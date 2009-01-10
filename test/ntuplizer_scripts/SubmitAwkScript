@@ -41,32 +41,6 @@ BEGIN {
 if($1!=""){
  	x=x+1;
 	ifiles++;
-	if (ifiles==nrepeats) {
-		ifiles=0;
-		nfiles++;
-# temporary solution
-# for 1 files:
-	print "cat pixelNtuplizer_RealData_template | replace MYGLOBALTAGNAME "globaltagname" INPUTFILE '"namestring1"' OUTPUTFILE NTUPLIZER_"globaltagname"_JOB_"nfiles".root > pixelNtuplizerMerge_"globaltagname"_"nfiles".py";
-# for 2 files:
-#	print "cat pixelNtuplizer_RealData_template | replace MYGLOBALTAGNAME "globaltagname" INPUTFILE '"namestring1"\",\""namestring2"' OUTPUTFILE NTUPLIZER_"globaltagname"_JOB_"nfiles".root > pixelNtuplizerMerge_"globaltagname"_"nfiles".py";
-# for 4 files:
-#		print "cat pixelNtuplizer_RealData_template | replace MYGLOBALTAGNAME "globaltagname" INPUTFILE '"namestring1"\",\""namestring2"\",\""namestring3"\",\""namestring4"' OUTPUTFILE NTUPLIZER_"globaltagname"_JOB_"nfiles".root > pixelNtuplizerMerge_"globaltagname"_"nfiles".py";
-# for 10 files:
-#		print "cat pixelNtuplizer_RealData_template | replace MYGLOBALTAGNAME "globaltagname" INPUTFILE '"namestring1"\",\""namestring2"\",\""namestring3"\",\""namestring4"\",\""namestring5"\",\""namestring6"\",\""namestring7"\",\""namestring8"\",\""namestring9"\",\""namestring10"' OUTPUTFILE NTUPLIZER_"globaltagname"_JOB_"nfiles".root > pixelNtuplizerMerge_"globaltagname"_"nfiles".py";
-		print "cat batchscript_template | replace PYFILE pixelNtuplizerMerge_"globaltagname"_"nfiles".py CURRENTDIR `pwd` CASTORDIR "castoroutputdir"/.  > batchMerge_"globaltagname"_"nfiles".csh";
-		print "bsub -q "batchqueuename" -J job_"globaltagname"_"nfiles" < batchMerge_"globaltagname"_"nfiles".csh"; 
-		finalnamestring="";
-		namestring1 = "";
-		namestring2 = "";
-		namestring3 = "";
-		namestring4 = "";
-		namestring5 = "";
-		namestring6 = "";
-		namestring7 = "";
-		namestring8 = "";
-		namestring9 = "";
-		namestring10 = "";
-	}
 # To be fixed, unfortunately does not work yet
 	if(ifiles>0){
 	 	finalnamestring=finalnamestring+"\",\"";
@@ -104,7 +78,34 @@ if($1!=""){
 	}	
 	if(ifiles==9){
 		namestring10 = $1;
-	}	
+	}
+	
+	if (ifiles==nrepeats) {
+		ifiles=0;
+		nfiles++;
+# temporary solution
+# for 1 files:
+	print "cat pixelNtuplizer_RealData_template | replace MYGLOBALTAGNAME "globaltagname" INPUTFILE '"namestring1"' OUTPUTFILE NTUPLIZER_"globaltagname"_JOB_"nfiles".root > pixelNtuplizerMerge_"globaltagname"_"nfiles".py";
+# for 2 files:
+#	print "cat pixelNtuplizer_RealData_template | replace MYGLOBALTAGNAME "globaltagname" INPUTFILE '"namestring1"\",\""namestring2"' OUTPUTFILE NTUPLIZER_"globaltagname"_JOB_"nfiles".root > pixelNtuplizerMerge_"globaltagname"_"nfiles".py";
+# for 4 files:
+#		print "cat pixelNtuplizer_RealData_template | replace MYGLOBALTAGNAME "globaltagname" INPUTFILE '"namestring1"\",\""namestring2"\",\""namestring3"\",\""namestring4"' OUTPUTFILE NTUPLIZER_"globaltagname"_JOB_"nfiles".root > pixelNtuplizerMerge_"globaltagname"_"nfiles".py";
+# for 10 files:
+#		print "cat pixelNtuplizer_RealData_template | replace MYGLOBALTAGNAME "globaltagname" INPUTFILE '"namestring1"\",\""namestring2"\",\""namestring3"\",\""namestring4"\",\""namestring5"\",\""namestring6"\",\""namestring7"\",\""namestring8"\",\""namestring9"\",\""namestring10"' OUTPUTFILE NTUPLIZER_"globaltagname"_JOB_"nfiles".root > pixelNtuplizerMerge_"globaltagname"_"nfiles".py";
+		print "cat batchscript_template | replace PYFILE pixelNtuplizerMerge_"globaltagname"_"nfiles".py CURRENTDIR `pwd` CASTORDIR "castoroutputdir"/.  > batchMerge_"globaltagname"_"nfiles".csh";
+		print "bsub -q "batchqueuename" -J job_"globaltagname"_"nfiles" < batchMerge_"globaltagname"_"nfiles".csh"; 
+		finalnamestring="";
+		namestring1 = "";
+		namestring2 = "";
+		namestring3 = "";
+		namestring4 = "";
+		namestring5 = "";
+		namestring6 = "";
+		namestring7 = "";
+		namestring8 = "";
+		namestring9 = "";
+		namestring10 = "";
+	}
 }
 }
 END {
