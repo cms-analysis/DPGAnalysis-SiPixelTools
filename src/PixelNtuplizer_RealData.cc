@@ -94,7 +94,7 @@ void PixelNtuplizer_RD::beginJob(const edm::EventSetup& es)
   t_->Branch("gzpix", pixinfo_.gz, "gz[npix]/F", bufsize);
 
   std::cout << "Making rechit branch:" << std::endl;
-  t_->Branch("RecHit", &rechit_, "localX/F:localY:globalX:globalY:globalZ:residualX:residualY:resErrX:resErrY:resXprime:resXprimeErr", bufsize);
+  t_->Branch("RecHit", &rechit_, "localX/F:localY:globalX:globalY:globalZ:residualX:residualY:resErrX:resErrY:hit_errX:hit_errY:resXprime:resXprimeErr", bufsize);
 
   std::cout << "Making track branch:" << std::endl;
   t_->Branch("track", &track_, "pt/F:p:px:py:pz:globalTheta:globalEta:globalPhi:localTheta:localPhi:chi2:ndof:foundHits/I:tracknum", bufsize);
@@ -518,6 +518,8 @@ void PixelNtuplizer_RD::RecHitStruct::init()
   residualY = dummy_float;
   resErrX = dummy_float;
   resErrY = dummy_float;
+  hit_errX = dummy_float;
+  hit_errY = dummy_float;
   resXprime = dummy_float;
   resXprimeErr = dummy_float;  
 }
