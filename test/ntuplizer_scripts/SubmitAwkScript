@@ -13,9 +13,10 @@ BEGIN {
 ####################################
 	globaltagname="CRAFT_ALL_V4"
 # fill out your preferred castor output directory here
-#	castoroutputdir="/castor/cern.ch/user/m/myname"
+	castoroutputdir="/castor/cern.ch/user/m/mpsearle"
 # preferred batch queue. see bqueues -u myname for available queues.
-	batchqueuename="cmscaf"
+#	batchqueuename="cmscaf"
+	batchqueuename="1nh"
 
 ####################################
 # worker variables
@@ -85,7 +86,7 @@ if($1!=""){
 		nfiles++;
 # temporary solution
 # for 1 files:
-	print "cat pixelNtuplizer_RealData_template | replace MYGLOBALTAGNAME "globaltagname" INPUTFILE '"namestring1"' OUTPUTFILE NTUPLIZER_"globaltagname"_JOB_"nfiles".root > pixelNtuplizerMerge_"globaltagname"_"nfiles".py";
+	print "cat pixelNtuplizer_RealData_template | replace MYGLOBALTAGNAME "globaltagname" INPUTFILE '"$1"' OUTPUTFILE NTUPLIZER_"globaltagname"_JOB_"nfiles".root > pixelNtuplizerMerge_"globaltagname"_"nfiles".py";
 # for 2 files:
 #	print "cat pixelNtuplizer_RealData_template | replace MYGLOBALTAGNAME "globaltagname" INPUTFILE '"namestring1"\",\""namestring2"' OUTPUTFILE NTUPLIZER_"globaltagname"_JOB_"nfiles".root > pixelNtuplizerMerge_"globaltagname"_"nfiles".py";
 # for 4 files:
