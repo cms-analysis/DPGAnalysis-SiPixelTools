@@ -139,6 +139,8 @@ class PixelNtuplizer_RD : public edm::EDAnalyzer
     float residualY;
     float resErrX;
     float resErrY;
+    float hit_errX;
+    float hit_errY;
     float resXprime;
     float resXprimeErr;
 

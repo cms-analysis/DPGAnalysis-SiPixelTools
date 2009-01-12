@@ -227,6 +227,8 @@ void PixelNtuplizer_RD::analyze(const edm::Event& iEvent, const edm::EventSetup&
 		rechit_.residualX = res.x();
 		rechit_.resErrX = errX;
 		rechit_.resErrY = errY;
+		rechit_.hit_errX = sqrt(err2.xx());
+		rechit_.hit_errY = sqrt(err2.yy());
 	        rechit_.resXprime = (res.x())*(phiorientation );
 	        rechit_.resXprimeErr = errX;
 		dZ = gROrZDirection.z() - gPModule.z();
@@ -369,8 +371,7 @@ void PixelNtuplizer_RD::fillClust(const SiPixelCluster& matchIt, const Rectangul
   clust_.clust_alpha = atan2( locz, locx );
   clust_.clust_beta = atan2( locz, locy );
 
-  clust_.normalized_charge = clust_.charge / (det_.thickness / cos( loctheta ) );
-  if ( clust_.normalized_charge <=0 ) clust_.normalized_charge = -1 * clust_.normalized_charge;
+  clust_.normalized_charge = clust_.charge*sqrt(1.0/(1.0/pow(tan(clust_.clust_alpha),2)+1.0/pow(tan(clust_.clust_beta),2)+1.0));
 
 }
 
