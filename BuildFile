@@ -27,10 +27,8 @@
 <use name=clhep>
 <use name=boost>
 <use name=root>
-
-<flags EDM_PLUGIN=1>
 <export>
-   <lib name=AuxCodeCheckTkCollection>
+   <lib name=DPGAnalysisSiPixelTools>
    <use name=FWCore/Framework>
    <use name=SimDataFormats/HepMCProduct>
    <use name=FWCore/PluginManager>
