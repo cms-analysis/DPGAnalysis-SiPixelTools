@@ -54,7 +54,8 @@ process.source = cms.Source("PoolSource",
     #timetype = cms.string('runnumber'),
     #firstRun = cms.untracked.uint32(64108),
     #interval = cms.uint32(1),
-    fileNames = cms.untracked.vstring("INPUTFILE"
+    fileNames = cms.untracked.vstring(
+    INPUTFILE
     ) )
 
 process.maxEvents = cms.untracked.PSet(
