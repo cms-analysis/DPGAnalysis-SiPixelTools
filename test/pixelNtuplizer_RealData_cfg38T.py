@@ -36,6 +36,12 @@ process.TrackRefitterP5.TrajectoryInEvent = True
 
 process.load("RecoTracker.TransientTrackingRecHit.TransientTrackingRecHitBuilderWithoutRefit_cfi")
 
+# muon to track matching (necessary to find muon trigger time)
+process.matchMap = TrivialDeltaRMatcher{
+    src = process.TrackRefitterP5.src,
+    matched = cms.InputTag('allMuons'),
+    distMin = cms.double(0.1) # matching in dR
+}
 
 ##
 ## Load and Configure OfflineValidation
@@ -43,9 +49,9 @@ process.load("RecoTracker.TransientTrackingRecHit.TransientTrackingRecHitBuilder
 process.load("Alignment.OfflineValidation.TrackerOfflineValidation_cfi")
 
 
-process.load("RecoLocalTracker.SiPixelRecHits.pixelNtuplizerRealData_cfi")
-process.PixelNtuplizer_RD.OutputFile = 'W43ALCARECOTkAlCosmicsCosmicTF0TTTree.root'
-process.PixelNtuplizer_RD.trajectoryInput = 'TrackRefitterP5'
+process.load("DPGAnalysis.SiPixelTools.pixelNtuplizer_RealData_cfi")
+process.PixelNtuplizer_RealData.OutputFile = 'W43ALCARECOTkAlCosmicsCosmicTF0TTTree.root'
+process.PixelNtuplizer_RealData.trajectoryInput = 'TrackRefitterP5'
 
 
 process.source = cms.Source("PoolSource",
@@ -74,7 +80,7 @@ process.source = cms.Source("PoolSource",
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1) )
 
-process.p = cms.Path(process.offlineBeamSpot*process.TrackRefitterP5*process.PixelNtuplizer_RD)
+process.p = cms.Path(process.offlineBeamSpot*process.TrackRefitterP5*process.PixelNtuplizer_RealData)
 process.MessageLogger.cerr.FwkReport.reportEvery = 10
 process.MessageLogger.cerr.threshold = 'Info'
 process.TrackerDigiGeometryESModule.applyAlignment = True
