@@ -5,6 +5,8 @@
 //          Freya Blekman, Cornell
 //
 //
+
+#include "RecoMuon/GlobalTrackingTools/interface/GlobalMuonTrackMatcher.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
 #include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
 #include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
@@ -14,8 +16,10 @@
 #include "TrackingTools/TrajectoryState/interface/TrajectoryStateTransform.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/PatternTools/interface/TrajTrackAssociation.h"
-#include "DPGAnalysis/SiPixelTools/interface/PixelNtuplizer_RealData.h"
+#include "PixelNtuplizer_RealData.h"
 #include "Geometry/TrackerTopology/interface/RectangularPixelTopology.h"
+#include "PhysicsTools/UtilAlgos/interface/PhysObjectMatcher.h"
+#include "TrackingTools/TrackAssociator/interface/TrackDetectorAssociator.h"
 
 // For ROOT
 #include <TROOT.h>
@@ -33,18 +37,19 @@ using namespace std;
 using namespace edm;
 using namespace reco;
 
-PixelNtuplizer_RD::PixelNtuplizer_RD(edm::ParameterSet const& ps) : 
-  conf_(ps),
+PixelNtuplizer_RealData::PixelNtuplizer_RealData(edm::ParameterSet const& iConfig) : 
+  conf_(iConfig),
   tfile_(0), 
   t_(0),
   maxsize_PixInfoStruct_(200)
-{}
+{
+}
 
 // Virtual destructor needed.
-PixelNtuplizer_RD::~PixelNtuplizer_RD() { }  
+PixelNtuplizer_RealData::~PixelNtuplizer_RealData() { }  
 
 // End job: write and close the ntuple file
-void PixelNtuplizer_RD::endJob() 
+void PixelNtuplizer_RealData::endJob() 
 {
 
   std::string outputFileName = conf_.getParameter<std::string>("OutputFile");
@@ -55,7 +60,7 @@ void PixelNtuplizer_RD::endJob()
 }
 
 
-void PixelNtuplizer_RD::beginJob(const edm::EventSetup& es)
+void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
 {
   es.get<TrackerDigiGeometryRecord>().get( tkGeom_ );
   es.get<IdealMagneticFieldRecord>().get(magneticField_);
@@ -103,7 +108,7 @@ void PixelNtuplizer_RD::beginJob(const edm::EventSetup& es)
   //  ts_->Branch("TrackerHit", &trackerhits_, "globalX/F:globalY:globalZ:run/I:evtnum:tracknum", bufsize);
 
   std::cout << "Making track only branch:" << std::endl;
-  tt_->Branch("TrackInfo", &trackonly_, "run/I:evtnum:tracknum:pixelTrack:NumPixelHits:NumStripHits:charge:chi2/F:ndof:theta:d0:dz:p:pt:px:py:pz:phi:eta:vx:vy:vz", bufsize);
+  tt_->Branch("TrackInfo", &trackonly_, "run/I:evtnum:tracknum:pixelTrack:NumPixelHits:NumStripHits:charge:chi2/F:ndof:theta:d0:dz:p:pt:px:py:pz:phi:eta:vx:vy:vz:muonT0", bufsize);
   
   std::cout << "Made all branches." << std::endl;
 
@@ -111,7 +116,7 @@ void PixelNtuplizer_RD::beginJob(const edm::EventSetup& es)
 
 
 // Functions that get called by framework every event
-void PixelNtuplizer_RD::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   //std::cout << " here " << endl;
   int TrackNumber = 0;
@@ -146,7 +151,7 @@ void PixelNtuplizer_RD::analyze(const edm::Event& iEvent, const edm::EventSetup&
 
     }
 
-    fillTrackOnly(iEvent, pixelHits, stripHits, TrackNumber, track);
+    fillTrackOnly(iEvent,iSetup, pixelHits, stripHits, TrackNumber, track);
     //++++++++++
     tt_->Fill();
     //++++++++++
@@ -271,12 +276,12 @@ void PixelNtuplizer_RD::analyze(const edm::Event& iEvent, const edm::EventSetup&
   }  // end loop over trajectories
  }  // end analyze function
 
-void PixelNtuplizer_RD::fillTrackOnly(const edm::Event& E, int pixelHits, int stripHits, int TrackNumber, const Track& track)
+void PixelNtuplizer_RealData::fillTrackOnly(const edm::Event& iEvent, const edm::EventSetup& iSetup, int pixelHits, int stripHits, int TrackNumber, const Track& track)
 {
   if(pixelHits > 0) trackonly_.pixelTrack = 1;
   trackonly_.tracknum = TrackNumber;
-  trackonly_.run = E.id().run();
-  trackonly_.evtnum = E.id().event();
+  trackonly_.run = iEvent.id().run();
+  trackonly_.evtnum = iEvent.id().event();
   trackonly_.NumPixelHits = pixelHits;
   trackonly_.NumStripHits = stripHits;
   trackonly_.chi2 = track.chi2();
@@ -295,16 +300,22 @@ void PixelNtuplizer_RD::fillTrackOnly(const edm::Event& E, int pixelHits, int st
   trackonly_.vx = track.vx();
   trackonly_.vy = track.vy();
   trackonly_.vz = track.vz();
+  // associate muon with track and then fill muon T0. For now: set to zero.
+  trackonly_.muonT0=0;
+  // load trackassociation from event, get muon out and read timing
+
+  // TO DO
+  
 }
 
-void PixelNtuplizer_RD::fillEvt(const edm::Event& E,int NbrTracks)
+void PixelNtuplizer_RealData::fillEvt(const edm::Event& iEvent,int NbrTracks)
 {
-  evt_.run = E.id().run();
-  evt_.evtnum = E.id().event();
+  evt_.run = iEvent.id().run();
+  evt_.evtnum = iEvent.id().event();
   evt_.nbrTracks = NbrTracks;
 }
 
-void PixelNtuplizer_RD::fillDet(const DetId &tofill, uint subdetid, const PixelGeomDetUnit* PixGeom)
+void PixelNtuplizer_RealData::fillDet(const DetId &tofill, uint subdetid, const PixelGeomDetUnit* PixGeom)
 {
   if (subdetid==1) 
     {
@@ -328,13 +339,13 @@ void PixelNtuplizer_RD::fillDet(const DetId &tofill, uint subdetid, const PixelG
   det_.rows = PixGeom->specificTopology().nrows();
 }
 
-void PixelNtuplizer_RD::fillVertex(const PixelGeomDetUnit* PixGeom)
+void PixelNtuplizer_RealData::fillVertex(const PixelGeomDetUnit* PixGeom)
 {
   vertex_.z = PixGeom->surface().position().z();
   vertex_.r = PixGeom->surface().position().perp();
 }
 
-void PixelNtuplizer_RD::fillClust(const SiPixelCluster& matchIt, const RectangularPixelTopology* topol, const PixelGeomDetUnit* PixGeom, TrajectoryStateOnSurface& tsos) 
+void PixelNtuplizer_RealData::fillClust(const SiPixelCluster& matchIt, const RectangularPixelTopology* topol, const PixelGeomDetUnit* PixGeom, TrajectoryStateOnSurface& tsos) 
 {
   clust_.charge = (matchIt.charge())/1000.0; // convert electrons to kilo-electrons
   clust_.size = matchIt.size();
@@ -375,7 +386,7 @@ void PixelNtuplizer_RD::fillClust(const SiPixelCluster& matchIt, const Rectangul
 
 }
 
-void PixelNtuplizer_RD::fillPix(const SiPixelCluster & LocPix, const RectangularPixelTopology * topol, const PixelGeomDetUnit * PixGeom)
+void PixelNtuplizer_RealData::fillPix(const SiPixelCluster & LocPix, const RectangularPixelTopology * topol, const PixelGeomDetUnit * PixGeom)
 {
   const std::vector<SiPixelCluster::Pixel>& pixvector = LocPix.pixels();
   if(pixvector.size()>maxsize_PixInfoStruct_)
@@ -397,7 +408,7 @@ void PixelNtuplizer_RD::fillPix(const SiPixelCluster & LocPix, const Rectangular
     }
 }
 
-void PixelNtuplizer_RD::fillTrack(TrajectoryStateOnSurface& tsos,const Trajectory &traj, int TrackNumber) 
+void PixelNtuplizer_RealData::fillTrack(TrajectoryStateOnSurface& tsos,const Trajectory &traj, int TrackNumber) 
 {
   track_.pt = tsos.globalMomentum().perp();
   track_.p = tsos.globalMomentum().mag();
@@ -417,7 +428,7 @@ void PixelNtuplizer_RD::fillTrack(TrajectoryStateOnSurface& tsos,const Trajector
 }
 
 
-void PixelNtuplizer_RD::init() 
+void PixelNtuplizer_RealData::init() 
 {
   evt_.init();
   det_.init();
@@ -428,7 +439,7 @@ void PixelNtuplizer_RD::init()
   track_.init();
 }
 
-void PixelNtuplizer_RD::EvtStruct::init()
+void PixelNtuplizer_RealData::EvtStruct::init()
 {
   int dummy_int = -9999;
 
@@ -436,7 +447,7 @@ void PixelNtuplizer_RD::EvtStruct::init()
   evtnum = dummy_int;
 }
 
-void PixelNtuplizer_RD::DetStruct::init()
+void PixelNtuplizer_RealData::DetStruct::init()
 {
   int dummy_int = -9999;
   float dummy_float = -9999.0;
@@ -453,7 +464,7 @@ void PixelNtuplizer_RD::DetStruct::init()
   plaquette = dummy_int;
 }
 
-void PixelNtuplizer_RD::VertexStruct::init()
+void PixelNtuplizer_RealData::VertexStruct::init()
 {
   float dummy_float = -9999.0;
 
@@ -461,7 +472,7 @@ void PixelNtuplizer_RD::VertexStruct::init()
   z = dummy_float;
  }
 
-void PixelNtuplizer_RD::ClusterStruct::init()
+void PixelNtuplizer_RealData::ClusterStruct::init()
 {
   float dummy_float = -9999.0;
   int dummy_int = -9999;
@@ -487,7 +498,7 @@ void PixelNtuplizer_RD::ClusterStruct::init()
   clust_beta = dummy_float;
 }
 
-void PixelNtuplizer_RD::PixInfoStruct::init()
+void PixelNtuplizer_RealData::PixInfoStruct::init()
 {
   npix = 0;
   hasOverFlow = 0;
@@ -505,7 +516,7 @@ void PixelNtuplizer_RD::PixInfoStruct::init()
   */
 } 
 
-void PixelNtuplizer_RD::RecHitStruct::init()
+void PixelNtuplizer_RealData::RecHitStruct::init()
 {
   float dummy_float = -9999.0;
 
@@ -524,7 +535,7 @@ void PixelNtuplizer_RD::RecHitStruct::init()
   resXprimeErr = dummy_float;  
 }
 
-void PixelNtuplizer_RD::TrackStruct::init()
+void PixelNtuplizer_RealData::TrackStruct::init()
 {
   float dummy_float = -9999.0;
   int dummy_int = -9999;
@@ -545,7 +556,7 @@ void PixelNtuplizer_RD::TrackStruct::init()
   foundHits = dummy_int;
 }
 /*
-void PixelNtuplizer_RD::TrackerHitStruct::init()
+void PixelNtuplizer_RealData::TrackerHitStruct::init()
 {
   float dummy_float = -9999.0;
 
@@ -554,7 +565,7 @@ void PixelNtuplizer_RD::TrackerHitStruct::init()
   globalZ = dummy_float;
 } */
 
-void PixelNtuplizer_RD::TrackOnlyStruct::init()
+void PixelNtuplizer_RealData::TrackOnlyStruct::init()
 {
   int dummy_int = -9999;
   float dummy_float = -9999.0;
@@ -581,8 +592,9 @@ void PixelNtuplizer_RD::TrackOnlyStruct::init()
   vx = dummy_float;
   vy = dummy_float;
   vz = dummy_float;
+  muonT0 = dummy_float;
 }
 
 // define this as a plug-in
 //
-DEFINE_FWK_MODULE(PixelNtuplizer_RD);
+DEFINE_FWK_MODULE(PixelNtuplizer_RealData);

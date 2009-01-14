@@ -15,24 +15,26 @@
 #include "TrackingTools/TrackFitters/interface/TrajectoryStateCombiner.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "Alignment/OfflineValidation/interface/TrackerValidationVariables.h"
+#include "TrackingTools/TrackAssociator/interface/TrackAssociatorParameters.h"
+#include "TrackingTools/TrackAssociator/interface/TrackDetectorAssociator.h"
 
 using namespace reco;
 class TTree;
 class TFile;
 class RectangularPixelTopology;
 
-class PixelNtuplizer_RD : public edm::EDAnalyzer
+class PixelNtuplizer_RealData : public edm::EDAnalyzer
 {
  public:
   
-  explicit PixelNtuplizer_RD(const edm::ParameterSet& ps);
-  virtual ~PixelNtuplizer_RD();
+  explicit PixelNtuplizer_RealData(const edm::ParameterSet& ps);
+  virtual ~PixelNtuplizer_RealData();
   virtual void beginJob(const edm::EventSetup& iSetup);
   virtual void endJob();
   virtual void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
  protected:
-  void fillTrackOnly(const edm::Event&, int, int, int, const Track&);
+  void fillTrackOnly(const edm::Event&, const edm::EventSetup &, int, int, int, const Track&);
   void fillEvt(const edm::Event&,int NbrTracks);
   void fillDet(const DetId &, uint, const PixelGeomDetUnit*);
   void fillVertex(const PixelGeomDetUnit*);
@@ -40,10 +42,14 @@ class PixelNtuplizer_RD : public edm::EDAnalyzer
   void fillPix(const SiPixelCluster&, const RectangularPixelTopology*, const PixelGeomDetUnit*);
   void fillTrack(TrajectoryStateOnSurface&,const Trajectory&, int);
   
+		   
+
  private:
   edm::ParameterSet conf_;
   edm::ESHandle<TrackerGeometry> tkGeom_;
   edm::ESHandle<MagneticField> magneticField_;
+  // muon association.
+    
 
   TFile* tfile_;
   TTree* t_;  // tree filled on every pixel rec hit
@@ -203,6 +209,7 @@ class PixelNtuplizer_RD : public edm::EDAnalyzer
     float vx;
     float vy;
     float vz;
+    float muonT0;
 
     void init();
     } trackonly_;
