@@ -13,10 +13,10 @@ BEGIN {
 ####################################
 	globaltagname="CRAFT_ALL_V4"
 # fill out your preferred castor output directory here
-	castoroutputdir="/castor/cern.ch/user/m/mpsearle"
+	castoroutputdir="/castor/cern.ch/user/m/mpsearle/AlCaTkAlHLT_V00-00-04"
 # preferred batch queue. see bqueues -u myname for available queues.
-#	batchqueuename="cmscaf"
-	batchqueuename="1nh"
+	batchqueuename="cmscaf -o /dev/null"
+#	batchqueuename="1nh"
 
 ####################################
 # worker variables
@@ -24,7 +24,7 @@ BEGIN {
 	nfiles=0;
 	ifiles=0;
 # this varialbe controls the number of files per job. Currently impossible to be other than 1.
-	nrepeats=1;
+	nrepeats=10;
 	namestring1 = "";
 	namestring2 = "";
 	namestring3 = "";
@@ -41,7 +41,6 @@ BEGIN {
 #	print x;
 if($1!=""){
  	x=x+1;
-	ifiles++;
 # To be fixed, unfortunately does not work yet
 	if(ifiles>0){
 	 	finalnamestring=finalnamestring+"\",\"";
@@ -86,13 +85,13 @@ if($1!=""){
 		nfiles++;
 # temporary solution
 # for 1 files:
-	print "cat pixelNtuplizer_RealData_template | replace MYGLOBALTAGNAME "globaltagname" INPUTFILE '"$1"' OUTPUTFILE NTUPLIZER_"globaltagname"_JOB_"nfiles".root > pixelNtuplizerMerge_"globaltagname"_"nfiles".py";
+#	print "cat pixelNtuplizer_RealData_template | replace MYGLOBALTAGNAME "globaltagname" INPUTFILE '"$1"' OUTPUTFILE NTUPLIZER_"globaltagname"_JOB_"nfiles".root > pixelNtuplizerMerge_"globaltagname"_"nfiles".py";
 # for 2 files:
 #	print "cat pixelNtuplizer_RealData_template | replace MYGLOBALTAGNAME "globaltagname" INPUTFILE '"namestring1"\",\""namestring2"' OUTPUTFILE NTUPLIZER_"globaltagname"_JOB_"nfiles".root > pixelNtuplizerMerge_"globaltagname"_"nfiles".py";
 # for 4 files:
 #		print "cat pixelNtuplizer_RealData_template | replace MYGLOBALTAGNAME "globaltagname" INPUTFILE '"namestring1"\",\""namestring2"\",\""namestring3"\",\""namestring4"' OUTPUTFILE NTUPLIZER_"globaltagname"_JOB_"nfiles".root > pixelNtuplizerMerge_"globaltagname"_"nfiles".py";
 # for 10 files:
-#		print "cat pixelNtuplizer_RealData_template | replace MYGLOBALTAGNAME "globaltagname" INPUTFILE '"namestring1"\",\""namestring2"\",\""namestring3"\",\""namestring4"\",\""namestring5"\",\""namestring6"\",\""namestring7"\",\""namestring8"\",\""namestring9"\",\""namestring10"' OUTPUTFILE NTUPLIZER_"globaltagname"_JOB_"nfiles".root > pixelNtuplizerMerge_"globaltagname"_"nfiles".py";
+		print "cat pixelNtuplizer_RealData_template | replace MYGLOBALTAGNAME "globaltagname" INPUTFILE '"namestring1"\",\""namestring2"\",\""namestring3"\",\""namestring4"\",\""namestring5"\",\""namestring6"\",\""namestring7"\",\""namestring8"\",\""namestring9"\",\""namestring10"' OUTPUTFILE NTUPLIZER_"globaltagname"_JOB_"nfiles".root > pixelNtuplizerMerge_"globaltagname"_"nfiles".py";
 		print "cat batchscript_template | replace PYFILE pixelNtuplizerMerge_"globaltagname"_"nfiles".py CURRENTDIR `pwd` CASTORDIR "castoroutputdir"/.  > batchMerge_"globaltagname"_"nfiles".csh";
 		print "bsub -q "batchqueuename" -J job_"globaltagname"_"nfiles" < batchMerge_"globaltagname"_"nfiles".csh"; 
 		finalnamestring="";
@@ -107,6 +106,7 @@ if($1!=""){
 		namestring9 = "";
 		namestring10 = "";
 	}
+	ifiles++;
 }
 }
 END {
