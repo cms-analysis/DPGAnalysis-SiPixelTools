@@ -79,7 +79,7 @@ if($1!=""){
 	if(ifiles==9){
 		namestring10 = $1;
 	}
-	
+	ifiles++;	
 	if (ifiles==nrepeats) {
 		ifiles=0;
 		nfiles++;
@@ -106,7 +106,6 @@ if($1!=""){
 		namestring9 = "";
 		namestring10 = "";
 	}
-	ifiles++;
 }
 }
 END {
