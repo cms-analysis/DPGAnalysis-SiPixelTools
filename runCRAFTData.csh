@@ -9,7 +9,7 @@ else
   rm -fr ${DIR}/*
 fi
 
-./templatePythonGenerator.csh
+./pythonTemplateGenerator.csh
 
 let i=0
 
