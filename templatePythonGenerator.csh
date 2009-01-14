@@ -12,6 +12,7 @@ cp pixelefficiency_templateA_cfg.py template1_pixelefficiency_cfg.py
 set i=1
 set linenumber=0
 set totallines=0
+set totallinecounter=0
 
 foreach fileline ( `more filelist.txt` )
   @ totallines++
@@ -19,12 +20,13 @@ end
    
 foreach fileline ( `more filelist.txt` )
   
+  @totallinecounter++
   @ linenumber++
-  if (($linenumber != $limit) && ($linenumber != $totallines)) then
+  if (($linenumber != $limit) && ($linenumber != $totallinecounter)) then
   echo $fileline,>>template${i}_pixelefficiency_cfg.py
   endif
   
-  if (($linenumber == $limit) && ($linenumber != $totallines)) then
+  if (($linenumber == $limit) && ($linenumber != $totallinecounter)) then
   echo $fileline>>template${i}_pixelefficiency_cfg.py
   cat pixelefficiency_templateB_cfg.py>>template${i}_pixelefficiency_cfg.py
   echo template${i}_pixelefficiency_cfg.py done !
@@ -33,7 +35,7 @@ foreach fileline ( `more filelist.txt` )
   set linenumber=0
   endif
   
-  if (($linenumber == $totallines)) then
+  if (($linenumber == $totallinecounter)) then
   echo $fileline>>template${i}_pixelefficiency_cfg.py
   cat pixelefficiency_templateB_cfg.py>>template${i}_pixelefficiency_cfg.py
   echo template${i}_pixelefficiency_cfg.py done !
