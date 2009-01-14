@@ -44,7 +44,7 @@ process.load("Alignment.OfflineValidation.TrackerOfflineValidation_cfi")
 
 
 
-process.load("DPGAnalysis.SiPixelTools.pixelNtuplizer_RealData_cfi")
+process.load("DPGAnalysis.SiPixelTools.PixelNtuplizer_RealData_cfi")
 process.PixelNtuplizer_RealData.OutputFile = 'MCRECOTkAlCosmicsCosmicTF38TTTree.root'
 process.PixelNtuplizer_RealData.trajectoryInput = 'TrackRefitterP5'
 
