@@ -5,6 +5,11 @@
 //          Freya Blekman, Cornell
 //
 //
+#include "DataFormats/MuonReco/interface/MuonFwd.h"
+#include "DataFormats/MuonReco/interface/Muon.h"
+#include "DataFormats/MuonReco/interface/MuonTime.h"
+#include "DataFormats/MuonDetId/interface/DTChamberId.h"
+#include "DataFormats/MuonDetId/interface/MuonSubdetId.h"
 
 #include "RecoMuon/GlobalTrackingTools/interface/GlobalMuonTrackMatcher.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
@@ -98,6 +103,21 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
   t_->Branch("gypix", pixinfo_.gy, "gy[npix]/F", bufsize);
   t_->Branch("gzpix", pixinfo_.gz, "gz[npix]/F", bufsize);
 
+  t_->Branch("nmuon",&muoninfo_.nmuon,"nmuon/I",bufsize);
+ t_->Branch("muoninfo_HasOverFlow",&muoninfo_.HasOverFlow,"muoninfo_HasOverFlow/bool",bufsize);
+ t_->Branch("muoninfo_IsGlobalMuon",muoninfo_.IsGlobalMuon,"muoninfo_IsGlobalMuon[nmuon]/bool",bufsize);
+ t_->Branch("muoninfo_IsStandAloneMuon",muoninfo_.IsStandAloneMuon,"muoninfo_IsStandAloneMuon[nmuon]/bool",bufsize);
+ t_->Branch("muoninfo_IsTrackerMuon",muoninfo_.IsTrackerMuon,"muoninfo_IsTrackerMuon[nmuon]/bool",bufsize);
+ t_->Branch("muoninfo_HasGlobalTrack",muoninfo_.HasGlobalTrack,"muoninfo_HasGlobalTrack[nmuon]/bool",bufsize);
+  t_->Branch("muoninfo_HasPixelHit",muoninfo_.HasPixelHit,"muoninfo_HasPixelHit[nmuon]/bool",bufsize);
+  t_->Branch("muoninfo_IsTimeValid",muoninfo_.IsTimeValid,"muoninfo_IsTimeValid[nmuon]/bool",bufsize);
+  t_->Branch("muoninfo_timeAtIpInOut",muoninfo_.timeAtIpInOut, "muoninfo_timeAtIpInOut[nmuon]/F",bufsize);
+  t_->Branch("muoninfo_errorTime",muoninfo_.errorTime, "muoninfo_errorTime[nmuon]/F",bufsize);
+  // t_->Branch("muoninfo_momentumDiff",muoninfo_.momentumDiff, "muoninfo_momentumDiff[nmuon]/F",bufsize);
+   t_->Branch("muoninfo_trackpt",muoninfo_.trackpt, "muoninfo_trackpt[nmuon]/F",bufsize);
+    t_->Branch("muoninfo_tracketa",muoninfo_.tracketa, "muoninfo_tracketa[nmuon]/F",bufsize);
+   t_->Branch("muoninfo_trackphi",muoninfo_.trackphi, "muoninfo_trackphi[nmuon]/F",bufsize);
+
   std::cout << "Making rechit branch:" << std::endl;
   t_->Branch("RecHit", &rechit_, "localX/F:localY:globalX:globalY:globalZ:residualX:residualY:resErrX:resErrY:hit_errX:hit_errY:resXprime:resXprimeErr", bufsize);
 
@@ -112,13 +132,218 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
   
   std::cout << "Made all branches." << std::endl;
 
+
+  /*  ifstream f("test.txt");
+
+  while(!f.eof())
+    {
+      int w0,s0,w1,s1;
+      float b,r,p;
+      
+      f >>  w0 >> s0 >> w1 >> s1 >> p >>  b >> r;
+      if (!f.good()) break;
+      
+      points[w0][s0][w1][s1] = p;
+      bias[w0][s0][w1][s1] = b;
+      rms[w0][s0][w1][s1] = r;
+      std::cout << w0 << " " << s0 << " " << w1 << " "<< s1 <<" " << b << " " << p << " " << r <<  std::endl;
+    }
+  
+  */
+  
+
+
 }
+
+
+bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent,const Track& track, int TrackNumber){
+
+ 
+  // get the ccmuons
+    edm::Handle<MuonCollection> MuonHandle;
+    //  iEvent.getByLabel("GLBMuons", MuonHandle);
+     iEvent.getByLabel("muons", MuonHandle);
+    if ( !MuonHandle.isValid() ) {
+      std::cout << "No Muon results for InputTag " << std::endl;
+      return false;
+    }
+
+    const MuonCollection & muoninfo  =  *MuonHandle.product();
+   
+    int count = 0;
+    muoninfo_.HasOverFlow = false;
+
+    //std::cout << "muon collection size " << MuonHandle->size() << std::endl;
+    int maxSize = MuonHandle->size();
+    
+      if(MuonHandle->size() > 2){
+      muoninfo_.HasOverFlow = true;
+      maxSize = 2;
+      muoninfo_.nmuon = 2;
+    }
+    else muoninfo_.nmuon = MuonHandle->size();
+    
+
+      /*  muoninfo_.nmuon = 0;
+
+    if(MuonHandle->size() != 2)return false;
+
+    if(muoninfo[0].isTimeValid() != true || muoninfo[1].isTimeValid() != true)return false; 
+
+    if( muoninfo[0].bestTrack()->hitPattern().numberOfValidMuonDTHits() < 25 ) return false;
+    if( muoninfo[1].bestTrack()->hitPattern().numberOfValidMuonDTHits() < 25 ) return false;
+
+
+    float t0 =  muoninfo[0].time().timeAtIpInOut;
+    float t1 =  muoninfo[1].time().timeAtIpInOut;
+
+    int w0=0,s0=0,w1=0,s1=0; //wheels and sectors
+    DTChamberId * id;
+
+
+    for(trackingRecHit_iterator match = muoninfo[0].bestTrack()->recHitsBegin() ; match != muoninfo[0].bestTrack()->recHitsEnd() ; ++match)
+       {
+	 DetId did=(*match)->geographicalId() ;
+	 if(did.det() == 2 && did.subdetId() == MuonSubdetId::DT)
+	   {
+	     id =  new DTChamberId(did);
+	     w0=id->wheel();
+	     s0=id->sector();
+	     delete id;
+	     break;
+	   }
+       }
+
+
+     
+    for(trackingRecHit_iterator match = muoninfo[1].bestTrack()->recHitsBegin() ; match != muoninfo[1].bestTrack()->recHitsEnd() ; ++match)
+      {
+	DetId did=(*match)->geographicalId() ;
+	if(did.det() == 2 && did.subdetId() == MuonSubdetId::DT)
+	  {
+	    id =  new DTChamberId(did);
+	    w1=id->wheel();
+	    s1=id->sector();
+	    delete id;
+	    break;
+	  }
+      }
+
+    if(s0 ==0 || s1 ==0)
+      {//no segment of muon chamber hit. Strange!
+	cout << "EEEEEEEEERRRRRRRRROOOOOORRRRRRRRRRRRR" << endl;
+	return false;
+      }
+  
+    muoninfo_.nmuon = 2;  
+
+
+    // cout << " points " << points[w0+2][s0][w1+2][s1] << endl;
+    if(points[w0+2][s0][w1+2][s1]>=50){//found combination more than 50 times
+      //  cout << " time 0 " << t0 << " corr time 1 " << t1-bias[w0+2][s0][w1+2][s1] << endl;
+      muoninfo_.timeAtIpInOut[0] = t0;
+      muoninfo_.timeAtIpInOut[1] = t1-bias[w0+2][s0][w1+2][s1];
+
+      muoninfo_.errorTime[0] = muoninfo[0].time().timeAtIpInOutErr;
+      muoninfo_.errorTime[1] = muoninfo[1].time().timeAtIpInOutErr; 
+
+      muoninfo_.momentumDiff[0]=(muoninfo[0].momentum() - muoninfo[1].momentum()).r();
+      muoninfo_.momentumDiff[1]=(muoninfo[0].momentum() - muoninfo[1].momentum()).r();
+
+    }
+    else {
+      muoninfo_.timeAtIpInOut[0] = -9999;
+      muoninfo_.timeAtIpInOut[1] = -9999;
+
+      muoninfo_.errorTime[0] = -9999;
+      muoninfo_.errorTime[1] = -9999; 
+
+      muoninfo_.momentumDiff[0]=-9999;
+      muoninfo_.momentumDiff[1]=-9999;
+
+
+    }
+      */
+
+    // std::cout << " muon size " << std::endl;
+      for(MuonCollection::const_iterator it = MuonHandle->begin(), itEnd = MuonHandle->end(); it!=itEnd;++it){
+     
+      if(count > 1) return false;
+
+      if(!it->globalTrack())muoninfo_.HasGlobalTrack[count] = false;
+      else muoninfo_.HasGlobalTrack[count] = true;
+   
+
+      muoninfo_.IsGlobalMuon[count] = it->isGlobalMuon();
+     
+      muoninfo_.IsStandAloneMuon[count] = it->isStandAloneMuon();
+     
+      muoninfo_.IsTrackerMuon[count] = it->isTrackerMuon();
+    
+      muoninfo_.IsTimeValid[count] = it->isTimeValid();
+
+      if(it->isTimeValid() == true){
+	muoninfo_.timeAtIpInOut[count] = it->time().timeAtIpInOut;
+	muoninfo_.errorTime[count] = it->time().timeAtIpInOutErr;
+      }
+      else {
+	muoninfo_.timeAtIpInOut[count] = -9999;
+	muoninfo_.errorTime[count] = -9999;
+
+      }
+
+      //  std::cout << " muon " << count << " time " << muoninfo_.timeAtIpInOut[count] << " error " << muoninfo_.errorTime[count] << std::endl;
+           
+
+      if(!it->globalTrack() == false){
+	muoninfo_.trackpt[count] = it->globalTrack()->pt();
+	muoninfo_.tracketa[count] = it->globalTrack()->eta();
+	muoninfo_.trackphi[count] = it->globalTrack()->phi();
+      }
+      else {
+	muoninfo_.trackpt[count] = -9999;
+	muoninfo_.tracketa[count] = -9999;
+	muoninfo_.trackphi[count] = -9999;
+      }
+      //std::cout << " has global track " << muoninfo_.HasGlobalTrack[count] <<std::endl;
+ 
+      if(  !it->globalTrack() == false){ 
+
+	bool isMuonPixelHit = false; 
+
+	for(size_t hit = 0; hit < it->globalTrack()->recHitsSize();hit++){
+	  //if hit is valid and in tracker say true
+	  if(it->globalTrack()->recHit(hit)->isValid() == true && it->globalTrack()->recHit(hit)->geographicalId().det() == DetId::Tracker){
+	    uint testSubDetID = it->globalTrack()->recHit(hit)->geographicalId().subdetId();
+	    //if hit is in pixel detector say true
+	    if(testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap) isMuonPixelHit = true;
+	  }
+	}//end loop over muon hits
+	muoninfo_.HasPixelHit[count] = isMuonPixelHit;
+
+      
+      }//end asking if time valid and has global track
+      else{
+	muoninfo_.HasPixelHit[count] = false;
+
+      }
+
+      count++;
+    } //end looping over muons
+    
+   
+    
+
+    return true;
+
+}
+
 
 
 // Functions that get called by framework every event
 void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-  //std::cout << " here " << endl;
+  // std::cout << " here " << endl;
   int TrackNumber = 0;
 
   trackonly_.init();
@@ -129,6 +354,9 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 
   TrajectoryStateCombiner tsoscomb;
   int NbrTracks =  trajTrackCollectionHandle->size();
+  //std::cout << " track measurements " << trajTrackCollectionHandle->size()  << std::endl;
+
+
   for(TrajTrackAssociationCollection::const_iterator it = trajTrackCollectionHandle->begin(), itEnd = trajTrackCollectionHandle->end(); it!=itEnd;++it){
 
     TrackNumber++;
@@ -137,6 +365,8 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
     const Track&      track = *it->val;
     const Trajectory& traj  = *it->key;
     
+  
+
     std::vector<TrajectoryMeasurement> checkColl = traj.measurements();
     for(std::vector<TrajectoryMeasurement>::const_iterator checkTraj = checkColl.begin(), checkTrajEnd = checkColl.end();
 	checkTraj != checkTrajEnd; ++checkTraj) {
@@ -241,6 +471,7 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 		else if(dZ != -999) rechit_.residualY = res.y() * (dZ >=0.? +1 : -1) ;
 		else rechit_.residualY = res.y();
 
+		isValidMuonAssoc(iEvent,track, TrackNumber);
                 // get the contents
                 fillEvt(iEvent,NbrTracks);
                 fillDet(hit_detId, IntSubDetID, theGeomDet);
@@ -346,7 +577,7 @@ void PixelNtuplizer_RealData::fillVertex(const PixelGeomDetUnit* PixGeom)
 }
 
 void PixelNtuplizer_RealData::fillClust(const SiPixelCluster& matchIt, const RectangularPixelTopology* topol, const PixelGeomDetUnit* PixGeom, TrajectoryStateOnSurface& tsos) 
-{
+{//std::cout << " clustcharge "<< (matchIt.charge())/1000.0 << std::endl;
   clust_.charge = (matchIt.charge())/1000.0; // convert electrons to kilo-electrons
   clust_.size = matchIt.size();
   clust_.size_x = matchIt.sizeX();
@@ -515,6 +746,14 @@ void PixelNtuplizer_RealData::PixInfoStruct::init()
      }
   */
 } 
+
+
+
+void PixelNtuplizer_RealData::MuonInfoStruct::init()
+{
+  nmuon = 0;
+  HasOverFlow = false;
+}
 
 void PixelNtuplizer_RealData::RecHitStruct::init()
 {

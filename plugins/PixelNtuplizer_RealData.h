@@ -1,3 +1,4 @@
+
 #ifndef PixelNtuplizer_RD_h
 #define PixelNtuplizer_RD_h
 
@@ -42,6 +43,7 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
   void fillPix(const SiPixelCluster&, const RectangularPixelTopology*, const PixelGeomDetUnit*);
   void fillTrack(TrajectoryStateOnSurface&,const Trajectory&, int);
   
+  bool isValidMuonAssoc(const edm::Event& iEvent,const Track& track, int TrackNumber);		   
 		   
 
  private:
@@ -55,6 +57,10 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
   TTree* t_;  // tree filled on every pixel rec hit
   //  TTree* ts_; // tree filled on every strip rec hit
   TTree* tt_; // tree filled every track
+
+  float bias[5][15][5][15];
+  float rms[5][15][5][15];
+  float points[5][15][5][15];
   
   void init();
   
@@ -116,6 +122,26 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
 
     void init();
   } clust_;
+
+
+  
+  struct MuonInfoStruct {
+    int nmuon;
+    bool HasOverFlow;
+    bool IsGlobalMuon[2];
+    bool IsStandAloneMuon[2];
+    bool IsTrackerMuon[2];
+     bool IsTimeValid[2];
+     bool HasGlobalTrack[2];
+      bool HasPixelHit[2];
+    float timeAtIpInOut[2];
+    float errorTime[2];
+    //  float momentumDiff[2];
+     float trackpt[2];
+     float tracketa[2];
+     float trackphi[2];
+    void init();
+  }muoninfo_;
 
   struct PixInfoStruct {
 
