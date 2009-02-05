@@ -18,11 +18,14 @@
 #include "Alignment/OfflineValidation/interface/TrackerValidationVariables.h"
 #include "TrackingTools/TrackAssociator/interface/TrackAssociatorParameters.h"
 #include "TrackingTools/TrackAssociator/interface/TrackDetectorAssociator.h"
+#include "TObject.h"
 
 using namespace reco;
 class TTree;
 class TFile;
 class RectangularPixelTopology;
+class TObject;
+
 
 class PixelNtuplizer_RealData : public edm::EDAnalyzer
 {
@@ -33,6 +36,9 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
   virtual void beginJob(const edm::EventSetup& iSetup);
   virtual void endJob();
   virtual void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+
+ 
+
 
  protected:
   void fillTrackOnly(const edm::Event&, const edm::EventSetup &, int, int, int, const Track&);
@@ -122,25 +128,34 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
 
     void init();
   } clust_;
-
-
   
-  struct MuonInfoStruct {
-    int nmuon;
-    bool HasOverFlow;
-    bool IsGlobalMuon[2];
-    bool IsStandAloneMuon[2];
-    bool IsTrackerMuon[2];
-     bool IsTimeValid[2];
-     bool HasGlobalTrack[2];
-      bool HasPixelHit[2];
-    float timeAtIpInOut[2];
-    float errorTime[2];
-    //  float momentumDiff[2];
-     float trackpt[2];
-     float tracketa[2];
-     float trackphi[2];
-    void init();
+  struct MuonInfoStruct{// : public TObject {
+    //  public:
+    //    MuonInfoStruct(){;}
+    //    ~MuonInfoStruct(){;}
+    Float_t timeAtIpInOut[2];
+    Float_t errorTime[2];
+    Float_t IsGlobalMuon[2];
+    Float_t IsStandAloneMuon[2];
+    Float_t IsTrackerMuon[2];
+    Float_t IsTimeValid[2];
+    Float_t HasGlobalTrack[2];
+    Float_t HasPixelHit[2];
+    //  Float_t momentumDiff[2];
+    Float_t trackpt[2];
+    Float_t tracketa[2];
+    Float_t trackphi[2];
+    Int_t HasOverFlow;
+    Int_t nMuon;
+    void init(){
+      nMuon=0; 
+      HasOverFlow=0;
+      IsGlobalMuon[0]=IsGlobalMuon[1]=IsStandAloneMuon[0]=IsStandAloneMuon[1]=0.0;
+      IsTrackerMuon[0]=IsTrackerMuon[1]=HasGlobalTrack[0]=HasGlobalTrack[1]=HasPixelHit[0]=HasPixelHit[1]=0.0;
+      timeAtIpInOut[0]=timeAtIpInOut[1]=errorTime[0]=errorTime[1]=0.0;
+      trackpt[0]=trackpt[1]=tracketa[0]=tracketa[1]=trackphi[0]=trackphi[1]=-100;
+      
+    }
   }muoninfo_;
 
   struct PixInfoStruct {

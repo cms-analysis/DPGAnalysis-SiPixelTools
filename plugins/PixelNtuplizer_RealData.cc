@@ -103,20 +103,25 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
   t_->Branch("gypix", pixinfo_.gy, "gy[npix]/F", bufsize);
   t_->Branch("gzpix", pixinfo_.gz, "gz[npix]/F", bufsize);
 
-  t_->Branch("nmuon",&muoninfo_.nmuon,"nmuon/I",bufsize);
- t_->Branch("muoninfo_HasOverFlow",&muoninfo_.HasOverFlow,"muoninfo_HasOverFlow/bool",bufsize);
- t_->Branch("muoninfo_IsGlobalMuon",muoninfo_.IsGlobalMuon,"muoninfo_IsGlobalMuon[nmuon]/bool",bufsize);
- t_->Branch("muoninfo_IsStandAloneMuon",muoninfo_.IsStandAloneMuon,"muoninfo_IsStandAloneMuon[nmuon]/bool",bufsize);
- t_->Branch("muoninfo_IsTrackerMuon",muoninfo_.IsTrackerMuon,"muoninfo_IsTrackerMuon[nmuon]/bool",bufsize);
- t_->Branch("muoninfo_HasGlobalTrack",muoninfo_.HasGlobalTrack,"muoninfo_HasGlobalTrack[nmuon]/bool",bufsize);
-  t_->Branch("muoninfo_HasPixelHit",muoninfo_.HasPixelHit,"muoninfo_HasPixelHit[nmuon]/bool",bufsize);
-  t_->Branch("muoninfo_IsTimeValid",muoninfo_.IsTimeValid,"muoninfo_IsTimeValid[nmuon]/bool",bufsize);
-  t_->Branch("muoninfo_timeAtIpInOut",muoninfo_.timeAtIpInOut, "muoninfo_timeAtIpInOut[nmuon]/F",bufsize);
-  t_->Branch("muoninfo_errorTime",muoninfo_.errorTime, "muoninfo_errorTime[nmuon]/F",bufsize);
-  // t_->Branch("muoninfo_momentumDiff",muoninfo_.momentumDiff, "muoninfo_momentumDiff[nmuon]/F",bufsize);
-   t_->Branch("muoninfo_trackpt",muoninfo_.trackpt, "muoninfo_trackpt[nmuon]/F",bufsize);
-    t_->Branch("muoninfo_tracketa",muoninfo_.tracketa, "muoninfo_tracketa[nmuon]/F",bufsize);
-   t_->Branch("muoninfo_trackphi",muoninfo_.trackphi, "muoninfo_trackphi[nmuon]/F",bufsize);
+  //  t_->Branch("Cluster", &clust_, "row/F:col:x:y:charge:normalized_charge:size/I:size_x:size_y:maxPixelCol:maxPixelRow:minPixelCol:minPixelRow:geoId/i:edgeHitX/I:edgeHitY:clust_alpha/F:clust_beta", bufsize);
+
+  std::cout << "Making muon branch:" << std::endl;
+  t_->Branch("MuonInfo",&muoninfo_,"timeAtIpInOut[2]/F:errorTime[2]/F:IsGlobalMuon[2]/F:IsStandAloneMuon[2]/F:IsTrackerMuon[2]/F:IsTimeValid[2]/F:HasGlobalTrack[2]/F:HasPixelHit[2]/F:trackpt[2]/F:tracketa[2]/F:trackphi[2]/F",bufsize);
+  t_->Branch("nMuon",&muoninfo_.nMuon,"nMuon/I",bufsize);
+  t_->Branch("nMuonHasOverFlow",&muoninfo_.HasOverFlow,"nMuonHasOverFlow/I",bufsize);
+//  t_->Branch("muoninfo_HasOverFlow",&muoninfo_.HasOverFlow,"muoninfo_HasOverFlow/bool",bufsize);
+//  t_->Branch("muoninfo_IsGlobalMuon",muoninfo_.IsGlobalMuon,"muoninfo_IsGlobalMuon[nMuon]/bool",bufsize);
+//  t_->Branch("muoninfo_IsStandAloneMuon",muoninfo_.IsStandAloneMuon,"muoninfo_IsStandAloneMuon[nMuon]/bool",bufsize);
+//  t_->Branch("muoninfo_IsTrackerMuon",muoninfo_.IsTrackerMuon,"muoninfo_IsTrackerMuon[nMuon]/bool",bufsize);
+//  t_->Branch("muoninfo_HasGlobalTrack",muoninfo_.HasGlobalTrack,"muoninfo_HasGlobalTrack[nMuon]/bool",bufsize);
+//   t_->Branch("muoninfo_HasPixelHit",muoninfo_.HasPixelHit,"muoninfo_HasPixelHit[nMuon]/bool",bufsize);
+//   t_->Branch("muoninfo_IsTimeValid",muoninfo_.IsTimeValid,"muoninfo_IsTimeValid[nMuon]/bool",bufsize);
+//   t_->Branch("muoninfo_timeAtIpInOut",muoninfo_.timeAtIpInOut, "muoninfo_timeAtIpInOut[nMuon]/F",bufsize);
+//   t_->Branch("muoninfo_errorTime",muoninfo_.errorTime, "muoninfo_errorTime[nMuon]/F",bufsize);
+//   // t_->Branch("muoninfo_momentumDiff",muoninfo_.momentumDiff, "muoninfo_momentumDiff[nMuon]/F",bufsize);
+//    t_->Branch("muoninfo_trackpt",muoninfo_.trackpt, "muoninfo_trackpt[nMuon]/F",bufsize);
+//     t_->Branch("muoninfo_tracketa",muoninfo_.tracketa, "muoninfo_tracketa[nMuon]/F",bufsize);
+//    t_->Branch("muoninfo_trackphi",muoninfo_.trackphi, "muoninfo_trackphi[nMuon]/F",bufsize);
 
   std::cout << "Making rechit branch:" << std::endl;
   t_->Branch("RecHit", &rechit_, "localX/F:localY:globalX:globalY:globalZ:residualX:residualY:resErrX:resErrY:hit_errX:hit_errY:resXprime:resXprimeErr", bufsize);
@@ -168,23 +173,23 @@ bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent,const Tr
       return false;
     }
 
-    const MuonCollection & muoninfo  =  *MuonHandle.product();
+    // currently unused.
+    //const MuonCollection & muoninfo  =  *MuonHandle.product();
    
     int count = 0;
-    muoninfo_.HasOverFlow = false;
-
+    muoninfo_.init();
     //std::cout << "muon collection size " << MuonHandle->size() << std::endl;
     int maxSize = MuonHandle->size();
     
       if(MuonHandle->size() > 2){
-      muoninfo_.HasOverFlow = true;
+      muoninfo_.HasOverFlow = 1;
       maxSize = 2;
-      muoninfo_.nmuon = 2;
+      muoninfo_.nMuon = 2;
     }
-    else muoninfo_.nmuon = MuonHandle->size();
-    
+    else muoninfo_.nMuon = MuonHandle->size();
+      
 
-      /*  muoninfo_.nmuon = 0;
+      /*  muoninfo_.nMuon = 0;
 
     if(MuonHandle->size() != 2)return false;
 
@@ -235,7 +240,7 @@ bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent,const Tr
 	return false;
       }
   
-    muoninfo_.nmuon = 2;  
+    muoninfo_.nMuon = 2;  
 
 
     // cout << " points " << points[w0+2][s0][w1+2][s1] << endl;
@@ -270,21 +275,23 @@ bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent,const Tr
      
       if(count > 1) return false;
 
-      if(!it->globalTrack())muoninfo_.HasGlobalTrack[count] = false;
-      else muoninfo_.HasGlobalTrack[count] = true;
+      if(!it->globalTrack())muoninfo_.HasGlobalTrack[count] = 0;
+      else muoninfo_.HasGlobalTrack[count] = 1;
    
 
-      muoninfo_.IsGlobalMuon[count] = it->isGlobalMuon();
+      muoninfo_.IsGlobalMuon[count] = (float)it->isGlobalMuon();
      
-      muoninfo_.IsStandAloneMuon[count] = it->isStandAloneMuon();
+      muoninfo_.IsStandAloneMuon[count] = (float)it->isStandAloneMuon();
      
-      muoninfo_.IsTrackerMuon[count] = it->isTrackerMuon();
+      muoninfo_.IsTrackerMuon[count] = (float)it->isTrackerMuon();
     
-      muoninfo_.IsTimeValid[count] = it->isTimeValid();
+      muoninfo_.IsTimeValid[count] = (float) it->isTimeValid();
 
       if(it->isTimeValid() == true){
 	muoninfo_.timeAtIpInOut[count] = it->time().timeAtIpInOut;
+	
 	muoninfo_.errorTime[count] = it->time().timeAtIpInOutErr;
+	std::cout << muoninfo_.timeAtIpInOut[count] << " " << 	muoninfo_.errorTime[count] << " " << count << std::endl;
       }
       else {
 	muoninfo_.timeAtIpInOut[count] = -9999;
@@ -319,7 +326,7 @@ bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent,const Tr
 	    if(testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap) isMuonPixelHit = true;
 	  }
 	}//end loop over muon hits
-	muoninfo_.HasPixelHit[count] = isMuonPixelHit;
+	muoninfo_.HasPixelHit[count] = (float)isMuonPixelHit;
 
       
       }//end asking if time valid and has global track
@@ -400,7 +407,7 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 	continue; 
       } else {
 	const DetId & hit_detId = hit->geographicalId();
-	uint IntRawDetID = (hit_detId.rawId());
+	//	uint IntRawDetID = (hit_detId.rawId()); // currently unused
 	uint IntSubDetID = (hit_detId.subdetId());
 	
 	if(IntSubDetID == 0 )
@@ -421,8 +428,8 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 
 	const GeomDetUnit* detUnit = hit->detUnit();
 	double dPhi = -999, dR = -999, dZ = -999, phiorientation = -999;
-	double R = 0.;
-	double origintointersect = 0.;	
+	//double R = 0.; // currently unused
+	//double origintointersect = 0.; // currently unused
 
 	if(detUnit) {
 	  const Surface& surface = hit->detUnit()->surface();
@@ -608,7 +615,7 @@ void PixelNtuplizer_RealData::fillClust(const SiPixelCluster& matchIt, const Rec
   float locx = localDir.x();
   float locy = localDir.y();
   float locz = localDir.z();
-  float loctheta = localDir.theta();
+  //float loctheta = localDir.theta(); // currently unused
 
   clust_.clust_alpha = atan2( locz, locx );
   clust_.clust_beta = atan2( locz, locy );
@@ -622,7 +629,7 @@ void PixelNtuplizer_RealData::fillPix(const SiPixelCluster & LocPix, const Recta
   const std::vector<SiPixelCluster::Pixel>& pixvector = LocPix.pixels();
   if(pixvector.size()>maxsize_PixInfoStruct_)
     pixinfo_.hasOverFlow=1;
-  for ( ; pixinfo_.npix < (int)pixvector.size() && pixinfo_.npix<maxsize_PixInfoStruct_; ++pixinfo_.npix)
+  for ( ; (size_t)pixinfo_.npix <pixvector.size() &&   (size_t)pixinfo_.npix< maxsize_PixInfoStruct_; ++pixinfo_.npix)
     {
      
       SiPixelCluster::Pixel holdpix = pixvector[pixinfo_.npix];
@@ -746,14 +753,6 @@ void PixelNtuplizer_RealData::PixInfoStruct::init()
      }
   */
 } 
-
-
-
-void PixelNtuplizer_RealData::MuonInfoStruct::init()
-{
-  nmuon = 0;
-  HasOverFlow = false;
-}
 
 void PixelNtuplizer_RealData::RecHitStruct::init()
 {
