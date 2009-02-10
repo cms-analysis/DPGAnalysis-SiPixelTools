@@ -9,7 +9,12 @@ else
   rm -fr ${DIR}/*
 fi
 
-./pythonTemplateGenerator.csh
+#./pythonTemplateGenerator.csh 50 SMALLfilelistTrackerPointingReReco.txt
+./pythonTemplateGenerator.csh 50 filelistTrackerPointingReReco.txt
+#./pythonTemplateGenerator.csh 10 filelistSuperPointingMagON.txt
+#./pythonTemplateGenerator.csh 100 filelistAlcaReco.txt
+#./pythonTemplateGenerator.csh 100 filelistAlCaSkimmed.txt
+#./pythonTemplateGenerator.csh 200 filelistSuperPointing.txt
 
 let i=0
 
@@ -17,8 +22,11 @@ for file in template*; do
 let i=$i+1
 echo Creating job $i
 sed "s#NUMOFEVENTS#-1#" < $file > temp1
-sed "s#TRACKINPUTTAG0T#ALCARECOTkAlCosmicsCosmicTF0T#" < temp1 > temp2
-sed "s#TRACKINPUTTAG#ALCARECOTkAlCosmicsCosmicTF#" < temp2 > temp3
+sed "s#TRACKINPUTTAG0T#ctfWithMaterialTracksP5#" < temp1 > temp2
+#SuperPointing tracks, ReReco TrackerPointing tracks
+sed "s#TRACKINPUTTAG#ctfWithMaterialTracksP5#" < temp2 > temp3
+#AlcaReco tracks: doesn't exist anymore
+#sed "s#TRACKINPUTTAG#ALCARECOTkAlCosmicsCTF#" < temp2 > temp3
 sed "s#ROOTFILE0T#pixelEfficiency0T$i.root#" < temp3 > temp4
 sed "s#ROOTFILE#pixelEfficiency$i.root#" < temp4 > ${DIR}/pixelefficiency_cfg$i.py
 
@@ -34,5 +42,7 @@ bsub -q cmscaf -J job_$i < submit_$i.csh
 
 cd ..
 done
+
+rm -f template*
 
 
