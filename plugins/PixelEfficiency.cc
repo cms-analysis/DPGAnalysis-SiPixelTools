@@ -34,7 +34,7 @@
 #include "MagneticField/Engine/interface/MagneticField.h"
 #include "MagneticField/UniformEngine/src/UniformMagneticField.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
-#include "MagneticField/UniformEngine/src/UniformMagneticFieldESProducer.h"
+//#include "MagneticField/UniformEngine/src/UniformMagneticFieldESProducer.h"
 //class to take the pixel submodules
 #include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
 //class for the trajectories
