@@ -10,7 +10,7 @@ else
 fi
 
 #./pythonTemplateGenerator.csh 50 SMALLfilelistTrackerPointingReReco.txt
-./pythonTemplateGenerator.csh 50 filelistTrackerPointingReReco.txt
+./pythonTemplateGenerator.csh 10 filelistTrackerPointingReReco.txt
 #./pythonTemplateGenerator.csh 10 filelistSuperPointingMagON.txt
 #./pythonTemplateGenerator.csh 100 filelistAlcaReco.txt
 #./pythonTemplateGenerator.csh 100 filelistAlCaSkimmed.txt

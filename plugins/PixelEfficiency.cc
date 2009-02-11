@@ -102,6 +102,7 @@ private:
   TH1F*  histEndcap;
 
   TH1F*  consistencyCheck;
+  TH1F*  consistencyCheckTraj;
 
   TH1F*  histInvalidRecHitCollection;
   TH1F*  histInvalidRecHitWithBadmoduleList;
@@ -118,6 +119,9 @@ private:
   TH1F*  checkoutValidityFlag;
   TH1F*  checkoutTraj;
   //
+  TH1F*  totalPerTrack;
+  TH1F*  inactivePerTrack;
+  TH1F*  missingPerTrack;
   TFile* fOutputFile;
 
 
@@ -271,13 +275,20 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	 inactivePerRun->GetXaxis()->SetBinLabel(setBin,testLabel);
 	 }
        
-       
+       float numPixHit=0;
+       float numInactiveHit=0;
+       float numMissingHit=0;
        for (trackingRecHit_iterator iHit = tkIter->recHitsBegin(); iHit != tkIter->recHitsEnd(); ++iHit)
          {
-	 
+	  
          //check if the recHit belong to Pixel otehrwise go to the next recHit
          int type =(*iHit)->geographicalId().subdetId();           
          if ( !( type==int(kBPIX)|| type==int(kFPIX)) ) continue;
+
+	 //DEBUG THIS *&$$!!! FLAG
+	 numPixHit++;
+	 if ( (*iHit)->getType()==TrackingRecHit::inactive )  numInactiveHit++;
+	 if ( (*iHit)->getType()==TrackingRecHit::missing )   numMissingHit++;
 	 
          //run analysis
 	 if ( ! ((*iHit)->isValid()) )  invalidPerRun->Fill(testLabel,1);
@@ -412,6 +423,11 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	   else                                           histEndcapPlus->Fill(filling);
 	   }//endcaps
          } // end of loop on rechits
+	
+       //no check on denominator: for sure at least 1 recHit in previous filling 
+       totalPerTrack->Fill( numPixHit );
+       inactivePerTrack->Fill( (numInactiveHit/numPixHit)*100.);
+       missingPerTrack->Fill( (numMissingHit/numPixHit)*100.);
 	 
        } //if-else inPixelVolume 
      } // end of loop on tracks
@@ -423,6 +439,7 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   edm::Handle<TrajTrackAssociationCollection> trajTrackCollectionHandle;
   iEvent.getByLabel(trajectoryInput_,trajTrackCollectionHandle);
 
+try{
   edm::Handle< edmNew::DetSetVector<SiPixelCluster> > theClusters;
   iEvent.getByLabel(pixelClusterInput_, theClusters);
   const edmNew::DetSetVector<SiPixelCluster>& input = *theClusters;
@@ -433,9 +450,35 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   TrajectoryStateCombiner tsoscomb;
   for(TrajTrackAssociationCollection::const_iterator it = trajTrackCollectionHandle->begin(),
       itEnd = trajTrackCollectionHandle->end(); it!=itEnd;++it){
-      
+    
+    consistencyCheckTraj->Fill(0);//number of total trajectories
     const Trajectory& traj  = *it->key;
     std::vector<TrajectoryMeasurement> tmColl = traj.measurements();
+
+    //precheck to count the BPix/FPix number of trajectories
+    for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
+	itTraj != itTrajEnd; ++itTraj) {
+      TransientTrackingRecHit::ConstRecHitPointer testhit = itTraj->recHit();
+      uint testSubDetID = (testhit->geographicalId().subdetId());
+      if( (testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap) ) 
+        {
+	consistencyCheckTraj->Fill(1);
+	break;
+	}
+      }
+
+    //precheck to count only the BPix number of trajectories
+    for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
+	itTraj != itTrajEnd; ++itTraj) {
+      TransientTrackingRecHit::ConstRecHitPointer testhit = itTraj->recHit();
+      uint testSubDetID = (testhit->geographicalId().subdetId());
+      if( testSubDetID == PixelSubdetector::PixelBarrel ) 
+        {
+	consistencyCheckTraj->Fill(2);
+	break;
+	}
+      }
+          
     for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
 	itTraj != itTrajEnd; ++itTraj) {
   
@@ -487,7 +530,7 @@ else if ((*testhit).getType()==TrackingRecHit::missing) checkoutValidityFlag->Fi
 else  if ((*testhit).getType()==TrackingRecHit::valid) checkoutValidityFlag->Fill(2);
 else checkoutValidityFlag->Fill(3);
 
-      if ( (*testhit).getType()!=TrackingRecHit::valid)
+      if ( (*testhit).getType()==TrackingRecHit::missing)
         {
         //set this better in case of no founded cluster at all...
 	double minDistance=999999;
@@ -524,8 +567,9 @@ else checkoutValidityFlag->Fill(3);
         //std::cout<<"previous of filling"<<std::endl;
 	windowSearch->Fill(minDistance); 
 	}//end-if "work-on-not-valid"    
-      }//end-for trajMeasurements
+      }//end-for trajMeasurements      
     }//end-for of Trajectories
+}catch ( ... ) {}
    
    } catch ( cms::Exception& er ) {
      std::cout<<"caught cicciburicci std::exception "<<er.what()<<std::endl;
@@ -559,6 +603,8 @@ PixelEfficiency::beginJob(const edm::EventSetup&)
  histInvalidRecHitWithBadmoduleList = new TH1F("histInvalidRecHitWithBadmoduleList","histInvalidRecHitWithBadmoduleList",5,0,5);
  
  consistencyCheck = new TH1F("consistencyCheck","consistencyCheck", 3, 0,3);
+ consistencyCheckTraj = new TH1F("consistencyCheckTraj","consistencyCheckTraj", 3, 0,3);
+
  windowSearch = new TH1F("windowSearch","windowSearch",100,0,0.10);
  validPerRun = new TH1F("validPerRun","validPerRun",200,0,200);
  invalidPerRun = new TH1F("invalidPerRun","invalidPerRun",200,0,200);
@@ -573,6 +619,10 @@ PixelEfficiency::beginJob(const edm::EventSetup&)
  checkoutValidityFlag = new TH1F("checkoutValidityFlag","checkoutValidityFlag", 4, 0,4);
  checkoutTraj = new TH1F("checkoutTraj","checkoutTraj",10,0,10);
  //
+ totalPerTrack= new TH1F ("totalPerTrack","totalPerTrack",20,0,20);
+ inactivePerTrack= new TH1F ("inactivePerTrack","inactivePerTrack",101,0,101);
+ missingPerTrack= new TH1F ("missingPerTrack","missingPerTrack",101,0,101);
+
 
  tree = new TTree("moduleAnalysis","moduleAnalysis");
  tree->Branch("id",&idTree,"id/I");
@@ -612,6 +662,8 @@ PixelEfficiency::endJob() {
   histInvalidRecHitWithBadmoduleList->Write();
 
   consistencyCheck->Write();
+  consistencyCheckTraj->Write();
+
   windowSearch->Write();
   validVsAlpha->Write();
   invalidVsAlpha->Write();
@@ -629,6 +681,9 @@ PixelEfficiency::endJob() {
   checkoutValidityFlag->Write();
   checkoutTraj->Write();
   //
+  totalPerTrack->Write();
+  inactivePerTrack->Write();
+  missingPerTrack->Write();
   
   
     isModuleBadTree=1;
