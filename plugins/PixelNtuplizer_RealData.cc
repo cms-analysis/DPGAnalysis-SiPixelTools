@@ -103,6 +103,13 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
   t_->Branch("gypix", pixinfo_.gy, "gy[npix]/F", bufsize);
   t_->Branch("gzpix", pixinfo_.gz, "gz[npix]/F", bufsize);
 
+  std::cout << "Making allpixinfo branch:" << std::endl;
+  t_->Branch("allpix_npix", &allpixinfo_.allpix_npix, "allpix_npix/I", bufsize);
+  t_->Branch("allpix_hasOverFlow",&allpixinfo_.allpix_hasOverFlow, "allpix_hasOverFlow/I",bufsize);
+  t_->Branch("allpix_rowpix", allpixinfo_.allpix_row, "allpix_row[allpix_npix]/F", bufsize);
+  t_->Branch("allpix_colpix", allpixinfo_.allpix_col, "allpix_col[allpix_npix]/F", bufsize);
+  t_->Branch("allpix_adc"   , allpixinfo_.allpix_adc, "allpix_adc[allpix_npix]/F", bufsize);
+
  std::cout << "Making allclustinfo branch:" << std::endl;
 
   t_->Branch("n_allclust"          , &allclustinfo_.n_allclust         , "n_allclust/I"                           , bufsize);
@@ -461,6 +468,9 @@ bool PixelNtuplizer_RealData::isOffTrackHits(const edm::Event& iEvent, const edm
   iSetup.get<TrackerDigiGeometryRecord> ().get (pDD);
   const TrackerGeometry* tracker = &(* pDD);
 
+  allpixinfo_.allpix_hasOverFlow = 0;
+  allclustinfo_.allclust_hasOverFlow = 0;
+
  //-----Iterate over detunits
 			  //cout << endl << "Start search for det unit..." << endl;
 			  bool found_det_unit = false;
@@ -490,7 +500,7 @@ bool PixelNtuplizer_RealData::isOffTrackHits(const edm::Event& iEvent, const edm
 				  SiPixelRecHitCollection::const_iterator pixeliter = pixelrechitRangeIteratorBegin;
 				  				
 				  int n_clust = 0;
-				 
+				   int pixel_index = 0;
 				  for ( ; pixeliter != pixelrechitRangeIteratorEnd; ++pixeliter) 
 				    {
 				      ++n_clust;
@@ -535,6 +545,27 @@ bool PixelNtuplizer_RealData::isOffTrackHits(const edm::Event& iEvent, const edm
 						    (clust_.x - allclustinfo_.allclust_x[n_clust-1]) +
 						    (clust_.y - allclustinfo_.allclust_y[n_clust-1])*
 						    (clust_.y - allclustinfo_.allclust_y[n_clust-1]) );
+
+
+					    const std::vector<SiPixelCluster::Pixel>& pixvector = pixeliter->cluster()->pixels();
+					  
+					    
+
+					    for (int i=0; i<(int)pixvector.size(); ++i )
+					    {
+					      if ( (int)pixel_index < (int)maxsize_AllPixInfoStruct_ )
+						{
+						  ++pixel_index;
+						  SiPixelCluster::Pixel holdpix = pixvector[i];
+						  allpixinfo_.allpix_row[pixel_index-1] = holdpix.x;
+						  allpixinfo_.allpix_col[pixel_index-1] = holdpix.y;
+						  allpixinfo_.allpix_adc[pixel_index-1] = holdpix.adc;
+						}
+					      else
+						allpixinfo_.allpix_hasOverFlow = 1;
+					      
+					    }
+
 					  
 					
 					  
@@ -730,7 +761,8 @@ void PixelNtuplizer_RealData::init()
   track_.init();
   muoninfo_.init();
   allclustinfo_.init();
-  
+  allpixinfo_.init();
+    
 }
 
 void PixelNtuplizer_RealData::EvtStruct::init()

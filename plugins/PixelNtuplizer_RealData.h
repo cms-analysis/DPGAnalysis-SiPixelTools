@@ -198,6 +198,24 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
   } allclustinfo_;
   size_t maxsize_AllClustInfoStruct_;
 
+ struct AllPixInfoStruct 
+  {
+    int allpix_npix;
+    float allpix_row[10000];
+    float allpix_col[10000];
+    float allpix_adc[10000];
+    int allpix_hasOverFlow;
+    
+    void init(){
+      allpix_npix = 0;
+      allpix_hasOverFlow = 0;
+      allpix_row[0] =allpix_col[0] = allpix_adc[0]= 0.;
+      
+
+    }
+  } allpixinfo_;
+  size_t maxsize_AllPixInfoStruct_;
+
   struct PixInfoStruct {
 
     int npix;
