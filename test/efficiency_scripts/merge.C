@@ -11,6 +11,7 @@ void merge(){
 
   using namespace std;
   bool DEBUG=false;
+  int Nfiles=90;
 
   if(DEBUG) cout<<"********* CREATING MERGED HISTO/TTREE ************"<<endl;
 
@@ -34,11 +35,34 @@ void merge(){
   TH1F* inactivePercentPerRun = new  TH1F("inactivePercentPerRun","inactivePercentPerRun",200,0,200);
 
   TH1F* validVsAlphaMerged = new TH1F("validVsAlphaMerged","validVsAlphaMerged",200,-3.5,3.5);
-  TH1F* invalidVsAlphaMerged = new TH1F("invalidVsAlphaMerged","invalidVsAlphaMerged",200,-3.5,3.5);
+  TH1F* validVsAlphaBPixMerged = new TH1F("validVsAlphaBPixMerged","validVsAlphaMerged",200,-3.5,3.5);
+  TH1F* validVsAlphaFPixMerged = new TH1F("validVsAlphaFPixMerged","validVsAlphaFPixMerged",200,-3.5,3.5);
+  TH1F* missingVsAlphaMerged = new TH1F("missingVsAlphaMerged","missingVsAlphaMerged",200,-3.5,3.5);
+  TH1F* missingVsAlphaBPixMerged = new TH1F("missingVsAlphaBPixMerged","missingVsAlphaBPixMerged",200,-3.5,3.5);
+  TH1F* missingVsAlphaFPixMerged = new TH1F("missingVsAlphaFPixMerged","missingVsAlphaFPixMerged",200,-3.5,3.5);
   TH1F* validVsBetaMerged = new TH1F("validVsBetaMerged","validVsBetaMerged",200,-3.5,3.5);
-  TH1F* invalidVsBetaMerged = new TH1F("invalidVsBetaMerged","invalidVsBetaMerged",200,-3.5,3.5);
+  TH1F* validVsBetaBPixMerged = new TH1F("validVsBetaBPixMerged","validVsBetaBPixMerged",200,-3.5,3.5);
+  TH1F* validVsBetaFPixMerged = new TH1F("validVsBetaFPixMerged","validVsBetaFPixMerged",200,-3.5,3.5);
+  TH1F* missingVsBetaMerged = new TH1F("missingVsBetaMerged","missingVsBetaMerged",200,-3.5,3.5);
+  TH1F* missingVsBetaBPixMerged = new TH1F("missingVsBetaBPixMerged","missingVsBetaBPixMerged",200,-3.5,3.5);
+  TH1F* missingVsBetaFPixMerged = new TH1F("missingVsBetaFPixMerged","missingVsBetaFPixMerged",200,-3.5,3.5);
 
-  TH1F*  windowSearchMerged = new  TH1F("windowSearchMerged","windowSearchMerged",100,0,0.10);
+  TH1F* validVsLocalXMerged = new TH1F("validVsLocalXMerged","validVsLocalXMerged",100,-1.5,1.5);
+  TH1F* validVsLocalYMerged = new TH1F("validVsLocalYMerged","validVsLocalYMerged",100,-4.,4.);
+  TH1F* missingVsLocalXMerged = new TH1F("missingVsLocalXMerged","missingVsLocalXMerged",100,-1.5,1.5);
+  TH1F* missingVsLocalYMerged = new TH1F("missingVsLocalYMerged","missingVsLocalYMerged",100,-4.,4.);
+
+
+  TH1F*  windowSearchMerged = new  TH1F("windowSearchMerged","windowSearchMerged",200,0,0.20);
+  TH1F* scurve = new TH1F("scurve", "scurve", windowSearchMerged->GetNbinsX(), 0, windowSearchMerged->GetXaxis()->GetBinUpEdge(windowSearchMerged->GetNbinsX()));
+    
+ /* TH1F* histoMethod2Merged = new TH1F("histoMethod2Merged", "histoMethod2Merged",2 , 0, 2);
+
+  
+  histoMethod2
+  histoMethod2After*/
+
+
 
   //invalidity version
   TH1F* histInvalidRecHitCollectionMerged = new TH1F("histInvalidRecHitCollectionMerged","histInvalidRecHitCollectionMerged", 4, 0,4);
@@ -54,7 +78,7 @@ void merge(){
 
 
   vector< vector<int> > tempTree;
-  int id, isModuleBad, inactive, missing, valid, isBarrelModule;
+  int id, isModuleBad, inactive, missing, valid, isBarrelModule, ladder, blade;
   TTree *treeMerged = new TTree("moduleAnalysisMerged","moduleAnalysisMerged");
   treeMerged->Branch("id",&id,"id/I");
   treeMerged->Branch("isModuleBad",&isModuleBad,"isModuleBad/I");
@@ -62,8 +86,9 @@ void merge(){
   treeMerged->Branch("missing",&missing,"missing/I");
   treeMerged->Branch("valid",&valid,"valid/I");
   treeMerged->Branch("isBarrelModule",&isBarrelModule,"isBarrelModule/I");
+  treeMerged->Branch("ladder",&ladder,"ladder/I");
+  treeMerged->Branch("blade",&blade,"blade/I");
 
-  int Nfiles=190;
 
   char name[120];
   for(int i=1;i<=Nfiles;i++)
@@ -185,29 +210,55 @@ void merge(){
     if(DEBUG) cout<<"********* NOW MERGING ANALYSIS FOR TRAJECTORY ************"<<endl;
 
 
+    TH1F *htest = (TH1F*)gDirectory->Get( "checkoutTraj" );
     for (int bin=1; bin<=10; bin++)
-      {
-      TH1F *htest = (TH1F*)gDirectory->Get( "checkoutTraj" );
-      checkoutTrajMerged->SetBinContent( bin, checkoutTrajMerged->GetBinContent(bin) + htest->GetBinContent(bin));
-      
-      delete htest;
-      }
+      checkoutTrajMerged->SetBinContent( bin, checkoutTrajMerged->GetBinContent(bin) + htest->GetBinContent(bin));  
+    delete htest;
+    
 //update to alpha and beta
-    for (int bin=1; bin<=200; bin++)
-      {
-      TH1F *hx = (TH1F*)gDirectory->Get( "validVsAlpha" );
-      validVsAlphaMerged->SetBinContent( bin, validVsAlphaMerged->GetBinContent(bin) + hx->GetBinContent(bin));
-      TH1F *hy = (TH1F*)gDirectory->Get( "invalidVsAlpha" );
-      invalidVsAlphaMerged->SetBinContent( bin, invalidVsAlphaMerged->GetBinContent(bin) + hy->GetBinContent(bin));
-      TH1F *hw = (TH1F*)gDirectory->Get( "validVsBeta" );
-      validVsBetaMerged->SetBinContent( bin, validVsBetaMerged->GetBinContent(bin) + hw->GetBinContent(bin));
-      TH1F *hz = (TH1F*)gDirectory->Get( "invalidVsBeta" );
-      invalidVsBetaMerged->SetBinContent( bin, invalidVsBetaMerged->GetBinContent(bin) + hz->GetBinContent(bin));
-      
-      delete hx;
-      delete hy;
-      }
+    TH1F *validVsAlpha = (TH1F*)gDirectory->Get( "validVsAlpha" );
+    TH1F *validVsAlphaBPix = (TH1F*)gDirectory->Get( "validVsAlphaBPix" );
+    TH1F *validVsAlphaFPix = (TH1F*)gDirectory->Get( "validVsAlphaFPix" );
+    TH1F *missingVsAlpha = (TH1F*)gDirectory->Get( "missingVsAlpha" );
+    TH1F *missingVsAlphaBPix = (TH1F*)gDirectory->Get( "missingVsAlphaBPix" );
+    TH1F *missingVsAlphaFPix = (TH1F*)gDirectory->Get( "missingVsAlphaFPix" );
+    TH1F *validVsBeta = (TH1F*)gDirectory->Get( "validVsBeta" );
+    TH1F *validVsBetaBPix = (TH1F*)gDirectory->Get( "validVsBetaBPix" );
+    TH1F *validVsBetaFPix = (TH1F*)gDirectory->Get( "validVsBetaFPix" );
+    TH1F *missingVsBeta = (TH1F*)gDirectory->Get( "missingVsBeta" );
+    TH1F *missingVsBetaBPix = (TH1F*)gDirectory->Get( "missingVsBetaBPix" );
+    TH1F *missingVsBetaFPix = (TH1F*)gDirectory->Get( "missingVsBetaFPix" );
 
+    for (int bin=1; bin<=200; bin++){
+      validVsAlphaMerged->SetBinContent( bin, validVsAlphaMerged->GetBinContent(bin) + validVsAlpha->GetBinContent(bin));
+      validVsAlphaBPixMerged->SetBinContent( bin, validVsAlphaBPixMerged->GetBinContent(bin) + validVsAlphaBPix->GetBinContent(bin));
+      validVsAlphaFPixMerged->SetBinContent( bin, validVsAlphaFPixMerged->GetBinContent(bin) + validVsAlphaFPix->GetBinContent(bin));
+      missingVsAlphaMerged->SetBinContent( bin, missingVsAlphaMerged->GetBinContent(bin) + missingVsAlpha->GetBinContent(bin));
+      missingVsAlphaBPixMerged->SetBinContent( bin, missingVsAlphaBPixMerged->GetBinContent(bin) + missingVsAlphaBPix->GetBinContent(bin));
+      missingVsAlphaFPixMerged->SetBinContent( bin, missingVsAlphaFPixMerged->GetBinContent(bin) + missingVsAlphaFPix->GetBinContent(bin));
+      validVsBetaMerged->SetBinContent( bin, validVsBetaMerged->GetBinContent(bin) + validVsBeta->GetBinContent(bin));
+      validVsBetaBPixMerged->SetBinContent( bin, validVsBetaBPixMerged->GetBinContent(bin) + validVsBeta->GetBinContent(bin));
+      validVsBetaFPixMerged->SetBinContent( bin, validVsBetaFPixMerged->GetBinContent(bin) + validVsBetaFPix->GetBinContent(bin));
+      missingVsBetaMerged->SetBinContent( bin, missingVsBetaMerged->GetBinContent(bin) + missingVsBeta->GetBinContent(bin));
+      missingVsBetaBPixMerged->SetBinContent( bin, missingVsBetaBPixMerged->GetBinContent(bin) + missingVsBetaBPix->GetBinContent(bin));
+      missingVsBetaFPixMerged->SetBinContent( bin, missingVsBetaFPixMerged->GetBinContent(bin) + missingVsBetaFPix->GetBinContent(bin));
+    }
+
+    TH1F *missingVsLocalX = (TH1F*)gDirectory->Get( "missingVsLocalX" );
+    TH1F *missingVsLocalY = (TH1F*)gDirectory->Get( "missingVsLocalY" );
+    TH1F *validVsLocalX = (TH1F*)gDirectory->Get( "validVsLocalX" );
+    TH1F *validVsLocalY = (TH1F*)gDirectory->Get( "validVsLocalY" );
+
+    for (int bin=1; bin<=missingVsLocalX->GetNbinsX(); bin++){
+      missingVsLocalXMerged->SetBinContent( bin, missingVsLocalXMerged->GetBinContent(bin) + missingVsLocalX->GetBinContent(bin));
+      missingVsLocalYMerged->SetBinContent( bin, missingVsLocalYMerged->GetBinContent(bin) + missingVsLocalY->GetBinContent(bin));
+      validVsLocalXMerged->SetBinContent( bin, validVsLocalXMerged->GetBinContent(bin) + validVsLocalX->GetBinContent(bin));
+      validVsLocalYMerged->SetBinContent( bin, validVsLocalYMerged->GetBinContent(bin) + validVsLocalY->GetBinContent(bin));
+    }
+    
+    
+    
+    
     for (int bin=1; bin<=101; bin++)
       {
       TH1F *h17 = (TH1F*)gDirectory->Get( "inactivePerTrack" );
@@ -235,15 +286,15 @@ void merge(){
  bin = nbins;   last bin with upper-edge xup EXCLUDED
  bin = nbins+1; overflow bin
 */
-    for (int bin=0; bin<=101; bin++)
-      {
-      TH1F *hw = (TH1F*)gDirectory->Get( "windowSearch" );
-      windowSearchMerged->SetBinContent( bin,
-      windowSearchMerged->GetBinContent(bin) + hw->GetBinContent(bin));
 
-      delete hw;
-      }
 
+    if(DEBUG) cout<<"********* NOW MERGING WINDOW SEARCH ************"<<endl;
+
+
+    TH1F *hw = (TH1F*)gDirectory->Get( "windowSearch" );
+    for (int bin=1; bin<=windowSearchMerged->GetNbinsX()+1; bin++)
+      windowSearchMerged->SetBinContent( bin, windowSearchMerged->GetBinContent(bin) + hw->GetBinContent(bin));
+    
 //
     
     if(DEBUG) cout<<"********* ALL HISTO WERE SUCCESSFULLY MERGED ************"<<endl;
@@ -257,16 +308,17 @@ void merge(){
     tree->SetBranchAddress("missing",&missing);
     tree->SetBranchAddress("valid",&valid);
     tree->SetBranchAddress("isBarrelModule",&isBarrelModule);
+    tree->SetBranchAddress("ladder",&ladder);
+    tree->SetBranchAddress("blade",&blade);
     
     if(tree==0) cout<<" !!!!!!!!  Problem opening TTree, it is probably void !!!!!!!!!!"<<endl;
     if(DEBUG) cout<<"********* TTREE WAS OPENED SUCCESSFULLY ************"<<endl;
     
     int entries = tree->GetEntries();
-        if(DEBUG) cout<<entries<<endl;
+    if(DEBUG) cout<<"== We have "<<entries<<" in the TTree =="<<endl;
 
     for(int n=0;n<entries;n++){
       tree->GetEntry(n);  //get the tree entries in the proper (already addressed) variables 
-          
       int PlaceInVector=-1;
       for(int j=0;j<tempTree.size();j++) if(id==tempTree[j][0]) {PlaceInVector = j;break;}
       
@@ -377,38 +429,31 @@ void merge(){
   error=0; if((a+b)!=0) error=sqrt( ((a)/(a+b))*(1-((a)/(a+b)))/(a+b) );
   histSubdetectors->SetBinError(5,error);
   histSubdetectors->GetXaxis()->SetBinLabel(5," FPix Minus");
-  
-/*   
-  hid.Form("histBarrelMerged;1");
-  TH1F *h6 = (TH1F*)gDirectory->Get( hid.Data() );
-  histSummary->SetBinContent( 1,h6->GetBinContent(3)/(h6->GetBinContent(3)+h6->GetBinContent(2)) );   
-  a=h6->GetBinContent(3); b=h6->GetBinContent(2);
+     
+  a=histBarrelMerged->GetBinContent(3); b=histBarrelMerged->GetBinContent(2);
+  histSummary->SetBinContent( 1, a/(a+b) );
   error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
   histSummary->SetBinError(1,error);
   histSummary->GetXaxis()->SetBinLabel(1,"BPix");
 
-  hid.Form("histEndcapMerged;1");
-  TH1F *h7 = (TH1F*)gDirectory->Get( hid.Data() );
-  histSummary->SetBinContent( 2,h7->GetBinContent(3)/(h7->GetBinContent(3)+h7->GetBinContent(2)) );
-  a=h7->GetBinContent(3); b=h7->GetBinContent(2);
+  a=histEndcapMerged->GetBinContent(3); b=histEndcapMerged->GetBinContent(2);
+  histSummary->SetBinContent( 2, a/(a+b) );
   error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
   histSummary->SetBinError(2,error);
   histSummary->GetXaxis()->SetBinLabel(2,"FPix");
   
-  hid.Form("histoMerged;1");
-  TH1F *h8 = (TH1F*)gDirectory->Get( hid.Data() );
-  histSummary->SetBinContent( 3,h8->GetBinContent(3)/(h8->GetBinContent(3)+h8->GetBinContent(2)) );
-  a=h8->GetBinContent(3); b=h8->GetBinContent(2);
+  a=histoMerged->GetBinContent(3); b=histoMerged->GetBinContent(2);
+  histSummary->SetBinContent( 3, a/(a+b) );
   error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
   histSummary->SetBinError(3,error);
   histSummary->GetXaxis()->SetBinLabel(3,"total");
-*/ 
+
   
   TH1F* histAlphaAnalysis = new TH1F("histAlphaAnalysis", "hist", 200, -3.5,3.5); 
   for (int bin=1;bin<=200;bin++)
     {
     double val=validVsAlphaMerged->GetBinContent(bin);
-    double mis=invalidVsAlphaMerged->GetBinContent(bin);
+    double mis=missingVsAlphaMerged->GetBinContent(bin);
     if ((val+mis)!=0)
       {
       histAlphaAnalysis->SetBinContent(bin,val/(val+mis));
@@ -422,7 +467,7 @@ void merge(){
   for (int bin=1;bin<=200;bin++)
     {
     double val=validVsBetaMerged->GetBinContent(bin);
-    double mis=invalidVsBetaMerged->GetBinContent(bin);
+    double mis=missingVsBetaMerged->GetBinContent(bin);
     if ((val+mis)!=0)
       {
       histBetaAnalysis->SetBinContent(bin,val/(val+mis));
@@ -489,9 +534,18 @@ void merge(){
 
     }//end-for loop on tree
 
-
-
-
+    
+    double totalHit=0., validHit=0.;
+    for (int bin=1;bin<=windowSearchMerged->GetNbinsX()+1; bin++) //201 includes overflow=definitevely missing
+    totalHit+=windowSearchMerged->GetBinContent(bin);
+   
+    for (int bin=1; bin<=scurve->GetNbinsX(); bin++){
+      validHit+=windowSearchMerged->GetBinContent(bin);
+      scurve->SetBinContent(bin, validHit/totalHit);
+    }
+    
+    scurve->GetXaxis()->SetTitle("window search [cm]");
+    scurve->GetYaxis()->SetTitle("eff");
 
 
 
@@ -524,9 +578,22 @@ void merge(){
   inactivePercentPerRun->Write();
 
   validVsAlphaMerged->Write();
-  invalidVsAlphaMerged->Write(); 
-  validVsBetaMerged->Write();
-  invalidVsBetaMerged->Write(); 
+  validVsAlphaBPixMerged->Write();
+  validVsAlphaFPixMerged->Write();
+  missingVsAlphaMerged->Write();
+  missingVsAlphaBPixMerged->Write();
+  missingVsAlphaFPixMerged->Write(); 
+  validVsBetaMerged->Write(); 
+  validVsBetaBPixMerged->Write(); 
+  validVsBetaFPixMerged->Write();
+  missingVsBetaMerged->Write();
+  missingVsBetaBPixMerged->Write();
+  missingVsBetaFPixMerged->Write();
+  
+  missingVsLocalXMerged->Write();
+  missingVsLocalYMerged->Write();
+  validVsLocalXMerged->Write();
+  validVsLocalYMerged->Write();  
 
   windowSearchMerged->Write();
   
@@ -560,6 +627,8 @@ void merge(){
 
   moduleBadBPix->Write(); 
   moduleBadFPix->Write(); 
+  
+  scurve->Write();
 
   fOutputFile->Close() ;
     
