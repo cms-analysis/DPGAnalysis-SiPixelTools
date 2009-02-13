@@ -3,12 +3,17 @@
 #include "TFile.h"
 #include "TString.h"
 #include "TTree.h"
+#include "TList.h"
 #include <vector>
 #include <iostream>
+
 void merge(){
 
   using namespace std;
   bool DEBUG=false;
+
+  if(DEBUG) cout<<"********* CREATING MERGED HISTO/TTREE ************"<<endl;
+
 
   TH1F* histoMerged = new TH1F("histoMerged", "histoMerged", 3, 0, 3);
 
@@ -58,7 +63,7 @@ void merge(){
   treeMerged->Branch("valid",&valid,"valid/I");
   treeMerged->Branch("isBarrelModule",&isBarrelModule,"isBarrelModule/I");
 
-  int Nfiles=170;
+  int Nfiles=190;
 
   char name[120];
   for(int i=1;i<=Nfiles;i++)
@@ -69,9 +74,13 @@ void merge(){
   
     TFile* myFile = TFile::Open(name);
     if(myFile==0) continue;
+    
+    //TList list = 
+    if((myFile->GetListOfKeys())->First()==0) {cout<< "IS VOID" << endl; continue;}
+    
     myFile->cd();
     
-    if(DEBUG) cout<<"File opened"<<endl;
+    if(DEBUG) cout<<"********* FILE OPENED, STARTING TO MERGE ************"<<endl;
     
     for (int bin=1; bin<=3; bin++)
       {
@@ -131,6 +140,10 @@ void merge(){
       delete h16;
       }      
       
+      
+    if(DEBUG) cout<<"********* NOW MERGING ANALYSIS PER RUN ************"<<endl;
+
+      
 //merging analysisPerRun
     int lastBin=-999;
     for (int bin=1; bin<=validPerRunMerged->GetNbinsX();bin++)
@@ -166,6 +179,11 @@ void merge(){
 	lastBin++;
 	}
       }
+//////////////////////////////////////////////delete delete delete
+
+
+    if(DEBUG) cout<<"********* NOW MERGING ANALYSIS FOR TRAJECTORY ************"<<endl;
+
 
     for (int bin=1; bin<=10; bin++)
       {
@@ -228,7 +246,9 @@ void merge(){
 
 //
     
-    if(DEBUG) cout<<"Histo merged"<<endl;
+    if(DEBUG) cout<<"********* ALL HISTO WERE SUCCESSFULLY MERGED ************"<<endl;
+    if(DEBUG) cout<<"********* NOW STARTING TO MERGE TTREE ************"<<endl;
+
     
     TTree *tree = (TTree*)gDirectory->Get("moduleAnalysis");
     tree->SetBranchAddress("id",&id);
@@ -238,8 +258,8 @@ void merge(){
     tree->SetBranchAddress("valid",&valid);
     tree->SetBranchAddress("isBarrelModule",&isBarrelModule);
     
-    if(DEBUG) cout<<"TTree opened"<<endl;
-    if(tree==0) cout<<"Problem opening TTree"<<endl;
+    if(tree==0) cout<<" !!!!!!!!  Problem opening TTree, it is probably void !!!!!!!!!!"<<endl;
+    if(DEBUG) cout<<"********* TTREE WAS OPENED SUCCESSFULLY ************"<<endl;
     
     int entries = tree->GetEntries();
         if(DEBUG) cout<<entries<<endl;
@@ -267,7 +287,7 @@ void merge(){
       } 
     }
     
-    if(DEBUG) cout<<"TTree merged"<<endl;
+    if(DEBUG) cout<<"********* TTREE MERGED ************"<<endl;    
     
     delete tree;
     
@@ -313,6 +333,169 @@ void merge(){
     treeMerged->Fill();
   }
 
+  //****************** END OF MERGING ****************
+  
+  if(DEBUG) cout<<"********* THE MERGING IS FINISHED ************"<<endl;
+  
+  
+  TH1F* histSubdetectors = new TH1F("histSubdetectors", "histSubdetectors", 5, 0, 5);
+  TH1F* histSummary = new TH1F("histSummary", "histSummary", 3, 0, 3);
+
+  double a, b, error;
+  /*
+  sigma(eff)=sqrt(eff*(1-eff)/N))
+  where N is the total amount of tracks that ou used to calculate your efficiency
+  (in your case total recHit for the run you  analyze).      
+  */
+
+  a=histLayer1Merged->GetBinContent(3); b=histLayer1Merged->GetBinContent(2);
+  histSubdetectors->SetBinContent( 1, a/(a+b) );
+  error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
+  histSubdetectors->SetBinError(1,error);
+  histSubdetectors->GetXaxis()->SetBinLabel(1," BPix Layer 1");
+
+  a=histLayer2Merged->GetBinContent(3); b=histLayer2Merged->GetBinContent(2);
+  histSubdetectors->SetBinContent( 2, a/(a+b) );
+  error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
+  histSubdetectors->SetBinError(2,error);
+  histSubdetectors->GetXaxis()->SetBinLabel(2," BPix Layer 2");
+  
+  a=histLayer3Merged->GetBinContent(3); b=histLayer3Merged->GetBinContent(2);
+  histSubdetectors->SetBinContent( 3, a/(a+b) );
+  error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
+  histSubdetectors->SetBinError(3,error);
+  histSubdetectors->GetXaxis()->SetBinLabel(3," BPix Layer 3");
+  
+  a=histEndcapPlusMerged->GetBinContent(3); b=histEndcapPlusMerged->GetBinContent(2);
+  histSubdetectors->SetBinContent( 4, a/(a+b) );
+  error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
+  histSubdetectors->SetBinError(4,error);
+  histSubdetectors->GetXaxis()->SetBinLabel(4," FPix Plus");
+  
+  a=histEndcapMinusMerged->GetBinContent(3); b=histEndcapMinusMerged->GetBinContent(2);
+  histSubdetectors->SetBinContent( 5, a/(a+b) );
+  error=0; if((a+b)!=0) error=sqrt( ((a)/(a+b))*(1-((a)/(a+b)))/(a+b) );
+  histSubdetectors->SetBinError(5,error);
+  histSubdetectors->GetXaxis()->SetBinLabel(5," FPix Minus");
+  
+/*   
+  hid.Form("histBarrelMerged;1");
+  TH1F *h6 = (TH1F*)gDirectory->Get( hid.Data() );
+  histSummary->SetBinContent( 1,h6->GetBinContent(3)/(h6->GetBinContent(3)+h6->GetBinContent(2)) );   
+  a=h6->GetBinContent(3); b=h6->GetBinContent(2);
+  error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
+  histSummary->SetBinError(1,error);
+  histSummary->GetXaxis()->SetBinLabel(1,"BPix");
+
+  hid.Form("histEndcapMerged;1");
+  TH1F *h7 = (TH1F*)gDirectory->Get( hid.Data() );
+  histSummary->SetBinContent( 2,h7->GetBinContent(3)/(h7->GetBinContent(3)+h7->GetBinContent(2)) );
+  a=h7->GetBinContent(3); b=h7->GetBinContent(2);
+  error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
+  histSummary->SetBinError(2,error);
+  histSummary->GetXaxis()->SetBinLabel(2,"FPix");
+  
+  hid.Form("histoMerged;1");
+  TH1F *h8 = (TH1F*)gDirectory->Get( hid.Data() );
+  histSummary->SetBinContent( 3,h8->GetBinContent(3)/(h8->GetBinContent(3)+h8->GetBinContent(2)) );
+  a=h8->GetBinContent(3); b=h8->GetBinContent(2);
+  error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
+  histSummary->SetBinError(3,error);
+  histSummary->GetXaxis()->SetBinLabel(3,"total");
+*/ 
+  
+  TH1F* histAlphaAnalysis = new TH1F("histAlphaAnalysis", "hist", 200, -3.5,3.5); 
+  for (int bin=1;bin<=200;bin++)
+    {
+    double val=validVsAlphaMerged->GetBinContent(bin);
+    double mis=invalidVsAlphaMerged->GetBinContent(bin);
+    if ((val+mis)!=0)
+      {
+      histAlphaAnalysis->SetBinContent(bin,val/(val+mis));
+      error=0;
+      error=sqrt(((val)/(val+mis))*(1-((val)/(val+mis)))/(val+mis));
+      histAlphaAnalysis->SetBinError(bin,error);
+      }
+    }
+    
+  TH1F* histBetaAnalysis = new TH1F("histBetaAnalysis", "hist", 200, -3.5,3.5); 
+  for (int bin=1;bin<=200;bin++)
+    {
+    double val=validVsBetaMerged->GetBinContent(bin);
+    double mis=invalidVsBetaMerged->GetBinContent(bin);
+    if ((val+mis)!=0)
+      {
+      histBetaAnalysis->SetBinContent(bin,val/(val+mis));
+      error=0;
+      error=sqrt(((val)/(val+mis))*(1-((val)/(val+mis)))/(val+mis));
+      histBetaAnalysis->SetBinError(bin,error);
+      }
+    }
+
+
+  TH1F* moduleBreakoutEff = new TH1F("moduleBreakoutEff", "moduleBreakoutEff", 1500, 0,1500); 
+  TH1F* moduleGoodBPix = new TH1F("moduleGoodBPix", "moduleGoodBPix", 800, 0,800); 
+  TH1F* moduleBadBPix = new TH1F("moduleBadBPix", "moduleBadBPix", 800, 0,800); 
+  TH1F* moduleGoodFPix = new TH1F("moduleGoodFPix", "moduleGoodFPix", 620, 0,620); 
+  TH1F* moduleBadFPix = new TH1F("moduleBadFPix", "moduleBadFPix", 620, 0,620); 
+
+  int entries = treeMerged->GetEntries();
+  int binGoodBPix,binBadBPix,binGoodFPix,binBadFPix;
+  int zeroStatModule=0;
+  binGoodBPix = 1;
+  binBadBPix  = 1;
+  binGoodFPix = 1;
+  binBadFPix  = 1;
+
+
+  for(int n=0;n<entries;n++){
+    treeMerged->GetEntry(n);
+    if (( valid+missing)!=0)
+      {
+      double setbin = (double)valid/(double)(valid+missing);
+      error=0;
+      error=sqrt( ((double)valid/(double)(valid+missing))*(1-((double)valid/(double)(valid+missing)))/(double)(valid+missing) );
+      
+      moduleBreakoutEff->SetBinContent(n+1,setbin);
+      moduleBreakoutEff->SetBinError(n+1,error);
+
+      if ( (isModuleBad==0) && (isBarrelModule==1) )
+        {
+        moduleGoodBPix->SetBinContent(binGoodBPix , setbin);
+        moduleGoodBPix->SetBinError(binGoodBPix , error);
+        binGoodBPix++;
+	}
+      if ( (isModuleBad==1) && (isBarrelModule==1) )
+        {
+        moduleBadBPix->SetBinContent(binBadBPix , setbin);
+        moduleBadBPix->SetBinError(binBadBPix , error);
+        binBadBPix++;
+	}
+      if ((isModuleBad==0) && (isBarrelModule==2) )
+        {
+        moduleGoodFPix->SetBinContent(binGoodFPix , setbin);
+        moduleGoodFPix->SetBinError(binGoodFPix , error);
+        binGoodFPix++;
+	}
+      if ( (isModuleBad==1) && (isBarrelModule==2) )
+        {
+        moduleBadFPix->SetBinContent(binBadFPix , setbin);
+        moduleBadFPix->SetBinError(binBadFPix , error);
+        binBadFPix++;
+	}
+	
+      }//end-if fill non "zero statistics" module hist
+    else zeroStatModule++;
+
+    }//end-for loop on tree
+
+
+
+
+
+
+
+
 
   TFile* fOutputFile = new TFile("merged.root", "RECREATE");
   fOutputFile->cd();
@@ -335,6 +518,7 @@ void merge(){
   inactivePerRunMerged->Write();
 
   efficiencyPerRun->LabelsDeflate("X");
+  efficiencyPerRun->LabelsOption("a","X");
   efficiencyPerRun->Write();
   inactivePercentPerRun->LabelsDeflate("X");
   inactivePercentPerRun->Write();
@@ -353,6 +537,29 @@ void merge(){
   inactivePerTrackMerged->Write();
   
   treeMerged->Write();
+
+
+  //******* EFFICIENCY PLOTS WRITING ************
+  histSubdetectors->Write();  
+  histSummary->Write();
+  histAlphaAnalysis->GetXaxis()->SetTitle("#alpha_{local}");  
+  histAlphaAnalysis->Write();
+  histAlphaAnalysis->GetXaxis()->SetTitle("#beta_{local}");  
+  histBetaAnalysis->Write();
+
+  //moduleBreakoutEff->LabelsDeflate("X");
+  moduleBreakoutEff->Write();
+  
+  moduleGoodBPix->GetYaxis()->SetTitle("eff_{goodBPix}"); 
+  moduleGoodBPix->GetXaxis()->SetTitle("detid_{list}"); 
+  moduleGoodBPix->Write(); 
+
+  moduleGoodFPix->GetYaxis()->SetTitle("eff_{goodFPix}"); 
+  moduleGoodFPix->GetXaxis()->SetTitle("detid_{list}"); 
+  moduleGoodFPix->Write(); 
+
+  moduleBadBPix->Write(); 
+  moduleBadFPix->Write(); 
 
   fOutputFile->Close() ;
     
