@@ -89,7 +89,7 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
   t_->Branch("vertex",   &vertex_,   "r/F:z", bufsize);
 
   std::cout << "Making cluster branch:" << std::endl;
-  t_->Branch("Cluster", &clust_, "row/F:col:x:y:charge:normalized_charge:size/I:size_x:size_y:maxPixelCol:maxPixelRow:minPixelCol:minPixelRow:geoId/i:edgeHitX/I:edgeHitY:clust_alpha/F:clust_beta", bufsize);
+  t_->Branch("Cluster", &clust_, "row/F:col:x:y:charge:normalized_charge:size/I:size_x:size_y:maxPixelCol:maxPixelRow:minPixelCol:minPixelRow:geoId/i:edgeHitX/I:edgeHitY:clust_alpha/F:clust_beta:n_neighbour_clust/I", bufsize);
   
   std::cout << "Making pixinfo branch:" << std::endl;
   t_->Branch("npix", &pixinfo_.npix, "npix/I", bufsize);
@@ -103,25 +103,39 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
   t_->Branch("gypix", pixinfo_.gy, "gy[npix]/F", bufsize);
   t_->Branch("gzpix", pixinfo_.gz, "gz[npix]/F", bufsize);
 
+ std::cout << "Making allclustinfo branch:" << std::endl;
+
+  t_->Branch("n_allclust"          , &allclustinfo_.n_allclust         , "n_allclust/I"                           , bufsize);
+  t_->Branch("allclust_hasOverFlow", &allclustinfo_.allclust_hasOverFlow, "allclust_hasOverFlow/I"                 , bufsize);
+  
+  t_->Branch("allclust_row"        , allclustinfo_.allclust_row        , "allclust_row[n_allclust]/F"        , bufsize);
+  t_->Branch("allclust_col"        , allclustinfo_.allclust_col        , "allclust_col[n_allclust]/F"        , bufsize);
+  t_->Branch("allclust_x"          , allclustinfo_.allclust_x          , "allclust_x[n_allclust]/F"          , bufsize);
+  t_->Branch("allclust_y"          , allclustinfo_.allclust_y          , "allclust_y[n_allclust]/F"          , bufsize);
+  t_->Branch("allclust_charge"     , allclustinfo_.allclust_charge     , "allclust_charge[n_allclust]/F"     , bufsize);
+  t_->Branch("allclust_nor_charge" , allclustinfo_.allclust_nor_charge , "allclust_nor_charge[n_allclust]/F" , bufsize);
+  t_->Branch("allclust_size"       , allclustinfo_.allclust_size       , "allclust_size[n_allclust]/I"       , bufsize);
+  t_->Branch("allclust_size_x"     , allclustinfo_.allclust_size_x     , "allclust_size_x[n_allclust]/I"     , bufsize);
+  t_->Branch("allclust_size_y"     , allclustinfo_.allclust_size_y     , "allclust_size_y[n_allclust]/I"     , bufsize);
+  t_->Branch("allclust_maxPixelCol", allclustinfo_.allclust_maxPixelCol, "allclust_maxPixelCol[n_allclust]/I", bufsize);
+  t_->Branch("allclust_maxPixelRow", allclustinfo_.allclust_maxPixelRow, "allclust_maxPixelRow[n_allclust]/I", bufsize);
+  t_->Branch("allclust_minPixelCol", allclustinfo_.allclust_minPixelCol, "allclust_minPixelCol[n_allclust]/I", bufsize);
+  t_->Branch("allclust_minPixelRow", allclustinfo_.allclust_minPixelRow, "allclust_minPixelRow[n_allclust]/I", bufsize);
+  t_->Branch("allclust_geoId"      , allclustinfo_.allclust_geoId      , "allclust_geoId[n_allclust]/I"      , bufsize);
+  t_->Branch("allclust_edgeHitX"   , allclustinfo_.allclust_edgeHitX   , "allclust_edgeHitX[n_allclust]/I"   , bufsize);
+  t_->Branch("allclust_edgeHitY"   , allclustinfo_.allclust_edgeHitY   , "allclust_edgeHitY[n_allclust]/I"   , bufsize);
+  t_->Branch("allclust_dist"       , allclustinfo_.allclust_dist       , "allclust_dist[n_allclust]/F"       , bufsize);
+
+
+
+
+
   //  t_->Branch("Cluster", &clust_, "row/F:col:x:y:charge:normalized_charge:size/I:size_x:size_y:maxPixelCol:maxPixelRow:minPixelCol:minPixelRow:geoId/i:edgeHitX/I:edgeHitY:clust_alpha/F:clust_beta", bufsize);
 
   std::cout << "Making muon branch:" << std::endl;
   t_->Branch("MuonInfo",&muoninfo_,"timeAtIpInOut[2]/F:errorTime[2]/F:IsGlobalMuon[2]/F:IsStandAloneMuon[2]/F:IsTrackerMuon[2]/F:IsTimeValid[2]/F:HasGlobalTrack[2]/F:HasPixelHit[2]/F:trackpt[2]/F:tracketa[2]/F:trackphi[2]/F",bufsize);
   t_->Branch("nMuon",&muoninfo_.nMuon,"nMuon/I",bufsize);
   t_->Branch("nMuonHasOverFlow",&muoninfo_.HasOverFlow,"nMuonHasOverFlow/I",bufsize);
-//  t_->Branch("muoninfo_HasOverFlow",&muoninfo_.HasOverFlow,"muoninfo_HasOverFlow/bool",bufsize);
-//  t_->Branch("muoninfo_IsGlobalMuon",muoninfo_.IsGlobalMuon,"muoninfo_IsGlobalMuon[nMuon]/bool",bufsize);
-//  t_->Branch("muoninfo_IsStandAloneMuon",muoninfo_.IsStandAloneMuon,"muoninfo_IsStandAloneMuon[nMuon]/bool",bufsize);
-//  t_->Branch("muoninfo_IsTrackerMuon",muoninfo_.IsTrackerMuon,"muoninfo_IsTrackerMuon[nMuon]/bool",bufsize);
-//  t_->Branch("muoninfo_HasGlobalTrack",muoninfo_.HasGlobalTrack,"muoninfo_HasGlobalTrack[nMuon]/bool",bufsize);
-//   t_->Branch("muoninfo_HasPixelHit",muoninfo_.HasPixelHit,"muoninfo_HasPixelHit[nMuon]/bool",bufsize);
-//   t_->Branch("muoninfo_IsTimeValid",muoninfo_.IsTimeValid,"muoninfo_IsTimeValid[nMuon]/bool",bufsize);
-//   t_->Branch("muoninfo_timeAtIpInOut",muoninfo_.timeAtIpInOut, "muoninfo_timeAtIpInOut[nMuon]/F",bufsize);
-//   t_->Branch("muoninfo_errorTime",muoninfo_.errorTime, "muoninfo_errorTime[nMuon]/F",bufsize);
-//   // t_->Branch("muoninfo_momentumDiff",muoninfo_.momentumDiff, "muoninfo_momentumDiff[nMuon]/F",bufsize);
-//    t_->Branch("muoninfo_trackpt",muoninfo_.trackpt, "muoninfo_trackpt[nMuon]/F",bufsize);
-//     t_->Branch("muoninfo_tracketa",muoninfo_.tracketa, "muoninfo_tracketa[nMuon]/F",bufsize);
-//    t_->Branch("muoninfo_trackphi",muoninfo_.trackphi, "muoninfo_trackphi[nMuon]/F",bufsize);
 
   std::cout << "Making rechit branch:" << std::endl;
   t_->Branch("RecHit", &rechit_, "localX/F:localY:globalX:globalY:globalZ:residualX:residualY:resErrX:resErrY:hit_errX:hit_errY:resXprime:resXprimeErr", bufsize);
@@ -189,86 +203,6 @@ bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent,const Tr
     else muoninfo_.nMuon = MuonHandle->size();
       
 
-      /*  muoninfo_.nMuon = 0;
-
-    if(MuonHandle->size() != 2)return false;
-
-    if(muoninfo[0].isTimeValid() != true || muoninfo[1].isTimeValid() != true)return false; 
-
-    if( muoninfo[0].bestTrack()->hitPattern().numberOfValidMuonDTHits() < 25 ) return false;
-    if( muoninfo[1].bestTrack()->hitPattern().numberOfValidMuonDTHits() < 25 ) return false;
-
-
-    float t0 =  muoninfo[0].time().timeAtIpInOut;
-    float t1 =  muoninfo[1].time().timeAtIpInOut;
-
-    int w0=0,s0=0,w1=0,s1=0; //wheels and sectors
-    DTChamberId * id;
-
-
-    for(trackingRecHit_iterator match = muoninfo[0].bestTrack()->recHitsBegin() ; match != muoninfo[0].bestTrack()->recHitsEnd() ; ++match)
-       {
-	 DetId did=(*match)->geographicalId() ;
-	 if(did.det() == 2 && did.subdetId() == MuonSubdetId::DT)
-	   {
-	     id =  new DTChamberId(did);
-	     w0=id->wheel();
-	     s0=id->sector();
-	     delete id;
-	     break;
-	   }
-       }
-
-
-     
-    for(trackingRecHit_iterator match = muoninfo[1].bestTrack()->recHitsBegin() ; match != muoninfo[1].bestTrack()->recHitsEnd() ; ++match)
-      {
-	DetId did=(*match)->geographicalId() ;
-	if(did.det() == 2 && did.subdetId() == MuonSubdetId::DT)
-	  {
-	    id =  new DTChamberId(did);
-	    w1=id->wheel();
-	    s1=id->sector();
-	    delete id;
-	    break;
-	  }
-      }
-
-    if(s0 ==0 || s1 ==0)
-      {//no segment of muon chamber hit. Strange!
-	cout << "EEEEEEEEERRRRRRRRROOOOOORRRRRRRRRRRRR" << endl;
-	return false;
-      }
-  
-    muoninfo_.nMuon = 2;  
-
-
-    // cout << " points " << points[w0+2][s0][w1+2][s1] << endl;
-    if(points[w0+2][s0][w1+2][s1]>=50){//found combination more than 50 times
-      //  cout << " time 0 " << t0 << " corr time 1 " << t1-bias[w0+2][s0][w1+2][s1] << endl;
-      muoninfo_.timeAtIpInOut[0] = t0;
-      muoninfo_.timeAtIpInOut[1] = t1-bias[w0+2][s0][w1+2][s1];
-
-      muoninfo_.errorTime[0] = muoninfo[0].time().timeAtIpInOutErr;
-      muoninfo_.errorTime[1] = muoninfo[1].time().timeAtIpInOutErr; 
-
-      muoninfo_.momentumDiff[0]=(muoninfo[0].momentum() - muoninfo[1].momentum()).r();
-      muoninfo_.momentumDiff[1]=(muoninfo[0].momentum() - muoninfo[1].momentum()).r();
-
-    }
-    else {
-      muoninfo_.timeAtIpInOut[0] = -9999;
-      muoninfo_.timeAtIpInOut[1] = -9999;
-
-      muoninfo_.errorTime[0] = -9999;
-      muoninfo_.errorTime[1] = -9999; 
-
-      muoninfo_.momentumDiff[0]=-9999;
-      muoninfo_.momentumDiff[1]=-9999;
-
-
-    }
-      */
 
     // std::cout << " muon size " << std::endl;
       for(MuonCollection::const_iterator it = MuonHandle->begin(), itEnd = MuonHandle->end(); it!=itEnd;++it){
@@ -291,7 +225,7 @@ bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent,const Tr
 	muoninfo_.timeAtIpInOut[count] = it->time().timeAtIpInOut;
 	
 	muoninfo_.errorTime[count] = it->time().timeAtIpInOutErr;
-	std::cout << muoninfo_.timeAtIpInOut[count] << " " << 	muoninfo_.errorTime[count] << " " << count << std::endl;
+	//std::cout << muoninfo_.timeAtIpInOut[count] << " " << 	muoninfo_.errorTime[count] << " " << count << std::endl;
       }
       else {
 	muoninfo_.timeAtIpInOut[count] = -9999;
@@ -353,6 +287,8 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
   // std::cout << " here " << endl;
   int TrackNumber = 0;
 
+  maxsize_AllClustInfoStruct_ = 10000;
+  
   trackonly_.init();
 
   edm::Handle<TrajTrackAssociationCollection> trajTrackCollectionHandle;
@@ -479,6 +415,10 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 		else rechit_.residualY = res.y();
 
 		isValidMuonAssoc(iEvent,track, TrackNumber);
+
+		isOffTrackHits(iEvent, iSetup,topol,theGeomDet->geographicalId().rawId());
+
+
                 // get the contents
                 fillEvt(iEvent,NbrTracks);
                 fillDet(hit_detId, IntSubDetID, theGeomDet);
@@ -513,6 +453,119 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
     }  // end loop over trajectory measurements (rec hits) 
   }  // end loop over trajectories
  }  // end analyze function
+
+
+bool PixelNtuplizer_RealData::isOffTrackHits(const edm::Event& iEvent, const edm::EventSetup & iSetup,const RectangularPixelTopology* topol, uint32_t geoId ){
+
+  edm::ESHandle<TrackerGeometry> pDD;
+  iSetup.get<TrackerDigiGeometryRecord> ().get (pDD);
+  const TrackerGeometry* tracker = &(* pDD);
+
+ //-----Iterate over detunits
+			  //cout << endl << "Start search for det unit..." << endl;
+			  bool found_det_unit = false;
+			  for (TrackerGeometry::DetContainer::const_iterator it = pDD->dets().begin(); it != pDD->dets().end(); it++) 
+			    {
+			      DetId detId = ( (*it)->geographicalId() );
+			      if ( (int)detId.subdetId() != (int)PixelSubdetector::PixelBarrel && 
+				   (int)detId.subdetId() != (int)PixelSubdetector::PixelEndcap )
+				{
+				  // cout << "Not a pixel detector. Skip it." << endl;
+				  continue;
+				}
+			      
+			      if ( detId.rawId() != geoId )
+				continue;
+			      else if ( detId.rawId() == geoId ) 
+				{
+				  // cout << "Found the det unit for this RecHit = " << (int)detId.rawId() << endl;
+				  found_det_unit = true;
+
+				  edm::Handle<SiPixelRecHitCollection> recHitColl;
+				  iEvent.getByLabel( "siPixelRecHits", recHitColl );
+				  
+				  SiPixelRecHitCollection::range pixelrechitRange = (recHitColl.product())->get(detId);
+				  SiPixelRecHitCollection::const_iterator pixelrechitRangeIteratorBegin = pixelrechitRange.first;
+				  SiPixelRecHitCollection::const_iterator pixelrechitRangeIteratorEnd = pixelrechitRange.second;
+				  SiPixelRecHitCollection::const_iterator pixeliter = pixelrechitRangeIteratorBegin;
+				  				
+				  int n_clust = 0;
+				 
+				  for ( ; pixeliter != pixelrechitRangeIteratorEnd; ++pixeliter) 
+				    {
+				      ++n_clust;
+				      
+				      if ( (int)n_clust <= (int)maxsize_AllClustInfoStruct_ )
+					{
+					  // cout << "row " << pixeliter->cluster()->x() << endl;
+
+					  allclustinfo_.allclust_row[n_clust-1] = pixeliter->cluster()->x();
+					  allclustinfo_.allclust_col[n_clust-1] = pixeliter->cluster()->y();
+					  
+					  LocalPoint lp = topol->localPosition( MeasurementPoint(allclustinfo_.allclust_row[n_clust-1], 
+												 allclustinfo_.allclust_col[n_clust-1]) );
+					  
+					  allclustinfo_.allclust_x[n_clust-1] = lp.x();          
+					  allclustinfo_.allclust_y[n_clust-1] = lp.y();          
+					  
+					  allclustinfo_.allclust_charge[n_clust-1] = pixeliter->cluster()->charge()/1000.0;     
+					  allclustinfo_.allclust_nor_charge[n_clust-1] = pixeliter->cluster()->charge() * 
+					    sqrt( 1.0 / ( 1.0/pow( tan(clust_.clust_alpha), 2 ) + 
+							  1.0/pow( tan(clust_.clust_beta ), 2 ) + 
+							  1.0 )
+						  );
+					  
+				          allclustinfo_.allclust_size[n_clust-1] = pixeliter->cluster()->size();       
+				          allclustinfo_.allclust_size_x[n_clust-1] = pixeliter->cluster()->sizeX();     
+					  allclustinfo_.allclust_size_y[n_clust-1] = pixeliter->cluster()->sizeY();     
+					  allclustinfo_.allclust_maxPixelCol[n_clust-1] = pixeliter->cluster()->maxPixelCol();
+					  allclustinfo_.allclust_maxPixelRow[n_clust-1] = pixeliter->cluster()->maxPixelRow();
+					  allclustinfo_.allclust_minPixelCol[n_clust-1] = pixeliter->cluster()->minPixelCol();
+					  allclustinfo_.allclust_minPixelRow[n_clust-1] = pixeliter->cluster()->minPixelRow();
+					  allclustinfo_.allclust_geoId[n_clust-1] = detId.rawId();      
+					  allclustinfo_.allclust_edgeHitX[n_clust-1] = (int)(topol->isItEdgePixelInX(clust_.minPixelRow) || 
+											     topol->isItEdgePixelInX(clust_.maxPixelRow));
+					  allclustinfo_.allclust_edgeHitY[n_clust-1] = (int)(topol->isItEdgePixelInY(clust_.minPixelCol) || 
+											     topol->isItEdgePixelInY(clust_.maxPixelCol));
+					  
+					  
+					 
+					  allclustinfo_.allclust_dist[n_clust-1] 
+					    = sqrt( (clust_.x - allclustinfo_.allclust_x[n_clust-1])*
+						    (clust_.x - allclustinfo_.allclust_x[n_clust-1]) +
+						    (clust_.y - allclustinfo_.allclust_y[n_clust-1])*
+						    (clust_.y - allclustinfo_.allclust_y[n_clust-1]) );
+					  
+					
+					  
+					
+					} // if ( n_clust <= maxsize_AllClustInfoStruct_ )
+				      else
+					allclustinfo_.allclust_hasOverFlow = 1;
+				      
+				    } 
+
+			
+
+				  //cout << "n_clust = " << n_clust << endl;
+				  clust_.n_neighbour_clust = n_clust;
+
+				  allclustinfo_.n_allclust = n_clust;
+				  
+				  break;
+				  
+				} 
+			      else cout << "Fuck this !!!" << endl;
+			      
+			    } 
+			  			  
+			  // if ( !found_det_unit )cout << "Did not find the det unit of this RecHit !!!!!!!!!!!!!!!!!!!!!!!!!! " << endl;
+
+			  return true;
+
+}
+
+
 
 void PixelNtuplizer_RealData::fillTrackOnly(const edm::Event& iEvent, const edm::EventSetup& iSetup, int pixelHits, int stripHits, int TrackNumber, const Track& track)
 {
@@ -675,6 +728,9 @@ void PixelNtuplizer_RealData::init()
   pixinfo_.init();
   rechit_.init();
   track_.init();
+  muoninfo_.init();
+  allclustinfo_.init();
+  
 }
 
 void PixelNtuplizer_RealData::EvtStruct::init()
@@ -734,6 +790,7 @@ void PixelNtuplizer_RealData::ClusterStruct::init()
   edgeHitY = dummy_int;    
   clust_alpha = dummy_float;
   clust_beta = dummy_float;
+  n_neighbour_clust = dummy_int;
 }
 
 void PixelNtuplizer_RealData::PixInfoStruct::init()
@@ -753,6 +810,10 @@ void PixelNtuplizer_RealData::PixInfoStruct::init()
      }
   */
 } 
+
+
+
+
 
 void PixelNtuplizer_RealData::RecHitStruct::init()
 {

@@ -50,7 +50,7 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
   void fillTrack(TrajectoryStateOnSurface&,const Trajectory&, int);
   
   bool isValidMuonAssoc(const edm::Event& iEvent,const Track& track, int TrackNumber);		   
-		   
+  bool isOffTrackHits(const edm::Event& iEvent, const edm::EventSetup& iSetup,const RectangularPixelTopology*, uint32_t geoId );		   
 
  private:
   edm::ParameterSet conf_;
@@ -126,6 +126,9 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
     float clust_alpha;
     float clust_beta;
 
+    int n_neighbour_clust; 
+   
+
     void init();
   } clust_;
   
@@ -157,6 +160,43 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
       
     }
   }muoninfo_;
+
+
+ struct AllClustStruct
+  {
+    int n_allclust; // should be the same as n_neighbour_clust 
+    float allclust_row[10000];
+    float allclust_col[10000];
+    float allclust_x[10000];
+    float allclust_y[10000];
+    float allclust_charge[10000];
+    float allclust_nor_charge[10000];
+    int allclust_size[10000];
+    int allclust_size_x[10000];
+    int allclust_size_y[10000];
+    int allclust_maxPixelCol[10000];
+    int allclust_maxPixelRow[10000];
+    int allclust_minPixelCol[10000];
+    int allclust_minPixelRow[10000];
+    uint32_t allclust_geoId[10000];
+    int allclust_edgeHitX[10000];
+    int allclust_edgeHitY[10000];    
+    float allclust_dist[10000];
+    int allclust_hasOverFlow;
+
+    void init(){ 
+      n_allclust = 0;
+      allclust_hasOverFlow = false;
+      allclust_row[0] = allclust_col[0] = allclust_x[0] = allclust_y[0] = allclust_charge[0] = allclust_nor_charge[0] = 0.0;
+      allclust_size[0] = allclust_size_x[0] =  allclust_size_y[0] = allclust_maxPixelCol[0] = allclust_maxPixelRow[0] = allclust_minPixelCol[0] = allclust_minPixelRow[0] = 0;
+      allclust_geoId[0] = 0;
+      allclust_edgeHitX[0] = allclust_edgeHitY[0] =  0;
+      allclust_dist[0] = 0.0;
+							 
+
+    }
+  } allclustinfo_;
+  size_t maxsize_AllClustInfoStruct_;
 
   struct PixInfoStruct {
 
