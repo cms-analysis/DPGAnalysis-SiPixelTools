@@ -293,7 +293,7 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 {
   // std::cout << " here " << endl;
   int TrackNumber = 0;
-
+  maxsize_AllPixInfoStruct_ = 10000;
   maxsize_AllClustInfoStruct_ = 10000;
   
   trackonly_.init();
@@ -304,7 +304,7 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 
   TrajectoryStateCombiner tsoscomb;
   int NbrTracks =  trajTrackCollectionHandle->size();
-  //std::cout << " track measurements " << trajTrackCollectionHandle->size()  << std::endl;
+  std::cout << " track measurements " << trajTrackCollectionHandle->size()  << std::endl;
 
 
   for(TrajTrackAssociationCollection::const_iterator it = trajTrackCollectionHandle->begin(), itEnd = trajTrackCollectionHandle->end(); it!=itEnd;++it){
@@ -336,6 +336,8 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
     tt_->Fill();
     //++++++++++
 
+    // std::cout << " pixelHits " << pixelHits << std::endl;
+
     if (pixelHits == 0) continue;
 
     std::vector<TrajectoryMeasurement> tmColl = traj.measurements();
@@ -365,7 +367,7 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 	float errY = std::sqrt( err1.yy() + err2.yy() );
 	
 	//std::cout << "Residual x/y " << res.x() << '/' << res.y() 
-	//  << ", Error x/y " << errX << '/' << errY;		
+	// << ", Error x/y " << errX << '/' << errY;		
 
 	// begin partly copied from Tifanalyser 
 
@@ -463,7 +465,7 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 
 
 bool PixelNtuplizer_RealData::isOffTrackHits(const edm::Event& iEvent, const edm::EventSetup & iSetup,const RectangularPixelTopology* topol, uint32_t geoId ){
-
+  
   edm::ESHandle<TrackerGeometry> pDD;
   iSetup.get<TrackerDigiGeometryRecord> ().get (pDD);
   const TrackerGeometry* tracker = &(* pDD);
@@ -507,7 +509,7 @@ bool PixelNtuplizer_RealData::isOffTrackHits(const edm::Event& iEvent, const edm
 				      
 				      if ( (int)n_clust <= (int)maxsize_AllClustInfoStruct_ )
 					{
-					  // cout << "row " << pixeliter->cluster()->x() << endl;
+					  cout << "row " << pixeliter->cluster()->x() << endl;
 
 					  allclustinfo_.allclust_row[n_clust-1] = pixeliter->cluster()->x();
 					  allclustinfo_.allclust_col[n_clust-1] = pixeliter->cluster()->y();
