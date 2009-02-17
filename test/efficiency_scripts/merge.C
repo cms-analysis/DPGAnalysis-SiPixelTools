@@ -1,17 +1,19 @@
 #include <sys/stat.h>
 #include "TH1.h"
+#include "TF1.h"
 #include "TFile.h"
 #include "TString.h"
 #include "TTree.h"
 #include "TList.h"
 #include <vector>
 #include <iostream>
+#include "TCanvas.h"
 
 void merge(){
 
   using namespace std;
   bool DEBUG=false;
-  int Nfiles=90;
+  int Nfiles=300;
 
   if(DEBUG) cout<<"********* CREATING MERGED HISTO/TTREE ************"<<endl;
 
@@ -52,17 +54,16 @@ void merge(){
   TH1F* missingVsLocalXMerged = new TH1F("missingVsLocalXMerged","missingVsLocalXMerged",100,-1.5,1.5);
   TH1F* missingVsLocalYMerged = new TH1F("missingVsLocalYMerged","missingVsLocalYMerged",100,-4.,4.);
 
-
-  TH1F*  windowSearchMerged = new  TH1F("windowSearchMerged","windowSearchMerged",200,0,0.20);
-  TH1F* scurve = new TH1F("scurve", "scurve", windowSearchMerged->GetNbinsX(), 0, windowSearchMerged->GetXaxis()->GetBinUpEdge(windowSearchMerged->GetNbinsX()));
+  double maxwindowsearch = 0.5;
+  TH1F*  windowSearchMerged = new  TH1F("windowSearchMerged","windowSearchMerged",maxwindowsearch*1000,0,maxwindowsearch);
+  TH1F*  windowSearchSameModuleMerged = new  TH1F("windowSearchSameModuleMerged","windowSearchSameModuleMerged",maxwindowsearch*1000,0,maxwindowsearch);
+  TH1F*  windowSearchBPixMerged = new  TH1F("windowSearchBPixMerged","windowSearchBPixMerged",maxwindowsearch*1000,0,maxwindowsearch);
+  TH1F*  windowSearchFPixMerged = new  TH1F("windowSearchFPixMerged","windowSearchFPixMerged",maxwindowsearch*1000,0,maxwindowsearch);
     
- /* TH1F* histoMethod2Merged = new TH1F("histoMethod2Merged", "histoMethod2Merged",2 , 0, 2);
-
-  
-  histoMethod2
-  histoMethod2After*/
-
-
+  TH1F* histoMethod2Merged = new TH1F("histoMethod2Merged", "histoMethod2Merged", 2, 0, 2);
+  TH1F* histoMethod2AfterMerged = new TH1F("histoMethod2AfterMerged", "histoMethod2AfterMerged", 2, 0, 2);
+  TH1F* histoMethod2FPixMerged = new TH1F("histoMethod2FPixMerged", "histoMethod2FPixMerged", 2, 0, 2);
+  TH1F* histoMethod2AfterFPixMerged = new TH1F("histoMethod2AfterFPixMerged", "histoMethod2AfterFPixMerged", 2, 0, 2);
 
   //invalidity version
   TH1F* histInvalidRecHitCollectionMerged = new TH1F("histInvalidRecHitCollectionMerged","histInvalidRecHitCollectionMerged", 4, 0,4);
@@ -78,7 +79,7 @@ void merge(){
 
 
   vector< vector<int> > tempTree;
-  int id, isModuleBad, inactive, missing, valid, isBarrelModule, ladder, blade;
+  int id, isModuleBad, inactive, missing, valid, isBarrelModule, ladder, blade, moduleInLadder;
   TTree *treeMerged = new TTree("moduleAnalysisMerged","moduleAnalysisMerged");
   treeMerged->Branch("id",&id,"id/I");
   treeMerged->Branch("isModuleBad",&isModuleBad,"isModuleBad/I");
@@ -88,6 +89,7 @@ void merge(){
   treeMerged->Branch("isBarrelModule",&isBarrelModule,"isBarrelModule/I");
   treeMerged->Branch("ladder",&ladder,"ladder/I");
   treeMerged->Branch("blade",&blade,"blade/I");
+  treeMerged->Branch("moduleInLadder",&moduleInLadder,"moduleInLadder/I");
 
 
   char name[120];
@@ -164,8 +166,20 @@ void merge(){
       consistencyCheckTrajMerged->SetBinContent( bin, consistencyCheckTrajMerged->GetBinContent(bin) + h16->GetBinContent(bin));
       delete h16;
       }      
+    
+    
+    TH1F *histoMethod2 = (TH1F*)gDirectory->Get( "histoMethod2" );
+    TH1F *histoMethod2After = (TH1F*)gDirectory->Get( "histoMethod2After" );
+    TH1F *histoMethod2FPix = (TH1F*)gDirectory->Get( "histoMethod2FPix" );
+    TH1F *histoMethod2AfterFPix = (TH1F*)gDirectory->Get( "histoMethod2AfterFPix" );
       
-      
+    for(int bin=1; bin<=3; bin++){
+      histoMethod2Merged->SetBinContent( bin, histoMethod2Merged->GetBinContent(bin) + histoMethod2->GetBinContent(bin));
+      histoMethod2AfterMerged->SetBinContent( bin, histoMethod2AfterMerged->GetBinContent(bin) + histoMethod2After->GetBinContent(bin));
+      histoMethod2FPixMerged->SetBinContent( bin, histoMethod2FPixMerged->GetBinContent(bin) + histoMethod2FPix->GetBinContent(bin));
+      histoMethod2AfterFPixMerged->SetBinContent( bin, histoMethod2AfterFPixMerged->GetBinContent(bin) + histoMethod2AfterFPix->GetBinContent(bin));
+    }
+ 
     if(DEBUG) cout<<"********* NOW MERGING ANALYSIS PER RUN ************"<<endl;
 
       
@@ -291,9 +305,21 @@ void merge(){
     if(DEBUG) cout<<"********* NOW MERGING WINDOW SEARCH ************"<<endl;
 
 
-    TH1F *hw = (TH1F*)gDirectory->Get( "windowSearch" );
+    TH1F *windowSearch = (TH1F*)gDirectory->Get( "windowSearch" );
     for (int bin=1; bin<=windowSearchMerged->GetNbinsX()+1; bin++)
-      windowSearchMerged->SetBinContent( bin, windowSearchMerged->GetBinContent(bin) + hw->GetBinContent(bin));
+      windowSearchMerged->SetBinContent( bin, windowSearchMerged->GetBinContent(bin) + windowSearch->GetBinContent(bin));
+ 
+     TH1F *windowSearchSameModule = (TH1F*)gDirectory->Get( "windowSearchSameModule" );
+    for (int bin=1; bin<=windowSearchSameModuleMerged->GetNbinsX()+1; bin++)
+      windowSearchSameModuleMerged->SetBinContent( bin, windowSearchSameModuleMerged->GetBinContent(bin) + windowSearchSameModule->GetBinContent(bin));
+    
+    TH1F *windowSearchBPix = (TH1F*)gDirectory->Get( "windowSearchBPix" );
+    for (int bin=1; bin<=windowSearchBPixMerged->GetNbinsX()+1; bin++)
+      windowSearchBPixMerged->SetBinContent( bin, windowSearchBPixMerged->GetBinContent(bin) + windowSearchBPix->GetBinContent(bin));
+    
+    TH1F *windowSearchFPix = (TH1F*)gDirectory->Get( "windowSearchFPix" );
+    for (int bin=1; bin<=windowSearchFPixMerged->GetNbinsX()+1; bin++)
+      windowSearchFPixMerged->SetBinContent( bin, windowSearchFPixMerged->GetBinContent(bin) + windowSearchFPix->GetBinContent(bin));
     
 //
     
@@ -310,6 +336,7 @@ void merge(){
     tree->SetBranchAddress("isBarrelModule",&isBarrelModule);
     tree->SetBranchAddress("ladder",&ladder);
     tree->SetBranchAddress("blade",&blade);
+    tree->SetBranchAddress("moduleInLadder",&moduleInLadder);
     
     if(tree==0) cout<<" !!!!!!!!  Problem opening TTree, it is probably void !!!!!!!!!!"<<endl;
     if(DEBUG) cout<<"********* TTREE WAS OPENED SUCCESSFULLY ************"<<endl;
@@ -330,6 +357,9 @@ void merge(){
 	temp.push_back(missing);
 	temp.push_back(valid);
 	temp.push_back(isBarrelModule);
+	temp.push_back(ladder);
+	temp.push_back(blade);
+	temp.push_back(moduleInLadder);
 	tempTree.push_back(temp);	
       }
       else {
@@ -382,6 +412,9 @@ void merge(){
     missing=tempTree[i][3];
     valid=tempTree[i][4];
     isBarrelModule=tempTree[i][5];
+    ladder=tempTree[i][6];
+    blade=tempTree[i][7];
+    moduleInLadder=tempTree[i][8];
     treeMerged->Fill();
   }
 
@@ -390,8 +423,11 @@ void merge(){
   if(DEBUG) cout<<"********* THE MERGING IS FINISHED ************"<<endl;
   
   
-  TH1F* histSubdetectors = new TH1F("histSubdetectors", "histSubdetectors", 5, 0, 5);
-  TH1F* histSummary = new TH1F("histSummary", "histSummary", 3, 0, 3);
+  
+  TH1F* histBarrelEfficiencyComparison = new TH1F("histBarrelEfficiencyComparison", "histBarrelEfficiencyComparison", 4, 0, 4);
+  TH1F* histEndCapEfficiencyComparison = new TH1F("histEndCapEfficiencyComparison", "histEndCapEfficiencyComparison", 4, 0, 4);
+  
+  
 
   double a, b, error;
   /*
@@ -399,6 +435,52 @@ void merge(){
   where N is the total amount of tracks that ou used to calculate your efficiency
   (in your case total recHit for the run you  analyze).      
   */
+  //BPIX ********
+  a=histBarrelMerged->GetBinContent(3); b=histBarrelMerged->GetBinContent(2);
+  histBarrelEfficiencyComparison->SetBinContent(1, a/(a+b) );
+  error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
+  histBarrelEfficiencyComparison->SetBinError(1,error);
+  histBarrelEfficiencyComparison->GetXaxis()->SetBinLabel(1,"Method 1");
+  
+  a=histoMethod2Merged->GetBinContent(2); b=histoMethod2Merged->GetBinContent(1);
+  histBarrelEfficiencyComparison->SetBinContent(2, a/(a+b) );
+  error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
+  histBarrelEfficiencyComparison->SetBinError(2,error);
+  histBarrelEfficiencyComparison->GetXaxis()->SetBinLabel(2,"Method 1 Check");
+  
+  a=histoMethod2AfterMerged->GetBinContent(2); b=histoMethod2AfterMerged->GetBinContent(1);
+  histBarrelEfficiencyComparison->SetBinContent(3, a/(a+b) );
+  error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
+  histBarrelEfficiencyComparison->SetBinError(3,error);
+  histBarrelEfficiencyComparison->GetXaxis()->SetBinLabel(3,"Method 2 infinity");
+  
+  //FPIX *******
+  a=histEndcapMerged->GetBinContent(3); b=histEndcapMerged->GetBinContent(2);
+  histEndCapEfficiencyComparison->SetBinContent(1, a/(a+b) );
+  error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
+  histEndCapEfficiencyComparison->SetBinError(1,error);
+  histEndCapEfficiencyComparison->GetXaxis()->SetBinLabel(1,"Method 1");
+  
+  a=histoMethod2FPixMerged->GetBinContent(2); b=histoMethod2FPixMerged->GetBinContent(1);
+  histEndCapEfficiencyComparison->SetBinContent(2, a/(a+b) );
+  error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
+  histEndCapEfficiencyComparison->SetBinError(2,error);
+  histEndCapEfficiencyComparison->GetXaxis()->SetBinLabel(2,"Method 1 Check");
+  
+  a=histoMethod2AfterFPixMerged->GetBinContent(2); b=histoMethod2AfterFPixMerged->GetBinContent(1);
+  histEndCapEfficiencyComparison->SetBinContent(3, a/(a+b) );
+  error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
+  histEndCapEfficiencyComparison->SetBinError(3,error);
+  histEndCapEfficiencyComparison->GetXaxis()->SetBinLabel(3,"Method 2 infinity");
+  
+  
+  
+  
+  
+  
+  TH1F* histSubdetectors = new TH1F("histSubdetectors", "histSubdetectors", 5, 0, 5);
+  TH1F* histSummary = new TH1F("histSummary", "histSummary", 3, 0, 3);
+  
 
   a=histLayer1Merged->GetBinContent(3); b=histLayer1Merged->GetBinContent(2);
   histSubdetectors->SetBinContent( 1, a/(a+b) );
@@ -477,6 +559,33 @@ void merge(){
       }
     }
 
+  TH1F* localXAnalysis = new TH1F("localXAnalysis", "hist", 100,-1.5,1.5); 
+  for (int bin=1;bin<=100;bin++)
+    {
+    double val=validVsLocalXMerged->GetBinContent(bin);
+    double mis=missingVsLocalXMerged->GetBinContent(bin);
+    if ((val+mis)!=0)
+      {
+      localXAnalysis->SetBinContent(bin,val/(val+mis));
+      error=0;
+      error=sqrt(((val)/(val+mis))*(1-((val)/(val+mis)))/(val+mis));
+      localXAnalysis->SetBinError(bin,error);
+      }
+    }
+  TH1F* localYAnalysis = new TH1F("localYAnalysis", "hist", 100,-4.,4.); 
+  for (int bin=1;bin<=100;bin++)
+    {
+    double val=validVsLocalYMerged->GetBinContent(bin);
+    double mis=missingVsLocalYMerged->GetBinContent(bin);
+    if ((val+mis)!=0)
+      {
+      localYAnalysis->SetBinContent(bin,val/(val+mis));
+      error=0;
+      error=sqrt(((val)/(val+mis))*(1-((val)/(val+mis)))/(val+mis));
+      localYAnalysis->SetBinError(bin,error);
+      }
+    }
+
 
   TH1F* moduleBreakoutEff = new TH1F("moduleBreakoutEff", "moduleBreakoutEff", 1500, 0,1500); 
   TH1F* moduleGoodBPix = new TH1F("moduleGoodBPix", "moduleGoodBPix", 800, 0,800); 
@@ -534,10 +643,31 @@ void merge(){
 
     }//end-for loop on tree
 
+  //Fit on goodBPixModule with cut at 75%
+  TH1F* qualityBPixModule = new TH1F("qualityBPixModule", "qualityBPixModule", moduleGoodBPix->GetNbinsX(), 0 ,moduleGoodBPix->GetXaxis()->GetBinUpEdge(windowSearchMerged->GetNbinsX())); 
+  int fillme=1;
+  for (int bin=1; bin<=moduleGoodBPix->GetNbinsX(); bin++)
+    {
+    if (moduleGoodBPix->GetBinContent(bin)>0.75)//
+      {
+      qualityBPixModule->SetBinContent( fillme,moduleGoodBPix->GetBinContent(bin) );
+      qualityBPixModule->SetBinError( fillme,moduleGoodBPix->GetBinError(bin));
+      fillme++;
+      }
+    }
+  
+  TF1 *myfit = new TF1("myfit","[0]", 0, fillme);
+  myfit->SetParName(0,"eff");
+  myfit->SetParameter(0, 1);
+  
+  qualityBPixModule->Fit("myfit");
     
+    //Total SCURVE ***********
     double totalHit=0., validHit=0.;
+
+    TH1F* scurve = new TH1F("scurve", "scurve", windowSearchMerged->GetNbinsX(), 0, windowSearchMerged->GetXaxis()->GetBinUpEdge(windowSearchMerged->GetNbinsX()));
     for (int bin=1;bin<=windowSearchMerged->GetNbinsX()+1; bin++) //201 includes overflow=definitevely missing
-    totalHit+=windowSearchMerged->GetBinContent(bin);
+      totalHit+=windowSearchMerged->GetBinContent(bin);
    
     for (int bin=1; bin<=scurve->GetNbinsX(); bin++){
       validHit+=windowSearchMerged->GetBinContent(bin);
@@ -546,9 +676,83 @@ void merge(){
     
     scurve->GetXaxis()->SetTitle("window search [cm]");
     scurve->GetYaxis()->SetTitle("eff");
+    
+    double up,down,delta;
+    up= windowSearchMerged->GetXaxis()->GetBinUpEdge(windowSearchMerged->GetNbinsX());
+    delta= windowSearchMerged->GetXaxis()->GetBinUpEdge(windowSearchMerged->GetNbinsX())/(double)windowSearchMerged->GetNbinsX();
+    down=delta*(windowSearchMerged->GetNbinsX()-100.);
+    TF1 *fitSC = new TF1("fitSC","[0]", down, up);
+    fitSC->SetParName(0,"asympt_eff");
+    fitSC->SetParameter(0, 0.7);
+    scurve->Fit("fitSC","R");
+
+    //sameModule SCURVE ***********
+    totalHit=0.; validHit=0.;
+    TH1F* scurveSameModule = new TH1F("scurveSameModule", "scurveSameModule", windowSearchMerged->GetNbinsX(), 0, windowSearchMerged->GetXaxis()->GetBinUpEdge(windowSearchMerged->GetNbinsX()));
+    for (int bin=1;bin<=windowSearchMerged->GetNbinsX()+1; bin++) //201 includes overflow=definitevely missing
+      totalHit+=windowSearchMerged->GetBinContent(bin);
+   
+    for (int bin=1; bin<=scurveSameModule->GetNbinsX(); bin++){
+      validHit+=windowSearchSameModuleMerged->GetBinContent(bin);
+      scurveSameModule->SetBinContent(bin, validHit/totalHit);
+    }
+    
+    scurveSameModule->GetXaxis()->SetTitle("window search [cm]");
+    scurveSameModule->GetYaxis()->SetTitle("eff [same module]");
+    TF1 *fitSCSameModule = new TF1("fitSCSameModule","[0]", down, up);
+    fitSCSameModule->SetParName(0,"asympt_eff");
+    fitSCSameModule->SetParameter(0, 0.7);
+    scurveSameModule->Fit("fitSCSameModule","R");
 
 
+    //BPix SCURVE ***********
+    totalHit=0.; validHit=0.;
+    TH1F* scurveBPix = new TH1F("scurveBPix", "scurveBPix", windowSearchMerged->GetNbinsX(), 0, windowSearchMerged->GetXaxis()->GetBinUpEdge(windowSearchMerged->GetNbinsX()));
+    for (int bin=1;bin<=windowSearchMerged->GetNbinsX()+1; bin++) //201 includes overflow=definitevely missing
+      totalHit+=windowSearchBPixMerged->GetBinContent(bin);
+   
+    for (int bin=1; bin<=scurveBPix->GetNbinsX(); bin++){
+      validHit+=windowSearchBPixMerged->GetBinContent(bin);
+      scurveBPix->SetBinContent(bin, validHit/totalHit);
+    }
+    
+    scurveBPix->GetXaxis()->SetTitle("window search [cm]");
+    scurveBPix->GetYaxis()->SetTitle("eff [BPIX]");
+    TF1 *fitSCBPix = new TF1("fitSCBPix","[0]", down, up);
+    fitSCBPix->SetParName(0,"asympt_eff");
+    fitSCBPix->SetParameter(0, 0.7);
+    scurveBPix->Fit("fitSCBPix","R");
 
+    a=validHit ; b=totalHit-validHit;
+    histBarrelEfficiencyComparison->SetBinContent(4, a/(a+b) );
+    error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
+    histBarrelEfficiencyComparison->SetBinError(4,error);
+    histBarrelEfficiencyComparison->GetXaxis()->SetBinLabel(4,"Method 2 s-curve");
+  
+    // SCURVE for FPix ********
+    totalHit=0.; validHit=0.;
+    TH1F* scurveFPix = new TH1F("scurveFPix", "scurveFPix", windowSearchMerged->GetNbinsX(), 0, windowSearchMerged->GetXaxis()->GetBinUpEdge(windowSearchMerged->GetNbinsX()));
+    for (int bin=1;bin<=windowSearchMerged->GetNbinsX()+1; bin++) //201 includes overflow=definitevely missing
+      totalHit+=windowSearchFPixMerged->GetBinContent(bin);
+   
+    for (int bin=1; bin<=scurveFPix->GetNbinsX(); bin++){
+      validHit+=windowSearchFPixMerged->GetBinContent(bin);
+      scurveFPix->SetBinContent(bin, validHit/totalHit);
+    }
+    
+    scurveFPix->GetXaxis()->SetTitle("window search [cm]");
+    scurveFPix->GetYaxis()->SetTitle("eff [FPIX]");
+    TF1 *fitSCFPix = new TF1("fitSCFPix","[0]", down, up);
+    fitSCFPix->SetParName(0,"asympt_eff");
+    fitSCFPix->SetParameter(0, 0.7);
+    scurveFPix->Fit("fitSCFPix","R");
+
+    a=validHit ; b=totalHit-validHit;
+    histEndCapEfficiencyComparison->SetBinContent(4, a/(a+b) );
+    error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
+    histEndCapEfficiencyComparison->SetBinError(4,error);
+    histEndCapEfficiencyComparison->GetXaxis()->SetBinLabel(4,"Method 2 s-curve");
+  
 
 
   TFile* fOutputFile = new TFile("merged.root", "RECREATE");
@@ -566,6 +770,8 @@ void merge(){
   consistencyCheckTrajMerged->Write();
   histInvalidRecHitCollectionMerged->Write();
   histInvalidRecHitWithBadmoduleListMerged->Write();
+  histoMethod2Merged->Write();
+  histoMethod2AfterMerged->Write();
 
   invalidPerRunMerged->Write(); 
   validPerRunMerged->Write();
@@ -594,8 +800,12 @@ void merge(){
   missingVsLocalYMerged->Write();
   validVsLocalXMerged->Write();
   validVsLocalYMerged->Write();  
+  localXAnalysis->Write();
+  localYAnalysis->Write();
 
   windowSearchMerged->Write();
+  windowSearchBPixMerged->Write();
+  windowSearchFPixMerged->Write();
   
   checkoutTrajMerged->Write();
   checkoutValidityFlagMerged->Write();   
@@ -607,6 +817,7 @@ void merge(){
 
 
   //******* EFFICIENCY PLOTS WRITING ************
+  histBarrelEfficiencyComparison->Write();
   histSubdetectors->Write();  
   histSummary->Write();
   histAlphaAnalysis->GetXaxis()->SetTitle("#alpha_{local}");  
@@ -620,6 +831,7 @@ void merge(){
   moduleGoodBPix->GetYaxis()->SetTitle("eff_{goodBPix}"); 
   moduleGoodBPix->GetXaxis()->SetTitle("detid_{list}"); 
   moduleGoodBPix->Write(); 
+  qualityBPixModule->Write();
 
   moduleGoodFPix->GetYaxis()->SetTitle("eff_{goodFPix}"); 
   moduleGoodFPix->GetXaxis()->SetTitle("detid_{list}"); 
@@ -629,6 +841,9 @@ void merge(){
   moduleBadFPix->Write(); 
   
   scurve->Write();
+  scurveSameModule->Write();
+  scurveBPix->Write();
+  scurveFPix->Write();
 
   fOutputFile->Close() ;
     

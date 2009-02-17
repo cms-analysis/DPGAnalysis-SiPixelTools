@@ -17,13 +17,20 @@ process.load("Configuration.StandardSequences.ReconstructionCosmics_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.connect = "frontier://FrontierProd/CMS_COND_21X_GLOBALTAG"   #modifythismodifythismodifythismodifythis
-process.GlobalTag.globaltag = "CRAFT_ALL_V8::All"
+
+#process.GlobalTag.globaltag = "CRAFT_ALL_V4::All"
+#tag behind for MC dataset
+#process.GlobalTag.globaltag = "COSMMC_21X_V1"
+process.GlobalTag.globaltag = "CRAFT_ALL_V9::All"
+
+#Do the reconstruction with new tag
+#process.load("Configuration.StandardSequences.ReconstructionCosmics_cff")
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(NUMOFEVENTS) )
 
 process.source = cms.Source("PoolSource",
    #comment this line when ALCARECO
-   inputCommands = cms.untracked.vstring('keep *',"drop *_*_*_FU"),
+   #inputCommands = cms.untracked.vstring('keep *',"drop *_*_*_FU"),
 
 #replace 'myfile.root' with the source file you want to use
      fileNames = cms.untracked.vstring(    
@@ -242,4 +249,5 @@ process.checkCosmicTF = cms.EDAnalyzer('PixelEfficiency',
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.MessageLogger.cerr.threshold = 'Info'
 
+#process.p = cms.Path(process.trackerCosmics*process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
 process.p = cms.Path(process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
