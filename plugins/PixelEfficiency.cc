@@ -1,3 +1,5 @@
+//try me
+#include "DataFormats/GeometrySurface/interface/LocalError.h"
 // system include files
 #include <memory>
 
@@ -155,7 +157,8 @@ TH1F* histoMethod2FPix;
   vector< vector<int> > goodModuleMap; //but interesting only in-active!!
   //TTree for module analysis
   TTree* tree;
-  int idTree, isModuleBadTree, inactiveTree, missingTree, validTree, barrelTree, ladderTree, bladeTree, moduleInLadder;
+  int idTree, isModuleBadTree, inactiveTree, missingTree, validTree, barrelTree, ladderTree, bladeTree, moduleInLadderTree;
+  int globalXTree, globalYTree, globalZTree;
 
   bool badRun;  
 };
@@ -329,9 +332,15 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     if (trajWithTwoPixIntersec)
       {
       for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
-	  itTraj != itTrajEnd; ++itTraj) {
-       
+	  itTraj != itTrajEnd; ++itTraj) {     
+       	//check if belonging to badmodule list otherwise go to the next recHit
         TransientTrackingRecHit::ConstRecHitPointer testhit = itTraj->recHit();
+	bool badModule=false;
+        for(Parameters::iterator it = BadModuleList_.begin(); it != BadModuleList_.end(); ++it) {         
+          if ( ((testhit)->geographicalId().rawId())==(it->getParameter<uint32_t>("detid")) ) {badModule=true; break;}
+	  }
+        if (badModule) continue;
+       
         uint testSubDetID = (testhit->geographicalId().subdetId());
         if (testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap)
           {
@@ -341,11 +350,12 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	    break;
 	    }
 	  }
-        }
-      }
+        }//end-loop trajMeas
+      }//end-second cut
 
   if ( !(trajWithAtLeastOneValid&&trajWithTwoPixIntersec) ) continue;
 
+  // now find if the track has only 1 valid and on which layer
 
        //****************************************
        //Traj in Pixel volume       
@@ -396,11 +406,11 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
            if ( ((iHit)->geographicalId().rawId())==(it->getParameter<uint32_t>("detid")) ) {badModule=true; break;}
 	   }
 	 
+	 numPixHit++;
 	 //uncomment the subsequent line when you will be sure to run EVERYTHING only on good modules
 	 if (badModule) continue;
 	   
 	 //THIS IS ONLY TO CHECK THE DEFINITION OF INACTIVE-FLAG!!!
-	 numPixHit++;
 	 if ( (*iHit).getType()==TrackingRecHit::inactive )  numInactiveHit++;
 	 if ( (*iHit).getType()==TrackingRecHit::missing )   numMissingHit++;
 	  
@@ -439,7 +449,14 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	 if (type==int(kBPIX))
 	   {PXBDetId pdetId = PXBDetId(detId); layer=pdetId.layer(); ladder=pdetId.ladder(); moduleInLadder=pdetId.module();}
 	 if (type==int(kFPIX)){PXFDetId pfdetId = PXFDetId(detId); blade=pfdetId.blade();}
-
+	 int globalX = 0;
+	 int globalY = 0;
+	 int globalZ = 0;
+         const PixelGeomDetUnit* theGeomDet = dynamic_cast<const PixelGeomDetUnit*> (theTracker.idToDet(detId) );
+         globalX = theGeomDet->surface().position().x();
+         globalY = theGeomDet->surface().position().y();
+         globalZ = theGeomDet->surface().position().z();
+	 
 	 //maps stuffs
 	 //consider only good runs (ie not 100% inactive)
 	 if (!badRun)
@@ -491,7 +508,7 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                {
 	       vector<int> aux;
 	       aux.push_back(moduleRawId);
-	       for (int j=1;j<=7; j++) aux.push_back(0);
+	       for (int j=1;j<=10; j++) aux.push_back(0);
 	       goodModuleMap.push_back(aux);
                if ( (*iHit).getType()==TrackingRecHit::inactive ) (goodModuleMap[goodModuleMap.size()-1])[1]++;
 	       if ( (*iHit).getType()==TrackingRecHit::missing )  (goodModuleMap[goodModuleMap.size()-1])[2]++;
@@ -510,9 +527,9 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 		 (goodModuleMap[goodModuleMap.size()-1])[6]= blade;
 		 (goodModuleMap[goodModuleMap.size()-1])[7]= moduleInLadder;  //by now it's ZERO for BPix
 		 }
-	       
-		 
-	       
+	       (goodModuleMap[goodModuleMap.size()-1])[8]=globalX;       
+	       (goodModuleMap[goodModuleMap.size()-1])[9]=globalY;       	       
+	       (goodModuleMap[goodModuleMap.size()-1])[10]=globalZ;       	       
   	       }
 	     }
 	   }
@@ -550,7 +567,6 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	   {
 	   histEndcap->Fill(filling);
 	   
-	   const PixelGeomDetUnit* theGeomDet = dynamic_cast<const PixelGeomDetUnit*> (theTracker.idToDet(detId) );
 	   if(theGeomDet->surface().position().z() < 0.0) histEndcapMinus->Fill(filling);
 	   else                                           histEndcapPlus->Fill(filling);
 	   }//endcaps
@@ -600,9 +616,15 @@ try{
     if (trajWithTwoPixIntersec)
       {
       for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
-	  itTraj != itTrajEnd; ++itTraj) {
-       
+	  itTraj != itTrajEnd; ++itTraj) {     
+       	//check if belonging to badmodule list otherwise go to the next recHit
         TransientTrackingRecHit::ConstRecHitPointer testhit = itTraj->recHit();
+	bool badModule=false;
+        for(Parameters::iterator it = BadModuleList_.begin(); it != BadModuleList_.end(); ++it) {         
+          if ( ((testhit)->geographicalId().rawId())==(it->getParameter<uint32_t>("detid")) ) {badModule=true; break;}
+	  }
+        if (badModule) continue;
+       
         uint testSubDetID = (testhit->geographicalId().subdetId());
         if (testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap)
           {
@@ -835,7 +857,11 @@ std::cout<<"giusto "<<testhit->geographicalId().rawId()<<" giusto? "<<theGeomDet
       	      //check same module
 	      if (testhit->geographicalId().rawId()==theGeomDet->geographicalId().rawId()) sameModule=true;
 	      else sameModule=false;
-              minDistance=distance;
+	      //??LocalError errClust = (*clustIt).localError().positionError();
+              //??LocalError err=(*clustIt).localPositionError();
+              //??LocalError leclust = topol->localError().positionError(MeasurementPoint((*clustIt).x(),(*clustIt).y()));
+
+	      minDistance=distance;
 	      }
 	    }//end-for first cluster loop	   
 	  }//end-for second cluster loop 
@@ -942,7 +968,10 @@ PixelEfficiency::beginJob(const edm::EventSetup&)
  tree->Branch("isBarrelModule",&barrelTree,"isBarrelModule/I");
  tree->Branch("ladder",&ladderTree,"ladder/I");
  tree->Branch("blade",&bladeTree,"blade/I");
- tree->Branch("moduleInLadder",&moduleInLadder,"moduleInLadder/I");
+ tree->Branch("moduleInLadder",&moduleInLadderTree,"moduleInLadder/I");
+ tree->Branch("globalX",&globalXTree,"globalX/I");
+ tree->Branch("globalY",&globalYTree,"globalY/I");
+ tree->Branch("globalZ",&globalZTree,"globalZ/I");
 
  
  if(DEBUG) std::cout<<"End of begin job"<<std::endl;
@@ -1033,7 +1062,8 @@ histoMethod2FPix->Write();
       {
       idTree=(goodModuleMap[l])[0];inactiveTree=(goodModuleMap[l])[1]; missingTree=(goodModuleMap[l])[2]; validTree=(goodModuleMap[l])[3];
       barrelTree=(goodModuleMap[l])[4] ; ladderTree=(goodModuleMap[l])[5]; bladeTree=(goodModuleMap[l])[6];
-      moduleInLadder=(goodModuleMap[l])[7];
+      moduleInLadderTree=(goodModuleMap[l])[7];
+      globalXTree=(goodModuleMap[l])[8]; globalYTree=(goodModuleMap[l])[9]; globalZTree=(goodModuleMap[l])[10];
       tree->Fill();
       }
     tree->Write();
