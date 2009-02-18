@@ -17,7 +17,9 @@ fi
 #./pythonTemplateGenerator.csh 200 filelistSuperPointing.txt
 #./pythonTemplateGenerator.csh 3 filelistSuperPointingV9.txt
 #./pythonTemplateGenerator.csh 15 filelistMC.txt
-./pythonTemplateGenerator.csh 20 filelistTrackerPointingV9.txt
+#./pythonTemplateGenerator.csh 20 filelistTrackerPointingV9.txt
+./pythonTemplateGenerator.csh  4 filelistMCSuperPointing.txt
+
 let i=0
 
 for file in template*; do
