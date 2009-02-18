@@ -16,12 +16,12 @@ process.load("Configuration.StandardSequences.ReconstructionCosmics_cff")
 # Global Tag
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.connect = "frontier://FrontierProd/CMS_COND_21X_GLOBALTAG"   #modifythismodifythismodifythismodifythis
+process.GlobalTag.connect = "frontier://FrontierProd/CMS_COND_21X_GLOBALTAG"
 
 #process.GlobalTag.globaltag = "CRAFT_ALL_V4::All"
 #tag behind for MC dataset
-#process.GlobalTag.globaltag = "COSMMC_21X_V1"
-process.GlobalTag.globaltag = "CRAFT_ALL_V9::All"
+process.GlobalTag.globaltag = "COSMMC_21X_V1"
+#process.GlobalTag.globaltag = "CRAFT_ALL_V9::All"
 
 #Do the reconstruction with new tag
 #process.load("Configuration.StandardSequences.ReconstructionCosmics_cff")
