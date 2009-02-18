@@ -154,11 +154,11 @@ TH1F* histoMethod2FPix;
 
   //"maps" for module analysis: <rawModuleID, counterOn[inactive,missing,valid]>
   vector< vector<int> > badModuleMap;  
-  vector< vector<int> > goodModuleMap; //but interesting only in-active!!
+  vector< vector<double> > goodModuleMap; //but interesting only in-active!!
   //TTree for module analysis
   TTree* tree;
   int idTree, isModuleBadTree, inactiveTree, missingTree, validTree, barrelTree, ladderTree, bladeTree, moduleInLadderTree;
-  int globalXTree, globalYTree, globalZTree;
+  double globalXTree, globalYTree, globalZTree;
 
   bool badRun;  
 };
@@ -212,44 +212,9 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
   
   unsigned int runNumber=iEvent.id().run();
-
-  //skip 0T runs for reprocessing errors
-/*
-  if (
-  runNumber==69557 || runNumber==69559|| runNumber==69564|| runNumber==69572|| runNumber==69573|| runNumber==69587|| runNumber==69594||
-  runNumber==69728|| runNumber==69743|| runNumber==70147|| runNumber==70170|| runNumber==70195|| runNumber==70344 || runNumber==70347 ||
-  runNumber==70410|| runNumber==70411||
-  runNumber==70412|| runNumber==70413|| runNumber==70414|| runNumber==70415|| runNumber==70416|| runNumber==70417|| runNumber==70421||
-  runNumber==70454|| runNumber==70664|| runNumber==70674|| runNumber==70675 ||
-       (runNumber>= 66951 && runNumber<=67085) ||
-       (runNumber>=67264 && runNumber<=67432) ||
-       (runNumber>=67676 && runNumber<=67777) ||
-       (runNumber>=69536 && runNumber<=69671) ||
-       (runNumber>=70196 && runNumber<=99999) ) return;
-*/
-
-  //check carefully this 
-  //last implemented list: from January reprocessing observation
-  int badRunList[numOfBadRuns]={66664,66706,66709,66733,66910,67139,67534,67544,67548,68124,69253,69256,69269,69276,69273,69310};
-  //new list: from February ReRecoi TrackerPointing
-  //int badRunList[numOfBadRuns]={66733,64711,68124,69276,67548,67139,69256,67544};
-                               
+                
   badRun=false;
-//since we understood teh inactive flag, we don't need to discrimante badRuns(==inactive>80%)
-/*
-  for (int ll=0; ll<numOfBadRuns; ll++)
-    {
-    if (runNumber==badRunList[ll])
-      {
-      badRun=true;
-      break;
-      }
-    }
-*/    
-  //make the analysis only on well known goodRuns (=not 100% inactive)
-  //comment this line if you want to observe everything
-  //if (!badRun) return;
-
+ 
   // Get event setup (to get global transformation)
   edm::ESHandle<TrackerGeometry> geom;
   iSetup.get<TrackerDigiGeometryRecord>().get( geom );
@@ -257,352 +222,41 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
    //handle of the tracks 
    consistencyCheck->Fill(0); //fill for each event
-   // Get Tracks
-   //Handle<reco::TrackCollection> trackCollection;
    
    // Loop over trajectories
    edm::Handle<TrajTrackAssociationCollection> trajTrackCollectionHandle;
-   try{
-     //iEvent.getByLabel(TkTag_,trackCollection);
-     iEvent.getByLabel(trajectoryInput_,trajTrackCollectionHandle);
-
-
-     reco::TrackCollection::const_iterator tkIter;
-////////////////////////////////////////////////////////////////////////////////////////////////
-/*
-     for( tkIter=trackCollection->begin(); tkIter!=trackCollection->end(); ++tkIter )
-       {
-
-       consistencyCheck->Fill(1); //1 = each track
-
-       bool inPixelVolume = false;
-       //precheck that the track is passing at least through 2 pixels layers 
-       int twoPixelPassages=0;
-       for (trackingRecHit_iterator iHit = tkIter->recHitsBegin(); iHit != tkIter->recHitsEnd(); ++iHit)
-         {
-	 int type =(*iHit)->geographicalId().subdetId();
-         if (type==int(kBPIX)|| type==int(kFPIX))
-	   {
-           twoPixelPassages++;
-	   if (twoPixelPassages==2)
-	     {
-	     inPixelVolume = true;
-	     break;
-	     }
-	   }
-         }
-       //precheck that the track has at least 1 valid hit;
-       bool atLeastOneValid=false;
-       if (inPixelVolume)
-        {
-         for (trackingRecHit_iterator iHit = tkIter->recHitsBegin(); iHit != tkIter->recHitsEnd(); ++iHit)
-           {
-           int type =(*iHit)->geographicalId().subdetId();
-           if (type==int(kBPIX)|| type==int(kFPIX))
-	     {
-	     if ( (*iHit)->isValid() )
-	       {
-	       atLeastOneValid=true;
-	       break;
-	       }
-	     }
-	   }
-         }
-*/           
-  for(TrajTrackAssociationCollection::const_iterator it = trajTrackCollectionHandle->begin(),
-      itEnd = trajTrackCollectionHandle->end(); it!=itEnd;++it){
-
-    consistencyCheck->Fill(1); //1 = each track
-
-    const Trajectory& traj  = *it->key;
-    std::vector<TrajectoryMeasurement> tmColl = traj.measurements();
-    //here put the QUALITY CUTS over teh trajectories      
-    //at least two intersections and 1 valid hit
-    bool trajWithTwoPixIntersec  = false;
-    int numOfPixIntersec=0;
-    for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
-        itTraj != itTrajEnd; ++itTraj) {
-  
-      TransientTrackingRecHit::ConstRecHitPointer testhit = itTraj->recHit();
-      uint testSubDetID = (testhit->geographicalId().subdetId());
-      if( testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap ) numOfPixIntersec++;
-      if (numOfPixIntersec==2) {trajWithTwoPixIntersec=true; break;}
-      }
-    bool trajWithAtLeastOneValid = false; 
-    if (trajWithTwoPixIntersec)
-      {
-      for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
-	  itTraj != itTrajEnd; ++itTraj) {     
-       	//check if belonging to badmodule list otherwise go to the next recHit
-        TransientTrackingRecHit::ConstRecHitPointer testhit = itTraj->recHit();
-	bool badModule=false;
-        for(Parameters::iterator it = BadModuleList_.begin(); it != BadModuleList_.end(); ++it) {         
-          if ( ((testhit)->geographicalId().rawId())==(it->getParameter<uint32_t>("detid")) ) {badModule=true; break;}
-	  }
-        if (badModule) continue;
-       
-        uint testSubDetID = (testhit->geographicalId().subdetId());
-        if (testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap)
-          {
-	  if( (*testhit).getType()== TrackingRecHit::valid )
-	    {
-	    trajWithAtLeastOneValid=true;
-	    break;
-	    }
-	  }
-        }//end-loop trajMeas
-      }//end-second cut
-
-  if ( !(trajWithAtLeastOneValid&&trajWithTwoPixIntersec) ) continue;
-
-  // now find if the track has only 1 valid and on which layer
-
-       //****************************************
-       //Traj in Pixel volume       
-//       if (inPixelVolume&&atLeastOneValid)
-       
-//       {
-       consistencyCheck->Fill(2);
-       
-       //runNumber analysis
-       char testLabel[10] ;
-       sprintf (testLabel,"%d",runNumber) ;
-       bool found=false;
-       int setBin=190;
-       for (int binSearch=1; binSearch<=200; binSearch++)
-         {
-	 if ( !strcmp(validPerRun->GetXaxis()->GetBinLabel(binSearch),"") ) {setBin=binSearch; break;}
-	 else
-	   {
-	   if ( !strcmp(testLabel,validPerRun->GetXaxis()->GetBinLabel(binSearch)) ) {found=true; break;}
-	   } 
-	 }
-	 
-       if (!found)
-         {
-	 validPerRun->GetXaxis()->SetBinLabel(setBin,testLabel);
-	 invalidPerRun->GetXaxis()->SetBinLabel(setBin,testLabel);
-	 inactivePerRun->GetXaxis()->SetBinLabel(setBin,testLabel);
-	 }
-       
-       float numPixHit=0;
-       float numInactiveHit=0;
-       float numMissingHit=0;
-//       for (trackingRecHit_iterator iHit = tkIter->recHitsBegin(); iHit != tkIter->recHitsEnd(); ++iHit)
-//         {
-    for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
-        itTraj != itTrajEnd; ++itTraj) {
-  
-      TransientTrackingRecHit::ConstRecHitPointer iHit = itTraj->recHit();
-
-	  
-         //check if the recHit belong to Pixel otherwise go to the next recHit
-         int type =(iHit)->geographicalId().subdetId();           
-         if ( !( type==int(kBPIX)|| type==int(kFPIX)) ) continue;
-
-	 //check if belonging to badmodule list otherwise go to the next recHit
-	 bool badModule=false;
-         for(Parameters::iterator it = BadModuleList_.begin(); it != BadModuleList_.end(); ++it) {         
-           if ( ((iHit)->geographicalId().rawId())==(it->getParameter<uint32_t>("detid")) ) {badModule=true; break;}
-	   }
-	 
-	 numPixHit++;
-	 //uncomment the subsequent line when you will be sure to run EVERYTHING only on good modules
-	 if (badModule) continue;
-	   
-	 //THIS IS ONLY TO CHECK THE DEFINITION OF INACTIVE-FLAG!!!
-	 if ( (*iHit).getType()==TrackingRecHit::inactive )  numInactiveHit++;
-	 if ( (*iHit).getType()==TrackingRecHit::missing )   numMissingHit++;
-	  
-	 //***********************************
-	 //type of invalid recHiT
-	
-	 //let's observe better invalid not missing recHits
-         int specificInvalid = 0;  //something else than inactive or missing or bad
-	 if ( ! ((*iHit).isValid()) )
-	   {
-	   if ( (*iHit).getType()==TrackingRecHit::inactive )     specificInvalid = 1;
-	   if ( (*iHit).getType()==TrackingRecHit::bad )          specificInvalid = 2;
-	   if ( (*iHit).getType()==TrackingRecHit::missing )      specificInvalid = 3;
-	   }
-	 if ( ( (*iHit).isValid() && badModule ) )
-	   {
-	   specificInvalid = 4;
-	   }
-	 
-	 if ( ! ((*iHit).isValid()) ) histInvalidRecHitCollection->Fill(specificInvalid);
-	 
-	 //histWithBadmoduleList
-	 //fill 4th bin when we have a valid recHit belonging to badModule list: we expect 0 !!!
-	 if (specificInvalid == 4)                    histInvalidRecHitWithBadmoduleList->Fill(specificInvalid);
-	 //the other 3 bins are filled for the invalid statistic and excluding bad module list
-	 if ( (!((*iHit).isValid()))&&(!(badModule)) )  histInvalidRecHitWithBadmoduleList->Fill(specificInvalid);
-	 
-	 int moduleRawId = (iHit)->geographicalId().rawId();
-
-	 DetId detId = ((iHit)->geographicalId());
-        
-         unsigned int layer=0;
-         unsigned int ladder=0;
-         unsigned int blade=0;
-	 unsigned int moduleInLadder=0;
-	 if (type==int(kBPIX))
-	   {PXBDetId pdetId = PXBDetId(detId); layer=pdetId.layer(); ladder=pdetId.ladder(); moduleInLadder=pdetId.module();}
-	 if (type==int(kFPIX)){PXFDetId pfdetId = PXFDetId(detId); blade=pfdetId.blade();}
-	 int globalX = 0;
-	 int globalY = 0;
-	 int globalZ = 0;
-         const PixelGeomDetUnit* theGeomDet = dynamic_cast<const PixelGeomDetUnit*> (theTracker.idToDet(detId) );
-         globalX = theGeomDet->surface().position().x();
-         globalY = theGeomDet->surface().position().y();
-         globalZ = theGeomDet->surface().position().z();
-	 
-	 //maps stuffs
-	 //consider only good runs (ie not 100% inactive)
-	 if (!badRun)
-	 {
-	 if (badModule)
-	   {
-	   bool founded=0;
-           for (int it=0; it<badModuleMap.size(); it++)
-	     {
-	     if (badModuleMap[it][0]==moduleRawId)
-	       {
-	       founded=1;
-	       if ( (*iHit).getType()==TrackingRecHit::inactive ) (badModuleMap[it])[1]++;
-	       if ( (*iHit).getType()==TrackingRecHit::missing )  (badModuleMap[it])[2]++;
-	       if ( (*iHit).isValid() )                           (badModuleMap[it])[3]++;      
-	       break;
-	       }
-	     }
-           if (!founded)
-             {
-	     vector<int> aux;
-	     aux.push_back(moduleRawId);
-	     for (int j=1;j<=4; j++) aux.push_back(0);
-	     badModuleMap.push_back(aux);
-             if ( (*iHit).getType()==TrackingRecHit::inactive ) (badModuleMap[badModuleMap.size()-1])[1]++;
-	     if ( (*iHit).getType()==TrackingRecHit::missing )  (badModuleMap[badModuleMap.size()-1])[2]++;
-	     if ( (*iHit).isValid() )                           (badModuleMap[badModuleMap.size()-1])[3]++;     
-	     if ( type==int(kBPIX) ) (badModuleMap[badModuleMap.size()-1])[4]= 1;
-	     if ( type==int(kFPIX) )  (badModuleMap[badModuleMap.size()-1])[4]= 2;
-	     }
-	   }
-	 else
-	   {
-	   //if ( !((*iHit)->isValid()) )
-	     {
-	     bool founded=0;
-             for (int it=0; it<goodModuleMap.size(); it++)
-	       {
-	       if (goodModuleMap[it][0]==moduleRawId)
-	         {
-	         founded=1;
-	         if ( (*iHit).getType()==TrackingRecHit::inactive ) (goodModuleMap[it])[1]++;
-	         if ( (*iHit).getType()==TrackingRecHit::missing )  (goodModuleMap[it])[2]++;
-		 if ( (*iHit).isValid() )                           (goodModuleMap[it])[3]++;
-	         break;
-	         }
-	       }
-             if (!founded)
-               {
-	       vector<int> aux;
-	       aux.push_back(moduleRawId);
-	       for (int j=1;j<=10; j++) aux.push_back(0);
-	       goodModuleMap.push_back(aux);
-               if ( (*iHit).getType()==TrackingRecHit::inactive ) (goodModuleMap[goodModuleMap.size()-1])[1]++;
-	       if ( (*iHit).getType()==TrackingRecHit::missing )  (goodModuleMap[goodModuleMap.size()-1])[2]++;
-	       if ( (*iHit).isValid() )                           (goodModuleMap[goodModuleMap.size()-1])[3]++;
-	       if ( type==int(kBPIX) )
-	         {
-		 (goodModuleMap[goodModuleMap.size()-1])[4]= 1;
-		 (goodModuleMap[goodModuleMap.size()-1])[5]= ladder;
-		 (goodModuleMap[goodModuleMap.size()-1])[6]= 0;
-		 (goodModuleMap[goodModuleMap.size()-1])[7]= moduleInLadder;
-		 }
-	       if ( type==int(kFPIX) ) 
-	         {
-		 (goodModuleMap[goodModuleMap.size()-1])[4]= 2;
-		 (goodModuleMap[goodModuleMap.size()-1])[5]= 0;
-		 (goodModuleMap[goodModuleMap.size()-1])[6]= blade;
-		 (goodModuleMap[goodModuleMap.size()-1])[7]= moduleInLadder;  //by now it's ZERO for BPix
-		 }
-	       (goodModuleMap[goodModuleMap.size()-1])[8]=globalX;       
-	       (goodModuleMap[goodModuleMap.size()-1])[9]=globalY;       	       
-	       (goodModuleMap[goodModuleMap.size()-1])[10]=globalZ;       	       
-  	       }
-	     }
-	   }
-	   }//end-if not badRun
-	 
-	 //***********************************
-	 //Fill with valid/missing recHits
-	 
-	 //make statistic only on not badModule
-	 if (badModule) continue;
-
-         //analysis per run 
-	 if ( ! ((*iHit).isValid()) )  invalidPerRun->Fill(testLabel,1);
-	 if (   ((*iHit).isValid()) )  validPerRun->Fill(testLabel,1);
-	 if ( (*iHit).getType()==TrackingRecHit::inactive ) inactivePerRun->Fill(testLabel,1);
-	 
-	 //operation done for all the Pixel recHit
-         int filling = 0;
-         if((*iHit).isValid() ) filling=2;
-         if (!((*iHit).isValid()) ) filling=0;
-	 if (!((*iHit).isValid()) && (*iHit).getType()==TrackingRecHit::missing) filling=1;	 
-	 
-	 histo->Fill(filling);
-
-         if (type==int(kBPIX))  
-	   {
-	   histBarrel->Fill(filling);
-	   
-	   
-	   if (layer==1) histLayer1->Fill(filling);
-	   if (layer==2) histLayer2->Fill(filling);
-	   if (layer==3) histLayer3->Fill(filling);
-	   }//barrel
-	 if (type==int(kFPIX))
-	   {
-	   histEndcap->Fill(filling);
-	   
-	   if(theGeomDet->surface().position().z() < 0.0) histEndcapMinus->Fill(filling);
-	   else                                           histEndcapPlus->Fill(filling);
-	   }//endcaps
-         } // end of loop on rechits (i.e. trajmeasurement)
-	
-       //no check on denominator: for sure at least 1 recHit in previous filling 
-       totalPerTrack->Fill( numPixHit );
-       inactivePerTrack->Fill( (numInactiveHit/numPixHit)*100.);
-       missingPerTrack->Fill( (numMissingHit/numPixHit)*100.);
-	 
-//       } //if-else inPixelVolume 
-     } // end of loop on traj
-      
    
   //**************************************************************
   //residual (loop on traj)
   
 
 try{
+
+ iEvent.getByLabel(trajectoryInput_,trajTrackCollectionHandle);
+
   edm::Handle< edmNew::DetSetVector<SiPixelCluster> > theClusters;
   iEvent.getByLabel(pixelClusterInput_, theClusters);
+
   const edmNew::DetSetVector<SiPixelCluster>& input = *theClusters;
 
   int NbrTracks =  trajTrackCollectionHandle->size();
+
   checkoutTraj->Fill(NbrTracks);
 
   TrajectoryStateCombiner tsoscomb;
   for(TrajTrackAssociationCollection::const_iterator it = trajTrackCollectionHandle->begin(),
       itEnd = trajTrackCollectionHandle->end(); it!=itEnd;++it){
 
+    consistencyCheck->Fill(1); //1 = each track //*************
+
     const Trajectory& traj  = *it->key;
     std::vector<TrajectoryMeasurement> tmColl = traj.measurements();
       
     //here put the QUALITY CUTS over teh trajectories      
     //at least two intersections and 1 valid hit
-    bool trajWithTwoPixIntersec  = false;
+    
+    //************************ WE DONT CARE ANYMORE ABOUT TRACK SELECTION, ITS ON HIT SELECTION !!
+    /*bool trajWithTwoPixIntersec  = false;
     int numOfPixIntersec=0;
     for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
         itTraj != itTrajEnd; ++itTraj) {
@@ -635,16 +289,48 @@ try{
 	    }
 	  }
         }
-      }
+      }*/
 
     consistencyCheckTraj->Fill(0);//number of total trajectories
 
 
-  if ( !(trajWithAtLeastOneValid&&trajWithTwoPixIntersec) ) continue;
+  //if ( !(trajWithAtLeastOneValid&&trajWithTwoPixIntersec) ) continue;
 
+//*************
+    consistencyCheck->Fill(2);
+
+    //runNumber analysis
+       char testLabel[10] ;
+       sprintf (testLabel,"%d",runNumber) ;
+       bool found=false;
+       int setBin=190;
+       for (int binSearch=1; binSearch<=200; binSearch++)
+         {
+	 if ( !strcmp(validPerRun->GetXaxis()->GetBinLabel(binSearch),"") ) {setBin=binSearch; break;}
+	 else
+	   {
+	   if ( !strcmp(testLabel,validPerRun->GetXaxis()->GetBinLabel(binSearch)) ) {found=true; break;}
+	   } 
+	 }
+	 
+       if (!found)
+         {
+	 validPerRun->GetXaxis()->SetBinLabel(setBin,testLabel);
+	 invalidPerRun->GetXaxis()->SetBinLabel(setBin,testLabel);
+	 inactivePerRun->GetXaxis()->SetBinLabel(setBin,testLabel);
+	 }
+       
+       float numPixHit=0;
+       float numInactiveHit=0;
+       float numMissingHit=0;
+       
+       //*************
+       
     //precheck to count the BPix/FPix number of trajectories
     for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
 	itTraj != itTrajEnd; ++itTraj) {
+	
+	
       TransientTrackingRecHit::ConstRecHitPointer testhit = itTraj->recHit();
       uint testSubDetID = (testhit->geographicalId().subdetId());
       if( (testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap) ) 
@@ -665,14 +351,19 @@ try{
 	break;
 	}
       }
-          
+     
+    int numofhit=0;      
     for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
 	itTraj != itTrajEnd; ++itTraj) {
+
+	numofhit++;
+	
   
       //are we in the pixels with valid stuffs?
       TransientTrackingRecHit::ConstRecHitPointer testhit = itTraj->recHit();
       //check if in PixelDetector
       uint testSubDetID = (testhit->geographicalId().subdetId());
+      int type = testSubDetID;
       if(! (testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap) ) continue;
       //check if belonging to badmodule list
       bool badModule=false;
@@ -680,6 +371,186 @@ try{
         if ( (testhit->geographicalId().rawId())==(it->getParameter<uint32_t>("detid")) ) {badModule=true; break;}
 	}
       if (badModule) continue;
+            	
+	 int moduleRawId = (testhit)->geographicalId().rawId();
+
+	 DetId detId = ((testhit)->geographicalId());
+        
+         unsigned int layer=0;
+         unsigned int ladder=0;
+         unsigned int disk=0;
+         unsigned int blade=0;
+	 unsigned int moduleInLadder=0;
+	 if (type==int(kBPIX))
+	   {PXBDetId pdetId = PXBDetId(detId); layer=pdetId.layer(); ladder=pdetId.ladder(); moduleInLadder=pdetId.module();}
+	 if (type==int(kFPIX)){PXFDetId pfdetId = PXFDetId(detId); blade=pfdetId.blade(); disk=pfdetId.disk();}
+	 double globalX = 0;
+	 double globalY = 0;
+	 double globalZ = 0;
+         const PixelGeomDetUnit* theGeomDet = dynamic_cast<const PixelGeomDetUnit*> (theTracker.idToDet(detId) );
+         globalX = theGeomDet->surface().position().x();
+         globalY = theGeomDet->surface().position().y();
+         globalZ = theGeomDet->surface().position().z();
+	
+	 
+	//********************* HERE IS THE CUT ON HITS !!
+	int numofhitCut=0;
+        int numOfOtherValid=0;  
+	bool hasValidInUpperPix = false;
+	bool hasValidInLowerPix = false;
+	for(std::vector<TrajectoryMeasurement>::const_iterator itCut1 = tmColl.begin(), itCut1End = tmColl.end();
+	itCut1 != itCut1End; ++itCut1) {
+	  numofhitCut++;
+	
+	  //FPixTest;
+	  
+	  TransientTrackingRecHit::ConstRecHitPointer testhitCut = itCut1->recHit();
+          uint testSubDetIDCut = (testhitCut->geographicalId().subdetId());
+          int typeCut = testSubDetIDCut;
+          if(! (testSubDetIDCut == PixelSubdetector::PixelBarrel || testSubDetIDCut == PixelSubdetector::PixelEndcap) ) continue;
+         
+	  //check if belonging to badmodule list
+          bool badModuleCut=false;
+          for(Parameters::iterator itCut = BadModuleList_.begin(); itCut != BadModuleList_.end(); ++itCut) {         
+            if ( (testhitCut->geographicalId().rawId())==(itCut->getParameter<uint32_t>("detid")) ) {badModuleCut=true; break;}
+	  }
+          if (badModuleCut) continue;
+           	
+	   //int moduleRawIdCut = (testhitCut)->geographicalId().rawId();
+
+	   DetId detIdCut = ((testhitCut)->geographicalId());
+        
+           unsigned int layerCut=99999;
+           unsigned int diskCut=99999;
+	   if (typeCut==int(kBPIX))
+	     {PXBDetId pdetIdCut = PXBDetId(detIdCut); layerCut=pdetIdCut.layer();}
+	   if (typeCut==int(kFPIX)){PXFDetId pfdetIdCut = PXFDetId(detIdCut); diskCut=pfdetIdCut.disk();}
+	   double globalYCut = 0;
+           const PixelGeomDetUnit* theGeomDetCut = dynamic_cast<const PixelGeomDetUnit*> (theTracker.idToDet(detIdCut) );
+           globalYCut = theGeomDetCut->surface().position().y();
+	   
+	   if(numofhitCut!=numofhit && globalYCut>0 && layerCut!=layer && disk!=diskCut && (*testhitCut).getType()==TrackingRecHit::valid)
+	     hasValidInUpperPix = true;
+	   if(numofhitCut!=numofhit && globalYCut<0 && layerCut!=layer && disk!=diskCut && (*testhitCut).getType()==TrackingRecHit::valid)
+	     hasValidInLowerPix = true;
+		
+	   if(numofhitCut!=numofhit && layerCut!=layer && disk!=diskCut && (*testhitCut).getType()==TrackingRecHit::valid)
+	     numOfOtherValid++;  
+
+	}//end of loop for trajmeas for cut
+	
+      
+       //*******************************
+       // DO THE ANALYSIS ONLY IF GOOD OTHER HIT ARE FOUND !!!!!!!!!!!
+       
+//different tightness in the cuts 
+       if (numOfOtherValid<1) continue;
+//         if(! (hasValidInLowerPix && hasValidInUpperPix) ) continue;
+
+
+      
+      //**********
+      
+      //THIS IS ONLY TO CHECK THE DEFINITION OF INACTIVE-FLAG!!!
+	 if ( (*testhit).getType()==TrackingRecHit::inactive )  numInactiveHit++;
+	 if ( (*testhit).getType()==TrackingRecHit::missing )   numMissingHit++;
+	  
+	 //***********************************
+	 //type of invalid recHiT
+	
+	 //let's observe better invalid not missing recHits
+         int specificInvalid = 0;  //something else than inactive or missing or bad
+	 if ( ! ((*testhit).isValid()) )
+	   {
+	   if ( (*testhit).getType()==TrackingRecHit::inactive )     specificInvalid = 1;
+	   if ( (*testhit).getType()==TrackingRecHit::bad )          specificInvalid = 2;
+	   if ( (*testhit).getType()==TrackingRecHit::missing )      specificInvalid = 3;
+	   }
+	 if ( ( (*testhit).isValid() && badModule ) )
+	   {
+	   specificInvalid = 4;
+	   }
+	 
+	 if ( ! ((*testhit).isValid()) ) histInvalidRecHitCollection->Fill(specificInvalid);
+	 
+	 //histWithBadmoduleList
+	 //fill 4th bin when we have a valid recHit belonging to badModule list: we expect 0 !!!
+	 if (specificInvalid == 4)                    histInvalidRecHitWithBadmoduleList->Fill(specificInvalid);
+	 //the other 3 bins are filled for the invalid statistic and excluding bad module list
+	 if ( (!((*testhit).isValid()))&&(!(badModule)) )  histInvalidRecHitWithBadmoduleList->Fill(specificInvalid);
+	 
+	 
+      
+      bool founded=0;
+             for (int it=0; it<goodModuleMap.size(); it++)
+	       {
+	       if (goodModuleMap[it][0]==moduleRawId)
+	         {
+	         founded=1;
+	         if ( (*testhit).getType()==TrackingRecHit::inactive ) (goodModuleMap[it])[1]++;
+	         if ( (*testhit).getType()==TrackingRecHit::missing )  (goodModuleMap[it])[2]++;
+		 if ( (*testhit).isValid() )                           (goodModuleMap[it])[3]++;
+	         break;
+	         }
+	       }
+             if (!founded)
+               {
+	       vector<double> aux;
+	       aux.push_back(moduleRawId);
+	       for (int j=1;j<=10; j++) aux.push_back(0);
+	       goodModuleMap.push_back(aux);
+               if ( (*testhit).getType()==TrackingRecHit::inactive ) (goodModuleMap[goodModuleMap.size()-1])[1]++;
+	       if ( (*testhit).getType()==TrackingRecHit::missing )  (goodModuleMap[goodModuleMap.size()-1])[2]++;
+	       if ( (*testhit).isValid() )                           (goodModuleMap[goodModuleMap.size()-1])[3]++;
+	       if ( type==int(kBPIX) )
+	         {
+		 (goodModuleMap[goodModuleMap.size()-1])[4]= 1;
+		 (goodModuleMap[goodModuleMap.size()-1])[5]= ladder;
+		 (goodModuleMap[goodModuleMap.size()-1])[6]= 0;
+		 (goodModuleMap[goodModuleMap.size()-1])[7]= moduleInLadder;
+		 }
+	       if ( type==int(kFPIX) ) 
+	         {
+		 (goodModuleMap[goodModuleMap.size()-1])[4]= 2;
+		 (goodModuleMap[goodModuleMap.size()-1])[5]= 0;
+		 (goodModuleMap[goodModuleMap.size()-1])[6]= blade;
+		 (goodModuleMap[goodModuleMap.size()-1])[7]= moduleInLadder;  //by now it's ZERO for BPix
+		 }
+	       (goodModuleMap[goodModuleMap.size()-1])[8]=globalX;       
+	       (goodModuleMap[goodModuleMap.size()-1])[9]=globalY;       	       
+	       (goodModuleMap[goodModuleMap.size()-1])[10]=globalZ;       	       
+  	       }
+	       
+	       
+	     if ( ! ((*testhit).isValid()) )  invalidPerRun->Fill(testLabel,1);
+	 if (   ((*testhit).isValid()) )  validPerRun->Fill(testLabel,1);
+	 if ( (*testhit).getType()==TrackingRecHit::inactive ) inactivePerRun->Fill(testLabel,1);
+	 
+	 //operation done for all the Pixel recHit
+         int filling = 0;
+         if((*testhit).isValid() ) filling=2;
+         if (!((*testhit).isValid()) ) filling=0;
+	 if (!((*testhit).isValid()) && (*testhit).getType()==TrackingRecHit::missing) filling=1;	 
+	 
+	 histo->Fill(filling);
+
+         if (type==int(kBPIX))  
+	   {
+	   histBarrel->Fill(filling);
+	   
+	   
+	   if (layer==1) histLayer1->Fill(filling);
+	   if (layer==2) histLayer2->Fill(filling);
+	   if (layer==3) histLayer3->Fill(filling);
+	   }//barrel
+	 if (type==int(kFPIX))
+	   {
+	   histEndcap->Fill(filling);
+	   
+	   if(theGeomDet->surface().position().z() < 0.0) histEndcapMinus->Fill(filling);
+	   else                                           histEndcapPlus->Fill(filling);
+	   }
+      //**********
 
       TrajectoryStateOnSurface tsos = tsoscomb( itTraj->forwardPredictedState(), itTraj->backwardPredictedState() );
 
@@ -772,9 +643,6 @@ else checkoutValidityFlag->Fill(3);
 	    deltaZ= GPclust.z()- tsos.globalPosition().z();
 	    double distance;
 	    distance = sqrt( pow(deltaZ,2)+pow(deltaX,2)+pow(deltaY,2) );
-//test
-std::cout<<"giusto "<<testhit->geographicalId().rawId()<<" giusto? "<<theGeomDet->geographicalId().rawId()<<std::endl;
-//	    
 	    
 	    if (distance<minDistance) 
 	      {
@@ -876,15 +744,16 @@ std::cout<<"giusto "<<testhit->geographicalId().rawId()<<" giusto? "<<theGeomDet
 	}//end-if "work-on-valid-&-missing"    
       }//end-if method 2 for forward
 
-      }//end-for trajMeasurements      
+      }//end-for trajMeasurements 
+      
+      //**********
+       totalPerTrack->Fill( numPixHit );
+       inactivePerTrack->Fill( (numInactiveHit/numPixHit)*100.);
+       missingPerTrack->Fill( (numMissingHit/numPixHit)*100.);
+       //****************
+	     
     }//end-for of Trajectories
 }catch ( ... ) {}
-   
-   } catch ( cms::Exception& er ) {
-     std::cout<<"caught cicciburicci std::exception "<<er.what()<<std::endl;
-   } catch ( ... ) {
-     std::cout<<" funny error " <<std::endl;
-   }
 
    if(DEBUG) cout<<"End of Analyze"<<endl;
 
@@ -969,9 +838,9 @@ PixelEfficiency::beginJob(const edm::EventSetup&)
  tree->Branch("ladder",&ladderTree,"ladder/I");
  tree->Branch("blade",&bladeTree,"blade/I");
  tree->Branch("moduleInLadder",&moduleInLadderTree,"moduleInLadder/I");
- tree->Branch("globalX",&globalXTree,"globalX/I");
- tree->Branch("globalY",&globalYTree,"globalY/I");
- tree->Branch("globalZ",&globalZTree,"globalZ/I");
+ tree->Branch("globalX",&globalXTree,"globalX/D");
+ tree->Branch("globalY",&globalYTree,"globalY/D");
+ tree->Branch("globalZ",&globalZTree,"globalZ/D");
 
  
  if(DEBUG) std::cout<<"End of begin job"<<std::endl;
