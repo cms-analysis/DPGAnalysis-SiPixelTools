@@ -1,5 +1,6 @@
 #include <sys/stat.h>
 #include "TH1.h"
+#include "TH2.h"
 #include "TF1.h"
 #include "TFile.h"
 #include "TString.h"
@@ -78,8 +79,10 @@ void merge(){
   TH1F* missingPerTrackMerged= new TH1F ("missingPerTrackMerged","missingPerTrackMerged",101,0,101);
 
 
-  vector< vector<int> > tempTree;
+  vector< vector<double> > tempTree;
   int id, isModuleBad, inactive, missing, valid, isBarrelModule, ladder, blade, moduleInLadder;
+  double globalX, globalY, globalZ;
+  
   TTree *treeMerged = new TTree("moduleAnalysisMerged","moduleAnalysisMerged");
   treeMerged->Branch("id",&id,"id/I");
   treeMerged->Branch("isModuleBad",&isModuleBad,"isModuleBad/I");
@@ -90,6 +93,9 @@ void merge(){
   treeMerged->Branch("ladder",&ladder,"ladder/I");
   treeMerged->Branch("blade",&blade,"blade/I");
   treeMerged->Branch("moduleInLadder",&moduleInLadder,"moduleInLadder/I");
+  treeMerged->Branch("globalX",&globalX,"globalX/D");
+  treeMerged->Branch("globalY",&globalY,"globalY/D");
+  treeMerged->Branch("globalZ",&globalZ,"globalZ/D");
 
 
   char name[120];
@@ -337,6 +343,9 @@ void merge(){
     tree->SetBranchAddress("ladder",&ladder);
     tree->SetBranchAddress("blade",&blade);
     tree->SetBranchAddress("moduleInLadder",&moduleInLadder);
+    tree->SetBranchAddress("globalX",&globalX);
+    tree->SetBranchAddress("globalY",&globalY);
+    tree->SetBranchAddress("globalZ",&globalZ);
     
     if(tree==0) cout<<" !!!!!!!!  Problem opening TTree, it is probably void !!!!!!!!!!"<<endl;
     if(DEBUG) cout<<"********* TTREE WAS OPENED SUCCESSFULLY ************"<<endl;
@@ -350,16 +359,19 @@ void merge(){
       for(int j=0;j<tempTree.size();j++) if(id==tempTree[j][0]) {PlaceInVector = j;break;}
       
       if(PlaceInVector==-1){
-        vector<int> temp;
-	temp.push_back(id);
-	temp.push_back(isModuleBad);
-	temp.push_back(inactive);
-	temp.push_back(missing);
-	temp.push_back(valid);
-	temp.push_back(isBarrelModule);
-	temp.push_back(ladder);
-	temp.push_back(blade);
-	temp.push_back(moduleInLadder);
+        vector<double> temp;
+	temp.push_back((double)id);
+	temp.push_back((double)isModuleBad);
+	temp.push_back((double)inactive);
+	temp.push_back((double)missing);
+	temp.push_back((double)valid);
+	temp.push_back((double)isBarrelModule);
+	temp.push_back((double)ladder);
+	temp.push_back((double)blade);
+	temp.push_back((double)moduleInLadder);
+	temp.push_back(globalX);
+	temp.push_back(globalY);
+	temp.push_back(globalZ);
 	tempTree.push_back(temp);	
       }
       else {
@@ -394,11 +406,12 @@ void merge(){
        efficiencyPerRun->SetBinError( i,sqrt( (a/(a+b))*(1-(a/(a+b)))/(a+b)) );
        efficiencyPerRun->GetXaxis()->SetBinLabel( i,validPerRunMerged->GetXaxis()->GetBinLabel(i) );
        }
-     else 
+/*     else 
        {
        efficiencyPerRun->SetBinContent(i,0);
        efficiencyPerRun->GetXaxis()->SetBinLabel( i,"deleted" );
        }
+*/       
      inactivePercentPerRun->SetBinContent(i,inactivePerRunMerged->GetBinContent(i)/(invalidPerRunMerged->GetBinContent(i)+validPerRunMerged->GetBinContent(i)) );
      inactivePercentPerRun->GetXaxis()->SetBinLabel( i,validPerRunMerged->GetXaxis()->GetBinLabel(i) );
        
@@ -406,15 +419,18 @@ void merge(){
     
   //Filling TTree merged
   for(int i=0;i<tempTree.size();i++){
-    id=tempTree[i][0];
-    isModuleBad=tempTree[i][1];
-    inactive=tempTree[i][2];
-    missing=tempTree[i][3];
-    valid=tempTree[i][4];
-    isBarrelModule=tempTree[i][5];
-    ladder=tempTree[i][6];
-    blade=tempTree[i][7];
-    moduleInLadder=tempTree[i][8];
+    id=(int)tempTree[i][0];
+    isModuleBad=(int)tempTree[i][1];
+    inactive=(int)tempTree[i][2];
+    missing=(int)tempTree[i][3];
+    valid=(int)tempTree[i][4];
+    isBarrelModule=(int)tempTree[i][5];
+    ladder=(int)tempTree[i][6];
+    blade=(int)tempTree[i][7];
+    moduleInLadder=(int)tempTree[i][8];
+    globalX=tempTree[i][9];
+    globalY=tempTree[i][10];
+    globalZ=tempTree[i][11];
     treeMerged->Fill();
   }
 
@@ -753,6 +769,144 @@ void merge(){
     histEndCapEfficiencyComparison->SetBinError(4,error);
     histEndCapEfficiencyComparison->GetXaxis()->SetBinLabel(4,"Method 2 s-curve");
   
+  
+    //****************** BEGIN OF 2D MAPS FOR MODULE ANALYSIS ****************
+
+   //****************** Barrel Maps ****************
+  
+  TH2F* layer1 =  new TH2F("layer1","layer1",8,1,9 ,20,1,21);
+  TH2F* layer2 =  new TH2F("layer2","layer2",8,1,9 ,32,1,33);
+  TH2F* layer3 =  new TH2F("layer3","layer3",8,1,9 ,44,1,45);
+
+  layer1->GetXaxis()->SetTitle("module");
+  layer1->GetYaxis()->SetTitle("ladder");
+  layer2->GetXaxis()->SetTitle("module");
+  layer2->GetYaxis()->SetTitle("ladder");
+  layer3->GetXaxis()->SetTitle("module");
+  layer3->GetYaxis()->SetTitle("ladder");
+    
+  vector< vector<double> > tempTreeLayer1;
+  entries = treeMerged->GetEntries();
+  for(int n=0;n<entries;n++){
+    treeMerged->GetEntry(n);
+    if (isModuleBad==0    &&
+        isBarrelModule==1 &&
+	id<302080000       ) 
+      {
+      vector<double> aux;
+      aux.push_back(ladder);aux.push_back(moduleInLadder);
+      if ((((double)valid)+((double)missing))!=0.) aux.push_back( ((double)valid)/(((double)valid)+((double)missing)) );
+      else {aux.push_back(-1.);std::cout<<"e' successo"<<std::endl;}
+      tempTreeLayer1.push_back( aux );
+      }
+    }
+
+  vector< vector<double> > tempTreeLayer2;
+  for(int n=0;n<entries;n++){
+    treeMerged->GetEntry(n);
+    if (isModuleBad==0    &&
+        isBarrelModule==1 &&
+	id>302080000 && id<302160000 ) 
+      {
+      vector<double> aux;
+      aux.push_back(ladder);aux.push_back(moduleInLadder);
+      if ((((double)valid)+((double)missing))!=0.) aux.push_back( ((double)valid)/(((double)valid)+((double)missing)) );
+      else {aux.push_back(-1.);std::cout<<"e' successo"<<std::endl;}
+      tempTreeLayer2.push_back( aux );
+      }
+    }
+  vector< vector<double> > tempTreeLayer3;
+  for(int n=0;n<entries;n++){
+    treeMerged->GetEntry(n);
+    if (isModuleBad==0    &&
+        isBarrelModule==1 &&
+	id>302160000 && id<310000000 ) //test sul layer1
+      {
+      vector<double> aux;
+      aux.push_back(ladder);aux.push_back(moduleInLadder);
+      if ((((double)valid)+((double)missing))!=0.) aux.push_back( ((double)valid)/(((double)valid)+((double)missing)) );
+      else {aux.push_back(-1.);std::cout<<"e' successo"<<std::endl;}
+      tempTreeLayer3.push_back( aux );
+      }
+    }
+
+  for (int iter=0; iter<tempTreeLayer1.size(); iter++)
+    {
+    layer1->Fill(tempTreeLayer1[iter][1],tempTreeLayer1[iter][0],tempTreeLayer1[iter][2]);
+    }
+  for (int iter=0; iter<tempTreeLayer2.size(); iter++)
+    {
+    layer2->Fill(tempTreeLayer2[iter][1],tempTreeLayer2[iter][0],tempTreeLayer2[iter][2]);
+    }
+  for (int iter=0; iter<tempTreeLayer3.size(); iter++)
+    {
+    layer3->Fill(tempTreeLayer3[iter][1],tempTreeLayer3[iter][0],tempTreeLayer3[iter][2]);
+    }
+/*
+//force holes from dead modules (badModuleList) for "nice show"
+    layer2->Fill(1,22,-0.5);
+    layer2->Fill(8,24,-0.5);
+    layer2->Fill(8,9,-0.5);
+    layer3->Fill(6,44,-0.5);
+    layer3->Fill(8,34,-0.5);
+    layer3->Fill(2,8,-0.5);
+*/
+  
+if (DEBUG)
+  {
+  std::cout<<"Layer1"<<std::endl;         
+  for (int ladderIter=1; ladderIter<=32; ladderIter++)
+    {
+    int moduleIter=1;
+    for (int dim=0;dim<tempTreeLayer1.size();dim++)
+      {
+      if (tempTreeLayer1[dim][0]==ladderIter)
+        {
+	moduleIter++;
+        }
+      }
+    std::cout<<"we have "<<moduleIter-1<<" module for ladder"<<ladderIter<<std::endl;
+    }
+
+  std::cout<<"Layer2"<<std::endl;         
+  for (int ladderIter=1; ladderIter<=32; ladderIter++)
+    {
+    int moduleIter=1;
+    for (int dim=0;dim<tempTreeLayer2.size();dim++)
+      {
+      if (tempTreeLayer2[dim][0]==ladderIter)
+        {
+	moduleIter++;
+        }
+      }
+    std::cout<<"we have "<<moduleIter-1<<" module for ladder"<<ladderIter<<std::endl;
+    }
+
+  std::cout<<"Layer3"<<std::endl;         
+  for (int ladderIter=1; ladderIter<=44; ladderIter++)
+    {
+    int moduleIter=1;
+    for (int dim=0;dim<tempTreeLayer3.size();dim++)
+      {
+      if (tempTreeLayer3[dim][0]==ladderIter)
+        {
+	moduleIter++;
+        }
+      }
+    std::cout<<"we have "<<moduleIter-1<<" module for ladder"<<ladderIter<<std::endl;
+    }
+    
+  }//end if debug module entries
+   //****************** Disk Maps ****************
+
+    
+    //****************** END   OF 2D MAPS FOR MODULE ANALYSIS ****************    
+
+  TF1 *runfit = new TF1("runfit","[0]", 0, efficiencyPerRun->GetNbinsX());
+  runfit->SetParName(0,"mean_eff");
+  runfit->SetParameter(0, 1);
+  efficiencyPerRun->Fit("runfit");
+
 
 
   TFile* fOutputFile = new TFile("merged.root", "RECREATE");
@@ -777,11 +931,19 @@ void merge(){
   validPerRunMerged->Write();
   inactivePerRunMerged->Write();
 
+  TCanvas* cRun = new TCanvas("cRun","cRun",1200,600); 
+  cRun->cd();
   efficiencyPerRun->LabelsDeflate("X");
   efficiencyPerRun->LabelsOption("a","X");
   efficiencyPerRun->Write();
+  efficiencyPerRun->Draw();
+  cRun->Print("efficiencyPerRun.gif","gif");
+  cRun->Close();
+
+
   inactivePercentPerRun->LabelsDeflate("X");
   inactivePercentPerRun->Write();
+
 
   validVsAlphaMerged->Write();
   validVsAlphaBPixMerged->Write();
@@ -800,8 +962,6 @@ void merge(){
   missingVsLocalYMerged->Write();
   validVsLocalXMerged->Write();
   validVsLocalYMerged->Write();  
-  localXAnalysis->Write();
-  localYAnalysis->Write();
 
   windowSearchMerged->Write();
   windowSearchBPixMerged->Write();
@@ -817,13 +977,34 @@ void merge(){
 
 
   //******* EFFICIENCY PLOTS WRITING ************
+  TCanvas* c1 = new TCanvas("c1","c1");
+  c1->cd();
+ 
+  localXAnalysis->Write();
+  localXAnalysis->Draw();
+  c1->Print("localXAnalysis.gif","gif");
+  localYAnalysis->Write();
+  localYAnalysis->Draw();
+  c1->Print("localYAnalysis.gif","gif");
+  
   histBarrelEfficiencyComparison->Write();
-  histSubdetectors->Write();  
+  histSubdetectors->Write();
+  histSubdetectors->Draw();
+  c1->Print("histSubdetectors.gif","gif");
+  histSubdetectors->GetYaxis()->SetRangeUser(0., 1.);
+  histSubdetectors->Draw();
+  c1->Print("histSubdetectorsFullRange.gif","gif");
+    
   histSummary->Write();
   histAlphaAnalysis->GetXaxis()->SetTitle("#alpha_{local}");  
   histAlphaAnalysis->Write();
-  histAlphaAnalysis->GetXaxis()->SetTitle("#beta_{local}");  
+  histAlphaAnalysis->Draw();
+  c1->Print("histAlphaAnalysis.gif","gif");
+  
+  histBetaAnalysis->GetXaxis()->SetTitle("#beta_{local}");  
   histBetaAnalysis->Write();
+  histBetaAnalysis->Draw();
+  c1->Print("histBetaAnalysis.gif","gif");
 
   //moduleBreakoutEff->LabelsDeflate("X");
   moduleBreakoutEff->Write();
@@ -832,18 +1013,40 @@ void merge(){
   moduleGoodBPix->GetXaxis()->SetTitle("detid_{list}"); 
   moduleGoodBPix->Write(); 
   qualityBPixModule->Write();
+  qualityBPixModule->Draw();
+  c1->Print("qualityBPixModule.gif","gif");
 
   moduleGoodFPix->GetYaxis()->SetTitle("eff_{goodFPix}"); 
   moduleGoodFPix->GetXaxis()->SetTitle("detid_{list}"); 
   moduleGoodFPix->Write(); 
+  moduleGoodFPix->Draw();
+  c1->Print("moduleFPix.gif","gif");
 
   moduleBadBPix->Write(); 
   moduleBadFPix->Write(); 
   
   scurve->Write();
+  scurve->Draw();
+  c1->Print("scurve.gif","gif");
   scurveSameModule->Write();
+  scurveSameModule->Draw();
+  c1->Print("scurveSameModule.gif","gif");
   scurveBPix->Write();
+  scurveBPix->Draw();
+  c1->Print("scurveBPix.gif","gif");
   scurveFPix->Write();
+  scurveFPix->Draw();
+  c1->Print("scurveFPix.gif","gif");  
+
+  layer1->Write();
+  layer2->Write();
+  layer3->Write();
+  layer1->Draw("colz");
+  c1->Print("layer1.gif","gif");
+  layer2->Draw("colz");
+  c1->Print("layer2.gif","gif");
+  layer3->Draw("colz");
+  c1->Print("layer3.gif","gif");
 
   fOutputFile->Close() ;
     
