@@ -154,7 +154,7 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
   //  ts_->Branch("TrackerHit", &trackerhits_, "globalX/F:globalY:globalZ:run/I:evtnum:tracknum", bufsize);
 
   std::cout << "Making track only branch:" << std::endl;
-  tt_->Branch("TrackInfo", &trackonly_, "run/I:evtnum:tracknum:pixelTrack:NumPixelHits:NumStripHits:charge:chi2/F:ndof:theta:d0:dz:p:pt:px:py:pz:phi:eta:vx:vy:vz:muonT0", bufsize);
+  tt_->Branch("TrackInfo", &trackonly_, "run/I:evtnum:tracknum:pixelTrack:NumPixelHits:NumStripHits:charge:chi2/F:ndof:theta:d0:dz:p:pt:px:py:pz:phi:eta:vx:vy:vz:muonT0:muondT0", bufsize);
   
   std::cout << "Made all branches." << std::endl;
 
@@ -624,8 +624,21 @@ void PixelNtuplizer_RealData::fillTrackOnly(const edm::Event& iEvent, const edm:
   trackonly_.vx = track.vx();
   trackonly_.vy = track.vy();
   trackonly_.vz = track.vz();
-  // associate muon with track and then fill muon T0. For now: set to zero.
-  trackonly_.muonT0=0;
+  // associate muon with track and then fill muon T0. get best value from other tree.
+  isValidMuonAssoc(iEvent,track,TrackNumber); 
+  trackonly_.muonT0=-1000;
+  trackonly_.muondT0=0;
+  if(muoninfo_.nMuon==0)
+    return;
+  trackonly_.muonT0=muoninfo_.timeAtIpInOut[0];
+  trackonly_.muondT0=muoninfo_.errorTime[0];
+  if(muoninfo_.nMuon==1)
+    return;
+  if(muoninfo_.errorTime[1]< muoninfo_.errorTime[2]){
+    trackonly_.muonT0=muoninfo_.timeAtIpInOut[0];
+    trackonly_.muondT0=muoninfo_.errorTime[0];
+  }
+  
   // load trackassociation from event, get muon out and read timing
 
   // TO DO

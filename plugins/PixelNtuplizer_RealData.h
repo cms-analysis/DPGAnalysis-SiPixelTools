@@ -309,7 +309,7 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
     float vy;
     float vz;
     float muonT0;
-
+    float muondT0;
     void init();
     } trackonly_;
 
