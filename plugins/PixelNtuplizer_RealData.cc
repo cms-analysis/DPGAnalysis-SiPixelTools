@@ -304,7 +304,7 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 
   TrajectoryStateCombiner tsoscomb;
   int NbrTracks =  trajTrackCollectionHandle->size();
-  std::cout << " track measurements " << trajTrackCollectionHandle->size()  << std::endl;
+  // std::cout << " track measurements " << trajTrackCollectionHandle->size()  << std::endl;
 
 
   for(TrajTrackAssociationCollection::const_iterator it = trajTrackCollectionHandle->begin(), itEnd = trajTrackCollectionHandle->end(); it!=itEnd;++it){
