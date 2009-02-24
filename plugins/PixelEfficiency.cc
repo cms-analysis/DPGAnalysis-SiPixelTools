@@ -52,7 +52,14 @@
 //class to handle the pixelcluster
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 
+//classes to handle muons
+#include "DataFormats/MuonReco/interface/Muon.h"
+#include "DataFormats/MuonReco/interface/MuonTime.h"
+#include "DataFormats/MuonReco/interface/MuonFwd.h"
+
+//TRoot classes
 #include "TH1F.h"
+#include "TH2F.h"
 #include "TFile.h"
 #include "TTree.h"
 #include <vector>
@@ -113,6 +120,13 @@ private:
   TH1F*  windowSearchSameModule;
   TH1F*  windowSearchBPix;
   TH1F*  windowSearchFPix;
+  TH1F*  missingButClusterOnSameModule;
+  TH1F*  missingButCluster;
+  TH1F*  chargeDistriValid;
+  TH1F*  chargeDistriMisRecovered;
+  TH1F*  numbPixInClusterValid;
+  TH1F*  numbPixInClusterMisRecovered;
+  
   TH1F*  validPerRun;
   TH1F*  invalidPerRun;
   TH1F*  inactivePerRun;
@@ -145,12 +159,23 @@ private:
   TH1F*  inactivePerTrack;
   TH1F*  missingPerTrack;
   TFile* fOutputFile;
+  
+  
+  //// HIT QUALITY ANALYSIS
+  //P->Passing Cut
+  //NP->Not Passing Cut
+  TH1F* hitsPassingCutsVal;
+  TH1F* hitsPassingCutsMis;
+  TH2F* xPosFracVal;
+  TH2F* xPosFracMis;
+  TH2F* yPosFracVal;
+  TH2F* yPosFracMis;
 
-//test
-TH1F* histoMethod2After;
-TH1F* histoMethod2;
-TH1F* histoMethod2AfterFPix;
-TH1F* histoMethod2FPix;
+  //test
+  TH1F* histoMethod2After;
+  TH1F* histoMethod2;
+  TH1F* histoMethod2AfterFPix;
+  TH1F* histoMethod2FPix;
 
   //"maps" for module analysis: <rawModuleID, counterOn[inactive,missing,valid]>
   vector< vector<int> > badModuleMap;  
@@ -229,10 +254,13 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   //**************************************************************
   //residual (loop on traj)
   
+  // get the ccmuons
+  edm::Handle<MuonCollection> MuonHandle;
 
 try{
 
- iEvent.getByLabel(trajectoryInput_,trajTrackCollectionHandle);
+  iEvent.getByLabel(trajectoryInput_,trajTrackCollectionHandle);
+ 
 
   edm::Handle< edmNew::DetSetVector<SiPixelCluster> > theClusters;
   iEvent.getByLabel(pixelClusterInput_, theClusters);
@@ -242,6 +270,22 @@ try{
   int NbrTracks =  trajTrackCollectionHandle->size();
 
   checkoutTraj->Fill(NbrTracks);
+  
+  iEvent.getByLabel("muons", MuonHandle);
+  
+  bool hasGoodTiming=false;
+  int nmuon = 0;
+  for(MuonCollection::const_iterator itmuon = MuonHandle->begin(), itmuonEnd = MuonHandle->end(); itmuon!=itmuonEnd;++itmuon){
+   if(nmuon>1) break;
+  
+   if(itmuon->isTimeValid() == false) continue;
+   if(itmuon->time().timeAtIpInOut<10)
+     hasGoodTiming=true;
+	
+     //it->time().timeAtIpInOutErr;
+     
+    nmuon++;
+  }
 
   TrajectoryStateCombiner tsoscomb;
   for(TrajTrackAssociationCollection::const_iterator it = trajTrackCollectionHandle->begin(),
@@ -358,13 +402,14 @@ try{
 
 	numofhit++;
 	
-  
       //are we in the pixels with valid stuffs?
       TransientTrackingRecHit::ConstRecHitPointer testhit = itTraj->recHit();
+      
       //check if in PixelDetector
       uint testSubDetID = (testhit->geographicalId().subdetId());
       int type = testSubDetID;
       if(! (testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap) ) continue;
+            
       //check if belonging to badmodule list
       bool badModule=false;
       for(Parameters::iterator it = BadModuleList_.begin(); it != BadModuleList_.end(); ++it) {         
@@ -391,8 +436,25 @@ try{
          globalX = theGeomDet->surface().position().x();
          globalY = theGeomDet->surface().position().y();
          globalZ = theGeomDet->surface().position().z();
-	
 	 
+	 TrajectoryStateOnSurface tsos = tsoscomb( itTraj->forwardPredictedState(), itTraj->backwardPredictedState() );
+
+	 int nrows = theGeomDet->specificTopology().nrows();
+	 int ncols = theGeomDet->specificTopology().ncolumns();
+	 //std::pair<float,float> pitch = theGeomDet->specificTopology().pitch();
+	 //RectangularPixelTopology rectTopol = RectangularPixelTopology(nrows, ncols, pitch.first, pitch.second);
+	 //std::pair<float,float> pixel = rectTopol.pixel(tsos.localPosition());
+	 std::pair<float,float> pixel = theGeomDet->specificTopology().pixel(tsos.localPosition());
+	 bool isNotInMiddle = false;
+	 double edgeRejectionPercentage = 0.95;
+	 double xposfrac_ = TMath::Abs(pixel.first-double(nrows)/2.)  /(double(nrows)/2.);
+	 double yposfrac_ = TMath::Abs(pixel.second-double(ncols)/2.) /(double(ncols)/2.);
+	 if(xposfrac_ > edgeRejectionPercentage || pixel.first>nrows  || pixel.first<0)
+	   isNotInMiddle = true;
+	 if(yposfrac_ > edgeRejectionPercentage || pixel.second>ncols || pixel.second<0)
+	   isNotInMiddle = true;
+	
+ 
 	//********************* HERE IS THE CUT ON HITS !!
 	int numofhitCut=0;
         int numOfOtherValid=0;  
@@ -442,13 +504,82 @@ try{
       
        //*******************************
        // DO THE ANALYSIS ONLY IF GOOD OTHER HIT ARE FOUND !!!!!!!!!!!
-       
-//different tightness in the cuts 
-       if (numOfOtherValid<1) continue;
-//         if(! (hasValidInLowerPix && hasValidInUpperPix) ) continue;
+       if((*testhit).getType()==TrackingRecHit::missing){
+         xPosFracMis->Fill(xposfrac_,0);
+         yPosFracMis->Fill(yposfrac_,0);
+	 hitsPassingCutsMis->Fill(0);
+	 
+	 if(numOfOtherValid>=1){
+           xPosFracMis->Fill(xposfrac_,1);
+           yPosFracMis->Fill(yposfrac_,1);
+	   hitsPassingCutsMis->Fill(1);
+	 }
+	 
+	 if(hasValidInLowerPix && hasValidInUpperPix){
+           xPosFracMis->Fill(xposfrac_,2);
+           yPosFracMis->Fill(yposfrac_,2);
+	   hitsPassingCutsMis->Fill(2);
+	 }
+	 
+	 if(hasGoodTiming){
+           xPosFracMis->Fill(xposfrac_,3);
+           yPosFracMis->Fill(yposfrac_,3);
+	   hitsPassingCutsMis->Fill(3);
+	 }
+	 
+	 if(!isNotInMiddle){
+           xPosFracMis->Fill(xposfrac_,4);
+           yPosFracMis->Fill(yposfrac_,4);
+	   hitsPassingCutsMis->Fill(4);
+	 }
+       }
+       else if((*testhit).isValid()){
+         xPosFracVal->Fill(xposfrac_,0);
+         yPosFracVal->Fill(yposfrac_,0);
+	 hitsPassingCutsVal->Fill(0);
+	 
+	 if(numOfOtherValid>=1){
+           xPosFracVal->Fill(xposfrac_,1);
+           yPosFracVal->Fill(yposfrac_,1);
+	   hitsPassingCutsVal->Fill(1);
+	 }
+	 
+	 if(hasValidInLowerPix && hasValidInUpperPix){
+           xPosFracVal->Fill(xposfrac_,2);
+           yPosFracVal->Fill(yposfrac_,2);
+	   hitsPassingCutsVal->Fill(2);
+	 }
+	 
+	 if(hasGoodTiming){
+           xPosFracVal->Fill(xposfrac_,3);
+           yPosFracVal->Fill(yposfrac_,3);
+	   hitsPassingCutsVal->Fill(3);
+	 }
+	 
+	 if(!isNotInMiddle){
+           xPosFracVal->Fill(xposfrac_,4);
+           yPosFracVal->Fill(yposfrac_,4);
+	   hitsPassingCutsVal->Fill(4);
+	 }
+       }
+  
+  	//************************ HERE IS THE CUT *****************************
+        //different tightness in the cuts 
+        //if (numOfOtherValid<1) continue;
+         if(! (hasValidInLowerPix && hasValidInUpperPix) ) continue;
+        //can also use : isNotInMiddle && hasGoodTiming
 
-
-      
+        if((*testhit).getType()==TrackingRecHit::missing){
+          xPosFracMis->Fill(xposfrac_,5);
+          yPosFracMis->Fill(yposfrac_,5);
+	 hitsPassingCutsMis->Fill(5);
+	}
+	else if((*testhit).isValid()){
+          xPosFracVal->Fill(xposfrac_,5);
+          yPosFracVal->Fill(yposfrac_,5);
+	  hitsPassingCutsVal->Fill(5);
+	}
+	 
       //**********
       
       //THIS IS ONLY TO CHECK THE DEFINITION OF INACTIVE-FLAG!!!
@@ -552,9 +683,6 @@ try{
 	   }
       //**********
 
-      TrajectoryStateOnSurface tsos = tsoscomb( itTraj->forwardPredictedState(), itTraj->backwardPredictedState() );
-
-
       //**********************************
       //angular analysis of efficiency
       LocalTrajectoryParameters ltp = tsos.localParameters();
@@ -590,6 +718,12 @@ try{
         if ((*testhit).getType()== TrackingRecHit::missing)   missingVsBetaFPix->Fill( beta);
         }
 	
+	
+      bool hasClusterOnSameModule=false;
+      bool hasCluster=false;
+      int clusterSize;
+      double clusterCharge;
+      
       if ( (testSubDetID==kBPIX) )             
         {
       //**********************************
@@ -614,7 +748,7 @@ else checkoutValidityFlag->Fill(3);
       if ( (*testhit).getType()!=TrackingRecHit::inactive)
         {
 	double minDistance=999999;
-	bool sameModule=false;
+	double minDistanceOnSameModule=999999;
 	for (edmNew::DetSetVector<SiPixelCluster>::const_iterator DSViter = input.begin(); DSViter != input.end(); DSViter++)
 	  {
 	  unsigned int ClusterId = DSViter->id();
@@ -644,14 +778,16 @@ else checkoutValidityFlag->Fill(3);
 	    double distance;
 	    distance = sqrt( pow(deltaZ,2)+pow(deltaX,2)+pow(deltaY,2) );
 	    
-	    if (distance<minDistance) 
-	      {
-	      //check same module
-	      if (testhit->geographicalId().rawId()==theGeomDet->geographicalId().rawId()) sameModule=true;
-	      else sameModule=false;
-	      
+	    if (distance<minDistance)
 	      minDistance=distance;
-	      }
+
+	    if (distance<minDistanceOnSameModule && 
+	        testhit->geographicalId().rawId()==theGeomDet->geographicalId().rawId()){
+	           minDistanceOnSameModule=distance;
+		clusterCharge = clustIt->charge();
+		clusterSize = clustIt->size();
+	    }
+		   
 	    }//end-for first cluster loop	   
 	  }//end-for second cluster loop 
 
@@ -670,16 +806,24 @@ else checkoutValidityFlag->Fill(3);
 	  histoMethod2After->Fill(1);
 	  }
 	
-	if (sameModule) windowSearchSameModule->Fill(minDistance);
+	windowSearchSameModule->Fill(minDistanceOnSameModule);
 	windowSearch->Fill(minDistance); 
-	windowSearchBPix->Fill(minDistance); 
+	windowSearchBPix->Fill(minDistance);
+	
+	if(minDistance!=999999)
+	  hasCluster=true;
+	if(minDistanceOnSameModule!=999999)
+	  hasClusterOnSameModule=true;
+	   
 	}//end-if "work-on-valid-&-missing"    
       }//end-if method 2 for barrel
 
-      if ( (testSubDetID==kFPIX) )             
-        {
+
+
       //**********************************
       //window searching analysis FPix
+      
+      if ( (testSubDetID==kFPIX) ){
 
       DetId hitDetId = (testhit->geographicalId());
       PXFDetId hitPdetId = PXFDetId(hitDetId);
@@ -689,12 +833,12 @@ else checkoutValidityFlag->Fill(3);
       if ((*testhit).getType()==TrackingRecHit::missing) histoMethod2FPix->Fill(0);
       if ((*testhit).getType()==TrackingRecHit::valid)   histoMethod2FPix->Fill(1);
 
-      if ( (*testhit).getType()!=TrackingRecHit::inactive)
-        {
+      if ( (*testhit).getType()!=TrackingRecHit::inactive){
+      
 	double minDistance=999999;
+	double minDistanceOnSameModule=999999;
 	bool sameModule=false;
-	for (edmNew::DetSetVector<SiPixelCluster>::const_iterator DSViter = input.begin(); DSViter != input.end(); DSViter++)
-	  {
+	for (edmNew::DetSetVector<SiPixelCluster>::const_iterator DSViter = input.begin(); DSViter != input.end(); DSViter++) {
 	  unsigned int ClusterId = DSViter->id();
           DetId ClusterDetId(ClusterId);
 	  PXFDetId pdetId = PXFDetId(ClusterDetId);
@@ -708,8 +852,7 @@ else checkoutValidityFlag->Fill(3);
           edmNew::DetSet<SiPixelCluster>::const_iterator begin=DSViter->begin();
           edmNew::DetSet<SiPixelCluster>::const_iterator end  =DSViter->end();
           	  
-	  for(edmNew::DetSet<SiPixelCluster>::const_iterator clustIt=begin; clustIt!=end;++clustIt)
-            {
+	  for(edmNew::DetSet<SiPixelCluster>::const_iterator clustIt=begin; clustIt!=end;++clustIt) {
             const PixelGeomDetUnit* theGeomDet = dynamic_cast<const PixelGeomDetUnit*> (theTracker.idToDet(detIdObject) );
 	    const RectangularPixelTopology * topol = dynamic_cast<const RectangularPixelTopology*>(&(theGeomDet->specificTopology()));
 	    LocalPoint lpclust = topol->localPosition(MeasurementPoint((*clustIt).x(),(*clustIt).y()));
@@ -720,17 +863,21 @@ else checkoutValidityFlag->Fill(3);
 	    deltaZ= GPclust.z()- tsos.globalPosition().z();
 	    double distance;
 	    distance = sqrt( pow(deltaZ,2)+pow(deltaX,2)+pow(deltaY,2) );
-	    if (distance<minDistance) 
-	      {
-      	      //check same module
-	      if (testhit->geographicalId().rawId()==theGeomDet->geographicalId().rawId()) sameModule=true;
-	      else sameModule=false;
+	    
+	    if (distance<minDistanceOnSameModule &&
+	        testhit->geographicalId().rawId()==theGeomDet->geographicalId().rawId() ){
+		minDistanceOnSameModule=distance;
+		clusterCharge = clustIt->charge();
+		clusterSize = clustIt->size();
+	    }
 	      //??LocalError errClust = (*clustIt).localError().positionError();
               //??LocalError err=(*clustIt).localPositionError();
               //??LocalError leclust = topol->localError().positionError(MeasurementPoint((*clustIt).x(),(*clustIt).y()));
 
+	    if (distance<minDistance)
 	      minDistance=distance;
-	      }
+	      
+	      
 	    }//end-for first cluster loop	   
 	  }//end-for second cluster loop 
 
@@ -738,12 +885,36 @@ else checkoutValidityFlag->Fill(3);
 	if (minDistance>0.5)  histoMethod2After->Fill(0);
 	else                  histoMethod2After->Fill(1);
 	  
-	if (sameModule) windowSearchSameModule->Fill(minDistance);
+	windowSearchSameModule->Fill(minDistanceOnSameModule);
 	windowSearchFPix->Fill(minDistance); 
-	windowSearch->Fill(minDistance); 
+	windowSearch->Fill(minDistance);
+	
+	if(minDistance!=999999)
+	  hasCluster=true;
+	if(minDistanceOnSameModule!=999999)
+	  hasClusterOnSameModule=true;
+	  
 	}//end-if "work-on-valid-&-missing"    
       }//end-if method 2 for forward
-
+      
+      
+      //FOR BARREL && ENDCAP
+      if ((*testhit).getType()==TrackingRecHit::missing){
+        missingButClusterOnSameModule->Fill(hasClusterOnSameModule);
+        missingButCluster->Fill(hasCluster);
+	
+	if(hasClusterOnSameModule){
+	  chargeDistriMisRecovered->Fill(clusterCharge);
+	  numbPixInClusterMisRecovered->Fill(clusterSize);	  
+	}
+      }
+      else if((*testhit).isValid() && hasClusterOnSameModule){
+	  chargeDistriValid->Fill(clusterCharge);
+	  numbPixInClusterValid->Fill(clusterSize);
+      }
+      
+      
+      
       }//end-for trajMeasurements 
       
       //**********
@@ -791,9 +962,17 @@ PixelEfficiency::beginJob(const edm::EventSetup&)
  consistencyCheckTraj = new TH1F("consistencyCheckTraj","consistencyCheckTraj", 3, 0,3);
 
  windowSearch = new TH1F("windowSearch","windowSearch",500,0,0.50);
- windowSearchSameModule = new TH1F("windowSearchSameModule","windowSearchSameModule",500,0,0.50);
+ windowSearchSameModule = new TH1F("windowSearchSameModule","windowSearchSameModule",1000,0,10);
  windowSearchBPix = new TH1F("windowSearchBPix","windowSearchBPix",500,0,0.50);
  windowSearchFPix = new TH1F("windowSearchFPix","windowSearchFPix",500,0,0.50);
+ missingButClusterOnSameModule = new TH1F("missingButClusterOnSameModule","missingButClusterOnSameModule",2,0,2);
+ missingButCluster = new TH1F("missingButCluster","missingButCluster",2,0,2);
+ chargeDistriValid = new TH1F("chargeDistriValid","chargeDistriValid",1000,0,100000);
+ numbPixInClusterValid = new TH1F("numbPixInClusterValid","numbPixInClusterValid",50,0,50);
+ chargeDistriMisRecovered = new TH1F("chargeDistriMisRecovered","chargeDistriMisRecovered",1000,0,100000);
+ numbPixInClusterMisRecovered = new TH1F("numbPixInClusterMisRecovered","numbPixInClusterMisRecovered",50,0,50);
+ 
+ 
  validPerRun = new TH1F("validPerRun","validPerRun",200,0,200);
  invalidPerRun = new TH1F("invalidPerRun","invalidPerRun",200,0,200);
  inactivePerRun = new TH1F("inactivePerRun","inactivePerRun",200,0,200);
@@ -826,7 +1005,13 @@ PixelEfficiency::beginJob(const edm::EventSetup&)
  totalPerTrack= new TH1F ("totalPerTrack","totalPerTrack",20,0,20);
  inactivePerTrack= new TH1F ("inactivePerTrack","inactivePerTrack",101,0,101);
  missingPerTrack= new TH1F ("missingPerTrack","missingPerTrack",101,0,101);
-
+ 
+ hitsPassingCutsVal = new TH1F("hitsPassingCutsVal","hitsPassingCutsVal",6,0,6);
+ hitsPassingCutsMis = new TH1F("hitsPassingCutsMis","hitsPassingCutsMis",6,0,6);
+ xPosFracVal = new TH2F("xPosFracVal" ,"xPosFracVal" ,101,0,1.01,6,0,6);
+ xPosFracMis = new TH2F("xPosFracMis" ,"xPosFracMis" ,101,0,1.01,6,0,6);
+ yPosFracVal = new TH2F("yPosFracVal" ,"yPosFracVal" ,101,0,1.01,6,0,6);
+ yPosFracMis = new TH2F("yPosFracMis" ,"yPosFracMis" ,101,0,1.01,6,0,6);
 
  tree = new TTree("moduleAnalysis","moduleAnalysis");
  tree->Branch("id",&idTree,"id/I");
@@ -878,7 +1063,13 @@ PixelEfficiency::endJob() {
   windowSearchSameModule->Write();
   windowSearchBPix->Write();
   windowSearchFPix->Write();
-
+  missingButClusterOnSameModule->Write();
+  missingButCluster->Write();
+  chargeDistriValid->Write();
+  numbPixInClusterValid->Write();
+  chargeDistriMisRecovered->Write();
+  numbPixInClusterMisRecovered->Write();
+  
   validVsAlpha->Write();
   missingVsAlpha->Write();
   validVsBeta->Write();
@@ -911,6 +1102,14 @@ PixelEfficiency::endJob() {
   totalPerTrack->Write();
   inactivePerTrack->Write();
   missingPerTrack->Write();
+  
+  hitsPassingCutsVal->Write();
+  hitsPassingCutsMis->Write();
+  xPosFracVal->Write();
+  xPosFracMis->Write();
+  yPosFracVal->Write();
+  yPosFracMis->Write();
+  
 
 //test
 histoMethod2After->Write();
