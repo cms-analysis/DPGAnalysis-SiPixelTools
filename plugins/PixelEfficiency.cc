@@ -27,6 +27,7 @@
 #include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripMatchedRecHit2DCollection.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2DCollection.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHitCollection.h"
 #include "DataFormats/DetId/interface/DetId.h"
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
@@ -93,14 +94,14 @@ private:
   Parameters  BadModuleList_;
 
       // ----------member data ---------------------------
-  std::string fOutputFileName; 
-  edm::InputTag TkTag_ ;
+  std::string fOutputFileName;  
+  edm::InputTag TkTag_ ; 
+  std::string fOutputFileName0T;
+  edm::InputTag TkTag0T_ ;
 
   edm::InputTag trajectoryInput_;
   edm::InputTag pixelClusterInput_;
 
-  std::string fOutputFileName0T; 
-  edm::InputTag TkTag0T_ ;
 
   TH1F*  histo;
   TH1F*  histLayer1;
@@ -122,10 +123,22 @@ private:
   TH1F*  windowSearchFPix;
   TH1F*  missingButClusterOnSameModule;
   TH1F*  missingButCluster;
+ 
+ 
+  TH1F*  chargeDistri;
+  TH1F*  numbPixInCluster;
+  TH1F*  numbPixInClusterX;
+  TH1F*  numbPixInClusterY;
+  TH1F*  xposCluster;
+  TH1F*  yposCluster;
   TH1F*  chargeDistriValid;
   TH1F*  chargeDistriMisRecovered;
   TH1F*  numbPixInClusterValid;
   TH1F*  numbPixInClusterMisRecovered;
+  TH1F*  xposClusterValid;
+  TH1F*  yposClusterValid;
+  TH1F*  xposClusterMisRecovered;
+  TH1F*  yposClusterMisRecovered;
   
   TH1F*  validPerRun;
   TH1F*  invalidPerRun;
@@ -580,7 +593,26 @@ try{
 	  hitsPassingCutsVal->Fill(5);
 	}
 	 
-      //**********
+      //**********  TAKING CLUSTER FROM recHIT
+      edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster> testclust;
+      if((*testhit).isValid()){
+        const TrackingRecHit *persistenthit = testhit->hit();
+	if((persistenthit!=0) && (typeid(*persistenthit)==typeid(SiPixelRecHit))){
+	  const SiPixelRecHit* pixhit = dynamic_cast<const SiPixelRecHit*>(testhit->hit());
+	  testclust = (*pixhit).cluster();
+	}
+      }
+      
+      if(testclust.isNonnull()){
+        chargeDistri->Fill(testclust->charge());
+	numbPixInCluster->Fill(testclust->size());
+	numbPixInClusterX->Fill(testclust->sizeX());
+	numbPixInClusterY->Fill(testclust->sizeY());
+	xposCluster->Fill(testclust->x());
+	yposCluster->Fill(testclust->y());	
+      }
+      
+      
       
       //THIS IS ONLY TO CHECK THE DEFINITION OF INACTIVE-FLAG!!!
 	 if ( (*testhit).getType()==TrackingRecHit::inactive )  numInactiveHit++;
@@ -613,7 +645,7 @@ try{
 	 
       
       bool founded=0;
-             for (int it=0; it<goodModuleMap.size(); it++)
+             for (unsigned int it=0; it<goodModuleMap.size(); it++)
 	       {
 	       if (goodModuleMap[it][0]==moduleRawId)
 	         {
@@ -721,10 +753,12 @@ try{
 	
       bool hasClusterOnSameModule=false;
       bool hasCluster=false;
-      int clusterSize;
-      double clusterCharge;
+      int  clusterSize=-1;
+      double clusterCharge=-1;
+      double clusterXPos=-999;
+      double clusterYPos=-999;
       
-      if ( (testSubDetID==kBPIX) )             
+      if ( testSubDetID==int(kBPIX) )             
         {
       //**********************************
       //window searching analysis
@@ -760,7 +794,7 @@ else checkoutValidityFlag->Fill(3);
 	  unsigned int detidaux = DSViter->detId();
           DetId detIdObject( detidaux );  
           //you don't use this last line
-	  const GeomDetUnit * genericDet = geom->idToDetUnit( detIdObject );
+	  //const GeomDetUnit * genericDet = geom->idToDetUnit( detIdObject );
 		  
           edmNew::DetSet<SiPixelCluster>::const_iterator begin=DSViter->begin();
           edmNew::DetSet<SiPixelCluster>::const_iterator end  =DSViter->end();
@@ -786,6 +820,8 @@ else checkoutValidityFlag->Fill(3);
 	           minDistanceOnSameModule=distance;
 		clusterCharge = clustIt->charge();
 		clusterSize = clustIt->size();
+		clusterXPos = clustIt->x();
+		clusterYPos = clustIt->y();
 	    }
 		   
 	    }//end-for first cluster loop	   
@@ -823,7 +859,7 @@ else checkoutValidityFlag->Fill(3);
       //**********************************
       //window searching analysis FPix
       
-      if ( (testSubDetID==kFPIX) ){
+      if ( testSubDetID==int(kFPIX) ){
 
       DetId hitDetId = (testhit->geographicalId());
       PXFDetId hitPdetId = PXFDetId(hitDetId);
@@ -837,7 +873,6 @@ else checkoutValidityFlag->Fill(3);
       
 	double minDistance=999999;
 	double minDistanceOnSameModule=999999;
-	bool sameModule=false;
 	for (edmNew::DetSetVector<SiPixelCluster>::const_iterator DSViter = input.begin(); DSViter != input.end(); DSViter++) {
 	  unsigned int ClusterId = DSViter->id();
           DetId ClusterDetId(ClusterId);
@@ -847,7 +882,7 @@ else checkoutValidityFlag->Fill(3);
 	  if ( clusterDisk != hitDisk) continue;	  
 	  unsigned int detidaux = DSViter->detId();
           DetId detIdObject( detidaux );  
-          const GeomDetUnit * genericDet = geom->idToDetUnit( detIdObject );
+          //const GeomDetUnit * genericDet = geom->idToDetUnit( detIdObject );
 		  
           edmNew::DetSet<SiPixelCluster>::const_iterator begin=DSViter->begin();
           edmNew::DetSet<SiPixelCluster>::const_iterator end  =DSViter->end();
@@ -869,6 +904,8 @@ else checkoutValidityFlag->Fill(3);
 		minDistanceOnSameModule=distance;
 		clusterCharge = clustIt->charge();
 		clusterSize = clustIt->size();
+		clusterXPos = clustIt->x();
+		clusterYPos = clustIt->y();
 	    }
 	      //??LocalError errClust = (*clustIt).localError().positionError();
               //??LocalError err=(*clustIt).localPositionError();
@@ -905,12 +942,16 @@ else checkoutValidityFlag->Fill(3);
 	
 	if(hasClusterOnSameModule){
 	  chargeDistriMisRecovered->Fill(clusterCharge);
-	  numbPixInClusterMisRecovered->Fill(clusterSize);	  
+	  numbPixInClusterMisRecovered->Fill(clusterSize);
+	  xposClusterMisRecovered->Fill(clusterXPos);
+	  yposClusterMisRecovered->Fill(clusterYPos);
 	}
       }
       else if((*testhit).isValid() && hasClusterOnSameModule){
 	  chargeDistriValid->Fill(clusterCharge);
 	  numbPixInClusterValid->Fill(clusterSize);
+	  xposClusterValid->Fill(clusterXPos);
+	  yposClusterValid->Fill(clusterYPos);
       }
       
       
@@ -967,10 +1008,22 @@ PixelEfficiency::beginJob(const edm::EventSetup&)
  windowSearchFPix = new TH1F("windowSearchFPix","windowSearchFPix",500,0,0.50);
  missingButClusterOnSameModule = new TH1F("missingButClusterOnSameModule","missingButClusterOnSameModule",2,0,2);
  missingButCluster = new TH1F("missingButCluster","missingButCluster",2,0,2);
+ 
+ 
+ chargeDistri = new TH1F("chargeDistri","chargeDistri",200,0,100000);
+ numbPixInCluster = new TH1F("numbPixInCluster","numbPixInCluster",50,0,50);
+ numbPixInClusterX = new TH1F("numbPixInClusterX","numbPixInClusterX",30,0,30);
+ numbPixInClusterY = new TH1F("numbPixInClusterY","numbPixInClusterY",30,0,30);
+ xposCluster = new TH1F("xposCluster","xposCluster",200,-2,2);
+ yposCluster = new TH1F("yposCluster","yposCluster",500,-10,10);
  chargeDistriValid = new TH1F("chargeDistriValid","chargeDistriValid",1000,0,100000);
  numbPixInClusterValid = new TH1F("numbPixInClusterValid","numbPixInClusterValid",50,0,50);
  chargeDistriMisRecovered = new TH1F("chargeDistriMisRecovered","chargeDistriMisRecovered",1000,0,100000);
  numbPixInClusterMisRecovered = new TH1F("numbPixInClusterMisRecovered","numbPixInClusterMisRecovered",50,0,50);
+ xposClusterValid = new TH1F("xposClusterValid","xposClusterValid",200,-2,2);
+ yposClusterValid = new TH1F("yposClusterValid","yposClusterValid",500,-10,10);
+ xposClusterMisRecovered = new TH1F("xposClusterMisRecovered","xposClusterMisRecovered",200,-2,2);
+ yposClusterMisRecovered = new TH1F("yposClusterMisRecovered","yposClusterMisRecovered",500,-10,10);
  
  
  validPerRun = new TH1F("validPerRun","validPerRun",200,0,200);
@@ -1065,6 +1118,18 @@ PixelEfficiency::endJob() {
   windowSearchFPix->Write();
   missingButClusterOnSameModule->Write();
   missingButCluster->Write();
+  
+  chargeDistri->Write();
+  numbPixInCluster->Write();
+  numbPixInClusterX->Write();
+  numbPixInClusterY->Write();
+  xposCluster->Write();
+  yposCluster->Write();
+  xposClusterValid->Write();
+  yposClusterValid->Write();
+  xposClusterMisRecovered->Write();
+  yposClusterMisRecovered->Write();
+
   chargeDistriValid->Write();
   numbPixInClusterValid->Write();
   chargeDistriMisRecovered->Write();
@@ -1118,7 +1183,7 @@ histoMethod2AfterFPix->Write();
 histoMethod2FPix->Write();  
   
     isModuleBadTree=1;
-    for (int l=0; l<badModuleMap.size(); l++)
+    for (unsigned int l=0; l<badModuleMap.size(); l++)
       {
       idTree=(badModuleMap[l])[0];inactiveTree=(badModuleMap[l])[1]; missingTree=(badModuleMap[l])[2]; validTree=(badModuleMap[l])[3];
       barrelTree=(badModuleMap[l])[4] ;
@@ -1126,7 +1191,7 @@ histoMethod2FPix->Write();
       }
     isModuleBadTree=0;
     //validTree=-10;
-    for (int l=0; l<goodModuleMap.size(); l++)
+    for (unsigned int l=0; l<goodModuleMap.size(); l++)
       {
       idTree=(goodModuleMap[l])[0];inactiveTree=(goodModuleMap[l])[1]; missingTree=(goodModuleMap[l])[2]; validTree=(goodModuleMap[l])[3];
       barrelTree=(goodModuleMap[l])[4] ; ladderTree=(goodModuleMap[l])[5]; bladeTree=(goodModuleMap[l])[6];
