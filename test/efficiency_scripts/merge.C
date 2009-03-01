@@ -10,11 +10,25 @@
 #include <iostream>
 #include "TCanvas.h"
 
+
+//************** Quick function to merge easilly histos **************
+void mergeHisto(char* name,TH1F* histo, bool mergeOverflows = false){
+    TH1F*  temp=(TH1F*)gDirectory->Get(name);
+    
+    if(!mergeOverflows)
+      for (int bin=1; bin<=histo->GetNbinsX(); bin++)
+        histo->SetBinContent( bin, histo->GetBinContent(bin) + temp->GetBinContent(bin));
+
+    if(mergeOverflows)
+      for (int bin=0; bin<=histo->GetNbinsX()+1; bin++)
+        histo->SetBinContent( bin, histo->GetBinContent(bin) + temp->GetBinContent(bin));
+}
+
 void merge(){
 
   using namespace std;
   bool DEBUG=false;
-  int Nfiles=300;
+  int Nfiles=100;
 
   if(DEBUG) cout<<"********* CREATING MERGED HISTO/TTREE ************"<<endl;
 
@@ -56,11 +70,13 @@ void merge(){
   TH1F* missingVsLocalYMerged = new TH1F("missingVsLocalYMerged","missingVsLocalYMerged",100,-4.,4.);
 
   double maxwindowsearch = 0.5;
-  TH1F*  windowSearchMerged = new  TH1F("windowSearchMerged","windowSearchMerged",maxwindowsearch*1000,0,maxwindowsearch);
-  TH1F*  windowSearchSameModuleMerged = new  TH1F("windowSearchSameModuleMerged","windowSearchSameModuleMerged",maxwindowsearch*1000,0,maxwindowsearch);
-  TH1F*  windowSearchBPixMerged = new  TH1F("windowSearchBPixMerged","windowSearchBPixMerged",maxwindowsearch*1000,0,maxwindowsearch);
-  TH1F*  windowSearchFPixMerged = new  TH1F("windowSearchFPixMerged","windowSearchFPixMerged",maxwindowsearch*1000,0,maxwindowsearch);
-    
+  TH1F* windowSearchMerged = new  TH1F("windowSearchMerged","windowSearchMerged",maxwindowsearch*1000,0,maxwindowsearch);
+  TH1F* windowSearchSameModuleMerged = new TH1F("windowSearchSameModuleMerged","windowSearchSameModuleMerged",1000,0,10);
+  TH1F* windowSearchBPixMerged = new  TH1F("windowSearchBPixMerged","windowSearchBPixMerged",maxwindowsearch*1000,0,maxwindowsearch);
+  TH1F* windowSearchFPixMerged = new  TH1F("windowSearchFPixMerged","windowSearchFPixMerged",maxwindowsearch*1000,0,maxwindowsearch);
+  TH1F* missingButClusterOnSameModuleMerged = new TH1F("missingButClusterOnSameModuleMerged","missingButClusterOnSameModuleMerged",2,0,2);
+  TH1F* missingButClusterMerged = new TH1F("missingButClusterMerged","missingButClusterMerged",2,0,2);
+   
   TH1F* histoMethod2Merged = new TH1F("histoMethod2Merged", "histoMethod2Merged", 2, 0, 2);
   TH1F* histoMethod2AfterMerged = new TH1F("histoMethod2AfterMerged", "histoMethod2AfterMerged", 2, 0, 2);
   TH1F* histoMethod2FPixMerged = new TH1F("histoMethod2FPixMerged", "histoMethod2FPixMerged", 2, 0, 2);
@@ -96,7 +112,55 @@ void merge(){
   treeMerged->Branch("globalX",&globalX,"globalX/D");
   treeMerged->Branch("globalY",&globalY,"globalY/D");
   treeMerged->Branch("globalZ",&globalZ,"globalZ/D");
+  
+  
+  TH2F* xPosFracValMerged = new TH2F("xPosFracVal","xPosFracVal", 101,0,1.01, 6,0,6);
+  TH2F* xPosFracMisMerged = new TH2F("xPosFracMis","xPosFracMis", 101,0,1.01 ,6,0,6);
+  TH2F* yPosFracValMerged = new TH2F("yPosFracVal","yPosFracVal", 101,0,1.01 ,6,0,6);
+  TH2F* yPosFracMisMerged = new TH2F("yPosFracMis","yPosFracMis", 101,0,1.01 ,6,0,6);
+ 
+  TH1F* hitsPassingCutsValMerged = new TH1F("hitsPassingCutsValMerged","hitsPassingCutsValMerged",6,0,6);
+  TH1F* hitsPassingCutsMisMerged = new TH1F("hitsPassingCutsMisMerged","hitsPassingCutsMisMerged",6,0,6);
+  TH1F* hitsPassingCutsValBPixMerged = new TH1F("hitsPassingCutsValBPixMerged","hitsPassingCutsValBPixMerged",6,0,6);
+  TH1F* hitsPassingCutsMisBPixMerged = new TH1F("hitsPassingCutsMisBPixMerged","hitsPassingCutsMisBPixMerged",6,0,6);
+  TH1F* hitsPassingCutsValFPixMerged = new TH1F("hitsPassingCutsValFPixMerged","hitsPassingCutsValFPixMerged",6,0,6);
+  TH1F* hitsPassingCutsMisFPixMerged = new TH1F("hitsPassingCutsMisFPixMerged","hitsPassingCutsMisFPixMerged",6,0,6);
 
+  TH1F* effDistriLayer1 = new TH1F("effDistriLayer1","effDistriLayer1",101,0,1.01);
+  TH1F* effDistriLayer2 = new TH1F("effDistriLayer2","effDistriLayer2",101,0,1.01);
+  TH1F* effDistriLayer3 = new TH1F("effDistriLayer3","effDistriLayer3",101,0,1.01);
+  TH1F* effDistriFpixPlus = new TH1F("effDistriFpixPlus","effDistriFpixPlus",101,0,1.01);
+  TH1F* effDistriFpixMinus = new TH1F("effDistriFpixMinus","effDistriFpixMinus",101,0,1.01);
+  
+//cluster analysis histos
+  TH1F* chargeDistriPreCutsMerged = new TH1F("chargeDistriPreCutsMerged","chargeDistriPreCutsMerged",200,0,100000);
+  TH1F* numbPixInClusterPreCutsMerged = new TH1F("numbPixInClusterPreCutsMerged","numbPixInClusterPreCutsMerged",50,0,50);
+  TH1F* chargeDistriBPixPreCutsMerged = new TH1F("chargeDistriBPixPreCutsMerged","chargeDistriBPixPreCutsMerged",200,0,100000);
+  TH1F* numbPixInClusterBPixPreCutsMerged = new TH1F("numbPixInClusterBPixPreCutsMerged","numbPixInClusterBPixPreCutsMerged",50,0,50);
+  TH1F* chargeDistriFPixPlusPreCutsMerged = new TH1F("chargeDistriFPixPlusPreCutsMerged","chargeDistriFPixPlusPreCutsMerged",200,0,100000);
+  TH1F* numbPixInClusterFPixPlusPreCutsMerged = new TH1F("numbPixInClusterFPixPlusPreCutsMerged","numbPixInClusterFPixPlusPreCutsMerged",50,0,50);  
+  TH1F* chargeDistriFPixMinusPreCutsMerged = new TH1F("chargeDistriFPixMinusPreCutsMerged","chargeDistriFPixMinusPreCutsMerged",200,0,100000);
+  TH1F* numbPixInClusterFPixMinusPreCutsMerged = new TH1F("numbPixInClusterFPixMinusPreCutsMerged","numbPixInClusterFPixMinusPreCutsMerged",50,0,50);  
+
+  TH1F* chargeDistriMerged = new TH1F("chargeDistriMerged","chargeDistriMerged",200,0,100000);
+  TH1F* numbPixInClusterMerged = new TH1F("numbPixInClusterMerged","numbPixInClusterMerged",50,0,50);
+  TH1F* chargeDistriBPixMerged = new TH1F("chargeDistriBPixMerged","chargeDistriBPixMerged",200,0,100000);
+  TH1F* numbPixInClusterBPixMerged = new TH1F("numbPixInClusterBPixMerged","numbPixInClusterBPixMerged",50,0,50);
+  TH1F* chargeDistriFPixPlusMerged = new TH1F("chargeDistriFPixPlusMerged","chargeDistriFPixPlusMerged",200,0,100000);
+  TH1F* numbPixInClusterFPixPlusMerged = new TH1F("numbPixInClusterFPixPlusMerged","numbPixInClusterFPixPlusMerged",50,0,50);  
+  TH1F* chargeDistriFPixMinusMerged = new TH1F("chargeDistriFPixMinusMerged","chargeDistriFPixMinusMerged",200,0,100000);
+  TH1F* numbPixInClusterFPixMinusMerged = new TH1F("numbPixInClusterFPixMinusMerged","numbPixInClusterFPixMinusMerged",50,0,50);  
+  
+  TH1F* numbPixInClusterXMerged = new TH1F("numbPixInClusterXMerged","numbPixInClusterXMerged",30,0,30);
+  TH1F* numbPixInClusterYMerged = new TH1F("numbPixInClusterYMerged","numbPixInClusterYMerged",30,0,30);
+  TH1F* xposClusterMerged = new TH1F("xposClusterMerged","xposClusterMerged",200,-2,2);
+  TH1F* yposClusterMerged = new TH1F("yposClusterMerged","yposClusterMerged",500,-10,10);
+  TH1F* xposClusterValidMerged = new TH1F("xposClusterValidMerged","xposClusterValidMerged",200,-2,2);
+  TH1F* yposClusterValidMerged = new TH1F("yposClusterValidMerged","yposClusterValidMerged",500,-10,10);
+  TH1F* xposClusterMisRecoveredMerged = new TH1F("xposClusterMisRecoveredMerged","xposClusterMisRecoveredMerged",200,-2,2);
+  TH1F* yposClusterMisRecoveredMerged = new TH1F("yposClusterMisRecoveredMerged","yposClusterMisRecoveredMerged",500,-10,10);
+
+//
 
   char name[120];
   for(int i=1;i<=Nfiles;i++)
@@ -224,7 +288,6 @@ void merge(){
 	lastBin++;
 	}
       }
-//////////////////////////////////////////////delete delete delete
 
 
     if(DEBUG) cout<<"********* NOW MERGING ANALYSIS FOR TRAJECTORY ************"<<endl;
@@ -298,15 +361,119 @@ void merge(){
       delete h19;
       }
 
+    if(DEBUG) cout<<"********* NOW MERGING analysis for numerator and denominator ************"<<endl;
+   
+    TH2F * xPosFracVal= (TH2F*)gDirectory->Get("xPosFracVal");
+    for (int cutBin=1; cutBin<=6; cutBin++){
+      for (int bin=0; bin<=xPosFracValMerged->GetNbinsX()+1; bin++)
+        xPosFracValMerged->SetBinContent( bin,cutBin, xPosFracValMerged->GetBinContent(bin,cutBin) + xPosFracVal->GetBinContent(bin,cutBin));
+      }
 
-/*
- For all histogram types: nbins, xlow, xup
- bin = 0;       underflow bin
- bin = 1;       first bin with low-edge xlow INCLUDED
- bin = nbins;   last bin with upper-edge xup EXCLUDED
- bin = nbins+1; overflow bin
+    TH2F * xPosFracMis= (TH2F*)gDirectory->Get("xPosFracMis");
+    for (int cutBin=1; cutBin<=6; cutBin++){
+      for (int bin=0; bin<=xPosFracMisMerged->GetNbinsX()+1; bin++)
+        xPosFracMisMerged->SetBinContent( bin,cutBin, xPosFracMisMerged->GetBinContent(bin,cutBin) + xPosFracMis->GetBinContent(bin,cutBin));
+      }
+
+    TH2F * yPosFracVal= (TH2F*)gDirectory->Get("yPosFracVal");
+    for (int cutBin=1; cutBin<=6; cutBin++){    
+      for (int bin=0; bin<=yPosFracValMerged->GetNbinsX()+1; bin++)
+        yPosFracValMerged->SetBinContent( bin,cutBin, yPosFracValMerged->GetBinContent(bin,cutBin) + yPosFracVal->GetBinContent(bin,cutBin));
+      }
+
+    TH2F * yPosFracMis= (TH2F*)gDirectory->Get("yPosFracMis");
+    for (int cutBin=1; cutBin<=6; cutBin++){
+      for (int bin=0; bin<=yPosFracMisMerged->GetNbinsX()+1; bin++)
+        yPosFracMisMerged->SetBinContent( bin,cutBin, yPosFracMisMerged->GetBinContent(bin,cutBin) + yPosFracMis->GetBinContent(bin,cutBin));
+      }
+
+
+    TH1F*  hitsPassingCutsValBPix=(TH1F*)gDirectory->Get("hitsPassingCutsValBPix");
+    for (int bin=1; bin<=hitsPassingCutsValBPixMerged->GetNbinsX(); bin++)
+      hitsPassingCutsValBPixMerged->SetBinContent( bin, hitsPassingCutsValBPix->GetBinContent(bin) + hitsPassingCutsValBPixMerged->GetBinContent(bin));
+
+    TH1F*  hitsPassingCutsMisBPix=(TH1F*)gDirectory->Get("hitsPassingCutsMisBPix");
+    for (int bin=1; bin<=hitsPassingCutsMisBPixMerged->GetNbinsX(); bin++)
+      hitsPassingCutsMisBPixMerged->SetBinContent( bin, hitsPassingCutsMisBPix->GetBinContent(bin) + hitsPassingCutsMisBPixMerged->GetBinContent(bin));
+    
+    TH1F*  hitsPassingCutsValFPix=(TH1F*)gDirectory->Get("hitsPassingCutsValFPix");
+    for (int bin=1; bin<=hitsPassingCutsValFPixMerged->GetNbinsX(); bin++)
+      hitsPassingCutsValFPixMerged->SetBinContent( bin, hitsPassingCutsValFPix->GetBinContent(bin) + hitsPassingCutsValFPixMerged->GetBinContent(bin));
+
+    TH1F*  hitsPassingCutsMisFPix=(TH1F*)gDirectory->Get("hitsPassingCutsMisFPix");
+    for (int bin=1; bin<=hitsPassingCutsMisFPixMerged->GetNbinsX(); bin++)
+      hitsPassingCutsMisFPixMerged->SetBinContent( bin, hitsPassingCutsMisFPix->GetBinContent(bin) + hitsPassingCutsMisFPixMerged->GetBinContent(bin));
+    
+    for (int bin=1; bin<=hitsPassingCutsValMerged->GetNbinsX(); bin++)
+      hitsPassingCutsValMerged->SetBinContent( bin, hitsPassingCutsValBPix->GetBinContent(bin) + hitsPassingCutsValFPix->GetBinContent(bin) + hitsPassingCutsValMerged->GetBinContent(bin));
+
+    for (int bin=1; bin<=hitsPassingCutsMisMerged->GetNbinsX(); bin++)
+      hitsPassingCutsMisMerged->SetBinContent( bin, hitsPassingCutsMisBPix->GetBinContent(bin) + hitsPassingCutsMisFPix->GetBinContent(bin) + hitsPassingCutsMisMerged->GetBinContent(bin));
+    
+    
+    //***TO COMMENT IF U WANT TO RUN
+    /*TH1F*  hitsPassingCutsVal=(TH1F*)gDirectory->Get("hitsPassingCutsVal");
+    for (int bin=1; bin<=hitsPassingCutsValMerged->GetNbinsX(); bin++)
+      hitsPassingCutsValMerged->SetBinContent( bin, hitsPassingCutsValBPix->GetBinContent(bin) + hitsPassingCutsValFPix->GetBinContent(bin) + hitsPassingCutsValMerged->GetBinContent(bin));
+
+    TH1F*  hitsPassingCutsMis=(TH1F*)gDirectory->Get("hitsPassingCutsMis");
+    for (int bin=1; bin<=hitsPassingCutsMisMerged->GetNbinsX(); bin++)
+      hitsPassingCutsMisMerged->SetBinContent( bin, hitsPassingCutsMisBPix->GetBinContent(bin) + hitsPassingCutsMisFPix->GetBinContent(bin) + hitsPassingCutsMisMerged->GetBinContent(bin));
 */
 
+    if(DEBUG) cout<<"********* NOW MERGING cluster analysis ************"<<endl;
+    
+    mergeHisto("chargeDistriPreCuts",chargeDistriPreCutsMerged);
+    mergeHisto("numbPixInClusterPreCuts",numbPixInClusterPreCutsMerged);
+    mergeHisto("chargeDistriBPixPreCuts",chargeDistriBPixPreCutsMerged);
+    mergeHisto("numbPixInClusterBPixPreCuts",numbPixInClusterBPixPreCutsMerged);
+    mergeHisto("chargeDistriFPixPlusPreCuts",chargeDistriFPixPlusPreCutsMerged);
+    mergeHisto("numbPixInClusterFPixPlusPreCuts",numbPixInClusterFPixPlusPreCutsMerged);
+    mergeHisto("chargeDistriFPixMinusPreCuts",chargeDistriFPixMinusPreCutsMerged);
+    mergeHisto("numbPixInClusterFPixMinusPreCuts",numbPixInClusterFPixMinusPreCutsMerged);
+    
+    mergeHisto("chargeDistri",chargeDistriMerged);
+    mergeHisto("numbPixInCluster",numbPixInClusterMerged);
+    mergeHisto("chargeDistriBPix",chargeDistriBPixMerged);
+    mergeHisto("numbPixInClusterBPix",numbPixInClusterBPixMerged);
+    mergeHisto("chargeDistriFPixPlus",chargeDistriFPixPlusMerged);
+    mergeHisto("numbPixInClusterFPixPlus",numbPixInClusterFPixPlusMerged);
+    mergeHisto("chargeDistriFPixMinus",chargeDistriFPixMinusMerged);
+    mergeHisto("numbPixInClusterFPixMinus",numbPixInClusterFPixMinusMerged);
+    
+    TH1F* numbPixInClusterX =(TH1F*)gDirectory->Get("numbPixInClusterX");
+    for (int bin=1; bin<=numbPixInClusterXMerged->GetNbinsX(); bin++)
+      numbPixInClusterXMerged->SetBinContent( bin, numbPixInClusterX->GetBinContent(bin) + numbPixInClusterXMerged->GetBinContent(bin));
+    
+    TH1F* numbPixInClusterY =(TH1F*)gDirectory->Get("numbPixInClusterY");
+    for (int bin=1; bin<=numbPixInClusterYMerged->GetNbinsX(); bin++)
+      numbPixInClusterYMerged->SetBinContent( bin, numbPixInClusterY->GetBinContent(bin) + numbPixInClusterYMerged->GetBinContent(bin));
+    
+    /*TH1F* xposCluster =(TH1F*)gDirectory->Get("xposCluster");
+    for (int bin=1; bin<=xposClusterMerged->GetNbinsX(); bin++)
+      xposClusterMerged->SetBinContent( bin, xposCluster->GetBinContent(bin) + xposClusterMerged->GetBinContent(bin));
+    
+    TH1F*  yposCluster=(TH1F*)gDirectory->Get("yposCluster");
+    for (int bin=1; bin<=yposClusterMerged->GetNbinsX(); bin++)
+      yposClusterMerged->SetBinContent( bin, yposCluster->GetBinContent(bin) + yposClusterMerged->GetBinContent(bin));
+    */
+    TH1F* xposClusterValid =(TH1F*)gDirectory->Get("xposClusterValid");
+    for (int bin=1; bin<=xposClusterValidMerged->GetNbinsX(); bin++)
+      xposClusterValidMerged->SetBinContent( bin, xposClusterValid->GetBinContent(bin) + xposClusterValidMerged->GetBinContent(bin));
+    
+    TH1F* yposClusterValid =(TH1F*)gDirectory->Get("yposClusterValid");
+    for (int bin=1; bin<=yposClusterValidMerged->GetNbinsX(); bin++)
+      yposClusterValidMerged->SetBinContent( bin, yposClusterValid->GetBinContent(bin) + yposClusterValidMerged->GetBinContent(bin));
+    
+    TH1F* xposClusterMisRecovered =(TH1F*)gDirectory->Get("xposClusterMisRecovered");
+    for (int bin=1; bin<=xposClusterMisRecoveredMerged->GetNbinsX(); bin++)
+      xposClusterMisRecoveredMerged->SetBinContent( bin, xposClusterMisRecovered->GetBinContent(bin) + xposClusterMisRecoveredMerged->GetBinContent(bin));
+    
+    TH1F*  yposClusterMisRecovered=(TH1F*)gDirectory->Get("yposClusterMisRecovered");
+    for (int bin=1; bin<=yposClusterMisRecoveredMerged->GetNbinsX(); bin++)
+      yposClusterMisRecoveredMerged->SetBinContent( bin, yposClusterMisRecovered->GetBinContent(bin) + yposClusterMisRecoveredMerged->GetBinContent(bin));
+
+ 
 
     if(DEBUG) cout<<"********* NOW MERGING WINDOW SEARCH ************"<<endl;
 
@@ -327,6 +494,13 @@ void merge(){
     for (int bin=1; bin<=windowSearchFPixMerged->GetNbinsX()+1; bin++)
       windowSearchFPixMerged->SetBinContent( bin, windowSearchFPixMerged->GetBinContent(bin) + windowSearchFPix->GetBinContent(bin));
     
+    TH1F *missingButClusterOnSameModule = (TH1F*)gDirectory->Get( "missingButClusterOnSameModule" );
+    missingButClusterOnSameModuleMerged->Fill(0.,missingButClusterOnSameModule->GetBinContent(1));
+    missingButClusterOnSameModuleMerged->Fill(1.,missingButClusterOnSameModule->GetBinContent(2));
+    
+    TH1F *missingButCluster = (TH1F*)gDirectory->Get( "missingButCluster" );
+    missingButClusterMerged->Fill(0.,missingButCluster->GetBinContent(1));
+    missingButClusterMerged->Fill(1.,missingButCluster->GetBinContent(2));
 //
     
     if(DEBUG) cout<<"********* ALL HISTO WERE SUCCESSFULLY MERGED ************"<<endl;
@@ -491,57 +665,54 @@ void merge(){
   
   
   
-  
-  
-  
   TH1F* histSubdetectors = new TH1F("histSubdetectors", "histSubdetectors", 5, 0, 5);
   TH1F* histSummary = new TH1F("histSummary", "histSummary", 3, 0, 3);
   
 
   a=histLayer1Merged->GetBinContent(3); b=histLayer1Merged->GetBinContent(2);
-  histSubdetectors->SetBinContent( 1, a/(a+b) );
+  if((a+b)!=0) histSubdetectors->SetBinContent( 1, a/(a+b) );
   error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
   histSubdetectors->SetBinError(1,error);
   histSubdetectors->GetXaxis()->SetBinLabel(1," BPix Layer 1");
 
   a=histLayer2Merged->GetBinContent(3); b=histLayer2Merged->GetBinContent(2);
-  histSubdetectors->SetBinContent( 2, a/(a+b) );
+  if((a+b)!=0) histSubdetectors->SetBinContent( 2, a/(a+b) );
   error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
   histSubdetectors->SetBinError(2,error);
   histSubdetectors->GetXaxis()->SetBinLabel(2," BPix Layer 2");
   
   a=histLayer3Merged->GetBinContent(3); b=histLayer3Merged->GetBinContent(2);
-  histSubdetectors->SetBinContent( 3, a/(a+b) );
+  if((a+b)!=0) histSubdetectors->SetBinContent( 3, a/(a+b) );
   error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
   histSubdetectors->SetBinError(3,error);
   histSubdetectors->GetXaxis()->SetBinLabel(3," BPix Layer 3");
   
   a=histEndcapPlusMerged->GetBinContent(3); b=histEndcapPlusMerged->GetBinContent(2);
-  histSubdetectors->SetBinContent( 4, a/(a+b) );
+  if((a+b)!=0) histSubdetectors->SetBinContent( 4, a/(a+b) );
   error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
   histSubdetectors->SetBinError(4,error);
   histSubdetectors->GetXaxis()->SetBinLabel(4," FPix Plus");
   
   a=histEndcapMinusMerged->GetBinContent(3); b=histEndcapMinusMerged->GetBinContent(2);
-  histSubdetectors->SetBinContent( 5, a/(a+b) );
+  if((a+b)!=0) histSubdetectors->SetBinContent( 5, a/(a+b) );
   error=0; if((a+b)!=0) error=sqrt( ((a)/(a+b))*(1-((a)/(a+b)))/(a+b) );
   histSubdetectors->SetBinError(5,error);
   histSubdetectors->GetXaxis()->SetBinLabel(5," FPix Minus");
      
   a=histBarrelMerged->GetBinContent(3); b=histBarrelMerged->GetBinContent(2);
-  histSummary->SetBinContent( 1, a/(a+b) );
+  if((a+b)!=0) histSummary->SetBinContent( 1, a/(a+b) );
   error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
   histSummary->SetBinError(1,error);
   histSummary->GetXaxis()->SetBinLabel(1,"BPix");
 
   a=histEndcapMerged->GetBinContent(3); b=histEndcapMerged->GetBinContent(2);
-  histSummary->SetBinContent( 2, a/(a+b) );
+  if((a+b)!=0) histSummary->SetBinContent( 2, a/(a+b) );
   error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
   histSummary->SetBinError(2,error);
   histSummary->GetXaxis()->SetBinLabel(2,"FPix");
   
   a=histoMerged->GetBinContent(3); b=histoMerged->GetBinContent(2);
-  histSummary->SetBinContent( 3, a/(a+b) );
+  if((a+b)!=0) histSummary->SetBinContent( 3, a/(a+b) );
   error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
   histSummary->SetBinError(3,error);
   histSummary->GetXaxis()->SetBinLabel(3,"total");
@@ -620,6 +791,8 @@ void merge(){
 
   for(int n=0;n<entries;n++){
     treeMerged->GetEntry(n);
+    if (missing==0 && valid==0)
+    std::cout<<"dei, tiraghe via sto mona..."<< id <<std::endl;
     if (( valid+missing)!=0)
       {
       double setbin = (double)valid/(double)(valid+missing);
@@ -704,9 +877,9 @@ void merge(){
 
     //sameModule SCURVE ***********
     totalHit=0.; validHit=0.;
-    TH1F* scurveSameModule = new TH1F("scurveSameModule", "scurveSameModule", windowSearchMerged->GetNbinsX(), 0, windowSearchMerged->GetXaxis()->GetBinUpEdge(windowSearchMerged->GetNbinsX()));
-    for (int bin=1;bin<=windowSearchMerged->GetNbinsX()+1; bin++) //201 includes overflow=definitevely missing
-      totalHit+=windowSearchMerged->GetBinContent(bin);
+    TH1F* scurveSameModule = new TH1F("scurveSameModule", "scurveSameModule", windowSearchSameModuleMerged->GetNbinsX(), 0, windowSearchSameModuleMerged->GetXaxis()->GetBinUpEdge(windowSearchSameModuleMerged->GetNbinsX()));
+    for (int bin=1;bin<=windowSearchSameModuleMerged->GetNbinsX()+1; bin++) //201 includes overflow=definitevely missing
+      totalHit+=windowSearchSameModuleMerged->GetBinContent(bin);
    
     for (int bin=1; bin<=scurveSameModule->GetNbinsX(); bin++){
       validHit+=windowSearchSameModuleMerged->GetBinContent(bin);
@@ -775,8 +948,15 @@ void merge(){
    //****************** Barrel Maps ****************
   
   TH2F* layer1 =  new TH2F("layer1","layer1",8,1,9 ,20,1,21);
+  TH2F* test =  new TH2F("test","test",8,1,9 ,20,1,21);
+  TH2F* layer1valid =  new TH2F("layer1valid","layer1valid",8,1,9 ,20,1,21);
+  TH2F* layer1missing =  new TH2F("layer1missing","layer1missing",8,1,9 ,20,1,21);
   TH2F* layer2 =  new TH2F("layer2","layer2",8,1,9 ,32,1,33);
+  TH2F* layer2valid =  new TH2F("layer2valid","layer2valid",8,1,9 ,32,1,33);
+  TH2F* layer2missing =  new TH2F("layer2missing","layer2missing",8,1,9 ,32,1,33);
   TH2F* layer3 =  new TH2F("layer3","layer3",8,1,9 ,44,1,45);
+  TH2F* layer3valid =  new TH2F("layer3valid","layer3valid",8,1,9 ,44,1,45);
+  TH2F* layer3missing =  new TH2F("layer3missing","layer3missing",8,1,9 ,44,1,45);
 
   layer1->GetXaxis()->SetTitle("module");
   layer1->GetYaxis()->SetTitle("ladder");
@@ -784,64 +964,54 @@ void merge(){
   layer2->GetYaxis()->SetTitle("ladder");
   layer3->GetXaxis()->SetTitle("module");
   layer3->GetYaxis()->SetTitle("ladder");
+  layer1valid->GetXaxis()->SetTitle("module");
+  layer1valid->GetYaxis()->SetTitle("ladder");
+  layer2valid->GetXaxis()->SetTitle("module");
+  layer2valid->GetYaxis()->SetTitle("ladder");
+  layer3valid->GetXaxis()->SetTitle("module");
+  layer3valid->GetYaxis()->SetTitle("ladder");
+  layer1missing->GetXaxis()->SetTitle("module");
+  layer1missing->GetYaxis()->SetTitle("ladder");
+  layer2missing->GetXaxis()->SetTitle("module");
+  layer2missing->GetYaxis()->SetTitle("ladder");
+  layer3missing->GetXaxis()->SetTitle("module");
+  layer3missing->GetYaxis()->SetTitle("ladder");
     
-  vector< vector<double> > tempTreeLayer1;
   entries = treeMerged->GetEntries();
   for(int n=0;n<entries;n++){
     treeMerged->GetEntry(n);
-    if (isModuleBad==0    &&
-        isBarrelModule==1 &&
-	id<302080000       ) 
-      {
-      vector<double> aux;
-      aux.push_back(ladder);aux.push_back(moduleInLadder);
-      if ((((double)valid)+((double)missing))!=0.) aux.push_back( ((double)valid)/(((double)valid)+((double)missing)) );
-      else {aux.push_back(-1.);std::cout<<"e' successo"<<std::endl;}
-      tempTreeLayer1.push_back( aux );
-      }
+    if (isModuleBad!=0 || isBarrelModule!=1) continue;
+    
+    if(id<302080000){
+      layer1valid->Fill(moduleInLadder,ladder,valid);
+      layer1missing->Fill(moduleInLadder,ladder,missing);
+      if( (valid+missing)!=0 ){
+        layer1->Fill(moduleInLadder,ladder,double(valid)/double(valid+missing));
+	if (double(valid)/double(valid+missing)<0.2)
+          std::cout<<"cms.PSet(errortype = cms.string('whole'),detid = cms.uint32("<<id<<")),"<<std::endl;
+	}
     }
-
-  vector< vector<double> > tempTreeLayer2;
-  for(int n=0;n<entries;n++){
-    treeMerged->GetEntry(n);
-    if (isModuleBad==0    &&
-        isBarrelModule==1 &&
-	id>302080000 && id<302160000 ) 
-      {
-      vector<double> aux;
-      aux.push_back(ladder);aux.push_back(moduleInLadder);
-      if ((((double)valid)+((double)missing))!=0.) aux.push_back( ((double)valid)/(((double)valid)+((double)missing)) );
-      else {aux.push_back(-1.);std::cout<<"e' successo"<<std::endl;}
-      tempTreeLayer2.push_back( aux );
-      }
+    if(id>302080000 && id<302160000){
+      layer2valid->Fill(moduleInLadder,ladder,valid);
+      layer2missing->Fill(moduleInLadder,ladder,missing);
+      if( (valid+missing)!=0 ){
+        layer2->Fill(moduleInLadder,ladder,double(valid)/double(valid+missing));
+	if (double(valid)/double(valid+missing)<0.2)
+          std::cout<<"cms.PSet(errortype = cms.string('whole'),detid = cms.uint32("<<id<<")),"<<std::endl;
+	}
     }
-  vector< vector<double> > tempTreeLayer3;
-  for(int n=0;n<entries;n++){
-    treeMerged->GetEntry(n);
-    if (isModuleBad==0    &&
-        isBarrelModule==1 &&
-	id>302160000 && id<310000000 ) //test sul layer1
-      {
-      vector<double> aux;
-      aux.push_back(ladder);aux.push_back(moduleInLadder);
-      if ((((double)valid)+((double)missing))!=0.) aux.push_back( ((double)valid)/(((double)valid)+((double)missing)) );
-      else {aux.push_back(-1.);std::cout<<"e' successo"<<std::endl;}
-      tempTreeLayer3.push_back( aux );
-      }
+    if(id>302160000 && id<310000000){
+      layer3valid->Fill(moduleInLadder,ladder,valid);
+      layer3missing->Fill(moduleInLadder,ladder,missing);
+      if( (valid+missing)!=0 ){
+        layer3->Fill(moduleInLadder,ladder,double(valid)/double(valid+missing));
+	if (double(valid)/double(valid+missing)<0.2)
+          std::cout<<"cms.PSet(errortype = cms.string('whole'),detid = cms.uint32("<<id<<")),"<<std::endl;
+	}
     }
-
-  for (int iter=0; iter<tempTreeLayer1.size(); iter++)
-    {
-    layer1->Fill(tempTreeLayer1[iter][1],tempTreeLayer1[iter][0],tempTreeLayer1[iter][2]);
-    }
-  for (int iter=0; iter<tempTreeLayer2.size(); iter++)
-    {
-    layer2->Fill(tempTreeLayer2[iter][1],tempTreeLayer2[iter][0],tempTreeLayer2[iter][2]);
-    }
-  for (int iter=0; iter<tempTreeLayer3.size(); iter++)
-    {
-    layer3->Fill(tempTreeLayer3[iter][1],tempTreeLayer3[iter][0],tempTreeLayer3[iter][2]);
-    }
+  }
+  
+  
 /*
 //force holes from dead modules (badModuleList) for "nice show"
     layer2->Fill(1,22,-0.5);
@@ -852,62 +1022,90 @@ void merge(){
     layer3->Fill(2,8,-0.5);
 */
   
-if (DEBUG)
-  {
-  std::cout<<"Layer1"<<std::endl;         
-  for (int ladderIter=1; ladderIter<=32; ladderIter++)
-    {
-    int moduleIter=1;
-    for (int dim=0;dim<tempTreeLayer1.size();dim++)
-      {
-      if (tempTreeLayer1[dim][0]==ladderIter)
-        {
-	moduleIter++;
-        }
-      }
-    std::cout<<"we have "<<moduleIter-1<<" module for ladder"<<ladderIter<<std::endl;
-    }
-
-  std::cout<<"Layer2"<<std::endl;         
-  for (int ladderIter=1; ladderIter<=32; ladderIter++)
-    {
-    int moduleIter=1;
-    for (int dim=0;dim<tempTreeLayer2.size();dim++)
-      {
-      if (tempTreeLayer2[dim][0]==ladderIter)
-        {
-	moduleIter++;
-        }
-      }
-    std::cout<<"we have "<<moduleIter-1<<" module for ladder"<<ladderIter<<std::endl;
-    }
-
-  std::cout<<"Layer3"<<std::endl;         
-  for (int ladderIter=1; ladderIter<=44; ladderIter++)
-    {
-    int moduleIter=1;
-    for (int dim=0;dim<tempTreeLayer3.size();dim++)
-      {
-      if (tempTreeLayer3[dim][0]==ladderIter)
-        {
-	moduleIter++;
-        }
-      }
-    std::cout<<"we have "<<moduleIter-1<<" module for ladder"<<ladderIter<<std::endl;
-    }
-    
-  }//end if debug module entries
    //****************** Disk Maps ****************
 
     
     //****************** END   OF 2D MAPS FOR MODULE ANALYSIS ****************    
-
+  
+  
+  
+  for(int n=0;n<entries;n++){
+    treeMerged->GetEntry(n);
+    double eff = 0;
+    if(id<302080000){
+      if((valid+missing)!=0)
+        effDistriLayer1->Fill(double(valid)/double(valid+missing));
+    }
+    if(id>302080000 && id<302160000){
+      if( (valid+missing)!=0 )
+        effDistriLayer2->Fill(double(valid)/double(valid+missing));
+    }
+    if(id>302160000 && id<310000000){
+      if( (valid+missing)!=0 )
+        effDistriLayer3->Fill(double(valid)/double(valid+missing));
+    }
+    if(id>340000000 && globalZ>0){
+      if( (valid+missing)!=0 )
+        effDistriFpixPlus->Fill(double(valid)/double(valid+missing));
+    }
+    if(id>340000000 && globalZ<0){
+      if( (valid+missing)!=0 )
+        effDistriFpixMinus->Fill(double(valid)/double(valid+missing));
+    }
+  }
+  
+  
+  
   TF1 *runfit = new TF1("runfit","[0]", 0, efficiencyPerRun->GetNbinsX());
   runfit->SetParName(0,"mean_eff");
   runfit->SetParameter(0, 1);
   efficiencyPerRun->Fit("runfit");
 
+  TH1F* cutsEfficiencyValid = new TH1F("cutsEfficiencyValid","cutsEfficiencyValid",5,0,5);
+  TH1F* cutsEfficiencyMissing = new TH1F("cutsEfficiencyMissing","cutsEfficiencyMissing",5,0,5);
+  TH1F* cutsEfficiencyValidBPix = new TH1F("cutsEfficiencyValidBPix","cutsEfficiencyValidBPix",5,0,5);
+  TH1F* cutsEfficiencyMissingBPix = new TH1F("cutsEfficiencyMissingBPix","cutsEfficiencyMissingBPix",5,0,5);
+  TH1F* cutsEfficiencyValidFPix = new TH1F("cutsEfficiencyValidFPix","cutsEfficiencyValidFPix",5,0,5);
+  TH1F* cutsEfficiencyMissingFPix = new TH1F("cutsEfficiencyMissingFPix","cutsEfficiencyMissingFPix",5,0,5);
+  for(int i=1;i<6;i++){
+    cutsEfficiencyValid->SetBinContent(i,double(hitsPassingCutsValMerged->GetBinContent(i+1))/double(hitsPassingCutsValMerged->GetBinContent(1)));
+    cutsEfficiencyMissing->SetBinContent(i,double(hitsPassingCutsMisMerged->GetBinContent(i+1))/double(hitsPassingCutsMisMerged->GetBinContent(1)));
+    cutsEfficiencyValidBPix->SetBinContent(i,double(hitsPassingCutsValBPixMerged->GetBinContent(i+1))/double(hitsPassingCutsValBPixMerged->GetBinContent(1)));
+    cutsEfficiencyMissingBPix->SetBinContent(i,double(hitsPassingCutsMisBPixMerged->GetBinContent(i+1))/double(hitsPassingCutsMisBPixMerged->GetBinContent(1)));
+    cutsEfficiencyValidFPix->SetBinContent(i,double(hitsPassingCutsValFPixMerged->GetBinContent(i+1))/double(hitsPassingCutsValFPixMerged->GetBinContent(1)));
+    cutsEfficiencyMissingFPix->SetBinContent(i,double(hitsPassingCutsMisFPixMerged->GetBinContent(i+1))/double(hitsPassingCutsMisFPixMerged->GetBinContent(1)));
+  }
 
+
+  TH1F* cutsEfficiency = new TH1F("cutsEfficiency","cutsEfficiency",6,0,6);
+  TH1F* cutsEfficiencyBPix = new TH1F("cutsEfficiencyBPix","cutsEfficiencyBPix",6,0,6);
+  TH1F* cutsEfficiencyFPix = new TH1F("cutsEfficiencyFPix","cutsEfficiencyFPix",6,0,6);
+  for(int i=1;i<7;i++){
+    cutsEfficiency->SetBinContent(i,double(hitsPassingCutsValMerged->GetBinContent(i))/double(hitsPassingCutsValMerged->GetBinContent(i)+hitsPassingCutsMisMerged->GetBinContent(i)));
+    cutsEfficiencyBPix->SetBinContent(i,double(hitsPassingCutsValBPixMerged->GetBinContent(i))/double(hitsPassingCutsValBPixMerged->GetBinContent(i)+hitsPassingCutsMisBPixMerged->GetBinContent(i)));
+    cutsEfficiencyFPix->SetBinContent(i,double(hitsPassingCutsValFPixMerged->GetBinContent(i))/double(hitsPassingCutsValFPixMerged->GetBinContent(i)+hitsPassingCutsMisFPixMerged->GetBinContent(i)));
+  }
+  cutsEfficiency->GetXaxis()->SetBinLabel(1,"No Cuts");
+  cutsEfficiency->GetXaxis()->SetBinLabel(2,"Loose cut");
+  cutsEfficiency->GetXaxis()->SetBinLabel(3,"Telescope");
+  cutsEfficiency->GetXaxis()->SetBinLabel(4,"Edge cut");
+  cutsEfficiency->GetXaxis()->SetBinLabel(5,"Muon Timing");
+  cutsEfficiency->GetXaxis()->SetBinLabel(6,"Analysis cut");
+  cutsEfficiency->GetYaxis()->SetTitle("Efficiency");
+  cutsEfficiencyBPix->GetXaxis()->SetBinLabel(1,"No Cuts");
+  cutsEfficiencyBPix->GetXaxis()->SetBinLabel(2,"Loose cut");
+  cutsEfficiencyBPix->GetXaxis()->SetBinLabel(3,"Telescope");
+  cutsEfficiencyBPix->GetXaxis()->SetBinLabel(4,"Edge cut");
+  cutsEfficiencyBPix->GetXaxis()->SetBinLabel(5,"Muon Timing");
+  cutsEfficiencyBPix->GetXaxis()->SetBinLabel(6,"Analysis cut");
+  cutsEfficiencyBPix->GetYaxis()->SetTitle("Efficiency [BPix]");
+  cutsEfficiencyFPix->GetXaxis()->SetBinLabel(1,"No Cuts");
+  cutsEfficiencyFPix->GetXaxis()->SetBinLabel(2,"Loose cut");
+  cutsEfficiencyFPix->GetXaxis()->SetBinLabel(3,"Telescope");
+  cutsEfficiencyFPix->GetXaxis()->SetBinLabel(4,"Edge cut");
+  cutsEfficiencyFPix->GetXaxis()->SetBinLabel(5,"Muon Timing");
+  cutsEfficiencyFPix->GetXaxis()->SetBinLabel(6,"Analysis cut");
+  cutsEfficiencyFPix->GetYaxis()->SetTitle("Efficiency [FPix]");
 
   TFile* fOutputFile = new TFile("merged.root", "RECREATE");
   fOutputFile->cd();
@@ -964,8 +1162,11 @@ if (DEBUG)
   validVsLocalYMerged->Write();  
 
   windowSearchMerged->Write();
+  windowSearchSameModuleMerged->Write();
   windowSearchBPixMerged->Write();
   windowSearchFPixMerged->Write();
+  missingButClusterMerged->Write();
+  missingButClusterOnSameModuleMerged->Write();
   
   checkoutTrajMerged->Write();
   checkoutValidityFlagMerged->Write();   
@@ -974,6 +1175,45 @@ if (DEBUG)
   inactivePerTrackMerged->Write();
   
   treeMerged->Write();
+
+  xPosFracValMerged->Write();
+  xPosFracMisMerged->Write();
+  yPosFracValMerged->Write();
+  yPosFracMisMerged->Write();
+
+  hitsPassingCutsValMerged->Write();
+  hitsPassingCutsMisMerged->Write();
+  hitsPassingCutsValBPixMerged->Write();
+  hitsPassingCutsMisBPixMerged->Write();
+  hitsPassingCutsValFPixMerged->Write();
+  hitsPassingCutsMisFPixMerged->Write();
+  
+  chargeDistriMerged->Write();
+  numbPixInClusterMerged->Write();
+  chargeDistriBPixMerged->Write();
+  numbPixInClusterBPixMerged->Write();
+  chargeDistriFPixPlusMerged->Write();
+  numbPixInClusterFPixPlusMerged->Write();
+  chargeDistriFPixMinusMerged->Write();
+  numbPixInClusterFPixMinusMerged->Write();
+
+  chargeDistriPreCutsMerged->Write();
+  numbPixInClusterPreCutsMerged->Write();
+  chargeDistriBPixPreCutsMerged->Write();
+  numbPixInClusterBPixPreCutsMerged->Write();
+  chargeDistriFPixPlusPreCutsMerged->Write();
+  numbPixInClusterFPixPlusPreCutsMerged->Write();
+  chargeDistriFPixMinusPreCutsMerged->Write();
+  numbPixInClusterFPixMinusPreCutsMerged->Write();
+  
+  numbPixInClusterXMerged->Write();
+  numbPixInClusterYMerged->Write();
+  xposClusterMerged->Write();
+  yposClusterMerged->Write();
+  xposClusterValidMerged->Write();
+  yposClusterValidMerged->Write();
+  xposClusterMisRecoveredMerged->Write();
+  yposClusterMisRecoveredMerged->Write();
 
 
   //******* EFFICIENCY PLOTS WRITING ************
@@ -1038,9 +1278,6 @@ if (DEBUG)
   scurveFPix->Draw();
   c1->Print("scurveFPix.gif","gif");  
 
-  layer1->Write();
-  layer2->Write();
-  layer3->Write();
   layer1->Draw("colz");
   c1->Print("layer1.gif","gif");
   layer2->Draw("colz");
@@ -1048,6 +1285,35 @@ if (DEBUG)
   layer3->Draw("colz");
   c1->Print("layer3.gif","gif");
 
+  layer1->Write();
+  layer1valid->Write();
+  layer1missing->Write();
+  layer2->Write();
+  layer2valid->Write();
+  layer2missing->Write();
+  layer3->Write();
+  layer3valid->Write();
+  layer3missing->Write();
+   
+  effDistriLayer1->Write();
+  effDistriLayer2->Write();
+  effDistriLayer3->Write();
+  effDistriFpixPlus->Write();
+  effDistriFpixMinus->Write();
+
+  cutsEfficiencyValidBPix->Write();
+  cutsEfficiencyMissingBPix->Write();
+  cutsEfficiencyValidFPix->Write();
+  cutsEfficiencyMissingFPix->Write();
+  cutsEfficiencyValid->Write();
+  cutsEfficiencyMissing->Write();
+  
+  cutsEfficiency->Write();
+  cutsEfficiencyBPix->Write();
+  cutsEfficiencyFPix->Write();
+  
+  
   fOutputFile->Close() ;
     
 }
+

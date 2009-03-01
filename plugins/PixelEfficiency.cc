@@ -1,5 +1,3 @@
-//try me
-#include "DataFormats/GeometrySurface/interface/LocalError.h"
 // system include files
 #include <memory>
 
@@ -124,9 +122,25 @@ private:
   TH1F*  missingButClusterOnSameModule;
   TH1F*  missingButCluster;
  
- 
+         
+  TH1F*  chargeDistriPreCuts;
+  TH1F*  numbPixInClusterPreCuts;
+  TH1F*  chargeDistriBPixPreCuts;
+  TH1F*  numbPixInClusterBPixPreCuts;
+  TH1F*  chargeDistriFPixPlusPreCuts;
+  TH1F*  numbPixInClusterFPixPlusPreCuts;  
+  TH1F*  chargeDistriFPixMinusPreCuts;
+  TH1F*  numbPixInClusterFPixMinusPreCuts;  
+
   TH1F*  chargeDistri;
   TH1F*  numbPixInCluster;
+  TH1F*  chargeDistriBPix;
+  TH1F*  numbPixInClusterBPix;
+  TH1F*  chargeDistriFPixPlus;
+  TH1F*  numbPixInClusterFPixPlus;  
+  TH1F*  chargeDistriFPixMinus;
+  TH1F*  numbPixInClusterFPixMinus;  
+  
   TH1F*  numbPixInClusterX;
   TH1F*  numbPixInClusterY;
   TH1F*  xposCluster;
@@ -177,8 +191,10 @@ private:
   //// HIT QUALITY ANALYSIS
   //P->Passing Cut
   //NP->Not Passing Cut
-  TH1F* hitsPassingCutsVal;
-  TH1F* hitsPassingCutsMis;
+  TH1F* hitsPassingCutsValBPix;
+  TH1F* hitsPassingCutsMisBPix;
+  TH1F* hitsPassingCutsValFPix;
+  TH1F* hitsPassingCutsMisFPix;
   TH2F* xPosFracVal;
   TH2F* xPosFracMis;
   TH2F* yPosFracVal;
@@ -288,11 +304,21 @@ try{
   
   bool hasGoodTiming=false;
   int nmuon = 0;
+  double time = -999;
+  double timerr = 999;
   for(MuonCollection::const_iterator itmuon = MuonHandle->begin(), itmuonEnd = MuonHandle->end(); itmuon!=itmuonEnd;++itmuon){
    if(nmuon>1) break;
   
    if(itmuon->isTimeValid() == false) continue;
-   if(itmuon->time().timeAtIpInOut<10)
+   
+   if(itmuon->time().timeAtIpInOutErr<timerr){
+     time = itmuon->time().timeAtIpInOut;
+     timerr = itmuon->time().timeAtIpInOutErr;
+   }
+   
+   if(runNumber<68094 && time<0 && time>-20)
+     hasGoodTiming=true;
+   if(runNumber>=68094 && time<5 && time>-5)
      hasGoodTiming=true;
 	
      //it->time().timeAtIpInOutErr;
@@ -309,52 +335,9 @@ try{
     const Trajectory& traj  = *it->key;
     std::vector<TrajectoryMeasurement> tmColl = traj.measurements();
       
-    //here put the QUALITY CUTS over teh trajectories      
-    //at least two intersections and 1 valid hit
-    
-    //************************ WE DONT CARE ANYMORE ABOUT TRACK SELECTION, ITS ON HIT SELECTION !!
-    /*bool trajWithTwoPixIntersec  = false;
-    int numOfPixIntersec=0;
-    for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
-        itTraj != itTrajEnd; ++itTraj) {
-  
-      TransientTrackingRecHit::ConstRecHitPointer testhit = itTraj->recHit();
-      uint testSubDetID = (testhit->geographicalId().subdetId());
-      if( testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap ) numOfPixIntersec++;
-      if (numOfPixIntersec==2) {trajWithTwoPixIntersec=true; break;}
-      }
-    bool trajWithAtLeastOneValid = false; 
-    if (trajWithTwoPixIntersec)
-      {
-      for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
-	  itTraj != itTrajEnd; ++itTraj) {     
-       	//check if belonging to badmodule list otherwise go to the next recHit
-        TransientTrackingRecHit::ConstRecHitPointer testhit = itTraj->recHit();
-	bool badModule=false;
-        for(Parameters::iterator it = BadModuleList_.begin(); it != BadModuleList_.end(); ++it) {         
-          if ( ((testhit)->geographicalId().rawId())==(it->getParameter<uint32_t>("detid")) ) {badModule=true; break;}
-	  }
-        if (badModule) continue;
-       
-        uint testSubDetID = (testhit->geographicalId().subdetId());
-        if (testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap)
-          {
-	  if( (*testhit).getType()== TrackingRecHit::valid )
-	    {
-	    trajWithAtLeastOneValid=true;
-	    break;
-	    }
-	  }
-        }
-      }*/
-
     consistencyCheckTraj->Fill(0);//number of total trajectories
 
-
-  //if ( !(trajWithAtLeastOneValid&&trajWithTwoPixIntersec) ) continue;
-
 //*************
-    consistencyCheck->Fill(2);
 
     //runNumber analysis
        char testLabel[10] ;
@@ -386,8 +369,6 @@ try{
     //precheck to count the BPix/FPix number of trajectories
     for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
 	itTraj != itTrajEnd; ++itTraj) {
-	
-	
       TransientTrackingRecHit::ConstRecHitPointer testhit = itTraj->recHit();
       uint testSubDetID = (testhit->geographicalId().subdetId());
       if( (testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap) ) 
@@ -413,7 +394,7 @@ try{
     for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
 	itTraj != itTrajEnd; ++itTraj) {
 
-	numofhit++;
+      numofhit++;
 	
       //are we in the pixels with valid stuffs?
       TransientTrackingRecHit::ConstRecHitPointer testhit = itTraj->recHit();
@@ -430,8 +411,10 @@ try{
 	}
       if (badModule) continue;
             	
+		
+	 //******take the geometrical parameters of the hit**********
+	 	
 	 int moduleRawId = (testhit)->geographicalId().rawId();
-
 	 DetId detId = ((testhit)->geographicalId());
         
          unsigned int layer=0;
@@ -441,7 +424,8 @@ try{
 	 unsigned int moduleInLadder=0;
 	 if (type==int(kBPIX))
 	   {PXBDetId pdetId = PXBDetId(detId); layer=pdetId.layer(); ladder=pdetId.ladder(); moduleInLadder=pdetId.module();}
-	 if (type==int(kFPIX)){PXFDetId pfdetId = PXFDetId(detId); blade=pfdetId.blade(); disk=pfdetId.disk();}
+	 if (type==int(kFPIX))
+	   {PXFDetId pfdetId = PXFDetId(detId); blade=pfdetId.blade(); disk=pfdetId.disk();}
 	 double globalX = 0;
 	 double globalY = 0;
 	 double globalZ = 0;
@@ -451,6 +435,8 @@ try{
          globalZ = theGeomDet->surface().position().z();
 	 
 	 TrajectoryStateOnSurface tsos = tsoscomb( itTraj->forwardPredictedState(), itTraj->backwardPredictedState() );
+
+	 //****** compute the edge-cut **********
 
 	 int nrows = theGeomDet->specificTopology().nrows();
 	 int ncols = theGeomDet->specificTopology().ncolumns();
@@ -468,7 +454,7 @@ try{
 	   isNotInMiddle = true;
 	
  
-	//********************* HERE IS THE CUT ON HITS !!
+	//********************* HERE IS THE TELESCOPE CUT ON HITS
 	int numofhitCut=0;
         int numOfOtherValid=0;  
 	bool hasValidInUpperPix = false;
@@ -514,85 +500,6 @@ try{
 
 	}//end of loop for trajmeas for cut
 	
-      
-       //*******************************
-       // DO THE ANALYSIS ONLY IF GOOD OTHER HIT ARE FOUND !!!!!!!!!!!
-       if((*testhit).getType()==TrackingRecHit::missing){
-         xPosFracMis->Fill(xposfrac_,0);
-         yPosFracMis->Fill(yposfrac_,0);
-	 hitsPassingCutsMis->Fill(0);
-	 
-	 if(numOfOtherValid>=1){
-           xPosFracMis->Fill(xposfrac_,1);
-           yPosFracMis->Fill(yposfrac_,1);
-	   hitsPassingCutsMis->Fill(1);
-	 }
-	 
-	 if(hasValidInLowerPix && hasValidInUpperPix){
-           xPosFracMis->Fill(xposfrac_,2);
-           yPosFracMis->Fill(yposfrac_,2);
-	   hitsPassingCutsMis->Fill(2);
-	 }
-	 
-	 if(hasGoodTiming){
-           xPosFracMis->Fill(xposfrac_,3);
-           yPosFracMis->Fill(yposfrac_,3);
-	   hitsPassingCutsMis->Fill(3);
-	 }
-	 
-	 if(!isNotInMiddle){
-           xPosFracMis->Fill(xposfrac_,4);
-           yPosFracMis->Fill(yposfrac_,4);
-	   hitsPassingCutsMis->Fill(4);
-	 }
-       }
-       else if((*testhit).isValid()){
-         xPosFracVal->Fill(xposfrac_,0);
-         yPosFracVal->Fill(yposfrac_,0);
-	 hitsPassingCutsVal->Fill(0);
-	 
-	 if(numOfOtherValid>=1){
-           xPosFracVal->Fill(xposfrac_,1);
-           yPosFracVal->Fill(yposfrac_,1);
-	   hitsPassingCutsVal->Fill(1);
-	 }
-	 
-	 if(hasValidInLowerPix && hasValidInUpperPix){
-           xPosFracVal->Fill(xposfrac_,2);
-           yPosFracVal->Fill(yposfrac_,2);
-	   hitsPassingCutsVal->Fill(2);
-	 }
-	 
-	 if(hasGoodTiming){
-           xPosFracVal->Fill(xposfrac_,3);
-           yPosFracVal->Fill(yposfrac_,3);
-	   hitsPassingCutsVal->Fill(3);
-	 }
-	 
-	 if(!isNotInMiddle){
-           xPosFracVal->Fill(xposfrac_,4);
-           yPosFracVal->Fill(yposfrac_,4);
-	   hitsPassingCutsVal->Fill(4);
-	 }
-       }
-  
-  	//************************ HERE IS THE CUT *****************************
-        //different tightness in the cuts 
-        //if (numOfOtherValid<1) continue;
-         if(! (hasValidInLowerPix && hasValidInUpperPix) ) continue;
-        //can also use : isNotInMiddle && hasGoodTiming
-
-        if((*testhit).getType()==TrackingRecHit::missing){
-          xPosFracMis->Fill(xposfrac_,5);
-          yPosFracMis->Fill(yposfrac_,5);
-	 hitsPassingCutsMis->Fill(5);
-	}
-	else if((*testhit).isValid()){
-          xPosFracVal->Fill(xposfrac_,5);
-          yPosFracVal->Fill(yposfrac_,5);
-	  hitsPassingCutsVal->Fill(5);
-	}
-	 
       //**********  TAKING CLUSTER FROM recHIT
       edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster> testclust;
       if((*testhit).isValid()){
@@ -602,14 +509,131 @@ try{
 	  testclust = (*pixhit).cluster();
 	}
       }
-      
+      //**********  fill CLUSTER properties for valid recHit without CUTS requirements    
+      if(testclust.isNonnull()){
+        chargeDistriPreCuts->Fill(testclust->charge());
+	numbPixInClusterPreCuts->Fill(testclust->size());
+	
+        if(type==int(kBPIX)) {chargeDistriBPixPreCuts->Fill(testclust->charge());numbPixInClusterBPixPreCuts->Fill(testclust->size());}
+	if(type==int(kFPIX) && globalZ>0.) {chargeDistriFPixPlusPreCuts->Fill(testclust->charge());numbPixInClusterFPixPlusPreCuts->Fill(testclust->size());}
+	if(type==int(kFPIX) && globalZ<0.) {chargeDistriFPixMinusPreCuts->Fill(testclust->charge());numbPixInClusterFPixMinusPreCuts->Fill(testclust->size());}	
+      }
+
+
+  	//************************ Fill the HISTOS for the analysis on the Selection Cuts Quality  *****************************
+        /*legend:
+	0=without any selection;
+	1=loose cut (i.e. at least 1 another valid hit in the same track);
+	2=telscopic cut;
+	3=timing cut;
+	4=edge cuts;
+	5= final combined cuts;
+	*/
+	
+       if((*testhit).getType()==TrackingRecHit::missing){
+         xPosFracMis->Fill(xposfrac_,0);
+         yPosFracMis->Fill(yposfrac_,0);
+	 if(type==int(kBPIX)) hitsPassingCutsMisBPix->Fill(0);
+	 if(type==int(kFPIX)) hitsPassingCutsMisFPix->Fill(0);
+	 
+	 if(numOfOtherValid>=1){
+           xPosFracMis->Fill(xposfrac_,1);
+           yPosFracMis->Fill(yposfrac_,1);
+	   if(type==int(kBPIX)) hitsPassingCutsMisBPix->Fill(1);
+	   if(type==int(kFPIX)) hitsPassingCutsMisFPix->Fill(1);
+	 }
+	 
+	 if(hasValidInLowerPix && hasValidInUpperPix){
+           xPosFracMis->Fill(xposfrac_,2);
+           yPosFracMis->Fill(yposfrac_,2);
+	   if(type==int(kBPIX)) hitsPassingCutsMisBPix->Fill(2);
+	   if(type==int(kFPIX)) hitsPassingCutsMisFPix->Fill(2);
+	 }
+	 
+	 if(hasGoodTiming){
+           xPosFracMis->Fill(xposfrac_,3);
+           yPosFracMis->Fill(yposfrac_,3);
+	   if(type==int(kBPIX)) hitsPassingCutsMisBPix->Fill(3);
+	   if(type==int(kFPIX)) hitsPassingCutsMisFPix->Fill(3);
+	 }
+	 
+	 if(!isNotInMiddle){
+           xPosFracMis->Fill(xposfrac_,4);
+           yPosFracMis->Fill(yposfrac_,4);
+	   if(type==int(kBPIX)) hitsPassingCutsMisBPix->Fill(4);
+	   if(type==int(kFPIX)) hitsPassingCutsMisFPix->Fill(4);
+	 }
+       }//end-if missing recHit
+       
+       else if((*testhit).isValid()){
+         xPosFracVal->Fill(xposfrac_,0);
+         yPosFracVal->Fill(yposfrac_,0);
+	 if(type==int(kBPIX)) hitsPassingCutsValBPix->Fill(0);
+	 if(type==int(kFPIX)) hitsPassingCutsValFPix->Fill(0);
+	 
+	 if(numOfOtherValid>=1){
+           xPosFracVal->Fill(xposfrac_,1);
+           yPosFracVal->Fill(yposfrac_,1);
+	   if(type==int(kBPIX)) hitsPassingCutsValBPix->Fill(1);
+	   if(type==int(kFPIX)) hitsPassingCutsValFPix->Fill(1);
+	 }
+	 
+	 if(hasValidInLowerPix && hasValidInUpperPix){
+           xPosFracVal->Fill(xposfrac_,2);
+           yPosFracVal->Fill(yposfrac_,2);
+	   if(type==int(kBPIX)) hitsPassingCutsValBPix->Fill(2);
+	   if(type==int(kFPIX)) hitsPassingCutsValFPix->Fill(2);
+	 }
+	 
+	 if(hasGoodTiming){
+           xPosFracVal->Fill(xposfrac_,3);
+           yPosFracVal->Fill(yposfrac_,3);
+	   if(type==int(kBPIX)) hitsPassingCutsValBPix->Fill(3);
+	   if(type==int(kFPIX)) hitsPassingCutsValFPix->Fill(3);
+	 }
+	 
+	 if(!isNotInMiddle){
+           xPosFracVal->Fill(xposfrac_,4);
+           yPosFracVal->Fill(yposfrac_,4);
+	   if(type==int(kBPIX)) hitsPassingCutsValBPix->Fill(4);
+	   if(type==int(kFPIX)) hitsPassingCutsValFPix->Fill(4);
+	 }
+       }
+  
+  	//************************ HERE IS THE CUT *****************************
+        //different tightness in the cuts 
+        //if (numOfOtherValid<1) continue;
+        //if( (!hasValidInLowerPix) || (!hasValidInUpperPix)  ) continue; 
+        //if(  isNotInMiddle  ) continue; 
+        //if(  (!hasGoodTiming) ) continue; 
+        //if( (!hasValidInLowerPix) || (!hasValidInUpperPix) || isNotInMiddle || (!hasGoodTiming) ) continue; 
+        //can also use : isNotInMiddle && hasGoodTiming
+
+        if((*testhit).getType()==TrackingRecHit::missing){
+          xPosFracMis->Fill(xposfrac_,5);
+          yPosFracMis->Fill(yposfrac_,5);
+	  if(type==int(kBPIX)) hitsPassingCutsMisBPix->Fill(5);
+	  if(type==int(kFPIX)) hitsPassingCutsMisFPix->Fill(5);
+	}
+	else if((*testhit).isValid()){
+          xPosFracVal->Fill(xposfrac_,5);
+          yPosFracVal->Fill(yposfrac_,5);
+	   if(type==int(kBPIX)) hitsPassingCutsValBPix->Fill(5);
+	   if(type==int(kFPIX)) hitsPassingCutsValFPix->Fill(5);
+	}
+	 
+      //**********  fill CLUSTER properties for valid recHit passing ALL the selection CUTS     
       if(testclust.isNonnull()){
         chargeDistri->Fill(testclust->charge());
 	numbPixInCluster->Fill(testclust->size());
 	numbPixInClusterX->Fill(testclust->sizeX());
 	numbPixInClusterY->Fill(testclust->sizeY());
 	xposCluster->Fill(testclust->x());
-	yposCluster->Fill(testclust->y());	
+	yposCluster->Fill(testclust->y());
+	
+        if(type==int(kBPIX)) {chargeDistriBPix->Fill(testclust->charge());numbPixInClusterBPix->Fill(testclust->size());}
+	if(type==int(kFPIX) && globalZ>0.) {chargeDistriFPixPlus->Fill(testclust->charge());numbPixInClusterFPixPlus->Fill(testclust->size());}
+	if(type==int(kFPIX) && globalZ<0.) {chargeDistriFPixMinus->Fill(testclust->charge());numbPixInClusterFPixMinus->Fill(testclust->size());}	
       }
       
       
@@ -643,8 +667,9 @@ try{
 	 if ( (!((*testhit).isValid()))&&(!(badModule)) )  histInvalidRecHitWithBadmoduleList->Fill(specificInvalid);
 	 
 	 
-      
-      bool founded=0;
+       //**********  create the TREE used for the analysis ****************
+     
+             bool founded=0;
              for (unsigned int it=0; it<goodModuleMap.size(); it++)
 	       {
 	       if (goodModuleMap[it][0]==moduleRawId)
@@ -685,11 +710,13 @@ try{
   	       }
 	       
 	       
-	     if ( ! ((*testhit).isValid()) )  invalidPerRun->Fill(testLabel,1);
+	 if ( ! ((*testhit).isValid()) )  invalidPerRun->Fill(testLabel,1);
 	 if (   ((*testhit).isValid()) )  validPerRun->Fill(testLabel,1);
 	 if ( (*testhit).getType()==TrackingRecHit::inactive ) inactivePerRun->Fill(testLabel,1);
 	 
-	 //operation done for all the Pixel recHit
+
+      //**********  METHOD 1 plots for subdetectors and run *************************
+ 
          int filling = 0;
          if((*testhit).isValid() ) filling=2;
          if (!((*testhit).isValid()) ) filling=0;
@@ -697,26 +724,24 @@ try{
 	 
 	 histo->Fill(filling);
 
-         if (type==int(kBPIX))  
-	   {
+         if (type==int(kBPIX)){
 	   histBarrel->Fill(filling);
 	   
 	   
 	   if (layer==1) histLayer1->Fill(filling);
 	   if (layer==2) histLayer2->Fill(filling);
 	   if (layer==3) histLayer3->Fill(filling);
-	   }//barrel
-	 if (type==int(kFPIX))
-	   {
+	 }//barrel
+	 
+	 if (type==int(kFPIX)){
 	   histEndcap->Fill(filling);
 	   
 	   if(theGeomDet->surface().position().z() < 0.0) histEndcapMinus->Fill(filling);
 	   else                                           histEndcapPlus->Fill(filling);
-	   }
-      //**********
+	 }
 
-      //**********************************
-      //angular analysis of efficiency
+      //****************  angular analysis of efficiency: METHOD 1    ******************
+      
       LocalTrajectoryParameters ltp = tsos.localParameters();
       LocalVector localDir = ltp.momentum()/ltp.momentum().mag();
 
@@ -731,25 +756,26 @@ try{
       if ((*testhit).getType()== TrackingRecHit::valid)  validVsBeta->Fill( beta );
       if ((*testhit).getType()== TrackingRecHit::missing)   missingVsBeta->Fill( beta);
       
-      if(testSubDetID == PixelSubdetector::PixelBarrel)
-        {
+      if(testSubDetID == PixelSubdetector::PixelBarrel){
         float alpha = atan2( locz, locx );
         if ((*testhit).getType()== TrackingRecHit::valid)  validVsAlphaBPix->Fill( alpha );
         if ((*testhit).getType()== TrackingRecHit::missing)   missingVsAlphaBPix->Fill( alpha);
         float  beta = atan2( locz, locy );
         if ((*testhit).getType()== TrackingRecHit::valid)  validVsBetaBPix->Fill( beta );
         if ((*testhit).getType()== TrackingRecHit::missing)   missingVsBetaBPix->Fill( beta);
-        }
-      if(testSubDetID == PixelSubdetector::PixelEndcap)
-        {
+      }
+      
+      if(testSubDetID == PixelSubdetector::PixelEndcap){
         float alpha = atan2( locz, locx );
         if ((*testhit).getType()== TrackingRecHit::valid)  validVsAlphaFPix->Fill( alpha );
         if ((*testhit).getType()== TrackingRecHit::missing)   missingVsAlphaFPix->Fill( alpha);
         float  beta = atan2( locz, locy );
         if ((*testhit).getType()== TrackingRecHit::valid)  validVsBetaFPix->Fill( beta );
         if ((*testhit).getType()== TrackingRecHit::missing)   missingVsBetaFPix->Fill( beta);
-        }
+      }
 	
+
+      //*****************   METHOD 2: window searching      *****************
 	
       bool hasClusterOnSameModule=false;
       bool hasCluster=false;
@@ -758,29 +784,17 @@ try{
       double clusterXPos=-999;
       double clusterYPos=-999;
       
-      if ( testSubDetID==int(kBPIX) )             
-        {
-      //**********************************
-      //window searching analysis
+      if ( testSubDetID==int(kBPIX) ){
 
       DetId hitDetId = (testhit->geographicalId());
       PXBDetId hitPdetId = PXBDetId(hitDetId);
       unsigned int hitLayer=0;
       hitLayer=hitPdetId.layer();        
-/*
-//test of existence of PROPER validity-flag handling trajectories
-//make statistic both on valid/invalid!
-if ( (*testhit).getType()==TrackingRecHit::inactive ) checkoutValidityFlag->Fill(0);
-else if ((*testhit).getType()==TrackingRecHit::missing) checkoutValidityFlag->Fill(1);
-else  if ((*testhit).getType()==TrackingRecHit::valid) checkoutValidityFlag->Fill(2);
-else checkoutValidityFlag->Fill(3);
-*/
 //test
       if ((*testhit).getType()==TrackingRecHit::missing) histoMethod2->Fill(0);
       if ((*testhit).getType()==TrackingRecHit::valid)   histoMethod2->Fill(1);
 //
-      if ( (*testhit).getType()!=TrackingRecHit::inactive)
-        {
+      if ( (*testhit).getType()==TrackingRecHit::valid || (*testhit).getType()==TrackingRecHit::missing ){
 	double minDistance=999999;
 	double minDistanceOnSameModule=999999;
 	for (edmNew::DetSetVector<SiPixelCluster>::const_iterator DSViter = input.begin(); DSViter != input.end(); DSViter++)
@@ -869,7 +883,7 @@ else checkoutValidityFlag->Fill(3);
       if ((*testhit).getType()==TrackingRecHit::missing) histoMethod2FPix->Fill(0);
       if ((*testhit).getType()==TrackingRecHit::valid)   histoMethod2FPix->Fill(1);
 
-      if ( (*testhit).getType()!=TrackingRecHit::inactive){
+      if ( (*testhit).getType()==TrackingRecHit::valid || (*testhit).getType()==TrackingRecHit::missing ){
       
 	double minDistance=999999;
 	double minDistanceOnSameModule=999999;
@@ -965,7 +979,7 @@ else checkoutValidityFlag->Fill(3);
        //****************
 	     
     }//end-for of Trajectories
-}catch ( ... ) {}
+}catch ( ... ) {std::cout<<"I've had a problem, skipped the try !!"<<std::endl;}
 
    if(DEBUG) cout<<"End of Analyze"<<endl;
 
@@ -1012,6 +1026,22 @@ PixelEfficiency::beginJob(const edm::EventSetup&)
  
  chargeDistri = new TH1F("chargeDistri","chargeDistri",200,0,100000);
  numbPixInCluster = new TH1F("numbPixInCluster","numbPixInCluster",50,0,50);
+ chargeDistriBPix = new TH1F("chargeDistriBPix","chargeDistriBPix",200,0,100000);
+ numbPixInClusterBPix = new TH1F("numbPixInClusterBPix","numbPixInClusterBPix",50,0,50);
+ chargeDistriFPixPlus = new TH1F("chargeDistriFPixPlus","chargeDistriFPixPlus",200,0,100000);
+ numbPixInClusterFPixPlus = new TH1F("numbPixInClusterFPixPlus","numbPixInClusterFPixPlus",50,0,50);
+ chargeDistriFPixMinus = new TH1F("chargeDistriFPixMinus","chargeDistriFPixMinus",200,0,100000);
+ numbPixInClusterFPixMinus = new TH1F("numbPixInClusterFPixMinus","numbPixInClusterFPixMinus",50,0,50);
+
+ chargeDistriPreCuts = new TH1F("chargeDistriPreCuts","chargeDistriPreCuts",200,0,100000);
+ numbPixInClusterPreCuts = new TH1F("numbPixInClusterPreCuts","numbPixInClusterPreCuts",50,0,50);
+ chargeDistriBPixPreCuts = new TH1F("chargeDistriBPixPreCuts","chargeDistriBPixPreCuts",200,0,100000);
+ numbPixInClusterBPixPreCuts = new TH1F("numbPixInClusterBPixPreCuts","numbPixInClusterBPixPreCuts",50,0,50);
+ chargeDistriFPixPlusPreCuts = new TH1F("chargeDistriFPixPlusPreCuts","chargeDistriFPixPlusPreCuts",200,0,100000);
+ numbPixInClusterFPixPlusPreCuts = new TH1F("numbPixInClusterFPixPlusPreCuts","numbPixInClusterFPixPlusPreCuts",50,0,50);
+ chargeDistriFPixMinusPreCuts = new TH1F("chargeDistriFPixMinusPreCuts","chargeDistriFPixMinusPreCuts",200,0,100000);
+ numbPixInClusterFPixMinusPreCuts = new TH1F("numbPixInClusterFPixMinusPreCuts","numbPixInClusterFPixMinusPreCuts",50,0,50);
+
  numbPixInClusterX = new TH1F("numbPixInClusterX","numbPixInClusterX",30,0,30);
  numbPixInClusterY = new TH1F("numbPixInClusterY","numbPixInClusterY",30,0,30);
  xposCluster = new TH1F("xposCluster","xposCluster",200,-2,2);
@@ -1059,8 +1089,10 @@ PixelEfficiency::beginJob(const edm::EventSetup&)
  inactivePerTrack= new TH1F ("inactivePerTrack","inactivePerTrack",101,0,101);
  missingPerTrack= new TH1F ("missingPerTrack","missingPerTrack",101,0,101);
  
- hitsPassingCutsVal = new TH1F("hitsPassingCutsVal","hitsPassingCutsVal",6,0,6);
- hitsPassingCutsMis = new TH1F("hitsPassingCutsMis","hitsPassingCutsMis",6,0,6);
+ hitsPassingCutsValBPix = new TH1F("hitsPassingCutsValBPix","hitsPassingCutsValBPix",6,0,6);
+ hitsPassingCutsMisBPix = new TH1F("hitsPassingCutsMisBPix","hitsPassingCutsMisBPix",6,0,6);
+ hitsPassingCutsValFPix = new TH1F("hitsPassingCutsValFPix","hitsPassingCutsValFPix",6,0,6);
+ hitsPassingCutsMisFPix = new TH1F("hitsPassingCutsMisFPix","hitsPassingCutsMisFPix",6,0,6);
  xPosFracVal = new TH2F("xPosFracVal" ,"xPosFracVal" ,101,0,1.01,6,0,6);
  xPosFracMis = new TH2F("xPosFracMis" ,"xPosFracMis" ,101,0,1.01,6,0,6);
  yPosFracVal = new TH2F("yPosFracVal" ,"yPosFracVal" ,101,0,1.01,6,0,6);
@@ -1121,6 +1153,22 @@ PixelEfficiency::endJob() {
   
   chargeDistri->Write();
   numbPixInCluster->Write();
+  chargeDistriBPix->Write();
+  numbPixInClusterBPix->Write();
+  chargeDistriFPixPlus->Write();
+  numbPixInClusterFPixPlus->Write();
+  chargeDistriFPixMinus->Write();
+  numbPixInClusterFPixMinus->Write();
+
+  chargeDistriPreCuts->Write();
+  numbPixInClusterPreCuts->Write();
+  chargeDistriBPixPreCuts->Write();
+  numbPixInClusterBPixPreCuts->Write();
+  chargeDistriFPixPlusPreCuts->Write();
+  numbPixInClusterFPixPlusPreCuts->Write();
+  chargeDistriFPixMinusPreCuts->Write();
+  numbPixInClusterFPixMinusPreCuts->Write();
+
   numbPixInClusterX->Write();
   numbPixInClusterY->Write();
   xposCluster->Write();
@@ -1168,8 +1216,10 @@ PixelEfficiency::endJob() {
   inactivePerTrack->Write();
   missingPerTrack->Write();
   
-  hitsPassingCutsVal->Write();
-  hitsPassingCutsMis->Write();
+  hitsPassingCutsValBPix->Write();
+  hitsPassingCutsMisBPix->Write();
+  hitsPassingCutsValFPix->Write();
+  hitsPassingCutsMisFPix->Write();
   xPosFracVal->Write();
   xPosFracMis->Write();
   yPosFracVal->Write();
