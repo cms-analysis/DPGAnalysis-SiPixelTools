@@ -17,8 +17,8 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 #process.GlobalTag.connect ="sqlite_file:/afs/cern.ch/user/m/malgeri/public/globtag/CRZT210_V1.db"
 process.GlobalTag.connect = "frontier://FrontierProd/CMS_COND_21X_GLOBALTAG"
-process.GlobalTag.globaltag = "CRAFT_ALL_V9::All"
-#process.GlobalTag.globaltag = "COSMMC_21X_V1::All"
+#process.GlobalTag.globaltag = "CRAFT_ALL_V9::All"
+process.GlobalTag.globaltag = "COSMMC_21X_V1::All"
 process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource','GlobalTag')
 
 ##
@@ -52,7 +52,7 @@ process.load("Alignment.OfflineValidation.TrackerOfflineValidation_cfi")
 
 
 process.load("DPGAnalysis.SiPixelTools.PixelNtuplizer_RealData_cfi")
-process.PixelNtuplizer_RealData.OutputFile = 'SuperPointing_AllCraft_V4_CosmicsCosmicTF0TTTree_dttof_MC.root'
+process.PixelNtuplizer_RealData.OutputFile = 'Summer08_COSMMC_21X_V1_SuperPointing_v4_ntupl.root'
 process.PixelNtuplizer_RealData.trajectoryInput = 'TrackRefitterP5'
 
 
@@ -90,7 +90,7 @@ process.source = cms.Source("PoolSource",
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1) )
 
-process.p = cms.Path(process.siPixelClusters*process.siPixelRecHits+process.siStripMatchedRecHits+process.tracksP5+process.CosmicMuonSeed+process.cosmicMuons+process.globalCosmicMuons+process.muons*process.offlineBeamSpot*process.TrackRefitterP5*process.PixelNtuplizer_RealData)
+process.p = cms.Path(process.offlineBeamSpot*process.TrackRefitterP5*process.PixelNtuplizer_RealData)
 process.MessageLogger.cerr.FwkReport.reportEvery = 10
 process.MessageLogger.cerr.threshold = 'Info'
 process.TrackerDigiGeometryESModule.applyAlignment = True
