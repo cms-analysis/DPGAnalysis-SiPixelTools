@@ -509,7 +509,7 @@ bool PixelNtuplizer_RealData::isOffTrackHits(const edm::Event& iEvent, const edm
 				      
 				      if ( (int)n_clust <= (int)maxsize_AllClustInfoStruct_ )
 					{
-					  cout << "row " << pixeliter->cluster()->x() << endl;
+					  //	  cout << "row " << pixeliter->cluster()->x() << endl;
 
 					  allclustinfo_.allclust_row[n_clust-1] = pixeliter->cluster()->x();
 					  allclustinfo_.allclust_col[n_clust-1] = pixeliter->cluster()->y();
