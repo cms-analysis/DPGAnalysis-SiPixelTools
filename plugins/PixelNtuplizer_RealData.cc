@@ -584,7 +584,8 @@ bool PixelNtuplizer_RealData::isOffTrackHits(const edm::Event& iEvent, const edm
 				  clust_.n_neighbour_clust = n_clust;
 
 				  allclustinfo_.n_allclust = n_clust;
-				  
+				  allpixinfo_.allpix_npix = pixel_index;
+
 				  break;
 				  
 				} 
