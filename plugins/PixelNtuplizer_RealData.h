@@ -49,7 +49,7 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
   void fillPix(const SiPixelCluster&, const RectangularPixelTopology*, const PixelGeomDetUnit*);
   void fillTrack(TrajectoryStateOnSurface&,const Trajectory&, int);
   
-  bool isValidMuonAssoc(const edm::Event& iEvent,const Track& track, int TrackNumber);		   
+  bool isValidMuonAssoc(const edm::Event& iEvent);		   
   bool isOffTrackHits(const edm::Event& iEvent, const edm::EventSetup& iSetup,const RectangularPixelTopology*, uint32_t geoId );		   
 
  private:
@@ -164,7 +164,7 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
 
  struct AllClustStruct
   {
-    int n_allclust; // should be the same as n_neighbour_clust 
+    //    int n_allclust; // should be the same as n_neighbour_clust 
     float allclust_row[10000];
     float allclust_col[10000];
     float allclust_x[10000];
@@ -183,6 +183,7 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
     int allclust_edgeHitY[10000];    
     float allclust_dist[10000];
     int allclust_hasOverFlow;
+    int n_allclust;
 
     void init(){ 
       n_allclust = 0;
@@ -200,12 +201,13 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
 
  struct AllPixInfoStruct 
   {
-    int allpix_npix;
+    //int allpix_npix;
     float allpix_row[10000];
     float allpix_col[10000];
     float allpix_adc[10000];
     int allpix_hasOverFlow;
-    
+    int allpix_npix;
+
     void init(){
       allpix_npix = 0;
       allpix_hasOverFlow = 0;
