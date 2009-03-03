@@ -13,7 +13,7 @@
 //
 // Original Author:  Tanja ROMMERSKIRCHEN
 //         Created:  Wed Feb 25 11:59:48 CET 2009
-// $Id$
+// $Id: MuonTOFFilter_trackQuality.cc,v 1.1 2009/03/02 13:08:41 trommers Exp $
 //
 //
 
@@ -36,6 +36,8 @@
 #include "DataFormats/MuonDetId/interface/DTChamberId.h"
 #include "DataFormats/MuonDetId/interface/MuonSubdetId.h"
 #include "RecoMuon/GlobalTrackingTools/interface/GlobalMuonTrackMatcher.h"
+
+#include "DataFormats/TrackReco/interface/Track.h"
 
 #include <vector>
 
@@ -72,6 +74,8 @@ class MuonTOFFilter_trackQuality : public edm::EDFilter {
   double  min_time;
   double  max_time;
   double max_timeError;
+  double min_trk_pt;
+  double max_chi2_ndof;
 
 vector<double> timeAtIpInOut;
 vector<double> errorTime;
@@ -86,6 +90,8 @@ MuonTOFFilter_trackQuality::MuonTOFFilter_trackQuality(const edm::ParameterSet& 
   min_time = iConfig.getParameter<double>("min_time");
   max_time = iConfig.getParameter<double>("max_time");
   max_timeError = iConfig.getParameter<double>("max_timeError");
+  min_trk_pt = iConfig.getParameter<double>("min_trk_pt");
+  max_chi2_ndof = iConfig.getParameter<double>("max_chi2_ndof");
   
 
   
@@ -129,6 +135,12 @@ MuonTOFFilter_trackQuality::filter(edm::Event& iEvent, const edm::EventSetup& iS
 
     for(MuonCollection::const_iterator it = MuonHandle->begin(), itEnd = MuonHandle->end(); it!=itEnd;++it){
      
+      if(!it->globalTrack() == false){
+	if(it->globalTrack()->chi2()/it->globalTrack()->ndof() >  max_chi2_ndof) return false;
+	if(it->globalTrack()->pt() < min_trk_pt) return false;
+
+      }
+      else return false;
 
       if(it->isTimeValid() == true){//check if muon has a valid time information
 

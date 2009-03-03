@@ -30,13 +30,13 @@ process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource','GlobalTag')
 # reconstruction sequence for Cosmics
 process.load("Configuration.StandardSequences.ReconstructionCosmics_cff")
 
-process.load("MuonTOFFilter.MuonTOFFilter.muonTOF_cfi")
+process.load("DPGAnalysis.SiPixelTools.muonTOF_cfi")
 process.MuonTOFFilter_trackQuality.max_goodmuons = 2
 
 process.source = cms.Source("PoolSource",
 
     fileNames = cms.untracked.vstring(
- '/store/data/Commissioning08/Cosmics/RAW-RECO/CRAFT_ALL_V9_SuperPointing_225-v3/0005/B6350AB1-5BFF-DD11-A4BA-00304875A7B5.root
+ '/store/data/Commissioning08/Cosmics/RAW-RECO/CRAFT_ALL_V9_SuperPointing_225-v3/0005/B6350AB1-5BFF-DD11-A4BA-00304875A7B5.root'
 
         )  )
 
