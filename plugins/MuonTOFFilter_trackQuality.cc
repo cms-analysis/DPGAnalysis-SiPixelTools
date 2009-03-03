@@ -13,7 +13,7 @@
 //
 // Original Author:  Tanja ROMMERSKIRCHEN
 //         Created:  Wed Feb 25 11:59:48 CET 2009
-// $Id: MuonTOFFilter_trackQuality.cc,v 1.1 2009/03/02 13:08:41 trommers Exp $
+// $Id: MuonTOFFilter_trackQuality.cc,v 1.2 2009/03/03 17:04:14 trommers Exp $
 //
 //
 
@@ -69,7 +69,7 @@ class MuonTOFFilter_trackQuality : public edm::EDFilter {
 // static data member definitions
 //
 
-
+  int min_goodmuons;
   int max_goodmuons;
   double  min_time;
   double  max_time;
@@ -86,6 +86,7 @@ vector<double> errorTime;
 //
 MuonTOFFilter_trackQuality::MuonTOFFilter_trackQuality(const edm::ParameterSet& iConfig)
 {
+  min_goodmuons = iConfig.getParameter<double>("min_goodmuons");
   max_goodmuons = iConfig.getParameter<double>("max_goodmuons");
   min_time = iConfig.getParameter<double>("min_time");
   max_time = iConfig.getParameter<double>("max_time");
@@ -133,32 +134,44 @@ MuonTOFFilter_trackQuality::filter(edm::Event& iEvent, const edm::EventSetup& iS
     timeAtIpInOut.clear();
     errorTime.clear();
 
+    edm::LogVerbatim("MuonTOFFilter_trackQuality") << " new event " << std::endl;
+    
     for(MuonCollection::const_iterator it = MuonHandle->begin(), itEnd = MuonHandle->end(); it!=itEnd;++it){
      
-      if(!it->globalTrack() == false){
-	if(it->globalTrack()->chi2()/it->globalTrack()->ndof() >  max_chi2_ndof) return false;
-	if(it->globalTrack()->pt() < min_trk_pt) return false;
-
+      if(!it->track() == false){
+	if(it->track()->chi2()/it->track()->ndof() >  max_chi2_ndof) {
+	  edm::LogVerbatim("MuonTOFFilter_trackQuality") << " muon rejected because chi1/ndof to large! chi2/ndof " <<it->track()->chi2()/it->track()->ndof()   << " required chi2/ndof " << max_chi2_ndof  << " chi2 " <<it->track()->chi2() << " ndof " << it->track()->ndof() <<  std::endl;
+	  continue;
+	}
+	if(it->track()->pt() < min_trk_pt){
+	  edm::LogVerbatim("MuonTOFFilter_trackQuality") << " muon rejected because pt to small! pt " << it->track()->pt() << " required pt " << min_trk_pt<< std::endl;
+	  continue;
+	}
       }
-      else return false;
+      else {
+	edm::LogVerbatim("MuonTOFFilter_trackQuality") << " muon has no valid track attached, reject ! " << std::endl;
+	continue;
+      }
 
       if(it->isTimeValid() == true){//check if muon has a valid time information
 
 	if(it->time().timeAtIpInOutErr < max_timeError){//only take muons with error < max_timeError
-
+	  edm::LogVerbatim("MuonTOFFilter_trackQuality") << " muon time " <<  it->time().timeAtIpInOut << std::endl;
 	  timeAtIpInOut.push_back( it->time().timeAtIpInOut);
 	  errorTime.push_back(it->time().timeAtIpInOutErr);
 	  good_muons++;
-
 	}
-
+	else  edm::LogVerbatim("MuonTOFFilter_trackQuality") << "error on muon time is too large, " << it->time().timeAtIpInOutErr  << " maximum error " <<  max_timeError << " reject ! " << std::endl;
       }
+      else edm::LogVerbatim("MuonTOFFilter_trackQuality") << "muon has no valid time information reject " << std::endl;
     }//end of for loop
 
-    //  for(unsigned int i = 0; i < timeAtIpInOut.size(); i++){
-    //    edm::LogVerbatim("MuonTOFFilter_trackQuality") << " time " << i  << " timeAtIpInOut " << timeAtIpInOut[i] << " error " << errorTime[i] << std::endl;
-    //  }
+    if(good_muons < min_goodmuons) {
+      edm::LogVerbatim("MuonTOFFilter_trackQuality") << " event rejected contains not enough good muon! number of muons " << good_muons << " minimum number of good muons " << min_goodmuons << " all muons " << MuonHandle->size() << std::endl;
+      return false;
+    }
 
+    
 
     Float_t mean_Time = 0;
     Float_t sumweight = 0;
@@ -174,7 +187,8 @@ MuonTOFFilter_trackQuality::filter(edm::Event& iEvent, const edm::EventSetup& iS
       if(sumweight != 0) mean_Time = mean_Time/sumweight;
     }
     else{
-      edm::LogVerbatim("MuonTOFFilter_trackQuality") << " number muons " << good_muons << " max_number muons " <<  max_goodmuons << std::endl;
+      edm::LogVerbatim("MuonTOFFilter_trackQuality") << " event rejected because it contains to many good muons! Number muons " << good_muons << " max_number muons " <<  max_goodmuons << std::endl;
+      return false;
     }
 
     
