@@ -6,6 +6,7 @@ process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 10
 process.MessageLogger.cerr.threshold = 'Info'
 process.MessageLogger.categories.extend(["MuonTOFFilter_trackQuality"])
+process.MessageLogger.categories.extend(["FEDInRunFilter"])
 
 
 
@@ -23,7 +24,7 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 
 process.GlobalTag.connect = "frontier://FrontierProd/CMS_COND_21X_GLOBALTAG"
-process.GlobalTag.globaltag = "CRAFT_ALL_V9::All"
+process.GlobalTag.globaltag = "CRAFT_ALL_V11::All"
 
 process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource','GlobalTag')
 
@@ -31,19 +32,26 @@ process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource','GlobalTag')
 process.load("Configuration.StandardSequences.ReconstructionCosmics_cff")
 
 process.load("DPGAnalysis.SiPixelTools.muonTOF_cfi")
+process.load("DPGAnalysis.SiPixelTools.FEDInRunFilter_cfi")
 process.MuonTOFFilter_trackQuality.max_goodmuons = 2
 
 process.source = cms.Source("PoolSource",
 
     fileNames = cms.untracked.vstring(
- '/store/data/Commissioning08/Cosmics/RAW-RECO/CRAFT_ALL_V9_SuperPointing_225-v3/0005/B6350AB1-5BFF-DD11-A4BA-00304875A7B5.root'
+       '/store/data/Commissioning08/Cosmics/RAW-RECO/CRAFT_ALL_V9_SuperPointing_225-v3/0005/B8FB3273-5DFF-DD11-BEAB-00304875A7B5.root',
+       '/store/data/Commissioning08/Cosmics/RAW-RECO/CRAFT_ALL_V9_SuperPointing_225-v3/0005/C0E4F880-5CFF-DD11-B561-0030487624FD.root',
+       '/store/data/Commissioning08/Cosmics/RAW-RECO/CRAFT_ALL_V9_SuperPointing_225-v3/0005/EAA9AE47-5FFF-DD11-A966-001A92810ADE.root',
+       '/store/data/Commissioning08/Cosmics/RAW-RECO/CRAFT_ALL_V9_SuperPointing_225-v3/0006/20993712-7C00-DE11-8BAA-003048678B5E.root',
+       '/store/data/Commissioning08/Cosmics/RAW-RECO/CRAFT_ALL_V9_SuperPointing_225-v3/0006/26B79166-7C00-DE11-AA81-0030486790A0.root',
+       '/store/data/Commissioning08/Cosmics/RAW-RECO/CRAFT_ALL_V9_SuperPointing_225-v3/0006/32C72A0C-7C00-DE11-B984-001731A288A1.root',
+       '/store/data/Commissioning08/Cosmics/RAW-RECO/CRAFT_ALL_V9_SuperPointing_225-v3/0006/36BDFBA4-7C00-DE11-A74E-001A92971BB8.root'
 
         )  )
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1) )
 
-process.p = cms.Path(process.MuonTOFFilter_trackQuality)
+process.p = cms.Path(process.fedInRunFilter*process.MuonTOFFilter_trackQuality)
 
 
         
