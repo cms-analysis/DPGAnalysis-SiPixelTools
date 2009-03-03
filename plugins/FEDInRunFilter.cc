@@ -13,7 +13,7 @@
 //
 // Original Author:  Freya Blekman
 //         Created:  Tue Mar  3 19:15:02 CET 2009
-// $Id$
+// $Id: FEDInRunFilter.cc,v 1.1 2009/03/03 19:30:42 fblekman Exp $
 //
 //
 
@@ -56,12 +56,12 @@ private:
 
   uint32_t totbpixfeds_;
   uint32_t totfpixfeds_;
-  uint32_t max_badfeds_fpix_;
   uint32_t max_badfeds_bpix_;
+  uint32_t max_badfeds_fpix_;
   uint32_t max_badfeds_;
 
-  uint64_t bookkeeping_[40];
-  uint64_t totevents_;
+  //  uint64_t bookkeeping_[40];
+  //  uint64_t totevents_;
   // ----------member data ---------------------------
 };
 
@@ -85,9 +85,9 @@ FEDInRunFilter::FEDInRunFilter(const edm::ParameterSet& iConfig)
   max_badfeds_(iConfig.getParameter<uint32_t>("maxBadFEDs"))
 {
    //now do what ever initialization is needed
-  totevents_=0;
-  for(int ifed=0; ifed<totbpixfeds_+totfpixfeds_;++ifed)
-    bookkeeping_[ifed]=0;
+  //  totevents_=0;
+  //  for(int ifed=0; ifed<totbpixfeds_+totfpixfeds_;++ifed)
+  //    bookkeeping_[ifed]=0;
 }
 
 
@@ -143,14 +143,14 @@ FEDInRunFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
   uint32_t nfpixfeds=0;
   // loop over all, they come in random order, unfortunately.
   for(size_t fedindex=0; fedindex< feds_.size(); fedindex++){
-    if(feds_[fedindex]>=totbpixfeds_+totfpixfeds_)
+    if((uint32_t)feds_[fedindex]>=totbpixfeds_+totfpixfeds_)
       continue;
-    if(feds_[fedindex]<totbpixfeds_)
+    if((uint32_t)feds_[fedindex]<totbpixfeds_)
       nbpixfeds++;
-    else if(feds_[fedindex]<totbpixfeds_+totfpixfeds_)
+    else if((uint32_t)feds_[fedindex]<totbpixfeds_+totfpixfeds_)
       nfpixfeds++;
     // keep track of number of passed events.
-    bookkeeping_[feds_[fedindex]]++;
+    //    bookkeeping_[feds_[fedindex]]++;
   }
   // use hard-coded values of the total numbers of FEDs (defined in constructor)
   edm::LogInfo("FEDInRunFilter::filter()") << "number of feds in run: BPIX " << nbpixfeds << ", FPIX " << nfpixfeds << std::endl;
