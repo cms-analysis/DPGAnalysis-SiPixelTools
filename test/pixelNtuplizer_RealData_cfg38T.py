@@ -17,8 +17,8 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 #process.GlobalTag.connect ="sqlite_file:/afs/cern.ch/user/m/malgeri/public/globtag/CRZT210_V1.db"
 process.GlobalTag.connect = "frontier://FrontierProd/CMS_COND_21X_GLOBALTAG"
-#process.GlobalTag.globaltag = "CRAFT_ALL_V9::All"
-process.GlobalTag.globaltag = "COSMMC_22X_V1::All"
+process.GlobalTag.globaltag = "CRAFT_ALL_V9::All"
+#process.GlobalTag.globaltag = "COSMMC_22X_V1::All"
 process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource','GlobalTag')
 
 ##
@@ -52,7 +52,7 @@ process.load("Alignment.OfflineValidation.TrackerOfflineValidation_cfi")
 
 
 process.load("DPGAnalysis.SiPixelTools.PixelNtuplizer_RealData_cfi")
-process.PixelNtuplizer_RealData.OutputFile = 'COSMMC_22X_SuperPointing_ntupl_2.root'
+process.PixelNtuplizer_RealData.OutputFile = 'CRAFT_ALL_V9_SuperPointing_225-v3.root'
 process.PixelNtuplizer_RealData.trajectoryInput = 'TrackRefitterP5'
 
 
@@ -63,9 +63,7 @@ process.source = cms.Source("PoolSource",
     #firstRun = cms.untracked.uint32(64108),
     #interval = cms.uint32(1),
     fileNames = cms.untracked.vstring(
-'rfio:/castor/cern.ch/user/v/vesna/REPROCESSING/Reprocessed_SuperPointingMC_COSMMC_22X_V1_1.root',
-'rfio:/castor/cern.ch/user/v/vesna/REPROCESSING/Reprocessed_SuperPointingMC_COSMMC_22X_V1_10.root'
-
+    '/store/data/Commissioning08/Cosmics/RAW-RECO/CRAFT_ALL_V9_SuperPointing_225-v3/0005/B8FB3273-5DFF-DD11-BEAB-00304875A7B5.root'
 
    
     ) )
