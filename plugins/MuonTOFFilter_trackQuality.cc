@@ -13,7 +13,7 @@
 //
 // Original Author:  Tanja ROMMERSKIRCHEN
 //         Created:  Wed Feb 25 11:59:48 CET 2009
-// $Id: MuonTOFFilter_trackQuality.cc,v 1.4 2009/03/04 13:51:43 trommers Exp $
+// $Id: MuonTOFFilter_trackQuality.cc,v 1.5 2009/03/04 14:58:28 trommers Exp $
 //
 //
 
@@ -261,7 +261,7 @@ void
 MuonTOFFilter_trackQuality::endJob() {
 
   std::stringstream buffer;
-  buffer << "statistics: " << std::endl;
+  buffer << "MuonTOFFilter_trackQuality: statistics: " << std::endl;
   buffer << " all events " << count_all_events << " good events " << count_good_events << " percentage " << (float)count_good_events/count_all_events << std::endl;
   buffer << " events rejected because not enough good muons " << notenough_good_muons << std::endl;
   buffer << " events rejected because out of time " << outOfTime_events <<endl;

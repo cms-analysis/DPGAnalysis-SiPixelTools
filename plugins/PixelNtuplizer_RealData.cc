@@ -659,9 +659,9 @@ void PixelNtuplizer_RealData::fillTrackOnly(const edm::Event& iEvent, const edm:
   trackonly_.muondT0=muoninfo_.errorTime[0];
   if(muoninfo_.nMuon==1)
     return;
-  if(muoninfo_.errorTime[1]< muoninfo_.errorTime[2]){
-    trackonly_.muonT0=muoninfo_.timeAtIpInOut[0];
-    trackonly_.muondT0=muoninfo_.errorTime[0];
+  if(muoninfo_.errorTime[1]< muoninfo_.errorTime[0]){
+    trackonly_.muonT0=muoninfo_.timeAtIpInOut[1];
+    trackonly_.muondT0=muoninfo_.errorTime[1];
   }
   
   // load trackassociation from event, get muon out and read timing

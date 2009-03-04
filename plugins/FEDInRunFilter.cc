@@ -13,7 +13,7 @@
 //
 // Original Author:  Freya Blekman
 //         Created:  Tue Mar  3 19:15:02 CET 2009
-// $Id: FEDInRunFilter.cc,v 1.1 2009/03/03 19:30:42 fblekman Exp $
+// $Id: FEDInRunFilter.cc,v 1.2 2009/03/03 19:37:49 fblekman Exp $
 //
 //
 
@@ -60,8 +60,9 @@ private:
   uint32_t max_badfeds_fpix_;
   uint32_t max_badfeds_;
 
-  //  uint64_t bookkeeping_[40];
-  //  uint64_t totevents_;
+  uint64_t bookkeeping_[40];
+  uint64_t totevents_;
+  uint64_t goodevents_;
   // ----------member data ---------------------------
 };
 
@@ -85,9 +86,11 @@ FEDInRunFilter::FEDInRunFilter(const edm::ParameterSet& iConfig)
   max_badfeds_(iConfig.getParameter<uint32_t>("maxBadFEDs"))
 {
    //now do what ever initialization is needed
-  //  totevents_=0;
-  //  for(int ifed=0; ifed<totbpixfeds_+totfpixfeds_;++ifed)
-  //    bookkeeping_[ifed]=0;
+  totevents_=0;
+  goodevents_=0;
+  
+  for(int ifed=0; ifed<totbpixfeds_+totfpixfeds_;++ifed)
+    bookkeeping_[ifed]=0;
 }
 
 
@@ -150,8 +153,9 @@ FEDInRunFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
     else if((uint32_t)feds_[fedindex]<totbpixfeds_+totfpixfeds_)
       nfpixfeds++;
     // keep track of number of passed events.
-    //    bookkeeping_[feds_[fedindex]]++;
+    bookkeeping_[feds_[fedindex]]++;
   }
+  totevents_++;
   // use hard-coded values of the total numbers of FEDs (defined in constructor)
   edm::LogInfo("FEDInRunFilter::filter()") << "number of feds in run: BPIX " << nbpixfeds << ", FPIX " << nfpixfeds << std::endl;
   if(nbpixfeds-totbpixfeds_> max_badfeds_bpix_){
@@ -166,6 +170,7 @@ FEDInRunFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
     //    std::cout << "number of feds in run: BPIX " << nbpixfeds << ", FPIX " << nfpixfeds << " returning false"<< std::endl;
     return false;
   }
+  goodevents_++;
   //  std::cout<< "number of feds in run: BPIX " << nbpixfeds << ", FPIX " << nfpixfeds  << " returning true" << std::endl;
   return true;
 }
@@ -180,8 +185,16 @@ FEDInRunFilter::beginJob(const edm::EventSetup&)
 void 
 FEDInRunFilter::endJob() {
 
-  //  for(int ifed=0; ifed<totbpixfeds_+totfpixfeds_;++ifed)
-  //    std::cout << "fed " << ifed << " was in " << bookkeeping_[ifed] << " events." << std::endl;
+  std::stringstream buffer;
+  buffer << "FEDInRunFilter: statistics: " << std::endl;
+  buffer << "total number of events processed is : " << totevents_<< ", of which " << goodevents_ << " (" << 100*goodevents_/(double)totevents_ << "%) passed the following criteria:" << std::endl;
+  buffer << "max number of bad FEDs in the entire Pixel detector:" << max_badfeds_ << std::endl;
+  buffer << "max number of bad FEDs in the BPIX:" << max_badfeds_bpix_ << std::endl;
+  buffer << "max number of bad FEDs in the FPIX:" << max_badfeds_fpix_ << std::endl;
+  buffer<< "breakdown per FED: " << std::endl;
+  for(int ifed=0; ifed<totbpixfeds_+totfpixfeds_;++ifed)
+    buffer << "FED " << ifed << " was in " << bookkeeping_[ifed] << " (" << 100*bookkeeping_[ifed]/(double)totevents_<< "%) events." << std::endl;
+  edm::LogInfo("FEDInRunFilter")<< buffer.str() ;
   
 }
 
