@@ -34,6 +34,9 @@ process.load("Configuration.StandardSequences.ReconstructionCosmics_cff")
 process.load("DPGAnalysis.SiPixelTools.muonTOF_cfi")
 process.load("DPGAnalysis.SiPixelTools.FEDInRunFilter_cfi")
 process.MuonTOFFilter_trackQuality.max_goodmuons = 2
+process.MuonTOFFilter_trackQuality.max_timeError = 15
+process.MuonTOFFilter_trackQuality.max_chi2_ndof = 15
+
 
 process.source = cms.Source("PoolSource",
 
