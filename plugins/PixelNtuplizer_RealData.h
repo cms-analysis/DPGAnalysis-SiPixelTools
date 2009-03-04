@@ -18,6 +18,7 @@
 #include "TrackingTools/TrackAssociator/interface/TrackAssociatorParameters.h"
 #include "TrackingTools/TrackAssociator/interface/TrackDetectorAssociator.h"
 #include "TObject.h"
+#include "TH1D.h"
 
 using namespace reco;
 class TTree;
@@ -58,7 +59,7 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
   // muon association.
     
 
-  TFile* tfile_;
+  TH1D *dummyhist;
   TTree* t_;  // tree filled on every pixel rec hit
   //  TTree* ts_; // tree filled on every strip rec hit
   TTree* tt_; // tree filled every track

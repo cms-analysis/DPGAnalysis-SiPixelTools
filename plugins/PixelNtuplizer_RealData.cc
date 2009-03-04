@@ -25,6 +25,9 @@
 #include "Geometry/TrackerTopology/interface/RectangularPixelTopology.h"
 #include "PhysicsTools/UtilAlgos/interface/PhysObjectMatcher.h"
 #include "TrackingTools/TrackAssociator/interface/TrackDetectorAssociator.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "PhysicsTools/UtilAlgos/interface/TFileService.h"
+
 
 // For ROOT
 #include <TROOT.h>
@@ -44,8 +47,8 @@ using namespace reco;
 
 PixelNtuplizer_RealData::PixelNtuplizer_RealData(edm::ParameterSet const& iConfig) : 
   conf_(iConfig),
-  tfile_(0), 
   t_(0),
+  tt_(0),
   maxsize_PixInfoStruct_(200)
 {
   useAllPixel = iConfig.getParameter<bool>("useAllPixel");
@@ -59,11 +62,6 @@ PixelNtuplizer_RealData::~PixelNtuplizer_RealData() { }
 void PixelNtuplizer_RealData::endJob() 
 {
 
-  std::string outputFileName = conf_.getParameter<std::string>("OutputFile");
-  std::cout << " PixelNtuplizer_RealData::endJob" << std::endl;
-  tfile_->Write();
-  tfile_->Close();
-
 }
 
 
@@ -73,9 +71,11 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
   es.get<IdealMagneticFieldRecord>().get(magneticField_);
 
   // put here whatever you want to do at the beginning of the job
-  std::string outputFile = conf_.getParameter<std::string>("OutputFile");
-  tfile_ = new TFile ( outputFile.c_str() , "RECREATE" );
+  edm::Service<TFileService> fs;
+  // a 'feature' of TFileService is that it does not like to add trees until a histogram is also created.
+  dummyhist = fs->make<TH1D>("number_of_events","number of events",1,0,1);
 
+    // but after that it is ok to create a tree..
   t_ = new TTree("PixNtuple", "Pixel hit analyzer ntuple");
   //  ts_ = new TTree("StripNtuple", "Strip hit analyzer ntuple");
   tt_ = new TTree("TrackNtuple", "Counters filled every track");
@@ -87,13 +87,13 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
   
   t_->Branch("det", &det_, "thickness/F:cols/I:rows/I:layer/I:ladder/I:module/I:disk/I:blade/I:panel/I:plaquette/I", bufsize);
 
-  std::cout << "Making vertex branch:" << std::endl;
+  //  std::cout << "Making vertex branch:" << std::endl;
   t_->Branch("vertex",   &vertex_,   "r/F:z", bufsize);
 
-  std::cout << "Making cluster branch:" << std::endl;
+  //  std::cout << "Making cluster branch:" << std::endl;
   t_->Branch("Cluster", &clust_, "row/F:col:x:y:charge:normalized_charge:size/I:size_x:size_y:maxPixelCol:maxPixelRow:minPixelCol:minPixelRow:geoId/i:edgeHitX/I:edgeHitY:clust_alpha/F:clust_beta:n_neighbour_clust/I", bufsize);
   
-  std::cout << "Making pixinfo branch:" << std::endl;
+  //  std::cout << "Making pixinfo branch:" << std::endl;
   t_->Branch("npix", &pixinfo_.npix, "npix/I", bufsize);
   t_->Branch("hasOverFlow",&pixinfo_.hasOverFlow, "hasOverFlow/I",bufsize);
   t_->Branch("rowpix", pixinfo_.row, "row[npix]/F", bufsize);
@@ -107,7 +107,7 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
 
 
   if(useAllPixel == true){
-    std::cout << "Making allpixinfo branch:" << std::endl;
+    //    std::cout << "Making allpixinfo branch:" << std::endl;
     t_->Branch("allpix_npix", &allpixinfo_.allpix_npix, "allpix_npix/I", bufsize);
     t_->Branch("allpix_hasOverFlow",&allpixinfo_.allpix_hasOverFlow, "allpix_hasOverFlow/I",bufsize);
     t_->Branch("allpixInfo",&allpixinfo_,"allpix_row[200]/F:allpix_col[200]/F:allpix_adc[200]/F",bufsize);
@@ -119,7 +119,7 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
   //t_->Branch("allpix_colpix", allpixinfo_.allpix_col, "allpix_col[allpix_npix]/F", bufsize);
   //t_->Branch("allpix_adc"   , allpixinfo_.allpix_adc, "allpix_adc[allpix_npix]/F", bufsize);
 
- std::cout << "Making allclustinfo branch:" << std::endl;
+  // std::cout << "Making allclustinfo branch:" << std::endl;
 
  //  t_->Branch("allclustInfo",&allclustinfo_,"allclust_row[100]/F:allclust_col[100]:allclust_x[100]:allclust_y[100]:allclust_charge[100]:allclust_nor_charge[100]:allclust_size[100]:allclust_size_x[100]:allclust_size_y[100]:allclust_maxPixelCol[100]:allclust_maxPixelRow[100]:allclust_minPixelCol[10000]:allclust_minPixelRow[100]:allclust_geoId[100]:allclust_edgeHitX[100]:allclust_edgeHitY[100]:allclust_dist[100]",bufsize);
 
@@ -148,24 +148,24 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
   
 
 
-  std::cout << "Making muon branch:" << std::endl;
+  //  std::cout << "Making muon branch:" << std::endl;
   t_->Branch("MuonInfo",&muoninfo_,"timeAtIpInOut[2]/F:errorTime[2]/F:IsGlobalMuon[2]/F:IsStandAloneMuon[2]/F:IsTrackerMuon[2]/F:IsTimeValid[2]/F:HasGlobalTrack[2]/F:HasPixelHit[2]/F:trackpt[2]/F:tracketa[2]/F:trackphi[2]/F",bufsize);
   t_->Branch("nMuon",&muoninfo_.nMuon,"nMuon/I",bufsize);
   t_->Branch("nMuonHasOverFlow",&muoninfo_.HasOverFlow,"nMuonHasOverFlow/I",bufsize);
 
-  std::cout << "Making rechit branch:" << std::endl;
+  //  std::cout << "Making rechit branch:" << std::endl;
   t_->Branch("RecHit", &rechit_, "localX/F:localY:globalX:globalY:globalZ:residualX:residualY:resErrX:resErrY:hit_errX:hit_errY:resXprime:resXprimeErr", bufsize);
 
-  std::cout << "Making track branch:" << std::endl;
+  //  std::cout << "Making track branch:" << std::endl;
   t_->Branch("track", &track_, "pt/F:p:px:py:pz:globalTheta:globalEta:globalPhi:localTheta:localPhi:chi2:ndof:foundHits/I:tracknum", bufsize);
 
   //  std::cout << "Making tracker hit branch:" << std::endl;
   //  ts_->Branch("TrackerHit", &trackerhits_, "globalX/F:globalY:globalZ:run/I:evtnum:tracknum", bufsize);
 
-  std::cout << "Making track only branch:" << std::endl;
+  //  std::cout << "Making track only branch:" << std::endl;
   tt_->Branch("TrackInfo", &trackonly_, "run/I:evtnum:tracknum:pixelTrack:NumPixelHits:NumStripHits:charge:chi2/F:ndof:theta:d0:dz:p:pt:px:py:pz:phi:eta:vx:vy:vz:muonT0:muondT0", bufsize);
   
-  std::cout << "Made all branches." << std::endl;
+  edm::LogInfo("PixelNuplizer_RealData") << "Made all branches." << std::endl;
 
 
  
@@ -284,9 +284,10 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 {
   // std::cout << " here " << endl;
   int TrackNumber = 0;
+  dummyhist->Fill(0.5);
   maxsize_AllPixInfoStruct_ = 200;
   maxsize_AllClustInfoStruct_ = 100;
-
+  
  
   for(int i = 0; i < maxsize_AllPixInfoStruct_; i++){
     allpixinfo_.allpix_row[i] = -999;

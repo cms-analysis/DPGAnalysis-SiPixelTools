@@ -28,6 +28,8 @@
 <use name=DataFormats/TrajectorySeed>
 <use name=SimTracker/TrackerHitAssociation>
 <use name=Alignment/OfflineValidation>
+<use name=PhysicsTools/UtilAlgos>
+<use name=FWCore/ServiceRegistry> 
 <use name=clhep>
 <use name=boost>
 <use name=root>
