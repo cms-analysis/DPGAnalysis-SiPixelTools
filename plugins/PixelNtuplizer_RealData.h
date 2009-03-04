@@ -67,6 +67,9 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
   float rms[5][15][5][15];
   float points[5][15][5][15];
   
+
+  bool useAllPixel;
+
   void init();
   
   //--- Structures for ntupling:

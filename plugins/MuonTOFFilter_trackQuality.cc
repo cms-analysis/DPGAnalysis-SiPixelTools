@@ -13,7 +13,7 @@
 //
 // Original Author:  Tanja ROMMERSKIRCHEN
 //         Created:  Wed Feb 25 11:59:48 CET 2009
-// $Id: MuonTOFFilter_trackQuality.cc,v 1.3 2009/03/03 18:28:46 trommers Exp $
+// $Id: MuonTOFFilter_trackQuality.cc,v 1.4 2009/03/04 13:51:43 trommers Exp $
 //
 //
 
@@ -152,15 +152,16 @@ MuonTOFFilter_trackQuality::filter(edm::Event& iEvent, const edm::EventSetup& iS
     
     for(MuonCollection::const_iterator it = MuonHandle->begin(), itEnd = MuonHandle->end(); it!=itEnd;++it){
       all_muons++;
-
-      if(!it->globalTrack() == false){
-	if(it->globalTrack()->chi2()/it->globalTrack()->ndof() >  max_chi2_ndof) {
-	  LogDebug("MuonTOFFilter_trackQuality") << " muon rejected because chi1/ndof to large! chi2/ndof " <<it->globalTrack()->chi2()/it->globalTrack()->ndof()   << " required chi2/ndof " << max_chi2_ndof  << " chi2 " <<it->globalTrack()->chi2() << " ndof " << it->globalTrack()->ndof() <<  std::endl;
+      
+      /*
+      if(!it->track() == false){
+	if(it->track()->chi2()/it->track()->ndof() >  max_chi2_ndof) {
+	  LogDebug("MuonTOFFilter_trackQuality") << " muon rejected because chi1/ndof to large! chi2/ndof " <<it->track()->chi2()/it->track()->ndof()   << " required chi2/ndof " << max_chi2_ndof  << " chi2 " <<it->track()->chi2() << " ndof " << it->track()->ndof() <<  std::endl;
 	  muon_chi2TooLarge++;
 	  continue;
 	}
-	if(it->globalTrack()->pt() < min_trk_pt){
-	  LogDebug("MuonTOFFilter_trackQuality") << " muon rejected because pt to small! pt " << it->globalTrack()->pt() << " required pt " << min_trk_pt<< std::endl;
+	if(it->track()->pt() < min_trk_pt){
+	  LogDebug("MuonTOFFilter_trackQuality") << " muon rejected because pt to small! pt " << it->track()->pt() << " required pt " << min_trk_pt<< std::endl;
 	  muon_ptTooSmall++;
 	  continue;
 	}
@@ -170,6 +171,7 @@ MuonTOFFilter_trackQuality::filter(edm::Event& iEvent, const edm::EventSetup& iS
 	muon_noValidTrack++;
 	continue;
       }
+      */
 
       if(it->isTimeValid() == true){//check if muon has a valid time information
 
@@ -260,7 +262,7 @@ MuonTOFFilter_trackQuality::endJob() {
 
   std::stringstream buffer;
   buffer << "statistics: " << std::endl;
-  buffer << " all events " << count_all_events << " good events " << count_good_events << std::endl;
+  buffer << " all events " << count_all_events << " good events " << count_good_events << " percentage " << (float)count_good_events/count_all_events << std::endl;
   buffer << " events rejected because not enough good muons " << notenough_good_muons << std::endl;
   buffer << " events rejected because out of time " << outOfTime_events <<endl;
   buffer << " all muons " << all_muons << " ~muons/event " << (float)all_muons/count_all_events << std::endl;
