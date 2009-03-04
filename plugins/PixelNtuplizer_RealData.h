@@ -1,4 +1,3 @@
-
 #ifndef PixelNtuplizer_RD_h
 #define PixelNtuplizer_RD_h
 
@@ -50,7 +49,7 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
   void fillTrack(TrajectoryStateOnSurface&,const Trajectory&, int);
   
   bool isValidMuonAssoc(const edm::Event& iEvent);		   
-  bool isOffTrackHits(const edm::Event& iEvent, const edm::EventSetup& iSetup,const RectangularPixelTopology*, uint32_t geoId );		   
+  bool isOffTrackHits(const edm::Event& iEvent,const SiPixelCluster& matchIt, const edm::EventSetup& iSetup,const RectangularPixelTopology*, uint32_t geoId, TrajectoryStateOnSurface& tsos );		   
 
  private:
   edm::ParameterSet conf_;
@@ -165,34 +164,49 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
  struct AllClustStruct
   {
     //    int n_allclust; // should be the same as n_neighbour_clust 
-    float allclust_row[10000];
-    float allclust_col[10000];
-    float allclust_x[10000];
-    float allclust_y[10000];
-    float allclust_charge[10000];
-    float allclust_nor_charge[10000];
-    int allclust_size[10000];
-    int allclust_size_x[10000];
-    int allclust_size_y[10000];
-    int allclust_maxPixelCol[10000];
-    int allclust_maxPixelRow[10000];
-    int allclust_minPixelCol[10000];
-    int allclust_minPixelRow[10000];
-    uint32_t allclust_geoId[10000];
-    int allclust_edgeHitX[10000];
-    int allclust_edgeHitY[10000];    
-    float allclust_dist[10000];
+    float allclust_row[100];
+    float allclust_col[100];
+    float allclust_x[100];
+    float allclust_y[100];
+    float allclust_charge[100];
+    float allclust_nor_charge[100];
+    float allclust_size[100];
+    float allclust_size_x[100];
+    float allclust_size_y[100];
+    float allclust_maxPixelCol[100];
+    float allclust_maxPixelRow[100];
+    float allclust_minPixelCol[100];
+    float allclust_minPixelRow[100];
+    float allclust_geoId[100];
+    float allclust_edgeHitX[100];
+    float allclust_edgeHitY[100];    
+    float allclust_dist[100];
     int allclust_hasOverFlow;
     int n_allclust;
 
     void init(){ 
       n_allclust = 0;
       allclust_hasOverFlow = false;
-      allclust_row[0] = allclust_col[0] = allclust_x[0] = allclust_y[0] = allclust_charge[0] = allclust_nor_charge[0] = 0.0;
-      allclust_size[0] = allclust_size_x[0] =  allclust_size_y[0] = allclust_maxPixelCol[0] = allclust_maxPixelRow[0] = allclust_minPixelCol[0] = allclust_minPixelRow[0] = 0;
-      allclust_geoId[0] = 0;
-      allclust_edgeHitX[0] = allclust_edgeHitY[0] =  0;
-      allclust_dist[0] = 0.0;
+    
+       for(int i = 0; i < 100; i++){
+    allclust_row[i]=-999;
+    allclust_col[i]=-999;
+     allclust_x[i]=-999;
+     allclust_y[i]=-999;
+     allclust_charge[i]=-999;
+     allclust_nor_charge[i]=-999;
+     allclust_size[i]=-999;
+     allclust_size_x[i]=-999;
+     allclust_size_y[i]=-999;
+     allclust_maxPixelCol[i]=-999;
+     allclust_maxPixelRow[i]=-999;
+     allclust_minPixelCol[i]=-999;
+     allclust_minPixelRow[i]=-999;
+     allclust_geoId[i]=-999;
+     allclust_edgeHitX[i]=-999;
+     allclust_edgeHitY[i]=-999;    
+     allclust_dist[i]=-999;
+  }
 							 
 
     }
@@ -202,9 +216,9 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
  struct AllPixInfoStruct 
   {
     //int allpix_npix;
-    float allpix_row[10000];
-    float allpix_col[10000];
-    float allpix_adc[10000];
+    float allpix_row[200];
+    float allpix_col[200];
+    float allpix_adc[200];
     int allpix_hasOverFlow;
     int allpix_npix;
 

@@ -106,14 +106,21 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
   std::cout << "Making allpixinfo branch:" << std::endl;
   t_->Branch("allpix_npix", &allpixinfo_.allpix_npix, "allpix_npix/I", bufsize);
   t_->Branch("allpix_hasOverFlow",&allpixinfo_.allpix_hasOverFlow, "allpix_hasOverFlow/I",bufsize);
-  t_->Branch("allpix_rowpix", allpixinfo_.allpix_row, "allpix_row[allpix_npix]/F", bufsize);
-  t_->Branch("allpix_colpix", allpixinfo_.allpix_col, "allpix_col[allpix_npix]/F", bufsize);
-  t_->Branch("allpix_adc"   , allpixinfo_.allpix_adc, "allpix_adc[allpix_npix]/F", bufsize);
+  t_->Branch("allpixInfo",&allpixinfo_,"allpix_row[200]/F:allpix_col[200]/F:allpix_adc[200]/F",bufsize);
+
+  // t_->Branch("allpix_npix", &allpixinfo_.allpix_npix, "allpix_npix/I", bufsize);
+  //  t_->Branch("allpix_hasOverFlow",&allpixinfo_.allpix_hasOverFlow, "allpix_hasOverFlow/I",bufsize);
+  //t_->Branch("allpix_rowpix", allpixinfo_.allpix_row, "allpix_row[allpix_npix]/F", bufsize);
+  //t_->Branch("allpix_colpix", allpixinfo_.allpix_col, "allpix_col[allpix_npix]/F", bufsize);
+  //t_->Branch("allpix_adc"   , allpixinfo_.allpix_adc, "allpix_adc[allpix_npix]/F", bufsize);
 
  std::cout << "Making allclustinfo branch:" << std::endl;
 
-  t_->Branch("n_allclust"          , &allclustinfo_.n_allclust         , "n_allclust/I"                           , bufsize);
+ //  t_->Branch("allclustInfo",&allclustinfo_,"allclust_row[100]/F:allclust_col[100]:allclust_x[100]:allclust_y[100]:allclust_charge[100]:allclust_nor_charge[100]:allclust_size[100]:allclust_size_x[100]:allclust_size_y[100]:allclust_maxPixelCol[100]:allclust_maxPixelRow[100]:allclust_minPixelCol[10000]:allclust_minPixelRow[100]:allclust_geoId[100]:allclust_edgeHitX[100]:allclust_edgeHitY[100]:allclust_dist[100]",bufsize);
+
   t_->Branch("allclust_hasOverFlow", &allclustinfo_.allclust_hasOverFlow, "allclust_hasOverFlow/I"                 , bufsize);
+  t_->Branch("n_allclust"          , &allclustinfo_.n_allclust         , "n_allclust/I"                           , bufsize);
+  
   
   t_->Branch("allclust_row"        , allclustinfo_.allclust_row        , "allclust_row[n_allclust]/F"        , bufsize);
   t_->Branch("allclust_col"        , allclustinfo_.allclust_col        , "allclust_col[n_allclust]/F"        , bufsize);
@@ -121,19 +128,19 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
   t_->Branch("allclust_y"          , allclustinfo_.allclust_y          , "allclust_y[n_allclust]/F"          , bufsize);
   t_->Branch("allclust_charge"     , allclustinfo_.allclust_charge     , "allclust_charge[n_allclust]/F"     , bufsize);
   t_->Branch("allclust_nor_charge" , allclustinfo_.allclust_nor_charge , "allclust_nor_charge[n_allclust]/F" , bufsize);
-  t_->Branch("allclust_size"       , allclustinfo_.allclust_size       , "allclust_size[n_allclust]/I"       , bufsize);
-  t_->Branch("allclust_size_x"     , allclustinfo_.allclust_size_x     , "allclust_size_x[n_allclust]/I"     , bufsize);
-  t_->Branch("allclust_size_y"     , allclustinfo_.allclust_size_y     , "allclust_size_y[n_allclust]/I"     , bufsize);
-  t_->Branch("allclust_maxPixelCol", allclustinfo_.allclust_maxPixelCol, "allclust_maxPixelCol[n_allclust]/I", bufsize);
-  t_->Branch("allclust_maxPixelRow", allclustinfo_.allclust_maxPixelRow, "allclust_maxPixelRow[n_allclust]/I", bufsize);
-  t_->Branch("allclust_minPixelCol", allclustinfo_.allclust_minPixelCol, "allclust_minPixelCol[n_allclust]/I", bufsize);
-  t_->Branch("allclust_minPixelRow", allclustinfo_.allclust_minPixelRow, "allclust_minPixelRow[n_allclust]/I", bufsize);
-  t_->Branch("allclust_geoId"      , allclustinfo_.allclust_geoId      , "allclust_geoId[n_allclust]/I"      , bufsize);
-  t_->Branch("allclust_edgeHitX"   , allclustinfo_.allclust_edgeHitX   , "allclust_edgeHitX[n_allclust]/I"   , bufsize);
-  t_->Branch("allclust_edgeHitY"   , allclustinfo_.allclust_edgeHitY   , "allclust_edgeHitY[n_allclust]/I"   , bufsize);
+  t_->Branch("allclust_size"       , allclustinfo_.allclust_size       , "allclust_size[n_allclust]/F"       , bufsize);
+  t_->Branch("allclust_size_x"     , allclustinfo_.allclust_size_x     , "allclust_size_x[n_allclust]/F"     , bufsize);
+  t_->Branch("allclust_size_y"     , allclustinfo_.allclust_size_y     , "allclust_size_y[n_allclust]/F"     , bufsize);
+  t_->Branch("allclust_maxPixelCol", allclustinfo_.allclust_maxPixelCol, "allclust_maxPixelCol[n_allclust]/F", bufsize);
+  t_->Branch("allclust_maxPixelRow", allclustinfo_.allclust_maxPixelRow, "allclust_maxPixelRow[n_allclust]/F", bufsize);
+  t_->Branch("allclust_minPixelCol", allclustinfo_.allclust_minPixelCol, "allclust_minPixelCol[n_allclust]/F", bufsize);
+  t_->Branch("allclust_minPixelRow", allclustinfo_.allclust_minPixelRow, "allclust_minPixelRow[n_allclust]/F", bufsize);
+  t_->Branch("allclust_geoId"      , allclustinfo_.allclust_geoId      , "allclust_geoId[n_allclust]/F"      , bufsize);
+  t_->Branch("allclust_edgeHitX"   , allclustinfo_.allclust_edgeHitX   , "allclust_edgeHitX[n_allclust]/F"   , bufsize);
+  t_->Branch("allclust_edgeHitY"   , allclustinfo_.allclust_edgeHitY   , "allclust_edgeHitY[n_allclust]/F"   , bufsize);
   t_->Branch("allclust_dist"       , allclustinfo_.allclust_dist       , "allclust_dist[n_allclust]/F"       , bufsize);
 
-
+  
 
 
 
@@ -293,9 +300,18 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 {
   // std::cout << " here " << endl;
   int TrackNumber = 0;
-  maxsize_AllPixInfoStruct_ = 10000;
-  maxsize_AllClustInfoStruct_ = 10000;
-  
+  maxsize_AllPixInfoStruct_ = 200;
+  maxsize_AllClustInfoStruct_ = 100;
+
+ 
+  for(int i = 0; i < maxsize_AllPixInfoStruct_; i++){
+    allpixinfo_.allpix_row[i] = -999;
+    allpixinfo_.allpix_col[i] = -999;
+    allpixinfo_.allpix_adc[i] = -999;
+  }
+
+	init();
+
   trackonly_.init();
 
   edm::Handle<TrajTrackAssociationCollection> trajTrackCollectionHandle;
@@ -425,7 +441,7 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 
 		isValidMuonAssoc(iEvent);
 
-		isOffTrackHits(iEvent, iSetup,topol,theGeomDet->geographicalId().rawId());
+		isOffTrackHits(iEvent,*clust, iSetup,topol,theGeomDet->geographicalId().rawId(),tsos);
 
 
                 // get the contents
@@ -464,7 +480,7 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
  }  // end analyze function
 
 
-bool PixelNtuplizer_RealData::isOffTrackHits(const edm::Event& iEvent, const edm::EventSetup & iSetup,const RectangularPixelTopology* topol, uint32_t geoId ){
+bool PixelNtuplizer_RealData::isOffTrackHits(const edm::Event& iEvent,const SiPixelCluster& clust, const edm::EventSetup & iSetup,const RectangularPixelTopology* topol, uint32_t geoId, TrajectoryStateOnSurface& tsos ){
   
   edm::ESHandle<TrackerGeometry> pDD;
   iSetup.get<TrackerDigiGeometryRecord> ().get (pDD);
@@ -472,6 +488,29 @@ bool PixelNtuplizer_RealData::isOffTrackHits(const edm::Event& iEvent, const edm
 
   allpixinfo_.allpix_hasOverFlow = 0;
   allclustinfo_.allclust_hasOverFlow = 0;
+
+  allclustinfo_.n_allclust = 0;
+  allpixinfo_.allpix_npix = 0;
+
+  // calculate alpha and beta from cluster position
+  LocalTrajectoryParameters ltp = tsos.localParameters();
+  LocalVector localDir = ltp.momentum()/ltp.momentum().mag();
+
+  float locx = localDir.x();
+  float locy = localDir.y();
+  float locz = localDir.z();
+  //float loctheta = localDir.theta(); // currently unused
+
+  float clust_alpha = atan2( locz, locx );
+  float clust_beta = atan2( locz, locy );
+
+  LocalPoint lpc = topol->localPosition(MeasurementPoint(clust.x(),clust.y()));
+  float clust_x = lpc.x();
+  float clust_y = lpc.y();
+
+  if(clust_x > 1000) cout << " not valid x too large "<< clust_x << endl;
+
+
 
  //-----Iterate over detunits
 			  //cout << endl << "Start search for det unit..." << endl;
@@ -522,33 +561,33 @@ bool PixelNtuplizer_RealData::isOffTrackHits(const edm::Event& iEvent, const edm
 					  
 					  allclustinfo_.allclust_charge[n_clust-1] = pixeliter->cluster()->charge()/1000.0;     
 					  allclustinfo_.allclust_nor_charge[n_clust-1] = pixeliter->cluster()->charge() * 
-					    sqrt( 1.0 / ( 1.0/pow( tan(clust_.clust_alpha), 2 ) + 
-							  1.0/pow( tan(clust_.clust_beta ), 2 ) + 
+					    sqrt( 1.0 / ( 1.0/pow( tan(clust_alpha), 2 ) + 
+							  1.0/pow( tan(clust_beta ), 2 ) + 
 							  1.0 )
 						  );
 					  
-				          allclustinfo_.allclust_size[n_clust-1] = pixeliter->cluster()->size();       
-				          allclustinfo_.allclust_size_x[n_clust-1] = pixeliter->cluster()->sizeX();     
-					  allclustinfo_.allclust_size_y[n_clust-1] = pixeliter->cluster()->sizeY();     
-					  allclustinfo_.allclust_maxPixelCol[n_clust-1] = pixeliter->cluster()->maxPixelCol();
-					  allclustinfo_.allclust_maxPixelRow[n_clust-1] = pixeliter->cluster()->maxPixelRow();
-					  allclustinfo_.allclust_minPixelCol[n_clust-1] = pixeliter->cluster()->minPixelCol();
-					  allclustinfo_.allclust_minPixelRow[n_clust-1] = pixeliter->cluster()->minPixelRow();
-					  allclustinfo_.allclust_geoId[n_clust-1] = detId.rawId();      
-					  allclustinfo_.allclust_edgeHitX[n_clust-1] = (int)(topol->isItEdgePixelInX(clust_.minPixelRow) || 
-											     topol->isItEdgePixelInX(clust_.maxPixelRow));
-					  allclustinfo_.allclust_edgeHitY[n_clust-1] = (int)(topol->isItEdgePixelInY(clust_.minPixelCol) || 
-											     topol->isItEdgePixelInY(clust_.maxPixelCol));
+				          allclustinfo_.allclust_size[n_clust-1] = (float)pixeliter->cluster()->size();       
+				          allclustinfo_.allclust_size_x[n_clust-1] = (float)pixeliter->cluster()->sizeX();     
+					  allclustinfo_.allclust_size_y[n_clust-1] = (float)pixeliter->cluster()->sizeY();     
+					  allclustinfo_.allclust_maxPixelCol[n_clust-1] = (float)pixeliter->cluster()->maxPixelCol();
+					  allclustinfo_.allclust_maxPixelRow[n_clust-1] = (float)pixeliter->cluster()->maxPixelRow();
+					  allclustinfo_.allclust_minPixelCol[n_clust-1] = (float)pixeliter->cluster()->minPixelCol();
+					  allclustinfo_.allclust_minPixelRow[n_clust-1] = (float)pixeliter->cluster()->minPixelRow();
+					  allclustinfo_.allclust_geoId[n_clust-1] = (float)detId.rawId();      
+					  allclustinfo_.allclust_edgeHitX[n_clust-1] = (float)(int)(topol->isItEdgePixelInX(clust.minPixelRow()) || 
+											     topol->isItEdgePixelInX(clust.maxPixelRow()));
+					  allclustinfo_.allclust_edgeHitY[n_clust-1] = (float)(int)(topol->isItEdgePixelInY(clust.minPixelCol()) || 
+											     topol->isItEdgePixelInY(clust.maxPixelCol()));
 					  
 					  
 					 
 					  allclustinfo_.allclust_dist[n_clust-1] 
-					    = sqrt( (clust_.x - allclustinfo_.allclust_x[n_clust-1])*
-						    (clust_.x - allclustinfo_.allclust_x[n_clust-1]) +
-						    (clust_.y - allclustinfo_.allclust_y[n_clust-1])*
-						    (clust_.y - allclustinfo_.allclust_y[n_clust-1]) );
+					    = sqrt( (clust_x - allclustinfo_.allclust_x[n_clust-1])*
+						    (clust_x - allclustinfo_.allclust_x[n_clust-1]) +
+						    (clust_y - allclustinfo_.allclust_y[n_clust-1])*
+						    (clust_y - allclustinfo_.allclust_y[n_clust-1]) );
 
-					  // std::cout << " distance " << allclustinfo_.allclust_dist[n_clust-1] << std::endl;
+					  // std::cout << " distance " << allclustinfo_.allclust_dist[n_clust-1] << "clustx " << clust_x << " allclust dist " << allclustinfo_.allclust_x[n_clust-1] << std::endl;
 
 
 					    const std::vector<SiPixelCluster::Pixel>& pixvector = pixeliter->cluster()->pixels();
@@ -628,6 +667,22 @@ void PixelNtuplizer_RealData::fillTrackOnly(const edm::Event& iEvent, const edm:
   trackonly_.vy = track.vy();
   trackonly_.vz = track.vz();
 
+  trackonly_.muonT0=-1000;
+  trackonly_.muondT0=0;
+  if(muoninfo_.nMuon==0)
+    return;
+  trackonly_.muonT0=muoninfo_.timeAtIpInOut[0];
+  trackonly_.muondT0=muoninfo_.errorTime[0];
+  if(muoninfo_.nMuon==1)
+    return;
+  if(muoninfo_.errorTime[1]< muoninfo_.errorTime[2]){
+    trackonly_.muonT0=muoninfo_.timeAtIpInOut[0];
+    trackonly_.muondT0=muoninfo_.errorTime[0];
+  }
+  
+  // load trackassociation from event, get muon out and read timing
+
+  // TO DO
   
 }
 
@@ -830,18 +885,7 @@ void PixelNtuplizer_RealData::PixInfoStruct::init()
 {
   npix = 0;
   hasOverFlow = 0;
-  /* for(int i = 0; i != maxpix; ++i)
-     {
-     row[i] = dummy_float;
-     col[i] = dummy_float;
-     adc[i] = dummy_float;
-     x[i] = dummy_float;
-     y[i] = dummy_float;
-     gx[i] = dummy_float;
-     gy[i] = dummy_float;
-     gz[i] = dummy_float;
-     }
-  */
+ 
 } 
 
 
