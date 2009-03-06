@@ -664,7 +664,7 @@ bool PixelNtuplizer_RealData::isOffTrackHits(const edm::Event& iEvent,const SiPi
 				  break;
 				  
 				} 
-			      else cout << "Fuck this !!!" << endl;
+			      else cout << "Not good !!!" << endl;
 			      
 			    } 
 			  			  
