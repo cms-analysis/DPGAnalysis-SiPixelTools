@@ -151,15 +151,19 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
     Float_t trackpt[2];
     Float_t tracketa[2];
     Float_t trackphi[2];
+    Float_t mean_Time;
     Int_t HasOverFlow;
     Int_t nMuon;
     void init(){
       nMuon=0; 
       HasOverFlow=0;
-      IsGlobalMuon[0]=IsGlobalMuon[1]=IsStandAloneMuon[0]=IsStandAloneMuon[1]=0.0;
-      IsTrackerMuon[0]=IsTrackerMuon[1]=HasGlobalTrack[0]=HasGlobalTrack[1]=HasPixelHit[0]=HasPixelHit[1]=0.0;
-      timeAtIpInOut[0]=timeAtIpInOut[1]=errorTime[0]=errorTime[1]=0.0;
-      trackpt[0]=trackpt[1]=tracketa[0]=tracketa[1]=trackphi[0]=trackphi[1]=-100;
+      mean_Time = -9999;
+      for(int i = 0; i < 2; i++){
+      IsGlobalMuon[i]=IsStandAloneMuon[i]=0.0;
+      IsTrackerMuon[i]=HasGlobalTrack[i]=HasPixelHit[i]=0.0;
+      timeAtIpInOut[i]=errorTime[i] = -9999;
+      trackpt[i]=tracketa[i]=trackphi[i]=-9999;
+      }
       
     }
   }muoninfo_;

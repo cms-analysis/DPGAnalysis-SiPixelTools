@@ -40,6 +40,7 @@
 #include <memory>
 #include <string>
 #include <iostream>
+#include <vector>
 
 using namespace std;
 using namespace edm;
@@ -146,12 +147,28 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
   t_->Branch("allclust_dist"       , allclustinfo_.allclust_dist       , "allclust_dist[n_allclust]/F"       , bufsize);
 
   
-
+  /* t_->Branch("nmuon",&muoninfo_.nMuon,"nmuon/I",bufsize);
+ t_->Branch("muoninfo_HasOverFlow",&muoninfo_.HasOverFlow,"muoninfo_HasOverFlow/bool",bufsize);
+ t_->Branch("muoninfo_IsGlobalMuon",muoninfo_.IsGlobalMuon,"muoninfo_IsGlobalMuon[nmuon]/bool",bufsize);
+ t_->Branch("muoninfo_IsStandAloneMuon",muoninfo_.IsStandAloneMuon,"muoninfo_IsStandAloneMuon[nmuon]/bool",bufsize);
+ t_->Branch("muoninfo_IsTrackerMuon",muoninfo_.IsTrackerMuon,"muoninfo_IsTrackerMuon[nmuon]/bool",bufsize);
+ t_->Branch("muoninfo_HasGlobalTrack",muoninfo_.HasGlobalTrack,"muoninfo_HasGlobalTrack[nmuon]/bool",bufsize);
+  t_->Branch("muoninfo_HasPixelHit",muoninfo_.HasPixelHit,"muoninfo_HasPixelHit[nmuon]/bool",bufsize);
+  t_->Branch("muoninfo_IsTimeValid",muoninfo_.IsTimeValid,"muoninfo_IsTimeValid[nmuon]/bool",bufsize);
+  t_->Branch("muoninfo_timeAtIpInOut",muoninfo_.timeAtIpInOut, "muoninfo_timeAtIpInOut[nmuon]/F",bufsize);
+  t_->Branch("muoninfo_errorTime",muoninfo_.errorTime, "muoninfo_errorTime[nmuon]/F",bufsize);
+  // t_->Branch("muoninfo_momentumDiff",muoninfo_.momentumDiff, "muoninfo_momentumDiff[nmuon]/F",bufsize);
+   t_->Branch("muoninfo_trackpt",muoninfo_.trackpt, "muoninfo_trackpt[nmuon]/F",bufsize);
+    t_->Branch("muoninfo_tracketa",muoninfo_.tracketa, "muoninfo_tracketa[nmuon]/F",bufsize);
+    t_->Branch("muoninfo_trackphi",muoninfo_.trackphi, "muoninfo_trackphi[nmuon]/F",bufsize);*/
 
   //  std::cout << "Making muon branch:" << std::endl;
   t_->Branch("MuonInfo",&muoninfo_,"timeAtIpInOut[2]/F:errorTime[2]/F:IsGlobalMuon[2]/F:IsStandAloneMuon[2]/F:IsTrackerMuon[2]/F:IsTimeValid[2]/F:HasGlobalTrack[2]/F:HasPixelHit[2]/F:trackpt[2]/F:tracketa[2]/F:trackphi[2]/F",bufsize);
   t_->Branch("nMuon",&muoninfo_.nMuon,"nMuon/I",bufsize);
   t_->Branch("nMuonHasOverFlow",&muoninfo_.HasOverFlow,"nMuonHasOverFlow/I",bufsize);
+  t_->Branch("Muon_meanTime",&muoninfo_.mean_Time,"Muon_meanTime/F",bufsize);
+  
+ 
 
   //  std::cout << "Making rechit branch:" << std::endl;
   t_->Branch("RecHit", &rechit_, "localX/F:localY:globalX:globalY:globalZ:residualX:residualY:resErrX:resErrY:hit_errX:hit_errY:resXprime:resXprimeErr", bufsize);
@@ -176,9 +193,10 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
 
 bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent){
 
+
  
   // get the ccmuons
-    edm::Handle<MuonCollection> MuonHandle;
+     edm::Handle<MuonCollection> MuonHandle;
     //  iEvent.getByLabel("GLBMuons", MuonHandle);
      iEvent.getByLabel("muons", MuonHandle);
     if ( !MuonHandle.isValid() ) {
@@ -200,13 +218,20 @@ bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent){
       muoninfo_.nMuon = 2;
     }
     else muoninfo_.nMuon = MuonHandle->size();
-      
 
+
+      int good_muons = 0;
+
+      vector<float> timeAtIpInOut;
+      vector<float> errorTime;
+
+      timeAtIpInOut.clear();
+      errorTime.clear();
 
    
       for(MuonCollection::const_iterator it = MuonHandle->begin(), itEnd = MuonHandle->end(); it!=itEnd;++it){
      
-      if(count > 1) return false;
+      if(count >= 2) return false;
 
       if(!it->globalTrack())muoninfo_.HasGlobalTrack[count] = 0;
       else muoninfo_.HasGlobalTrack[count] = 1;
@@ -230,8 +255,16 @@ bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent){
 	muoninfo_.timeAtIpInOut[count] = -9999;
 	muoninfo_.errorTime[count] = -9999;
 
+
       }
 
+
+      if( it->isTimeValid() == true && it->time().timeAtIpInOutErr < 15){//only take muons with error < max_timeError
+	  LogDebug("MuonTOFFilter_trackQuality") << " muon time " <<  it->time().timeAtIpInOut << std::endl;
+	  timeAtIpInOut.push_back( it->time().timeAtIpInOut);
+	  errorTime.push_back(it->time().timeAtIpInOutErr);
+	  good_muons++;
+      }
    
 
       if(!it->globalTrack() == false){
@@ -269,10 +302,24 @@ bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent){
 
       count++;
     } //end looping over muons
-    
-   
-    
 
+     
+
+      muoninfo_.mean_Time = 0;
+      
+      float sumweight;
+    
+      if(good_muons <= 2 && good_muons > 0){//only calc. time for events with right number of good muons
+
+      for(unsigned int i = 0; i < timeAtIpInOut.size(); i++){
+	muoninfo_.mean_Time =  muoninfo_.mean_Time + 1/(pow(errorTime[i],2))*timeAtIpInOut[i];
+	sumweight = sumweight + 1/(pow(errorTime[i],2));
+      }
+
+      if(sumweight != 0) muoninfo_.mean_Time = muoninfo_.mean_Time/sumweight;
+    }
+    
+      // cout << " time "<< 	muoninfo_.mean_Time << endl;
     return true;
 
 }
@@ -298,6 +345,9 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 	init();
 
   trackonly_.init();
+
+  // always run the muon association... the content is used by the fillTrackOnly method too.
+  isValidMuonAssoc(iEvent);
 
   edm::Handle<TrajTrackAssociationCollection> trajTrackCollectionHandle;
   //edm::Handle<std::vector<Trajectory> > trajCollectionHandle;
@@ -331,7 +381,6 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 	       testSubDetID == StripSubdetector::TID || testSubDetID == StripSubdetector::TEC) stripHits++;
 
     }
-
     fillTrackOnly(iEvent,iSetup, pixelHits, stripHits, TrackNumber, track);
     //++++++++++
     tt_->Fill();
@@ -405,7 +454,7 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
               edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster> const& clust = (*pixhit).cluster();
               //  check if the ref is not null
               if (clust.isNonnull()) {
-
+		muoninfo_.init();
 		init();
 		rechit_.localX = hit->localPosition().x();
 		rechit_.localY = hit->localPosition().y();
@@ -615,7 +664,7 @@ bool PixelNtuplizer_RealData::isOffTrackHits(const edm::Event& iEvent,const SiPi
 				  break;
 				  
 				} 
-			      else cout << "Fuck this !!!" << endl;
+			      else cout << "Not good !!!" << endl;
 			      
 			    } 
 			  			  
@@ -652,23 +701,24 @@ void PixelNtuplizer_RealData::fillTrackOnly(const edm::Event& iEvent, const edm:
   trackonly_.vy = track.vy();
   trackonly_.vz = track.vz();
 
-  trackonly_.muonT0=-1000;
-  trackonly_.muondT0=0;
-  if(muoninfo_.nMuon==0)
+  if(muoninfo_.errorTime[0]<0)
     return;
   trackonly_.muonT0=muoninfo_.timeAtIpInOut[0];
   trackonly_.muondT0=muoninfo_.errorTime[0];
-  if(muoninfo_.nMuon==1)
+  //  std::cout <<  trackonly_.muonT0 << " " << trackonly_.muondT0 << std::endl;
+  if(muoninfo_.errorTime[1]<0)
     return;
-  if(muoninfo_.errorTime[1]< muoninfo_.errorTime[0]){
+  if(muoninfo_.errorTime[1]<muoninfo_.errorTime[0]){ // time [1] more accurate than [0]
     trackonly_.muonT0=muoninfo_.timeAtIpInOut[1];
     trackonly_.muondT0=muoninfo_.errorTime[1];
   }
   
-  // load trackassociation from event, get muon out and read timing
-
-  // TO DO
+  // if more than one muon: take best one
+ 
   
+  
+  //  std::cout<< "* "  <<  trackonly_.muonT0 << " " << trackonly_.muondT0 << std::endl;
+  return;
 }
 
 void PixelNtuplizer_RealData::fillEvt(const edm::Event& iEvent,int NbrTracks)
@@ -945,6 +995,7 @@ void PixelNtuplizer_RealData::TrackOnlyStruct::init()
   vy = dummy_float;
   vz = dummy_float;
   muonT0 = dummy_float;
+  muondT0 = dummy_float;
 }
 
 // define this as a plug-in
