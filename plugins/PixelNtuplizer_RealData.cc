@@ -299,6 +299,9 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 
   trackonly_.init();
 
+  // always run the muon association... the content is used by the fillTrackOnly method too.
+  isValidMuonAssoc(iEvent);
+
   edm::Handle<TrajTrackAssociationCollection> trajTrackCollectionHandle;
   //edm::Handle<std::vector<Trajectory> > trajCollectionHandle;
   iEvent.getByLabel(conf_.getParameter<std::string>("trajectoryInput"),trajTrackCollectionHandle);
@@ -331,7 +334,6 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 	       testSubDetID == StripSubdetector::TID || testSubDetID == StripSubdetector::TEC) stripHits++;
 
     }
-
     fillTrackOnly(iEvent,iSetup, pixelHits, stripHits, TrackNumber, track);
     //++++++++++
     tt_->Fill();
@@ -652,23 +654,24 @@ void PixelNtuplizer_RealData::fillTrackOnly(const edm::Event& iEvent, const edm:
   trackonly_.vy = track.vy();
   trackonly_.vz = track.vz();
 
-  trackonly_.muonT0=-1000;
-  trackonly_.muondT0=0;
-  if(muoninfo_.nMuon==0)
+  if(muoninfo_.errorTime[0]<0)
     return;
   trackonly_.muonT0=muoninfo_.timeAtIpInOut[0];
   trackonly_.muondT0=muoninfo_.errorTime[0];
-  if(muoninfo_.nMuon==1)
+  //  std::cout <<  trackonly_.muonT0 << " " << trackonly_.muondT0 << std::endl;
+  if(muoninfo_.errorTime[1]<0)
     return;
-  if(muoninfo_.errorTime[1]< muoninfo_.errorTime[0]){
+  if(muoninfo_.errorTime[1]<muoninfo_.errorTime[0]){ // time [1] more accurate than [0]
     trackonly_.muonT0=muoninfo_.timeAtIpInOut[1];
     trackonly_.muondT0=muoninfo_.errorTime[1];
   }
   
-  // load trackassociation from event, get muon out and read timing
-
-  // TO DO
+  // if more than one muon: take best one
+ 
   
+  
+  //  std::cout<< "* "  <<  trackonly_.muonT0 << " " << trackonly_.muondT0 << std::endl;
+  return;
 }
 
 void PixelNtuplizer_RealData::fillEvt(const edm::Event& iEvent,int NbrTracks)
@@ -945,6 +948,7 @@ void PixelNtuplizer_RealData::TrackOnlyStruct::init()
   vy = dummy_float;
   vz = dummy_float;
   muonT0 = dummy_float;
+  muondT0 = dummy_float;
 }
 
 // define this as a plug-in
