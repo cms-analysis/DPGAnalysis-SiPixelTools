@@ -1,5 +1,5 @@
 // system include files
-#include <memory>
+#include <memory> 
 
 // user include files
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
@@ -59,9 +59,11 @@
 //TRoot classes
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TH2D.h"
 #include "TFile.h"
 #include "TTree.h"
 #include <vector>
+#include <map>
 
 using namespace std;
 using namespace edm;
@@ -109,6 +111,7 @@ private:
   TH1F*  histEndcapMinus;
   TH1F*  histBarrel;
   TH1F*  histEndcap;
+  TH1F*  efficiencyPerSubdetector;
 
   TH1F*  consistencyCheck;
   TH1F*  consistencyCheckTraj;
@@ -162,6 +165,8 @@ private:
   TH1F*  missingVsAlpha;
   TH1F*  validVsBeta;
   TH1F*  missingVsBeta;
+  TH2F*  validAlphaBeta;
+  TH2F*  missingAlphaBeta;
 
   TH1F*  validVsAlphaBPix;
   TH1F*  missingVsAlphaBPix;
@@ -177,7 +182,24 @@ private:
   TH1F*  missingVsLocalX;
   TH1F*  validVsLocalY;
   TH1F*  missingVsLocalY;
+
+  TH2F*  validAlphaLocalXBig;
+  TH2F*  missingAlphaLocalXBig;
+  TH2F*  validAlphaLocalXSmall;
+  TH2F*  missingAlphaLocalXSmall;
   
+  TH1F*  validVsLocalXBig;
+  TH1F*  missingVsLocalXBig;
+  TH1F*  validVsLocalXSmall;
+  TH1F*  missingVsLocalXSmall;
+
+  TH1F*  validVsMuontimePre68094;
+  TH1F*  missingVsMuontimePre68094;
+  TH1F*  validVsMuontimePost68094;
+  TH1F*  missingVsMuontimePost68094;
+
+  TH1F*  validVsPT;
+  TH1F*  missingVsPT;
   //
   TH1F*  checkoutValidityFlag;
   TH1F*  checkoutTraj;
@@ -199,6 +221,18 @@ private:
   TH2F* xPosFracMis;
   TH2F* yPosFracVal;
   TH2F* yPosFracMis;
+  
+  //TUNING
+  TH2F* tunningVal;
+  TH2F* tunningMis;
+  TH1F* tunningEdgeVal;
+  TH1F* tunningEdgeMis;
+  TH1F* tunningMuonVal;
+  TH1F* tunningMuonMis;
+
+  //ChiSqaure
+  TH1F* validChiSquare;
+  TH1F* missingChiSquare;
 
   //test
   TH1F* histoMethod2After;
@@ -266,8 +300,23 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
   
   unsigned int runNumber=iEvent.id().run();
-                
+  
+  //skip 0T runs for reprocessing errors
+  if (
+  runNumber==69557 || runNumber==69559|| runNumber==69564|| runNumber==69572|| runNumber==69573|| runNumber==69587|| runNumber==69594||
+  runNumber==69728|| runNumber==69743|| runNumber==70147|| runNumber==70170|| runNumber==70195|| runNumber==70344 || runNumber==70347 ||
+  runNumber==70410|| runNumber==70411||
+  runNumber==70412|| runNumber==70413|| runNumber==70414|| runNumber==70415|| runNumber==70416|| runNumber==70417|| runNumber==70421||
+  runNumber==70454|| runNumber==70664|| runNumber==70674|| runNumber==70675 ||
+       (runNumber>= 66951 && runNumber<=67085) ||
+       (runNumber>=67264 && runNumber<=67432) ||
+       (runNumber>=67676 && runNumber<=67777) ||
+       (runNumber>=69536 && runNumber<=69671) ||
+       (runNumber>=70196 && runNumber<=99999) ) return;
+
   badRun=false;
+
+  if(DEBUG) std::cout<<"pre iSetup"<<std::endl;
  
   // Get event setup (to get global transformation)
   edm::ESHandle<TrackerGeometry> geom;
@@ -286,7 +335,13 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   // get the ccmuons
   edm::Handle<MuonCollection> MuonHandle;
 
+  if(DEBUG) std::cout<<"previous the try"<<std::endl;
+
+
 try{
+
+  if(DEBUG) std::cout<<"after try"<<std::endl;
+
 
   iEvent.getByLabel(trajectoryInput_,trajTrackCollectionHandle);
  
@@ -297,11 +352,15 @@ try{
   const edmNew::DetSetVector<SiPixelCluster>& input = *theClusters;
 
   int NbrTracks =  trajTrackCollectionHandle->size();
+  if (NbrTracks!=1) return;
 
   checkoutTraj->Fill(NbrTracks);
   
   iEvent.getByLabel("muons", MuonHandle);
   
+  //******** MUON CUT ************
+  
+  std::map<double,bool> muonTimingMap;
   bool hasGoodTiming=false;
   int nmuon = 0;
   double time = -999;
@@ -315,17 +374,25 @@ try{
      time = itmuon->time().timeAtIpInOut;
      timerr = itmuon->time().timeAtIpInOutErr;
    }
-   
-   if(runNumber<68094 && time<0 && time>-20)
-     hasGoodTiming=true;
-   if(runNumber>=68094 && time<5 && time>-5)
-     hasGoodTiming=true;
-	
-     //it->time().timeAtIpInOutErr;
-     
     nmuon++;
   }
+    
+  double peak=-8;   
+  for(double t=0;t<20;t+=0.5){
+    hasGoodTiming=false;
+    if(runNumber<68094 && time<peak+t && time>peak-t)
+      hasGoodTiming=true;
+    if(runNumber>=68094 && time<peak+9+t && time>peak+9-t)
+      hasGoodTiming=true;
+    muonTimingMap[2.*t]=hasGoodTiming;
+  }
 
+  hasGoodTiming = false;
+  if(runNumber<68094 && time<peak+5 && time>peak-5)
+     hasGoodTiming=true;
+  if(runNumber>=68094 && time<peak+9+5 && time>peak+9-5)
+     hasGoodTiming=true;
+   
   TrajectoryStateCombiner tsoscomb;
   for(TrajTrackAssociationCollection::const_iterator it = trajTrackCollectionHandle->begin(),
       itEnd = trajTrackCollectionHandle->end(); it!=itEnd;++it){
@@ -333,8 +400,9 @@ try{
     consistencyCheck->Fill(1); //1 = each track //*************
 
     const Trajectory& traj  = *it->key;
+    float chiSquare = traj.chiSquared();
     std::vector<TrajectoryMeasurement> tmColl = traj.measurements();
-      
+    
     consistencyCheckTraj->Fill(0);//number of total trajectories
 
 //*************
@@ -389,11 +457,10 @@ try{
 	break;
 	}
       }
-     
+         
     int numofhit=0;      
     for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
 	itTraj != itTrajEnd; ++itTraj) {
-
       numofhit++;
 	
       //are we in the pixels with valid stuffs?
@@ -413,6 +480,8 @@ try{
             	
 		
 	 //******take the geometrical parameters of the hit**********
+
+  if(DEBUG) std::cout<<"take the geometrical parameters of the hit"<<std::endl;
 	 	
 	 int moduleRawId = (testhit)->geographicalId().rawId();
 	 DetId detId = ((testhit)->geographicalId());
@@ -436,25 +505,93 @@ try{
 	 
 	 TrajectoryStateOnSurface tsos = tsoscomb( itTraj->forwardPredictedState(), itTraj->backwardPredictedState() );
 
+
+	 //****** compute the  pT cut **********
+
+    	 bool hasHighPT = false;
+	 double PT = tsos.globalMomentum().perp();
+    	 if ( PT>10.) hasHighPT = true;
+
 	 //****** compute the edge-cut **********
 
+         bool isBigModule=false;
 	 int nrows = theGeomDet->specificTopology().nrows();
+	 if (nrows>80) isBigModule=true;
+	 else          isBigModule=false;
 	 int ncols = theGeomDet->specificTopology().ncolumns();
-	 //std::pair<float,float> pitch = theGeomDet->specificTopology().pitch();
-	 //RectangularPixelTopology rectTopol = RectangularPixelTopology(nrows, ncols, pitch.first, pitch.second);
-	 //std::pair<float,float> pixel = rectTopol.pixel(tsos.localPosition());
+	 //
+	 //std::pair<float,float> pitchTest = theGeomDet->specificTopology().pitch();
+	 //RectangularPixelTopology rectTopolTest = RectangularPixelTopology(nrows, ncols, pitch.first, pitch.second);
+	 //std::pair<float,float> pixelTest = rectTopol.pixel(tsos.localPosition());
+	 //
 	 std::pair<float,float> pixel = theGeomDet->specificTopology().pixel(tsos.localPosition());
-	 bool isNotInMiddle = false;
-	 double edgeRejectionPercentage = 0.95;
+
+	 //****sigma cut
+	 bool isNotInMiddle = false;          
+	 LocalPoint  exagerated;
+	 LocalError tsosErr = tsos.localError().positionError();	 
+	 if ( tsos.localPosition().x()>0 && tsos.localPosition().y()>0 )
+	   exagerated = LocalPoint(tsos.localPosition().x()+std::sqrt(tsosErr.xx()),tsos.localPosition().y()+std::sqrt(tsosErr.yy()) );
+	 if ( tsos.localPosition().x()<0 && tsos.localPosition().y()>0)
+	   exagerated = LocalPoint(tsos.localPosition().x()-std::sqrt(tsosErr.xx()),tsos.localPosition().y()+std::sqrt(tsosErr.yy())  );
+	 if ( tsos.localPosition().x()<0 && tsos.localPosition().y()<0)
+	   exagerated = LocalPoint(tsos.localPosition().x()-std::sqrt(tsosErr.xx()),tsos.localPosition().y()-std::sqrt(tsosErr.yy()) );
+	 if ( tsos.localPosition().x()>0 && tsos.localPosition().y()<0)
+	   exagerated = LocalPoint(tsos.localPosition().x()+std::sqrt(tsosErr.xx()),tsos.localPosition().y()-std::sqrt(tsosErr.yy()) );
+	 
+	 std::pair<float,float> pixelExagerated = theGeomDet->specificTopology().pixel(exagerated);
+	 
+	 if( pixelExagerated.first>nrows  || pixelExagerated.first<0)
+	   isNotInMiddle = true;
+	 if( pixelExagerated.second>ncols || pixelExagerated.second<0)
+	   isNotInMiddle = true;
+	 
+	 
+	 //map for the TH2
+	 std::map <double,bool> edgeCutMap;
+
+	 for (int divideMe=0;divideMe<50;divideMe++)
+	   {
+	   double sigma=divideMe/10.;
+	   
+          LocalPoint  exageratedMap;
+	   if ( tsos.localPosition().x()>0 && tsos.localPosition().y()>0 )
+	     exageratedMap =LocalPoint(tsos.localPosition().x()+sigma*std::sqrt(tsosErr.xx()),tsos.localPosition().y()+sigma*std::sqrt(tsosErr.yy()) );
+	   if ( tsos.localPosition().x()<0 && tsos.localPosition().y()>0)
+	     exageratedMap =LocalPoint(tsos.localPosition().x()-sigma*std::sqrt(tsosErr.xx()),tsos.localPosition().y()+sigma*std::sqrt(tsosErr.yy())  );
+	   if ( tsos.localPosition().x()<0 && tsos.localPosition().y()<0)
+	     exageratedMap =LocalPoint(tsos.localPosition().x()-sigma*std::sqrt(tsosErr.xx()),tsos.localPosition().y()-sigma*std::sqrt(tsosErr.yy()) );
+	   if ( tsos.localPosition().x()>0 && tsos.localPosition().y()<0)
+	     exageratedMap = LocalPoint(tsos.localPosition().x()+sigma*std::sqrt(tsosErr.xx()),tsos.localPosition().y()-sigma*std::sqrt(tsosErr.yy()) );
+	 
+	   std::pair<float,float> pixelExageratedMap = theGeomDet->specificTopology().pixel(exageratedMap);
+	 
+	   if( pixelExageratedMap.first>nrows  || pixelExageratedMap.first<0)
+	     edgeCutMap[sigma] = true;
+	   else if( pixelExageratedMap.second>ncols || pixelExageratedMap.second<0)
+	      edgeCutMap[sigma] = true;
+	    else edgeCutMap[sigma] = false;	   
+	  
+	   }
+
+
+	 
+	 
+	 
+	 //PERCENTAGE CUT
+	 //bool isNotInMiddle = false;
+	 //double edgeRejectionPercentage = 0.95;
 	 double xposfrac_ = TMath::Abs(pixel.first-double(nrows)/2.)  /(double(nrows)/2.);
 	 double yposfrac_ = TMath::Abs(pixel.second-double(ncols)/2.) /(double(ncols)/2.);
-	 if(xposfrac_ > edgeRejectionPercentage || pixel.first>nrows  || pixel.first<0)
-	   isNotInMiddle = true;
-	 if(yposfrac_ > edgeRejectionPercentage || pixel.second>ncols || pixel.second<0)
-	   isNotInMiddle = true;
+	 //if(xposfrac_ > edgeRejectionPercentage || pixel.first>nrows  || pixel.first<0)
+	 //  isNotInMiddle = true;
+	 //if(yposfrac_ > edgeRejectionPercentage || pixel.second>ncols || pixel.second<0)
+	 //  isNotInMiddle = true;
 	
  
 	//********************* HERE IS THE TELESCOPE CUT ON HITS
+  if(DEBUG) std::cout<<"ERE IS THE TELESCOPE CUT ON HIT"<<std::endl;
+
 	int numofhitCut=0;
         int numOfOtherValid=0;  
 	bool hasValidInUpperPix = false;
@@ -494,11 +631,14 @@ try{
 	     hasValidInUpperPix = true;
 	   if(numofhitCut!=numofhit && globalYCut<0 && layerCut!=layer && disk!=diskCut && (*testhitCut).getType()==TrackingRecHit::valid)
 	     hasValidInLowerPix = true;
+	     
 		
 	   if(numofhitCut!=numofhit && layerCut!=layer && disk!=diskCut && (*testhitCut).getType()==TrackingRecHit::valid)
 	     numOfOtherValid++;  
 
 	}//end of loop for trajmeas for cut
+	
+	bool isTelescopeGood = hasValidInUpperPix && hasValidInLowerPix;
 	
       //**********  TAKING CLUSTER FROM recHIT
       edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster> testclust;
@@ -520,6 +660,64 @@ try{
       }
 
 
+
+      //*******  INSERTING TUNNIG INTO HISTOS *******
+      if(DEBUG) std::cout<<"INSERTING TUNNIG INTO HISTOS"<<std::endl;
+      
+      if(muonTimingMap.size()!=unsigned(tunningMuonMis->GetNbinsX()))
+        cout<<"There is a problem with the muon tunning histo's binning !!"<<endl;
+      if(edgeCutMap.size()!=unsigned(tunningEdgeMis->GetNbinsX()))
+        cout<<"There is a problem with the edge tunning histo's binning !! But it's not really a problem ..."<<endl;
+      
+      if((*testhit).getType()==TrackingRecHit::missing){
+        int i=0;
+        for(map<double,bool>::const_iterator mapit=edgeCutMap.begin();mapit!=edgeCutMap.end();mapit++){
+	  i++;
+	  if( !(mapit->second) )  tunningEdgeMis->SetBinContent(i,tunningEdgeMis->GetBinContent(i)+1);
+	}
+	
+	i=0;   
+	for(map<double,bool>::const_iterator mapit=muonTimingMap.begin();mapit!=muonTimingMap.end();mapit++){
+	  i++;
+	  if(mapit->second) tunningMuonMis->SetBinContent(i,tunningMuonMis->GetBinContent(i)+1);
+	  //std::cout<<"map["<<mapit->first<<"]="<<mapit->second<<"    ";
+	  
+	  int j=0;
+	  for(map<double,bool>::const_iterator mapit2=edgeCutMap.begin();mapit2!=edgeCutMap.end();mapit2++){
+	    j++;
+	    if(!(mapit2->second) && mapit->second && isTelescopeGood) tunningMis->SetBinContent(j,i, tunningMis->GetBinContent(j,i)+1);
+	  }
+	}
+      }
+      else if((*testhit).isValid()){
+        int i=0;
+        for(map<double,bool>::const_iterator mapit=edgeCutMap.begin();mapit!=edgeCutMap.end();mapit++){
+	  i++;
+	  if(!(mapit->second))  tunningEdgeVal->SetBinContent(i,tunningEdgeVal->GetBinContent(i)+1);
+	}
+	
+	i=0;   
+	for(map<double,bool>::const_iterator mapit=muonTimingMap.begin();mapit!=muonTimingMap.end();mapit++){
+	  i++;
+	  if(mapit->second) tunningMuonVal->SetBinContent(i,tunningMuonVal->GetBinContent(i)+1);
+	  //std::cout<<"map["<<mapit->first<<"]="<<mapit->second<<"    ";
+	  
+	  int j=0;
+	  for(map<double,bool>::const_iterator mapit2=edgeCutMap.begin();mapit2!=edgeCutMap.end();mapit2++){
+	    j++;
+	    if(!(mapit2->second) && mapit->second && isTelescopeGood) tunningVal->SetBinContent(j,i, tunningVal->GetBinContent(j,i)+1);
+	  }
+	}
+      }
+      
+      //********** Fill efficiency VS pT for all cuts but pTcut ************
+      if( isTelescopeGood || isNotInMiddle || hasGoodTiming ){
+        if( (*testhit).isValid() )
+	  validVsPT->Fill(PT);
+        if( (*testhit).getType()==TrackingRecHit::missing )
+	  missingVsPT->Fill(PT);
+      }
+
   	//************************ Fill the HISTOS for the analysis on the Selection Cuts Quality  *****************************
         /*legend:
 	0=without any selection;
@@ -533,94 +731,160 @@ try{
        if((*testhit).getType()==TrackingRecHit::missing){
          xPosFracMis->Fill(xposfrac_,0);
          yPosFracMis->Fill(yposfrac_,0);
-	 if(type==int(kBPIX)) hitsPassingCutsMisBPix->Fill(0);
-	 if(type==int(kFPIX)) hitsPassingCutsMisFPix->Fill(0);
+	 if(type==int(kBPIX)) hitsPassingCutsMisBPix->Fill(0.5);
+	 if(type==int(kFPIX)) hitsPassingCutsMisFPix->Fill(0.5);
 	 
 	 if(numOfOtherValid>=1){
            xPosFracMis->Fill(xposfrac_,1);
            yPosFracMis->Fill(yposfrac_,1);
-	   if(type==int(kBPIX)) hitsPassingCutsMisBPix->Fill(1);
-	   if(type==int(kFPIX)) hitsPassingCutsMisFPix->Fill(1);
+	   if(type==int(kBPIX)) hitsPassingCutsMisBPix->Fill(1.5);
+	   if(type==int(kFPIX)) hitsPassingCutsMisFPix->Fill(1.5);
 	 }
 	 
-	 if(hasValidInLowerPix && hasValidInUpperPix){
+	 if(isTelescopeGood){
            xPosFracMis->Fill(xposfrac_,2);
            yPosFracMis->Fill(yposfrac_,2);
-	   if(type==int(kBPIX)) hitsPassingCutsMisBPix->Fill(2);
-	   if(type==int(kFPIX)) hitsPassingCutsMisFPix->Fill(2);
+	   if(type==int(kBPIX)) hitsPassingCutsMisBPix->Fill(2.5);
+	   if(type==int(kFPIX)) hitsPassingCutsMisFPix->Fill(2.5);
 	 }
-	 
 	 if(hasGoodTiming){
            xPosFracMis->Fill(xposfrac_,3);
            yPosFracMis->Fill(yposfrac_,3);
-	   if(type==int(kBPIX)) hitsPassingCutsMisBPix->Fill(3);
-	   if(type==int(kFPIX)) hitsPassingCutsMisFPix->Fill(3);
+	   if(type==int(kBPIX)) hitsPassingCutsMisBPix->Fill(3.5);
+	   if(type==int(kFPIX)) hitsPassingCutsMisFPix->Fill(3.5);
 	 }
-	 
 	 if(!isNotInMiddle){
            xPosFracMis->Fill(xposfrac_,4);
            yPosFracMis->Fill(yposfrac_,4);
-	   if(type==int(kBPIX)) hitsPassingCutsMisBPix->Fill(4);
-	   if(type==int(kFPIX)) hitsPassingCutsMisFPix->Fill(4);
+	   if(type==int(kBPIX)) hitsPassingCutsMisBPix->Fill(4.5);
+	   if(type==int(kFPIX)) hitsPassingCutsMisFPix->Fill(4.5);
+	 }
+	 if(hasHighPT){
+           xPosFracMis->Fill(xposfrac_,4);
+           yPosFracMis->Fill(yposfrac_,4);
+	   if(type==int(kBPIX)) hitsPassingCutsMisBPix->Fill(5.5);
+	   if(type==int(kFPIX)) hitsPassingCutsMisFPix->Fill(5.5);
+	 }
+//combination of cuts: 3 entries	 
+	 if(isTelescopeGood && hasGoodTiming){
+	   if(type==int(kBPIX)) hitsPassingCutsMisBPix->Fill(6.5);
+	   if(type==int(kFPIX)) hitsPassingCutsMisFPix->Fill(6.5);
+	 }
+	 if(isTelescopeGood && !isNotInMiddle){
+	   if(type==int(kBPIX)) hitsPassingCutsMisBPix->Fill(7.5);
+	   if(type==int(kFPIX)) hitsPassingCutsMisFPix->Fill(7.5);
+	 }
+	 if(!isNotInMiddle && hasGoodTiming){
+	   if(type==int(kBPIX)) hitsPassingCutsMisBPix->Fill(8.5);
+	   if(type==int(kFPIX)) hitsPassingCutsMisFPix->Fill(8.5);
 	 }
        }//end-if missing recHit
        
        else if((*testhit).isValid()){
          xPosFracVal->Fill(xposfrac_,0);
          yPosFracVal->Fill(yposfrac_,0);
-	 if(type==int(kBPIX)) hitsPassingCutsValBPix->Fill(0);
-	 if(type==int(kFPIX)) hitsPassingCutsValFPix->Fill(0);
+	 if(type==int(kBPIX)) hitsPassingCutsValBPix->Fill(0.5);
+	 if(type==int(kFPIX)) hitsPassingCutsValFPix->Fill(0.5);
 	 
 	 if(numOfOtherValid>=1){
            xPosFracVal->Fill(xposfrac_,1);
            yPosFracVal->Fill(yposfrac_,1);
-	   if(type==int(kBPIX)) hitsPassingCutsValBPix->Fill(1);
-	   if(type==int(kFPIX)) hitsPassingCutsValFPix->Fill(1);
+	   if(type==int(kBPIX)) hitsPassingCutsValBPix->Fill(1.5);
+	   if(type==int(kFPIX)) hitsPassingCutsValFPix->Fill(1.5);
 	 }
 	 
-	 if(hasValidInLowerPix && hasValidInUpperPix){
+	 if(isTelescopeGood){
            xPosFracVal->Fill(xposfrac_,2);
            yPosFracVal->Fill(yposfrac_,2);
-	   if(type==int(kBPIX)) hitsPassingCutsValBPix->Fill(2);
-	   if(type==int(kFPIX)) hitsPassingCutsValFPix->Fill(2);
+	   if(type==int(kBPIX)) hitsPassingCutsValBPix->Fill(2.5);
+	   if(type==int(kFPIX)) hitsPassingCutsValFPix->Fill(2.5);
 	 }
 	 
 	 if(hasGoodTiming){
            xPosFracVal->Fill(xposfrac_,3);
            yPosFracVal->Fill(yposfrac_,3);
-	   if(type==int(kBPIX)) hitsPassingCutsValBPix->Fill(3);
-	   if(type==int(kFPIX)) hitsPassingCutsValFPix->Fill(3);
+	   if(type==int(kBPIX)) hitsPassingCutsValBPix->Fill(3.5);
+	   if(type==int(kFPIX)) hitsPassingCutsValFPix->Fill(3.5);
 	 }
 	 
 	 if(!isNotInMiddle){
            xPosFracVal->Fill(xposfrac_,4);
            yPosFracVal->Fill(yposfrac_,4);
-	   if(type==int(kBPIX)) hitsPassingCutsValBPix->Fill(4);
-	   if(type==int(kFPIX)) hitsPassingCutsValFPix->Fill(4);
+	   if(type==int(kBPIX)) hitsPassingCutsValBPix->Fill(4.5);
+	   if(type==int(kFPIX)) hitsPassingCutsValFPix->Fill(4.5);
 	 }
+	 
+	 if(hasHighPT){
+	   if(type==int(kBPIX)) hitsPassingCutsValBPix->Fill(5.5);
+	   if(type==int(kFPIX)) hitsPassingCutsValFPix->Fill(5.5);
+	 }
+	 
+	 if(isTelescopeGood && hasGoodTiming){
+	   if(type==int(kBPIX)) hitsPassingCutsValBPix->Fill(6.5);
+	   if(type==int(kFPIX)) hitsPassingCutsValFPix->Fill(6.5);
+	 }
+	 if(isTelescopeGood && !isNotInMiddle){
+	   if(type==int(kBPIX)) hitsPassingCutsValBPix->Fill(7.5);
+	   if(type==int(kFPIX)) hitsPassingCutsValFPix->Fill(7.5);
+	 }
+	 if(!isNotInMiddle && hasGoodTiming){
+	   if(type==int(kBPIX)) hitsPassingCutsValBPix->Fill(8.5);
+	   if(type==int(kFPIX)) hitsPassingCutsValFPix->Fill(8.5);
+	 }
+	 
        }
   
-  	//************************ HERE IS THE CUT *****************************
+  
+  
+        //do the efficiencyVSmuontime with the "official cuts" applied
+        if( isTelescopeGood || !isNotInMiddle ) {
+          if ((*testhit).getType()== TrackingRecHit::valid){
+            if ( runNumber < 68094 ) validVsMuontimePre68094->Fill(time);
+            else    validVsMuontimePost68094->Fill(time);
+	    }
+          if ((*testhit).getType()== TrackingRecHit::missing){
+            if ( runNumber < 68094 ) missingVsMuontimePre68094->Fill(time);
+            else    missingVsMuontimePost68094->Fill(time);
+	    }
+	  }
+	//cout<<"tunning1 VAL"<<tunningVal->GetBinContent(11,11)<<endl;
+	//cout<<"ppp "<<tunningEdgeVal->GetBinContent(11)<<endl;
+	//cout<<"ppp2 "<<hitsPassingCutsValFPix->GetBinContent(5)+hitsPassingCutsValBPix->GetBinContent(5)<<endl;
+	
+  	//************************************ HERE IS THE CUT *****************************************************
+
         //different tightness in the cuts 
         //if (numOfOtherValid<1) continue;
         //if( (!hasValidInLowerPix) || (!hasValidInUpperPix)  ) continue; 
         //if(  isNotInMiddle  ) continue; 
         //if(  (!hasGoodTiming) ) continue; 
-        //if( (!hasValidInLowerPix) || (!hasValidInUpperPix) || isNotInMiddle || (!hasGoodTiming) ) continue; 
-        //can also use : isNotInMiddle && hasGoodTiming
+        //if( (!isTelescopeGood) || isNotInMiddle || (!hasGoodTiming) ) continue; 
+        if( (!isTelescopeGood) || isNotInMiddle || (!hasGoodTiming) || !hasHighPT ) continue;
+	//if( !isTelescopeGood || isNotInMiddle ) continue;
+        //can also use : isNotInMiddle && hasGoodTiming && isTelescopeGood
 
         if((*testhit).getType()==TrackingRecHit::missing){
+	  
+	  missingChiSquare->Fill(chiSquare);
+	
           xPosFracMis->Fill(xposfrac_,5);
           yPosFracMis->Fill(yposfrac_,5);
-	  if(type==int(kBPIX)) hitsPassingCutsMisBPix->Fill(5);
-	  if(type==int(kFPIX)) hitsPassingCutsMisFPix->Fill(5);
+	  if(type==int(kBPIX)) hitsPassingCutsMisBPix->Fill(9.5);
+	  if(type==int(kFPIX)) hitsPassingCutsMisFPix->Fill(9.5);
 	}
 	else if((*testhit).isValid()){
+	
+	  validChiSquare->Fill(chiSquare);
+	
           xPosFracVal->Fill(xposfrac_,5);
           yPosFracVal->Fill(yposfrac_,5);
-	   if(type==int(kBPIX)) hitsPassingCutsValBPix->Fill(5);
-	   if(type==int(kFPIX)) hitsPassingCutsValFPix->Fill(5);
+	   if(type==int(kBPIX)) hitsPassingCutsValBPix->Fill(9.5);
+	   if(type==int(kFPIX)) hitsPassingCutsValFPix->Fill(9.5);
 	}
+	 
+	//cout<<"tunning2 VAL"<<tunningVal->GetBinContent(11,11)<<endl;
+	//cout<<"hits VAL"<<hitsPassingCutsValFPix->GetBinContent(9)+hitsPassingCutsValBPix->GetBinContent(9)<<endl;
+	
 	 
       //**********  fill CLUSTER properties for valid recHit passing ALL the selection CUTS     
       if(testclust.isNonnull()){
@@ -740,7 +1004,7 @@ try{
 	   else                                           histEndcapPlus->Fill(filling);
 	 }
 
-      //****************  angular analysis of efficiency: METHOD 1    ******************
+      //****************  angular analysis: METHOD 1    ******************
       
       LocalTrajectoryParameters ltp = tsos.localParameters();
       LocalVector localDir = ltp.momentum()/ltp.momentum().mag();
@@ -748,31 +1012,69 @@ try{
       float locx = localDir.x();
       float locy = localDir.y();
       float locz = localDir.z();
-
       float alpha = atan2( locz, locx );
-      if ((*testhit).getType()== TrackingRecHit::valid)  validVsAlpha->Fill( alpha );
-      if ((*testhit).getType()== TrackingRecHit::missing)   missingVsAlpha->Fill( alpha);
-      float  beta = atan2( locz, locy );
-      if ((*testhit).getType()== TrackingRecHit::valid)  validVsBeta->Fill( beta );
-      if ((*testhit).getType()== TrackingRecHit::missing)   missingVsBeta->Fill( beta);
+      float  beta = atan2( locz, locy );   
+      
+      if ((*testhit).getType()== TrackingRecHit::valid){
+        validVsAlpha->Fill( alpha );
+	validVsBeta->Fill( beta );
+	validAlphaBeta->Fill(alpha,beta);
+      }
+      if ((*testhit).getType()== TrackingRecHit::missing){
+        missingVsAlpha->Fill( alpha);
+	missingVsBeta->Fill( beta);
+	missingAlphaBeta->Fill(alpha,beta);
+      }
       
       if(testSubDetID == PixelSubdetector::PixelBarrel){
-        float alpha = atan2( locz, locx );
-        if ((*testhit).getType()== TrackingRecHit::valid)  validVsAlphaBPix->Fill( alpha );
-        if ((*testhit).getType()== TrackingRecHit::missing)   missingVsAlphaBPix->Fill( alpha);
-        float  beta = atan2( locz, locy );
-        if ((*testhit).getType()== TrackingRecHit::valid)  validVsBetaBPix->Fill( beta );
-        if ((*testhit).getType()== TrackingRecHit::missing)   missingVsBetaBPix->Fill( beta);
+        if ((*testhit).getType()== TrackingRecHit::valid){
+	  validVsAlphaBPix->Fill( alpha );
+	  validVsBetaBPix->Fill( beta );
+	}
+        if ((*testhit).getType()== TrackingRecHit::missing){
+	   missingVsAlphaBPix->Fill( alpha);
+	   missingVsBetaBPix->Fill( beta);
+	}
       }
       
       if(testSubDetID == PixelSubdetector::PixelEndcap){
-        float alpha = atan2( locz, locx );
-        if ((*testhit).getType()== TrackingRecHit::valid)  validVsAlphaFPix->Fill( alpha );
-        if ((*testhit).getType()== TrackingRecHit::missing)   missingVsAlphaFPix->Fill( alpha);
-        float  beta = atan2( locz, locy );
-        if ((*testhit).getType()== TrackingRecHit::valid)  validVsBetaFPix->Fill( beta );
-        if ((*testhit).getType()== TrackingRecHit::missing)   missingVsBetaFPix->Fill( beta);
+        if ((*testhit).getType()== TrackingRecHit::valid){
+	  validVsAlphaFPix->Fill( alpha );
+	  validVsBetaFPix->Fill( beta );
+	}
+        if ((*testhit).getType()== TrackingRecHit::missing){
+	   missingVsAlphaFPix->Fill( alpha);
+           missingVsBetaFPix->Fill( beta);
+	}
       }
+
+	if ((*testhit).getType()== TrackingRecHit::missing){
+          missingVsLocalX->Fill(tsos.localPosition().x());
+          missingVsLocalY->Fill(tsos.localPosition().y());
+	  
+	  if (isBigModule){
+	    missingVsLocalXBig->Fill(tsos.localPosition().x());
+	    missingAlphaLocalXBig->Fill(alpha,tsos.localPosition().x());
+	  }
+	  else {
+	    missingVsLocalXSmall->Fill(tsos.localPosition().x());
+	    missingAlphaLocalXSmall->Fill(alpha,tsos.localPosition().x());
+	  }
+	}
+	
+	if ((*testhit).getType()== TrackingRecHit::valid){
+	  validVsLocalX->Fill(tsos.localPosition().x());	  
+	  validVsLocalY->Fill(tsos.localPosition().y());
+	  
+	  if (isBigModule){
+	    validVsLocalXBig->Fill(tsos.localPosition().x());
+	    validAlphaLocalXBig->Fill(alpha,tsos.localPosition().x());
+	  }
+	  else{
+	    validVsLocalXSmall->Fill(tsos.localPosition().x());
+	    validAlphaLocalXSmall->Fill(alpha,tsos.localPosition().x());
+	  }
+	}
 	
 
       //*****************   METHOD 2: window searching      *****************
@@ -843,15 +1145,15 @@ try{
 
 	if (minDistance>0.5)
 	  {
-          missingVsLocalX->Fill(tsos.localPosition().x());
-          missingVsLocalY->Fill(tsos.localPosition().y());
+          //missingVsLocalX->Fill(tsos.localPosition().x());
+          //missingVsLocalY->Fill(tsos.localPosition().y());
 	  //test
 	  histoMethod2After->Fill(0);
 	  }
 	else
 	  {
-	  validVsLocalX->Fill(tsos.localPosition().x());	  
-	  validVsLocalY->Fill(tsos.localPosition().y());
+	  //validVsLocalX->Fill(tsos.localPosition().x());	  
+	  //validVsLocalY->Fill(tsos.localPosition().y());
 	  //test
 	  histoMethod2After->Fill(1);
 	  }
@@ -988,7 +1290,7 @@ try{
 // ------------ method called once each job just before starting event loop  ------------
 
 void 
-PixelEfficiency::beginJob(const edm::EventSetup&)
+PixelEfficiency::beginJob(const edm::EventSetup& iSetup)
 {
  if(DEBUG) std::cout<<"Begin job"<<std::endl;
 
@@ -1066,6 +1368,10 @@ PixelEfficiency::beginJob(const edm::EventSetup&)
  validVsBeta = new TH1F("validVsBeta","validVsBeta",200,-3.5,3.5);
  missingVsBeta = new TH1F("missingVsBeta","missingVsBeta",200,-3.5,3.5);
 
+ validAlphaBeta   = new TH2F("validAlphaBeta"  ,"validAlphaBeta"  ,50,-3.5,3.5,50,-3.5,3.5);
+ missingAlphaBeta = new TH2F("missingAlphaBeta","missingAlphaBeta",50,-3.5,3.5,50,-3.5,3.5);
+
+
  validVsAlphaBPix = new TH1F("validVsAlphaBPix","validVsAlphaBPix",200,-3.5,3.5);
  missingVsAlphaBPix = new TH1F("missingVsAlphaBPix","missingVsAlphaBPix",200,-3.5,3.5);
  validVsBetaBPix = new TH1F("validVsBetaBPix","validVsBetaBPix",200,-3.5,3.5);
@@ -1081,6 +1387,24 @@ PixelEfficiency::beginJob(const edm::EventSetup&)
  validVsLocalY = new TH1F("validVsLocalY","validVsLocalY",100,-4.,4.);
  missingVsLocalY = new TH1F("missingVsLocalY","missingVsLocalY",100,-4.,4.);
 
+ validVsLocalXBig = new TH1F("validVsLocalXBig","validVsLocalXBig",100,-1.5,1.5);
+ missingVsLocalXBig = new TH1F("missingVsLocalXBig","missingVsLocalXBig",100,-1.5,1.5);
+ validVsLocalXSmall = new TH1F("validVsLocalXSmall","validVsLocalXSmall",100,-1.5,1.5);
+ missingVsLocalXSmall = new TH1F("missingVsLocalXSmall","missingVsLocalXSmall",100,-1.5,1.5);
+
+ validAlphaLocalXBig = new TH2F("validAlphaLocalXBig","validAlphaLocalXBig",200,-3.5,3.5,100,-1.5,1.5);
+ missingAlphaLocalXBig = new TH2F("missingAlphaLocalXBig","missingAlphaLocalXBig",200,-3.5,3.5,100,-1.5,1.5);
+ validAlphaLocalXSmall = new TH2F("validAlphaLocalXSmall","validAlphaLocalXSmall",200,-3.5,3.5,100,-1.5,1.5);
+ missingAlphaLocalXSmall = new TH2F("missingAlphaLocalXSmall","missingAlphaLocalXSmall",200,-3.5,3.5,100,-1.5,1.5);
+
+ validVsMuontimePost68094 = new TH1F("validVsMuontimePost68094","validVPost68094sMuontime",50,-40.,80.);
+ missingVsMuontimePost68094 = new TH1F("missingVsMuontimePost68094","missingVsMuontimePost68094",50,-40.,80.);
+ validVsMuontimePre68094 = new TH1F("validVsMuontimePre68094","validVsMuontimePre68094",50,-40.,80.);
+ missingVsMuontimePre68094 = new TH1F("missingVsMuontimePre68094","missingVsMuontimePre68094",50,-40.,80.);
+
+ validVsPT = new TH1F("validVsPT","validVsPT",100,0.,50.);
+ missingVsPT = new TH1F("missingVsPT","missingVsPT",100,0.,50.);
+
  //
  checkoutValidityFlag = new TH1F("checkoutValidityFlag","checkoutValidityFlag", 4, 0,4);
  checkoutTraj = new TH1F("checkoutTraj","checkoutTraj",10,0,10);
@@ -1089,14 +1413,24 @@ PixelEfficiency::beginJob(const edm::EventSetup&)
  inactivePerTrack= new TH1F ("inactivePerTrack","inactivePerTrack",101,0,101);
  missingPerTrack= new TH1F ("missingPerTrack","missingPerTrack",101,0,101);
  
- hitsPassingCutsValBPix = new TH1F("hitsPassingCutsValBPix","hitsPassingCutsValBPix",6,0,6);
- hitsPassingCutsMisBPix = new TH1F("hitsPassingCutsMisBPix","hitsPassingCutsMisBPix",6,0,6);
- hitsPassingCutsValFPix = new TH1F("hitsPassingCutsValFPix","hitsPassingCutsValFPix",6,0,6);
- hitsPassingCutsMisFPix = new TH1F("hitsPassingCutsMisFPix","hitsPassingCutsMisFPix",6,0,6);
+ hitsPassingCutsValBPix = new TH1F("hitsPassingCutsValBPix","hitsPassingCutsValBPix",10,0,10);
+ hitsPassingCutsMisBPix = new TH1F("hitsPassingCutsMisBPix","hitsPassingCutsMisBPix",10,0,10);
+ hitsPassingCutsValFPix = new TH1F("hitsPassingCutsValFPix","hitsPassingCutsValFPix",10,0,10);
+ hitsPassingCutsMisFPix = new TH1F("hitsPassingCutsMisFPix","hitsPassingCutsMisFPix",10,0,10);
  xPosFracVal = new TH2F("xPosFracVal" ,"xPosFracVal" ,101,0,1.01,6,0,6);
  xPosFracMis = new TH2F("xPosFracMis" ,"xPosFracMis" ,101,0,1.01,6,0,6);
  yPosFracVal = new TH2F("yPosFracVal" ,"yPosFracVal" ,101,0,1.01,6,0,6);
  yPosFracMis = new TH2F("yPosFracMis" ,"yPosFracMis" ,101,0,1.01,6,0,6);
+
+ validChiSquare   = new TH1F("validChiSquare","validChiSquare",200, 0., 100.);
+ missingChiSquare = new TH1F("missingChiSquare","missingChiSquare",200, 0., 100.);;
+
+ tunningVal = new TH2F("tunningVal" ,"tunningVal" ,50,0,5,40,0,40);
+ tunningMis = new TH2F("tunningMis" ,"tunningMis" ,50,0,5,40,0,40);
+ tunningEdgeVal = new TH1F("tunningEdgeVal","tunningEdgeVal",50,0,5);
+ tunningEdgeMis = new TH1F("tunningEdgeMis","tunningEdgeMis",50,0,5);
+ tunningMuonVal = new TH1F("tunningMuonVal","tunningMuonVal",40,0,40);
+ tunningMuonMis = new TH1F("tunningMuonMis","tunningMuonMis",40,0,40);
 
  tree = new TTree("moduleAnalysis","moduleAnalysis");
  tree->Branch("id",&idTree,"id/I");
@@ -1187,6 +1521,8 @@ PixelEfficiency::endJob() {
   missingVsAlpha->Write();
   validVsBeta->Write();
   missingVsBeta->Write();
+  validAlphaBeta->Write();
+  missingAlphaBeta->Write();
   validVsAlphaBPix->Write();
   missingVsAlphaBPix->Write();
   validVsBetaBPix->Write();
@@ -1200,7 +1536,24 @@ PixelEfficiency::endJob() {
   missingVsLocalX->Write();
   validVsLocalY->Write();
   missingVsLocalY->Write();
+  validVsLocalXBig->Write();
+  missingVsLocalXBig->Write();
+  validVsLocalXSmall->Write();
+  missingVsLocalXSmall->Write();
   
+  missingVsMuontimePre68094->Write();
+  validVsMuontimePre68094->Write();
+  missingVsMuontimePost68094->Write();
+  validVsMuontimePost68094->Write();
+
+  validVsPT->Write();
+  missingVsPT->Write();
+
+  validAlphaLocalXBig->Write();
+  missingAlphaLocalXBig->Write();
+  validAlphaLocalXSmall->Write();
+  missingAlphaLocalXSmall->Write();
+
   validPerRun->LabelsDeflate("X");
   validPerRun->Write();
   invalidPerRun->LabelsDeflate("X");
@@ -1224,13 +1577,22 @@ PixelEfficiency::endJob() {
   xPosFracMis->Write();
   yPosFracVal->Write();
   yPosFracMis->Write();
-  
 
-//test
-histoMethod2After->Write();
-histoMethod2->Write();  
-histoMethod2AfterFPix->Write();
-histoMethod2FPix->Write();  
+  validChiSquare->Write();
+  missingChiSquare->Write();
+  
+  tunningVal->Write();
+  tunningMis->Write();
+  tunningEdgeVal->Write();
+  tunningEdgeMis->Write();
+  tunningMuonVal->Write();
+  tunningMuonMis->Write();
+
+  //test
+  histoMethod2After->Write();
+  histoMethod2->Write();  
+  histoMethod2AfterFPix->Write();
+  histoMethod2FPix->Write();  
   
     isModuleBadTree=1;
     for (unsigned int l=0; l<badModuleMap.size(); l++)
@@ -1243,10 +1605,19 @@ histoMethod2FPix->Write();
     //validTree=-10;
     for (unsigned int l=0; l<goodModuleMap.size(); l++)
       {
-      idTree=(goodModuleMap[l])[0];inactiveTree=(goodModuleMap[l])[1]; missingTree=(goodModuleMap[l])[2]; validTree=(goodModuleMap[l])[3];
-      barrelTree=(goodModuleMap[l])[4] ; ladderTree=(goodModuleMap[l])[5]; bladeTree=(goodModuleMap[l])[6];
-      moduleInLadderTree=(goodModuleMap[l])[7];
-      globalXTree=(goodModuleMap[l])[8]; globalYTree=(goodModuleMap[l])[9]; globalZTree=(goodModuleMap[l])[10];
+      idTree=int((goodModuleMap[l])[0]);
+      inactiveTree=int((goodModuleMap[l])[1]);
+      missingTree=int((goodModuleMap[l])[2]);
+      validTree=int((goodModuleMap[l])[3]);
+      
+      barrelTree=int((goodModuleMap[l])[4]);
+      ladderTree=int((goodModuleMap[l])[5]);
+      bladeTree=int((goodModuleMap[l])[6]);
+      moduleInLadderTree=int((goodModuleMap[l])[7]);
+      
+      globalXTree=(goodModuleMap[l])[8];
+      globalYTree=(goodModuleMap[l])[9];
+      globalZTree=(goodModuleMap[l])[10];
       tree->Fill();
       }
     tree->Write();
