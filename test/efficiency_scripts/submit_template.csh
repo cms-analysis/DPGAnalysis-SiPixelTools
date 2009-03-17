@@ -6,7 +6,8 @@ setenv startdir `pwd`
 
 cd ${storedir}
 cmsenv
-setenv STAGE_SVCCLASS wan
+#setenv STAGE_SVCCLASS wan
+setenv STAGE_SVCCLASS cmscaf
 cp CFGFILE ${startdir}
 
 cd ${startdir}
