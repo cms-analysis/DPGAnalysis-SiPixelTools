@@ -6,7 +6,7 @@ process = cms.Process("PixelEfficiency")
 process.load("FWCore.MessageService.MessageLogger_cfi")
 
 # DQM services
-process.load("DQMServices.Core.DQM_cfg")
+#process.load("DQMServices.Core.DQM_cfg")
 
 # DB Configuration
 process.load("CondCore.DBCommon.CondDBSetup_cfi")
@@ -16,8 +16,9 @@ process.load("CondCore.DBCommon.CondDBCommon_cfi")
 process.load("Configuration.StandardSequences.Geometry_cff")
 # Magnetic Field
 process.load("Configuration.StandardSequences.MagneticField_38T_cff")
+
+# reconstruction sequence for Cosmics
 process.load("Configuration.StandardSequences.ReconstructionCosmics_cff")
-#process.load("Configuration.GlobalRuns.ForceZeroTeslaField_cff")
 
 # Global Tag
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
@@ -27,10 +28,7 @@ process.GlobalTag.connect = "frontier://FrontierProd/CMS_COND_21X_GLOBALTAG"
 #process.GlobalTag.globaltag = "CRAFT_ALL_V4::All"
 #tag behind for MC dataset
 #process.GlobalTag.globaltag = 'COSMMC_21X_V1::All'
-process.GlobalTag.globaltag = "CRAFT_ALL_V9::All"
-
-#Do the reconstruction with new tag
-#process.load("Configuration.StandardSequences.ReconstructionCosmics_cff")
+process.GlobalTag.globaltag = "CRAFT_ALL_V11::All"
 
 ## Load and Configure OfflineValidation
 process.load("Alignment.OfflineValidation.TrackerOfflineValidation_cfi")
@@ -262,6 +260,8 @@ process.checkCosmicTF = cms.EDAnalyzer('PixelEfficiency',
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.MessageLogger.cerr.threshold = 'Info'
 
-process.p = cms.Path(process.trackerCosmics*process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
-#process.p = cms.Path(process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
+#process.p = cms.Path(process.trackerCosmics*process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
+process.p = cms.Path(process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
+
+    
 process.TrackerDigiGeometryESModule.applyAlignment = True
