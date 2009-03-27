@@ -11,11 +11,11 @@
 #include <vector>
 #include <iostream>
 #include "TCanvas.h"
-
+#include "TGaxis.h"
 
   using namespace std;
   bool DEBUG=false;
-  int Nfiles=100;
+  int Nfiles=500;
   
   
 //************** Quick function to merge easilly histos **************
@@ -68,14 +68,16 @@ void makeEfficiency(TH2F* valid, TH2F* missing, TH2F* efficiency){
 }
 
 
-void Canv(TH1F *Histo1,TH1F *Histo2,char CName[100], char Option[60], TLegend* Leg)
+void Canv(TH1F *Histo1,TH1F *Histo2,char CName[100], char Option[60], TLegend* Leg, bool integrate = false)
 {
   TCanvas *Can = new TCanvas("cc","cc");
   Can->cd();
   double Max;
   
-  Histo1->Scale(1./Histo1->Integral());
-  Histo2->Scale(1./Histo2->Integral());
+  if(integrate){
+    Histo1->Scale(1./Histo1->Integral());
+    Histo2->Scale(1./Histo2->Integral());
+  }
   
   (Histo1->GetMaximum() <= Histo2->GetMaximum() )? Max=Histo2->GetMaximum():Max=Histo1->GetMaximum();
   
@@ -83,6 +85,8 @@ void Canv(TH1F *Histo1,TH1F *Histo2,char CName[100], char Option[60], TLegend* L
     
   Histo1->SetLineColor(kBlack);
   Histo2->SetLineColor(kRed);
+  Histo1->SetMarkerColor(kBlack);
+  Histo2->SetMarkerColor(kRed);
   
   char Option1[60];
   if(!strcmp(Option,"")) strcpy(Option1,"HIST");
@@ -113,11 +117,15 @@ void merge(){
   TH1F* histLayer1Merged = new TH1F("histLayer1Merged", "histLayer1Merged", 3, 0, 3);
   TH1F* histLayer2Merged = new TH1F("histLayer2Merged", "histLayer2Merged", 3, 0, 3);
   TH1F* histLayer3Merged = new TH1F("histLayer3Merged", "histLayer3Merged", 3, 0, 3);
-  TH1F* histEndcapPlusMerged = new TH1F("histEndcapPlusMerged", "histEndcapPlusMerged", 3, 0, 3);
+  TH1F* histEndcapPlusMerged  = new TH1F("histEndcapPlusMerged", "histEndcapPlusMerged", 3, 0, 3);
   TH1F* histEndcapMinusMerged = new TH1F("histEndcapMinusMerged", "histEndcapMinusMerged", 3, 0, 3);
   TH1F* histBarrelMerged = new TH1F("histBarrelMerged", "histBarrelMerged", 3, 0, 3);
   TH1F* histEndcapMerged = new TH1F("histEndcapMerged", "histEndcapMerged", 3, 0, 3);
-  TH1F* consistencyCheckMerged = new TH1F("consistencyCheckMerged","consistencyCheckMerged", 3, 0,3);
+  TH1F* validPerSubdetectorMerged   = new TH1F("validPerSubdetectorMerged", "validPerSubdetectorMerged", 5, 0, 5);
+  TH1F* missingPerSubdetectorMerged = new TH1F("missingPerSubdetectorMerged", "missingPerSubdetectorMerged", 5, 0, 5);
+  TH1F* validSummaryMerged   = new TH1F("validSummaryMerged", "validSummaryMerged", 3, 0, 3);
+  TH1F* missingSummaryMerged = new TH1F("missingSummaryMerged", "missingSummaryMerged", 3, 0, 3);
+  TH1F* consistencyCheckMerged     = new TH1F("consistencyCheckMerged","consistencyCheckMerged", 3, 0,3);
   TH1F* consistencyCheckTrajMerged = new TH1F("consistencyCheckTrajMerged","consistencyCheckTrajMerged", 3, 0,3);
 
   TH1F* validPerRunMerged = new  TH1F("validPerRunMerged","validPerRunMerged",200,0,200);
@@ -127,9 +135,11 @@ void merge(){
   TH1F* inactivePercentPerRun = new  TH1F("inactivePercentPerRun","inactivePercentPerRun",200,0,200);
 
   TH1F* validVsAlphaMerged = new TH1F("validVsAlphaMerged","validVsAlphaMerged",200,-3.5,3.5);
+  TH1F* validVsCotanAlphaMerged = new TH1F("validVsCotanAlphaMerged","validVsCotanAlphaMerged",200,-3.5,3.5);
   TH1F* validVsAlphaBPixMerged = new TH1F("validVsAlphaBPixMerged","validVsAlphaMerged",200,-3.5,3.5);
   TH1F* validVsAlphaFPixMerged = new TH1F("validVsAlphaFPixMerged","validVsAlphaFPixMerged",200,-3.5,3.5);
   TH1F* missingVsAlphaMerged = new TH1F("missingVsAlphaMerged","missingVsAlphaMerged",200,-3.5,3.5);
+  TH1F* missingVsCotanAlphaMerged = new TH1F("missingVsCotanAlphaMerged","missingVsCotanAlphaMerged",200,-3.5,3.5);
   TH1F* missingVsAlphaBPixMerged = new TH1F("missingVsAlphaBPixMerged","missingVsAlphaBPixMerged",200,-3.5,3.5);
   TH1F* missingVsAlphaFPixMerged = new TH1F("missingVsAlphaFPixMerged","missingVsAlphaFPixMerged",200,-3.5,3.5);
   TH1F* validVsBetaMerged = new TH1F("validVsBetaMerged","validVsBetaMerged",200,-3.5,3.5);
@@ -139,9 +149,9 @@ void merge(){
   TH1F* missingVsBetaBPixMerged = new TH1F("missingVsBetaBPixMerged","missingVsBetaBPixMerged",200,-3.5,3.5);
   TH1F* missingVsBetaFPixMerged = new TH1F("missingVsBetaFPixMerged","missingVsBetaFPixMerged",200,-3.5,3.5);
 
-  TH2F* validAlphaBetaMerged   = new TH2F("validAlphaBetaMerged"  ,"validAlphaBetaMerged"  ,200,-3.5,3.5,200,-3.5,3.5);
-  TH2F* missingAlphaBetaMerged = new TH2F("missingAlphaBetaMerged","missingAlphaBetaMerged",200,-3.5,3.5,200,-3.5,3.5);
-  TH2F* alphaBetaEfficiency    = new TH2F("alphaBetaEfficiency"   ,"alphaBetaEfficiency"   ,200,-3.5,3.5,200,-3.5,3.5);
+  TH2F* validAlphaBetaMerged   = new TH2F("validAlphaBetaMerged"  ,"validAlphaBetaMerged"  ,50,-3.5,3.5,50,-3.5,3.5);
+  TH2F* missingAlphaBetaMerged = new TH2F("missingAlphaBetaMerged","missingAlphaBetaMerged",50,-3.5,3.5,50,-3.5,3.5);
+  TH2F* alphaBetaEfficiency    = new TH2F("alphaBetaEfficiency"   ,"alphaBetaEfficiency"   ,50,-3.5,3.5,50,-3.5,3.5);
   
   TH1F* validVsLocalXMerged = new TH1F("validVsLocalXMerged","validVsLocalXMerged",100,-1.5,1.5);
   TH1F* validVsLocalYMerged = new TH1F("validVsLocalYMerged","validVsLocalYMerged",100,-4.,4.);
@@ -201,6 +211,17 @@ void merge(){
   TH1F* inactivePerTrackMerged= new TH1F ("inactivePerTrackMerged","inactivePerTrackMerged",101,0,101);
   TH1F* missingPerTrackMerged= new TH1F ("missingPerTrackMerged","missingPerTrackMerged",101,0,101);
 
+  TH2F* xPosFracValMerged = new TH2F("xPosFracVal","xPosFracVal", 101,0,1.01, 6,0,6);
+  TH2F* xPosFracMisMerged = new TH2F("xPosFracMis","xPosFracMis", 101,0,1.01 ,6,0,6);
+  TH2F* yPosFracValMerged = new TH2F("yPosFracVal","yPosFracVal", 101,0,1.01 ,6,0,6);
+  TH2F* yPosFracMisMerged = new TH2F("yPosFracMis","yPosFracMis", 101,0,1.01 ,6,0,6);
+ 
+  TH1F* hitsPassingCutsValMerged = new TH1F("hitsPassingCutsValMerged","hitsPassingCutsValMerged",10,0,10);
+  TH1F* hitsPassingCutsMisMerged = new TH1F("hitsPassingCutsMisMerged","hitsPassingCutsMisMerged",10,0,10);
+  TH1F* hitsPassingCutsValBPixMerged = new TH1F("hitsPassingCutsValBPixMerged","hitsPassingCutsValBPixMerged",10,0,10);
+  TH1F* hitsPassingCutsMisBPixMerged = new TH1F("hitsPassingCutsMisBPixMerged","hitsPassingCutsMisBPixMerged",10,0,10);
+  TH1F* hitsPassingCutsValFPixMerged = new TH1F("hitsPassingCutsValFPixMerged","hitsPassingCutsValFPixMerged",10,0,10);
+  TH1F* hitsPassingCutsMisFPixMerged = new TH1F("hitsPassingCutsMisFPixMerged","hitsPassingCutsMisFPixMerged",10,0,10);
 
   vector< vector<double> > tempTree;
   int id, isModuleBad, inactive, missing, valid, isBarrelModule, ladder, blade, moduleInLadder;
@@ -220,18 +241,11 @@ void merge(){
   treeMerged->Branch("globalY",&globalY,"globalY/D");
   treeMerged->Branch("globalZ",&globalZ,"globalZ/D");
   
+  TH1F* histSubdetectors = new TH1F("histSubdetectors", "histSubdetectors", 5, 0, 5);
+  TH1F* histSummary = new TH1F("histSummary", "histSummary", 3, 0, 3);
+  TH1F* efficiencyPerSubdetector = new TH1F("efficiencyPerSubdetector", "efficiencyPerSubdetector", 5, 0, 5);
+  TH1F* efficiencySummary = new TH1F("efficiencySummary", "efficiencySummary", 3, 0, 3);
   
-  TH2F* xPosFracValMerged = new TH2F("xPosFracVal","xPosFracVal", 101,0,1.01, 6,0,6);
-  TH2F* xPosFracMisMerged = new TH2F("xPosFracMis","xPosFracMis", 101,0,1.01 ,6,0,6);
-  TH2F* yPosFracValMerged = new TH2F("yPosFracVal","yPosFracVal", 101,0,1.01 ,6,0,6);
-  TH2F* yPosFracMisMerged = new TH2F("yPosFracMis","yPosFracMis", 101,0,1.01 ,6,0,6);
- 
-  TH1F* hitsPassingCutsValMerged = new TH1F("hitsPassingCutsValMerged","hitsPassingCutsValMerged",10,0,10);
-  TH1F* hitsPassingCutsMisMerged = new TH1F("hitsPassingCutsMisMerged","hitsPassingCutsMisMerged",10,0,10);
-  TH1F* hitsPassingCutsValBPixMerged = new TH1F("hitsPassingCutsValBPixMerged","hitsPassingCutsValBPixMerged",10,0,10);
-  TH1F* hitsPassingCutsMisBPixMerged = new TH1F("hitsPassingCutsMisBPixMerged","hitsPassingCutsMisBPixMerged",10,0,10);
-  TH1F* hitsPassingCutsValFPixMerged = new TH1F("hitsPassingCutsValFPixMerged","hitsPassingCutsValFPixMerged",10,0,10);
-  TH1F* hitsPassingCutsMisFPixMerged = new TH1F("hitsPassingCutsMisFPixMerged","hitsPassingCutsMisFPixMerged",10,0,10);
 
   TH1F* effDistriLayer1 = new TH1F("effDistriLayer1","effDistriLayer1",101,0,1.01);
   TH1F* effDistriLayer2 = new TH1F("effDistriLayer2","effDistriLayer2",101,0,1.01);
@@ -289,7 +303,14 @@ void merge(){
   TH1F* tunningEdgeMisMerged = new TH1F("tunningEdgeMisMerged","tunningEdgeMisMerged",50,0,5);
   TH1F* tunningMuonValMerged = new TH1F("tunningMuonValMerged","tunningMuonValMerged",40,0,40);
   TH1F* tunningMuonMisMerged = new TH1F("tunningMuonMisMerged","tunningMuonMisMerged",40,0,40);
-  
+    
+  TH1F* histAlphaAnalysis = new TH1F("histAlphaAnalysis", "hist", 200, -3.5,3.5);
+  TH1F* histAlphaAnalysisBPix = new TH1F("histAlphaAnalysisBPix", "hist", 200, -3.5,3.5);
+  TH1F* histAlphaAnalysisFPix = new TH1F("histAlphaAnalysisFPix", "hist", 200, -3.5,3.5);
+  TH1F* histCotanAlphaAnalysis = new TH1F("histCotanAlphaAnalysis", "hist:cotan(#alpha)", 200, -3.5,3.5); 
+  TH1F* histBetaAnalysis = new TH1F("histBetaAnalysis", "hist", 200, -3.5,3.5); 
+  TH1F* histBetaAnalysisBPix = new TH1F("histBetaAnalysisBPix", "hist", 200, -3.5,3.5); 
+  TH1F* histBetaAnalysisFPix = new TH1F("histBetaAnalysisFPix", "hist", 200, -3.5,3.5); 
   
   TH2F* tunningEfficiency = new TH2F("tunningEfficiency" ,"tunningEfficiency" ,50,0,5,40,0,40);
   TH1F* tunningEdgeEfficiency = new TH1F("tunningEdgeEfficiency","tunningEdgeEfficiency",50,0,5);
@@ -301,8 +322,8 @@ void merge(){
   TH1F* PTEfficiency = new TH1F ("PTEfficiency","PTEfficiency",100,0,50);
 
   char name[120];
-  for(int i=1;i<=Nfiles;i++)
-    {
+  for(int i=1;i<=Nfiles;i++){
+  
     sprintf(name,"pixelEfficiency%d.root",i);
         
     cout<<name<<endl;
@@ -317,8 +338,7 @@ void merge(){
     
     if(DEBUG) cout<<"********* FILE OPENED, STARTING TO MERGE ************"<<endl;
     
-    for (int bin=1; bin<=3; bin++)
-      {
+    for (int bin=1; bin<=3; bin++){
       TH1F *h1 = (TH1F*)gDirectory->Get( "histo" );
       histoMerged->SetBinContent( bin, histoMerged->GetBinContent(bin) + h1->GetBinContent(bin));
     
@@ -354,7 +374,26 @@ void merge(){
       delete h7;
       delete h8;
       delete h9;
-      }
+    }
+      
+      
+    mergeHisto("validPerSubdetector",validPerSubdetectorMerged);
+    mergeHisto("missingPerSubdetector",missingPerSubdetectorMerged);
+    validSummaryMerged->Fill(0.5,validPerSubdetectorMerged->GetBinContent(1)
+    				+validPerSubdetectorMerged->GetBinContent(2)
+    				+validPerSubdetectorMerged->GetBinContent(3));
+    validSummaryMerged->Fill(1.5,validPerSubdetectorMerged->GetBinContent(4)
+    				+validPerSubdetectorMerged->GetBinContent(5));
+    validSummaryMerged->Fill(2.5,validSummaryMerged->GetBinContent(1)
+    				+validSummaryMerged->GetBinContent(2));
+    missingSummaryMerged->Fill(0.5,missingPerSubdetectorMerged->GetBinContent(1)
+    				  +missingPerSubdetectorMerged->GetBinContent(2)
+    				  +missingPerSubdetectorMerged->GetBinContent(3));
+    missingSummaryMerged->Fill(1.5,missingPerSubdetectorMerged->GetBinContent(4)
+    				  +missingPerSubdetectorMerged->GetBinContent(5));
+    missingSummaryMerged->Fill(2.5,missingSummaryMerged->GetBinContent(1)
+    				  +missingSummaryMerged->GetBinContent(2));
+  
     for (int bin=1; bin<=4; bin++)
       {
       TH1F *h10 = (TH1F*)gDirectory->Get( "histInvalidRecHitCollection" );
@@ -438,12 +477,14 @@ void merge(){
     
 //update to alpha and beta
     TH1F *validVsAlpha = (TH1F*)gDirectory->Get( "validVsAlpha" );
+    mergeHisto("validVsCotanAlpha",validVsCotanAlphaMerged);
     TH1F *validVsAlphaBPix = (TH1F*)gDirectory->Get( "validVsAlphaBPix" );
     TH1F *validVsAlphaFPix = (TH1F*)gDirectory->Get( "validVsAlphaFPix" );
     TH1F *missingVsAlpha = (TH1F*)gDirectory->Get( "missingVsAlpha" );
     TH1F *missingVsAlphaBPix = (TH1F*)gDirectory->Get( "missingVsAlphaBPix" );
     TH1F *missingVsAlphaFPix = (TH1F*)gDirectory->Get( "missingVsAlphaFPix" );
     TH1F *validVsBeta = (TH1F*)gDirectory->Get( "validVsBeta" );
+    mergeHisto("missingVsCotanAlpha",missingVsCotanAlphaMerged);
     TH1F *validVsBetaBPix = (TH1F*)gDirectory->Get( "validVsBetaBPix" );
     TH1F *validVsBetaFPix = (TH1F*)gDirectory->Get( "validVsBetaFPix" );
     TH1F *missingVsBeta = (TH1F*)gDirectory->Get( "missingVsBeta" );
@@ -834,9 +875,6 @@ void merge(){
   
   
   
-  TH1F* histSubdetectors = new TH1F("histSubdetectors", "histSubdetectors", 5, 0, 5);
-  TH1F* histSummary = new TH1F("histSummary", "histSummary", 3, 0, 3);
-  
 
   a=histLayer1Merged->GetBinContent(3); b=histLayer1Merged->GetBinContent(2);
   if((a+b)!=0) histSubdetectors->SetBinContent( 1, a/(a+b) );
@@ -886,6 +924,19 @@ void merge(){
   histSummary->SetBinError(3,error);
   histSummary->GetXaxis()->SetBinLabel(3,"total");
 
+  makeEfficiency(validPerSubdetectorMerged,missingPerSubdetectorMerged,efficiencyPerSubdetector);
+  efficiencyPerSubdetector->GetXaxis()->SetBinLabel(1," BPix Layer 1");
+  efficiencyPerSubdetector->GetXaxis()->SetBinLabel(2," BPix Layer 2");
+  efficiencyPerSubdetector->GetXaxis()->SetBinLabel(3," BPix Layer 3");
+  efficiencyPerSubdetector->GetXaxis()->SetBinLabel(4," FPix Plus");
+  efficiencyPerSubdetector->GetXaxis()->SetBinLabel(5," FPix Minus");
+
+  makeEfficiency(validSummaryMerged,missingSummaryMerged,efficiencySummary);
+  efficiencySummary->GetXaxis()->SetBinLabel(1," BPix");
+  efficiencySummary->GetXaxis()->SetBinLabel(2," FPix");
+  efficiencySummary->GetXaxis()->SetBinLabel(3," Total");
+  
+/*
   
   TH1F* histAlphaAnalysis = new TH1F("histAlphaAnalysis", "hist", 200, -3.5,3.5); 
   for (int bin=1;bin<=200;bin++)
@@ -914,7 +965,16 @@ void merge(){
       histBetaAnalysis->SetBinError(bin,error);
       }
     }
-
+    
+  */
+  
+  makeEfficiency(validVsAlphaMerged,missingVsAlphaMerged,histAlphaAnalysis);
+  makeEfficiency(validVsAlphaBPixMerged,missingVsAlphaBPixMerged,histAlphaAnalysisBPix);
+  makeEfficiency(validVsAlphaFPixMerged,missingVsAlphaFPixMerged,histAlphaAnalysisFPix);
+  makeEfficiency(validVsCotanAlphaMerged,missingVsCotanAlphaMerged,histCotanAlphaAnalysis);
+  makeEfficiency(validVsBetaMerged,missingVsBetaMerged,histBetaAnalysis);
+  makeEfficiency(validVsBetaBPixMerged,missingVsBetaBPixMerged,histBetaAnalysisBPix);
+  makeEfficiency(validVsBetaFPixMerged,missingVsBetaFPixMerged,histBetaAnalysisFPix);
   makeEfficiency(validAlphaBetaMerged,missingAlphaBetaMerged,alphaBetaEfficiency); 
   makeEfficiency(validVsLocalXBigMerged,missingVsLocalXBigMerged,localXBigEfficiency);
   makeEfficiency(validVsLocalXSmallMerged,missingVsLocalXSmallMerged,localXSmallEfficiency);
@@ -1368,7 +1428,7 @@ void merge(){
   TH1F* cutsTotal = new TH1F("cutsTotal","cutsTotal",10,0,10);
   TH1F* cutsTotalBPix = new TH1F("cutsTotalBPix","cutsTotalBPix",10,0,10);
   TH1F* cutsTotalFPix = new TH1F("cutsTotalFPix","cutsTotalFPix",10,0,10);
-  for(int i=1;i<10;i++){
+  for(int i=1;i<11;i++){
     cutsEfficiency->SetBinContent(i,double(hitsPassingCutsValMerged->GetBinContent(i))/double(hitsPassingCutsValMerged->GetBinContent(i)+hitsPassingCutsMisMerged->GetBinContent(i)));
     cutsEfficiencyBPix->SetBinContent(i,double(hitsPassingCutsValBPixMerged->GetBinContent(i))/double(hitsPassingCutsValBPixMerged->GetBinContent(i)+hitsPassingCutsMisBPixMerged->GetBinContent(i)));
     cutsEfficiencyFPix->SetBinContent(i,double(hitsPassingCutsValFPixMerged->GetBinContent(i))/double(hitsPassingCutsValFPixMerged->GetBinContent(i)+hitsPassingCutsMisFPixMerged->GetBinContent(i)));
@@ -1465,7 +1525,10 @@ void merge(){
   histEndcapPlusMerged->Write();
   histEndcapMinusMerged->Write();
   histBarrelMerged->Write();  
-  histEndcapMerged->Write();  
+  histEndcapMerged->Write();    
+  validPerSubdetectorMerged->Write();  
+  missingPerSubdetectorMerged->Write(); 
+  
   consistencyCheckMerged->Write();
   consistencyCheckTrajMerged->Write();
   histInvalidRecHitCollectionMerged->Write();
@@ -1495,9 +1558,11 @@ void merge(){
 
 
   validVsAlphaMerged->Write();
+  validVsCotanAlphaMerged->Write();
   validVsAlphaBPixMerged->Write();
   validVsAlphaFPixMerged->Write();
   missingVsAlphaMerged->Write();
+  missingVsCotanAlphaMerged->Write();
   missingVsAlphaBPixMerged->Write();
   missingVsAlphaFPixMerged->Write(); 
   validVsBetaMerged->Write(); 
@@ -1522,7 +1587,10 @@ void merge(){
   missingButClusterOnSameModuleMerged->Write();
   
   checkoutTrajMerged->Write();
-  checkoutValidityFlagMerged->Write();   
+  checkoutValidityFlagMerged->Write(); 
+    
+  validVsPTMerged->Write();   
+  missingVsPTMerged->Write();   
   
   missingPerTrackMerged->Write();
   inactivePerTrackMerged->Write();
@@ -1588,10 +1656,24 @@ void merge(){
   histBarrelEfficiencyComparison->Write();
   histSubdetectors->Write();
   histSummary->Write();
+  efficiencyPerSubdetector->Write();
+  efficiencySummary->Write();
   
-  goodStatLayer1Eff->Write();  
+  goodStatLayer1Eff->GetYaxis()->SetTitle("efficiency"); 
+  goodStatLayer1Eff->GetXaxis()->SetTitle("modules Layer 1"); 
+  goodStatLayer2Eff->GetYaxis()->SetTitle("efficiency"); 
+  goodStatLayer2Eff->GetXaxis()->SetTitle("modules Layer 2"); 
+  goodStatLayer3Eff->GetYaxis()->SetTitle("efficiency"); 
+  goodStatLayer3Eff->GetXaxis()->SetTitle("modules Layer 3"); 
+  goodStatLayer1Eff->Write(); 
+  goodStatLayer1Eff->Write(); 
   goodStatLayer2Eff->Write();  
-  goodStatLayer3Eff->Write();  
+  goodStatLayer1Eff->Draw(); 
+  c1->Print("goodStatLayer1Eff.gif","gif");   
+  goodStatLayer2Eff->Draw(); 
+  c1->Print("goodStatLayer2Eff.gif","gif");  
+  goodStatLayer3Eff->Draw(); 
+  c1->Print("goodStatLayer3Eff.gif","gif");  
 
   //moduleBreakoutEff->LabelsDeflate("X");
   moduleBreakoutEff->Write();
@@ -1679,13 +1761,25 @@ void merge(){
   alphaLocalXSmallEfficiency->Write();
   chiSquareEfficiency->GetXaxis()->SetTitle("Chi2");
   chiSquareEfficiency->Write();
+
+  validAlphaLocalXBigMerged->Write();
+  missingAlphaLocalXBigMerged->Write();
+  validAlphaLocalXSmallMerged->Write();
+  missingAlphaLocalXSmallMerged->Write();
   
+  
+  muontimePre68094Efficiency->GetXaxis()->SetTitle("Muon arrival time [ns]");
   muontimePre68094Efficiency->Write();
+  muontimePost68094Efficiency->GetXaxis()->SetTitle("Muon arrival time [ns]");
   muontimePost68094Efficiency->Write();
  
+  PTEfficiency->GetXaxis()->SetTitle("pT Track [GeV]");
   PTEfficiency->Write();
   
   gStyle->SetOptStat(0);
+  
+  PTEfficiency->Draw("colz");
+  c1->Print("PTEfficiency.gif","gif");
   
   alphaBetaEfficiency->Draw("colz");
   c1->Print("alphaBetaEfficiency.gif","gif");
@@ -1726,6 +1820,18 @@ void merge(){
   histAlphaAnalysis->Draw();
   c1->Print("histAlphaAnalysis.gif","gif");
   
+  histAlphaAnalysisBPix->GetXaxis()->SetTitle("#alpha_{local}");  
+  histAlphaAnalysisBPix->Write();
+  histAlphaAnalysisFPix->GetXaxis()->SetTitle("#alpha_{local}");  
+  histAlphaAnalysisFPix->Write();
+ 
+  histCotanAlphaAnalysis->Write();
+  
+  histBetaAnalysisBPix->GetXaxis()->SetTitle("#beta_{local}");  
+  histBetaAnalysisBPix->Write();
+  histBetaAnalysisFPix->GetXaxis()->SetTitle("#beta_{local}");  
+  histBetaAnalysisFPix->Write();
+  
   histBetaAnalysis->GetXaxis()->SetTitle("#beta_{local}");  
   histBetaAnalysis->Write();
   histBetaAnalysis->Draw();
@@ -1761,15 +1867,41 @@ void merge(){
   leg->AddEntry(chargeDistriPreCutsMerged,"NO CUTS","l");
   leg->SetFillColor(10);
   
-  Canv(chargeDistriMerged,chargeDistriPreCutsMerged,"chargeDistri.gif","",leg);
-  Canv(numbPixInClusterMerged,numbPixInClusterPreCutsMerged,"numbPixInCluster.gif","",leg);
-  Canv(chargeDistriBPixMerged,chargeDistriBPixPreCutsMerged,"chargeDistriBPix.gif","",leg);
-  Canv(numbPixInClusterBPixMerged,numbPixInClusterBPixPreCutsMerged,"numbPixInClusterBPix.gif","",leg);
-  Canv(chargeDistriFPixPlusMerged,chargeDistriFPixPlusPreCutsMerged,"chargeDistriFPixPlus.gif","",leg);
-  Canv(numbPixInClusterFPixPlusMerged,numbPixInClusterFPixPlusPreCutsMerged,"numbPixInClusterFPixPlus.gif","",leg);
-  Canv(chargeDistriFPixMinusMerged,chargeDistriFPixMinusPreCutsMerged,"chargeDistriFPixMinus.gif","",leg);
-  Canv(numbPixInClusterFPixMinusMerged,numbPixInClusterFPixMinusPreCutsMerged,"numbPixInClusterFPixMinus.gif","",leg);
-    
+  Canv(chargeDistriMerged,chargeDistriPreCutsMerged,"chargeDistri.gif","",leg,true);
+  Canv(numbPixInClusterMerged,numbPixInClusterPreCutsMerged,"numbPixInCluster.gif","",leg,true);
+  Canv(chargeDistriBPixMerged,chargeDistriBPixPreCutsMerged,"chargeDistriBPix.gif","",leg,true);
+  Canv(numbPixInClusterBPixMerged,numbPixInClusterBPixPreCutsMerged,"numbPixInClusterBPix.gif","",leg,true);
+  Canv(chargeDistriFPixPlusMerged,chargeDistriFPixPlusPreCutsMerged,"chargeDistriFPixPlus.gif","",leg,true);
+  Canv(numbPixInClusterFPixPlusMerged,numbPixInClusterFPixPlusPreCutsMerged,"numbPixInClusterFPixPlus.gif","",leg,true);
+  Canv(chargeDistriFPixMinusMerged,chargeDistriFPixMinusPreCutsMerged,"chargeDistriFPixMinus.gif","",leg,true);
+  Canv(numbPixInClusterFPixMinusMerged,numbPixInClusterFPixMinusPreCutsMerged,"numbPixInClusterFPixMinus.gif","",leg,true);
+  
+  delete leg;
+  leg = new TLegend(0.2,0.2,0.4,0.4);
+  leg->AddEntry(muontimePre68094Efficiency,"before run 68094","P");
+  leg->AddEntry(muontimePost68094Efficiency," after run 68094","P");
+  leg->SetFillColor(10);
+  
+  Canv(muontimePre68094Efficiency,muontimePost68094Efficiency,"EfficiencyVsMuonTime.gif","ERR",leg);
+
+//nice overimposion
+  histAlphaAnalysisFPix->GetXaxis()->SetTitle("#alpha_{local}");
+  histAlphaAnalysisFPix->GetYaxis()->SetTitle("efficiency");
+  histAlphaAnalysisFPix->Draw();
+  c1->Update();
+  Float_t rightmax = 1.1*validVsAlphaFPixMerged->GetMaximum();
+  Float_t scale = gPad->GetUymax()/rightmax;
+  validVsAlphaFPixMerged->Scale(scale);
+  validVsAlphaFPixMerged->SetLineColor(kRed);
+  validVsAlphaFPixMerged->Draw("same");
+  TGaxis *axis = new TGaxis(gPad->GetUxmax(),gPad->GetUymin(),gPad->GetUxmax(),gPad->GetUymax(),0,rightmax,510,"+L");
+  axis->SetLineColor(kRed);
+  axis->SetLabelColor(kRed);
+  axis->SetTitleColor(kRed);
+  axis->SetTitle("number_{valid hits}");
+  axis->Draw();
+  c1->Print("histAlphaAnlaysisANDvalidstatistic.gif","gif");
+
   fOutputFile->Close() ;
     
 }
