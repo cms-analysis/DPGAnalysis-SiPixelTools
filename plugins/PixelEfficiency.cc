@@ -111,7 +111,8 @@ private:
   TH1F*  histEndcapMinus;
   TH1F*  histBarrel;
   TH1F*  histEndcap;
-  TH1F*  efficiencyPerSubdetector;
+  TH1F*  validPerSubdetector;
+  TH1F*  missingPerSubdetector;
 
   TH1F*  consistencyCheck;
   TH1F*  consistencyCheckTraj;
@@ -163,6 +164,8 @@ private:
   
   TH1F*  validVsAlpha;
   TH1F*  missingVsAlpha;
+  TH1F*  validVsCotanAlpha;
+  TH1F*  missingVsCotanAlpha;
   TH1F*  validVsBeta;
   TH1F*  missingVsBeta;
   TH2F*  validAlphaBeta;
@@ -233,6 +236,11 @@ private:
   //ChiSqaure
   TH1F* validChiSquare;
   TH1F* missingChiSquare;
+  TH1F* validChiSquareNdf;
+  TH1F* missingChiSquareNdf;
+
+  TH2F* missPerTrackVsChiSquareNdf;
+  TH2F* missPerTrackPercentVsChiSquareNdf;
 
   //test
   TH1F* histoMethod2After;
@@ -370,7 +378,7 @@ try{
   
    if(itmuon->isTimeValid() == false) continue;
    
-   if(itmuon->time().timeAtIpInOutErr<timerr){
+   if(itmuon->time().timeAtIpInOutErr<timerr && itmuon->time().timeAtIpInOutErr<10){
      time = itmuon->time().timeAtIpInOut;
      timerr = itmuon->time().timeAtIpInOutErr;
    }
@@ -401,6 +409,12 @@ try{
 
     const Trajectory& traj  = *it->key;
     float chiSquare = traj.chiSquared();
+    float chiSquareNdf;
+    if (traj.ndof()!=0.) chiSquareNdf = traj.chiSquared()/traj.ndof();
+    else chiSquareNdf=0.;
+    float missingInTrack=0.;
+    float validInTrack=0.;
+    
     std::vector<TrajectoryMeasurement> tmColl = traj.measurements();
     
     consistencyCheckTraj->Fill(0);//number of total trajectories
@@ -573,10 +587,6 @@ try{
 	    else edgeCutMap[sigma] = false;	   
 	  
 	   }
-
-
-	 
-	 
 	 
 	 //PERCENTAGE CUT
 	 //bool isNotInMiddle = false;
@@ -590,7 +600,7 @@ try{
 	
  
 	//********************* HERE IS THE TELESCOPE CUT ON HITS
-  if(DEBUG) std::cout<<"ERE IS THE TELESCOPE CUT ON HIT"<<std::endl;
+  if(DEBUG) std::cout<<"HERE IS THE TELESCOPE CUT ON HIT"<<std::endl;
 
 	int numofhitCut=0;
         int numOfOtherValid=0;  
@@ -685,7 +695,7 @@ try{
 	  int j=0;
 	  for(map<double,bool>::const_iterator mapit2=edgeCutMap.begin();mapit2!=edgeCutMap.end();mapit2++){
 	    j++;
-	    if(!(mapit2->second) && mapit->second && isTelescopeGood) tunningMis->SetBinContent(j,i, tunningMis->GetBinContent(j,i)+1);
+	    if(!(mapit2->second) && mapit->second && isTelescopeGood && hasHighPT) tunningMis->SetBinContent(j,i, tunningMis->GetBinContent(j,i)+1);
 	  }
 	}
       }
@@ -705,7 +715,7 @@ try{
 	  int j=0;
 	  for(map<double,bool>::const_iterator mapit2=edgeCutMap.begin();mapit2!=edgeCutMap.end();mapit2++){
 	    j++;
-	    if(!(mapit2->second) && mapit->second && isTelescopeGood) tunningVal->SetBinContent(j,i, tunningVal->GetBinContent(j,i)+1);
+	    if(!(mapit2->second) && mapit->second && isTelescopeGood && hasHighPT) tunningVal->SetBinContent(j,i, tunningVal->GetBinContent(j,i)+1);
 	  }
 	}
       }
@@ -847,27 +857,27 @@ try{
             else    missingVsMuontimePost68094->Fill(time);
 	    }
 	  }
-	//cout<<"tunning1 VAL"<<tunningVal->GetBinContent(11,11)<<endl;
-	//cout<<"ppp "<<tunningEdgeVal->GetBinContent(11)<<endl;
-	//cout<<"ppp2 "<<hitsPassingCutsValFPix->GetBinContent(5)+hitsPassingCutsValBPix->GetBinContent(5)<<endl;
-	
-  	//************************************ HERE IS THE CUT *****************************************************
 
-        //different tightness in the cuts 
+  	//************************************ HERE IS THE CUT *****************************************************
+        //different tightness in the cuts: 
+
         //if (numOfOtherValid<1) continue;
         //if( (!hasValidInLowerPix) || (!hasValidInUpperPix)  ) continue; 
         //if(  isNotInMiddle  ) continue; 
         //if(  (!hasGoodTiming) ) continue; 
         //if( (!isTelescopeGood) || isNotInMiddle || (!hasGoodTiming) ) continue; 
         if( (!isTelescopeGood) || isNotInMiddle || (!hasGoodTiming) || !hasHighPT ) continue;
+        //if( isNotInMiddle || (!hasGoodTiming) || !hasHighPT ) continue;
 	//if( !isTelescopeGood || isNotInMiddle ) continue;
         //can also use : isNotInMiddle && hasGoodTiming && isTelescopeGood
 
         if((*testhit).getType()==TrackingRecHit::missing){
 	  
 	  missingChiSquare->Fill(chiSquare);
-	
-          xPosFracMis->Fill(xposfrac_,5);
+          missingChiSquareNdf->Fill(chiSquareNdf);
+          missingInTrack++;
+	    
+	  xPosFracMis->Fill(xposfrac_,5);
           yPosFracMis->Fill(yposfrac_,5);
 	  if(type==int(kBPIX)) hitsPassingCutsMisBPix->Fill(9.5);
 	  if(type==int(kFPIX)) hitsPassingCutsMisFPix->Fill(9.5);
@@ -875,7 +885,9 @@ try{
 	else if((*testhit).isValid()){
 	
 	  validChiSquare->Fill(chiSquare);
-	
+	  validChiSquareNdf->Fill(chiSquareNdf);
+	  validInTrack++;
+	  
           xPosFracVal->Fill(xposfrac_,5);
           yPosFracVal->Fill(yposfrac_,5);
 	   if(type==int(kBPIX)) hitsPassingCutsValBPix->Fill(9.5);
@@ -1003,6 +1015,22 @@ try{
 	   if(theGeomDet->surface().position().z() < 0.0) histEndcapMinus->Fill(filling);
 	   else                                           histEndcapPlus->Fill(filling);
 	 }
+	 
+	 if( (*testhit).isValid() ){
+	   if(layer==1) validPerSubdetector->Fill(0.5);
+	   if(layer==2) validPerSubdetector->Fill(1.5);
+	   if(layer==3) validPerSubdetector->Fill(2.5);
+	   if(type==int(kFPIX) && globalZ < 0.0) validPerSubdetector->Fill(3.5);
+	   if(type==int(kFPIX) && globalZ >= 0.0) validPerSubdetector->Fill(4.5);
+	 }
+	 else if ( (*testhit).getType()==TrackingRecHit::missing ){
+	   if(layer==1) missingPerSubdetector->Fill(0.5);
+	   if(layer==2) missingPerSubdetector->Fill(1.5);
+	   if(layer==3) missingPerSubdetector->Fill(2.5);
+	   if(type==int(kFPIX) && globalZ < 0.0) missingPerSubdetector->Fill(3.5);
+	   if(type==int(kFPIX) && globalZ >= 0.0) missingPerSubdetector->Fill(4.5);
+	 }
+	 
 
       //****************  angular analysis: METHOD 1    ******************
       
@@ -1017,11 +1045,13 @@ try{
       
       if ((*testhit).getType()== TrackingRecHit::valid){
         validVsAlpha->Fill( alpha );
+        validVsCotanAlpha->Fill( 1/tan(alpha) );
 	validVsBeta->Fill( beta );
 	validAlphaBeta->Fill(alpha,beta);
       }
       if ((*testhit).getType()== TrackingRecHit::missing){
-        missingVsAlpha->Fill( alpha);
+        missingVsAlpha->Fill( alpha );
+        missingVsCotanAlpha->Fill( 1/tan(alpha) );
 	missingVsBeta->Fill( beta);
 	missingAlphaBeta->Fill(alpha,beta);
       }
@@ -1279,11 +1309,15 @@ try{
        inactivePerTrack->Fill( (numInactiveHit/numPixHit)*100.);
        missingPerTrack->Fill( (numMissingHit/numPixHit)*100.);
        //****************
+       
+       missPerTrackVsChiSquareNdf->Fill(chiSquareNdf,missingInTrack);
+       missPerTrackPercentVsChiSquareNdf->Fill(chiSquareNdf,missingInTrack/(missingInTrack+validInTrack));
 	     
     }//end-for of Trajectories
-}catch ( ... ) {std::cout<<"I've had a problem, skipped the try !!"<<std::endl;}
 
-   if(DEBUG) cout<<"End of Analyze"<<endl;
+  }catch ( ... ) {std::cout<<"I've had a problem, skipped the try !!"<<std::endl;}
+
+  if(DEBUG) cout<<"End of Analyze"<<endl;
 
 }
 
@@ -1311,7 +1345,10 @@ PixelEfficiency::beginJob(const edm::EventSetup& iSetup)
  histEndcapMinus = new TH1F("histEndcapMinus", "histEndcapMinus", 3, 0, 3);
  histBarrel = new TH1F("histBarrel", "histBarrel", 3, 0, 3);
  histEndcap = new TH1F("histEndcap", "histEndcap", 3, 0, 3);
-
+ validPerSubdetector = new TH1F("validPerSubdetector", "validPerSubdetector", 5, 0, 5);
+ missingPerSubdetector = new TH1F("missingPerSubdetector", "missingPerSubdetector", 5, 0, 5);
+  
+  
  histInvalidRecHitCollection = new TH1F("histInvalidRecHitCollection","histInvalidRecHitCollection",5,0,5);
  histInvalidRecHitWithBadmoduleList = new TH1F("histInvalidRecHitWithBadmoduleList","histInvalidRecHitWithBadmoduleList",5,0,5);
  
@@ -1365,12 +1402,13 @@ PixelEfficiency::beginJob(const edm::EventSetup& iSetup)
 //
  validVsAlpha = new TH1F("validVsAlpha","validVsAlpha",200,-3.5,3.5);
  missingVsAlpha = new TH1F("missingVsAlpha","missingVsAlpha",200,-3.5,3.5);
+ validVsCotanAlpha = new TH1F("validVsCotanAlpha","validVsCotanAlpha",200,-3.5,3.5);
+ missingVsCotanAlpha = new TH1F("missingVsCotanAlpha","missingVsCotanAlpha",200,-3.5,3.5);
  validVsBeta = new TH1F("validVsBeta","validVsBeta",200,-3.5,3.5);
  missingVsBeta = new TH1F("missingVsBeta","missingVsBeta",200,-3.5,3.5);
 
  validAlphaBeta   = new TH2F("validAlphaBeta"  ,"validAlphaBeta"  ,50,-3.5,3.5,50,-3.5,3.5);
  missingAlphaBeta = new TH2F("missingAlphaBeta","missingAlphaBeta",50,-3.5,3.5,50,-3.5,3.5);
-
 
  validVsAlphaBPix = new TH1F("validVsAlphaBPix","validVsAlphaBPix",200,-3.5,3.5);
  missingVsAlphaBPix = new TH1F("missingVsAlphaBPix","missingVsAlphaBPix",200,-3.5,3.5);
@@ -1424,6 +1462,11 @@ PixelEfficiency::beginJob(const edm::EventSetup& iSetup)
 
  validChiSquare   = new TH1F("validChiSquare","validChiSquare",200, 0., 100.);
  missingChiSquare = new TH1F("missingChiSquare","missingChiSquare",200, 0., 100.);;
+ validChiSquareNdf   = new TH1F("validChiSquareNdf","validChiSquareNdf",200, 0., 100.);
+ missingChiSquareNdf = new TH1F("missingChiSquareNdf","missingChiSquareNdf",200, 0., 100.);;
+
+ missPerTrackVsChiSquareNdf = new TH2F("missPerTrackVsChiSquareNdf","missPerTrackVsChiSquareNdf", 200,0.,100., 5,0,4);
+ missPerTrackPercentVsChiSquareNdf = new TH2F("missPerTrackPercentVsChiSquareNdf","missPerTrackPercentVsChiSquareNdf", 200,0.,100.,100,0,1.);
 
  tunningVal = new TH2F("tunningVal" ,"tunningVal" ,50,0,5,40,0,40);
  tunningMis = new TH2F("tunningMis" ,"tunningMis" ,50,0,5,40,0,40);
@@ -1471,7 +1514,9 @@ PixelEfficiency::endJob() {
   histEndcapMinus->Write();
   histBarrel->Write();  
   histEndcap->Write();  
-
+  validPerSubdetector->Write();  
+  missingPerSubdetector->Write();  
+  
   histInvalidRecHitCollection->Write();
   histInvalidRecHitWithBadmoduleList->Write();
 
@@ -1519,6 +1564,8 @@ PixelEfficiency::endJob() {
   
   validVsAlpha->Write();
   missingVsAlpha->Write();
+  validVsCotanAlpha->Write();
+  missingVsCotanAlpha->Write();
   validVsBeta->Write();
   missingVsBeta->Write();
   validAlphaBeta->Write();
@@ -1580,6 +1627,11 @@ PixelEfficiency::endJob() {
 
   validChiSquare->Write();
   missingChiSquare->Write();
+  validChiSquareNdf->Write();
+  missingChiSquareNdf->Write();
+
+  missPerTrackVsChiSquareNdf->Write();
+  missPerTrackPercentVsChiSquareNdf->Write();
   
   tunningVal->Write();
   tunningMis->Write();
