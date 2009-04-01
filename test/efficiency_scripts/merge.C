@@ -185,12 +185,20 @@ void merge(){
   TH1F* validChiSquareMerged   = new TH1F("validChiSquareMerged","validChiSquareMerged",200, 0., 100.);
   TH1F* missingChiSquareMerged = new TH1F("missingChiSquareMerged","missingChiSquareMerged",200, 0., 100.);
   TH1F* chiSquareEfficiency    = new TH1F("chiSquareEfficiency","chiSquareEfficiency",200, 0., 100.);
+
+  TH1F* validChiSquareNdfMerged   = new TH1F("validChiSquareNdfMerged","validChiSquareNdfMerged",200, 0., 100.);
+  TH1F* missingChiSquareNdfMerged = new TH1F("missingChiSquareNdfMerged","missingChiSquareNdfMerged",200, 0., 100.);
+  TH1F* chiSquareNdfEfficiency    = new TH1F("chiSquareNdfEfficiency","chiSquareNdfEfficiency",200, 0., 100.);
+
+  TH2F* missPerTrackVsChiSquareNdfMerged = new TH2F("missPerTrackVsChiSquareNdfMerged","missPerTrackVsChiSquareNdfMerged", 200,0.,100., 5,0,4);
+  TH2F* missPerTrackPercentVsChiSquareNdfMerged = new TH2F("missPerTrackPercentVsChiSquareNdfMerged","missPerTrackPercentVsChiSquareNdfMerged", 200,0.,100.,100,0,1.);
+
  
   double maxwindowsearch = 0.5;
-  TH1F* windowSearchMerged = new  TH1F("windowSearchMerged","windowSearchMerged",maxwindowsearch*1000,0,maxwindowsearch);
+  TH1F* windowSearchMerged = new  TH1F("windowSearchMerged","windowSearchMerged",(int)maxwindowsearch*1000,0,maxwindowsearch);
   TH1F* windowSearchSameModuleMerged = new TH1F("windowSearchSameModuleMerged","windowSearchSameModuleMerged",1000,0,10);
-  TH1F* windowSearchBPixMerged = new  TH1F("windowSearchBPixMerged","windowSearchBPixMerged",maxwindowsearch*1000,0,maxwindowsearch);
-  TH1F* windowSearchFPixMerged = new  TH1F("windowSearchFPixMerged","windowSearchFPixMerged",maxwindowsearch*1000,0,maxwindowsearch);
+  TH1F* windowSearchBPixMerged = new  TH1F("windowSearchBPixMerged","windowSearchBPixMerged",(int)maxwindowsearch*1000,0,maxwindowsearch);
+  TH1F* windowSearchFPixMerged = new  TH1F("windowSearchFPixMerged","windowSearchFPixMerged",(int)maxwindowsearch*1000,0,maxwindowsearch);
   TH1F* missingButClusterOnSameModuleMerged = new TH1F("missingButClusterOnSameModuleMerged","missingButClusterOnSameModuleMerged",2,0,2);
   TH1F* missingButClusterMerged = new TH1F("missingButClusterMerged","missingButClusterMerged",2,0,2);
    
@@ -613,6 +621,11 @@ void merge(){
     mergeHisto("missingAlphaLocalXSmall",missingAlphaLocalXSmallMerged);
     mergeHisto("validChiSquare",validChiSquareMerged);
     mergeHisto("missingChiSquare",missingChiSquareMerged);
+    mergeHisto("validChiSquareNdf",validChiSquareNdfMerged);
+    mergeHisto("missingChiSquareNdf",missingChiSquareNdfMerged);
+
+    mergeHisto("missPerTrackVsChiSquareNdf",missPerTrackVsChiSquareNdfMerged);
+    mergeHisto("missPerTrackPercentVsChiSquareNdf",missPerTrackPercentVsChiSquareNdfMerged);
 
     mergeHisto("validVsMuontimePre68094",validVsMuontimePre68094Merged);
     mergeHisto("missingVsMuontimePre68094",missingVsMuontimePre68094Merged);
@@ -740,7 +753,7 @@ void merge(){
     for(int n=0;n<entries;n++){
       tree->GetEntry(n);  //get the tree entries in the proper (already addressed) variables 
       int PlaceInVector=-1;
-      for(int j=0;j<tempTree.size();j++) if(id==tempTree[j][0]) {PlaceInVector = j;break;}
+      for(unsigned int j=0;j<tempTree.size();j++) if(id==tempTree[j][0]) {PlaceInVector = j;break;}
       
       if(PlaceInVector==-1){
         vector<double> temp;
@@ -802,7 +815,7 @@ void merge(){
      } 
     
   //Filling TTree merged
-  for(int i=0;i<tempTree.size();i++){
+  for(unsigned int i=0;i<tempTree.size();i++){
     id=(int)tempTree[i][0];
     isModuleBad=(int)tempTree[i][1];
     inactive=(int)tempTree[i][2];
@@ -981,6 +994,7 @@ void merge(){
   makeEfficiency(validAlphaLocalXBigMerged,missingAlphaLocalXBigMerged,alphaLocalXBigEfficiency );
   makeEfficiency(validAlphaLocalXSmallMerged,missingAlphaLocalXSmallMerged,alphaLocalXSmallEfficiency);
   makeEfficiency(validChiSquareMerged,missingChiSquareMerged,chiSquareEfficiency);
+  makeEfficiency(validChiSquareNdfMerged,missingChiSquareNdfMerged,chiSquareNdfEfficiency);
 
   makeEfficiency(validVsMuontimePre68094Merged,missingVsMuontimePre68094Merged,muontimePre68094Efficiency);
   makeEfficiency(validVsMuontimePost68094Merged,missingVsMuontimePost68094Merged,muontimePost68094Efficiency);
@@ -1322,6 +1336,8 @@ void merge(){
   TH1F* goodStatLayer1Eff = new TH1F("goodStatLayer1Eff","goodStatLayer1Eff",160,0,160);
   TH1F* goodStatLayer2Eff = new TH1F("goodStatLayer2Eff","goodStatLayer2Eff",256,0,256);
   TH1F* goodStatLayer3Eff = new TH1F("goodStatLayer3Eff","goodStatLayer3Eff",352,0,352);
+  TH1F* goodStatValid = new TH1F("goodstatvalid","goodstatvalid",3,0,3);
+  TH1F* goodStatMissing = new TH1F("goodstatmissing","goodstatmissing",3,0,3);
   int setbin=0;
   for (int binX=1; binX<=layer1valid->GetNbinsX(); binX++){
     for (int binY=1; binY<=layer1valid->GetNbinsY(); binY++){
@@ -1329,9 +1345,11 @@ void merge(){
           danekBadModuleLayer1->GetBinContent(binX,binY)==0. ){
         setbin++;
 	goodStatLayer1Eff->SetBinContent(setbin,layer1->GetBinContent(binX,binY));
-	}
+	goodStatValid->Fill(0.5,layer1valid->GetBinContent(binX,binY));
+	goodStatMissing->Fill(0.5,layer1missing->GetBinContent(binX,binY));
       }
     }
+  }
   TF1 *goodStatFit1 = new TF1("goodStatFit1","[0]", 0, setbin);
   goodStatFit1->SetParName(0,"eff");
   goodStatFit1->SetParameter(0, 1);
@@ -1344,9 +1362,11 @@ void merge(){
           danekBadModuleLayer2->GetBinContent(binX,binY)==0. ){
         setbin++;
 	goodStatLayer2Eff->SetBinContent(setbin,layer2->GetBinContent(binX,binY));
-	}
+	goodStatValid->Fill(1.5,layer1valid->GetBinContent(binX,binY));
+	goodStatMissing->Fill(1.5,layer1missing->GetBinContent(binX,binY));
       }
     }
+  }
   TF1 *goodStatFit2 = new TF1("goodStatFit2","[0]", 0, setbin);
   goodStatFit2->SetParName(0,"eff");
   goodStatFit2->SetParameter(0, 1);
@@ -1359,14 +1379,20 @@ void merge(){
           danekBadModuleLayer3->GetBinContent(binX,binY)==0.){
         setbin++;
 	goodStatLayer3Eff->SetBinContent(setbin,layer3->GetBinContent(binX,binY));
-	}
+	goodStatValid->Fill(2.5,layer1valid->GetBinContent(binX,binY));
+	goodStatMissing->Fill(2.5,layer1missing->GetBinContent(binX,binY));
       }
     }
+  }
   TF1 *goodStatFit3 = new TF1("goodStatFit3","[0]", 0, setbin);
   goodStatFit3->SetParName(0,"eff");
   goodStatFit3->SetParameter(0, 1);
   goodStatLayer3Eff->Fit("goodStatFit3");    
-    
+  
+  TH1F* goodStatEfficiency = new TH1F("goodStatEfficiency","goodStatEfficiency",3,0,3);
+  makeEfficiency(goodStatValid,goodStatMissing,goodStatEfficiency);
+  
+  
    //****************** Disk Maps ****************
 
     
@@ -1664,7 +1690,7 @@ void merge(){
   goodStatLayer2Eff->GetYaxis()->SetTitle("efficiency"); 
   goodStatLayer2Eff->GetXaxis()->SetTitle("modules Layer 2"); 
   goodStatLayer3Eff->GetYaxis()->SetTitle("efficiency"); 
-  goodStatLayer3Eff->GetXaxis()->SetTitle("modules Layer 3"); 
+  goodStatLayer3Eff->GetXaxis()->SetTitle("modules Layer 3");
   goodStatLayer1Eff->Write(); 
   goodStatLayer1Eff->Write(); 
   goodStatLayer2Eff->Write();  
@@ -1674,7 +1700,8 @@ void merge(){
   c1->Print("goodStatLayer2Eff.gif","gif");  
   goodStatLayer3Eff->Draw(); 
   c1->Print("goodStatLayer3Eff.gif","gif");  
-
+  
+  
   //moduleBreakoutEff->LabelsDeflate("X");
   moduleBreakoutEff->Write();
   
@@ -1735,7 +1762,7 @@ void merge(){
   tunningMuonValMerged->Write();
   tunningMuonMisMerged->Write();
  
-  tunningEfficiency->GetYaxis()->SetRange(2.,40.);
+  tunningEfficiency->GetYaxis()->SetRange(2,40);
   tunningEfficiency->GetYaxis()->SetTitle("window for muon timing [ns]");
   tunningEfficiency->GetXaxis()->SetTitle("\"Edge cut\" : number of sigma [ns]");
   tunningEfficiency->Write();
@@ -1761,6 +1788,16 @@ void merge(){
   alphaLocalXSmallEfficiency->Write();
   chiSquareEfficiency->GetXaxis()->SetTitle("Chi2");
   chiSquareEfficiency->Write();
+  chiSquareNdfEfficiency->GetXaxis()->SetTitle("#Chi^{2}_{ndf}");
+  chiSquareNdfEfficiency->Write();
+
+  missPerTrackVsChiSquareNdfMerged->GetXaxis()->SetTitle("#chi^{2}_{/ndf}");
+  missPerTrackVsChiSquareNdfMerged->GetYaxis()->SetTitle("num^{miss}_{track}");
+  missPerTrackVsChiSquareNdfMerged->Write();
+  missPerTrackPercentVsChiSquareNdfMerged->GetXaxis()->SetTitle("#chi^{2}_{/ndf}");
+  missPerTrackPercentVsChiSquareNdfMerged->GetYaxis()->SetTitle("%^{miss}_{track}");
+  missPerTrackPercentVsChiSquareNdfMerged->Write();
+
 
   validAlphaLocalXBigMerged->Write();
   missingAlphaLocalXBigMerged->Write();
@@ -1776,7 +1813,18 @@ void merge(){
   PTEfficiency->GetXaxis()->SetTitle("pT Track [GeV]");
   PTEfficiency->Write();
   
+  
+  //**************** NO PAD ************
   gStyle->SetOptStat(0);
+  
+  
+  
+  goodStatEfficiency->GetXaxis()->SetBinLabel(1,"Layer 1");
+  goodStatEfficiency->GetXaxis()->SetBinLabel(2,"Layer 2");
+  goodStatEfficiency->GetXaxis()->SetBinLabel(3,"Layer 3");
+  goodStatEfficiency->Write();
+  goodStatEfficiency->Draw(); 
+  c1->Print("goodStatEfficiency.gif","gif"); 
   
   PTEfficiency->Draw("colz");
   c1->Print("PTEfficiency.gif","gif");
