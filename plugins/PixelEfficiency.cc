@@ -410,8 +410,8 @@ try{
     const Trajectory& traj  = *it->key;
     float chiSquare = traj.chiSquared();
     float chiSquareNdf;
-    if (traj.ndof()!=0.) chiSquareNdf = traj.chiSquared()/traj.ndof();
-    else chiSquareNdf=0.;
+    chiSquareNdf = traj.chiSquared()/traj.ndof();
+    
     float missingInTrack=0.;
     float validInTrack=0.;
     
