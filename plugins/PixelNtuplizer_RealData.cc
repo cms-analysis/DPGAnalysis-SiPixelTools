@@ -147,7 +147,7 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
   t_->Branch("allclust_dist"       , allclustinfo_.allclust_dist       , "allclust_dist[n_allclust]/F"       , bufsize);
 
   
-  /* t_->Branch("nmuon",&muoninfo_.nMuon,"nmuon/I",bufsize);
+  /*   t_->Branch("nmuon",&muoninfo_.nMuon,"nmuon/I",bufsize);
  t_->Branch("muoninfo_HasOverFlow",&muoninfo_.HasOverFlow,"muoninfo_HasOverFlow/bool",bufsize);
  t_->Branch("muoninfo_IsGlobalMuon",muoninfo_.IsGlobalMuon,"muoninfo_IsGlobalMuon[nmuon]/bool",bufsize);
  t_->Branch("muoninfo_IsStandAloneMuon",muoninfo_.IsStandAloneMuon,"muoninfo_IsStandAloneMuon[nmuon]/bool",bufsize);
@@ -163,11 +163,11 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
     t_->Branch("muoninfo_trackphi",muoninfo_.trackphi, "muoninfo_trackphi[nmuon]/F",bufsize);*/
 
   //  std::cout << "Making muon branch:" << std::endl;
-  t_->Branch("MuonInfo",&muoninfo_,"timeAtIpInOut[2]/F:errorTime[2]/F:IsGlobalMuon[2]/F:IsStandAloneMuon[2]/F:IsTrackerMuon[2]/F:IsTimeValid[2]/F:HasGlobalTrack[2]/F:HasPixelHit[2]/F:trackpt[2]/F:tracketa[2]/F:trackphi[2]/F",bufsize);
-  t_->Branch("nMuon",&muoninfo_.nMuon,"nMuon/I",bufsize);
-  t_->Branch("nMuonHasOverFlow",&muoninfo_.HasOverFlow,"nMuonHasOverFlow/I",bufsize);
+      t_->Branch("MuonInfo",&muoninfo_,"timeAtIpInOut[2]/F:corrTimeAtIpInOut[2]/F:errorTime[2]/F:IsGlobalMuon[2]/F:IsStandAloneMuon[2]/F:IsTrackerMuon[2]/F:IsTimeValid[2]/F:HasGlobalTrack[2]/F:HasPixelHit[2]/F:trackpt[2]/F:tracketa[2]/F:trackphi[2]/F",bufsize);
+	t_->Branch("nMuon",&muoninfo_.nMuon,"nMuon/I",bufsize);
+	t_->Branch("nMuonHasOverFlow",&muoninfo_.HasOverFlow,"nMuonHasOverFlow/I",bufsize);
   t_->Branch("Muon_meanTime",&muoninfo_.mean_Time,"Muon_meanTime/F",bufsize);
-  
+   
  
 
   //  std::cout << "Making rechit branch:" << std::endl;
@@ -185,7 +185,7 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
   edm::LogInfo("PixelNuplizer_RealData") << "Made all branches." << std::endl;
 
 
- 
+  readOffsets();
 
 
 }
@@ -223,9 +223,11 @@ bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent){
       int good_muons = 0;
 
       vector<float> timeAtIpInOut;
+      vector<float> corrTimeAtIpInOut;
       vector<float> errorTime;
 
       timeAtIpInOut.clear();
+      corrTimeAtIpInOut.clear();
       errorTime.clear();
 
    
@@ -247,12 +249,13 @@ bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent){
 
       if(it->isTimeValid() == true){
 	muoninfo_.timeAtIpInOut[count] = it->time().timeAtIpInOut;
-	
+	muoninfo_.corrTimeAtIpInOut[count] = correctedTime(*it);
 	muoninfo_.errorTime[count] = it->time().timeAtIpInOutErr;
 
       }
       else {
 	muoninfo_.timeAtIpInOut[count] = -9999;
+	muoninfo_.corrTimeAtIpInOut[count] = -9999;
 	muoninfo_.errorTime[count] = -9999;
 
 
@@ -260,8 +263,10 @@ bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent){
 
 
       if( it->isTimeValid() == true && it->time().timeAtIpInOutErr < 15){//only take muons with error < max_timeError
-	  LogDebug("MuonTOFFilter_trackQuality") << " muon time " <<  it->time().timeAtIpInOut << std::endl;
+	//LogInfo("MuonTOFFilter_trackQuality") << " muon time " <<  it->time().timeAtIpInOut << "corrected Time " << correctedTime(*it) << std::endl;
+	//if(correctedTime(*it) != -10000)cout << " muon time " <<  it->time().timeAtIpInOut << "corrected Time " << correctedTime(*it) << std::endl;
 	  timeAtIpInOut.push_back( it->time().timeAtIpInOut);
+	  corrTimeAtIpInOut.push_back(correctedTime(*it));
 	  errorTime.push_back(it->time().timeAtIpInOutErr);
 	  good_muons++;
       }
@@ -329,6 +334,8 @@ bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent){
 // Functions that get called by framework every event
 void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
+  //cout << " analyze " << endl;
+  LogDebug("MuonTOFFilter_trackQuality") << " analyze " << std::endl;
   // std::cout << " here " << endl;
   int TrackNumber = 0;
   dummyhist->Fill(0.5);
@@ -997,6 +1004,71 @@ void PixelNtuplizer_RealData::TrackOnlyStruct::init()
   muonT0 = dummy_float;
   muondT0 = dummy_float;
 }
+
+
+void PixelNtuplizer_RealData::readOffsets()
+{
+  for(int i = 0; i < 6; i++){
+    for(int j = 0; j < 16; j++){
+      spoints[i][j] =  -10000;
+      sbias[i][j] =  -10000;
+      srms[i][j] =  -10000;
+    }
+  }
+
+  ifstream f1("muons_input-singleOffset.txt");
+  while(!f1.eof())
+  {
+   int w0,s0;
+   float b,r,p;
+
+   f1 >>  w0 >> s0 >> p >>  b >> r;
+   if (!f1.good()) break;
+
+   spoints[w0][s0] = p;
+   sbias[w0][s0] = b;
+   srms[w0][s0] = r;
+   std::cout << " muon offsets " << w0 << " " << s0 << " " << b << " " << p << " " << r <<  std::endl;
+  }
+}
+
+
+void PixelNtuplizer_RealData::sectorAndWheel(const  reco::Muon & muon0 ,int & w0,int & s0 )
+{
+ w0=0;
+ s0=0;
+ for(trackingRecHit_iterator match = muon0.bestTrack()->recHitsBegin() ; match != muon0.bestTrack()->recHitsEnd() ; ++match)
+ {
+  DetId did=(*match)->geographicalId() ;
+  if(did.det() == 2 && did.subdetId() == MuonSubdetId::DT)
+  {
+    DTChamberId * id =  new DTChamberId(did);
+    w0=id->wheel();
+    s0=id->sector();
+ 
+    delete id;
+    break;
+  }
+ }
+
+}
+
+
+float PixelNtuplizer_RealData::correctedTime(const  reco::Muon & aMuon)
+{
+// readOffsets() should be called in beginJob to initialized the offset maps
+ int s0,w0;
+ sectorAndWheel(aMuon,w0,s0);
+ float time = -10000;
+  
+ 
+ if(spoints[w0+2][s0]>20) time = aMuon.time().timeAtIpInOut-sbias[w0+2][s0];
+ 
+ 
+ return time;
+}
+
+
 
 // define this as a plug-in
 //

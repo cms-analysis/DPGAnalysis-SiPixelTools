@@ -52,6 +52,11 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
   bool isValidMuonAssoc(const edm::Event& iEvent);		   
   bool isOffTrackHits(const edm::Event& iEvent,const SiPixelCluster& matchIt, const edm::EventSetup& iSetup,const RectangularPixelTopology*, uint32_t geoId, TrajectoryStateOnSurface& tsos );		   
 
+  void readOffsets();
+  void sectorAndWheel(const  reco::Muon & muon0 ,int & w0,int & s0 );
+  float correctedTime(const  reco::Muon & muon0);
+
+
  private:
   edm::ParameterSet conf_;
   edm::ESHandle<TrackerGeometry> tkGeom_;
@@ -67,6 +72,10 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
   float bias[5][15][5][15];
   float rms[5][15][5][15];
   float points[5][15][5][15];
+
+  float sbias[5][15];
+  float srms[5][15];
+  float spoints[5][15];
   
 
   bool useAllPixel;
@@ -140,6 +149,7 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
     //    MuonInfoStruct(){;}
     //    ~MuonInfoStruct(){;}
     Float_t timeAtIpInOut[2];
+    Float_t corrTimeAtIpInOut[2];
     Float_t errorTime[2];
     Float_t IsGlobalMuon[2];
     Float_t IsStandAloneMuon[2];
@@ -161,7 +171,7 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
       for(int i = 0; i < 2; i++){
       IsGlobalMuon[i]=IsStandAloneMuon[i]=0.0;
       IsTrackerMuon[i]=HasGlobalTrack[i]=HasPixelHit[i]=0.0;
-      timeAtIpInOut[i]=errorTime[i] = -9999;
+      timeAtIpInOut[i]=errorTime[i] =corrTimeAtIpInOut[i] = -9999;
       trackpt[i]=tracketa[i]=trackphi[i]=-9999;
       }
       
