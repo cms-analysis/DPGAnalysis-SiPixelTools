@@ -15,9 +15,9 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
-process.GlobalTag.connect = "frontier://FrontierProd/CMS_COND_21X_GLOBALTAG"
-process.GlobalTag.globaltag = "CRAFT_ALL_V11::All"
-process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource','GlobalTag')
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+#process.GlobalTag.connect = "frontier://FrontierInt/CMS_COND_30X_GLOBALTAG"
+process.GlobalTag.globaltag = "CRAFT_30X::All"
 
 ##
 ## Load and Configure track selection for alignment
@@ -134,7 +134,7 @@ process.p = cms.Path(
     # filters:
     process.fedInRunFilter*
     # standard reco sequence
-#    process.RawToDigi*process.reconstructionCosmics*
+    process.RawToDigi*process.reconstructionCosmics*
     # more filters:
     process.MuonTOFFilter_trackQuality *
     # create rechits

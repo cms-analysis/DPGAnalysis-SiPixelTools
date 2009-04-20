@@ -10,9 +10,10 @@
 #include "DataFormats/MuonReco/interface/MuonTime.h"
 #include "DataFormats/MuonDetId/interface/DTChamberId.h"
 #include "DataFormats/MuonDetId/interface/MuonSubdetId.h"
-
+#include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHitCollection.h"
 #include "RecoMuon/GlobalTrackingTools/interface/GlobalMuonTrackMatcher.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
+#include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
 #include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
 #include "DataFormats/TrackReco/interface/Track.h"
@@ -23,7 +24,7 @@
 #include "TrackingTools/PatternTools/interface/TrajTrackAssociation.h"
 #include "PixelNtuplizer_RealData.h"
 #include "Geometry/TrackerTopology/interface/RectangularPixelTopology.h"
-#include "PhysicsTools/UtilAlgos/interface/PhysObjectMatcher.h"
+#include <Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h>
 #include "TrackingTools/TrackAssociator/interface/TrackDetectorAssociator.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
@@ -576,11 +577,13 @@ bool PixelNtuplizer_RealData::isOffTrackHits(const edm::Event& iEvent,const SiPi
 				  edm::Handle<SiPixelRecHitCollection> recHitColl;
 				  iEvent.getByLabel( "siPixelRecHits", recHitColl );
 				  
-				  SiPixelRecHitCollection::range pixelrechitRange = (recHitColl.product())->get(detId);
-				  SiPixelRecHitCollection::const_iterator pixelrechitRangeIteratorBegin = pixelrechitRange.first;
-				  SiPixelRecHitCollection::const_iterator pixelrechitRangeIteratorEnd = pixelrechitRange.second;
-				  SiPixelRecHitCollection::const_iterator pixeliter = pixelrechitRangeIteratorBegin;
-				  				
+				  SiPixelRecHitCollection::const_iterator dsmatch = recHitColl->find(detId);
+				  if (dsmatch == recHitColl->end()) continue;
+			          SiPixelRecHitCollection::DetSet pixelrechitRange = *dsmatch;
+			          SiPixelRecHitCollection::DetSet::const_iterator pixelrechitRangeIteratorBegin = pixelrechitRange.begin();
+				  SiPixelRecHitCollection::DetSet::const_iterator pixelrechitRangeIteratorEnd = pixelrechitRange.end();
+				  SiPixelRecHitCollection::DetSet::const_iterator pixeliter = pixelrechitRangeIteratorBegin;
+
 				  int n_clust = 0;
 				   int pixel_index = 0;
 				  for ( ; pixeliter != pixelrechitRangeIteratorEnd; ++pixeliter) 
