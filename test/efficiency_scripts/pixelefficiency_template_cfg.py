@@ -15,20 +15,43 @@ process.load("CondCore.DBCommon.CondDBCommon_cfi")
 # Geometry
 process.load("Configuration.StandardSequences.Geometry_cff")
 # Magnetic Field
-process.load("Configuration.StandardSequences.MagneticField_38T_cff")
+#process.load("Configuration.StandardSequences.MagneticField_38T_cff")#with MF
+#process.load("Configuration.StandardSequences.MagneticField_cff")#0T
+process.load("Configuration.GlobalRuns.ForceZeroTeslaField_cff")#0T
 
 # reconstruction sequence for Cosmics
+process.load("Configuration.StandardSequences.RawToDigi_Data_cff")
 process.load("Configuration.StandardSequences.ReconstructionCosmics_cff")
+#process.MeasurementTracker.pixelClusterProducer = cms.string('')
+
 
 # Global Tag
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.connect = "frontier://FrontierProd/CMS_COND_21X_GLOBALTAG"
+#process.GlobalTag.connect = "frontier://FrontierProd/CMS_COND_21X_GLOBALTAG" # FOR 21X REPRO
+process.GlobalTag.connect = "frontier://FrontierProd/CMS_COND_31X_GLOBALTAG" # FOR 31X REPRO
 
 #process.GlobalTag.globaltag = "CRAFT_ALL_V4::All"
-#tag behind for MC dataset
+########tag behind for MC dataset
 #process.GlobalTag.globaltag = 'COSMMC_21X_V1::All'
-process.GlobalTag.globaltag = "CRAFT_ALL_V11::All"
+#process.GlobalTag.globaltag = 'COSMMC_22X_V1::All'
+#process.GlobalTag.globaltag = "CRAFT_ALL_V11::All"
+######## TAG FOR 31X REPROCESSING
+process.GlobalTag.globaltag = "GR09_31X_V6P::All"
+#process.GlobalTag.globaltag = "CRAFT0831X_V1::All"
+
+#process.test = cms.ESSource("PoolDBESSource",
+#                                        DBParameters = cms.PSet(
+#                                           messageLevel = cms.untracked.int32(0),
+#					   #authenticationPath = cms.untracked.string('/afs/cern.ch/cms/DB/conddb')
+#                                           authenticationPath = cms.untracked.string('0')
+#                                        ),
+#                                        connect = cms.string("sqlite_file:/afs/cern.ch/user/m/mucib/public/prova.db"),
+#                                        toGet = cms.VPSet(cms.PSet(record = cms.string("SiPixelGainCalibrationOfflineRcd"),
+#                                                                   tag = cms.string("GainCalib_TEST_offline"))
+#                                                          )
+#                                        )
+#process.es_prefer_test = cms.ESPrefer("PoolDBESSource","test")
 
 ## Load and Configure OfflineValidation
 process.load("Alignment.OfflineValidation.TrackerOfflineValidation_cfi")
@@ -39,6 +62,10 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(NUMOFEVENTS)
 process.source = cms.Source("PoolSource",
    #comment this line when ALCARECO
    #inputCommands = cms.untracked.vstring('keep *',"drop *_*_*_FU"),
+   lastRun = cms.untracked.uint32(109624),
+   #timetype = cms.string('runnumber'),
+   firstRun = cms.untracked.uint32(109011),
+   #interval = cms.uint32(1),
 
 #replace 'myfile.root' with the source file you want to use
      fileNames = cms.untracked.vstring(    
@@ -52,6 +79,12 @@ process.TrackRefitterP5.TrajectoryInEvent = True
 
 process.load("RecoTracker.TransientTrackingRecHit.TransientTrackingRecHitBuilderWithoutRefit_cfi")
 
+process.load("DPGAnalysis.SiPixelTools.muonTOF_cfi")
+process.load("DPGAnalysis.SiPixelTools.FEDInRunFilter_cfi")
+#process.MuonTOFFilter_trackQuality.max_goodmuons = 2
+#process.MuonTOFFilter_trackQuality.max_timeError = 15
+#process.MuonTOFFilter_trackQuality.max_chi2_ndof = 15
+
 process.checkCosmicTF = cms.EDAnalyzer('PixelEfficiency',
                 TkTag = cms.InputTag("TRACKINPUTTAG"),
 		TkTag0T = cms.InputTag("TRACKINPUTTAG0T"),	
@@ -62,6 +95,20 @@ process.checkCosmicTF = cms.EDAnalyzer('PixelEfficiency',
 		
                 HistOutFile =cms.untracked.string('ROOTFILE'),
 		HistOutFile0T =cms.untracked.string('ROOTFILE0T'),
+		
+		skip0TRuns           = cms.untracked.bool(False),
+		keepOnlyOneTrackEvts = cms.untracked.bool(False),
+		skipBadModules       = cms.untracked.bool(False),
+  
+		ListOfCuts = cms.untracked.PSet(
+		  pT_cut        = cms.bool(False),
+		  edge_cut      = cms.bool(True),
+		  telescope_cut = cms.bool(True),
+		  muon_cut      = cms.bool(False),
+		  loose_cut     = cms.bool(False)
+		),
+		
+		
 #list from /CMSSW/CondTools/SiPixel/test/SiPixelBadModuleByHandBuilder_cfg.py    
     BadModuleList = cms.untracked.VPSet(
 #
@@ -258,10 +305,37 @@ process.checkCosmicTF = cms.EDAnalyzer('PixelEfficiency',
 )
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
-process.MessageLogger.cerr.threshold = 'Info'
+process.MessageLogger.cerr.threshold = 'INFO'#32X version
+#process.MessageLogger.cerr.threshold = 'Info' #22X version
 
+#RECONSTRUCTION FROM DQM
+#process.load("Configuration.StandardSequences.Reconstruction_cff")
+#process.load("EventFilter.SiPixelRawToDigi.SiPixelRawToDigi_cfi")
+#process.siPixelDigis.InputLabel = 'source'
+#process.load("RecoLocalTracker.SiPixelClusterizer.SiPixelClusterizer_cfi")
+#process.load("EventFilter.SiStripRawToDigi.SiStripRawToDigis_standard_cff")
+#process.siStripDigis.ProductLabel = 'source'
+#process.load("RecoLocalTracker.SiStripClusterizer.SiStripClusterizer_cfi")
+#process.load("RecoLocalTracker.SiStripRecHitConverter.SiStripRecHitConverter_cfi")
+#process.load("RecoLocalTracker.SiStripRecHitConverter.SiStripRecHitMatcher_cfi")
+#process.load("RecoLocalTracker.SiStripRecHitConverter.StripCPEfromTrackAngle_cfi")
+#process.load("RecoLocalTracker.SiStripZeroSuppression.SiStripZeroSuppression_cfi")
+#process.load("RecoVertex.BeamSpotProducer.BeamSpot_cff")
+#process.load("RecoPixelVertexing.Configuration.RecoPixelVertexing_cff")
+#process.load("RecoTracker.Configuration.RecoTrackerP5_cff")
+#process.Reco = cms.Sequence(process.siPixelDigis*process.siPixelClusters)
+#process.RecoStrips = cms.Sequence(process.siStripDigis*process.siStripClusters)
+#process.siPixelLocalReco = cms.Sequence(process.siPixelRecHits)
+#process.siStripLocalReco = cms.Sequence(process.siStripMatchedRecHits)
+#process.trackerLocalReco = cms.Sequence(process.siPixelLocalReco*process.siStripLocalReco)
+#process.trackReconstruction = cms.Sequence(process.trackerLocalReco*process.offlineBeamSpot*process.recopixelvertexing*process.tracksP5) 
+
+#process.p = cms.Path(process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
+process.p = cms.Path(process.RawToDigi*process.reconstructionCosmics*process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
+#process.p = cms.Path(process.trackReconstruction*process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
 #process.p = cms.Path(process.trackerCosmics*process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
-process.p = cms.Path(process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
+#process.p = cms.Path(process.fedInRunFilter*process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
+#process.p = cms.Path(process.fedInRunFilter*process.MuonTOFFilter_trackQuality*process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
 
     
 process.TrackerDigiGeometryESModule.applyAlignment = True
