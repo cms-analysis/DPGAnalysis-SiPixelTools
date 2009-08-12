@@ -227,6 +227,11 @@ private:
   TH1F*  missingVsMuontimePre68094;
   TH1F*  validVsMuontimePost68094;
   TH1F*  missingVsMuontimePost68094;
+  
+  TH2F* validMuonTimeVSchargeBPix;
+  TH2F* missingMuonTimeVSchargeBPix;
+  TH2F* validMuonTimeVSchargeFPix;
+  TH2F* missingMuonTimeVSchargeFPix;
 
   TH1F*  validVsPT;
   TH1F*  missingVsPT;
@@ -915,13 +920,28 @@ try{
           if ((*testhit).getType()== TrackingRecHit::valid){
             if ( runNumber < 68094 ) validVsMuontimePre68094->Fill(time);
             else    validVsMuontimePost68094->Fill(time);
-	    }
+	  }
           if ((*testhit).getType()== TrackingRecHit::missing){
             if ( runNumber < 68094 ) missingVsMuontimePre68094->Fill(time);
             else    missingVsMuontimePost68094->Fill(time);
-	    }
 	  }
-
+	}
+	
+	
+	//do the eff VS muon time VS charge
+	if( isTelescopeGood || !isNotInMiddle ) {
+	  if(type==int(kBPIX)){
+	    if ((*testhit).getType()== TrackingRecHit::valid)     validMuonTimeVSchargeBPix->Fill(time,testclust->charge());
+	    if ((*testhit).getType()== TrackingRecHit::missing)   missingMuonTimeVSchargeBPix->Fill(time,testclust->charge());
+	  }
+	  if(type==int(kFPIX)){
+	    if ((*testhit).getType()== TrackingRecHit::valid)     validMuonTimeVSchargeFPix->Fill(time,testclust->charge());
+	    if ((*testhit).getType()== TrackingRecHit::missing)   missingMuonTimeVSchargeFPix->Fill(time,testclust->charge());
+	  }
+  	}
+	
+	
+  
   	//************************************ HERE IS THE CUT *****************************************************
         //different tightness in the cuts: 
 
@@ -983,7 +1003,7 @@ try{
 	  chargeDistriBPix->Fill(testclust->charge());
 	  numbPixInClusterBPix->Fill(testclust->size());
 	  chargeVsDimensionBPix->Fill(testclust->charge(),testclust->size());
-	  }
+	}
 	if(type==int(kFPIX) && globalZ>0.) {chargeDistriFPixPlus->Fill(testclust->charge());numbPixInClusterFPixPlus->Fill(testclust->size());}
 	if(type==int(kFPIX) && globalZ<0.) {chargeDistriFPixMinus->Fill(testclust->charge());numbPixInClusterFPixMinus->Fill(testclust->size());}	
       }
@@ -1581,7 +1601,13 @@ PixelEfficiency::beginJob(const edm::EventSetup& iSetup)
  missingVsMuontimePost68094 = new TH1F("missingVsMuontimePost68094","missingVsMuontimePost68094",50,-40.,80.);
  validVsMuontimePre68094 = new TH1F("validVsMuontimePre68094","validVsMuontimePre68094",50,-40.,80.);
  missingVsMuontimePre68094 = new TH1F("missingVsMuontimePre68094","missingVsMuontimePre68094",50,-40.,80.);
-
+ 
+ 
+ validMuonTimeVSchargeBPix   = new TH2F("validMuonTimeVSchargeBPix","validMuonTimeVSchargeBPix",60,-40.,80.,200,0,200000);
+ missingMuonTimeVSchargeBPix = new TH2F("missingMuonTimeVSchargeBPix","missingMuonTimeVSchargeBPix",60,-40.,80.,200,0,200000);
+ validMuonTimeVSchargeFPix   = new TH2F("validMuonTimeVSchargeFPix","validMuonTimeVSchargeFPix",60,-40.,80.,200,0,200000);
+ missingMuonTimeVSchargeFPix = new TH2F("missingMuonTimeVSchargeFPix","missingMuonTimeVSchargeFPix",60,-40.,80.,200,0,200000);
+     
  validVsPT = new TH1F("validVsPT","validVsPT",100,0.,50.);
  missingVsPT = new TH1F("missingVsPT","missingVsPT",100,0.,50.);
 
@@ -1756,6 +1782,11 @@ PixelEfficiency::endJob() {
   missingVsMuontimePost68094->Write();
   validVsMuontimePost68094->Write();
 
+  validMuonTimeVSchargeBPix->Write();
+  missingMuonTimeVSchargeBPix->Write();
+  validMuonTimeVSchargeFPix->Write();
+  missingMuonTimeVSchargeFPix->Write();
+     
   validVsPT->Write();
   missingVsPT->Write();
 

@@ -417,6 +417,16 @@ void merge(){
   TH1F* muontimePre68094Efficiency = new TH1F("muontimePre68094Efficiency","muontimePre68094Efficiency",50,-40.,80.);
   TH1F* muontimePost68094Efficiency = new TH1F("muontimePost68094Efficiency","muontimePost68094Efficiency",50,-40.,80.);
 
+
+ 
+ TH2F* validMuonTimeVSchargeBPixMerged   = new TH2F("validMuonTimeVSchargeBPixMerged","validMuonTimeVSchargeBPixMerged",60,-40.,80.,200,0,200000);
+ TH2F* missingMuonTimeVSchargeBPixMerged = new TH2F("missingMuonTimeVSchargeBPixMerged","missingMuonTimeVSchargeBPixMerged",60,-40.,80.,200,0,200000);
+ TH2F* validMuonTimeVSchargeFPixMerged   = new TH2F("validMuonTimeVSchargeFPixMerged","validMuonTimeVSchargeFPixMerged",60,-40.,80.,200,0,200000);
+ TH2F* missingMuonTimeVSchargeFPixMerged = new TH2F("missingMuonTimeVSchargeFPixMerged","missingMuonTimeVSchargeFPixMerged",60,-40.,80.,200,0,200000);
+
+ TH2F* efficiencyMuonTimeVSchargeBPix = new TH2F("efficiencyMuonTimeVSchargeBPix","efficiencyMuonTimeVSchargeBPix",60,-40.,80.,200,0,200000);
+ TH2F* efficiencyMuonTimeVSchargeFPix = new TH2F("efficiencyMuonTimeVSchargeFPix","efficiencyMuonTimeVSchargeFPix",60,-40.,80.,200,0,200000);
+
   TH1F* PTEfficiency = new TH1F ("PTEfficiency","PTEfficiency",100,0,50);
 
   char name[120];
@@ -757,7 +767,12 @@ void merge(){
     mergeHisto("missingVsMuontimePre68094",missingVsMuontimePre68094Merged);
     mergeHisto("validVsMuontimePost68094",validVsMuontimePost68094Merged);
     mergeHisto("missingVsMuontimePost68094",missingVsMuontimePost68094Merged);
-
+    
+    mergeHisto("validMuonTimeVSchargeBPix",validMuonTimeVSchargeBPixMerged);
+    mergeHisto("missingMuonTimeVSchargeBPix",missingMuonTimeVSchargeBPixMerged);
+    mergeHisto("validMuonTimeVSchargeFPix",validMuonTimeVSchargeFPixMerged);
+    mergeHisto("missingMuonTimeVSchargeFPix",missingMuonTimeVSchargeFPixMerged);
+    
     mergeHisto("validVsPT",validVsPTMerged);
     mergeHisto("missingVsPT",missingVsPTMerged);
 
@@ -1117,7 +1132,10 @@ void merge(){
   
   makeEfficiency(validVsMuontimePre68094Merged,missingVsMuontimePre68094Merged,muontimePre68094Efficiency);
   makeEfficiency(validVsMuontimePost68094Merged,missingVsMuontimePost68094Merged,muontimePost68094Efficiency);
-    
+  
+  makeEfficiency(validMuonTimeVSchargeBPixMerged,missingMuonTimeVSchargeBPixMerged,efficiencyMuonTimeVSchargeBPix);
+  makeEfficiency(validMuonTimeVSchargeFPixMerged,missingMuonTimeVSchargeFPixMerged,efficiencyMuonTimeVSchargeFPix);
+  
   makeEfficiency(validVsPTMerged,missingVsPTMerged,PTEfficiency);
 
   TH1F* localXAnalysis = new TH1F("localXAnalysis", "hist", 100,-1.5,1.5); 
@@ -2050,7 +2068,13 @@ void merge(){
   yposClusterValidMerged->Write();
   xposClusterMisRecoveredMerged->Write();
   yposClusterMisRecoveredMerged->Write();
-
+  
+  
+  validMuonTimeVSchargeBPixMerged->Write();
+  missingMuonTimeVSchargeBPixMerged->Write();
+  validMuonTimeVSchargeFPixMerged->Write();
+  missingMuonTimeVSchargeFPixMerged->Write();
+  
 
   //******* EFFICIENCY PLOTS WRITING ************
   TCanvas* c1 = new TCanvas("c1","c1");
@@ -2131,13 +2155,13 @@ void merge(){
   moduleGoodBPix->Write(); 
   qualityBPixModule->Write();
   qualityBPixModule->Draw();
-  c1->Print("qualityBPixModule.png","png");
+  c1->Print("qualityBPixModule.png","png");
 
   moduleGoodFPix->GetYaxis()->SetTitle("eff_{goodFPix}"); 
   moduleGoodFPix->GetXaxis()->SetTitle("detid_{list}"); 
   moduleGoodFPix->Write(); 
   moduleGoodFPix->Draw();
-  c1->Print("moduleFPix.png","png");
+  c1->Print("moduleFPix.png","png");
 
   moduleBadBPix->Write(); 
   moduleBadFPix->Write(); 
@@ -2271,7 +2295,8 @@ void merge(){
   muontimePre68094Efficiency->Write();
   muontimePost68094Efficiency->GetXaxis()->SetTitle("Muon arrival time [ns]");
   muontimePost68094Efficiency->Write();
- 
+  
+  
   PTEfficiency->GetXaxis()->SetTitle("pT Track [GeV]");
   PTEfficiency->Write();
   
@@ -2297,14 +2322,12 @@ void merge(){
   scurveGoodModulesBPix->Draw();
   c1->Print("scurveGoodModulesBPix.png","png");
  
- cout<<"I'm here !!"<<endl;
   scurveGoodModulesBPix->SetLineColor(kBlue);
   scurveGoodModulesBPix->Draw();
   scurveBPix->Draw("same");
   TLegend* legComp = new TLegend(0.3,0.3,0.7,0.7);
   legComp->AddEntry(scurveGoodModulesBPix,"all non-dead modules","l");
   legComp->AddEntry(scurveBPix,"all non-dead non-misconfigured","l");
- cout<<"I'm here !!"<<endl;
   legComp->AddEntry(fitSCGoodModulesBPix,"Fitted region","l");
   legComp->SetFillColor(10);
   legComp->SetTextSize(0.03);
@@ -2312,7 +2335,6 @@ void merge(){
   legComp->Draw("same");
   c1->Print("scurveBPixCompareWOcleaning.png","png");
     
- cout<<"I'm here !!"<<endl;
   
   goodStatEfficiency->GetXaxis()->SetBinLabel(1,"Layer 1");
   goodStatEfficiency->GetXaxis()->SetBinLabel(2,"Layer 2");
@@ -2490,6 +2512,18 @@ void merge(){
   leg->SetFillColor(10);
   
   Canv(muontimePre68094Efficiency,muontimePost68094Efficiency,"EfficiencyVsMuonTime.png","ERR",leg);
+  
+  
+  efficiencyMuonTimeVSchargeBPix->GetXaxis()->SetTitle("Muon arrival time [ns]");
+  efficiencyMuonTimeVSchargeBPix->GetYaxis()->SetTitle("cluster_{charge} [e^{-}]");
+  efficiencyMuonTimeVSchargeFPix->GetXaxis()->SetTitle("Muon arrival time [ns]");
+  efficiencyMuonTimeVSchargeFPix->GetYaxis()->SetTitle("cluster_{charge} [e^{-}]");
+  efficiencyMuonTimeVSchargeBPix->Write();
+  efficiencyMuonTimeVSchargeBPix->Draw("colz");
+  c1->Print("efficiencyMuonTimeVSchargeBPix.png","png");
+  efficiencyMuonTimeVSchargeFPix->Write();
+  efficiencyMuonTimeVSchargeFPix->Draw("colz");
+  c1->Print("efficiencyMuonTimeVSchargeFPix.png","png");
 
 //nice overimposion
   histAlphaAnalysisFPix->GetXaxis()->SetTitle("#alpha_{local}");
