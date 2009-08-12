@@ -101,6 +101,12 @@ private:
 
   edm::InputTag trajectoryInput_;
   edm::InputTag pixelClusterInput_;
+  
+  edm::ParameterSet listOfCuts_;
+  
+  bool skip0TRuns_;
+  bool keepOnlyOneTrackEvts_;
+  bool skipBadModules_;
 
 
   TH1F*  histo;
@@ -116,12 +122,14 @@ private:
 
   TH1F*  consistencyCheck;
   TH1F*  consistencyCheckTraj;
-
+  TH1F*  trackingEfficiency;
+  
   TH1F*  histInvalidRecHitCollection;
   TH1F*  histInvalidRecHitWithBadmoduleList;
   TH1F*  windowSearch;
   TH1F*  windowSearchSameModule;
   TH1F*  windowSearchBPix;
+  TH1F*  windowSearchGoodModulesBPix;
   TH1F*  windowSearchFPix;
   TH1F*  missingButClusterOnSameModule;
   TH1F*  missingButCluster;
@@ -144,6 +152,7 @@ private:
   TH1F*  numbPixInClusterFPixPlus;  
   TH1F*  chargeDistriFPixMinus;
   TH1F*  numbPixInClusterFPixMinus;  
+  TH2F*  chargeVsDimensionBPix;
   
   TH1F*  numbPixInClusterX;
   TH1F*  numbPixInClusterY;
@@ -190,6 +199,24 @@ private:
   TH2F*  missingAlphaLocalXBig;
   TH2F*  validAlphaLocalXSmall;
   TH2F*  missingAlphaLocalXSmall;
+  
+  TH2F*  missingAlphaLocalXBigBPix;
+  TH2F*  missingBetaLocalXBigBPix;
+  TH2F*  missingAlphaLocalYBPix;
+  TH2F*  missingBetaLocalYBPix;
+  TH2F*  validAlphaLocalXBigBPix;
+  TH2F*  validBetaLocalXBigBPix;
+  TH2F*  validAlphaLocalYBPix;
+  TH2F*  validBetaLocalYBPix;
+  
+  TH2F*  missingAlphaLocalXBigFPix;
+  TH2F*  missingBetaLocalXBigFPix;
+  TH2F*  missingAlphaLocalYFPix;
+  TH2F*  missingBetaLocalYFPix;
+  TH2F*  validAlphaLocalXBigFPix;
+  TH2F*  validBetaLocalXBigFPix;
+  TH2F*  validAlphaLocalYFPix;
+  TH2F*  validBetaLocalYFPix;
   
   TH1F*  validVsLocalXBig;
   TH1F*  missingVsLocalXBig;
@@ -277,10 +304,14 @@ PixelEfficiency::PixelEfficiency(const edm::ParameterSet& iConfig) :
   fOutputFileName0T( iConfig.getUntrackedParameter<std::string>("HistOutFile0T",std::string("pixelEfficiency0T.root")) ), 
   TkTag0T_( iConfig.getParameter<edm::InputTag>("TkTag0T") ),
   trajectoryInput_( iConfig.getParameter<edm::InputTag>("trajectoryInput") ),
-  pixelClusterInput_( iConfig.getParameter<edm::InputTag>("pixelClusterInput") )
+  pixelClusterInput_( iConfig.getParameter<edm::InputTag>("pixelClusterInput") ),
+  skip0TRuns_( iConfig.getUntrackedParameter<bool>("skip0TRuns")),
+  keepOnlyOneTrackEvts_( iConfig.getUntrackedParameter<bool>("keepOnlyOneTrackEvts")),
+  skipBadModules_( iConfig.getUntrackedParameter<bool>("skipBadModules"))
 {   
  //now do what ever initialization is needed
  std::cout<<"debug constructor"<<std::endl;
+ listOfCuts_ = iConfig.getUntrackedParameter<edm::ParameterSet>("ListOfCuts");
  BadModuleList_ = iConfig.getUntrackedParameter<Parameters>("BadModuleList");
 
 }
@@ -310,7 +341,7 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   unsigned int runNumber=iEvent.id().run();
   
   //skip 0T runs for reprocessing errors
-  if (
+  if ( skip0TRuns_ && (
   runNumber==69557 || runNumber==69559|| runNumber==69564|| runNumber==69572|| runNumber==69573|| runNumber==69587|| runNumber==69594||
   runNumber==69728|| runNumber==69743|| runNumber==70147|| runNumber==70170|| runNumber==70195|| runNumber==70344 || runNumber==70347 ||
   runNumber==70410|| runNumber==70411||
@@ -320,7 +351,7 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
        (runNumber>=67264 && runNumber<=67432) ||
        (runNumber>=67676 && runNumber<=67777) ||
        (runNumber>=69536 && runNumber<=69671) ||
-       (runNumber>=70196 && runNumber<=99999) ) return;
+       (runNumber>=70196 && runNumber<=99999)) ) return;
 
   badRun=false;
 
@@ -360,9 +391,10 @@ try{
   const edmNew::DetSetVector<SiPixelCluster>& input = *theClusters;
 
   int NbrTracks =  trajTrackCollectionHandle->size();
-  if (NbrTracks!=1) return;
+  if (NbrTracks!=1 && keepOnlyOneTrackEvts_) return;
 
   checkoutTraj->Fill(NbrTracks);
+  consistencyCheck->Fill(2,NbrTracks); //2 = each track //*************
   
   iEvent.getByLabel("muons", MuonHandle);
   
@@ -385,7 +417,8 @@ try{
     nmuon++;
   }
     
-  double peak=-8;   
+  double peak=-8;    //For CRAFT08
+  //double peak=10;      //For MC
   for(double t=0;t<20;t+=0.5){
     hasGoodTiming=false;
     if(runNumber<68094 && time<peak+t && time>peak-t)
@@ -396,10 +429,11 @@ try{
   }
 
   hasGoodTiming = false;
-  if(runNumber<68094 && time<peak+5 && time>peak-5)
+  double muonwindow = 5;
+  if(runNumber<68094 && time<peak+muonwindow && time>peak-muonwindow)
      hasGoodTiming=true;
-  if(runNumber>=68094 && time<peak+9+5 && time>peak+9-5)
-     hasGoodTiming=true;
+  if(runNumber>=68094 && time<peak+9+muonwindow && time>peak+9-muonwindow)
+    hasGoodTiming=true;
    
   TrajectoryStateCombiner tsoscomb;
   for(TrajTrackAssociationCollection::const_iterator it = trajTrackCollectionHandle->begin(),
@@ -408,6 +442,7 @@ try{
     consistencyCheck->Fill(1); //1 = each track //*************
 
     const Trajectory& traj  = *it->key;
+    const Track& track  = *it->val;
     float chiSquare = traj.chiSquared();
     float chiSquareNdf;
     chiSquareNdf = traj.chiSquared()/traj.ndof();
@@ -451,26 +486,55 @@ try{
     //precheck to count the BPix/FPix number of trajectories
     for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
 	itTraj != itTrajEnd; ++itTraj) {
-      TransientTrackingRecHit::ConstRecHitPointer testhit = itTraj->recHit();
-      uint testSubDetID = (testhit->geographicalId().subdetId());
-      if( (testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap) ) 
-        {
+      if( itTraj->recHit()->geographicalId().det() == DetId::Tracker ){
 	consistencyCheckTraj->Fill(1);
 	break;
-	}
       }
-
-    //precheck to count only the BPix number of trajectories
+    }
+    
     for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
 	itTraj != itTrajEnd; ++itTraj) {
       TransientTrackingRecHit::ConstRecHitPointer testhit = itTraj->recHit();
       uint testSubDetID = (testhit->geographicalId().subdetId());
-      if( testSubDetID == PixelSubdetector::PixelBarrel ) 
-        {
+      if( (testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap) ){
 	consistencyCheckTraj->Fill(2);
 	break;
-	}
       }
+    }
+    
+    for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
+	itTraj != itTrajEnd; ++itTraj) {
+      TransientTrackingRecHit::ConstRecHitPointer testhit = itTraj->recHit();
+      uint testSubDetID = (testhit->geographicalId().subdetId());
+      if( testSubDetID == PixelSubdetector::PixelBarrel ){
+	consistencyCheckTraj->Fill(3);
+	break;
+      }
+    }
+    
+    for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
+	itTraj != itTrajEnd; ++itTraj) {
+      TransientTrackingRecHit::ConstRecHitPointer testhit = itTraj->recHit();
+      uint testSubDetID = (testhit->geographicalId().subdetId());
+      if( testSubDetID == PixelSubdetector::PixelEndcap ){
+	consistencyCheckTraj->Fill(4);
+	break;
+      }
+    }
+      
+    if(track.d0()<9 && fabs(track.dz())<30/* && track.pt()>10 */&& track.chi2()<15){
+      trackingEfficiency->Fill(0);
+      
+      for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
+	itTraj != itTrajEnd; ++itTraj) {
+        TransientTrackingRecHit::ConstRecHitPointer testhit = itTraj->recHit();
+        uint testSubDetID = (testhit->geographicalId().subdetId());
+        if( (testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap) ){
+	  trackingEfficiency->Fill(1);
+	  break;
+        }
+      }
+    }
          
     int numofhit=0;      
     for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
@@ -490,7 +554,7 @@ try{
       for(Parameters::iterator it = BadModuleList_.begin(); it != BadModuleList_.end(); ++it) {         
         if ( (testhit->geographicalId().rawId())==(it->getParameter<uint32_t>("detid")) ) {badModule=true; break;}
 	}
-      if (badModule) continue;
+      if (badModule && skipBadModules_) continue;
             	
 		
 	 //******take the geometrical parameters of the hit**********
@@ -622,7 +686,7 @@ try{
           for(Parameters::iterator itCut = BadModuleList_.begin(); itCut != BadModuleList_.end(); ++itCut) {         
             if ( (testhitCut->geographicalId().rawId())==(itCut->getParameter<uint32_t>("detid")) ) {badModuleCut=true; break;}
 	  }
-          if (badModuleCut) continue;
+          if (badModuleCut && skipBadModules_) continue;
            	
 	   //int moduleRawIdCut = (testhitCut)->geographicalId().rawId();
 
@@ -864,12 +928,20 @@ try{
         //if (numOfOtherValid<1) continue;
         //if( (!hasValidInLowerPix) || (!hasValidInUpperPix)  ) continue; 
         //if(  isNotInMiddle  ) continue; 
-        //if(  (!hasGoodTiming) ) continue; 
+        //if(  (!hasGoodTiming) ) continue;
+	//if( !hasHighPT || isNotInMiddle || (!hasGoodTiming)) continue;
         //if( (!isTelescopeGood) || isNotInMiddle || (!hasGoodTiming) ) continue; 
-        if( (!isTelescopeGood) || isNotInMiddle || (!hasGoodTiming) || !hasHighPT ) continue;
+        //if( (!isTelescopeGood) || isNotInMiddle || (!hasGoodTiming) || !hasHighPT ) continue;
+        //if( (numOfOtherValid<1) || isNotInMiddle || (!hasGoodTiming) || !hasHighPT ) continue;
         //if( isNotInMiddle || (!hasGoodTiming) || !hasHighPT ) continue;
-	//if( !isTelescopeGood || isNotInMiddle ) continue;
+	//if( !isTelescopeGood || isNotInMiddle || !hasHighPT) continue;
         //can also use : isNotInMiddle && hasGoodTiming && isTelescopeGood
+	
+	if(listOfCuts_.getParameter<bool>("pT_cut") && !hasHighPT ) continue;
+	if(listOfCuts_.getParameter<bool>("edge_cut") && isNotInMiddle ) continue;
+	if(listOfCuts_.getParameter<bool>("telescope_cut") && !isTelescopeGood ) continue;
+	if(listOfCuts_.getParameter<bool>("muon_cut") && !hasGoodTiming ) continue;
+	if(listOfCuts_.getParameter<bool>("loose_cut") && numOfOtherValid<1 ) continue;
 
         if((*testhit).getType()==TrackingRecHit::missing){
 	  
@@ -907,7 +979,11 @@ try{
 	xposCluster->Fill(testclust->x());
 	yposCluster->Fill(testclust->y());
 	
-        if(type==int(kBPIX)) {chargeDistriBPix->Fill(testclust->charge());numbPixInClusterBPix->Fill(testclust->size());}
+        if(type==int(kBPIX)){
+	  chargeDistriBPix->Fill(testclust->charge());
+	  numbPixInClusterBPix->Fill(testclust->size());
+	  chargeVsDimensionBPix->Fill(testclust->charge(),testclust->size());
+	  }
 	if(type==int(kFPIX) && globalZ>0.) {chargeDistriFPixPlus->Fill(testclust->charge());numbPixInClusterFPixPlus->Fill(testclust->size());}
 	if(type==int(kFPIX) && globalZ<0.) {chargeDistriFPixMinus->Fill(testclust->charge());numbPixInClusterFPixMinus->Fill(testclust->size());}	
       }
@@ -1060,10 +1136,24 @@ try{
         if ((*testhit).getType()== TrackingRecHit::valid){
 	  validVsAlphaBPix->Fill( alpha );
 	  validVsBetaBPix->Fill( beta );
+	  
+	  if (isBigModule){
+	    validAlphaLocalXBigBPix->Fill(alpha,tsos.localPosition().x());
+	    validBetaLocalXBigBPix->Fill(beta,tsos.localPosition().x());
+	  }
+	  validAlphaLocalYBPix->Fill(alpha,tsos.localPosition().y());
+	  validBetaLocalYBPix->Fill(beta,tsos.localPosition().y());
 	}
         if ((*testhit).getType()== TrackingRecHit::missing){
 	   missingVsAlphaBPix->Fill( alpha);
 	   missingVsBetaBPix->Fill( beta);
+	   
+	   if (isBigModule){
+	    missingAlphaLocalXBigBPix->Fill(alpha,tsos.localPosition().x());
+	    missingBetaLocalXBigBPix->Fill(beta,tsos.localPosition().x());
+	  }
+	  missingAlphaLocalYBPix->Fill(alpha,tsos.localPosition().y());
+	  missingBetaLocalYBPix->Fill(beta,tsos.localPosition().y());	   
 	}
       }
       
@@ -1071,10 +1161,24 @@ try{
         if ((*testhit).getType()== TrackingRecHit::valid){
 	  validVsAlphaFPix->Fill( alpha );
 	  validVsBetaFPix->Fill( beta );
+	  
+	  if (isBigModule){
+	    validAlphaLocalXBigFPix->Fill(alpha,tsos.localPosition().x());
+	    validBetaLocalXBigFPix->Fill(beta,tsos.localPosition().x());
+	  }
+	  validAlphaLocalYFPix->Fill(alpha,tsos.localPosition().y());
+	  validBetaLocalYFPix->Fill(beta,tsos.localPosition().y());
 	}
         if ((*testhit).getType()== TrackingRecHit::missing){
 	   missingVsAlphaFPix->Fill( alpha);
            missingVsBetaFPix->Fill( beta);
+	   
+	   if (isBigModule){
+	    missingAlphaLocalXBigFPix->Fill(alpha,tsos.localPosition().x());
+	    missingBetaLocalXBigFPix->Fill(beta,tsos.localPosition().x());
+	  }
+	  missingAlphaLocalYFPix->Fill(alpha,tsos.localPosition().y());
+	  missingBetaLocalYFPix->Fill(beta,tsos.localPosition().y());	
 	}
       }
 
@@ -1120,8 +1224,23 @@ try{
 
       DetId hitDetId = (testhit->geographicalId());
       PXBDetId hitPdetId = PXBDetId(hitDetId);
-      unsigned int hitLayer=0;
-      hitLayer=hitPdetId.layer();        
+      unsigned int hitLayer  =hitPdetId.layer();
+      unsigned int hitLadder =hitPdetId.ladder();
+      unsigned int hitModule=hitPdetId.module();
+      
+//+++++++++++++++++++++++cleaning with danek misconfigured module List+++++++++++++++++++++
+      bool goodModule=true;
+      if (hitLayer==1&&
+            ((hitLadder==4&&hitModule==6)||(hitLadder==12&&hitModule==5)||(hitLadder==14&&hitModule==5)||(hitLadder==16&&hitModule==5) )
+          ||hitLayer==2&&
+	    ((hitLadder==3&&hitModule==8)||(hitLadder==12&&(hitModule==5||hitModule==7||hitModule==8))||(hitLadder==20&&hitModule==8)||(hitLadder==26&&hitModule==1)||(hitLadder==28&&hitModule==2) )
+	  ||hitLayer==3&&
+	    ((hitLadder==3&&hitModule==3)||(hitLadder==19&&hitModule==5)||(hitLadder==32&&hitModule==1)||
+	    (hitLadder==35&&(hitModule<=4||hitModule==7))||(hitLadder==37&&(hitModule<=6&&hitModule>=2))||
+	    (hitLadder==39&&hitModule==8)||(hitLadder==43&&hitModule==7)) 
+         )
+        goodModule=false;        
+	
 //test
       if ((*testhit).getType()==TrackingRecHit::missing) histoMethod2->Fill(0);
       if ((*testhit).getType()==TrackingRecHit::valid)   histoMethod2->Fill(1);
@@ -1191,6 +1310,7 @@ try{
 	windowSearchSameModule->Fill(minDistanceOnSameModule);
 	windowSearch->Fill(minDistance); 
 	windowSearchBPix->Fill(minDistance);
+	if (goodModule) windowSearchGoodModulesBPix->Fill(minDistance);
 	
 	if(minDistance!=999999)
 	  hasCluster=true;
@@ -1352,12 +1472,14 @@ PixelEfficiency::beginJob(const edm::EventSetup& iSetup)
  histInvalidRecHitCollection = new TH1F("histInvalidRecHitCollection","histInvalidRecHitCollection",5,0,5);
  histInvalidRecHitWithBadmoduleList = new TH1F("histInvalidRecHitWithBadmoduleList","histInvalidRecHitWithBadmoduleList",5,0,5);
  
- consistencyCheck = new TH1F("consistencyCheck","consistencyCheck", 3, 0,3);
- consistencyCheckTraj = new TH1F("consistencyCheckTraj","consistencyCheckTraj", 3, 0,3);
+ consistencyCheck = new TH1F("consistencyCheck","consistencyCheck", 3, 0, 3);
+ consistencyCheckTraj = new TH1F("consistencyCheckTraj","consistencyCheckTraj", 5, 0, 5);
+ trackingEfficiency = new TH1F("trackingEfficiency","trackingEfficiency", 2, 0, 2);
 
  windowSearch = new TH1F("windowSearch","windowSearch",500,0,0.50);
  windowSearchSameModule = new TH1F("windowSearchSameModule","windowSearchSameModule",1000,0,10);
  windowSearchBPix = new TH1F("windowSearchBPix","windowSearchBPix",500,0,0.50);
+ windowSearchGoodModulesBPix = new TH1F("windowSearchGoodModulesBPix","windowSearchGoodModulesBPix",500,0,0.50);
  windowSearchFPix = new TH1F("windowSearchFPix","windowSearchFPix",500,0,0.50);
  missingButClusterOnSameModule = new TH1F("missingButClusterOnSameModule","missingButClusterOnSameModule",2,0,2);
  missingButCluster = new TH1F("missingButCluster","missingButCluster",2,0,2);
@@ -1371,6 +1493,8 @@ PixelEfficiency::beginJob(const edm::EventSetup& iSetup)
  numbPixInClusterFPixPlus = new TH1F("numbPixInClusterFPixPlus","numbPixInClusterFPixPlus",50,0,50);
  chargeDistriFPixMinus = new TH1F("chargeDistriFPixMinus","chargeDistriFPixMinus",200,0,100000);
  numbPixInClusterFPixMinus = new TH1F("numbPixInClusterFPixMinus","numbPixInClusterFPixMinus",50,0,50);
+
+ chargeVsDimensionBPix = new TH2F("chargeVsDimensionBPix","chargeVsDimensionBPix",200,0,100000,50,0,50);
 
  chargeDistriPreCuts = new TH1F("chargeDistriPreCuts","chargeDistriPreCuts",200,0,100000);
  numbPixInClusterPreCuts = new TH1F("numbPixInClusterPreCuts","numbPixInClusterPreCuts",50,0,50);
@@ -1435,6 +1559,24 @@ PixelEfficiency::beginJob(const edm::EventSetup& iSetup)
  validAlphaLocalXSmall = new TH2F("validAlphaLocalXSmall","validAlphaLocalXSmall",200,-3.5,3.5,100,-1.5,1.5);
  missingAlphaLocalXSmall = new TH2F("missingAlphaLocalXSmall","missingAlphaLocalXSmall",200,-3.5,3.5,100,-1.5,1.5);
 
+ missingAlphaLocalXBigBPix = new TH2F("missingAlphaLocalXBigBPix","missingAlphaLocalXBigBPix",200,-3.5,3.5,100,-1.5,1.5);
+ missingBetaLocalXBigBPix = new TH2F("missingBetaLocalXBigBPix","missingBetaLocalXBigBPix",200,-3.5,3.5,100,-1.5,1.5);
+ missingAlphaLocalYBPix = new TH2F("missingAlphaLocalYBPix","missingAlphaLocalYBPix",200,-3.5,3.5,100,-4,4);
+ missingBetaLocalYBPix = new TH2F("missingBetaLocalYBPix","missingBetaLocalYBPix",200,-3.5,3.5,100,-4,4);
+ validAlphaLocalXBigBPix = new TH2F("validAlphaLocalXBigBPix","validAlphaLocalXBigBPix",200,-3.5,3.5,100,-1.5,1.5);
+ validBetaLocalXBigBPix = new TH2F("validBetaLocalXBigBPix","validBetaLocalXBigBPix",200,-3.5,3.5,100,-1.5,1.5);
+ validAlphaLocalYBPix = new TH2F("validAlphaLocalYBPix","validAlphaLocalYBPix",200,-3.5,3.5,100,-4,4);
+ validBetaLocalYBPix = new TH2F("validBetaLocalYBPix","validBetaLocalYBPix",200,-3.5,3.5,100,-4,4);
+  
+ missingAlphaLocalXBigFPix = new TH2F("missingAlphaLocalXBigFPix","missingAlphaLocalXBigFPix",200,-3.5,3.5,100,-1.5,1.5);
+ missingBetaLocalXBigFPix = new TH2F("missingBetaLocalXBigFPix","missingBetaLocalXBigFPix",200,-3.5,3.5,100,-1.5,1.5);
+ missingAlphaLocalYFPix = new TH2F("missingAlphaLocalYFPix","missingAlphaLocalYFPix",200,-3.5,3.5,100,-4,4);
+ missingBetaLocalYFPix = new TH2F("missingBetaLocalYFPix","missingBetaLocalYFPix",200,-3.5,3.5,100,-4,4);
+ validAlphaLocalXBigFPix = new TH2F("validAlphaLocalXBigFPix","validAlphaLocalXBigFPix",200,-3.5,3.5,100,-1.5,1.5);
+ validBetaLocalXBigFPix = new TH2F("validBetaLocalXBigFPix","validBetaLocalXBigFPix",200,-3.5,3.5,100,-1.5,1.5);
+ validAlphaLocalYFPix = new TH2F("validAlphaLocalYFPix","validAlphaLocalYFPix",200,-3.5,3.5,100,-4,4);
+ validBetaLocalYFPix = new TH2F("validBetaLocalYFPix","validBetaLocalYFPix",200,-3.5,3.5,100,-4,4);
+ 
  validVsMuontimePost68094 = new TH1F("validVsMuontimePost68094","validVPost68094sMuontime",50,-40.,80.);
  missingVsMuontimePost68094 = new TH1F("missingVsMuontimePost68094","missingVsMuontimePost68094",50,-40.,80.);
  validVsMuontimePre68094 = new TH1F("validVsMuontimePre68094","validVsMuontimePre68094",50,-40.,80.);
@@ -1522,10 +1664,12 @@ PixelEfficiency::endJob() {
 
   consistencyCheck->Write();
   consistencyCheckTraj->Write();
+  trackingEfficiency->Write();
 
   windowSearch->Write();
   windowSearchSameModule->Write();
   windowSearchBPix->Write();
+  windowSearchGoodModulesBPix->Write();
   windowSearchFPix->Write();
   missingButClusterOnSameModule->Write();
   missingButCluster->Write();
@@ -1538,6 +1682,7 @@ PixelEfficiency::endJob() {
   numbPixInClusterFPixPlus->Write();
   chargeDistriFPixMinus->Write();
   numbPixInClusterFPixMinus->Write();
+  chargeVsDimensionBPix->Write();
 
   chargeDistriPreCuts->Write();
   numbPixInClusterPreCuts->Write();
@@ -1587,6 +1732,24 @@ PixelEfficiency::endJob() {
   missingVsLocalXBig->Write();
   validVsLocalXSmall->Write();
   missingVsLocalXSmall->Write();
+  
+  missingAlphaLocalXBigBPix->Write();
+  missingBetaLocalXBigBPix->Write();
+  missingAlphaLocalYBPix->Write();
+  missingBetaLocalYBPix->Write();
+  validAlphaLocalXBigBPix->Write();
+  validBetaLocalXBigBPix->Write();
+  validAlphaLocalYBPix->Write();
+  validBetaLocalYBPix->Write();
+  
+  missingAlphaLocalXBigFPix->Write();
+  missingBetaLocalXBigFPix->Write();
+  missingAlphaLocalYFPix->Write();
+  missingBetaLocalYFPix->Write();
+  validAlphaLocalXBigFPix->Write();
+  validBetaLocalXBigFPix->Write();
+  validAlphaLocalYFPix->Write();
+  validBetaLocalYFPix->Write();
   
   missingVsMuontimePre68094->Write();
   validVsMuontimePre68094->Write();
