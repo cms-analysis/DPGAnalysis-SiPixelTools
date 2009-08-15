@@ -916,7 +916,7 @@ try{
   
   
         //do the efficiencyVSmuontime with the "official cuts" applied
-        if( isTelescopeGood || !isNotInMiddle ) {
+        if( isTelescopeGood && !isNotInMiddle ) {
           if ((*testhit).getType()== TrackingRecHit::valid){
             if ( runNumber < 68094 ) validVsMuontimePre68094->Fill(time);
             else    validVsMuontimePost68094->Fill(time);
@@ -929,14 +929,18 @@ try{
 	
 	
 	//do the eff VS muon time VS charge
-	if( isTelescopeGood || !isNotInMiddle ) {
+	if( isTelescopeGood && !isNotInMiddle && testclust.isNonnull()) {
 	  if(type==int(kBPIX)){
-	    if ((*testhit).getType()== TrackingRecHit::valid)     validMuonTimeVSchargeBPix->Fill(time,testclust->charge());
-	    if ((*testhit).getType()== TrackingRecHit::missing)   missingMuonTimeVSchargeBPix->Fill(time,testclust->charge());
+	    if ((*testhit).getType()==TrackingRecHit::valid) ;
+	      validMuonTimeVSchargeBPix->Fill(time,testclust->charge());
+	    if ((*testhit).getType()==TrackingRecHit::missing)
+	      missingMuonTimeVSchargeBPix->Fill(time,testclust->charge());
 	  }
 	  if(type==int(kFPIX)){
-	    if ((*testhit).getType()== TrackingRecHit::valid)     validMuonTimeVSchargeFPix->Fill(time,testclust->charge());
-	    if ((*testhit).getType()== TrackingRecHit::missing)   missingMuonTimeVSchargeFPix->Fill(time,testclust->charge());
+	    if ((*testhit).getType()==TrackingRecHit::valid)
+	      validMuonTimeVSchargeFPix->Fill(time,testclust->charge());
+	    if ((*testhit).getType()==TrackingRecHit::missing)
+	      missingMuonTimeVSchargeFPix->Fill(time,testclust->charge());
 	  }
   	}
 	
