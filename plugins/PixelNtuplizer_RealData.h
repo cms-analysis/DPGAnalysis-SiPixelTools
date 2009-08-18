@@ -9,6 +9,9 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
+#include "SimDataFormats/TrackingHit/interface/PSimHit.h"
+#include "SimDataFormats/Track/interface/SimTrack.h"
+#include "SimDataFormats/Track/interface/SimTrackContainer.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHitCollection.h"
 #include "DQM/TrackerMonitorTrack/interface/MonitorTrackResiduals.h"
 #include "TrackingTools/PatternTools/interface/TrajectoryFitter.h"
@@ -47,6 +50,8 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
   void fillVertex(const PixelGeomDetUnit*);
   void fillClust(const SiPixelCluster&, const RectangularPixelTopology*, const PixelGeomDetUnit*, TrajectoryStateOnSurface&);
   void fillPix(const SiPixelCluster&, const RectangularPixelTopology*, const PixelGeomDetUnit*);
+  void fillSim(std::vector<PSimHit>::const_iterator, unsigned int, const PixelGeomDetUnit *,
+  	       const RectangularPixelTopology *, const edm::SimTrackContainer& );
   void fillTrack(TrajectoryStateOnSurface&,const Trajectory&, int);
   
   bool isValidMuonAssoc(const edm::Event& iEvent);		   
@@ -61,12 +66,10 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
   edm::ParameterSet conf_;
   edm::ESHandle<TrackerGeometry> tkGeom_;
   edm::ESHandle<MagneticField> magneticField_;
-  // muon association.
-    
+
 
   TH1D *dummyhist;
   TTree* t_;  // tree filled on every pixel rec hit
-  //  TTree* ts_; // tree filled on every strip rec hit
   TTree* tt_; // tree filled every track
 
   float bias[5][15][5][15];
@@ -78,6 +81,8 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
   float spoints[5][15];
   
 
+  bool isCosmic;
+  bool isSim;
   bool useAllPixel;
 
   void init();
@@ -105,6 +110,7 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
     int blade;
     int panel;
     int plaquette;
+    int isflipped;
 
     void init();
   } det_;
@@ -143,6 +149,46 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
 
     void init();
   } clust_;
+
+  struct SimStruct {
+
+    float localX;
+    float localY;
+    float eloss;             //Energy loss
+    float localPhi;          //track phi on module
+    float localTheta;        //track theta on module
+    // alpha and beta are related to phi and theta, but
+    // more standard:
+    float alpha;   
+    float beta;
+    float charge;            // track charge in electron units
+    int particleID;          // Particle ID
+    uint32_t trackID;    // ID number of the Sim Track in event
+    int vertexID;            // index of Sim Track vertex (-1 if none)
+    float entryPointLocalX, exitPointLocalX;     // entry and exit points
+    float entryPointLocalY, exitPointLocalY;
+    float entryPointLocalZ, exitPointLocalZ;
+    float entryPointRow, exitPointRow;           // entry and exit row/columns
+    float entryPointColumn, exitPointColumn;
+    float entryPointGlobalX, exitPointGlobalX;   // global coor.
+    float entryPointGlobalY, exitPointGlobalY;
+    float entryPointGlobalZ, exitPointGlobalZ;
+
+    int processID;          // ID of the process which created the track which created the PSimHit
+    //float trk_eta;    // wrong, don't use it !!!
+    //float trk_phi;    // wrong, don't use it !!!
+    float p;           // sim track momentum
+    float px;
+    float py;
+    float pz;
+    float globalEta;   // global sim track eta
+    float globalPhi;   // global sim track phi
+    float globalTheta; // global sim track theta
+
+
+    void init();
+  } sim_;
+
   
   struct MuonInfoStruct{// : public TObject {
     //  public:
@@ -305,18 +351,6 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
 
     void init();
     } track_;
-
-  /*  struct TrackerHitStruct{
-
-    float globalX;
-    float globalY;
-    float globalZ;
-    int run;
-    int evtnum;
-    int tracknum;     // number of track processed (correlates with others)
-
-    void init();
-    } trackerhits_; */
 
   struct TrackOnlyStruct{
 

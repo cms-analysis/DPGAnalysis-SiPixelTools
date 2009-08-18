@@ -11,12 +11,13 @@ process.load("CondCore.DBCommon.CondDBCommon_cfi")
 process.load("CondCore.DBCommon.CondDBSetup_cfi")
 
 # conditions
+process.load('Configuration.StandardSequences.MixingNoPileUp_cff')
+process.load('Configuration.StandardSequences.GeometryIdeal_cff')
 process.load("Configuration.StandardSequences.MagneticField_38T_cff")
-process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 #process.GlobalTag.connect = "frontier://FrontierProd/CMS_COND_21X_GLOBALTAG"
-process.GlobalTag.globaltag = "IDEAL_31X::All"
+process.GlobalTag.globaltag = "MC_31X_V5::All"
 process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource','GlobalTag')
 
 ##
@@ -27,30 +28,21 @@ process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource','GlobalTag')
 
 # reconstruction sequence for Cosmics
 process.load("Configuration.StandardSequences.RawToDigi_cff")
-process.load("Configuration.StandardSequences.ReconstructionCosmics_cff")
-
+process.load("Configuration.StandardSequences.Reconstruction_cff")
 
 ##
 ## Load and Configure TrackRefitter
 ##
 process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
-# tracks available in cosmic reco: 'cosmictrackfinderP5', 'ctfWithMaterialTracksP5', 'rsWithMaterialTracksP5'
-#process.TrackRefitterP5.src =  'cosmictrackfinderP5' #'ctfWithMaterialTracksP5'
-# AlCa tracks:
-#processlTrackRefitterP5.src = 'ALCARECOTkAlCosmicsCosmicTF0T'
-#process.TrackRefitterP5.TrajectoryInEvent = True
 
-# Instead, load all three track algorithms:
-process.ctfRefitter = process.TrackRefitterP5.clone()
-process.ctfRefitter.src = 'ctfWithMaterialTracksP5'
-process.ctfRefitter.TrajectoryInEvent = True
-process.rsRefitter = process.TrackRefitterP5.clone()
-process.rsRefitter.src = 'rsWithMaterialTracksP5'
+# Instead, load all track algorithms:
+process.ckfRefitter = process.TrackRefitter.clone()
+process.ckfRefitter.src = 'generalTracks'
+process.ckfRefitter.TrajectoryInEvent = True
+
+process.rsRefitter = process.TrackRefitter.clone()
+process.rsRefitter.src = 'rsWithMaterialTracks'
 process.rsRefitter.TrajectoryInEvent = True
-process.cosmRefitter = process.TrackRefitterP5.clone()
-process.cosmRefitter.src = 'cosmictrackfinderP5'
-process.cosmRefitter.TrajectoryInEvent = True
-
 
 process.load("RecoTracker.TransientTrackingRecHit.TransientTrackingRecHitBuilderWithoutRefit_cfi")
 
@@ -69,32 +61,28 @@ process.MuonTOFFilter_trackQuality.max_goodmuons = 2
 process.MuonTOFFilter_trackQuality.max_timeError = 15
 process.MuonTOFFilter_trackQuality.max_chi2_ndof = 15
 
-
 ##
 ##  Ntuplizer
 ##
 
 process.load("DPGAnalysis.SiPixelTools.PixelNtuplizer_RealData_cfi")
+process.PixelNtuplizer_RealData.isCosmic = False
+process.PixelNtuplizer_RealData.isSim = True
+process.PixelNtuplizer_RealData.useAllPixel = False
+
 # also run 3 times:
-process.ctfNtuple = process.PixelNtuplizer_RealData.clone()
-process.ctfNtuple.trajectoryInput = 'ctfRefitter'
+process.ckfNtuple = process.PixelNtuplizer_RealData.clone()
+process.ckfNtuple.trajectoryInput = 'ckfRefitter'
 
 process.rsNtuple = process.PixelNtuplizer_RealData.clone()
 process.rsNtuple.trajectoryInput = 'rsRefitter'
-
-process.cosmtfNtuple = process.PixelNtuplizer_RealData.clone()
-process.cosmtfNtuple.trajectoryInput = 'cosmRefitter'
-
-#process.load("DPGAnalysis.SiPixelTools.PixelNtuplizer_RealData_cfi")
-#process.PixelNtuplizer_RealData.trajectoryInput = 'TrackRefitterP5'
-
 
 ##
 ## configure output ntuple file using TFileService
 ##
 
 process.TFileService = cms.Service("TFileService", 
-                                   fileName = cms.string("SuperPointing_test_threealgos_MC.root"),
+                                   fileName = cms.string("test.root"),
                                    closeFileFast = cms.untracked.bool(True)
                                    )
 
@@ -108,9 +96,10 @@ process.source = cms.Source("PoolSource",
     #firstRun = cms.untracked.uint32(64108),
     #interval = cms.uint32(1),
     fileNames = cms.untracked.vstring(
-    'rfio:/castor/cern.ch/user/a/andrewdc/SingleMuPt10_cfi_GEN_SIM_DIGI_L1_DIGI2RAW_HLT.root'
-                                     )
-                           )
+    'rfio:/castor/cern.ch/user/a/andrewdc/TestInput312.root'
+
+  )
+)
 
 # these drop commands are necessary to get rid of all HLT problems and DQM bulk
 process.source.inputCommand = cms.untracked.vstring("drop *_*_*_FU"
@@ -127,25 +116,24 @@ process.maxEvents = cms.untracked.PSet(
 ## executionpath
 ##
 process.p = cms.Path(
+    # mixing module (only for sim data)
+    process.mix*
     # filters:
 #    process.fedInRunFilter*
     # standard reco sequence
-    process.RawToDigi*process.reconstructionCosmics*
+    process.RawToDigi*process.reconstruction_withRS*
     # more filters:
-    process.MuonTOFFilter_trackQuality *
+#    process.MuonTOFFilter_trackQuality *
     # create rechits
     # (rechits are transient data members so are not saved in CMSSW .root files)
     process.offlineBeamSpot*
 #   refitters for all tracking algos (thse are what actually create the rechits)
-    process.ctfRefitter*
+    process.ckfRefitter*
     process.rsRefitter*
-    process.cosmRefitter*
     # run ntuplizers
-    process.ctfNtuple*
-    process.rsNtuple*
-    process.cosmtfNtuple
+    process.ckfNtuple*
+    process.rsNtuple
     )
 process.MessageLogger.cerr.FwkReport.reportEvery = 10
-process.MessageLogger.cerr.threshold = 'Info'
+process.MessageLogger.cerr.threshold = 'INFO'
 process.TrackerDigiGeometryESModule.applyAlignment = True
-

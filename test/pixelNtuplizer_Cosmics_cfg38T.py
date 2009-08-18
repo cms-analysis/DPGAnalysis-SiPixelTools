@@ -12,12 +12,14 @@ process.load("CondCore.DBCommon.CondDBSetup_cfi")
 
 # conditions
 process.load("Configuration.StandardSequences.MagneticField_38T_cff")
+#process.load("Configuration.StandardSequences.MagneticField_cff") #for 0T runs
+#process.load("Configuration.GlobalRuns.ForceZeroTeslaField_cff") #for 0T runs
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #process.GlobalTag.connect = "frontier://FrontierInt/CMS_COND_30X_GLOBALTAG"
-process.GlobalTag.globaltag = "CRAFT_30X::All"
+process.GlobalTag.globaltag = "CRAFT0831X_V1::All"
 
 ##
 ## Load and Configure track selection for alignment
@@ -26,10 +28,8 @@ process.GlobalTag.globaltag = "CRAFT_30X::All"
 #process.AlignmentTrackSelector.ptMin = 3.0
 
 # reconstruction sequence for Cosmics
-# reconstruction sequence for Cosmics
 process.load("Configuration.StandardSequences.RawToDigi_Data_cff")
 process.load("Configuration.StandardSequences.ReconstructionCosmics_cff")
-
 
 ##
 ## Load and Configure TrackRefitter
@@ -52,7 +52,6 @@ process.cosmRefitter = process.TrackRefitterP5.clone()
 process.cosmRefitter.src = 'cosmictrackfinderP5'
 process.cosmRefitter.TrajectoryInEvent = True
 
-
 process.load("RecoTracker.TransientTrackingRecHit.TransientTrackingRecHitBuilderWithoutRefit_cfi")
 
 ##
@@ -70,12 +69,15 @@ process.MuonTOFFilter_trackQuality.max_goodmuons = 2
 process.MuonTOFFilter_trackQuality.max_timeError = 15
 process.MuonTOFFilter_trackQuality.max_chi2_ndof = 15
 
-
 ##
 ##  Ntuplizer
 ##
 
 process.load("DPGAnalysis.SiPixelTools.PixelNtuplizer_RealData_cfi")
+process.PixelNtuplizer_RealData.isCosmic = True
+process.PixelNtuplizer_RealData.isSim = False
+process.PixelNtuplizer_RealData.useAllPixel = False
+
 # also run 3 times:
 process.ctfNtuple = process.PixelNtuplizer_RealData.clone()
 process.ctfNtuple.trajectoryInput = 'ctfRefitter'
@@ -85,10 +87,6 @@ process.rsNtuple.trajectoryInput = 'rsRefitter'
 
 process.cosmtfNtuple = process.PixelNtuplizer_RealData.clone()
 process.cosmtfNtuple.trajectoryInput = 'cosmRefitter'
-
-#process.load("DPGAnalysis.SiPixelTools.PixelNtuplizer_RealData_cfi")
-#process.PixelNtuplizer_RealData.trajectoryInput = 'TrackRefitterP5'
-
 
 ##
 ## configure output ntuple file using TFileService
@@ -109,12 +107,24 @@ process.source = cms.Source("PoolSource",
     #firstRun = cms.untracked.uint32(64108),
     #interval = cms.uint32(1),
     fileNames = cms.untracked.vstring(
-    '/store/data/Commissioning08/Cosmics/RAW-RECO/CRAFT_ALL_V9_SuperPointing_225-v3/0006/26B79166-7C00-DE11-AA81-0030486790A0.root'
 
-   
-    )
-
-                            )
+        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0003/76160DD7-FE73-DE11-92B6-001A92810AE0.root',
+        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0003/6C615EAE-FE73-DE11-B169-001A92971B0E.root',
+        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0003/7EA856DA-FE73-DE11-AFD7-0018F3D0962A.root',
+        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0003/EE494DB9-FE73-DE11-A86F-0018F3D096BC.root',
+        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0003/28A5C5B0-FE73-DE11-A3FB-001A928116C0.root',
+        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0003/8A20AB9D-FE73-DE11-8E78-001BFCDBD154.root',
+        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0003/92575CDF-FE73-DE11-8FC6-001A92971B8E.root',
+        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0003/9CFEBBAB-FE73-DE11-9DFF-001A92971B8A.root',
+        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0003/081ACD90-FE73-DE11-A83C-0018F3D09688.root',
+        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0002/E4AEF4AC-FE73-DE11-BE61-001A92971B48.root',
+        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0002/9833D7D2-FE73-DE11-8FFF-0018F3D0970E.root',
+        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0002/CC35E3C2-FE73-DE11-964A-0018F3D096E0.root',
+        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0000/E44428C2-9873-DE11-AB53-003048679228.root',
+        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0002/30F0D9B7-FE73-DE11-B2A3-001A92971B04.root',
+        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0002/3E4F14C5-FE73-DE11-8314-001A92971B48.root',
+        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0002/904AA096-FE73-DE11-AE25-0018F3D09708.root'
+) )
 
 # these drop commands are necessary to get rid of all HLT problems and DQM bulk
 process.source.inputCommand = cms.untracked.vstring("drop *_*_*_FU"
@@ -134,7 +144,7 @@ process.p = cms.Path(
     # filters:
     process.fedInRunFilter*
     # standard reco sequence
-    process.RawToDigi*process.reconstructionCosmics*
+#    process.RawToDigi*process.reconstructionCosmics*
     # more filters:
     process.MuonTOFFilter_trackQuality *
     # create rechits
@@ -150,7 +160,5 @@ process.p = cms.Path(
     process.cosmtfNtuple
     )
 process.MessageLogger.cerr.FwkReport.reportEvery = 10
-process.MessageLogger.cerr.threshold = 'Info'
+process.MessageLogger.cerr.threshold = 'INFO'
 process.TrackerDigiGeometryESModule.applyAlignment = True
-
-

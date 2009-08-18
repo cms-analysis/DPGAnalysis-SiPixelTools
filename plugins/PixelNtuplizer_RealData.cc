@@ -1,3 +1,4 @@
+
 // File: PixelNtuplizer_RealData.cc
 // Description: Adapted tree structure from PixelNtuplizer package
 //   		Adapted method for finding residual information from TrackerValidationVariables package
@@ -29,6 +30,9 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
 
+// SimDataFormats
+#include "SimDataFormats/TrackingHit/interface/PSimHitContainer.h"
+#include "SimTracker/TrackerHitAssociation/interface/TrackerHitAssociator.h"
 
 // For ROOT
 #include <TROOT.h>
@@ -53,7 +57,6 @@ PixelNtuplizer_RealData::PixelNtuplizer_RealData(edm::ParameterSet const& iConfi
   tt_(0),
   maxsize_PixInfoStruct_(200)
 {
-  useAllPixel = iConfig.getParameter<bool>("useAllPixel");
 
 }
 
@@ -77,24 +80,28 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
   // a 'feature' of TFileService is that it does not like to add trees until a histogram is also created.
   dummyhist = fs->make<TH1D>("number_of_events","number of events",1,0,1);
 
-    // but after that it is ok to create a tree..
+  isCosmic = conf_.getParameter<bool>("isCosmic");
+  if (isCosmic == true) readOffsets();
+
+  isSim = conf_.getParameter<bool>("isSim");
+  useAllPixel = conf_.getParameter<bool>("useAllPixel");
+
+  // but after that it is ok to create a tree..
   t_ = new TTree("PixNtuple", "Pixel hit analyzer ntuple");
-  //  ts_ = new TTree("StripNtuple", "Strip hit analyzer ntuple");
   tt_ = new TTree("TrackNtuple", "Counters filled every track");
   int bufsize = 64000;
-
   // Create one branch. If splitlevel is set, event is a superbranch
   // creating a sub branch for each data member of the Event object.
+  //  std::cout << "Making evt branch:" << std::endl;
   t_->Branch("evt", &evt_, "run/I:evtnum:nbrTracks", bufsize);
-  
-  t_->Branch("det", &det_, "thickness/F:cols/I:rows/I:layer/I:ladder/I:module/I:disk/I:blade/I:panel/I:plaquette/I", bufsize);
-
+  //  std::cout << "Making det branch:" << std::endl;
+  t_->Branch("det", &det_, "thickness/F:cols/I:rows/I:layer/I:ladder/I:module/I:disk/I:blade/I:panel/I:plaquette/I:isflipped/I", bufsize);
   //  std::cout << "Making vertex branch:" << std::endl;
   t_->Branch("vertex",   &vertex_,   "r/F:z", bufsize);
-
-  //  std::cout << "Making cluster branch:" << std::endl;
+  //  std::cout << "Making clust branch:" << std::endl;
   t_->Branch("Cluster", &clust_, "row/F:col:x:y:charge:normalized_charge:size/I:size_x:size_y:maxPixelCol:maxPixelRow:minPixelCol:minPixelRow:geoId/i:edgeHitX/I:edgeHitY:clust_alpha/F:clust_beta:n_neighbour_clust/I", bufsize);
-  
+  //  std::cout << "Making sim branch:" << std::endl;
+  if(isSim == true) t_->Branch("sim",   &sim_, "localX/F:localY/F:eloss/F:localPhi/F:localTheta/F:alpha/F:beta/F:charge/F:particleID/I:trackID/i:vertexID/I:entryPointLocalX/F:exitPointLocalX/F:entryPointLocalY/F:exitPointLocalY/F:entryPointLocalZ/F:exitPointLocalZ/F:entryPointRow/F:exitPointRow/F:entryPointColumn/F:exitPointColumn/F:entryPointGlobalX/F:exitPointGlobalX/F:entryPointGlobalY/F:exitPointGlobalY/F:entryPointGlobalZ/F:exitPointGlobalZ/F:processID/I:p/F:px/F:py/F:pz/F:globalEta/F:globalPhi/F:globalTheta/F", bufsize);
   //  std::cout << "Making pixinfo branch:" << std::endl;
   t_->Branch("npix", &pixinfo_.npix, "npix/I", bufsize);
   t_->Branch("hasOverFlow",&pixinfo_.hasOverFlow, "hasOverFlow/I",bufsize);
@@ -107,28 +114,15 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
   t_->Branch("gypix", pixinfo_.gy, "gy[npix]/F", bufsize);
   t_->Branch("gzpix", pixinfo_.gz, "gz[npix]/F", bufsize);
 
-
   if(useAllPixel == true){
     //    std::cout << "Making allpixinfo branch:" << std::endl;
     t_->Branch("allpix_npix", &allpixinfo_.allpix_npix, "allpix_npix/I", bufsize);
     t_->Branch("allpix_hasOverFlow",&allpixinfo_.allpix_hasOverFlow, "allpix_hasOverFlow/I",bufsize);
     t_->Branch("allpixInfo",&allpixinfo_,"allpix_row[200]/F:allpix_col[200]/F:allpix_adc[200]/F",bufsize);
   }
-
-  // t_->Branch("allpix_npix", &allpixinfo_.allpix_npix, "allpix_npix/I", bufsize);
-  //  t_->Branch("allpix_hasOverFlow",&allpixinfo_.allpix_hasOverFlow, "allpix_hasOverFlow/I",bufsize);
-  //t_->Branch("allpix_rowpix", allpixinfo_.allpix_row, "allpix_row[allpix_npix]/F", bufsize);
-  //t_->Branch("allpix_colpix", allpixinfo_.allpix_col, "allpix_col[allpix_npix]/F", bufsize);
-  //t_->Branch("allpix_adc"   , allpixinfo_.allpix_adc, "allpix_adc[allpix_npix]/F", bufsize);
-
   // std::cout << "Making allclustinfo branch:" << std::endl;
-
- //  t_->Branch("allclustInfo",&allclustinfo_,"allclust_row[100]/F:allclust_col[100]:allclust_x[100]:allclust_y[100]:allclust_charge[100]:allclust_nor_charge[100]:allclust_size[100]:allclust_size_x[100]:allclust_size_y[100]:allclust_maxPixelCol[100]:allclust_maxPixelRow[100]:allclust_minPixelCol[10000]:allclust_minPixelRow[100]:allclust_geoId[100]:allclust_edgeHitX[100]:allclust_edgeHitY[100]:allclust_dist[100]",bufsize);
-
   t_->Branch("allclust_hasOverFlow", &allclustinfo_.allclust_hasOverFlow, "allclust_hasOverFlow/I"                 , bufsize);
   t_->Branch("n_allclust"          , &allclustinfo_.n_allclust         , "n_allclust/I"                           , bufsize);
-  
-  
   t_->Branch("allclust_row"        , allclustinfo_.allclust_row        , "allclust_row[n_allclust]/F"        , bufsize);
   t_->Branch("allclust_col"        , allclustinfo_.allclust_col        , "allclust_col[n_allclust]/F"        , bufsize);
   t_->Branch("allclust_x"          , allclustinfo_.allclust_x          , "allclust_x[n_allclust]/F"          , bufsize);
@@ -147,59 +141,29 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
   t_->Branch("allclust_edgeHitY"   , allclustinfo_.allclust_edgeHitY   , "allclust_edgeHitY[n_allclust]/F"   , bufsize);
   t_->Branch("allclust_dist"       , allclustinfo_.allclust_dist       , "allclust_dist[n_allclust]/F"       , bufsize);
 
-  
-  /*   t_->Branch("nmuon",&muoninfo_.nMuon,"nmuon/I",bufsize);
- t_->Branch("muoninfo_HasOverFlow",&muoninfo_.HasOverFlow,"muoninfo_HasOverFlow/bool",bufsize);
- t_->Branch("muoninfo_IsGlobalMuon",muoninfo_.IsGlobalMuon,"muoninfo_IsGlobalMuon[nmuon]/bool",bufsize);
- t_->Branch("muoninfo_IsStandAloneMuon",muoninfo_.IsStandAloneMuon,"muoninfo_IsStandAloneMuon[nmuon]/bool",bufsize);
- t_->Branch("muoninfo_IsTrackerMuon",muoninfo_.IsTrackerMuon,"muoninfo_IsTrackerMuon[nmuon]/bool",bufsize);
- t_->Branch("muoninfo_HasGlobalTrack",muoninfo_.HasGlobalTrack,"muoninfo_HasGlobalTrack[nmuon]/bool",bufsize);
-  t_->Branch("muoninfo_HasPixelHit",muoninfo_.HasPixelHit,"muoninfo_HasPixelHit[nmuon]/bool",bufsize);
-  t_->Branch("muoninfo_IsTimeValid",muoninfo_.IsTimeValid,"muoninfo_IsTimeValid[nmuon]/bool",bufsize);
-  t_->Branch("muoninfo_timeAtIpInOut",muoninfo_.timeAtIpInOut, "muoninfo_timeAtIpInOut[nmuon]/F",bufsize);
-  t_->Branch("muoninfo_errorTime",muoninfo_.errorTime, "muoninfo_errorTime[nmuon]/F",bufsize);
-  // t_->Branch("muoninfo_momentumDiff",muoninfo_.momentumDiff, "muoninfo_momentumDiff[nmuon]/F",bufsize);
-   t_->Branch("muoninfo_trackpt",muoninfo_.trackpt, "muoninfo_trackpt[nmuon]/F",bufsize);
-    t_->Branch("muoninfo_tracketa",muoninfo_.tracketa, "muoninfo_tracketa[nmuon]/F",bufsize);
-    t_->Branch("muoninfo_trackphi",muoninfo_.trackphi, "muoninfo_trackphi[nmuon]/F",bufsize);*/
-
   //  std::cout << "Making muon branch:" << std::endl;
-      t_->Branch("MuonInfo",&muoninfo_,"timeAtIpInOut[2]/F:corrTimeAtIpInOut[2]/F:errorTime[2]/F:IsGlobalMuon[2]/F:IsStandAloneMuon[2]/F:IsTrackerMuon[2]/F:IsTimeValid[2]/F:HasGlobalTrack[2]/F:HasPixelHit[2]/F:trackpt[2]/F:tracketa[2]/F:trackphi[2]/F",bufsize);
-	t_->Branch("nMuon",&muoninfo_.nMuon,"nMuon/I",bufsize);
-	t_->Branch("nMuonHasOverFlow",&muoninfo_.HasOverFlow,"nMuonHasOverFlow/I",bufsize);
-  t_->Branch("Muon_meanTime",&muoninfo_.mean_Time,"Muon_meanTime/F",bufsize);
-   
- 
-
+  if(isCosmic == true){
+    t_->Branch("MuonInfo",&muoninfo_,"timeAtIpInOut[2]/F:corrTimeAtIpInOut[2]/F:errorTime[2]/F:IsGlobalMuon[2]/F:IsStandAloneMuon[2]/F:IsTrackerMuon[2]/F:IsTimeValid[2]/F:HasGlobalTrack[2]/F:HasPixelHit[2]/F:trackpt[2]/F:tracketa[2]/F:trackphi[2]/F",bufsize);
+    t_->Branch("nMuon",&muoninfo_.nMuon,"nMuon/I",bufsize);
+    t_->Branch("nMuonHasOverFlow",&muoninfo_.HasOverFlow,"nMuonHasOverFlow/I",bufsize);
+    t_->Branch("Muon_meanTime",&muoninfo_.mean_Time,"Muon_meanTime/F",bufsize);
+  }
   //  std::cout << "Making rechit branch:" << std::endl;
   t_->Branch("RecHit", &rechit_, "localX/F:localY:globalX:globalY:globalZ:residualX:residualY:resErrX:resErrY:hit_errX:hit_errY:resXprime:resXprimeErr", bufsize);
-
   //  std::cout << "Making track branch:" << std::endl;
   t_->Branch("track", &track_, "pt/F:p:px:py:pz:globalTheta:globalEta:globalPhi:localTheta:localPhi:chi2:ndof:foundHits/I:tracknum", bufsize);
-
-  //  std::cout << "Making tracker hit branch:" << std::endl;
-  //  ts_->Branch("TrackerHit", &trackerhits_, "globalX/F:globalY:globalZ:run/I:evtnum:tracknum", bufsize);
-
   //  std::cout << "Making track only branch:" << std::endl;
   tt_->Branch("TrackInfo", &trackonly_, "run/I:evtnum:tracknum:pixelTrack:NumPixelHits:NumStripHits:charge:chi2/F:ndof:theta:d0:dz:p:pt:px:py:pz:phi:eta:vx:vy:vz:muonT0:muondT0", bufsize);
-  
   edm::LogInfo("PixelNuplizer_RealData") << "Made all branches." << std::endl;
-
-
-  readOffsets();
-
 
 }
 
 
 bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent){
-
-
  
   // get the ccmuons
-     edm::Handle<MuonCollection> MuonHandle;
-    //  iEvent.getByLabel("GLBMuons", MuonHandle);
-     iEvent.getByLabel("muons", MuonHandle);
+    edm::Handle<MuonCollection> MuonHandle;
+    iEvent.getByLabel("muons", MuonHandle);
     if ( !MuonHandle.isValid() ) {
       std::cout << "No Muon results for InputTag " << std::endl;
       return false;
@@ -213,13 +177,12 @@ bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent){
    
     int maxSize = MuonHandle->size();
     
-      if(MuonHandle->size() > 2){
+    if(MuonHandle->size() > 2){
       muoninfo_.HasOverFlow = 1;
       maxSize = 2;
       muoninfo_.nMuon = 2;
     }
     else muoninfo_.nMuon = MuonHandle->size();
-
 
       int good_muons = 0;
 
@@ -230,7 +193,6 @@ bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent){
       timeAtIpInOut.clear();
       corrTimeAtIpInOut.clear();
       errorTime.clear();
-
    
       for(MuonCollection::const_iterator it = MuonHandle->begin(), itEnd = MuonHandle->end(); it!=itEnd;++it){
      
@@ -239,29 +201,21 @@ bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent){
       if(!it->globalTrack())muoninfo_.HasGlobalTrack[count] = 0;
       else muoninfo_.HasGlobalTrack[count] = 1;
    
-
       muoninfo_.IsGlobalMuon[count] = (float)it->isGlobalMuon();
-     
       muoninfo_.IsStandAloneMuon[count] = (float)it->isStandAloneMuon();
-     
       muoninfo_.IsTrackerMuon[count] = (float)it->isTrackerMuon();
-    
       muoninfo_.IsTimeValid[count] = (float) it->isTimeValid();
 
       if(it->isTimeValid() == true){
 	muoninfo_.timeAtIpInOut[count] = it->time().timeAtIpInOut;
 	muoninfo_.corrTimeAtIpInOut[count] = correctedTime(*it);
 	muoninfo_.errorTime[count] = it->time().timeAtIpInOutErr;
-
       }
       else {
 	muoninfo_.timeAtIpInOut[count] = -9999;
 	muoninfo_.corrTimeAtIpInOut[count] = -9999;
 	muoninfo_.errorTime[count] = -9999;
-
-
       }
-
 
       if( it->isTimeValid() == true && it->time().timeAtIpInOutErr < 15){//only take muons with error < max_timeError
 	//LogInfo("MuonTOFFilter_trackQuality") << " muon time " <<  it->time().timeAtIpInOut << "corrected Time " << correctedTime(*it) << std::endl;
@@ -272,7 +226,6 @@ bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent){
 	  good_muons++;
       }
    
-
       if(!it->globalTrack() == false){
 	muoninfo_.trackpt[count] = it->globalTrack()->pt();
 	muoninfo_.tracketa[count] = it->globalTrack()->eta();
@@ -299,7 +252,6 @@ bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent){
 	}//end loop over muon hits
 	muoninfo_.HasPixelHit[count] = (float)isMuonPixelHit;
 
-      
       }//end asking if time valid and has global track
       else{
 	muoninfo_.HasPixelHit[count] = false;
@@ -309,11 +261,8 @@ bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent){
       count++;
     } //end looping over muons
 
-     
-
       muoninfo_.mean_Time = 0;
-      
-      float sumweight;
+      float sumweight = 0;
     
       if(good_muons <= 2 && good_muons > 0){//only calc. time for events with right number of good muons
 
@@ -335,36 +284,30 @@ bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent){
 // Functions that get called by framework every event
 void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-  //cout << " analyze " << endl;
   LogDebug("MuonTOFFilter_trackQuality") << " analyze " << std::endl;
-  // std::cout << " here " << endl;
   int TrackNumber = 0;
   dummyhist->Fill(0.5);
   maxsize_AllPixInfoStruct_ = 200;
   maxsize_AllClustInfoStruct_ = 100;
-  
  
-  for(int i = 0; i < maxsize_AllPixInfoStruct_; i++){
+  for(int i = 0; i < (int)maxsize_AllPixInfoStruct_; i++) {
     allpixinfo_.allpix_row[i] = -999;
     allpixinfo_.allpix_col[i] = -999;
     allpixinfo_.allpix_adc[i] = -999;
   }
 
-	init();
+  init();
 
   trackonly_.init();
+  // run the muon association for cosmics... the content is used by the fillTrackOnly method too.
+  if(isCosmic == true) isValidMuonAssoc(iEvent);
 
-  // always run the muon association... the content is used by the fillTrackOnly method too.
-  isValidMuonAssoc(iEvent);
-
+  //--- Get the trajectory-track association collection
   edm::Handle<TrajTrackAssociationCollection> trajTrackCollectionHandle;
-  //edm::Handle<std::vector<Trajectory> > trajCollectionHandle;
   iEvent.getByLabel(conf_.getParameter<std::string>("trajectoryInput"),trajTrackCollectionHandle);
-
   TrajectoryStateCombiner tsoscomb;
   int NbrTracks =  trajTrackCollectionHandle->size();
-  // std::cout << " track measurements " << trajTrackCollectionHandle->size()  << std::endl;
-
+  //std::cout << " track measurements " << trajTrackCollectionHandle->size()  << std::endl;
 
   for(TrajTrackAssociationCollection::const_iterator it = trajTrackCollectionHandle->begin(), itEnd = trajTrackCollectionHandle->end(); it!=itEnd;++it){
 
@@ -373,13 +316,9 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
     int stripHits = 0;
     const Track&      track = *it->val;
     const Trajectory& traj  = *it->key;
-    
-  
-
     std::vector<TrajectoryMeasurement> checkColl = traj.measurements();
     for(std::vector<TrajectoryMeasurement>::const_iterator checkTraj = checkColl.begin(), checkTrajEnd = checkColl.end();
 	checkTraj != checkTrajEnd; ++checkTraj) {
-
       if(! checkTraj->updatedState().isValid()) continue;
       TransientTrackingRecHit::ConstRecHitPointer testhit = checkTraj->recHit();
       if(! testhit->isValid() || testhit->geographicalId().det() != DetId::Tracker ) continue;
@@ -387,8 +326,8 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
       if(testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap) pixelHits++;
       else if (testSubDetID == StripSubdetector::TIB || testSubDetID == StripSubdetector::TOB ||
 	       testSubDetID == StripSubdetector::TID || testSubDetID == StripSubdetector::TEC) stripHits++;
-
     }
+
     fillTrackOnly(iEvent,iSetup, pixelHits, stripHits, TrackNumber, track);
     //++++++++++
     tt_->Fill();
@@ -417,39 +356,29 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 	  continue;
 	
 	align::LocalVector res = tsos.localPosition() - hit->localPosition();
-
 	LocalError err1 = tsos.localError().positionError();
 	LocalError err2 = hit->localPositionError();
-	
 	float errX = std::sqrt( err1.xx() + err2.xx() );
 	float errY = std::sqrt( err1.yy() + err2.yy() );
 	
-	//std::cout << "Residual x/y " << res.x() << '/' << res.y() 
-	// << ", Error x/y " << errX << '/' << errY;		
-
 	// begin partly copied from Tifanalyser 
 
 	const GeomDetUnit* detUnit = hit->detUnit();
 	double dPhi = -999, dR = -999, dZ = -999, phiorientation = -999;
-	//double R = 0.; // currently unused
-	//double origintointersect = 0.; // currently unused
 
 	if(detUnit) {
 	  const Surface& surface = hit->detUnit()->surface();
 	  LocalPoint lPModule(0.,0.,0.), lPhiDirection(1.,0.,0.), lROrZDirection(0.,1.,0.);
-	  GlobalPoint gPModule       = surface.toGlobal(lPModule),
-	    gPhiDirection  = surface.toGlobal(lPhiDirection),
-	    gROrZDirection = surface.toGlobal(lROrZDirection);
+	  GlobalPoint gPModule = surface.toGlobal(lPModule),
+	              gPhiDirection  = surface.toGlobal(lPhiDirection),
+	              gROrZDirection = surface.toGlobal(lROrZDirection);
 	  phiorientation = deltaPhi(gPhiDirection.phi(),gPModule.phi()) >= 0 ? +1. : -1.;
-
 	  dPhi = tsos.globalPosition().phi() - hit->globalPosition().phi();
 	  
 	  if(IntSubDetID == PixelSubdetector::PixelBarrel || IntSubDetID == PixelSubdetector::PixelEndcap) {
 
             const TrackerGeometry& theTracker(*tkGeom_);
-
 	    const PixelGeomDetUnit* theGeomDet = dynamic_cast<const PixelGeomDetUnit*> (theTracker.idToDet(hit_detId) );
-
             const RectangularPixelTopology * topol = dynamic_cast<const RectangularPixelTopology*>(&(theGeomDet->specificTopology()));
 
             // get the enclosed persistent hit
@@ -481,10 +410,47 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 		else if(dZ != -999) rechit_.residualY = res.y() * (dZ >=0.? +1 : -1) ;
 		else rechit_.residualY = res.y();
 
-		isValidMuonAssoc(iEvent);
+		if(isCosmic == true) isValidMuonAssoc(iEvent);
 
 		isOffTrackHits(iEvent,*clust, iSetup,topol,theGeomDet->geographicalId().rawId(),tsos);
 
+                // fill simulated hits if applicable
+                if(isSim == true) {
+                  edm::Handle<edm::SimTrackContainer> simtracks;
+                  iEvent.getByLabel("g4SimHits", simtracks);
+                  TrackerHitAssociator* associate = new TrackerHitAssociator(iEvent);
+                  std::vector<PSimHit> matched;
+                  matched.clear();
+                  matched = associate->associateHit(*persistentHit);
+                  LocalPoint lp = topol->localPosition(MeasurementPoint(clust->x(),clust->y()));
+                  float rechitx = lp.x();
+                  float rechity = lp.y();
+
+                  if ( !matched.empty() ) {
+	            bool found_hit_from_generated_particle = false;
+
+	            //---Loop over sim hits found on DetUnit, use closest to RecHit
+	            float closest_dist = 99999.9;
+	            std::vector<PSimHit>::const_iterator closest_simhit = matched.begin();
+	            for (std::vector<PSimHit>::const_iterator m = matched.begin(); m < matched.end(); m++) {
+ 
+		      float simhitx = 0.5 * ( (*m).entryPoint().x() + (*m).exitPoint().x() );
+		      float simhity = 0.5 * ( (*m).entryPoint().y() + (*m).exitPoint().y() );
+		      float x_res = simhitx - rechitx;
+		      float y_res = simhity - rechity;
+		      float dist = sqrt( x_res*x_res + y_res*y_res);
+	
+		      if ( dist < closest_dist ) {
+		        closest_dist = dist;
+		        closest_simhit = m;
+		        found_hit_from_generated_particle = true;
+		      } 
+		    } // end sim hit loop over candidates
+
+                    fillSim( closest_simhit, IntSubDetID, theGeomDet, topol, *(simtracks.product()) );
+
+                  } //end if ( !matched.empty() )
+                } // end if(isSim == true)
 
                 // get the contents
                 fillEvt(iEvent,NbrTracks);
@@ -492,8 +458,7 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 		fillVertex(theGeomDet);
                 fillClust(*clust, topol, theGeomDet, tsos);
                 fillPix(*clust, topol, theGeomDet);
-                fillTrack( tsos, traj, TrackNumber);
-                //fillRecHit(pixeliter, topol, theGeomDet);
+                fillTrack(tsos, traj, TrackNumber);
 
       	        //++++++++++
 	        t_->Fill();
@@ -502,31 +467,22 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
               } // end if(cluster is valid)
             } // end if(hit is pixel hit)
 
-	  } else if (IntSubDetID == StripSubdetector::TIB || IntSubDetID == StripSubdetector::TOB ||
-		     IntSubDetID == StripSubdetector::TID || IntSubDetID == StripSubdetector::TEC) {
-
-	    //fillTrackerHits(iEvent,hit);
-	    //++++++++++
-	    //ts_->Fill();
-	    //++++++++++
-
 	  } else {
 	    //std::cout << "@SUB=PixelNtuplizer_RealData::fillHitQuantities" 
-	    //  << "No valid tracker subdetector " << IntSubDetID;
-	    rechit_.resXprime = -999;
-	  }  // if-else to differentiate pixel hits vs tracker hits	  
+	    //  << "No valid pixel subdetector " << IntSubDetID;
+	  }  // if-else to differentiate pixel hits vs other hits	  
 	}  // end if(good detUnit)
       }  // end else (if-else to screen out invalid hits)
     }  // end loop over trajectory measurements (rec hits) 
   }  // end loop over trajectories
- }  // end analyze function
+}  // end analyze function
 
 
 bool PixelNtuplizer_RealData::isOffTrackHits(const edm::Event& iEvent,const SiPixelCluster& clust, const edm::EventSetup & iSetup,const RectangularPixelTopology* topol, uint32_t geoId, TrajectoryStateOnSurface& tsos ){
   
   edm::ESHandle<TrackerGeometry> pDD;
   iSetup.get<TrackerDigiGeometryRecord> ().get (pDD);
-  const TrackerGeometry* tracker = &(* pDD);
+  //const TrackerGeometry* tracker = &(* pDD); currently unused
 
   allpixinfo_.allpix_hasOverFlow = 0;
   allclustinfo_.allclust_hasOverFlow = 0;
@@ -555,135 +511,104 @@ bool PixelNtuplizer_RealData::isOffTrackHits(const edm::Event& iEvent,const SiPi
 
 
  //-----Iterate over detunits
-			  //cout << endl << "Start search for det unit..." << endl;
-			  bool found_det_unit = false;
-			  for (TrackerGeometry::DetContainer::const_iterator it = pDD->dets().begin(); it != pDD->dets().end(); it++) 
-			    {
-			      DetId detId = ( (*it)->geographicalId() );
-			      if ( (int)detId.subdetId() != (int)PixelSubdetector::PixelBarrel && 
-				   (int)detId.subdetId() != (int)PixelSubdetector::PixelEndcap )
-				{
-				  // cout << "Not a pixel detector. Skip it." << endl;
-				  continue;
-				}
-			      
-			      if ( detId.rawId() != geoId )
-				continue;
-			      else if ( detId.rawId() == geoId ) 
-				{
-				  // cout << "Found the det unit for this RecHit = " << (int)detId.rawId() << endl;
-				  found_det_unit = true;
+ //cout << endl << "Start search for det unit..." << endl;
+ bool found_det_unit = false;
+ for (TrackerGeometry::DetContainer::const_iterator it = pDD->dets().begin(); it != pDD->dets().end(); it++) 
+ {
+   DetId detId = ( (*it)->geographicalId() );
+   if ( (int)detId.subdetId() != (int)PixelSubdetector::PixelBarrel && 
+   (int)detId.subdetId() != (int)PixelSubdetector::PixelEndcap )
+   {
+     // cout << "Not a pixel detector. Skip it." << endl;
+     continue;
+   }
+		      
+   if ( detId.rawId() != geoId ) continue;
+   else if ( detId.rawId() == geoId ) {
+     // cout << "Found the det unit for this RecHit = " << (int)detId.rawId() << endl;
+     found_det_unit = true;
 
-				  edm::Handle<SiPixelRecHitCollection> recHitColl;
-				  iEvent.getByLabel( "siPixelRecHits", recHitColl );
-				  
-				  SiPixelRecHitCollection::const_iterator dsmatch = recHitColl->find(detId);
-				  if (dsmatch == recHitColl->end()) continue;
-			          SiPixelRecHitCollection::DetSet pixelrechitRange = *dsmatch;
-			          SiPixelRecHitCollection::DetSet::const_iterator pixelrechitRangeIteratorBegin = pixelrechitRange.begin();
-				  SiPixelRecHitCollection::DetSet::const_iterator pixelrechitRangeIteratorEnd = pixelrechitRange.end();
-				  SiPixelRecHitCollection::DetSet::const_iterator pixeliter = pixelrechitRangeIteratorBegin;
+     edm::Handle<SiPixelRecHitCollection> recHitColl;
+     iEvent.getByLabel( "siPixelRecHits", recHitColl );
+			  
+     SiPixelRecHitCollection::const_iterator dsmatch = recHitColl->find(detId);
+     if (dsmatch == recHitColl->end()) continue;
+     SiPixelRecHitCollection::DetSet pixelrechitRange = *dsmatch;
+     SiPixelRecHitCollection::DetSet::const_iterator pixelrechitRangeIteratorBegin = pixelrechitRange.begin();
+     SiPixelRecHitCollection::DetSet::const_iterator pixelrechitRangeIteratorEnd = pixelrechitRange.end();
+     SiPixelRecHitCollection::DetSet::const_iterator pixeliter = pixelrechitRangeIteratorBegin;
 
-				  int n_clust = 0;
-				   int pixel_index = 0;
-				  for ( ; pixeliter != pixelrechitRangeIteratorEnd; ++pixeliter) 
-				    {
-				      ++n_clust;
+     int n_clust = 0;
+     int pixel_index = 0;
+     for ( ; pixeliter != pixelrechitRangeIteratorEnd; ++pixeliter) {
+       ++n_clust;
 				      
-				      if ( (int)n_clust <= (int)maxsize_AllClustInfoStruct_ )
-					{
-					  //	  cout << "row " << pixeliter->cluster()->x() << endl;
+       if ( (int)n_clust <= (int)maxsize_AllClustInfoStruct_ ) {
+         //	  cout << "row " << pixeliter->cluster()->x() << endl;
+         allclustinfo_.allclust_row[n_clust-1] = pixeliter->cluster()->x();
+         allclustinfo_.allclust_col[n_clust-1] = pixeliter->cluster()->y();
+					  
+         LocalPoint lp = topol->localPosition( MeasurementPoint(allclustinfo_.allclust_row[n_clust-1], 
+	 allclustinfo_.allclust_col[n_clust-1]) );
+					  
+         allclustinfo_.allclust_x[n_clust-1] = lp.x();          
+         allclustinfo_.allclust_y[n_clust-1] = lp.y();          
+         allclustinfo_.allclust_charge[n_clust-1] = pixeliter->cluster()->charge()/1000.0;     
+         allclustinfo_.allclust_nor_charge[n_clust-1] = pixeliter->cluster()->charge() * 
+         sqrt( 1.0 / ( 1.0/pow( tan(clust_alpha), 2 ) + 
+         1.0/pow( tan(clust_beta ), 2 ) + 1.0 ) );
+					  
+         allclustinfo_.allclust_size[n_clust-1] = (float)pixeliter->cluster()->size();       
+         allclustinfo_.allclust_size_x[n_clust-1] = (float)pixeliter->cluster()->sizeX();     
+         allclustinfo_.allclust_size_y[n_clust-1] = (float)pixeliter->cluster()->sizeY();     
+         allclustinfo_.allclust_maxPixelCol[n_clust-1] = (float)pixeliter->cluster()->maxPixelCol();
+         allclustinfo_.allclust_maxPixelRow[n_clust-1] = (float)pixeliter->cluster()->maxPixelRow();
+         allclustinfo_.allclust_minPixelCol[n_clust-1] = (float)pixeliter->cluster()->minPixelCol();
+         allclustinfo_.allclust_minPixelRow[n_clust-1] = (float)pixeliter->cluster()->minPixelRow();
+         allclustinfo_.allclust_geoId[n_clust-1] = (float)detId.rawId();      
+         allclustinfo_.allclust_edgeHitX[n_clust-1] = (float)(int)(topol->isItEdgePixelInX(clust.minPixelRow()) || 
+                                                      topol->isItEdgePixelInX(clust.maxPixelRow()));
+         allclustinfo_.allclust_edgeHitY[n_clust-1] = (float)(int)(topol->isItEdgePixelInY(clust.minPixelCol()) || 
+                                                      topol->isItEdgePixelInY(clust.maxPixelCol()));
+         allclustinfo_.allclust_dist[n_clust-1] = sqrt( (clust_x - allclustinfo_.allclust_x[n_clust-1])*
+						      (clust_x - allclustinfo_.allclust_x[n_clust-1]) +
+						      (clust_y - allclustinfo_.allclust_y[n_clust-1])*
+						      (clust_y - allclustinfo_.allclust_y[n_clust-1]) );
 
-					  allclustinfo_.allclust_row[n_clust-1] = pixeliter->cluster()->x();
-					  allclustinfo_.allclust_col[n_clust-1] = pixeliter->cluster()->y();
-					  
-					  LocalPoint lp = topol->localPosition( MeasurementPoint(allclustinfo_.allclust_row[n_clust-1], 
-												 allclustinfo_.allclust_col[n_clust-1]) );
-					  
-					  allclustinfo_.allclust_x[n_clust-1] = lp.x();          
-					  allclustinfo_.allclust_y[n_clust-1] = lp.y();          
-					  
-					  allclustinfo_.allclust_charge[n_clust-1] = pixeliter->cluster()->charge()/1000.0;     
-					  allclustinfo_.allclust_nor_charge[n_clust-1] = pixeliter->cluster()->charge() * 
-					    sqrt( 1.0 / ( 1.0/pow( tan(clust_alpha), 2 ) + 
-							  1.0/pow( tan(clust_beta ), 2 ) + 
-							  1.0 )
-						  );
-					  
-				          allclustinfo_.allclust_size[n_clust-1] = (float)pixeliter->cluster()->size();       
-				          allclustinfo_.allclust_size_x[n_clust-1] = (float)pixeliter->cluster()->sizeX();     
-					  allclustinfo_.allclust_size_y[n_clust-1] = (float)pixeliter->cluster()->sizeY();     
-					  allclustinfo_.allclust_maxPixelCol[n_clust-1] = (float)pixeliter->cluster()->maxPixelCol();
-					  allclustinfo_.allclust_maxPixelRow[n_clust-1] = (float)pixeliter->cluster()->maxPixelRow();
-					  allclustinfo_.allclust_minPixelCol[n_clust-1] = (float)pixeliter->cluster()->minPixelCol();
-					  allclustinfo_.allclust_minPixelRow[n_clust-1] = (float)pixeliter->cluster()->minPixelRow();
-					  allclustinfo_.allclust_geoId[n_clust-1] = (float)detId.rawId();      
-					  allclustinfo_.allclust_edgeHitX[n_clust-1] = (float)(int)(topol->isItEdgePixelInX(clust.minPixelRow()) || 
-											     topol->isItEdgePixelInX(clust.maxPixelRow()));
-					  allclustinfo_.allclust_edgeHitY[n_clust-1] = (float)(int)(topol->isItEdgePixelInY(clust.minPixelCol()) || 
-											     topol->isItEdgePixelInY(clust.maxPixelCol()));
-					  
-					  
-					 
-					  allclustinfo_.allclust_dist[n_clust-1] 
-					    = sqrt( (clust_x - allclustinfo_.allclust_x[n_clust-1])*
-						    (clust_x - allclustinfo_.allclust_x[n_clust-1]) +
-						    (clust_y - allclustinfo_.allclust_y[n_clust-1])*
-						    (clust_y - allclustinfo_.allclust_y[n_clust-1]) );
+         // std::cout << " distance " << allclustinfo_.allclust_dist[n_clust-1] << "clustx " << clust_x << " allclust dist " << allclustinfo_.allclust_x[n_clust-1] << std::endl;
 
-					  // std::cout << " distance " << allclustinfo_.allclust_dist[n_clust-1] << "clustx " << clust_x << " allclust dist " << allclustinfo_.allclust_x[n_clust-1] << std::endl;
-
-
-					    const std::vector<SiPixelCluster::Pixel>& pixvector = pixeliter->cluster()->pixels();
-					  
+         const std::vector<SiPixelCluster::Pixel>& pixvector = pixeliter->cluster()->pixels();
 					    
-					    if(useAllPixel == true){
-					      for (int i=0; i<(int)pixvector.size(); ++i )
-						{
-						  if ( (int)pixel_index < (int)maxsize_AllPixInfoStruct_ )
-						    {
-						      ++pixel_index;
-						      SiPixelCluster::Pixel holdpix = pixvector[i];
-						      allpixinfo_.allpix_row[pixel_index-1] = holdpix.x;
-						      allpixinfo_.allpix_col[pixel_index-1] = holdpix.y;
-						      allpixinfo_.allpix_adc[pixel_index-1] = holdpix.adc;
-						    }
-						  else
-						    allpixinfo_.allpix_hasOverFlow = 1;
-						  
-						}
-					    }
-					  
-					
-					  
-					
-					} // if ( n_clust <= maxsize_AllClustInfoStruct_ )
-				      else
-					allclustinfo_.allclust_hasOverFlow = 1;
-				      
-				    } 
+         if(useAllPixel == true){
+         for (int i=0; i<(int)pixvector.size(); ++i ) {
+           if ( (int)pixel_index < (int)maxsize_AllPixInfoStruct_ ) {
+	      ++pixel_index;
+	      SiPixelCluster::Pixel holdpix = pixvector[i];
+	      allpixinfo_.allpix_row[pixel_index-1] = holdpix.x;
+	      allpixinfo_.allpix_col[pixel_index-1] = holdpix.y;
+	      allpixinfo_.allpix_adc[pixel_index-1] = holdpix.adc;
+           } 
+           else allpixinfo_.allpix_hasOverFlow = 1;
+        }
+      }
+    } // if ( n_clust <= maxsize_AllClustInfoStruct_ )
+    else allclustinfo_.allclust_hasOverFlow = 1;
+  } 
 
-			
-
-				  //cout << "n_clust = " << n_clust << endl;
-				  clust_.n_neighbour_clust = n_clust;
-
-				  allclustinfo_.n_allclust = n_clust;
-				  if(useAllPixel == true)allpixinfo_.allpix_npix = pixel_index;
-
-				  break;
-				  
-				} 
-			      else cout << "Not good !!!" << endl;
-			      
-			    } 
+  //cout << "n_clust = " << n_clust << endl;
+  clust_.n_neighbour_clust = n_clust;
+  allclustinfo_.n_allclust = n_clust;
+  if(useAllPixel == true)allpixinfo_.allpix_npix = pixel_index;
+  break;
+  } 
+  else cout << "Not good !!!" << endl;
+} 
+		  			  
+// if ( !found_det_unit )cout << "Did not find the det unit of this RecHit !!!!!!!!!!!!!!!!!!!!!!!!!! " << endl;
 			  			  
-			  // if ( !found_det_unit )cout << "Did not find the det unit of this RecHit !!!!!!!!!!!!!!!!!!!!!!!!!! " << endl;
-
-			  return true;
+return true;
 
 }
-
 
 
 void PixelNtuplizer_RealData::fillTrackOnly(const edm::Event& iEvent, const edm::EventSetup& iSetup, int pixelHits, int stripHits, int TrackNumber, const Track& track)
@@ -711,25 +636,24 @@ void PixelNtuplizer_RealData::fillTrackOnly(const edm::Event& iEvent, const edm:
   trackonly_.vy = track.vy();
   trackonly_.vz = track.vz();
 
-  if(muoninfo_.errorTime[0]<0)
-    return;
-  trackonly_.muonT0=muoninfo_.timeAtIpInOut[0];
-  trackonly_.muondT0=muoninfo_.errorTime[0];
-  //  std::cout <<  trackonly_.muonT0 << " " << trackonly_.muondT0 << std::endl;
-  if(muoninfo_.errorTime[1]<0)
-    return;
-  if(muoninfo_.errorTime[1]<muoninfo_.errorTime[0]){ // time [1] more accurate than [0]
-    trackonly_.muonT0=muoninfo_.timeAtIpInOut[1];
-    trackonly_.muondT0=muoninfo_.errorTime[1];
+  if(isCosmic == true){
+    if(muoninfo_.errorTime[0]<0)
+      return;
+    trackonly_.muonT0=muoninfo_.timeAtIpInOut[0];
+    trackonly_.muondT0=muoninfo_.errorTime[0];
+    //  std::cout <<  trackonly_.muonT0 << " " << trackonly_.muondT0 << std::endl;
+    if(muoninfo_.errorTime[1]<0)
+      return;
+    if(muoninfo_.errorTime[1]<muoninfo_.errorTime[0]){ // time [1] more accurate than [0]
+      trackonly_.muonT0=muoninfo_.timeAtIpInOut[1];
+      trackonly_.muondT0=muoninfo_.errorTime[1];
+    }
   }
-  
-  // if more than one muon: take best one
- 
-  
-  
+
   //  std::cout<< "* "  <<  trackonly_.muonT0 << " " << trackonly_.muondT0 << std::endl;
   return;
 }
+
 
 void PixelNtuplizer_RealData::fillEvt(const edm::Event& iEvent,int NbrTracks)
 {
@@ -737,6 +661,7 @@ void PixelNtuplizer_RealData::fillEvt(const edm::Event& iEvent,int NbrTracks)
   evt_.evtnum = iEvent.id().event();
   evt_.nbrTracks = NbrTracks;
 }
+
 
 void PixelNtuplizer_RealData::fillDet(const DetId &tofill, uint subdetid, const PixelGeomDetUnit* PixGeom)
 {
@@ -750,6 +675,8 @@ void PixelNtuplizer_RealData::fillDet(const DetId &tofill, uint subdetid, const 
     {
       det_.disk      =  PXFDetId::PXFDetId(tofill).disk();
       det_.blade     =  PXFDetId::PXFDetId(tofill).blade();
+      if( det_.blade < 19 ) det_.blade = 7-det_.blade;
+      else det_.blade = 31 - det_.blade;
       det_.panel     =  PXFDetId::PXFDetId(tofill).panel();
       det_.plaquette =  PXFDetId::PXFDetId(tofill).module();
       
@@ -760,13 +687,21 @@ void PixelNtuplizer_RealData::fillDet(const DetId &tofill, uint subdetid, const 
   det_.thickness = PixGeom->specificSurface().bounds().thickness();
   det_.cols = PixGeom->specificTopology().ncolumns();
   det_.rows = PixGeom->specificTopology().nrows();
+  // Is flipped ?
+  float tmp1 = PixGeom->surface().toGlobal(Local3DPoint(0.,0.,0.)).perp();
+  float tmp2 = PixGeom->surface().toGlobal(Local3DPoint(0.,0.,1.)).perp();
+  if ( tmp2<tmp1 ) det_.isflipped = 1;
+  else det_.isflipped = 0;
+
 }
+
 
 void PixelNtuplizer_RealData::fillVertex(const PixelGeomDetUnit* PixGeom)
 {
   vertex_.z = PixGeom->surface().position().z();
   vertex_.r = PixGeom->surface().position().perp();
 }
+
 
 void PixelNtuplizer_RealData::fillClust(const SiPixelCluster& matchIt, const RectangularPixelTopology* topol, const PixelGeomDetUnit* PixGeom, TrajectoryStateOnSurface& tsos) 
 {//std::cout << " clustcharge "<< (matchIt.charge())/1000.0 << std::endl;
@@ -809,6 +744,7 @@ void PixelNtuplizer_RealData::fillClust(const SiPixelCluster& matchIt, const Rec
 
 }
 
+
 void PixelNtuplizer_RealData::fillPix(const SiPixelCluster & LocPix, const RectangularPixelTopology * topol, const PixelGeomDetUnit * PixGeom)
 {
   const std::vector<SiPixelCluster::Pixel>& pixvector = LocPix.pixels();
@@ -831,6 +767,7 @@ void PixelNtuplizer_RealData::fillPix(const SiPixelCluster & LocPix, const Recta
     }
 }
 
+
 void PixelNtuplizer_RealData::fillTrack(TrajectoryStateOnSurface& tsos,const Trajectory &traj, int TrackNumber) 
 {
   track_.pt = tsos.globalMomentum().perp();
@@ -851,6 +788,73 @@ void PixelNtuplizer_RealData::fillTrack(TrajectoryStateOnSurface& tsos,const Tra
 }
 
 
+void PixelNtuplizer_RealData::fillSim(std::vector<PSimHit>::const_iterator isim, unsigned int subid, const PixelGeomDetUnit * theGeomDet, 
+                                      const RectangularPixelTopology * topol, const edm::SimTrackContainer& trks) 
+{
+  sim_.entryPointLocalX = (*isim).entryPoint().x(); // width (row index, in col direction)
+  sim_.entryPointLocalY = (*isim).entryPoint().y(); // length (col index, in row direction) 
+  sim_.entryPointLocalZ = (*isim).entryPoint().z(); 
+  sim_.exitPointLocalX = (*isim).exitPoint().x();
+  sim_.exitPointLocalY = (*isim).exitPoint().y();
+  sim_.exitPointLocalZ = (*isim).exitPoint().z();
+  GlobalPoint GP1 = theGeomDet->surface().toGlobal(Local3DPoint((*isim).entryPoint().x(),(*isim).entryPoint().y(),(*isim).entryPoint().z()));
+  GlobalPoint GP2 = theGeomDet->surface().toGlobal(Local3DPoint((*isim).exitPoint().x(),(*isim).exitPoint().y(),(*isim).exitPoint().z()));
+  sim_.entryPointGlobalX = GP1.x();
+  sim_.exitPointGlobalX = GP2.x();
+  sim_.entryPointGlobalY = GP1.y();
+  sim_.exitPointGlobalY = GP2.y();
+  sim_.entryPointGlobalZ = GP1.z();
+  sim_.exitPointGlobalZ = GP2.z();
+  
+  MeasurementPoint mp1 = topol->measurementPosition(LocalPoint((*isim).entryPoint().x(),(*isim).entryPoint().y(),(*isim).entryPoint().z()));
+  MeasurementPoint mp2 = topol->measurementPosition(LocalPoint((*isim).exitPoint().x(),(*isim).exitPoint().y(), (*isim).exitPoint().z()));
+  sim_.entryPointRow = mp1.x();
+  sim_.entryPointColumn = mp1.y();
+  sim_.exitPointRow = mp2.x();
+  sim_.exitPointColumn = mp2.y();
+  
+  float sim_xpos = 0.5*(sim_.entryPointLocalX+sim_.exitPointLocalX);
+  float sim_ypos = 0.5*(sim_.entryPointLocalY+sim_.exitPointLocalY);         
+  sim_.localX = sim_xpos;
+  sim_.localY = sim_ypos;
+  sim_.eloss = (*isim).energyLoss();
+  sim_.localPhi   = (*isim).phiAtEntry();
+  sim_.localTheta = (*isim).thetaAtEntry();
+  sim_.particleID = (*isim).particleType();
+  sim_.trackID = (*isim).trackId();
+  
+  //--- Fill alpha and beta -- more useful for exploring the residuals...
+  float localPx = (*isim).momentumAtEntry().x();
+  float localPy = (*isim).momentumAtEntry().y();
+  float localPz = (*isim).momentumAtEntry().z();
+  sim_.beta  = atan2(localPz, localPy);
+  sim_.alpha = atan2(localPz, localPx);
+  sim_.processID = (int)isim->processType();
+
+  SimTrackContainer::const_iterator trksiter;
+  for (trksiter = trks.begin(); trksiter != trks.end(); trksiter++) 
+    {
+/*      if ( trksiter->trackId() == (sim_.TID - 1) ) 
+	{
+	  sim_.trk_eta = trksiter->momentum().eta();
+	  sim_.trk_phi = trksiter->momentum().phi();
+	} */
+      if ( trksiter->trackId() == sim_.trackID ) 
+	{
+          sim_.p = trksiter->momentum().mag();
+          sim_.px = trksiter->momentum().x();
+          sim_.py = trksiter->momentum().y();
+          sim_.pz = trksiter->momentum().z();
+	  sim_.globalEta = trksiter->momentum().eta();
+          sim_.globalPhi = trksiter->momentum().phi();
+          sim_.globalTheta = trksiter->momentum().theta();
+          sim_.charge = trksiter->charge();
+          sim_.vertexID = trksiter->vertIndex();
+	}
+    }
+}
+
+
 void PixelNtuplizer_RealData::init() 
 {
   evt_.init();
@@ -860,6 +864,7 @@ void PixelNtuplizer_RealData::init()
   pixinfo_.init();
   rechit_.init();
   track_.init();
+  sim_.init();
   muoninfo_.init();
   allclustinfo_.init();
   allpixinfo_.init();
@@ -889,6 +894,7 @@ void PixelNtuplizer_RealData::DetStruct::init()
   blade = dummy_int;
   panel = dummy_int;
   plaquette = dummy_int;
+  isflipped = dummy_int;
 }
 
 void PixelNtuplizer_RealData::VertexStruct::init()
@@ -903,7 +909,7 @@ void PixelNtuplizer_RealData::ClusterStruct::init()
 {
   float dummy_float = -9999.0;
   int dummy_int = -9999;
-  unsigned int dummy_uint = 9999;
+  uint32_t dummy_uint = 9999;
   
   row = dummy_float;
   col = dummy_float;
@@ -932,10 +938,6 @@ void PixelNtuplizer_RealData::PixInfoStruct::init()
   hasOverFlow = 0;
  
 } 
-
-
-
-
 
 void PixelNtuplizer_RealData::RecHitStruct::init()
 {
@@ -977,6 +979,38 @@ void PixelNtuplizer_RealData::TrackStruct::init()
   foundHits = dummy_int;
 }
 
+void PixelNtuplizer_RealData::SimStruct::init()
+{
+  float dummy_float = -9999.0;
+  int dummy_int = -9999;
+  uint32_t dummy_uint = 9999;
+  
+  localX = dummy_float;
+  localY = dummy_float;
+  eloss = dummy_float;
+  localPhi = dummy_float;
+  localTheta = dummy_float;
+  alpha = dummy_float;
+  beta = dummy_float;
+  charge = dummy_float;
+  entryPointLocalX = entryPointLocalY = entryPointLocalZ = dummy_float;
+  exitPointLocalX = exitPointLocalY = exitPointLocalZ = dummy_float;
+  entryPointRow = entryPointColumn = exitPointRow = exitPointColumn = dummy_float;
+  entryPointGlobalX = entryPointGlobalY = entryPointGlobalZ = dummy_float;
+  exitPointGlobalX = exitPointGlobalY = exitPointGlobalZ = dummy_float;
+  p = px = py = pz = dummy_float;
+  globalEta = dummy_float;
+  globalPhi = dummy_float;
+  globalTheta = dummy_float;
+  
+  particleID = dummy_int;
+  vertexID = dummy_int;
+  processID = dummy_int;
+  
+  trackID = dummy_uint;
+
+}
+
 void PixelNtuplizer_RealData::TrackOnlyStruct::init()
 {
   int dummy_int = -9999;
@@ -1011,15 +1045,17 @@ void PixelNtuplizer_RealData::TrackOnlyStruct::init()
 
 void PixelNtuplizer_RealData::readOffsets()
 {
+
   for(int i = 0; i < 6; i++){
     for(int j = 0; j < 16; j++){
-      spoints[i][j] =  -10000;
-      sbias[i][j] =  -10000;
-      srms[i][j] =  -10000;
+      spoints[i][j] =  -1000;
+      sbias[i][j]   =  -1000;
+      srms[i][j]    =  -1000;
     }
   }
 
   ifstream f1("muons_input-singleOffset.txt");
+
   while(!f1.eof())
   {
    int w0,s0;
@@ -1070,7 +1106,6 @@ float PixelNtuplizer_RealData::correctedTime(const  reco::Muon & aMuon)
  
  return time;
 }
-
 
 
 // define this as a plug-in
