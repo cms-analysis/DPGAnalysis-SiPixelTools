@@ -11,12 +11,14 @@ process.load("CondCore.DBCommon.CondDBCommon_cfi")
 process.load("CondCore.DBCommon.CondDBSetup_cfi")
 
 # conditions
+process.load('Configuration.StandardSequences.MixingNoPileUp_cff')
 process.load("Configuration.StandardSequences.MagneticField_38T_cff")
-process.load("Configuration.StandardSequences.Geometry_cff")
+#process.load("Configuration.StandardSequences.Geometry_cff")
+process.load('Configuration.StandardSequences.GeometryIdeal_cff')
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 #process.GlobalTag.connect = "frontier://FrontierProd/CMS_COND_21X_GLOBALTAG"
-process.GlobalTag.globaltag = "IDEAL_31X::All"
+process.GlobalTag.globaltag = "MC_31X_V5::All"
 process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource','GlobalTag')
 
 ##
@@ -75,6 +77,9 @@ process.MuonTOFFilter_trackQuality.max_chi2_ndof = 15
 ##
 
 process.load("DPGAnalysis.SiPixelTools.PixelNtuplizer_RealData_cfi")
+process.PixelNtuplizer_RealData.isCosmic = True
+process.PixelNtuplizer_RealData.isSim = True
+process.PixelNtuplizer_RealData.useAllPixel = False
 # also run 3 times:
 process.ctfNtuple = process.PixelNtuplizer_RealData.clone()
 process.ctfNtuple.trajectoryInput = 'ctfRefitter'
@@ -127,6 +132,8 @@ process.maxEvents = cms.untracked.PSet(
 ## executionpath
 ##
 process.p = cms.Path(
+    # mixing module (only for sim data)
+    process.mix*
     # filters:
 #    process.fedInRunFilter*
     # standard reco sequence

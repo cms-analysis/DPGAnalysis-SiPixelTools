@@ -77,7 +77,6 @@ process.load("DPGAnalysis.SiPixelTools.PixelNtuplizer_RealData_cfi")
 process.PixelNtuplizer_RealData.isCosmic = True
 process.PixelNtuplizer_RealData.isSim = False
 process.PixelNtuplizer_RealData.useAllPixel = False
-
 # also run 3 times:
 process.ctfNtuple = process.PixelNtuplizer_RealData.clone()
 process.ctfNtuple.trajectoryInput = 'ctfRefitter'
@@ -87,6 +86,9 @@ process.rsNtuple.trajectoryInput = 'rsRefitter'
 
 process.cosmtfNtuple = process.PixelNtuplizer_RealData.clone()
 process.cosmtfNtuple.trajectoryInput = 'cosmRefitter'
+
+#process.load("DPGAnalysis.SiPixelTools.PixelNtuplizer_RealData_cfi")
+#process.PixelNtuplizer_RealData.trajectoryInput = 'TrackRefitterP5'
 
 ##
 ## configure output ntuple file using TFileService
@@ -108,22 +110,8 @@ process.source = cms.Source("PoolSource",
     #interval = cms.uint32(1),
     fileNames = cms.untracked.vstring(
 
-        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0003/76160DD7-FE73-DE11-92B6-001A92810AE0.root',
-        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0003/6C615EAE-FE73-DE11-B169-001A92971B0E.root',
-        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0003/7EA856DA-FE73-DE11-AFD7-0018F3D0962A.root',
-        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0003/EE494DB9-FE73-DE11-A86F-0018F3D096BC.root',
-        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0003/28A5C5B0-FE73-DE11-A3FB-001A928116C0.root',
-        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0003/8A20AB9D-FE73-DE11-8E78-001BFCDBD154.root',
-        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0003/92575CDF-FE73-DE11-8FC6-001A92971B8E.root',
-        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0003/9CFEBBAB-FE73-DE11-9DFF-001A92971B8A.root',
-        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0003/081ACD90-FE73-DE11-A83C-0018F3D09688.root',
-        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0002/E4AEF4AC-FE73-DE11-BE61-001A92971B48.root',
-        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0002/9833D7D2-FE73-DE11-8FFF-0018F3D0970E.root',
-        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0002/CC35E3C2-FE73-DE11-964A-0018F3D096E0.root',
-        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0000/E44428C2-9873-DE11-AB53-003048679228.root',
-        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0002/30F0D9B7-FE73-DE11-B2A3-001A92971B04.root',
-        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0002/3E4F14C5-FE73-DE11-8314-001A92971B48.root',
-        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0002/904AA096-FE73-DE11-AE25-0018F3D09708.root'
+        '/store/skimming/Commissioning08/Cosmics/RAW-RECO/CRAFT0831X_V1_311_ReReco_FromSuperPointing_v1/0002/36D223D6-FE73-DE11-BF55-0018F3D09702.root'
+
 ) )
 
 # these drop commands are necessary to get rid of all HLT problems and DQM bulk
