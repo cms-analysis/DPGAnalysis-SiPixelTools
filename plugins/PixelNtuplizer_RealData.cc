@@ -665,23 +665,35 @@ void PixelNtuplizer_RealData::fillEvt(const edm::Event& iEvent,int NbrTracks)
 
 void PixelNtuplizer_RealData::fillDet(const DetId &tofill, uint subdetid, const PixelGeomDetUnit* PixGeom)
 {
-  if (subdetid==1) 
-    {
+  if (subdetid==1) {
       det_.layer  = PXBDetId::PXBDetId(tofill).layer();
       det_.ladder = PXBDetId::PXBDetId(tofill).ladder();
+    // convert to online ladder numbering convention 
+    if (det_.layer==1) {
+           if (det_.ladder<=5&&det_.ladder>=1)   det_.ladder = 6-det_.ladder;
+      else if (det_.ladder<=15&&det_.ladder>=6)  det_.ladder = 5-det_.ladder;
+      else if (det_.ladder<=20&&det_.ladder>=16) det_.ladder = 26-det_.ladder;
+    } else if (det_.layer==2) {
+           if (det_.ladder<=8&&det_.ladder>=1)   det_.ladder = 9-det_.ladder;
+      else if (det_.ladder<=24&&det_.ladder>=9)  det_.ladder = 8-det_.ladder;
+      else if (det_.ladder<=32&&det_.ladder>=25) det_.ladder = 41-det_.ladder;
+    } if (det_.layer==3) {
+           if (det_.ladder<=11&&det_.ladder>=1)  det_.ladder = 12-det_.ladder;
+      else if (det_.ladder<=33&&det_.ladder>=12) det_.ladder = 11-det_.ladder;
+      else if (det_.ladder<=44&&det_.ladder>=34) det_.ladder = 56-det_.ladder;
+    }
       det_.module = PXBDetId::PXBDetId(tofill).module();
-    } 
-  else
-    {
+  } 
+  else {
       det_.disk      =  PXFDetId::PXFDetId(tofill).disk();
       det_.blade     =  PXFDetId::PXFDetId(tofill).blade();
-      // convert to standard blade numbering convention
+      // convert to online blade numbering convention
            if(det_.blade<=6&&det_.blade>=1)   det_.blade = 7-det_.blade;
       else if(det_.blade<=18&&det_.blade>=7)  det_.blade = 6-det_.blade;
       else if(det_.blade<=24&&det_.blade>=19) det_.blade = 31-det_.blade;
       det_.panel     =  PXFDetId::PXFDetId(tofill).panel();
       det_.plaquette =  PXFDetId::PXFDetId(tofill).module();
-    }
+  }
 
   det_.thickness = PixGeom->specificSurface().bounds().thickness();
   det_.cols = PixGeom->specificTopology().ncolumns();
@@ -1046,8 +1058,8 @@ void PixelNtuplizer_RealData::TrackOnlyStruct::init()
 void PixelNtuplizer_RealData::readOffsets()
 {
 
-  for(int i = 0; i < 6; i++){
-    for(int j = 0; j < 16; j++){
+  for(int i = 0; i < 5; i++){
+    for(int j = 0; j < 15; j++){
       spoints[i][j] =  -1000;
       sbias[i][j]   =  -1000;
       srms[i][j]    =  -1000;
