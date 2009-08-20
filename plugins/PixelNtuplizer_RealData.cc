@@ -675,19 +675,19 @@ void PixelNtuplizer_RealData::fillDet(const DetId &tofill, uint subdetid, const 
     {
       det_.disk      =  PXFDetId::PXFDetId(tofill).disk();
       det_.blade     =  PXFDetId::PXFDetId(tofill).blade();
-      if( det_.blade < 19 ) det_.blade = 7-det_.blade;
-      else det_.blade = 31 - det_.blade;
+      // convert to standard blade numbering convention
+           if(det_.blade<=6&&det_.blade>=1)   det_.blade = 7-det_.blade;
+      else if(det_.blade<=18&&det_.blade>=7)  det_.blade = 6-det_.blade;
+      else if(det_.blade<=24&&det_.blade>=19) det_.blade = 31-det_.blade;
       det_.panel     =  PXFDetId::PXFDetId(tofill).panel();
       det_.plaquette =  PXFDetId::PXFDetId(tofill).module();
-      
-      //Following Danek's advice...
-      //      unsigned int side = PXFDetId::PXFDetId(tofill).side();
-      //      if (side==1) det_.disk = - det_.disk; 
     }
+
   det_.thickness = PixGeom->specificSurface().bounds().thickness();
   det_.cols = PixGeom->specificTopology().ncolumns();
   det_.rows = PixGeom->specificTopology().nrows();
-  // Is flipped ?
+
+  // Does the module have a flipped local Y axis?
   float tmp1 = PixGeom->surface().toGlobal(Local3DPoint(0.,0.,0.)).perp();
   float tmp2 = PixGeom->surface().toGlobal(Local3DPoint(0.,0.,1.)).perp();
   if ( tmp2<tmp1 ) det_.isflipped = 1;
