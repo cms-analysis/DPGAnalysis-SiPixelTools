@@ -17,7 +17,7 @@
 
   using namespace std;
   bool DEBUG=false;
-  int Nfiles=450;
+  int Nfiles=530;
   
   
 //************** Quick function to merge easilly histos **************
@@ -312,6 +312,10 @@ void merge(){
   TH1F* hitsPassingCutsMisBPixMerged = new TH1F("hitsPassingCutsMisBPixMerged","hitsPassingCutsMisBPixMerged",10,0,10);
   TH1F* hitsPassingCutsValFPixMerged = new TH1F("hitsPassingCutsValFPixMerged","hitsPassingCutsValFPixMerged",10,0,10);
   TH1F* hitsPassingCutsMisFPixMerged = new TH1F("hitsPassingCutsMisFPixMerged","hitsPassingCutsMisFPixMerged",10,0,10);
+
+  TH1F* numTracksVsMuonTimeMerged = new TH1F("numTracksVsMuonTimeMerged","numTracksVsMuonTimeMerged",80,-40,40);
+  TH1F* denTracksVsMuonTimeMerged = new TH1F("denTracksVsMuonTimeMerged","denTracksVsMuonTimeMerged",80,-40,40);
+  TH1F* effTracksVsMuonTimeMerged = new TH1F("effTracksVsMuonTimeMerged","effTracksVsMuonTimeMerged",80,-40,40);
 
   vector< vector<double> > tempTree;
   int id, isModuleBad, inactive, missing, valid, isBarrelModule, ladder, blade, moduleInLadder;
@@ -1184,7 +1188,7 @@ void merge(){
   for(int n=0;n<entries;n++){
     treeMerged->GetEntry(n);
     if (missing==0 && valid==0)
-    std::cout<<"dei, tiraghe via sto mona..."<< id <<std::endl;
+    //std::cout<<"dei, tiraghe via sto mona..."<< id <<std::endl;
     if (( valid+missing)!=0)
       {
       double setbin = (double)valid/(double)(valid+missing);
@@ -2069,6 +2073,10 @@ void merge(){
   xposClusterMisRecoveredMerged->Write();
   yposClusterMisRecoveredMerged->Write();
   
+  validVsMuontimePre68094Merged->Write();
+  validVsMuontimePost68094Merged->Write();
+  missingVsMuontimePre68094Merged->Write();
+  missingVsMuontimePost68094Merged->Write();
   
   validMuonTimeVSchargeBPixMerged->Write();
   missingMuonTimeVSchargeBPixMerged->Write();
