@@ -105,9 +105,14 @@ private:
   edm::ParameterSet listOfCuts_;
   
   bool skip0TRuns_;
+  bool keep0TRuns_;
+  bool keep38TRuns_;
   bool keepOnlyOneTrackEvts_;
   bool skipBadModules_;
-
+  
+  double peak_MuonCut_;
+  double window_MuonCut_;
+  double nSigma_EdgeCut_;
 
   TH1F*  histo;
   TH1F*  histLayer1;
@@ -279,6 +284,9 @@ private:
   TH1F* histoMethod2;
   TH1F* histoMethod2AfterFPix;
   TH1F* histoMethod2FPix;
+  
+  TH1F* numTracksVsMuonTime;
+  TH1F* denTracksVsMuonTime;
 
   //"maps" for module analysis: <rawModuleID, counterOn[inactive,missing,valid]>
   vector< vector<int> > badModuleMap;  
@@ -311,8 +319,13 @@ PixelEfficiency::PixelEfficiency(const edm::ParameterSet& iConfig) :
   trajectoryInput_( iConfig.getParameter<edm::InputTag>("trajectoryInput") ),
   pixelClusterInput_( iConfig.getParameter<edm::InputTag>("pixelClusterInput") ),
   skip0TRuns_( iConfig.getUntrackedParameter<bool>("skip0TRuns")),
+  keep0TRuns_( iConfig.getUntrackedParameter<bool>("keep0TRuns")),
+  keep38TRuns_( iConfig.getUntrackedParameter<bool>("keep38TRuns")),
   keepOnlyOneTrackEvts_( iConfig.getUntrackedParameter<bool>("keepOnlyOneTrackEvts")),
-  skipBadModules_( iConfig.getUntrackedParameter<bool>("skipBadModules"))
+  skipBadModules_( iConfig.getUntrackedParameter<bool>("skipBadModules")),
+  peak_MuonCut_( iConfig.getUntrackedParameter<double>("peak_MuonCut")),
+  window_MuonCut_( iConfig.getUntrackedParameter<double>("window_MuonCut")),
+  nSigma_EdgeCut_( iConfig.getUntrackedParameter<double>("nSigma_EdgeCut"))
 {   
  //now do what ever initialization is needed
  std::cout<<"debug constructor"<<std::endl;
@@ -346,7 +359,8 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   unsigned int runNumber=iEvent.id().run();
   
   //skip 0T runs for reprocessing errors
-  if ( skip0TRuns_ && (
+  //CRAFT08
+  /*if ( skip0TRuns_ && (
   runNumber==69557 || runNumber==69559|| runNumber==69564|| runNumber==69572|| runNumber==69573|| runNumber==69587|| runNumber==69594||
   runNumber==69728|| runNumber==69743|| runNumber==70147|| runNumber==70170|| runNumber==70195|| runNumber==70344 || runNumber==70347 ||
   runNumber==70410|| runNumber==70411||
@@ -356,8 +370,58 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
        (runNumber>=67264 && runNumber<=67432) ||
        (runNumber>=67676 && runNumber<=67777) ||
        (runNumber>=69536 && runNumber<=69671) ||
-       (runNumber>=70196 && runNumber<=99999)) ) return;
-
+       (runNumber>=70196 && runNumber<=99999)) ) return;*/
+  
+  //CRAFT 09 @ 0T     
+  if ( keep0TRuns_ && (
+  runNumber!=108483 && runNumber!=108498 && runNumber!=108521
+  && runNumber!=108526 && runNumber!=108562 && runNumber!=108597
+  && runNumber!=108624 && runNumber!=108645 && runNumber!=108662
+  && runNumber!=108666 && runNumber!=108669 && runNumber!=108671
+  && runNumber!=108681 && runNumber!=108686 && runNumber!=108706
+  && runNumber!=108852 && runNumber!=108856 && runNumber!=108859
+  && runNumber!=108866 && runNumber!=109654 && runNumber!=109673
+  && runNumber!=109703 && runNumber!=109705 && runNumber!=109706
+  && runNumber!=109712 && runNumber!=109718 && runNumber!=109721
+  && runNumber!=109747 && runNumber!=109784 && runNumber!=109807
+  && runNumber!=109815 && runNumber!=109817 && runNumber!=109822
+  && runNumber!=109826 && runNumber!=109829 && runNumber!=109839
+  && runNumber!=109844 && runNumber!=109861 && runNumber!=109887
+  && runNumber!=109897 && runNumber!=109902 && runNumber!=109910
+  && runNumber!=109911 && runNumber!=110217 && runNumber!=110219
+  && runNumber!=110232 && runNumber!=110286 && runNumber!=110290
+  && runNumber!=110308 && runNumber!=110315 && runNumber!=110323
+  && runNumber!=110341 ) ) return;
+   
+  //CRAFT 09 @ 3.8T     
+  if ( keep38TRuns_ && (
+  runNumber!=109032 && runNumber!=109035 && runNumber!=109037 && runNumber!=109039
+  && runNumber!=109043 && runNumber!=109046 && runNumber!=109049 && runNumber!=109134
+  && runNumber!=109142 && runNumber!=109143 && runNumber!=109144 && runNumber!=109146
+  && runNumber!=109457 && runNumber!=109459 && runNumber!=109468 && runNumber!=109470
+  && runNumber!=109472 && runNumber!=109474 && runNumber!=109490 && runNumber!=109504
+  && runNumber!=109508 && runNumber!=109519 && runNumber!=109524 && runNumber!=109562
+  && runNumber!=109573 && runNumber!=109575 && runNumber!=109578 && runNumber!=109584
+  && runNumber!=109586 && runNumber!=109603 && runNumber!=109606 && runNumber!=109624
+  && runNumber!=110388 && runNumber!=110394 && runNumber!=110395 && runNumber!=110397
+  && runNumber!=110407 && runNumber!=110409 && runNumber!=110419 && runNumber!=110428
+  && runNumber!=110431 && runNumber!=110437 && runNumber!=110440 && runNumber!=110452
+  && runNumber!=110476 && runNumber!=110485 && runNumber!=110496 && runNumber!=110508
+  && runNumber!=110520 && runNumber!=110535 && runNumber!=110546 && runNumber!=110683
+  && runNumber!=110686 && runNumber!=110689 && runNumber!=110690 && runNumber!=110692
+  && runNumber!=110697 && runNumber!=110699 && runNumber!=110703 && runNumber!=110708
+  && runNumber!=110722 && runNumber!=110751 && runNumber!=110756 && runNumber!=110784
+  && runNumber!=110832 && runNumber!=110835 && runNumber!=110842 && runNumber!=110846
+  && runNumber!=110878 && runNumber!=110894 && runNumber!=110900 && runNumber!=110916
+  && runNumber!=110921 && runNumber!=110924 && runNumber!=110958 && runNumber!=110972
+  && runNumber!=110987 && runNumber!=110998 && runNumber!=111009 && runNumber!=111017
+  && runNumber!=111023 && runNumber!=111045 && runNumber!=111047
+  
+  ) ) return;  
+       
+       
+       
+       
   badRun=false;
 
   if(DEBUG) std::cout<<"pre iSetup"<<std::endl;
@@ -396,7 +460,7 @@ try{
   const edmNew::DetSetVector<SiPixelCluster>& input = *theClusters;
 
   int NbrTracks =  trajTrackCollectionHandle->size();
-  if (NbrTracks!=1 && keepOnlyOneTrackEvts_) return;
+  if (NbrTracks!=1 && keepOnlyOneTrackEvts_) return;  
 
   checkoutTraj->Fill(NbrTracks);
   consistencyCheck->Fill(2,NbrTracks); //2 = each track //*************
@@ -410,20 +474,21 @@ try{
   int nmuon = 0;
   double time = -999;
   double timerr = 999;
-  for(MuonCollection::const_iterator itmuon = MuonHandle->begin(), itmuonEnd = MuonHandle->end(); itmuon!=itmuonEnd;++itmuon){
-   if(nmuon>1) break;
+  for(MuonCollection::const_iterator itmuon = MuonHandle->begin(), itmuonEnd = MuonHandle->end(); itmuon!=itmuonEnd;++itmuon){   
+    if(nmuon>1) break;
   
-   if(itmuon->isTimeValid() == false) continue;
+    if(itmuon->isTimeValid() == false) continue;
    
-   if(itmuon->time().timeAtIpInOutErr<timerr && itmuon->time().timeAtIpInOutErr<10){
-     time = itmuon->time().timeAtIpInOut;
-     timerr = itmuon->time().timeAtIpInOutErr;
-   }
+    if(itmuon->time().timeAtIpInOutErr<timerr && itmuon->time().timeAtIpInOutErr<10){
+      time = itmuon->time().timeAtIpInOut;
+      timerr = itmuon->time().timeAtIpInOutErr;
+      }
     nmuon++;
-  }
+    }
     
   double peak=-8;    //For CRAFT08
   //double peak=10;      //For MC
+  peak = peak_MuonCut_; //from config file
   for(double t=0;t<20;t+=0.5){
     hasGoodTiming=false;
     if(runNumber<68094 && time<peak+t && time>peak-t)
@@ -433,8 +498,10 @@ try{
     muonTimingMap[2.*t]=hasGoodTiming;
   }
 
+
   hasGoodTiming = false;
   double muonwindow = 5;
+  muonwindow = window_MuonCut_;
   if(runNumber<68094 && time<peak+muonwindow && time>peak-muonwindow)
      hasGoodTiming=true;
   if(runNumber>=68094 && time<peak+9+muonwindow && time>peak+9-muonwindow)
@@ -443,7 +510,7 @@ try{
   TrajectoryStateCombiner tsoscomb;
   for(TrajTrackAssociationCollection::const_iterator it = trajTrackCollectionHandle->begin(),
       itEnd = trajTrackCollectionHandle->end(); it!=itEnd;++it){
-
+     
     consistencyCheck->Fill(1); //1 = each track //*************
 
     const Trajectory& traj  = *it->key;
@@ -451,12 +518,27 @@ try{
     float chiSquare = traj.chiSquared();
     float chiSquareNdf;
     chiSquareNdf = traj.chiSquared()/traj.ndof();
+
+    std::vector<TrajectoryMeasurement> tmColl = traj.measurements();
+
+    //Freya Plot
+    if (track.d0()<9 && fabs(track.dz())<30 && track.pt()>10 && timerr<5){
+      denTracksVsMuonTime->Fill(time);
+      bool selectMe=false;
+      for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
+	itTraj != itTrajEnd; ++itTraj) {
+        TransientTrackingRecHit::ConstRecHitPointer testhit = itTraj->recHit();
+        uint testSubDetID = (testhit->geographicalId().subdetId());
+        if( (testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap) ){
+	  if ((*testhit).isValid()){ selectMe=true; break;}
+	  }
+	}
+      if (selectMe)  numTracksVsMuonTime->Fill(time);
+      }
     
     float missingInTrack=0.;
     float validInTrack=0.;
-    
-    std::vector<TrajectoryMeasurement> tmColl = traj.measurements();
-    
+       
     consistencyCheckTraj->Fill(0);//number of total trajectories
 
 //*************
@@ -609,18 +691,19 @@ try{
 	 //
 	 std::pair<float,float> pixel = theGeomDet->specificTopology().pixel(tsos.localPosition());
 
-	 //****sigma cut
-	 bool isNotInMiddle = false;          
+	 //****Edge cut
+	 bool isNotInMiddle = false; 
+	 double nsigma = nSigma_EdgeCut_;
 	 LocalPoint  exagerated;
 	 LocalError tsosErr = tsos.localError().positionError();	 
 	 if ( tsos.localPosition().x()>0 && tsos.localPosition().y()>0 )
-	   exagerated = LocalPoint(tsos.localPosition().x()+std::sqrt(tsosErr.xx()),tsos.localPosition().y()+std::sqrt(tsosErr.yy()) );
+	   exagerated = LocalPoint(tsos.localPosition().x()+nsigma*std::sqrt(tsosErr.xx()),tsos.localPosition().y()+nsigma*std::sqrt(tsosErr.yy()) );
 	 if ( tsos.localPosition().x()<0 && tsos.localPosition().y()>0)
-	   exagerated = LocalPoint(tsos.localPosition().x()-std::sqrt(tsosErr.xx()),tsos.localPosition().y()+std::sqrt(tsosErr.yy())  );
+	   exagerated = LocalPoint(tsos.localPosition().x()-nsigma*std::sqrt(tsosErr.xx()),tsos.localPosition().y()+nsigma*std::sqrt(tsosErr.yy())  );
 	 if ( tsos.localPosition().x()<0 && tsos.localPosition().y()<0)
-	   exagerated = LocalPoint(tsos.localPosition().x()-std::sqrt(tsosErr.xx()),tsos.localPosition().y()-std::sqrt(tsosErr.yy()) );
+	   exagerated = LocalPoint(tsos.localPosition().x()-nsigma*std::sqrt(tsosErr.xx()),tsos.localPosition().y()-nsigma*std::sqrt(tsosErr.yy()) );
 	 if ( tsos.localPosition().x()>0 && tsos.localPosition().y()<0)
-	   exagerated = LocalPoint(tsos.localPosition().x()+std::sqrt(tsosErr.xx()),tsos.localPosition().y()-std::sqrt(tsosErr.yy()) );
+	   exagerated = LocalPoint(tsos.localPosition().x()+nsigma*std::sqrt(tsosErr.xx()),tsos.localPosition().y()-nsigma*std::sqrt(tsosErr.yy()) );
 	 
 	 std::pair<float,float> pixelExagerated = theGeomDet->specificTopology().pixel(exagerated);
 	 
@@ -916,7 +999,8 @@ try{
   
   
         //do the efficiencyVSmuontime with the "official cuts" applied
-        if( isTelescopeGood && !isNotInMiddle ) {
+      //  if( (listOfCuts_.getParameter<bool>("telescope_cut") && isTelescopeGood)
+	// && (listOfCuts_.getParameter<bool>("edge_cut") && !isNotInMiddle) ) {
           if ((*testhit).getType()== TrackingRecHit::valid){
             if ( runNumber < 68094 ) validVsMuontimePre68094->Fill(time);
             else    validVsMuontimePost68094->Fill(time);
@@ -925,7 +1009,7 @@ try{
             if ( runNumber < 68094 ) missingVsMuontimePre68094->Fill(time);
             else    missingVsMuontimePost68094->Fill(time);
 	  }
-	}
+	//}
 	
 	
 	//do the eff VS muon time VS charge
@@ -1647,6 +1731,9 @@ PixelEfficiency::beginJob(const edm::EventSetup& iSetup)
  tunningMuonVal = new TH1F("tunningMuonVal","tunningMuonVal",40,0,40);
  tunningMuonMis = new TH1F("tunningMuonMis","tunningMuonMis",40,0,40);
 
+ numTracksVsMuonTime = new TH1F("numTracksVsMuonTime","numTracksVsMuonTime",80,-40,40);
+ denTracksVsMuonTime = new TH1F("denTracksVsMuonTime","denTracksVsMuonTime",80,-40,40);
+
  tree = new TTree("moduleAnalysis","moduleAnalysis");
  tree->Branch("id",&idTree,"id/I");
  tree->Branch("isModuleBad",&isModuleBadTree,"isModuleBad/I");
@@ -1844,6 +1931,9 @@ PixelEfficiency::endJob() {
   histoMethod2AfterFPix->Write();
   histoMethod2FPix->Write();  
   
+  numTracksVsMuonTime->Write();
+  denTracksVsMuonTime->Write();
+
     isModuleBadTree=1;
     for (unsigned int l=0; l<badModuleMap.size(); l++)
       {
