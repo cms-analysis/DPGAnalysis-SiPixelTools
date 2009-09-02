@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DIR=$1
+DIR=$1_`date '+%d%m20%y_%H%M'`
 storedir=`pwd`/${DIR}
 
 if [ ! -d ${DIR} ]; then 
@@ -10,6 +10,7 @@ else
 fi
 
 cp -f ../../plugins/PixelEfficiency.cc ${DIR}/PixelEfficiency-Sauv
+cp -f merge.C ${DIR}/merge.C
 
 #./pythonTemplateGenerator.csh 50 SMALLfilelistTrackerPointingReReco.txt
 #./pythonTemplateGenerator.csh 30 filelistTrackerPointingReReco.txt
@@ -37,7 +38,12 @@ cp -f ../../plugins/PixelEfficiency.cc ${DIR}/PixelEfficiency-Sauv
 #./pythonTemplateGenerator.csh 1 filelistRun108298.txt
 #./pythonTemplateGenerator.csh 1 filelistRun109468.txt
 #./pythonTemplateGenerator.csh 1 filelistSuPo31X_v1.txt
-./pythonTemplateGenerator.csh 1 filelistCRAFT09_SPv1.txt
+##./pythonTemplateGenerator.csh 1  fileListShortTest.txt
+#./pythonTemplateGenerator.csh 1 filelistCRAFT09_SPv1.txt
+#./pythonTemplateGenerator.csh 1 filelist_DelayScan_419-421-424.txt
+#./pythonTemplateGenerator.csh 1 filelist_DelayScan_717-864.txt
+#./pythonTemplateGenerator.csh 1 filelist_DelayScan_868-873.txt
+./pythonTemplateGenerator.csh 1 filelistCRAFT09_SPv4.txt
 
 let i=0
 
