@@ -449,45 +449,7 @@ void merge(){
     myFile->cd();
     
     if(DEBUG) cout<<"********* FILE OPENED, STARTING TO MERGE ************"<<endl;
-    
-    /*for (int bin=1; bin<=3; bin++){
-      TH1F *h1 = (TH1F*)gDirectory->Get( "histo" );
-      histoMerged->SetBinContent( bin, histoMerged->GetBinContent(bin) + h1->GetBinContent(bin));
-    
-      TH1F *h2 = (TH1F*)gDirectory->Get( "histLayer1" ); 
-      histLayer1Merged->SetBinContent( bin, histLayer1Merged->GetBinContent(bin) + h2->GetBinContent(bin));
-    
-      TH1F *h3 = (TH1F*)gDirectory->Get( "histLayer2" );
-      histLayer2Merged->SetBinContent( bin, histLayer2Merged->GetBinContent(bin) + h3->GetBinContent(bin));
-    
-      TH1F *h4 = (TH1F*)gDirectory->Get( "histLayer3" );
-      histLayer3Merged->SetBinContent( bin, histLayer3Merged->GetBinContent(bin) + h4->GetBinContent(bin));
-    
-      TH1F *h5 = (TH1F*)gDirectory->Get( "histEndcapPlus" );
-      histEndcapPlusMerged->SetBinContent( bin, histEndcapPlusMerged->GetBinContent(bin) + h5->GetBinContent(bin));
-    
-      TH1F *h6 = (TH1F*)gDirectory->Get( "histEndcapMinus" );
-      histEndcapMinusMerged->SetBinContent( bin, histEndcapMinusMerged->GetBinContent(bin) + h6->GetBinContent(bin));
-    
-      TH1F *h7 = (TH1F*)gDirectory->Get( "histBarrel" );
-      histBarrelMerged->SetBinContent( bin, histBarrelMerged->GetBinContent(bin) + h7->GetBinContent(bin));
-    
-      TH1F *h8 = (TH1F*)gDirectory->Get( "histEndcap" );
-      histEndcapMerged->SetBinContent( bin, histEndcapMerged->GetBinContent(bin) + h8->GetBinContent(bin));
-    
-      TH1F *h9 = (TH1F*)gDirectory->Get( "consistencyCheck" );
-      consistencyCheckMerged->SetBinContent( bin, consistencyCheckMerged->GetBinContent(bin) + h9->GetBinContent(bin));
-      delete h1;
-      delete h2;
-      delete h3;
-      delete h4;
-      delete h5;
-      delete h6;
-      delete h7;
-      delete h8;
-      delete h9;
-    }*/
-      
+          
     mergeHisto("histo",histoMerged);
     mergeHisto("histLayer1",histLayer1Merged);
     mergeHisto("histLayer2",histLayer2Merged);
@@ -516,28 +478,7 @@ void merge(){
     				  +missingPerSubdetectorMerged->GetBinContent(5));
     missingSummaryMerged->Fill(2.5,missingSummaryMerged->GetBinContent(1)
     				  +missingSummaryMerged->GetBinContent(2));
-  
-    
-    /*for (int bin=1; bin<=4; bin++)
-      {
-      TH1F *h10 = (TH1F*)gDirectory->Get( "histInvalidRecHitCollection" );
-      histInvalidRecHitCollectionMerged->SetBinContent( bin, histInvalidRecHitCollectionMerged->GetBinContent(bin) + h10->GetBinContent(bin));
-      delete h10;
-      }
-    for (int bin=1; bin<=5; bin++)
-      {
-      TH1F *h12 = (TH1F*)gDirectory->Get( "histInvalidRecHitWithBadmoduleList" );
-      histInvalidRecHitWithBadmoduleListMerged->SetBinContent( bin, histInvalidRecHitWithBadmoduleListMerged->GetBinContent(bin) + h12->GetBinContent(bin));
-      delete h12;
-      }      
-
-    for (int bin=1; bin<=3; bin++)
-      {
-      TH1F *h16 = (TH1F*)gDirectory->Get( "consistencyCheckTraj" );
-      consistencyCheckTrajMerged->SetBinContent( bin, consistencyCheckTrajMerged->GetBinContent(bin) + h16->GetBinContent(bin));
-      delete h16;
-      } */     
-    
+      
     mergeHisto("histInvalidRecHitWithBadmoduleList",histInvalidRecHitWithBadmoduleListMerged);
     mergeHisto("histInvalidRecHitCollection",histInvalidRecHitCollectionMerged);
     
@@ -644,9 +585,6 @@ void merge(){
       validVsLocalXMerged->SetBinContent( bin, validVsLocalXMerged->GetBinContent(bin) + validVsLocalX->GetBinContent(bin));
       validVsLocalYMerged->SetBinContent( bin, validVsLocalYMerged->GetBinContent(bin) + validVsLocalY->GetBinContent(bin));
     }
-    
-    
-    
     
     for (int bin=1; bin<=101; bin++)
       {
@@ -843,10 +781,14 @@ void merge(){
     for (int bin=1; bin<=yposClusterMisRecoveredMerged->GetNbinsX(); bin++)
       yposClusterMisRecoveredMerged->SetBinContent( bin, yposClusterMisRecovered->GetBinContent(bin) + yposClusterMisRecoveredMerged->GetBinContent(bin));
 
- 
 
     if(DEBUG) cout<<"********* NOW MERGING WINDOW SEARCH ************"<<endl;
-
+ 
+    mergeHisto("numTracksVsMuonTime",numTracksVsMuonTimeMerged);
+    mergeHisto("denTracksVsMuonTime",denTracksVsMuonTimeMerged);
+  
+ 
+    if(DEBUG) cout<<"********* NOW MERGING WINDOW SEARCH ************"<<endl;
 
     TH1F *windowSearch = (TH1F*)gDirectory->Get( "windowSearch" );
     for (int bin=1; bin<=windowSearchMerged->GetNbinsX()+1; bin++)
@@ -1036,8 +978,6 @@ void merge(){
   error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
   histEndCapEfficiencyComparison->SetBinError(3,error);
   histEndCapEfficiencyComparison->GetXaxis()->SetBinLabel(3,"Method 2 infinity");
-  
-  
   
 
   a=histLayer1Merged->GetBinContent(3); b=histLayer1Merged->GetBinContent(2);
@@ -1362,7 +1302,20 @@ void merge(){
     histEndCapEfficiencyComparison->SetBinError(4,error);
     histEndCapEfficiencyComparison->GetXaxis()->SetBinLabel(4,"Method 2 s-curve");
   
-  
+  //********* efficiency FreyaPlot
+  for (int i=1;i<denTracksVsMuonTimeMerged->GetNbinsX();i++){
+    double iNum=numTracksVsMuonTimeMerged->GetBinContent(i);
+    double iDen=denTracksVsMuonTimeMerged->GetBinContent(i);
+    if (iDen!=0.){
+      double iEff=iNum/iDen;
+      effTracksVsMuonTimeMerged->SetBinContent(i,iEff);
+      double iErr = sqrt(iEff*(1-iEff)/(iDen));
+      effTracksVsMuonTimeMerged->SetBinError(i,iErr);
+      }
+    }
+  effTracksVsMuonTimeMerged->GetXaxis()->SetTitle("muon arrival time from DT [ns]");
+  effTracksVsMuonTimeMerged->GetYaxis()->SetTitle("#epsilon finding pixel tracks");
+
     //****************** BEGIN OF 2D MAPS FOR MODULE ANALYSIS ****************
 
    //****************** Barrel Maps ****************
@@ -2405,6 +2358,16 @@ void merge(){
   histAlphaAnalysisBPixGraph->Write(); 
  
   histCotanAlphaAnalysis->Write();
+
+  numTracksVsMuonTimeMerged->Write();
+  denTracksVsMuonTimeMerged->Write();
+  effTracksVsMuonTimeMerged->Draw();
+  effTracksVsMuonTimeMerged->Write();
+  TLegend* smallLeg = new TLegend(0.6,0.8,0.8,0.99);
+  smallLeg->AddEntry(effTracksVsMuonTimeMerged,"CRAFT09 data","l");
+  smallLeg->SetFillColor(kWhite);
+  smallLeg->Draw("same");
+  c1->Print("trackEffVSmuonTime.png","png");
 
   c1->Clear();
   c1->cd();
