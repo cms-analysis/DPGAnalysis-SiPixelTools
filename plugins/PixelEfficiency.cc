@@ -62,17 +62,19 @@
 #include "TH2D.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "TMath.h"
 #include <vector>
 #include <map>
 
 using namespace std;
 using namespace edm;
 using namespace reco;
+using namespace TMath;
 
  const bool DEBUG = false;
 
- const int kBPIX = PixelSubdetector::PixelBarrel;
- const int kFPIX = PixelSubdetector::PixelEndcap;
+ const unsigned int kBPIX = PixelSubdetector::PixelBarrel;
+ const unsigned int kFPIX = PixelSubdetector::PixelEndcap;
 
  const int numOfBadRuns=16;
 
@@ -285,9 +287,25 @@ private:
   TH1F* histoMethod2AfterFPix;
   TH1F* histoMethod2FPix;
   
+  //track analysis, muonj time analysis
   TH1F* numTracksVsMuonTime;
   TH1F* denTracksVsMuonTime;
+  
+  TH1F* numTracksVsRunNumber;
+  TH1F* denTracksVsRunNumber;
+  TH1F* muonTimeVSRunNumber;
+  TH1F* nMuonTimeVSRunNumber;
+  TH1F* muonTimeErrorVSRunNumber;
+  TH1F* nMuonTimeErrorVSRunNumber;
+  TH1F* muonTimeErrorDistri;
+  TH1F* validVSMuonTimeError;
+  TH1F* missingVSMuonTimeError;
 
+  TH2F* muonTimeVsRunNumber2D;
+
+  TH2F* xy_standardDev;
+  TH2F* xy_standardDev_insideModule;
+  
   //"maps" for module analysis: <rawModuleID, counterOn[inactive,missing,valid]>
   vector< vector<int> > badModuleMap;  
   vector< vector<double> > goodModuleMap; //but interesting only in-active!!
@@ -415,7 +433,8 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   && runNumber!=110878 && runNumber!=110894 && runNumber!=110900 && runNumber!=110916
   && runNumber!=110921 && runNumber!=110924 && runNumber!=110958 && runNumber!=110972
   && runNumber!=110987 && runNumber!=110998 && runNumber!=111009 && runNumber!=111017
-  && runNumber!=111023 && runNumber!=111045 && runNumber!=111047
+  && runNumber!=111023 && runNumber!=111045 && runNumber!=111047 && runNumber!=111130
+  && runNumber!=111138
   
   ) ) return;  
        
@@ -479,21 +498,21 @@ try{
   
     if(itmuon->isTimeValid() == false) continue;
    
-    if(itmuon->time().timeAtIpInOutErr<timerr && itmuon->time().timeAtIpInOutErr<10){
+    if(itmuon->time().timeAtIpInOutErr<timerr){
       time = itmuon->time().timeAtIpInOut;
       timerr = itmuon->time().timeAtIpInOutErr;
-      }
-    nmuon++;
     }
+    nmuon++;
+  }
     
   double peak=-8;    //For CRAFT08
   //double peak=10;      //For MC
   peak = peak_MuonCut_; //from config file
   for(double t=0;t<20;t+=0.5){
     hasGoodTiming=false;
-    if(runNumber<68094 && time<peak+t && time>peak-t)
+    if(runNumber<68094 && time<peak+t && time>peak-t && timerr<10)
       hasGoodTiming=true;
-    if(runNumber>=68094 && time<peak+9+t && time>peak+9-t)
+    if(runNumber>=68094 && time<peak+9+t && time>peak+9-t && timerr<10)
       hasGoodTiming=true;
     muonTimingMap[2.*t]=hasGoodTiming;
   }
@@ -502,9 +521,9 @@ try{
   hasGoodTiming = false;
   double muonwindow = 5;
   muonwindow = window_MuonCut_;
-  if(runNumber<68094 && time<peak+muonwindow && time>peak-muonwindow)
+  if(runNumber<68094 && time<peak+muonwindow && time>peak-muonwindow && timerr<10)
      hasGoodTiming=true;
-  if(runNumber>=68094 && time<peak+9+muonwindow && time>peak+9-muonwindow)
+  if(runNumber>=68094 && time<peak+9+muonwindow && time>peak+9-muonwindow && timerr<10)
     hasGoodTiming=true;
    
   TrajectoryStateCombiner tsoscomb;
@@ -520,21 +539,6 @@ try{
     chiSquareNdf = traj.chiSquared()/traj.ndof();
 
     std::vector<TrajectoryMeasurement> tmColl = traj.measurements();
-
-    //Freya Plot
-    if (track.d0()<9 && fabs(track.dz())<30 && track.pt()>10 && timerr<5){
-      denTracksVsMuonTime->Fill(time);
-      bool selectMe=false;
-      for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
-	itTraj != itTrajEnd; ++itTraj) {
-        TransientTrackingRecHit::ConstRecHitPointer testhit = itTraj->recHit();
-        uint testSubDetID = (testhit->geographicalId().subdetId());
-        if( (testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap) ){
-	  if ((*testhit).isValid()){ selectMe=true; break;}
-	  }
-	}
-      if (selectMe)  numTracksVsMuonTime->Fill(time);
-      }
     
     float missingInTrack=0.;
     float validInTrack=0.;
@@ -548,82 +552,85 @@ try{
        sprintf (testLabel,"%d",runNumber) ;
        bool found=false;
        int setBin=190;
-       for (int binSearch=1; binSearch<=200; binSearch++)
-         {
+       for (int binSearch=1; binSearch<=200; binSearch++){
 	 if ( !strcmp(validPerRun->GetXaxis()->GetBinLabel(binSearch),"") ) {setBin=binSearch; break;}
-	 else
-	   {
+	 else {
 	   if ( !strcmp(testLabel,validPerRun->GetXaxis()->GetBinLabel(binSearch)) ) {found=true; break;}
-	   } 
-	 }
+	 } 
+       }
 	 
-       if (!found)
-         {
+       if (!found){
 	 validPerRun->GetXaxis()->SetBinLabel(setBin,testLabel);
 	 invalidPerRun->GetXaxis()->SetBinLabel(setBin,testLabel);
 	 inactivePerRun->GetXaxis()->SetBinLabel(setBin,testLabel);
-	 }
+	 numTracksVsRunNumber->GetXaxis()->SetBinLabel(setBin,testLabel);
+	 denTracksVsRunNumber->GetXaxis()->SetBinLabel(setBin,testLabel);
+	 muonTimeVSRunNumber->GetXaxis()->SetBinLabel(setBin,testLabel);
+	 nMuonTimeVSRunNumber->GetXaxis()->SetBinLabel(setBin,testLabel);
+	 muonTimeErrorVSRunNumber->GetXaxis()->SetBinLabel(setBin,testLabel);
+	 nMuonTimeErrorVSRunNumber->GetXaxis()->SetBinLabel(setBin,testLabel);
+
+       }
        
-       float numPixHit=0;
-       float numInactiveHit=0;
-       float numMissingHit=0;
-       
-       //*************
-       
-    //precheck to count the BPix/FPix number of trajectories
-    for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
-	itTraj != itTrajEnd; ++itTraj) {
-      if( itTraj->recHit()->geographicalId().det() == DetId::Tracker ){
-	consistencyCheckTraj->Fill(1);
-	break;
-      }
-    }
+    
+    bool isInTracker = false;
+    bool isInPixel   = false;
+    bool isInBarrel  = false;
+    bool isInEndCap  = false;
     
     for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
-	itTraj != itTrajEnd; ++itTraj) {
+      itTraj != itTrajEnd; ++itTraj) {
       TransientTrackingRecHit::ConstRecHitPointer testhit = itTraj->recHit();
       uint testSubDetID = (testhit->geographicalId().subdetId());
-      if( (testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap) ){
-	consistencyCheckTraj->Fill(2);
-	break;
-      }
+      if(testhit->geographicalId().det() == DetId::Tracker && (*testhit).isValid()) isInTracker=true;
+      if((testSubDetID == kBPIX || testSubDetID == kFPIX) && (*testhit).isValid())  isInPixel  =true;
+      if(testSubDetID == kBPIX && (*testhit).isValid())                             isInBarrel =true;
+      if(testSubDetID == kFPIX && (*testhit).isValid())                             isInEndCap =true;
     }
     
-    for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
-	itTraj != itTrajEnd; ++itTraj) {
-      TransientTrackingRecHit::ConstRecHitPointer testhit = itTraj->recHit();
-      uint testSubDetID = (testhit->geographicalId().subdetId());
-      if( testSubDetID == PixelSubdetector::PixelBarrel ){
-	consistencyCheckTraj->Fill(3);
-	break;
-      }
-    }
-    
-    for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
-	itTraj != itTrajEnd; ++itTraj) {
-      TransientTrackingRecHit::ConstRecHitPointer testhit = itTraj->recHit();
-      uint testSubDetID = (testhit->geographicalId().subdetId());
-      if( testSubDetID == PixelSubdetector::PixelEndcap ){
-	consistencyCheckTraj->Fill(4);
-	break;
-      }
-    }
+        
+    if(isInTracker) consistencyCheckTraj->Fill(1);
+    if(isInPixel) consistencyCheckTraj->Fill(2);
+    if(isInBarrel) consistencyCheckTraj->Fill(3);
+    if(isInEndCap) consistencyCheckTraj->Fill(4);  
       
-    if(track.d0()<9 && fabs(track.dz())<30/* && track.pt()>10 */&& track.chi2()<15){
-      trackingEfficiency->Fill(0);
-      
-      for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
-	itTraj != itTrajEnd; ++itTraj) {
-        TransientTrackingRecHit::ConstRecHitPointer testhit = itTraj->recHit();
-        uint testSubDetID = (testhit->geographicalId().subdetId());
-        if( (testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap) ){
-	  trackingEfficiency->Fill(1);
-	  break;
-        }
+     
+    //********  IN PIXEL VOLUME *********  
+    if(track.d0()<9 && fabs(track.dz())<30){
+    
+      //FREYA PLOT
+      if(track.pt()>10 && timerr<5 && TMath::Prob(track.chi2(),(int)track.ndof())<0.5){
+        denTracksVsMuonTime->Fill(time);
+	denTracksVsRunNumber->Fill(testLabel,1);
+        if(isInPixel){
+	  numTracksVsMuonTime->Fill(time);
+	  numTracksVsRunNumber->Fill(testLabel,1);
+	}
       }
+      
+      if(track.chi2()<15){
+        trackingEfficiency->Fill(0);
+        if(isInPixel) trackingEfficiency->Fill(1);
+      }
+      
     }
-         
-    int numofhit=0;      
+    
+    if(isInPixel){
+      muonTimeVSRunNumber->Fill(testLabel,time);
+      nMuonTimeVSRunNumber->Fill(testLabel,1);
+      muonTimeErrorVSRunNumber->Fill(testLabel,timerr);
+      nMuonTimeErrorVSRunNumber->Fill(testLabel,1);
+    
+      muonTimeErrorDistri->Fill(timerr);
+    }
+    
+    
+    float numPixHit=0;
+    float numInactiveHit=0;
+    float numMissingHit=0;
+    int numofhit=0;
+    
+    //***********  LOOP OVER HITS    
     for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
 	itTraj != itTrajEnd; ++itTraj) {
       numofhit++;
@@ -635,12 +642,15 @@ try{
       uint testSubDetID = (testhit->geographicalId().subdetId());
       int type = testSubDetID;
       if(! (testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap) ) continue;
-            
+      
+      numPixHit++;
+      
+      
       //check if belonging to badmodule list
       bool badModule=false;
       for(Parameters::iterator it = BadModuleList_.begin(); it != BadModuleList_.end(); ++it) {         
         if ( (testhit->geographicalId().rawId())==(it->getParameter<uint32_t>("detid")) ) {badModule=true; break;}
-	}
+      }
       if (badModule && skipBadModules_) continue;
             	
 		
@@ -675,7 +685,7 @@ try{
 
     	 bool hasHighPT = false;
 	 double PT = tsos.globalMomentum().perp();
-    	 if ( PT>10.) hasHighPT = true;
+    	 if ( PT>5.) hasHighPT = true;
 
 	 //****** compute the edge-cut **********
 
@@ -695,6 +705,9 @@ try{
 	 bool isNotInMiddle = false; 
 	 double nsigma = nSigma_EdgeCut_;
 	 LocalPoint  exagerated;
+	 LocalPoint  actual;  actual = LocalPoint( tsos.localPosition().x(),tsos.localPosition().y() );
+	 std::pair<float,float> pixelActual = theGeomDet->specificTopology().pixel(actual);
+
 	 LocalError tsosErr = tsos.localError().positionError();	 
 	 if ( tsos.localPosition().x()>0 && tsos.localPosition().y()>0 )
 	   exagerated = LocalPoint(tsos.localPosition().x()+nsigma*std::sqrt(tsosErr.xx()),tsos.localPosition().y()+nsigma*std::sqrt(tsosErr.yy()) );
@@ -704,8 +717,15 @@ try{
 	   exagerated = LocalPoint(tsos.localPosition().x()-nsigma*std::sqrt(tsosErr.xx()),tsos.localPosition().y()-nsigma*std::sqrt(tsosErr.yy()) );
 	 if ( tsos.localPosition().x()>0 && tsos.localPosition().y()<0)
 	   exagerated = LocalPoint(tsos.localPosition().x()+nsigma*std::sqrt(tsosErr.xx()),tsos.localPosition().y()-nsigma*std::sqrt(tsosErr.yy()) );
-	 
+	 	 
 	 std::pair<float,float> pixelExagerated = theGeomDet->specificTopology().pixel(exagerated);
+	 
+	     //** general geometric information: **
+	     xy_standardDev->Fill( std::sqrt(tsosErr.xx()),std::sqrt(tsosErr.xx()) );
+	     if (pixelActual.first<nrows  && pixelActual.first>0 &&
+	         pixelActual.second<ncols && pixelActual.second>0)
+		   xy_standardDev->Fill( std::sqrt(tsosErr.xx()),std::sqrt(tsosErr.xx()) );
+	     //**  **
 	 
 	 if( pixelExagerated.first>nrows  || pixelExagerated.first<0)
 	   isNotInMiddle = true;
@@ -873,7 +893,9 @@ try{
       }
       
       //********** Fill efficiency VS pT for all cuts but pTcut ************
-      if( isTelescopeGood || isNotInMiddle || hasGoodTiming ){
+      // do you want with or without cuts earlier...
+      //if( isTelescopeGood && isNotInMiddle && hasGoodTiming )
+      {
         if( (*testhit).isValid() )
 	  validVsPT->Fill(PT);
         if( (*testhit).getType()==TrackingRecHit::missing )
@@ -1028,6 +1050,10 @@ try{
 	  }
   	}
 	
+	if((*testhit).getType()==TrackingRecHit::valid)
+	  validVSMuonTimeError->Fill(timerr);
+	if((*testhit).getType()==TrackingRecHit::missing)
+	  missingVSMuonTimeError->Fill(timerr);
 	
   
   	//************************************ HERE IS THE CUT *****************************************************
@@ -1627,9 +1653,19 @@ PixelEfficiency::beginJob(const edm::EventSetup& iSetup)
  yposClusterMisRecovered = new TH1F("yposClusterMisRecovered","yposClusterMisRecovered",500,-10,10);
  
  
- validPerRun = new TH1F("validPerRun","validPerRun",200,0,200);
- invalidPerRun = new TH1F("invalidPerRun","invalidPerRun",200,0,200);
+ validPerRun    = new TH1F("validPerRun","validPerRun",200,0,200);
+ invalidPerRun  = new TH1F("invalidPerRun","invalidPerRun",200,0,200);
  inactivePerRun = new TH1F("inactivePerRun","inactivePerRun",200,0,200);
+ 
+ numTracksVsRunNumber      = new TH1F("numTracksVsRunNumber","numTracksVsRunNumber",200,0,200);
+ denTracksVsRunNumber      = new TH1F("denTracksVsRunNumber","denTracksVsRunNumber",200,0,200);
+ muonTimeVSRunNumber       = new TH1F("muonTimeVSRunNumber","muonTimeVSRunNumber",200,0,200);
+ nMuonTimeVSRunNumber      = new TH1F("nMuonTimeVSRunNumber","nMuonTimeVSRunNumber",200,0,200);
+ muonTimeErrorVSRunNumber  = new TH1F("muonTimeErrorVSRunNumber","muonTimeErrorVSRunNumber",200,0,200);
+ nMuonTimeErrorVSRunNumber = new TH1F("nMuonTimeErrorVSRunNumber","nMuonTimeErrorVSRunNumber",200,0,200);
+ muonTimeErrorDistri       = new TH1F("muonTimeErrorDistri","muonTimeErrorDistri",80,0,40);
+ validVSMuonTimeError      = new TH1F("validVSMuonTimeError","validVSMuonTimeError",80,0,40);
+ missingVSMuonTimeError    = new TH1F("missingVSMuonTimeError","missingVSMuonTimeError",80,0,40);
  
 //
  validVsAlpha = new TH1F("validVsAlpha","validVsAlpha",200,-3.5,3.5);
@@ -1733,6 +1769,9 @@ PixelEfficiency::beginJob(const edm::EventSetup& iSetup)
 
  numTracksVsMuonTime = new TH1F("numTracksVsMuonTime","numTracksVsMuonTime",80,-40,40);
  denTracksVsMuonTime = new TH1F("denTracksVsMuonTime","denTracksVsMuonTime",80,-40,40);
+ 
+ xy_standardDev = new TH2F("xy_standardDev","xy_standardDev",100,0,1.5,300,0,4);
+ xy_standardDev_insideModule = new TH2F("xy_standardDev_insideModule","xy_standardDev_insideModule",100,0,1.5,300,0,4);
 
  tree = new TTree("moduleAnalysis","moduleAnalysis");
  tree->Branch("id",&idTree,"id/I");
@@ -1893,6 +1932,24 @@ PixelEfficiency::endJob() {
   inactivePerRun->LabelsDeflate("X");
   inactivePerRun->Write();
   
+  
+  numTracksVsRunNumber->LabelsDeflate("X");
+  numTracksVsRunNumber->Write();
+  denTracksVsRunNumber->LabelsDeflate("X");
+  denTracksVsRunNumber->Write();
+  muonTimeVSRunNumber->LabelsDeflate("X");
+  muonTimeVSRunNumber->Write();
+  nMuonTimeVSRunNumber->LabelsDeflate("X");
+  nMuonTimeVSRunNumber->Write();
+  muonTimeErrorVSRunNumber->LabelsDeflate("X");
+  muonTimeErrorVSRunNumber->Write();
+  nMuonTimeErrorVSRunNumber->LabelsDeflate("X");
+  nMuonTimeErrorVSRunNumber->Write();
+  muonTimeErrorDistri->Write();
+  validVSMuonTimeError->Write();
+  missingVSMuonTimeError->Write();
+  
+  
   //
   checkoutValidityFlag->Write();
   checkoutTraj->Write();
@@ -1934,6 +1991,9 @@ PixelEfficiency::endJob() {
   numTracksVsMuonTime->Write();
   denTracksVsMuonTime->Write();
 
+  xy_standardDev->Write();
+  xy_standardDev_insideModule->Write();
+  
     isModuleBadTree=1;
     for (unsigned int l=0; l<badModuleMap.size(); l++)
       {
