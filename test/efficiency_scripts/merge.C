@@ -38,8 +38,33 @@ void mergeHisto(char* name,TH2F* histo){
       for (int binx=1; binx<=histo->GetNbinsX(); binx++){
         for (int biny=1; biny<=histo->GetNbinsY(); biny++)
 	  histo->SetBinContent( binx, biny, histo->GetBinContent(binx,biny) + temp->GetBinContent(binx,biny));
-	}
+      }
 
+}
+
+void mergeHistoWithLabel(char* name,TH1F* histo){
+  int lastBin=-999;
+  for (int bin=1; bin<=histo->GetNbinsX();bin++){
+    if ( !strcmp(histo->GetXaxis()->GetBinLabel(bin),"") ) {lastBin=bin; break;}
+  }
+ 
+  TH1F*  temp=(TH1F*)gDirectory->Get(name);
+  for (int bin=1; bin<=temp->GetNbinsX(); bin++){
+    bool foundLabel=false;
+    for (int binMerged=1; binMerged<=histo->GetNbinsX(); binMerged++){
+      if ( !strcmp(temp->GetXaxis()->GetBinLabel(bin),histo->GetXaxis()->GetBinLabel(binMerged)) ){
+        foundLabel=true;
+        histo->SetBinContent( binMerged,histo->GetBinContent(binMerged)+temp->GetBinContent(bin));
+        break;
+      }
+    }
+   
+   
+    if (!foundLabel){
+      histo->GetXaxis()->SetBinLabel(lastBin,temp->GetXaxis()->GetBinLabel(bin));
+      lastBin++;
+    }
+  }
 }
 
 void makeEfficiency(TH1F* valid, TH1F* missing, TH1F* efficiency){
@@ -108,13 +133,34 @@ void makeEfficiencyGraph(TH1F* valid, TH1F* missing, TH1F* efficiency){
   delete auxiliumDen;
   }
 
-void summHist(TH1F* h1, TH1F* h2, TH1F* h3){
-  for (int bin=1;bin<=h1->GetNbinsX();bin++)
-    h3->SetBinContent(bin,h1->GetBinContent(bin)+h2->GetBinContent(bin));
+void makeOperation(TH1F* input1, TH1F* input2, TH1F* output, char* operationtype){
+  for (int bin=1;bin<=input1->GetNbinsX();bin++){
+    if(operationtype=="+")
+      output->SetBinContent(bin,input1->GetBinContent(bin)+input2->GetBinContent(bin));
+    if(operationtype=="-")
+      output->SetBinContent(bin,input1->GetBinContent(bin)-input2->GetBinContent(bin));
+    if(operationtype=="*")
+      output->SetBinContent(bin,input1->GetBinContent(bin)*input2->GetBinContent(bin));
+    if(operationtype=="/")
+      if(input2->GetBinContent(bin)!=0)
+        output->SetBinContent(bin,input1->GetBinContent(bin)+input2->GetBinContent(bin));
   }
+}
 
-void Canv(TH1F *Histo1,TH1F *Histo2,char CName[100], char Option[60], TLegend* Leg, bool integrate = false)
-{
+void makeMean(TH1F* value, TH1F* nentries, TH1F* mean){
+  for (int bin=1;bin<=value->GetNbinsX();bin++)
+    if(nentries->GetBinContent(bin)!=0)
+      mean->SetBinContent(bin,double(value->GetBinContent(bin))/double(nentries->GetBinContent(bin)));
+}
+
+void setSameLabel(TH1F* input, TH1F* copy){
+  input->LabelsDeflate("X");
+  for (int i=1; i<=input->GetNbinsX(); i++)
+    copy->GetXaxis()->SetBinLabel( i,input->GetXaxis()->GetBinLabel(i) );
+  copy->LabelsDeflate("X");
+}
+
+void Canv(TH1F *Histo1,TH1F *Histo2,char CName[100], char Option[60], TLegend* Leg, bool integrate = false){
   TCanvas *Can = new TCanvas("cc","cc");
   Can->cd();
   double Max;
@@ -183,6 +229,7 @@ void merge(){
     trackingEfficiencyMerged->GetXaxis()->SetBinLabel(2,"+ with 1 valid pix hit");
   
   TH1F* validPerRunMerged = new  TH1F("validPerRunMerged","validPerRunMerged",200,0,200);
+  TH1F* missingPerRunMerged = new  TH1F("missingPerRunMerged","missingPerRunMerged",200,0,200);
   TH1F* invalidPerRunMerged = new  TH1F("invalidPerRunMerged","invalidPerRunMerged",200,0,200);
   TH1F* inactivePerRunMerged = new  TH1F("inactivePerRunMerged","inactivePerRunMerged",200,0,200);
   TH1F* efficiencyPerRun = new  TH1F("efficiencyPerRun","efficiencyPerRun",200,0,200);
@@ -317,6 +364,9 @@ void merge(){
   TH1F* denTracksVsMuonTimeMerged = new TH1F("denTracksVsMuonTimeMerged","denTracksVsMuonTimeMerged",80,-40,40);
   TH1F* effTracksVsMuonTimeMerged = new TH1F("effTracksVsMuonTimeMerged","effTracksVsMuonTimeMerged",80,-40,40);
 
+  TH2F* xy_standardDevMerged = new TH2F("xy_standardDevMerged","xy_standardDevMerged",100,0,1.5,300,0,4);
+  TH2F* xy_standardDev_insideModuleMerged = new TH2F("xy_standardDev_insideModuleMerged","xy_standardDev_insideModuleMerged",100,0,1.5,300,0,4);
+
   vector< vector<double> > tempTree;
   int id, isModuleBad, inactive, missing, valid, isBarrelModule, ladder, blade, moduleInLadder;
   double globalX, globalY, globalZ;
@@ -394,44 +444,54 @@ void merge(){
   TH1F* xposClusterMisRecoveredMerged = new TH1F("xposClusterMisRecoveredMerged","xposClusterMisRecoveredMerged",200,-2,2);
   TH1F* yposClusterMisRecoveredMerged = new TH1F("yposClusterMisRecoveredMerged","yposClusterMisRecoveredMerged",500,-10,10);
 
-  TH2F* tunningValMerged = new TH2F("tunningValMerged" ,"tunningValMerged" ,50,0,5,40,0,40);
-  TH2F* tunningMisMerged = new TH2F("tunningMisMerged" ,"tunningMisMerged" ,50,0,5,40,0,40);
+  TH2F* tunningValMerged     = new TH2F("tunningValMerged" ,"tunningValMerged" ,50,0,5,40,0,40);
+  TH2F* tunningMisMerged     = new TH2F("tunningMisMerged" ,"tunningMisMerged" ,50,0,5,40,0,40);
   TH1F* tunningEdgeValMerged = new TH1F("tunningEdgeValMerged","tunningEdgeValMerged",50,0,5);
   TH1F* tunningEdgeMisMerged = new TH1F("tunningEdgeMisMerged","tunningEdgeMisMerged",50,0,5);
   TH1F* tunningMuonValMerged = new TH1F("tunningMuonValMerged","tunningMuonValMerged",40,0,40);
   TH1F* tunningMuonMisMerged = new TH1F("tunningMuonMisMerged","tunningMuonMisMerged",40,0,40);
     
-  TH1F* histAlphaAnalysis = new TH1F("histAlphaAnalysis", "hist", 200, -3.5,3.5);
-  TH1F* histAlphaAnalysisBPix = new TH1F("histAlphaAnalysisBPix", "hist", 200, -3.5,3.5);
-  TH1F* histAlphaAnalysisFPix = new TH1F("histAlphaAnalysisFPix", "hist", 200, -3.5,3.5);
+  TH1F* histAlphaAnalysis      = new TH1F("histAlphaAnalysis", "hist", 200, -3.5,3.5);
+  TH1F* histAlphaAnalysisBPix  = new TH1F("histAlphaAnalysisBPix", "hist", 200, -3.5,3.5);
+  TH1F* histAlphaAnalysisFPix  = new TH1F("histAlphaAnalysisFPix", "hist", 200, -3.5,3.5);
   TH1F* histCotanAlphaAnalysis = new TH1F("histCotanAlphaAnalysis", "hist:cotan(#alpha)", 200, -3.5,3.5); 
-  TH1F* histBetaAnalysis = new TH1F("histBetaAnalysis", "hist", 200, -3.5,3.5); 
-  TH1F* histBetaAnalysisBPix = new TH1F("histBetaAnalysisBPix", "hist", 200, -3.5,3.5); 
-  TH1F* histBetaAnalysisFPix = new TH1F("histBetaAnalysisFPix", "hist", 200, -3.5,3.5); 
+  TH1F* histBetaAnalysis       = new TH1F("histBetaAnalysis", "hist", 200, -3.5,3.5); 
+  TH1F* histBetaAnalysisBPix   = new TH1F("histBetaAnalysisBPix", "hist", 200, -3.5,3.5); 
+  TH1F* histBetaAnalysisFPix   = new TH1F("histBetaAnalysisFPix", "hist", 200, -3.5,3.5); 
   
   TGraphAsymmErrors*  histAlphaAnalysisBPixGraph;
   TGraphAsymmErrors*  histBetaAnalysisBPixGraph;
   
-  TH2F* tunningEfficiency = new TH2F("tunningEfficiency" ,"tunningEfficiency" ,50,0,5,40,0,40);
-  TH1F* tunningEdgeEfficiency = new TH1F("tunningEdgeEfficiency","tunningEdgeEfficiency",50,0,5);
-  TH1F* tunningMuonEfficiency = new TH1F("tunningMuonEfficiency","tunningMuonEfficiency",40,0,40);
-  TH1F* tunningSlice          = new TH1F("tunningSlice","tunningSlice",40,0,40);
-  TH1F* nTotVsTunningMuon     = new TH1F("nTotVsTunningMuon","nTotVsTunningMuon",40,0,40); 
+  TH2F* tunningEfficiency                = new TH2F("tunningEfficiency" ,"tunningEfficiency" ,50,0,5,40,0,40);
+  TH1F* tunningEdgeEfficiency            = new TH1F("tunningEdgeEfficiency","tunningEdgeEfficiency",50,0,5);
+  TH1F* tunningMuonEfficiency            = new TH1F("tunningMuonEfficiency","tunningMuonEfficiency",40,0,40);
+  TH1F* tunningSlice                     = new TH1F("tunningSlice","tunningSlice",40,0,40);
+  TH1F* nTotVsTunningMuon                = new TH1F("nTotVsTunningMuon","nTotVsTunningMuon",40,0,40); 
 
-  TH1F* muontimePre68094Efficiency = new TH1F("muontimePre68094Efficiency","muontimePre68094Efficiency",50,-40.,80.);
-  TH1F* muontimePost68094Efficiency = new TH1F("muontimePost68094Efficiency","muontimePost68094Efficiency",50,-40.,80.);
+  TH1F* muontimePre68094Efficiency       = new TH1F("muontimePre68094Efficiency","muontimePre68094Efficiency",50,-40.,80.);
+  TH1F* muontimePost68094Efficiency      = new TH1F("muontimePost68094Efficiency","muontimePost68094Efficiency",50,-40.,80.);
 
-
- 
  TH2F* validMuonTimeVSchargeBPixMerged   = new TH2F("validMuonTimeVSchargeBPixMerged","validMuonTimeVSchargeBPixMerged",60,-40.,80.,200,0,200000);
  TH2F* missingMuonTimeVSchargeBPixMerged = new TH2F("missingMuonTimeVSchargeBPixMerged","missingMuonTimeVSchargeBPixMerged",60,-40.,80.,200,0,200000);
  TH2F* validMuonTimeVSchargeFPixMerged   = new TH2F("validMuonTimeVSchargeFPixMerged","validMuonTimeVSchargeFPixMerged",60,-40.,80.,200,0,200000);
  TH2F* missingMuonTimeVSchargeFPixMerged = new TH2F("missingMuonTimeVSchargeFPixMerged","missingMuonTimeVSchargeFPixMerged",60,-40.,80.,200,0,200000);
 
- TH2F* efficiencyMuonTimeVSchargeBPix = new TH2F("efficiencyMuonTimeVSchargeBPix","efficiencyMuonTimeVSchargeBPix",60,-40.,80.,200,0,200000);
- TH2F* efficiencyMuonTimeVSchargeFPix = new TH2F("efficiencyMuonTimeVSchargeFPix","efficiencyMuonTimeVSchargeFPix",60,-40.,80.,200,0,200000);
+ TH2F* efficiencyMuonTimeVSchargeBPix    = new TH2F("efficiencyMuonTimeVSchargeBPix","efficiencyMuonTimeVSchargeBPix",60,-40.,80.,200,0,200000);
+ TH2F* efficiencyMuonTimeVSchargeFPix    = new TH2F("efficiencyMuonTimeVSchargeFPix","efficiencyMuonTimeVSchargeFPix",60,-40.,80.,200,0,200000);
 
-  TH1F* PTEfficiency = new TH1F ("PTEfficiency","PTEfficiency",100,0,50);
+ TH1F* PTEfficiency                      = new TH1F ("PTEfficiency","PTEfficiency",100,0,50);
+
+ TH1F* muonTimeVSRunNumberMerged         = new TH1F("muonTimeVSRunNumberMerged","muonTimeVSRunNumberMerged",200,0,200);
+ TH1F* nMuonTimeVSRunNumberMerged        = new TH1F("nMuonTimeVSRunNumberMerged","nMuonTimeVSRunNumberMerged",200,0,200);
+ TH1F* muonTimeErrorVSRunNumberMerged    = new TH1F("muonTimeErrorVSRunNumberMerged","muonTimeErrorVSRunNumberMerged",200,0,200);
+ TH1F* nMuonTimeErrorVSRunNumberMerged   = new TH1F("nMuonTimeErrorVSRunNumberMerged","nMuonTimeErrorVSRunNumberMerged",200,0,200);
+ TH1F* muonTimeErrorDistriMerged         = new TH1F("muonTimeErrorDistriMerged","muonTimeErrorDistriMerged",80,0,40);
+ TH1F* validVSMuonTimeErrorMerged        = new TH1F("validVSMuonTimeErrorMerged","validVSMuonTimeErrorMerged",80,0,40);
+ TH1F* missingVSMuonTimeErrorMerged      = new TH1F("missingVSMuonTimeErrorMerged","missingVSMuonTimeErrorMerged",80,0,40);
+
+ TH1F* efficiencyVSMuonTimeError         = new TH1F("efficiencyVSMuonTimeError","efficiencyVSMuonTimeError",80,0,40);
+ TH1F* meanMuonTimeVSRunNumber           = new TH1F("meanMuonTimeVSRunNumber","meanMuonTimeVSRunNumber",200,0,200);
+ TH1F* meanMuonTimeErrorVSRunNumber       = new TH1F("meanMuonTimeErrorVSRunNumber","meanMuonTimeErrorVSRunNumber",200,0,200);
 
   char name[120];
   for(int i=1;i<=Nfiles;i++){
@@ -496,43 +556,20 @@ void merge(){
  
     if(DEBUG) cout<<"********* NOW MERGING ANALYSIS PER RUN ************"<<endl;
 
-      
-//merging analysisPerRun
-    int lastBin=-999;
-    for (int bin=1; bin<=validPerRunMerged->GetNbinsX();bin++)
-      {
-      if ( !strcmp(validPerRunMerged->GetXaxis()->GetBinLabel(bin),"") ) {lastBin=bin; break;}
-      }
 
-    TH1F *h13 = (TH1F*)gDirectory->Get( "validPerRun" );
-    TH1F *h14 = (TH1F*)gDirectory->Get( "invalidPerRun" );
-    TH1F *h15 = (TH1F*)gDirectory->Get( "inactivePerRun" );
-    for (int bin=1; bin<=h13->GetNbinsX(); bin++)
-      {
-      bool founded=false;
-      for (int binMerged=1; binMerged<=validPerRunMerged->GetNbinsX(); binMerged++)
-        {
-	if ( !strcmp(h13->GetXaxis()->GetBinLabel(bin),validPerRunMerged->GetXaxis()->GetBinLabel(binMerged)) )
-	  {
-	  founded=true;
-	  validPerRunMerged->SetBinContent( binMerged,validPerRunMerged->GetBinContent(binMerged)+h13->GetBinContent(bin));
-	  invalidPerRunMerged->SetBinContent(binMerged,invalidPerRunMerged->GetBinContent(binMerged)+h14->GetBinContent(bin));
-	  inactivePerRunMerged->SetBinContent(binMerged,inactivePerRunMerged->GetBinContent(binMerged)+h15->GetBinContent(bin));
-	  break;
-	  }
-	}
-      if (!founded)
-	{
-	validPerRunMerged->GetXaxis()->SetBinLabel(lastBin, h13->GetXaxis()->GetBinLabel(bin) );
-	validPerRunMerged->SetBinContent( lastBin,h13->GetBinContent(bin) );
-	invalidPerRunMerged->GetXaxis()->SetBinLabel(lastBin, h14->GetXaxis()->GetBinLabel(bin) );
-	invalidPerRunMerged->SetBinContent( lastBin,h14->GetBinContent(bin) );
-	inactivePerRunMerged->GetXaxis()->SetBinLabel(lastBin, h15->GetXaxis()->GetBinLabel(bin) );
-	inactivePerRunMerged->SetBinContent( lastBin,h15->GetBinContent(bin) );
-	lastBin++;
-	}
-      }
-
+    mergeHistoWithLabel("invalidPerRun",invalidPerRunMerged);
+    mergeHistoWithLabel("validPerRun",validPerRunMerged);
+    mergeHistoWithLabel("inactivePerRun",inactivePerRunMerged);
+    
+    mergeHistoWithLabel("muonTimeVSRunNumber",muonTimeVSRunNumberMerged);
+    mergeHistoWithLabel("nMuonTimeVSRunNumber",nMuonTimeVSRunNumberMerged);
+    mergeHistoWithLabel("muonTimeErrorVSRunNumber",muonTimeErrorVSRunNumberMerged);
+    mergeHistoWithLabel("nMuonTimeErrorVSRunNumber",nMuonTimeErrorVSRunNumberMerged);
+    
+    mergeHisto("muonTimeErrorDistri",muonTimeErrorDistriMerged);
+    mergeHisto("validVSMuonTimeError",validVSMuonTimeErrorMerged);
+    mergeHisto("missingVSMuonTimeError",missingVSMuonTimeErrorMerged);
+    
 
     if(DEBUG) cout<<"********* NOW MERGING ANALYSIS FOR TRAJECTORY ************"<<endl;
 
@@ -783,10 +820,12 @@ void merge(){
 
 
     if(DEBUG) cout<<"********* NOW MERGING WINDOW SEARCH ************"<<endl;
- 
+
     mergeHisto("numTracksVsMuonTime",numTracksVsMuonTimeMerged);
     mergeHisto("denTracksVsMuonTime",denTracksVsMuonTimeMerged);
   
+    mergeHisto("xy_standardDev",xy_standardDevMerged);
+    mergeHisto("xy_standardDev_insideModule",xy_standardDev_insideModuleMerged);
  
     if(DEBUG) cout<<"********* NOW MERGING WINDOW SEARCH ************"<<endl;
 
@@ -880,32 +919,7 @@ void merge(){
     
     }//end of looping over the .root
     
-   invalidPerRunMerged->LabelsDeflate("X"); 
-   validPerRunMerged->LabelsDeflate("X"); 
-   inactivePerRunMerged->LabelsDeflate("X"); 
-    
-   for (int i=1; i<=validPerRunMerged->GetNbinsX(); i++)
-     {
-     double a,b;
-     a=validPerRunMerged->GetBinContent(i);
-     //by definition: take into account only VALID and MISSING!
-     b=(invalidPerRunMerged->GetBinContent(i)-inactivePerRunMerged->GetBinContent(i));
-     if ((a+b)!=0)
-       {
-       efficiencyPerRun->SetBinContent(i,(a)/(a+b));
-       efficiencyPerRun->SetBinError( i,sqrt( (a/(a+b))*(1-(a/(a+b)))/(a+b)) );
-       efficiencyPerRun->GetXaxis()->SetBinLabel( i,validPerRunMerged->GetXaxis()->GetBinLabel(i) );
-       }
-/*     else 
-       {
-       efficiencyPerRun->SetBinContent(i,0);
-       efficiencyPerRun->GetXaxis()->SetBinLabel( i,"deleted" );
-       }
-*/       
-     inactivePercentPerRun->SetBinContent(i,inactivePerRunMerged->GetBinContent(i)/(invalidPerRunMerged->GetBinContent(i)+validPerRunMerged->GetBinContent(i)) );
-     inactivePercentPerRun->GetXaxis()->SetBinLabel( i,validPerRunMerged->GetXaxis()->GetBinLabel(i) );
-       
-     } 
+
     
   //Filling TTree merged
   for(unsigned int i=0;i<tempTree.size();i++){
@@ -928,7 +942,40 @@ void merge(){
   
   if(DEBUG) cout<<"********* THE MERGING IS FINISHED ************"<<endl;
   
+   
+  //EFFIENCY PER RUN
+   
+   invalidPerRunMerged->LabelsDeflate("X"); 
+   validPerRunMerged->LabelsDeflate("X"); 
+   inactivePerRunMerged->LabelsDeflate("X");
+    
+   for (int i=1; i<=validPerRunMerged->GetNbinsX(); i++){
+     /*double a,b;
+     a=validPerRunMerged->GetBinContent(i);
+     //by definition: take into account only VALID and MISSING!
+     b=(invalidPerRunMerged->GetBinContent(i)-inactivePerRunMerged->GetBinContent(i));
+     if ((a+b)!=0){
+       efficiencyPerRun->SetBinContent(i,(a)/(a+b));
+       efficiencyPerRun->SetBinError( i,sqrt( (a/(a+b))*(1-(a/(a+b)))/(a+b)) );
+       efficiencyPerRun->GetXaxis()->SetBinLabel( i,validPerRunMerged->GetXaxis()->GetBinLabel(i) );
+     }*/
+       
+     inactivePercentPerRun->SetBinContent(i,inactivePerRunMerged->GetBinContent(i)/(invalidPerRunMerged->GetBinContent(i)+validPerRunMerged->GetBinContent(i)) );
+     inactivePercentPerRun->GetXaxis()->SetBinLabel( i,validPerRunMerged->GetXaxis()->GetBinLabel(i) );
+       
+   } 
   
+  setSameLabel(validPerRunMerged,missingPerRunMerged);
+  setSameLabel(validPerRunMerged,efficiencyPerRun);
+  makeOperation(invalidPerRunMerged,inactivePerRunMerged,missingPerRunMerged,"-");
+  makeEfficiency(validPerRunMerged,missingPerRunMerged,efficiencyPerRun);
+  
+  setSameLabel(muonTimeVSRunNumberMerged,meanMuonTimeVSRunNumber);
+  setSameLabel(muonTimeErrorVSRunNumberMerged,meanMuonTimeErrorVSRunNumber);
+  
+  makeEfficiency(validVSMuonTimeErrorMerged,missingVSMuonTimeErrorMerged,efficiencyVSMuonTimeError);
+  makeMean(muonTimeVSRunNumberMerged,nMuonTimeVSRunNumberMerged,meanMuonTimeVSRunNumber);
+  makeMean(muonTimeErrorVSRunNumberMerged,nMuonTimeErrorVSRunNumberMerged,meanMuonTimeErrorVSRunNumber);
   
   TH1F* histBarrelEfficiencyComparison = new TH1F("histBarrelEfficiencyComparison", "histBarrelEfficiencyComparison", 4, 0, 4);
   TH1F* histEndCapEfficiencyComparison = new TH1F("histEndCapEfficiencyComparison", "histEndCapEfficiencyComparison", 4, 0, 4);
@@ -1041,11 +1088,11 @@ void merge(){
   efficiencySummary->GetXaxis()->SetBinLabel(3," Total");
   
   TH1F* auxDen = new TH1F("auxDen","auxDen",validVsBetaBPixMerged->GetNbinsX(),validVsBetaBPixMerged->GetMinimumBin(),validVsBetaBPixMerged->GetMaximumBin());
-  summHist(validVsBetaBPixMerged,missingVsBetaBPixMerged,auxDen);
+  makeOperation(validVsBetaBPixMerged,missingVsBetaBPixMerged,auxDen,"+");
   histBetaAnalysisBPixGraph = new TGraphAsymmErrors (validVsBetaBPixMerged,auxDen);  
 
   TH1F* auxDen2 = new TH1F("auxDen2","auxDen2",validVsAlphaBPixMerged->GetNbinsX(),validVsAlphaBPixMerged->GetMinimumBin(),validVsAlphaBPixMerged->GetMaximumBin());
-  summHist(validVsAlphaBPixMerged,missingVsAlphaBPixMerged,auxDen2);
+  makeOperation(validVsAlphaBPixMerged,missingVsAlphaBPixMerged,auxDen2,"+");
   histAlphaAnalysisBPixGraph = new TGraphAsymmErrors (validVsAlphaBPixMerged,auxDen2);
   
   makeEfficiencyNoError(validVsBetaBPixMerged,missingVsBetaBPixMerged,histBetaAnalysisBPix);
@@ -1320,16 +1367,18 @@ void merge(){
 
    //****************** Barrel Maps ****************
   
-  TH2F* layer1 =  new TH2F("layer1","layer1",8,1,9 ,20,1,21);
-  //TH2F* test =  new TH2F("test","test",8,1,9 ,20,1,21);
-  TH2F* layer1valid =  new TH2F("layer1valid","layer1valid",8,1,9 ,20,1,21);
-  TH2F* layer1missing =  new TH2F("layer1missing","layer1missing",8,1,9 ,20,1,21);
-  TH2F* layer2 =  new TH2F("layer2","layer2",8,1,9 ,32,1,33);
-  TH2F* layer2valid =  new TH2F("layer2valid","layer2valid",8,1,9 ,32,1,33);
-  TH2F* layer2missing =  new TH2F("layer2missing","layer2missing",8,1,9 ,32,1,33);
-  TH2F* layer3 =  new TH2F("layer3","layer3",8,1,9 ,44,1,45);
-  TH2F* layer3valid =  new TH2F("layer3valid","layer3valid",8,1,9 ,44,1,45);
-  TH2F* layer3missing =  new TH2F("layer3missing","layer3missing",8,1,9 ,44,1,45);
+  TH2F* layer1         =  new TH2F("layer1","layer1",8,1,9 ,20,1,21);
+  TH2F* layer1valid    =  new TH2F("layer1valid","layer1valid",8,1,9 ,20,1,21);
+  TH2F* layer1missing  =  new TH2F("layer1missing","layer1missing",8,1,9 ,20,1,21);
+  TH2F* layer1inactive =  new TH2F("layer1inactive","layer1inactive",8,1,9 ,20,1,21);
+  TH2F* layer2         =  new TH2F("layer2","layer2",8,1,9 ,32,1,33);
+  TH2F* layer2valid    =  new TH2F("layer2valid","layer2valid",8,1,9 ,32,1,33);
+  TH2F* layer2missing  =  new TH2F("layer2missing","layer2missing",8,1,9 ,32,1,33);
+  TH2F* layer2inactive =  new TH2F("layer2inactive","layer2inactive",8,1,9 ,32,1,33);
+  TH2F* layer3         =  new TH2F("layer3","layer3",8,1,9 ,44,1,45);
+  TH2F* layer3valid    =  new TH2F("layer3valid","layer3valid",8,1,9 ,44,1,45);
+  TH2F* layer3missing  =  new TH2F("layer3missing","layer3missing",8,1,9 ,44,1,45);
+  TH2F* layer3inactive =  new TH2F("layer3inactive","layer3inactive",8,1,9 ,44,1,45);
 
   layer1->GetXaxis()->SetTitle("module");
   layer1->GetYaxis()->SetTitle("ladder");
@@ -1349,6 +1398,12 @@ void merge(){
   layer2missing->GetYaxis()->SetTitle("ladder");
   layer3missing->GetXaxis()->SetTitle("module");
   layer3missing->GetYaxis()->SetTitle("ladder");
+  layer1inactive->GetXaxis()->SetTitle("module");
+  layer1inactive->GetYaxis()->SetTitle("ladder");
+  layer2inactive->GetXaxis()->SetTitle("module");
+  layer2inactive->GetYaxis()->SetTitle("ladder");
+  layer3inactive->GetXaxis()->SetTitle("module");
+  layer3inactive->GetYaxis()->SetTitle("ladder");
   
   
   int nhigheffmodule = 0;
@@ -1361,6 +1416,7 @@ void merge(){
     if(id<302080000){
       layer1valid->Fill(moduleInLadder,ladder,valid);
       layer1missing->Fill(moduleInLadder,ladder,missing);
+      layer1inactive->Fill(moduleInLadder,ladder,inactive);
       nhigheffmoduletot++;
       
       if( (valid+missing)!=0 ){
@@ -1375,6 +1431,7 @@ void merge(){
     if(id>302080000 && id<302160000){
       layer2valid->Fill(moduleInLadder,ladder,valid);
       layer2missing->Fill(moduleInLadder,ladder,missing);
+      layer2inactive->Fill(moduleInLadder,ladder,inactive);
       nhigheffmoduletot++;
       
       if( (valid+missing)!=0 ){
@@ -1389,6 +1446,7 @@ void merge(){
     if(id>302160000 && id<310000000){
       layer3valid->Fill(moduleInLadder,ladder,valid);
       layer3missing->Fill(moduleInLadder,ladder,missing);
+      layer3inactive->Fill(moduleInLadder,ladder,inactive);
       nhigheffmoduletot++;
       
       if( (valid+missing)!=0 )
@@ -1502,8 +1560,8 @@ void merge(){
 	goodStatLayer1EffDistri->Fill(layer1->GetBinContent(binX,binY));
 	if(layer1->GetBinContent(binX,binY)>0.99) ngoodstat++;
       }
-      if (layer1valid->GetBinContent(binX,binY)+layer1missing->GetBinContent(binX,binY) <=10)
-         std::cout<<"layer 1: module "<<binX<<"; ladder "<<binY<<std::endl;
+      //if (layer1valid->GetBinContent(binX,binY)+layer1missing->GetBinContent(binX,binY) <=10)
+         //std::cout<<"layer 1: module "<<binX<<"; ladder "<<binY<<std::endl;
     }
   }
   TF1 *goodStatFit1 = new TF1("goodStatFit1","[0]", 0, setbin);
@@ -1526,8 +1584,8 @@ void merge(){
 	goodStatLayer2EffDistri->Fill(layer2->GetBinContent(binX,binY));
 	if(layer2->GetBinContent(binX,binY)>0.99) ngoodstat++;
       }
-      if (layer2valid->GetBinContent(binX,binY)+layer2missing->GetBinContent(binX,binY) <=10)
-        std::cout<<"layer 2: module "<<binX<<"; ladder "<<binY<<std::endl;      
+      //if (layer2valid->GetBinContent(binX,binY)+layer2missing->GetBinContent(binX,binY) <=10)
+        //std::cout<<"layer 2: module "<<binX<<"; ladder "<<binY<<std::endl;      
     }
   }
   TF1 *goodStatFit2 = new TF1("goodStatFit2","[0]", 0, setbin);
@@ -1550,8 +1608,8 @@ void merge(){
 	goodStatLayer3EffDistri->Fill(layer3->GetBinContent(binX,binY));
 	if(layer3->GetBinContent(binX,binY)>0.99) ngoodstat++;
       }
-      if (layer3valid->GetBinContent(binX,binY)+layer3missing->GetBinContent(binX,binY) <=10)
-        std::cout<<"layer 3: module "<<binX<<"; ladder "<<binY<<std::endl;
+      //if (layer3valid->GetBinContent(binX,binY)+layer3missing->GetBinContent(binX,binY) <=10)
+        //std::cout<<"layer 3: module "<<binX<<"; ladder "<<binY<<std::endl;
     }
   }
 
@@ -1894,7 +1952,7 @@ void merge(){
     tunningSlice->SetBinContent(bin,tunningEfficiency->GetBinContent(10,bin));
     int nTot=(int)tunningValMerged->GetBinContent(10,bin)+(int)tunningMisMerged->GetBinContent(10,bin);
     nTotVsTunningMuon->SetBinContent(bin,nTot);
-    } 
+  } 
   
   if (DEBUG) std::cout<<"please tell me that you are at least here"<<std::endl;
 
@@ -1922,7 +1980,8 @@ void merge(){
   histoMethod2AfterMerged->Write();
 
   invalidPerRunMerged->Write(); 
-  validPerRunMerged->Write();
+  validPerRunMerged->Write(); 
+  missingPerRunMerged->Write();
   inactivePerRunMerged->Write();
 
   TCanvas* cRun = new TCanvas("cRun","cRun",1200,600); 
@@ -1930,11 +1989,12 @@ void merge(){
   gStyle->SetStatX( 0.8);
   gStyle->SetStatY( 0.45);
 
-  efficiencyPerRun->LabelsDeflate("X");
+
+  //efficiencyPerRun->LabelsDeflate("X");
   efficiencyPerRun->LabelsOption("a","X");
   efficiencyPerRun->Write();
   efficiencyPerRun->Draw();
-  cRun->Print("efficiencyPerRun.png","png");
+  cRun->Print("efficiencyPerRun.png","png");
   cRun->Close();
 
 
@@ -2036,6 +2096,18 @@ void merge(){
   validMuonTimeVSchargeFPixMerged->Write();
   missingMuonTimeVSchargeFPixMerged->Write();
   
+  //muonTimeVSRunNumberMerged->Write();
+  //nMuonTimeVSRunNumberMerged->Write();
+  //muonTimeErrorVSRunNumberMerged->Write();
+  //nMuonTimeErrorVSRunNumberMerged->Write();
+  
+  efficiencyVSMuonTimeError->Write();
+  meanMuonTimeVSRunNumber->Write();
+  meanMuonTimeErrorVSRunNumber->Write();
+  muonTimeErrorDistriMerged->Write();
+  validVSMuonTimeErrorMerged->Write();
+  missingVSMuonTimeErrorMerged->Write();
+
 
   //******* EFFICIENCY PLOTS WRITING ************
   TCanvas* c1 = new TCanvas("c1","c1");
@@ -2046,12 +2118,15 @@ void merge(){
   layer1->Write();
   layer1valid->Write();
   layer1missing->Write();
+  layer1inactive->Write();
   layer2->Write();
   layer2valid->Write();
   layer2missing->Write();
+  layer2inactive->Write();
   layer3->Write();
   layer3valid->Write();
   layer3missing->Write();
+  layer3inactive->Write();
 
   histBarrelEfficiencyComparison->Write();
   histSubdetectors->Write();
@@ -2358,6 +2433,9 @@ void merge(){
   histAlphaAnalysisBPixGraph->Write(); 
  
   histCotanAlphaAnalysis->Write();
+
+  xy_standardDevMerged->Write();
+  xy_standardDev_insideModuleMerged->Write();
 
   numTracksVsMuonTimeMerged->Write();
   denTracksVsMuonTimeMerged->Write();
