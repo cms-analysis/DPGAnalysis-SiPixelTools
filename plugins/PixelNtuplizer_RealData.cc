@@ -683,6 +683,9 @@ void PixelNtuplizer_RealData::fillDet(const DetId &tofill, uint subdetid, const 
       else if (det_.ladder<=44&&det_.ladder>=34) det_.ladder = 56-det_.ladder;
     }
       det_.module = PXBDetId::PXBDetId(tofill).module();
+    // convert to online module numbering convention
+    if (det_.module<=4) det_.module = det_.module-5;
+    else det_.module = det_.module-4;
   } 
   else {
       det_.disk      =  PXFDetId::PXFDetId(tofill).disk();
