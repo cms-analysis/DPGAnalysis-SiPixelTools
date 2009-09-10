@@ -11,191 +11,36 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <math.h>
 #include "TCanvas.h"
 #include "TGaxis.h"
 #include "TGraphAsymmErrors.h"
 
   using namespace std;
   bool DEBUG=false;
-  int Nfiles=530;
+  int Nfiles=630;
   
-  
-//************** Quick function to merge easilly histos **************
-void mergeHisto(char* name,TH1F* histo, bool mergeOverflows = false){
-    TH1F*  temp=(TH1F*)gDirectory->Get(name);
-    
-    if(!mergeOverflows)
-      for (int bin=1; bin<=histo->GetNbinsX(); bin++)
-        histo->SetBinContent( bin, histo->GetBinContent(bin) + temp->GetBinContent(bin));
+void mergeHisto(const char*,TH1F*,bool=false);
+void mergeHisto(TH1F*,bool=false);			//NEW, TAKES NAME FROM MERGED
+void mergeHisto(const char*,TH2F*,bool=false);
+void mergeHisto(TH2F*,bool=false);			//NEW, TAKES NAME FROM MERGED
+void mergeHistoWithLabel(char*,TH1F*);
+void makeEfficiency(TH1F*,TH1F*,TH1F*,bool=true);
+void makeEfficiency(TH1F*,bool=true);			//NEW, TAKES NAME FROM MERGED --- NEEDS TO BE valid*, missing*, efficiency*
+void makeEfficiency(TH2F*,TH2F*,TH2F*);
+void makeEfficiencyGraph(TH1F*,TH1F*,TH1F*);
+void makeOperation(TH1F*,TH1F*,TH1F*,char*);
+void makeMean(TH1F*, TH1F*, TH1F*);//useless, replaced by makeOperation()
+void setSameLabel(TH1F*, TH1F*, bool=true);
+void Canv(TH1F*,TH1F*,char*,char*,TLegend*,bool=false);
 
-    if(mergeOverflows)
-      for (int bin=0; bin<=histo->GetNbinsX()+1; bin++)
-        histo->SetBinContent( bin, histo->GetBinContent(bin) + temp->GetBinContent(bin));
-}
 
-void mergeHisto(char* name,TH2F* histo){
-    TH2F*  temp=(TH2F*)gDirectory->Get(name);
-      for (int binx=1; binx<=histo->GetNbinsX(); binx++){
-        for (int biny=1; biny<=histo->GetNbinsY(); biny++)
-	  histo->SetBinContent( binx, biny, histo->GetBinContent(binx,biny) + temp->GetBinContent(binx,biny));
-      }
+// FROM DANEK
+static int module_online(int);
+static int ladder_online(int,int);
 
-}
 
-void mergeHistoWithLabel(char* name,TH1F* histo){
-  int lastBin=-999;
-  for (int bin=1; bin<=histo->GetNbinsX();bin++){
-    if ( !strcmp(histo->GetXaxis()->GetBinLabel(bin),"") ) {lastBin=bin; break;}
-  }
- 
-  TH1F*  temp=(TH1F*)gDirectory->Get(name);
-  for (int bin=1; bin<=temp->GetNbinsX(); bin++){
-    bool foundLabel=false;
-    for (int binMerged=1; binMerged<=histo->GetNbinsX(); binMerged++){
-      if ( !strcmp(temp->GetXaxis()->GetBinLabel(bin),histo->GetXaxis()->GetBinLabel(binMerged)) ){
-        foundLabel=true;
-        histo->SetBinContent( binMerged,histo->GetBinContent(binMerged)+temp->GetBinContent(bin));
-        break;
-      }
-    }
-   
-   
-    if (!foundLabel){
-      histo->GetXaxis()->SetBinLabel(lastBin,temp->GetXaxis()->GetBinLabel(bin));
-      lastBin++;
-    }
-  }
-}
 
-void makeEfficiency(TH1F* valid, TH1F* missing, TH1F* efficiency){
-  for(int i=1;i<=efficiency->GetNbinsX();i++){
-    double val = valid->GetBinContent(i);
-    double mis = missing->GetBinContent(i);
-    if( (val+mis)!=0 ){
-      double eff = val / (val+mis);
-      double err = sqrt(eff*(1-eff)/(val+mis));
-      efficiency->SetBinContent(i,eff);
-      efficiency->SetBinError(i,err);
-    }
-  }
-  efficiency->GetYaxis()->SetTitle("#epsilon_{hit}");
-}
-
-void makeEfficiencyNoError(TH1F* valid, TH1F* missing, TH1F* efficiency){
-  for(int i=1;i<=efficiency->GetNbinsX();i++){
-    double val = valid->GetBinContent(i);
-    double mis = missing->GetBinContent(i);
-    if( (val+mis)!=0 ){
-      double eff = val / (val+mis);
-      //double err = sqrt(eff*(1-eff)/(val+mis));
-      efficiency->SetBinContent(i,eff);
-    }
-  }
-  efficiency->GetYaxis()->SetTitle("#epsilon_{hit}");
-}
-
-void makeEfficiency(TH2F* valid, TH2F* missing, TH2F* efficiency){
-  for(int i=1;i<=efficiency->GetNbinsX();i++){
-    for(int j=1;j<=efficiency->GetNbinsY();j++){
-      double val = valid->GetBinContent(i,j);
-      double mis = missing->GetBinContent(i,j);
-      if( (val+mis)!=0 ){
-        double eff = val / (val+mis);
-        efficiency->SetBinContent(i,j,eff);
-      }
-    }
-  }
-}
-
-void makeEfficiencyGraph(TH1F* valid, TH1F* missing, TH1F* efficiency){
-  TGraphAsymmErrors* auxiliumEff;
-  TH1F* auxiliumDen = new TH1F("auxiliumDen","auxiliumDen",efficiency->GetNbinsX(),efficiency->GetXaxis()->GetXmin(),efficiency->GetXaxis()->GetXmax());
-  efficiency->GetYaxis()->SetTitle("#epsilon_{hit}");
-
-  for(int i=1;i<=efficiency->GetNbinsX();i++){
-    double val = valid->GetBinContent(i);
-    double mis = missing->GetBinContent(i);
-    auxiliumDen->SetBinContent(i,val+mis);
-    if( (val+mis)!=0 ){
-      double eff = val / (val+mis);
-      efficiency->SetBinContent(i,eff);
-      }
-    }
-  auxiliumEff = new TGraphAsymmErrors(valid,auxiliumDen);
-
-  int graphCounter = 0;
-  for(int i=1;i<=efficiency->GetNbinsX();i++){    
-    double val = valid->GetBinContent(i);
-    double mis = missing->GetBinContent(i);
-    if( (val+mis)!=0 )  {efficiency->SetBinError(i,auxiliumEff->GetErrorY(graphCounter)); graphCounter++;}
-    }
-  delete auxiliumEff;
-  delete auxiliumDen;
-  }
-
-void makeOperation(TH1F* input1, TH1F* input2, TH1F* output, char* operationtype){
-  for (int bin=1;bin<=input1->GetNbinsX();bin++){
-    if(operationtype=="+")
-      output->SetBinContent(bin,input1->GetBinContent(bin)+input2->GetBinContent(bin));
-    if(operationtype=="-")
-      output->SetBinContent(bin,input1->GetBinContent(bin)-input2->GetBinContent(bin));
-    if(operationtype=="*")
-      output->SetBinContent(bin,input1->GetBinContent(bin)*input2->GetBinContent(bin));
-    if(operationtype=="/")
-      if(input2->GetBinContent(bin)!=0)
-        output->SetBinContent(bin,input1->GetBinContent(bin)+input2->GetBinContent(bin));
-  }
-}
-
-void makeMean(TH1F* value, TH1F* nentries, TH1F* mean){
-  for (int bin=1;bin<=value->GetNbinsX();bin++)
-    if(nentries->GetBinContent(bin)!=0)
-      mean->SetBinContent(bin,double(value->GetBinContent(bin))/double(nentries->GetBinContent(bin)));
-}
-
-void setSameLabel(TH1F* input, TH1F* copy){
-  input->LabelsDeflate("X");
-  for (int i=1; i<=input->GetNbinsX(); i++)
-    copy->GetXaxis()->SetBinLabel( i,input->GetXaxis()->GetBinLabel(i) );
-  copy->LabelsDeflate("X");
-}
-
-void Canv(TH1F *Histo1,TH1F *Histo2,char CName[100], char Option[60], TLegend* Leg, bool integrate = false){
-  TCanvas *Can = new TCanvas("cc","cc");
-  Can->cd();
-  double Max;
-  
-  if(integrate){
-    Histo1->Scale(1./Histo1->Integral());
-    Histo2->Scale(1./Histo2->Integral());
-  }
-  
-  (Histo1->GetMaximum() <= Histo2->GetMaximum() )? Max=Histo2->GetMaximum():Max=Histo1->GetMaximum();
-  
-  Histo1->SetMaximum(1.1*Max);
-    
-  Histo1->SetLineColor(kBlack);
-  Histo2->SetLineColor(kRed);
-  Histo1->SetMarkerColor(kBlack);
-  Histo2->SetMarkerColor(kRed);
-  
-  char Option1[60];
-  if(!strcmp(Option,"")) strcpy(Option1,"HIST");
-  else strcpy(Option1,Option);
-  
-  Histo1->Draw(Option1);
-  
-  char Option2[60];
-  strcpy(Option2,"same ");
-  strcat(Option2,Option1);
-  
-  Histo2->Draw(Option2);
-  
-  Leg->Draw("same");
-  
-  Can->Print(CName,"png");
-  Can->Close();
-}
 
 void merge(){
 
@@ -542,18 +387,11 @@ void merge(){
     mergeHisto("histInvalidRecHitWithBadmoduleList",histInvalidRecHitWithBadmoduleListMerged);
     mergeHisto("histInvalidRecHitCollection",histInvalidRecHitCollectionMerged);
     
-    TH1F *histoMethod2 = (TH1F*)gDirectory->Get( "histoMethod2" );
-    TH1F *histoMethod2After = (TH1F*)gDirectory->Get( "histoMethod2After" );
-    TH1F *histoMethod2FPix = (TH1F*)gDirectory->Get( "histoMethod2FPix" );
-    TH1F *histoMethod2AfterFPix = (TH1F*)gDirectory->Get( "histoMethod2AfterFPix" );
-      
-    for(int bin=1; bin<=3; bin++){
-      histoMethod2Merged->SetBinContent( bin, histoMethod2Merged->GetBinContent(bin) + histoMethod2->GetBinContent(bin));
-      histoMethod2AfterMerged->SetBinContent( bin, histoMethod2AfterMerged->GetBinContent(bin) + histoMethod2After->GetBinContent(bin));
-      histoMethod2FPixMerged->SetBinContent( bin, histoMethod2FPixMerged->GetBinContent(bin) + histoMethod2FPix->GetBinContent(bin));
-      histoMethod2AfterFPixMerged->SetBinContent( bin, histoMethod2AfterFPixMerged->GetBinContent(bin) + histoMethod2AfterFPix->GetBinContent(bin));
-    }
- 
+    mergeHisto("histoMethod2",histoMethod2Merged);
+    mergeHisto("histoMethod2After",histoMethod2AfterMerged);
+    mergeHisto("histoMethod2FPix",histoMethod2FPixMerged);
+    mergeHisto("histoMethod2AfterFPix",histoMethod2AfterFPixMerged);
+    
     if(DEBUG) cout<<"********* NOW MERGING ANALYSIS PER RUN ************"<<endl;
 
 
@@ -580,127 +418,49 @@ void merge(){
     delete htest;
     
 //update to alpha and beta
-    TH1F *validVsAlpha = (TH1F*)gDirectory->Get( "validVsAlpha" );
+    mergeHisto("validVsAlpha",validVsAlphaMerged);
     mergeHisto("validVsCotanAlpha",validVsCotanAlphaMerged);
-    TH1F *validVsAlphaBPix = (TH1F*)gDirectory->Get( "validVsAlphaBPix" );
-    TH1F *validVsAlphaFPix = (TH1F*)gDirectory->Get( "validVsAlphaFPix" );
-    TH1F *missingVsAlpha = (TH1F*)gDirectory->Get( "missingVsAlpha" );
-    TH1F *missingVsAlphaBPix = (TH1F*)gDirectory->Get( "missingVsAlphaBPix" );
-    TH1F *missingVsAlphaFPix = (TH1F*)gDirectory->Get( "missingVsAlphaFPix" );
-    TH1F *validVsBeta = (TH1F*)gDirectory->Get( "validVsBeta" );
+    mergeHisto("validVsAlphaBPix",validVsAlphaBPixMerged);
+    mergeHisto("validVsAlphaFPix",validVsAlphaFPixMerged);
+    mergeHisto("validVsBeta",validVsBetaMerged);
+    mergeHisto("validVsBetaBPix",validVsBetaBPixMerged);
+    mergeHisto("validVsBetaFPix",validVsBetaFPixMerged);
+    mergeHisto("missingVsAlpha",missingVsAlphaMerged);
+    mergeHisto("missingVsAlphaBPix",missingVsAlphaBPixMerged);
+    mergeHisto("missingVsAlphaFPix",missingVsAlphaFPixMerged);
     mergeHisto("missingVsCotanAlpha",missingVsCotanAlphaMerged);
-    //TH1F *validVsBetaBPix = (TH1F*)gDirectory->Get( "validVsBetaBPix" );
-    TH1F *validVsBetaFPix = (TH1F*)gDirectory->Get( "validVsBetaFPix" );
-    TH1F *missingVsBeta = (TH1F*)gDirectory->Get( "missingVsBeta" );
-    TH1F *missingVsBetaBPix = (TH1F*)gDirectory->Get( "missingVsBetaBPix" );
-    TH1F *missingVsBetaFPix = (TH1F*)gDirectory->Get( "missingVsBetaFPix" );
-
-    for (int bin=1; bin<=200; bin++){
-      validVsAlphaMerged->SetBinContent( bin, validVsAlphaMerged->GetBinContent(bin) + validVsAlpha->GetBinContent(bin));
-      validVsAlphaBPixMerged->SetBinContent( bin, validVsAlphaBPixMerged->GetBinContent(bin) + validVsAlphaBPix->GetBinContent(bin));
-      validVsAlphaFPixMerged->SetBinContent( bin, validVsAlphaFPixMerged->GetBinContent(bin) + validVsAlphaFPix->GetBinContent(bin));
-      missingVsAlphaMerged->SetBinContent( bin, missingVsAlphaMerged->GetBinContent(bin) + missingVsAlpha->GetBinContent(bin));
-      missingVsAlphaBPixMerged->SetBinContent( bin, missingVsAlphaBPixMerged->GetBinContent(bin) + missingVsAlphaBPix->GetBinContent(bin));
-      missingVsAlphaFPixMerged->SetBinContent( bin, missingVsAlphaFPixMerged->GetBinContent(bin) + missingVsAlphaFPix->GetBinContent(bin));
-      validVsBetaMerged->SetBinContent( bin, validVsBetaMerged->GetBinContent(bin) + validVsBeta->GetBinContent(bin));
-      validVsBetaBPixMerged->SetBinContent( bin, validVsBetaBPixMerged->GetBinContent(bin) + validVsBeta->GetBinContent(bin));
-      validVsBetaFPixMerged->SetBinContent( bin, validVsBetaFPixMerged->GetBinContent(bin) + validVsBetaFPix->GetBinContent(bin));
-      missingVsBetaMerged->SetBinContent( bin, missingVsBetaMerged->GetBinContent(bin) + missingVsBeta->GetBinContent(bin));
-      missingVsBetaBPixMerged->SetBinContent( bin, missingVsBetaBPixMerged->GetBinContent(bin) + missingVsBetaBPix->GetBinContent(bin));
-      missingVsBetaFPixMerged->SetBinContent( bin, missingVsBetaFPixMerged->GetBinContent(bin) + missingVsBetaFPix->GetBinContent(bin));
-    }
-
-  
-    TH1F *missingVsLocalX = (TH1F*)gDirectory->Get( "missingVsLocalX" );
-    TH1F *missingVsLocalY = (TH1F*)gDirectory->Get( "missingVsLocalY" );
-    TH1F *validVsLocalX = (TH1F*)gDirectory->Get( "validVsLocalX" );
-    TH1F *validVsLocalY = (TH1F*)gDirectory->Get( "validVsLocalY" );
-
-    for (int bin=1; bin<=missingVsLocalX->GetNbinsX(); bin++){
-      missingVsLocalXMerged->SetBinContent( bin, missingVsLocalXMerged->GetBinContent(bin) + missingVsLocalX->GetBinContent(bin));
-      missingVsLocalYMerged->SetBinContent( bin, missingVsLocalYMerged->GetBinContent(bin) + missingVsLocalY->GetBinContent(bin));
-      validVsLocalXMerged->SetBinContent( bin, validVsLocalXMerged->GetBinContent(bin) + validVsLocalX->GetBinContent(bin));
-      validVsLocalYMerged->SetBinContent( bin, validVsLocalYMerged->GetBinContent(bin) + validVsLocalY->GetBinContent(bin));
-    }
+    mergeHisto("missingVsBeta",missingVsBetaMerged);
+    mergeHisto("missingVsBetaBPix",missingVsBetaBPixMerged);
+    mergeHisto("missingVsBetaFPix",missingVsBetaFPixMerged);
     
-    for (int bin=1; bin<=101; bin++)
-      {
-      TH1F *h17 = (TH1F*)gDirectory->Get( "inactivePerTrack" );
-      inactivePerTrackMerged->SetBinContent( bin, inactivePerTrackMerged->GetBinContent(bin) + h17->GetBinContent(bin));
-      TH1F *h18 = (TH1F*)gDirectory->Get( "missingPerTrack" );
-      missingPerTrackMerged->SetBinContent( bin, missingPerTrackMerged->GetBinContent(bin) + h18->GetBinContent(bin));
-      
-      delete h17;
-      delete h18;
-      }
-
-    for (int bin=1; bin<=4; bin++)
-      {
-      TH1F *h19 = (TH1F*)gDirectory->Get( "checkoutValidityFlag" );
-      checkoutValidityFlagMerged->SetBinContent( bin, checkoutValidityFlagMerged->GetBinContent(bin) + h19->GetBinContent(bin));
+    mergeHisto("missingVsLocalX",missingVsLocalXMerged);
+    mergeHisto("missingVsLocalY",missingVsLocalYMerged);
+    mergeHisto("validVsLocalX",validVsLocalXMerged);
+    mergeHisto("validVsLocalY",validVsLocalYMerged);
+    
+    mergeHisto("inactivePerTrack",inactivePerTrackMerged);
+    mergeHisto("missingPerTrack",missingPerTrackMerged);
+    
+    mergeHisto("checkoutValidityFlag",checkoutValidityFlagMerged);
+    
  
-      delete h19;
-      }
 
     if(DEBUG) cout<<"********* NOW MERGING analysis for numerator and denominator ************"<<endl;
    
-    TH2F * xPosFracVal= (TH2F*)gDirectory->Get("xPosFracVal");
-    for (int cutBin=1; cutBin<=6; cutBin++){
-      for (int bin=0; bin<=xPosFracValMerged->GetNbinsX()+1; bin++)
-        xPosFracValMerged->SetBinContent( bin,cutBin, xPosFracValMerged->GetBinContent(bin,cutBin) + xPosFracVal->GetBinContent(bin,cutBin));
-      }
-
-    TH2F * xPosFracMis= (TH2F*)gDirectory->Get("xPosFracMis");
-    for (int cutBin=1; cutBin<=6; cutBin++){
-      for (int bin=0; bin<=xPosFracMisMerged->GetNbinsX()+1; bin++)
-        xPosFracMisMerged->SetBinContent( bin,cutBin, xPosFracMisMerged->GetBinContent(bin,cutBin) + xPosFracMis->GetBinContent(bin,cutBin));
-      }
-
-    TH2F * yPosFracVal= (TH2F*)gDirectory->Get("yPosFracVal");
-    for (int cutBin=1; cutBin<=6; cutBin++){    
-      for (int bin=0; bin<=yPosFracValMerged->GetNbinsX()+1; bin++)
-        yPosFracValMerged->SetBinContent( bin,cutBin, yPosFracValMerged->GetBinContent(bin,cutBin) + yPosFracVal->GetBinContent(bin,cutBin));
-      }
-
-    TH2F * yPosFracMis= (TH2F*)gDirectory->Get("yPosFracMis");
-    for (int cutBin=1; cutBin<=6; cutBin++){
-      for (int bin=0; bin<=yPosFracMisMerged->GetNbinsX()+1; bin++)
-        yPosFracMisMerged->SetBinContent( bin,cutBin, yPosFracMisMerged->GetBinContent(bin,cutBin) + yPosFracMis->GetBinContent(bin,cutBin));
-      }
+   
+   
+    mergeHisto("xPosFracVal",xPosFracValMerged,true);
+    mergeHisto("xPosFracMis",xPosFracMisMerged,true);
+    mergeHisto("yPosFracVal",yPosFracValMerged,true);
+    mergeHisto("yPosFracMis",yPosFracMisMerged,true);
 
 
-    TH1F*  hitsPassingCutsValBPix=(TH1F*)gDirectory->Get("hitsPassingCutsValBPix");
-    for (int bin=1; bin<=hitsPassingCutsValBPixMerged->GetNbinsX(); bin++)
-      hitsPassingCutsValBPixMerged->SetBinContent( bin, hitsPassingCutsValBPix->GetBinContent(bin) + hitsPassingCutsValBPixMerged->GetBinContent(bin));
-
-    TH1F*  hitsPassingCutsMisBPix=(TH1F*)gDirectory->Get("hitsPassingCutsMisBPix");
-    for (int bin=1; bin<=hitsPassingCutsMisBPixMerged->GetNbinsX(); bin++)
-      hitsPassingCutsMisBPixMerged->SetBinContent( bin, hitsPassingCutsMisBPix->GetBinContent(bin) + hitsPassingCutsMisBPixMerged->GetBinContent(bin));
+    mergeHisto("hitsPassingCutsValBPix",hitsPassingCutsValBPixMerged);
+    mergeHisto("hitsPassingCutsMisBPix",hitsPassingCutsMisBPixMerged);
+    mergeHisto("hitsPassingCutsValFPix",hitsPassingCutsValFPixMerged);
+    mergeHisto("hitsPassingCutsMisFPix",hitsPassingCutsMisFPixMerged);
     
-    TH1F*  hitsPassingCutsValFPix=(TH1F*)gDirectory->Get("hitsPassingCutsValFPix");
-    for (int bin=1; bin<=hitsPassingCutsValFPixMerged->GetNbinsX(); bin++)
-      hitsPassingCutsValFPixMerged->SetBinContent( bin, hitsPassingCutsValFPix->GetBinContent(bin) + hitsPassingCutsValFPixMerged->GetBinContent(bin));
-
-    TH1F*  hitsPassingCutsMisFPix=(TH1F*)gDirectory->Get("hitsPassingCutsMisFPix");
-    for (int bin=1; bin<=hitsPassingCutsMisFPixMerged->GetNbinsX(); bin++)
-      hitsPassingCutsMisFPixMerged->SetBinContent( bin, hitsPassingCutsMisFPix->GetBinContent(bin) + hitsPassingCutsMisFPixMerged->GetBinContent(bin));
-    
-    for (int bin=1; bin<=hitsPassingCutsValMerged->GetNbinsX(); bin++)
-      hitsPassingCutsValMerged->SetBinContent( bin, hitsPassingCutsValBPix->GetBinContent(bin) + hitsPassingCutsValFPix->GetBinContent(bin) + hitsPassingCutsValMerged->GetBinContent(bin));
-
-    for (int bin=1; bin<=hitsPassingCutsMisMerged->GetNbinsX(); bin++)
-      hitsPassingCutsMisMerged->SetBinContent( bin, hitsPassingCutsMisBPix->GetBinContent(bin) + hitsPassingCutsMisFPix->GetBinContent(bin) + hitsPassingCutsMisMerged->GetBinContent(bin));
-    
-    
-    //***TO COMMENT IF U WANT TO RUN
-    /*TH1F*  hitsPassingCutsVal=(TH1F*)gDirectory->Get("hitsPassingCutsVal");
-    for (int bin=1; bin<=hitsPassingCutsValMerged->GetNbinsX(); bin++)
-      hitsPassingCutsValMerged->SetBinContent( bin, hitsPassingCutsValBPix->GetBinContent(bin) + hitsPassingCutsValFPix->GetBinContent(bin) + hitsPassingCutsValMerged->GetBinContent(bin));
-
-    TH1F*  hitsPassingCutsMis=(TH1F*)gDirectory->Get("hitsPassingCutsMis");
-    for (int bin=1; bin<=hitsPassingCutsMisMerged->GetNbinsX(); bin++)
-      hitsPassingCutsMisMerged->SetBinContent( bin, hitsPassingCutsMisBPix->GetBinContent(bin) + hitsPassingCutsMisFPix->GetBinContent(bin) + hitsPassingCutsMisMerged->GetBinContent(bin));
-*/
+ 
     if(DEBUG) cout<<"********* NOW MERGING *EKLUND* plots ************"<<endl;
     mergeHisto("validAlphaBeta",validAlphaBetaMerged);
     mergeHisto("missingAlphaBeta",missingAlphaBetaMerged);
@@ -744,7 +504,8 @@ void merge(){
 
     mergeHisto("validVsMuontimePre68094",validVsMuontimePre68094Merged);
     mergeHisto("missingVsMuontimePre68094",missingVsMuontimePre68094Merged);
-    mergeHisto("validVsMuontimePost68094",validVsMuontimePost68094Merged);
+    //mergeHisto("validVsMuontimePost68094",validVsMuontimePost68094Merged);
+    mergeHisto(validVsMuontimePost68094Merged);
     mergeHisto("missingVsMuontimePost68094",missingVsMuontimePost68094Merged);
     
     mergeHisto("validMuonTimeVSchargeBPix",validMuonTimeVSchargeBPixMerged);
@@ -786,40 +547,16 @@ void merge(){
     mergeHisto("chargeDistriFPixMinus",chargeDistriFPixMinusMerged);
     mergeHisto("numbPixInClusterFPixMinus",numbPixInClusterFPixMinusMerged);
     
-    TH1F* numbPixInClusterX =(TH1F*)gDirectory->Get("numbPixInClusterX");
-    for (int bin=1; bin<=numbPixInClusterXMerged->GetNbinsX(); bin++)
-      numbPixInClusterXMerged->SetBinContent( bin, numbPixInClusterX->GetBinContent(bin) + numbPixInClusterXMerged->GetBinContent(bin));
+    mergeHisto("numbPixInClusterX",numbPixInClusterXMerged);
+    mergeHisto("numbPixInClusterY",numbPixInClusterYMerged);
     
-    TH1F* numbPixInClusterY =(TH1F*)gDirectory->Get("numbPixInClusterY");
-    for (int bin=1; bin<=numbPixInClusterYMerged->GetNbinsX(); bin++)
-      numbPixInClusterYMerged->SetBinContent( bin, numbPixInClusterY->GetBinContent(bin) + numbPixInClusterYMerged->GetBinContent(bin));
+    mergeHisto(xposClusterMerged);
+    mergeHisto(yposClusterMerged);
     
-    /*TH1F* xposCluster =(TH1F*)gDirectory->Get("xposCluster");
-    for (int bin=1; bin<=xposClusterMerged->GetNbinsX(); bin++)
-      xposClusterMerged->SetBinContent( bin, xposCluster->GetBinContent(bin) + xposClusterMerged->GetBinContent(bin));
-    
-    TH1F*  yposCluster=(TH1F*)gDirectory->Get("yposCluster");
-    for (int bin=1; bin<=yposClusterMerged->GetNbinsX(); bin++)
-      yposClusterMerged->SetBinContent( bin, yposCluster->GetBinContent(bin) + yposClusterMerged->GetBinContent(bin));
-    */
-    TH1F* xposClusterValid =(TH1F*)gDirectory->Get("xposClusterValid");
-    for (int bin=1; bin<=xposClusterValidMerged->GetNbinsX(); bin++)
-      xposClusterValidMerged->SetBinContent( bin, xposClusterValid->GetBinContent(bin) + xposClusterValidMerged->GetBinContent(bin));
-    
-    TH1F* yposClusterValid =(TH1F*)gDirectory->Get("yposClusterValid");
-    for (int bin=1; bin<=yposClusterValidMerged->GetNbinsX(); bin++)
-      yposClusterValidMerged->SetBinContent( bin, yposClusterValid->GetBinContent(bin) + yposClusterValidMerged->GetBinContent(bin));
-    
-    TH1F* xposClusterMisRecovered =(TH1F*)gDirectory->Get("xposClusterMisRecovered");
-    for (int bin=1; bin<=xposClusterMisRecoveredMerged->GetNbinsX(); bin++)
-      xposClusterMisRecoveredMerged->SetBinContent( bin, xposClusterMisRecovered->GetBinContent(bin) + xposClusterMisRecoveredMerged->GetBinContent(bin));
-    
-    TH1F*  yposClusterMisRecovered=(TH1F*)gDirectory->Get("yposClusterMisRecovered");
-    for (int bin=1; bin<=yposClusterMisRecoveredMerged->GetNbinsX(); bin++)
-      yposClusterMisRecoveredMerged->SetBinContent( bin, yposClusterMisRecovered->GetBinContent(bin) + yposClusterMisRecoveredMerged->GetBinContent(bin));
-
-
-    if(DEBUG) cout<<"********* NOW MERGING WINDOW SEARCH ************"<<endl;
+    mergeHisto("xposClusterValid",xposClusterValidMerged);
+    mergeHisto("yposClusterValid",yposClusterValidMerged);
+    mergeHisto("xposClusterMisRecovered",xposClusterMisRecoveredMerged);
+    mergeHisto("yposClusterMisRecovered",yposClusterMisRecoveredMerged);
 
     mergeHisto("numTracksVsMuonTime",numTracksVsMuonTimeMerged);
     mergeHisto("denTracksVsMuonTime",denTracksVsMuonTimeMerged);
@@ -829,37 +566,17 @@ void merge(){
  
     if(DEBUG) cout<<"********* NOW MERGING WINDOW SEARCH ************"<<endl;
 
-    TH1F *windowSearch = (TH1F*)gDirectory->Get( "windowSearch" );
-    for (int bin=1; bin<=windowSearchMerged->GetNbinsX()+1; bin++)
-      windowSearchMerged->SetBinContent( bin, windowSearchMerged->GetBinContent(bin) + windowSearch->GetBinContent(bin));
- 
-     TH1F *windowSearchSameModule = (TH1F*)gDirectory->Get( "windowSearchSameModule" );
-    for (int bin=1; bin<=windowSearchSameModuleMerged->GetNbinsX()+1; bin++)
-      windowSearchSameModuleMerged->SetBinContent( bin, windowSearchSameModuleMerged->GetBinContent(bin) + windowSearchSameModule->GetBinContent(bin));
+    mergeHisto(windowSearchMerged,true);
+    mergeHisto(windowSearchSameModuleMerged,true);
+    mergeHisto(windowSearchBPixMerged,true);
+    mergeHisto(windowSearchGoodModulesBPixMerged,true);
+    mergeHisto(windowSearchFPixMerged,true);
     
-    TH1F *windowSearchBPix = (TH1F*)gDirectory->Get( "windowSearchBPix" );
-    for (int bin=1; bin<=windowSearchBPixMerged->GetNbinsX()+1; bin++)
-      windowSearchBPixMerged->SetBinContent( bin, windowSearchBPixMerged->GetBinContent(bin) + windowSearchBPix->GetBinContent(bin));
-    
-    TH1F *windowSearchGoodModulesBPix = (TH1F*)gDirectory->Get( "windowSearchGoodModulesBPix" );
-    for (int bin=1; bin<=windowSearchGoodModulesBPixMerged->GetNbinsX()+1; bin++)
-      windowSearchGoodModulesBPixMerged->SetBinContent( bin,windowSearchGoodModulesBPixMerged->GetBinContent(bin) + windowSearchGoodModulesBPix->GetBinContent(bin));
-
-    TH1F *windowSearchFPix = (TH1F*)gDirectory->Get( "windowSearchFPix" );
-    for (int bin=1; bin<=windowSearchFPixMerged->GetNbinsX()+1; bin++)
-      windowSearchFPixMerged->SetBinContent( bin, windowSearchFPixMerged->GetBinContent(bin) + windowSearchFPix->GetBinContent(bin));
-    
-    TH1F *missingButClusterOnSameModule = (TH1F*)gDirectory->Get( "missingButClusterOnSameModule" );
-    missingButClusterOnSameModuleMerged->Fill(0.,missingButClusterOnSameModule->GetBinContent(1));
-    missingButClusterOnSameModuleMerged->Fill(1.,missingButClusterOnSameModule->GetBinContent(2));
-    
-    TH1F *missingButCluster = (TH1F*)gDirectory->Get( "missingButCluster" );
-    missingButClusterMerged->Fill(0.,missingButCluster->GetBinContent(1));
-    missingButClusterMerged->Fill(1.,missingButCluster->GetBinContent(2));
-//
-    
+    mergeHisto(missingButClusterOnSameModuleMerged);
+    mergeHisto(missingButClusterMerged);
+        
     if(DEBUG) cout<<"********* ALL HISTO WERE SUCCESSFULLY MERGED ************"<<endl;
-    if(DEBUG) cout<<"********* NOW STARTING TO MERGE TTREE ************"<<endl;
+    if(DEBUG) cout<<"*********    NOW STARTING TO MERGE TTREE     ************"<<endl;
 
     
     TTree *tree = (TTree*)gDirectory->Get("moduleAnalysis");
@@ -949,33 +666,26 @@ void merge(){
    validPerRunMerged->LabelsDeflate("X"); 
    inactivePerRunMerged->LabelsDeflate("X");
     
-   for (int i=1; i<=validPerRunMerged->GetNbinsX(); i++){
-     /*double a,b;
-     a=validPerRunMerged->GetBinContent(i);
-     //by definition: take into account only VALID and MISSING!
-     b=(invalidPerRunMerged->GetBinContent(i)-inactivePerRunMerged->GetBinContent(i));
-     if ((a+b)!=0){
-       efficiencyPerRun->SetBinContent(i,(a)/(a+b));
-       efficiencyPerRun->SetBinError( i,sqrt( (a/(a+b))*(1-(a/(a+b)))/(a+b)) );
-       efficiencyPerRun->GetXaxis()->SetBinLabel( i,validPerRunMerged->GetXaxis()->GetBinLabel(i) );
-     }*/
-       
+   for (int i=1; i<=validPerRunMerged->GetNbinsX(); i++){       
      inactivePercentPerRun->SetBinContent(i,inactivePerRunMerged->GetBinContent(i)/(invalidPerRunMerged->GetBinContent(i)+validPerRunMerged->GetBinContent(i)) );
      inactivePercentPerRun->GetXaxis()->SetBinLabel( i,validPerRunMerged->GetXaxis()->GetBinLabel(i) );
-       
    } 
   
   setSameLabel(validPerRunMerged,missingPerRunMerged);
   setSameLabel(validPerRunMerged,efficiencyPerRun);
   makeOperation(invalidPerRunMerged,inactivePerRunMerged,missingPerRunMerged,"-");
-  makeEfficiency(validPerRunMerged,missingPerRunMerged,efficiencyPerRun);
+  //makeEfficiency(validPerRunMerged,missingPerRunMerged,efficiencyPerRun);
+  makeEfficiency(efficiencyPerRun);
   
   setSameLabel(muonTimeVSRunNumberMerged,meanMuonTimeVSRunNumber);
   setSameLabel(muonTimeErrorVSRunNumberMerged,meanMuonTimeErrorVSRunNumber);
   
   makeEfficiency(validVSMuonTimeErrorMerged,missingVSMuonTimeErrorMerged,efficiencyVSMuonTimeError);
-  makeMean(muonTimeVSRunNumberMerged,nMuonTimeVSRunNumberMerged,meanMuonTimeVSRunNumber);
-  makeMean(muonTimeErrorVSRunNumberMerged,nMuonTimeErrorVSRunNumberMerged,meanMuonTimeErrorVSRunNumber);
+  makeOperation(muonTimeVSRunNumberMerged,nMuonTimeVSRunNumberMerged,meanMuonTimeVSRunNumber,"/");
+  makeOperation(muonTimeErrorVSRunNumberMerged,nMuonTimeErrorVSRunNumberMerged,meanMuonTimeErrorVSRunNumber,"/");
+  
+  makeOperation(hitsPassingCutsMisBPixMerged,hitsPassingCutsMisFPixMerged,hitsPassingCutsMisMerged,"+");
+  makeOperation(hitsPassingCutsValBPixMerged,hitsPassingCutsValFPixMerged,hitsPassingCutsValMerged,"+");
   
   TH1F* histBarrelEfficiencyComparison = new TH1F("histBarrelEfficiencyComparison", "histBarrelEfficiencyComparison", 4, 0, 4);
   TH1F* histEndCapEfficiencyComparison = new TH1F("histEndCapEfficiencyComparison", "histEndCapEfficiencyComparison", 4, 0, 4);
@@ -1095,8 +805,8 @@ void merge(){
   makeOperation(validVsAlphaBPixMerged,missingVsAlphaBPixMerged,auxDen2,"+");
   histAlphaAnalysisBPixGraph = new TGraphAsymmErrors (validVsAlphaBPixMerged,auxDen2);
   
-  makeEfficiencyNoError(validVsBetaBPixMerged,missingVsBetaBPixMerged,histBetaAnalysisBPix);
-  makeEfficiencyNoError(validVsAlphaBPixMerged,missingVsAlphaBPixMerged,histAlphaAnalysisBPix);
+  makeEfficiency(validVsBetaBPixMerged,missingVsBetaBPixMerged,histBetaAnalysisBPix,false);
+  makeEfficiency(validVsAlphaBPixMerged,missingVsAlphaBPixMerged,histAlphaAnalysisBPix,false);
   makeEfficiency(validVsAlphaMerged,missingVsAlphaMerged,histAlphaAnalysis);  
   makeEfficiency(validVsAlphaFPixMerged,missingVsAlphaFPixMerged,histAlphaAnalysisFPix);
   makeEfficiency(validVsCotanAlphaMerged,missingVsCotanAlphaMerged,histCotanAlphaAnalysis);
@@ -1130,31 +840,27 @@ void merge(){
   makeEfficiency(validVsPTMerged,missingVsPTMerged,PTEfficiency);
 
   TH1F* localXAnalysis = new TH1F("localXAnalysis", "hist", 100,-1.5,1.5); 
-  for (int bin=1;bin<=100;bin++)
-    {
+  for (int bin=1;bin<=100;bin++){
     double val=validVsLocalXMerged->GetBinContent(bin);
     double mis=missingVsLocalXMerged->GetBinContent(bin);
-    if ((val+mis)!=0)
-      {
+    if ((val+mis)!=0){
       localXAnalysis->SetBinContent(bin,val/(val+mis));
       error=0;
       error=sqrt(((val)/(val+mis))*(1-((val)/(val+mis)))/(val+mis));
       localXAnalysis->SetBinError(bin,error);
-      }
     }
+  }
   TH1F* localYAnalysis = new TH1F("localYAnalysis", "hist", 100,-4.,4.); 
-  for (int bin=1;bin<=100;bin++)
-    {
+  for (int bin=1;bin<=100;bin++){
     double val=validVsLocalYMerged->GetBinContent(bin);
     double mis=missingVsLocalYMerged->GetBinContent(bin);
-    if ((val+mis)!=0)
-      {
+    if ((val+mis)!=0){
       localYAnalysis->SetBinContent(bin,val/(val+mis));
       error=0;
       error=sqrt(((val)/(val+mis))*(1-((val)/(val+mis)))/(val+mis));
       localYAnalysis->SetBinError(bin,error);
-      }
     }
+  }
 
 
   TH1F* moduleBreakoutEff = new TH1F("moduleBreakoutEff", "moduleBreakoutEff", 1500, 0,1500); 
@@ -1176,8 +882,7 @@ void merge(){
     treeMerged->GetEntry(n);
     if (missing==0 && valid==0)
     //std::cout<<"dei, tiraghe via sto mona..."<< id <<std::endl;
-    if (( valid+missing)!=0)
-      {
+    if (( valid+missing)!=0){
       double setbin = (double)valid/(double)(valid+missing);
       error=0;
       error=sqrt( ((double)valid/(double)(valid+missing))*(1-((double)valid/(double)(valid+missing)))/(double)(valid+missing) );
@@ -1185,48 +890,42 @@ void merge(){
       moduleBreakoutEff->SetBinContent(n+1,setbin);
       moduleBreakoutEff->SetBinError(n+1,error);
 
-      if ( (isModuleBad==0) && (isBarrelModule==1) )
-        {
+      if ( (isModuleBad==0) && (isBarrelModule==1) ){
         moduleGoodBPix->SetBinContent(binGoodBPix , setbin);
         moduleGoodBPix->SetBinError(binGoodBPix , error);
         binGoodBPix++;
-	}
-      if ( (isModuleBad==1) && (isBarrelModule==1) )
-        {
+      }
+      if ( (isModuleBad==1) && (isBarrelModule==1) ){
         moduleBadBPix->SetBinContent(binBadBPix , setbin);
         moduleBadBPix->SetBinError(binBadBPix , error);
         binBadBPix++;
-	}
-      if ((isModuleBad==0) && (isBarrelModule==2) )
-        {
+      }
+      if ((isModuleBad==0) && (isBarrelModule==2) ){
         moduleGoodFPix->SetBinContent(binGoodFPix , setbin);
         moduleGoodFPix->SetBinError(binGoodFPix , error);
         binGoodFPix++;
-	}
-      if ( (isModuleBad==1) && (isBarrelModule==2) )
-        {
+      }
+      if ( (isModuleBad==1) && (isBarrelModule==2) ){
         moduleBadFPix->SetBinContent(binBadFPix , setbin);
         moduleBadFPix->SetBinError(binBadFPix , error);
         binBadFPix++;
-	}
+      }
 	
-      }//end-if fill non "zero statistics" module hist
+    }//end-if fill non "zero statistics" module hist
     else zeroStatModule++;
 
-    }//end-for loop on tree
+  }//end-for loop on tree
 
   //Fit on goodBPixModule with cut at 75%
   TH1F* qualityBPixModule = new TH1F("qualityBPixModule", "qualityBPixModule", moduleGoodBPix->GetNbinsX(), 0 ,moduleGoodBPix->GetXaxis()->GetBinUpEdge(windowSearchMerged->GetNbinsX())); 
   int fillme=1;
-  for (int bin=1; bin<=moduleGoodBPix->GetNbinsX(); bin++)
-    {
-    if (moduleGoodBPix->GetBinContent(bin)>0.75)//
-      {
+  for (int bin=1; bin<=moduleGoodBPix->GetNbinsX(); bin++){
+    if (moduleGoodBPix->GetBinContent(bin)>0.75){
       qualityBPixModule->SetBinContent( fillme,moduleGoodBPix->GetBinContent(bin) );
       qualityBPixModule->SetBinError( fillme,moduleGoodBPix->GetBinError(bin));
       fillme++;
-      }
     }
+  }
   
   TF1 *myfit = new TF1("myfit","[0]", 0, fillme);
   myfit->SetParName(0,"eff");
@@ -1367,47 +1066,30 @@ void merge(){
 
    //****************** Barrel Maps ****************
   
-  TH2F* layer1         =  new TH2F("layer1","layer1",8,1,9 ,20,1,21);
-  TH2F* layer1valid    =  new TH2F("layer1valid","layer1valid",8,1,9 ,20,1,21);
-  TH2F* layer1missing  =  new TH2F("layer1missing","layer1missing",8,1,9 ,20,1,21);
-  TH2F* layer1inactive =  new TH2F("layer1inactive","layer1inactive",8,1,9 ,20,1,21);
-  TH2F* layer2         =  new TH2F("layer2","layer2",8,1,9 ,32,1,33);
-  TH2F* layer2valid    =  new TH2F("layer2valid","layer2valid",8,1,9 ,32,1,33);
-  TH2F* layer2missing  =  new TH2F("layer2missing","layer2missing",8,1,9 ,32,1,33);
-  TH2F* layer2inactive =  new TH2F("layer2inactive","layer2inactive",8,1,9 ,32,1,33);
-  TH2F* layer3         =  new TH2F("layer3","layer3",8,1,9 ,44,1,45);
-  TH2F* layer3valid    =  new TH2F("layer3valid","layer3valid",8,1,9 ,44,1,45);
-  TH2F* layer3missing  =  new TH2F("layer3missing","layer3missing",8,1,9 ,44,1,45);
-  TH2F* layer3inactive =  new TH2F("layer3inactive","layer3inactive",8,1,9 ,44,1,45);
+  TH2F* layer1         =  new TH2F("layer1","layer1;module;ladder;efficiency",8,1,9 ,20,1,21);
+  TH2F* layer1valid    =  new TH2F("layer1valid","layer1valid;module;ladder;nValid",8,1,9 ,20,1,21);
+  TH2F* layer1missing  =  new TH2F("layer1missing","layer1missing;module;ladder;nMissing",8,1,9 ,20,1,21);
+  TH2F* layer1inactive =  new TH2F("layer1inactive","layer1inactive;module;ladder;nInactive",8,1,9 ,20,1,21);
+  TH2F* layer2         =  new TH2F("layer2","layer2;module;ladder;efficiency",8,1,9 ,32,1,33);
+  TH2F* layer2valid    =  new TH2F("layer2valid","layer2valid;module;ladder;nValid",8,1,9 ,32,1,33);
+  TH2F* layer2missing  =  new TH2F("layer2missing","layer2missing;module;ladder;nMissing",8,1,9 ,32,1,33);
+  TH2F* layer2inactive =  new TH2F("layer2inactive","layer2inactive;module;ladder;nInactive",8,1,9 ,32,1,33);
+  TH2F* layer3         =  new TH2F("layer3","layer3;module;ladder;efficiency",8,1,9 ,44,1,45);
+  TH2F* layer3valid    =  new TH2F("layer3valid","layer3valid;module;ladder;nValid",8,1,9 ,44,1,45);
+  TH2F* layer3missing  =  new TH2F("layer3missing","layer3missing;module;ladder;nMissing",8,1,9 ,44,1,45);
+  TH2F* layer3inactive =  new TH2F("layer3inactive","layer3inactive;module;ladder;nInactive",8,1,9 ,44,1,45);
+  
+  TH2F* layer1_online         =  new TH2F("layer1_online","layer1_online;module;ladder;efficiency",10,-5,5,22,-11,11);
+  TH2F* layer1valid_online    =  new TH2F("layer1valid_online","layer1valid_online;module;ladder;nValid",10,-5,5,22,-11,11);
+  TH2F* layer1missing_online  =  new TH2F("layer1missing_online","layer1missing_online;module;ladder;nMissing",10,-5,5,22,-11,11);
+  TH2F* layer2_online         =  new TH2F("layer2_online","layer2_online;module;ladder;efficiency",10,-5,5,34,-17,17);
+  TH2F* layer2valid_online    =  new TH2F("layer2valid_online","layer2valid_online;module;ladder;nValid",10,-5,5,34,-17,17);
+  TH2F* layer2missing_online  =  new TH2F("layer2missing_online","layer2missing_online;module;ladder;nMissing",10,-5,5,34,-17,17);
+  TH2F* layer3_online         =  new TH2F("layer3_online","layer3_online;module;ladder;efficiency",10,-5,5,46,-23,23);
+  TH2F* layer3valid_online    =  new TH2F("layer3valid_online","layer3valid_online;module;ladder;nValid",10,-5,5,46,-23,23);
+  TH2F* layer3missing_online  =  new TH2F("layer3missing_online","layer3missing_online;module;ladder;nMissing",10,-5,5,46,-23,23);
 
-  layer1->GetXaxis()->SetTitle("module");
-  layer1->GetYaxis()->SetTitle("ladder");
-  layer2->GetXaxis()->SetTitle("module");
-  layer2->GetYaxis()->SetTitle("ladder");
-  layer3->GetXaxis()->SetTitle("module");
-  layer3->GetYaxis()->SetTitle("ladder");
-  layer1valid->GetXaxis()->SetTitle("module");
-  layer1valid->GetYaxis()->SetTitle("ladder");
-  layer2valid->GetXaxis()->SetTitle("module");
-  layer2valid->GetYaxis()->SetTitle("ladder");
-  layer3valid->GetXaxis()->SetTitle("module");
-  layer3valid->GetYaxis()->SetTitle("ladder");
-  layer1missing->GetXaxis()->SetTitle("module");
-  layer1missing->GetYaxis()->SetTitle("ladder");
-  layer2missing->GetXaxis()->SetTitle("module");
-  layer2missing->GetYaxis()->SetTitle("ladder");
-  layer3missing->GetXaxis()->SetTitle("module");
-  layer3missing->GetYaxis()->SetTitle("ladder");
-  layer1inactive->GetXaxis()->SetTitle("module");
-  layer1inactive->GetYaxis()->SetTitle("ladder");
-  layer2inactive->GetXaxis()->SetTitle("module");
-  layer2inactive->GetYaxis()->SetTitle("ladder");
-  layer3inactive->GetXaxis()->SetTitle("module");
-  layer3inactive->GetYaxis()->SetTitle("ladder");
-  
-  
-  int nhigheffmodule = 0;
-  int nhigheffmoduletot = 0;
+  cout<<"Listing Modules with no hits :"<<endl;  
   entries = treeMerged->GetEntries();
   for(int n=0;n<entries;n++){
     treeMerged->GetEntry(n);
@@ -1417,52 +1099,41 @@ void merge(){
       layer1valid->Fill(moduleInLadder,ladder,valid);
       layer1missing->Fill(moduleInLadder,ladder,missing);
       layer1inactive->Fill(moduleInLadder,ladder,inactive);
-      nhigheffmoduletot++;
       
-      if( (valid+missing)!=0 ){
-        layer1->Fill(moduleInLadder,ladder,double(valid)/double(valid+missing));
-	if (double(valid)/double(valid+missing)<0.2)
-          std::cout<<"cms.PSet(errortype = cms.string('whole'),detid = cms.uint32("<<id<<")),"<<std::endl;
-	}
-	
-	if(layer1->GetBinContent(moduleInLadder,ladder)>0.99)
-	  nhigheffmodule++;
+      layer1valid_online->Fill(module_online(moduleInLadder),ladder_online(1,ladder),valid);
+      layer1missing_online->Fill(module_online(moduleInLadder),ladder_online(1,ladder),missing);
+      
+      if ( valid+missing == 0 ) std::cout<<"layer 1, module "<<moduleInLadder<<", ladder "<<ladder<<std::endl;
     }
     if(id>302080000 && id<302160000){
       layer2valid->Fill(moduleInLadder,ladder,valid);
       layer2missing->Fill(moduleInLadder,ladder,missing);
       layer2inactive->Fill(moduleInLadder,ladder,inactive);
-      nhigheffmoduletot++;
       
-      if( (valid+missing)!=0 ){
-        layer2->Fill(moduleInLadder,ladder,double(valid)/double(valid+missing));
-	if (double(valid)/double(valid+missing)<0.2)
-          std::cout<<"cms.PSet(errortype = cms.string('whole'),detid = cms.uint32("<<id<<")),"<<std::endl;
-	}
-	
-	if(layer2->GetBinContent(moduleInLadder,ladder)>0.99)
-	  nhigheffmodule++;
+      layer2valid_online->Fill(module_online(moduleInLadder),ladder_online(2,ladder),valid);
+      layer2missing_online->Fill(module_online(moduleInLadder),ladder_online(2,ladder),missing);
+      
+      if ( valid+missing == 0 ) std::cout<<"layer 2, module "<<moduleInLadder<<", ladder "<<ladder<<std::endl;
     }
     if(id>302160000 && id<310000000){
       layer3valid->Fill(moduleInLadder,ladder,valid);
       layer3missing->Fill(moduleInLadder,ladder,missing);
       layer3inactive->Fill(moduleInLadder,ladder,inactive);
-      nhigheffmoduletot++;
       
-      if( (valid+missing)!=0 )
-        {
-        layer3->Fill(moduleInLadder,ladder,double(valid)/double(valid+missing));
-	if ( valid+missing == 0 ) std::cout<<"layer 3 void: module "<<moduleInLadder<<" ladder"<<ladder<<std::endl;
-	if (double(valid)/double(valid+missing)<0.2)
-          std::cout<<"cms.PSet(errortype = cms.string('whole'),detid = cms.uint32("<<id<<")),"<<std::endl;
-	}
-	
-	if(layer3->GetBinContent(moduleInLadder,ladder)>0.99)
-	  nhigheffmodule++;
+      layer3valid_online->Fill(module_online(moduleInLadder),ladder_online(3,ladder),valid);
+      layer3missing_online->Fill(module_online(moduleInLadder),ladder_online(3,ladder),missing);
+      
+      if ( valid+missing == 0 ) std::cout<<"layer 3, module "<<moduleInLadder<<", ladder "<<ladder<<std::endl;
     }
   }
 
-  cout<<"Number of modules with good stat : "<<nhigheffmodule<<" over "<<nhigheffmoduletot<<endl;
+  makeEfficiency(layer1valid,layer1missing,layer1);
+  makeEfficiency(layer2valid,layer2missing,layer2);
+  makeEfficiency(layer3valid,layer3missing,layer3);
+  
+  makeEfficiency(layer1valid_online,layer1missing_online,layer1_online);
+  makeEfficiency(layer2valid_online,layer2missing_online,layer2_online);
+  makeEfficiency(layer3valid_online,layer3missing_online,layer3_online);
 
  
   TH2F* danekBadModuleLayer1 = new TH2F ("danekBadModuleLayer1","danekBadModuleLayer1",8,1,9,20,1,21);
@@ -1483,7 +1154,7 @@ void merge(){
      danekBadModuleLayer3->SetBinContent(x,y,0.);
      }
     }
-  danekBadModuleLayer1->SetBinContent(6,4,1.);
+  /*danekBadModuleLayer1->SetBinContent(6,4,1.);
   danekBadModuleLayer1->SetBinContent(5,12,1.);
   danekBadModuleLayer1->SetBinContent(5,14,1.);
   danekBadModuleLayer1->SetBinContent(5,16,1.);
@@ -1528,7 +1199,7 @@ void merge(){
   danekBadModuleLayer3->SetBinContent(1,39,1.);
   danekBadModuleLayer3->SetBinContent(8,39,1.);
   danekBadModuleLayer3->SetBinContent(7,43,1.);
-  danekBadModuleLayer3->SetBinContent(6,44,1.);
+  danekBadModuleLayer3->SetBinContent(6,44,1.);*/
   
   TH1F* goodStatLayer1Eff = new TH1F("goodStatLayer1Eff","goodStatLayer1Eff",160,0,160);
   TH1F* goodStatLayer2Eff = new TH1F("goodStatLayer2Eff","goodStatLayer2Eff",256,0,256);
@@ -1564,6 +1235,8 @@ void merge(){
          //std::cout<<"layer 1: module "<<binX<<"; ladder "<<binY<<std::endl;
     }
   }
+  
+  cout<<endl<<"Fitting Layer 1, modules with nTot>10 && without known problems"<<endl;
   TF1 *goodStatFit1 = new TF1("goodStatFit1","[0]", 0, setbin);
   goodStatFit1->SetParName(0,"eff");
   goodStatFit1->SetParameter(0, 1);
@@ -1588,6 +1261,7 @@ void merge(){
         //std::cout<<"layer 2: module "<<binX<<"; ladder "<<binY<<std::endl;      
     }
   }
+  cout<<endl<<"Fitting Layer 2, modules with nTot>10 && without known problems"<<endl;
   TF1 *goodStatFit2 = new TF1("goodStatFit2","[0]", 0, setbin);
   goodStatFit2->SetParName(0,"eff");
   goodStatFit2->SetParameter(0, 1);
@@ -1608,11 +1282,10 @@ void merge(){
 	goodStatLayer3EffDistri->Fill(layer3->GetBinContent(binX,binY));
 	if(layer3->GetBinContent(binX,binY)>0.99) ngoodstat++;
       }
-      //if (layer3valid->GetBinContent(binX,binY)+layer3missing->GetBinContent(binX,binY) <=10)
-        //std::cout<<"layer 3: module "<<binX<<"; ladder "<<binY<<std::endl;
     }
   }
 
+  cout<<endl<<"Fitting Layer 3, modules with nTot>10 && without known problems"<<endl;
   TF1 *goodStatFit3 = new TF1("goodStatFit3","[0]", 0, setbin);
   goodStatFit3->SetParName(0,"eff");
   goodStatFit3->SetParameter(0, 1);
@@ -1688,8 +1361,8 @@ void merge(){
     for (int lad=1;lad<=22;lad++){
       totNum+=(int)layer1valid->GetBinContent(mod,lad);
       totDen+=(int)layer1valid->GetBinContent(mod,lad)+(int)layer1missing->GetBinContent(mod,lad);
-      }
     }
+  }
   wholeNum+=totNum;  wholeDen+=totDen;
   double averageEff = (double)totNum/(double)totDen;
   double binomialErr = sqrt(averageEff*(1-averageEff)/(double)(totNum+totDen));
@@ -1701,8 +1374,8 @@ void merge(){
     for (int lad=1;lad<=32;lad++){
       totNum+=(int)layer2valid->GetBinContent(mod,lad);
       totDen+=(int)layer2valid->GetBinContent(mod,lad)+(int)layer2missing->GetBinContent(mod,lad);
-      }
     }
+  }
   wholeNum+=totNum;  wholeDen+=totDen;
   averageEff = (double)totNum/(double)totDen;
   binomialErr = sqrt(averageEff*(1-averageEff)/(double)(totNum+totDen));
@@ -1714,8 +1387,8 @@ void merge(){
     for (int lad=1;lad<=44;lad++){
       totNum+=(int)layer3valid->GetBinContent(mod,lad);
       totDen+=(int)layer3valid->GetBinContent(mod,lad)+(int)layer3missing->GetBinContent(mod,lad);
-      }
     }
+  }
   wholeNum+=totNum;  wholeDen+=totDen;
   averageEff = (double)totNum/(double)totDen;
   binomialErr = sqrt(averageEff*(1-averageEff)/(double)(totNum+totDen));
@@ -1732,9 +1405,9 @@ void merge(){
       if (danekBadModuleLayer1->GetBinContent(mod,lad)==0){
         totNum+=(int)layer1valid->GetBinContent(mod,lad);
         totDen+=(int)layer1valid->GetBinContent(mod,lad)+(int)layer1missing->GetBinContent(mod,lad);
-        }
       }
     }
+  }
   wholeNum+=totNum;  wholeDen+=totDen;
   averageEff = (double)totNum/(double)totDen;
   binomialErr = sqrt(averageEff*(1-averageEff)/(double)(totNum+totDen));
@@ -1747,9 +1420,9 @@ void merge(){
       if (danekBadModuleLayer2->GetBinContent(mod,lad)==0){
         totNum+=(int)layer2valid->GetBinContent(mod,lad);
         totDen+=(int)layer2valid->GetBinContent(mod,lad)+(int)layer2missing->GetBinContent(mod,lad);
-        }
       }
     }
+  }
   wholeNum+=totNum;  wholeDen+=totDen;
   averageEff = (double)totNum/(double)totDen;
   binomialErr = sqrt(averageEff*(1-averageEff)/(double)(totNum+totDen));
@@ -1762,9 +1435,9 @@ void merge(){
       if (danekBadModuleLayer3->GetBinContent(mod,lad)==0){
         totNum+=(int)layer3valid->GetBinContent(mod,lad);
         totDen+=(int)layer3valid->GetBinContent(mod,lad)+(int)layer3missing->GetBinContent(mod,lad);
-        }
       }
     }
+  }
   wholeNum+=totNum;  wholeDen+=totDen;
   averageEff = (double)totNum/(double)totDen;
   binomialErr = sqrt(averageEff*(1-averageEff)/(double)(totNum+totDen));
@@ -1787,8 +1460,8 @@ void merge(){
       if (layer1RelativeErr->GetBinContent(mod,lad)<0.1)
         layer1publication->SetBinContent(mod,lad,layer1->GetBinContent(mod,lad));
       else layer1publication->SetBinContent(mod,lad,0.);
-      }
     }
+  }
 
   for (int mod=1;mod<=8;mod++){
     for (int lad=1;lad<=32;lad++){
@@ -1796,8 +1469,8 @@ void merge(){
            (mod==2&&lad==4)||(mod==8&&lad==9)||(mod==5&&lad==16)||(mod==7&&lad==21)||(mod==1&&lad==22)||(mod==8&&lad==24) )
         layer2publication->SetBinContent(mod,lad,0.);
       else layer2publication->SetBinContent(mod,lad,layer2->GetBinContent(mod,lad));
-      }
     }
+  }
 
   for (int mod=1;mod<=8;mod++){
     for (int lad=1;lad<=44;lad++){
@@ -1805,8 +1478,8 @@ void merge(){
           (mod==2&&lad==8)||(mod==5&&lad==21)||(mod==8&&lad==21)||(mod==8&&lad==34)||(mod==6&&lad==44) )
         layer3publication->SetBinContent(mod,lad,0);
       else layer3publication->SetBinContent(mod,lad,layer3->GetBinContent(mod,lad));
-      }
     }
+  }
 
     //****************** END   OF 2D MAPS FOR MODULE ANALYSIS ****************    
   
@@ -1838,7 +1511,7 @@ void merge(){
     }
   }
     
-  
+  cout<<endl<<"Doing Fit on efficiency per run"<<endl;
   TF1 *runfit = new TF1("runfit","[0]", 0, efficiencyPerRun->GetNbinsX());
   runfit->SetParName(0,"mean_eff");
   runfit->SetParameter(0, 1);
@@ -1860,12 +1533,12 @@ void merge(){
   }
 
 
-  TH1F* cutsEfficiency = new TH1F("cutsEfficiency","cutsEfficiency",10,0,10);
-  TH1F* cutsEfficiencyBPix = new TH1F("cutsEfficiencyBPix","cutsEfficiencyBPix",10,0,10);
-  TH1F* cutsEfficiencyFPix = new TH1F("cutsEfficiencyFPix","cutsEfficiencyFPix",10,0,10);
-  TH1F* cutsTotal = new TH1F("cutsTotal","cutsTotal",10,0,10);
-  TH1F* cutsTotalBPix = new TH1F("cutsTotalBPix","cutsTotalBPix",10,0,10);
-  TH1F* cutsTotalFPix = new TH1F("cutsTotalFPix","cutsTotalFPix",10,0,10);
+  TH1F* cutsEfficiency = new TH1F("cutsEfficiency","cutsEfficiency;;#epsilon_{hit}",10,0,10);
+  TH1F* cutsEfficiencyBPix = new TH1F("cutsEfficiencyBPix","cutsEfficiencyBPix;;Efficiency [BPix]",10,0,10);
+  TH1F* cutsEfficiencyFPix = new TH1F("cutsEfficiencyFPix","cutsEfficiencyFPix;;Efficiency [FPix]",10,0,10);
+  TH1F* cutsTotal = new TH1F("cutsTotal","cutsTotal;;nHits",10,0,10);
+  TH1F* cutsTotalBPix = new TH1F("cutsTotalBPix","cutsTotalBPix;;nHits [BPix]",10,0,10);
+  TH1F* cutsTotalFPix = new TH1F("cutsTotalFPix","cutsTotalFPix;;nHits [FPix]",10,0,10);
   for(int i=1;i<11;i++){
     cutsEfficiency->SetBinContent(i,double(hitsPassingCutsValMerged->GetBinContent(i))/double(hitsPassingCutsValMerged->GetBinContent(i)+hitsPassingCutsMisMerged->GetBinContent(i)));
     cutsEfficiencyBPix->SetBinContent(i,double(hitsPassingCutsValBPixMerged->GetBinContent(i))/double(hitsPassingCutsValBPixMerged->GetBinContent(i)+hitsPassingCutsMisBPixMerged->GetBinContent(i)));
@@ -1885,65 +1558,13 @@ void merge(){
   cutsEfficiency->GetXaxis()->SetBinLabel(8,"Telescope + Edge");
   cutsEfficiency->GetXaxis()->SetBinLabel(9,"Edge + Muon");
   cutsEfficiency->GetXaxis()->SetBinLabel(10,"Analysis cut");
-  cutsEfficiency->GetYaxis()->SetTitle("#epsilon_{hit}");
-  cutsEfficiencyBPix->GetXaxis()->SetBinLabel(1,"No Cut");
-  cutsEfficiencyBPix->GetXaxis()->SetBinLabel(2,"Loose cut");
-  cutsEfficiencyBPix->GetXaxis()->SetBinLabel(3,"Telescope");
-  cutsEfficiencyBPix->GetXaxis()->SetBinLabel(5,"Edge cut");
-  cutsEfficiencyBPix->GetXaxis()->SetBinLabel(4,"Muon Timing");
-  cutsEfficiencyBPix->GetXaxis()->SetBinLabel(6,"pT cut");
-  cutsEfficiencyBPix->GetXaxis()->SetBinLabel(7,"Telescope + Muon ");
-  cutsEfficiencyBPix->GetXaxis()->SetBinLabel(8,"Telescope + Edge");
-  cutsEfficiencyBPix->GetXaxis()->SetBinLabel(9,"Edge + Muon");
-  cutsEfficiencyBPix->GetXaxis()->SetBinLabel(10,"Analysis cut");
-  cutsEfficiencyBPix->GetYaxis()->SetTitle("Efficiency [BPix]");
-  cutsEfficiencyFPix->GetXaxis()->SetBinLabel(1,"No Cut");
-  cutsEfficiencyFPix->GetXaxis()->SetBinLabel(2,"Loose cut");
-  cutsEfficiencyFPix->GetXaxis()->SetBinLabel(3,"Telescope");
-  cutsEfficiencyFPix->GetXaxis()->SetBinLabel(5,"Edge cut");
-  cutsEfficiencyFPix->GetXaxis()->SetBinLabel(4,"Muon Timing");
-  cutsEfficiencyFPix->GetXaxis()->SetBinLabel(6,"pT cut");
-  cutsEfficiencyFPix->GetXaxis()->SetBinLabel(7,"Telescope + Muon ");
-  cutsEfficiencyFPix->GetXaxis()->SetBinLabel(8,"Telescope + Edge");
-  cutsEfficiencyFPix->GetXaxis()->SetBinLabel(9,"Edge + Muon");
-  cutsEfficiencyFPix->GetXaxis()->SetBinLabel(10,"Analysis cut");
-  cutsEfficiencyFPix->GetYaxis()->SetTitle("Efficiency [FPix]");
-  cutsTotal->GetXaxis()->SetBinLabel(1,"No Cut");
-  cutsTotal->GetXaxis()->SetBinLabel(2,"Loose cut");
-  cutsTotal->GetXaxis()->SetBinLabel(3,"Telescope");
-  cutsTotal->GetXaxis()->SetBinLabel(5,"Edge cut");
-  cutsTotal->GetXaxis()->SetBinLabel(4,"Muon Timing");
-  cutsTotal->GetXaxis()->SetBinLabel(6,"pT cut");
-  cutsTotal->GetXaxis()->SetBinLabel(7,"Telescope + Muon ");
-  cutsTotal->GetXaxis()->SetBinLabel(8,"Telescope + Edge");
-  cutsTotal->GetXaxis()->SetBinLabel(9,"Edge + Muon");
-  cutsTotal->GetXaxis()->SetBinLabel(10,"Analysis cut");
-  cutsTotal->GetYaxis()->SetTitle("number_{hit}");
-  cutsTotalBPix->GetXaxis()->SetBinLabel(1,"No Cut");
-  cutsTotalBPix->GetXaxis()->SetBinLabel(2,"Loose cut");
-  cutsTotalBPix->GetXaxis()->SetBinLabel(3,"Telescope");
-  cutsTotalBPix->GetXaxis()->SetBinLabel(5,"Edge cut");
-  cutsTotalBPix->GetXaxis()->SetBinLabel(4,"Muon Timing");
-  cutsTotalBPix->GetXaxis()->SetBinLabel(6,"pT cut");
-  cutsTotalBPix->GetXaxis()->SetBinLabel(7,"Telescope + Muon ");
-  cutsTotalBPix->GetXaxis()->SetBinLabel(8,"Telescope + Edge");
-  cutsTotalBPix->GetXaxis()->SetBinLabel(9,"Edge + Muon");
-  cutsTotalBPix->GetXaxis()->SetBinLabel(10,"Analysis cut");
-  cutsTotalBPix->GetYaxis()->SetTitle("number_{hit} [BPix]");
-  cutsTotalFPix->GetXaxis()->SetBinLabel(1,"No Cut");
-  cutsTotalFPix->GetXaxis()->SetBinLabel(2,"Loose cut");
-  cutsTotalFPix->GetXaxis()->SetBinLabel(3,"Telescope");
-  cutsTotalFPix->GetXaxis()->SetBinLabel(5,"Edge cut");
-  cutsTotalFPix->GetXaxis()->SetBinLabel(4,"Muon Timing");
-  cutsTotalFPix->GetXaxis()->SetBinLabel(6,"pT cut");
-  cutsTotalFPix->GetXaxis()->SetBinLabel(7,"Telescope + Muon ");
-  cutsTotalFPix->GetXaxis()->SetBinLabel(8,"Telescope + Edge");
-  cutsTotalFPix->GetXaxis()->SetBinLabel(9,"Edge + Muon");
-  cutsTotalFPix->GetXaxis()->SetBinLabel(10,"Analysis cut");
-  cutsTotalFPix->GetYaxis()->SetTitle("number_{hit} [FPix]");
-
-
-
+  
+  setSameLabel(cutsEfficiency,cutsEfficiencyBPix,false);
+  setSameLabel(cutsEfficiency,cutsEfficiencyFPix,false);
+  setSameLabel(cutsEfficiency,cutsTotal,false);
+  setSameLabel(cutsEfficiency,cutsTotalBPix,false);
+  setSameLabel(cutsEfficiency,cutsTotalFPix,false);
+  
   makeEfficiency(tunningValMerged, tunningMisMerged, tunningEfficiency);
   makeEfficiency(tunningEdgeValMerged, tunningEdgeMisMerged, tunningEdgeEfficiency);
   makeEfficiency(tunningMuonValMerged, tunningMuonMisMerged, tunningMuonEfficiency);
@@ -2127,6 +1748,16 @@ void merge(){
   layer3valid->Write();
   layer3missing->Write();
   layer3inactive->Write();
+  
+  layer1_online->Write();
+  layer1valid_online->Write();
+  layer1missing_online->Write();
+  layer2_online->Write();
+  layer2valid_online->Write();
+  layer2missing_online->Write();
+  layer3_online->Write();
+  layer3valid_online->Write();
+  layer3missing_online->Write();
 
   histBarrelEfficiencyComparison->Write();
   histSubdetectors->Write();
@@ -2634,3 +2265,246 @@ void merge(){
     
 }
 
+
+//************** Quick function to merge easilly histos **************
+void mergeHisto(const char* name,TH1F* histo, bool mergeOverflows){
+    TH1F*  temp=(TH1F*)gDirectory->Get(name);
+    if(!temp) return;
+    
+    if(!mergeOverflows)
+      for (int bin=1; bin<=histo->GetNbinsX(); bin++)
+        histo->SetBinContent( bin, histo->GetBinContent(bin) + temp->GetBinContent(bin));
+
+    if(mergeOverflows)
+      for (int bin=0; bin<=histo->GetNbinsX()+1; bin++)
+        histo->SetBinContent( bin, histo->GetBinContent(bin) + temp->GetBinContent(bin));
+}
+
+void mergeHisto(TH1F* histo, bool mergeOverflows){ //NEW, TAKES NAME OF HISTO FROM MERGED ONE
+  TString name = histo->GetName();
+  name=name.Remove(name.Length()-6);
+  mergeHisto(name,histo,mergeOverflows);
+}
+
+void mergeHisto(const char* name,TH2F* histo, bool mergeOverflows){
+    TH2F*  temp=(TH2F*)gDirectory->Get(name);
+    if(!temp) return;
+    
+    if(!mergeOverflows){
+      for (int binx=1; binx<=histo->GetNbinsX(); binx++){
+        for (int biny=1; biny<=histo->GetNbinsY(); biny++)
+	  histo->SetBinContent( binx, biny, histo->GetBinContent(binx,biny) + temp->GetBinContent(binx,biny));
+      }
+    }
+    
+    if(mergeOverflows){
+      for (int binx=0; binx<=histo->GetNbinsX()+1; binx++){
+        for (int biny=0; biny<=histo->GetNbinsY()+1; biny++)
+	  histo->SetBinContent( binx, biny, histo->GetBinContent(binx,biny) + temp->GetBinContent(binx,biny));
+      }
+    }
+
+}
+
+void mergeHisto(TH2F* histo, bool mergeOverflows){
+  TString name = histo->GetName();
+  name=name.Remove(name.Length()-5);
+  mergeHisto(name,histo,mergeOverflows);
+}
+
+void mergeHistoWithLabel(char* name,TH1F* histo){
+  int lastBin=-999;
+  for (int bin=1; bin<=histo->GetNbinsX();bin++){
+    if ( !strcmp(histo->GetXaxis()->GetBinLabel(bin),"") ) {lastBin=bin; break;}
+  }
+ 
+  TH1F*  temp=(TH1F*)gDirectory->Get(name);
+  if(!temp) return;
+  
+  for (int bin=1; bin<=temp->GetNbinsX(); bin++){
+    bool foundLabel=false;
+    for (int binMerged=1; binMerged<=histo->GetNbinsX(); binMerged++){
+      if ( !strcmp(temp->GetXaxis()->GetBinLabel(bin),histo->GetXaxis()->GetBinLabel(binMerged)) ){
+        foundLabel=true;
+        histo->SetBinContent( binMerged,histo->GetBinContent(binMerged)+temp->GetBinContent(bin));
+        break;
+      }
+    }
+   
+   
+    if (!foundLabel){
+      histo->GetXaxis()->SetBinLabel(lastBin,temp->GetXaxis()->GetBinLabel(bin));
+      lastBin++;
+    }
+  }
+}
+
+void makeEfficiency(TH1F* valid, TH1F* missing, TH1F* efficiency, bool withError){
+  for(int i=1;i<=efficiency->GetNbinsX();i++){
+    double val = valid->GetBinContent(i);
+    double mis = missing->GetBinContent(i);
+    if( (val+mis)!=0 ){
+      double eff = val / (val+mis);
+      double err = sqrt(eff*(1-eff)/(val+mis));
+      efficiency->SetBinContent(i,eff);
+      if(withError) efficiency->SetBinError(i,err);
+    }
+  }
+  efficiency->GetYaxis()->SetTitle("#epsilon_{hit}");
+}
+
+void makeEfficiency(TH1F* efficiency, bool withError){
+  TString name = efficiency->GetName();
+  name=name.Replace(0,10,0,0);
+  TH1F* valid = (TH1F*) gDirectory->Get("valid"+name+"Merged");
+  TH1F* missing = (TH1F*) gDirectory->Get("missing"+name+"Merged");
+  makeEfficiency(valid,missing,efficiency,withError);
+}
+/*
+void makeEfficiencyNoError(TH1F* valid, TH1F* missing, TH1F* efficiency){
+  for(int i=1;i<=efficiency->GetNbinsX();i++){
+    double val = valid->GetBinContent(i);
+    double mis = missing->GetBinContent(i);
+    if( (val+mis)!=0 ){
+      double eff = val / (val+mis);
+      //double err = sqrt(eff*(1-eff)/(val+mis));
+      efficiency->SetBinContent(i,eff);
+    }
+  }
+  efficiency->GetYaxis()->SetTitle("#epsilon_{hit}");
+}*/
+
+void makeEfficiency(TH2F* valid, TH2F* missing, TH2F* efficiency){
+  for(int i=1;i<=efficiency->GetNbinsX();i++){
+    for(int j=1;j<=efficiency->GetNbinsY();j++){
+      double val = valid->GetBinContent(i,j);
+      double mis = missing->GetBinContent(i,j);
+      if( (val+mis)!=0 ){
+        double eff = val / (val+mis);
+        efficiency->SetBinContent(i,j,eff);
+      }
+    }
+  }
+}
+
+void makeEfficiencyGraph(TH1F* valid, TH1F* missing, TH1F* efficiency){
+  TGraphAsymmErrors* auxiliumEff;
+  TH1F* auxiliumDen = new TH1F("auxiliumDen","auxiliumDen",efficiency->GetNbinsX(),efficiency->GetXaxis()->GetXmin(),efficiency->GetXaxis()->GetXmax());
+  efficiency->GetYaxis()->SetTitle("#epsilon_{hit}");
+
+  for(int i=1;i<=efficiency->GetNbinsX();i++){
+    double val = valid->GetBinContent(i);
+    double mis = missing->GetBinContent(i);
+    auxiliumDen->SetBinContent(i,val+mis);
+    if( (val+mis)!=0 ){
+      double eff = val / (val+mis);
+      efficiency->SetBinContent(i,eff);
+      }
+    }
+  auxiliumEff = new TGraphAsymmErrors(valid,auxiliumDen);
+
+  int graphCounter = 0;
+  for(int i=1;i<=efficiency->GetNbinsX();i++){    
+    double val = valid->GetBinContent(i);
+    double mis = missing->GetBinContent(i);
+    if( (val+mis)!=0 )  {efficiency->SetBinError(i,auxiliumEff->GetErrorY(graphCounter)); graphCounter++;}
+    }
+  delete auxiliumEff;
+  delete auxiliumDen;
+  }
+
+void makeOperation(TH1F* input1, TH1F* input2, TH1F* output, char* operationtype){
+  for (int bin=1;bin<=input1->GetNbinsX();bin++){
+    if(operationtype=="+")
+      output->SetBinContent(bin,input1->GetBinContent(bin)+input2->GetBinContent(bin));
+    if(operationtype=="-")
+      output->SetBinContent(bin,input1->GetBinContent(bin)-input2->GetBinContent(bin));
+    if(operationtype=="*")
+      output->SetBinContent(bin,input1->GetBinContent(bin)*input2->GetBinContent(bin));
+    if(operationtype=="/")
+      if(input2->GetBinContent(bin)!=0)
+        output->SetBinContent(bin,input1->GetBinContent(bin)/input2->GetBinContent(bin));
+  }
+}
+
+void makeMean(TH1F* value, TH1F* nentries, TH1F* mean){
+  for (int bin=1;bin<=value->GetNbinsX();bin++)
+    if(nentries->GetBinContent(bin)!=0)
+      mean->SetBinContent(bin,double(value->GetBinContent(bin))/double(nentries->GetBinContent(bin)));
+}
+
+void setSameLabel(TH1F* copyfrom, TH1F* output, bool deflate){
+  if(deflate) copyfrom->LabelsDeflate("X");
+  for (int i=1; i<=copyfrom->GetNbinsX(); i++)
+    output->GetXaxis()->SetBinLabel( i,copyfrom->GetXaxis()->GetBinLabel(i) );
+  if(deflate) output->LabelsDeflate("X");
+}
+
+void Canv(TH1F *Histo1,TH1F *Histo2,char CName[100], char Option[60], TLegend* Leg, bool integrate){
+  TCanvas *Can = new TCanvas("cc","cc");
+  Can->cd();
+  double Max;
+  
+  if(integrate){
+    Histo1->Scale(1./Histo1->Integral());
+    Histo2->Scale(1./Histo2->Integral());
+  }
+  
+  (Histo1->GetMaximum() <= Histo2->GetMaximum() )? Max=Histo2->GetMaximum():Max=Histo1->GetMaximum();
+  
+  Histo1->SetMaximum(1.1*Max);
+    
+  Histo1->SetLineColor(kBlack);
+  Histo2->SetLineColor(kRed);
+  Histo1->SetMarkerColor(kBlack);
+  Histo2->SetMarkerColor(kRed);
+  
+  char Option1[60];
+  if(!strcmp(Option,"")) strcpy(Option1,"HIST");
+  else strcpy(Option1,Option);
+  
+  Histo1->Draw(Option1);
+  
+  char Option2[60];
+  strcpy(Option2,"same ");
+  strcat(Option2,Option1);
+  
+  Histo2->Draw(Option2);
+  
+  Leg->Draw("same");
+  
+  Can->Print(CName,"png");
+  Can->Close();
+}
+
+
+//**************************************
+//    FROM DANEK
+static int module_online(int moduleCMSSW){
+  int newModule = moduleCMSSW -4; 
+  if (newModule<=0) newModule--;
+  return newModule;
+}
+
+static int ladder_online(int layer, int ladderCMSSW){
+
+  int newLadder = ladderCMSSW;
+    
+  if (layer == 1) {
+    if (newLadder <= 5) newLadder = 6-newLadder;
+    else if (newLadder >= 6 && newLadder <= 15 ) newLadder = 5-newLadder;
+    else if (newLadder >= 16) newLadder = 26-newLadder;
+  } 
+  else if (layer == 2) {
+    if (newLadder <= 8) newLadder = 9-newLadder;
+    else if (newLadder >= 9 && newLadder <= 24) newLadder = 8-newLadder;
+    else if (newLadder >= 25) newLadder = 41-newLadder; 
+  } 
+  else if (layer == 3) {
+    if (newLadder <= 11) newLadder = 12-newLadder;
+    else if (newLadder >= 12 && newLadder <= 33) newLadder = 11-newLadder;
+    else if (newLadder >= 34) newLadder = 56-newLadder;
+  } 
+
+  return newLadder;
+}
