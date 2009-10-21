@@ -233,7 +233,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
     edm::ESHandle<RunInfo> runInfoHandle;
     iSetup.get<RunInfoRcd>().get(runInfoHandle);
     const RunInfo *runInfo = runInfoHandle.product();
-    int totbpixfeds(32), totfpixfeds(8); 
+    unsigned int totbpixfeds(32), totfpixfeds(8); 
     
     std::vector<int> feds = runInfo->m_fed_in;
     uint32_t ifed(0); 
@@ -410,7 +410,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	  }
 
 
-	  const GeomDetUnit* detUnit = hit->detUnit();
+	  //const GeomDetUnit* detUnit = hit->detUnit();
 	  const Surface &surface = hit->detUnit()->surface();
           LocalPoint lPModule(0.,0.,0.), lPhiDirection(1.,0.,0.), lROrZDirection(0.,1.,0.);
           GlobalPoint gPModule       = surface.toGlobal(lPModule),
@@ -443,11 +443,11 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	  
 	  //find location of hit (barrel or endcap, same for cluster)
 	  bool barrel = DetId::DetId((*hit).geographicalId()).subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel);
-	  bool endcap = DetId::DetId((*hit).geographicalId()).subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap);
+	  //bool endcap = DetId::DetId((*hit).geographicalId()).subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap);
 	  
-	  uint32_t DBlayer = PixelBarrelName::PixelBarrelName(DetId::DetId((*hit).geographicalId())).layerName();
-	  float phi = clustgp.phi(); 
-	  float z = clustgp.z();
+	  //uint32_t DBlayer = PixelBarrelName::PixelBarrelName(DetId::DetId((*hit).geographicalId())).layerName();
+	  //float phi = clustgp.phi(); 
+	  //float z = clustgp.z();
 
 	  fClSize[fClN]   = clust->size();
 	  fClSizeX[fClN]  = clust->sizeX();
@@ -560,7 +560,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	  // -- Get digis of this cluster
 	  const std::vector<SiPixelCluster::Pixel>& pixvector = clust->pixels();
 	  //	  cout << "  Found " << pixvector.size() << " pixels for this cluster " << endl;
-	  for (int i = 0; i < pixvector.size(); ++i) {
+	  for (unsigned int i = 0; i < pixvector.size(); ++i) {
 	    SiPixelCluster::Pixel holdpix = pixvector[i];
 	    
 	    fDgRow[fDgN]    = holdpix.x;
@@ -580,7 +580,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	    fDgClI[fDgN] = fClN;
 
 	    // -- fill pointer to this digi in cluster digi index array
-	    if (i < DGPERCLMAX) {
+	    if ((signed)i < DGPERCLMAX) {
 	      fClDgI[fClN][i] = fDgN;
 	    } else {
 	      fClDgI[fClN][DGPERCLMAX-1] = -98;
@@ -609,9 +609,9 @@ void PixelTree::analyze(const edm::Event& iEvent,
     if (dynamic_cast<PixelGeomDetUnit*>((*it)) != 0){ 
       DetId detId = (*it)->geographicalId();
 
-      int nofclOnTrack = 0, nofclOffTrack=0; 
+      //int nofclOnTrack = 0, nofclOffTrack=0; 
       uint32_t DBlayer=10, DBdisk=10; 
-      float z=0.; 
+      //float z=0.; 
       //set layer/disk
       if (DetId::DetId(detId).subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel)) {
 	DBlayer = PixelBarrelName::PixelBarrelName(DetId::DetId(detId)).layerName();
@@ -629,8 +629,8 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	  if (clusterSet.size()>temp) {
 	    // 	    cout << "Found a cluster that is not on a track" << endl;
 
-	    const DetId &hit_detId = di->geographicalId();
-	    uint IntSubDetID = (hit_detId.subdetId());
+	    //const DetId &hit_detId = di->geographicalId();
+	    //uint IntSubDetID = (hit_detId.subdetId());
 
 	    /////////////////////////////////////////////////
 	    //find cluster global position (rphi, z) get cluster
@@ -646,7 +646,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	    
 	    // -- find location of hit (barrel or endcap, same for cluster)
 	    bool barrel = DetId::DetId((*di).geographicalId()).subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel);
-	    bool endcap = DetId::DetId((*di).geographicalId()).subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap);
+	    //bool endcap = DetId::DetId((*di).geographicalId()).subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap);
 
 	   
 	    //center of gravity (of charge)
@@ -743,7 +743,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	    // -- Get digis of this cluster
 	    const std::vector<SiPixelCluster::Pixel>& pixvector = di->pixels();
 	    // 	    cout << "  Found " << pixvector.size() << " pixels for this off-track cluster " << endl;
-	    for (int i = 0; i < pixvector.size(); ++i) {
+	    for (unsigned int i = 0; i < pixvector.size(); ++i) {
 	      SiPixelCluster::Pixel holdpix = pixvector[i];
 	      
 	      fDgRow[fDgN]    = holdpix.x;
@@ -763,7 +763,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	      fDgClI[fDgN] = fClN;
 	      
 	      // -- fill pointer to this digi in cluster digi index array
-	      if (i < DGPERCLMAX) {
+	      if ((signed)i < DGPERCLMAX) { 
 		fClDgI[fClN][i] = fDgN;
 	      } else {
 		fClDgI[fClN][DGPERCLMAX-1] = -98;
@@ -940,10 +940,10 @@ void PixelTree::dumpDetIds(const edm::EventSetup& iSetup) {
     if(dynamic_cast<PixelGeomDetUnit*>((*it))!=0){
 
       DetId detId = (*it)->geographicalId();
-      const GeomDetUnit      * geoUnit = pDD->idToDetUnit( detId );
-      const PixelGeomDetUnit * pixDet  = dynamic_cast<const PixelGeomDetUnit*>(geoUnit);
-      int nrows = (pixDet->specificTopology()).nrows();
-      int ncols = (pixDet->specificTopology()).ncolumns();
+      //const GeomDetUnit      * geoUnit = pDD->idToDetUnit( detId );
+      //const PixelGeomDetUnit * pixDet  = dynamic_cast<const PixelGeomDetUnit*>(geoUnit);
+      //int nrows = (pixDet->specificTopology()).nrows();
+      //int ncols = (pixDet->specificTopology()).ncolumns();
 
       if (detId.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel)) {
 
