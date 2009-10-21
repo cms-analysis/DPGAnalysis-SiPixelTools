@@ -13,7 +13,7 @@
 //
 // Original Author:  Freya Blekman
 //         Created:  Tue Mar  3 19:15:02 CET 2009
-// $Id: FEDInRunFilter.cc,v 1.2 2009/03/03 19:37:49 fblekman Exp $
+// $Id: FEDInRunFilter.cc,v 1.3 2009/03/04 16:41:12 fblekman Exp $
 //
 //
 
@@ -89,7 +89,7 @@ FEDInRunFilter::FEDInRunFilter(const edm::ParameterSet& iConfig)
   totevents_=0;
   goodevents_=0;
   
-  for(int ifed=0; ifed<totbpixfeds_+totfpixfeds_;++ifed)
+  for(unsigned int ifed=0; ifed<totbpixfeds_+totfpixfeds_;++ifed)
     bookkeeping_[ifed]=0;
 }
 
@@ -192,7 +192,7 @@ FEDInRunFilter::endJob() {
   buffer << "max number of bad FEDs in the BPIX:" << max_badfeds_bpix_ << std::endl;
   buffer << "max number of bad FEDs in the FPIX:" << max_badfeds_fpix_ << std::endl;
   buffer<< "breakdown per FED: " << std::endl;
-  for(int ifed=0; ifed<totbpixfeds_+totfpixfeds_;++ifed)
+  for(unsigned int ifed=0; ifed<totbpixfeds_+totfpixfeds_;++ifed)
     buffer << "FED " << ifed << " was in " << bookkeeping_[ifed] << " (" << 100*bookkeeping_[ifed]/(double)totevents_<< "%) events." << std::endl;
   edm::LogInfo("FEDInRunFilter")<< buffer.str() ;
   

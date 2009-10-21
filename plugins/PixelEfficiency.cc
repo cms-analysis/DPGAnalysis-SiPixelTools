@@ -1364,14 +1364,25 @@ try{
       
 //+++++++++++++++++++++++cleaning with danek misconfigured module List+++++++++++++++++++++
       bool goodModule=true;
-      if (hitLayer==1&&
-            ((hitLadder==4&&hitModule==6)||(hitLadder==12&&hitModule==5)||(hitLadder==14&&hitModule==5)||(hitLadder==16&&hitModule==5) )
-          ||hitLayer==2&&
-	    ((hitLadder==3&&hitModule==8)||(hitLadder==12&&(hitModule==5||hitModule==7||hitModule==8))||(hitLadder==20&&hitModule==8)||(hitLadder==26&&hitModule==1)||(hitLadder==28&&hitModule==2) )
-	  ||hitLayer==3&&
-	    ((hitLadder==3&&hitModule==3)||(hitLadder==19&&hitModule==5)||(hitLadder==32&&hitModule==1)||
-	    (hitLadder==35&&(hitModule<=4||hitModule==7))||(hitLadder==37&&(hitModule<=6&&hitModule>=2))||
-	    (hitLadder==39&&hitModule==8)||(hitLadder==43&&hitModule==7)) 
+      if ((hitLayer==1&&
+            ((hitLadder==4&&hitModule==6)||
+	    (hitLadder==12&&hitModule==5)||
+	    (hitLadder==14&&hitModule==5)||
+	    (hitLadder==16&&hitModule==5)))
+          ||(hitLayer==2&&	  
+            ((hitLadder==3&&hitModule==8)||
+	    (hitLadder==12&&(hitModule==5||hitModule==7||hitModule==8))||
+	    (hitLadder==20&&hitModule==8)||
+	    (hitLadder==26&&hitModule==1)||
+	    (hitLadder==28&&hitModule==2)))
+	  ||(hitLayer==3&&
+	    ((hitLadder==3&&hitModule==3)||
+	    (hitLadder==19&&hitModule==5)||
+	    (hitLadder==32&&hitModule==1)||
+	    (hitLadder==35&&(hitModule<=4||hitModule==7))||
+	    (hitLadder==37&&(hitModule<=6&&hitModule>=2))||
+	    (hitLadder==39&&hitModule==8)||
+	    (hitLadder==43&&hitModule==7))) 
          )
         goodModule=false;        
 	
