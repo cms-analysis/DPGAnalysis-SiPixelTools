@@ -1,5 +1,5 @@
 <use name=FWCore/Framework>
-<use name=SimDataFormats/HepMCProduct>
+#<use name=SimDataFormats/HepMCProduct>
 <use name=FWCore/PluginManager>
 <use name=FWCore/ParameterSet>
 <use name=DataFormats/TrackReco>
@@ -30,7 +30,7 @@
 <export>
    <lib name=DPGAnalysisSiPixelTools>
    <use name=FWCore/Framework>
-   <use name=SimDataFormats/HepMCProduct>
+#   <use name=SimDataFormats/HepMCProduct>
    <use name=FWCore/PluginManager>
    <use name=FWCore/ParameterSet>
    <use name=DataFormats/TrackReco>
