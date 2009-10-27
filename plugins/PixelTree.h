@@ -33,11 +33,13 @@
 #include "TObject.h"
 
 using namespace reco;
+
+class TObject;
 class TTree;
 class TH1D;
 class TFile;
 class RectangularPixelTopology;
-class TObject;
+class DetId; 
 
 class PixelTree : public edm::EDAnalyzer {
  public:
@@ -56,6 +58,10 @@ class PixelTree : public edm::EDAnalyzer {
   void fillVertex();
   void fillDigis();
 
+  void bpixNames(const DetId &pID, int &DBlayer, int &DBladder, int &DBmodule);
+  void fpixNames(const DetId &pID, int &DBdisk, int &DBblade, int &DBpanel, int &DBplaquette);
+
+
   void readOffsets();
   void sectorAndWheel(const reco::Muon &muon0, int &w0, int &s0);
   float correctedTime(const reco::Muon &muon0);
@@ -65,17 +71,29 @@ class PixelTree : public edm::EDAnalyzer {
 
 
  private:
+  int             fVerbose; 
   std::string     fRootFileName, fTrajectoryInputLabel;
   edm::InputTag   fMuonCollectionLabel, fTrackCollectionLabel, fPixelClusterLabel;
+  std::string     fL1GTReadoutRecordLabel; 
+  edm::InputTag   fL1GTmapLabel;
+  edm::InputTag   fHLTResultsLabel;
 
   TFile *fFile; 
-  TH1D  *fH1; 
+  TH1D  *fL1Thist, *fHLThist; 
   TTree *fTree;
 
-  // -- tree variables
-  int fRun, fEvent; 
+
+  // -- general stuff
+  unsigned int fRun, fEvent, fLumiBlock, fBX, fOrbit; 
+  unsigned int fTimeLo, fTimeHi; 
+  
   float fBz;
   int fFED1, fFED2; 
+
+  unsigned int fL1T, fL1T0,  fL1T1,  fL1T2,  fL1T3; 
+  unsigned int fHLT, fHLTa0, fHLTa1, fHLTa2, fHLTa3, 
+    fHLTr0, fHLTr1, fHLTr2, fHLTr3, 
+    fHLTe0, fHLTe1, fHLTe2, fHLTe3; 
 
   // -- muons
   static const int MUMAX = 100; 
@@ -105,7 +123,7 @@ class PixelTree : public edm::EDAnalyzer {
   static const int DGPERCLMAX = 50;  
   int   fClN;
   int   fClSize[CLUSTERMAX], fClSizeX[CLUSTERMAX], fClSizeY[CLUSTERMAX]; 
-  int   fClRow[CLUSTERMAX], fClCol[CLUSTERMAX];  //??
+  float fClRow[CLUSTERMAX], fClCol[CLUSTERMAX];  //??
   float fClLx[CLUSTERMAX], fClLy[CLUSTERMAX], fClLxe[CLUSTERMAX], fClLye[CLUSTERMAX];
   float fClGx[CLUSTERMAX], fClGy[CLUSTERMAX], fClGz[CLUSTERMAX];
   float fClCharge[CLUSTERMAX],  fClChargeCorr[CLUSTERMAX];
