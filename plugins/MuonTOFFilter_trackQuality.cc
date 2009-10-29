@@ -13,7 +13,7 @@
 //
 // Original Author:  Tanja ROMMERSKIRCHEN
 //         Created:  Wed Feb 25 11:59:48 CET 2009
-// $Id: MuonTOFFilter_trackQuality.cc,v 1.5 2009/03/04 14:58:28 trommers Exp $
+// $Id: MuonTOFFilter_trackQuality.cc,v 1.6 2009/03/04 16:41:12 fblekman Exp $
 //
 //
 
@@ -59,6 +59,33 @@ class MuonTOFFilter_trackQuality : public edm::EDFilter {
       virtual void endJob() ;
       
       // ----------member data ---------------------------
+
+  int min_goodmuons;
+  int max_goodmuons;
+  double  min_time;
+  double  max_time;
+  double max_timeError;
+  double min_trk_pt;
+  double max_chi2_ndof;
+
+  vector<double> timeAtIpInOut;
+  vector<double> errorTime;
+
+
+  int count_good_events;
+  int count_all_events;
+  int notenough_good_muons;
+  int outOfTime_events;
+  
+  int all_muons;
+  int muon_timeErrorTooLarge;
+  int muon_noValidTrack;
+  int muon_noValidTimeInformation;
+  int muon_ptTooSmall;
+  int muon_chi2TooLarge;
+
+
+
 };
 
 //
@@ -69,37 +96,15 @@ class MuonTOFFilter_trackQuality : public edm::EDFilter {
 // static data member definitions
 //
 
-  int min_goodmuons;
-  int max_goodmuons;
-  double  min_time;
-  double  max_time;
-  double max_timeError;
-  double min_trk_pt;
-  double max_chi2_ndof;
-
-vector<double> timeAtIpInOut;
-vector<double> errorTime;
-
-
-int count_good_events;
-int count_all_events;
-int notenough_good_muons;
-int outOfTime_events;
-
-int all_muons;
-int muon_timeErrorTooLarge;
-int muon_noValidTrack;
-int muon_noValidTimeInformation;
-int muon_ptTooSmall;
-int muon_chi2TooLarge;
+ 
 
 //
 // constructors and destructor
 //
 MuonTOFFilter_trackQuality::MuonTOFFilter_trackQuality(const edm::ParameterSet& iConfig)
 {
-  min_goodmuons = iConfig.getParameter<double>("min_goodmuons");
-  max_goodmuons = iConfig.getParameter<double>("max_goodmuons");
+  min_goodmuons = iConfig.getParameter<int>("min_goodmuons");
+  max_goodmuons = iConfig.getParameter<int>("max_goodmuons");
   min_time = iConfig.getParameter<double>("min_time");
   max_time = iConfig.getParameter<double>("max_time");
   max_timeError = iConfig.getParameter<double>("max_timeError");

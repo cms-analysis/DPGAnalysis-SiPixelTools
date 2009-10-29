@@ -1,8 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 
 MuonTOFFilter_trackQuality = cms.EDFilter("MuonTOFFilter_trackQuality",
-    min_goodmuons = cms.double(1),                                    
-    max_goodmuons = cms.double(3),
+    min_goodmuons = cms.int(1),                                    
+    max_goodmuons = cms.int(3),
     min_time      = cms.double(-20),
     max_time      = cms.double(20),
     max_timeError = cms.double(10),
