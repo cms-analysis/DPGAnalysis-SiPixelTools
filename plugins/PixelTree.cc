@@ -210,9 +210,14 @@ void PixelTree::beginJob(const edm::EventSetup& es) {
   fTree->Branch("ClRow",        fClRow,         "ClRow[ClN]/F");
   fTree->Branch("ClCol",        fClCol,         "ClCol[ClN]/F");
   fTree->Branch("ClLx",         fClLx,          "ClLx[ClN]/F");
+  fTree->Branch("ClLxE",        fClLxe,         "ClLxE[ClN]/F");
   fTree->Branch("ClLy",         fClLy,          "ClLy[ClN]/F");
+  fTree->Branch("ClLyE",        fClLye,         "ClLyE[ClN]/F");
   fTree->Branch("ClGx",         fClGx,          "ClGx[ClN]/F");
   fTree->Branch("ClGy",         fClGy,          "ClGy[ClN]/F");
+  fTree->Branch("ClSize",       fClSize,        "ClSize[ClN]/F");
+  fTree->Branch("ClSizeX",      fClSizeX,       "ClSizeX[ClN]/F");
+  fTree->Branch("ClSizeY",      fClSizeY,       "ClSizeY[ClN]/F");
   fTree->Branch("ClGz",         fClGz,          "ClGz[ClN]/F");
   fTree->Branch("ClFlipped",    fClFlipped,     "ClFlipped[ClN]/I");
   fTree->Branch("ClLayer",      fClLayer,       "ClLayer[ClN]/I");
@@ -869,7 +874,6 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	  unsigned int temp = clusterSet.size();
 	  clusterSet.insert(*di);
 	  if (clusterSet.size() > temp) {
-	    cout << "looking at a trackless cluster" << endl;
   
 	    const TrackerGeometry& theTracker(*theTrackerGeometry);
 	    const PixelGeomDetUnit* theGeomDet = dynamic_cast<const PixelGeomDetUnit*> (theTracker.idToDet(detId) );
@@ -911,7 +915,6 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
 	    if (barrel) {
 	      bpixNames(detId, DBlayer, DBladder, DBmodule); 
-	      cout << ".....B: " << DBlayer << " " << DBladder << " " << DBmodule << endl;
 	      fClLayer[fClN]     = DBlayer;
 	      fClLadder[fClN]    = DBladder; 
 	      fClModule[fClN]    = DBmodule;
@@ -923,7 +926,6 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
 	    if (endcap) {
 	      fpixNames(detId, DBdisk, DBblade, DBpanel, DBmodule); 
-	      cout << ".....F: " << DBdisk << " " << DBblade << " " << DBpanel << " " << DBmodule << endl;
 	      fClLayer[fClN]     = -99;
 	      fClLadder[fClN]    = -99; 
 	      fClModule[fClN]    = -99;
