@@ -1,3 +1,4 @@
+import os
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("Demo")
@@ -38,10 +39,15 @@ process.TrackRefitterP5.TrajectoryInEvent = True
 #process.load("RecoTracker.TransientTrackingRecHit.TransientTrackingRecHitBuilderWithoutRefit_cfi")
 
 # -- the tree filler
+try:
+    rootFileName = os.environ["JOB"] + ".root"
+except KeyError:
+    rootFileName = "pixel-mc.root"
+
 process.PixelTree = cms.EDAnalyzer(
     "PixelTree",
     verbose                = cms.untracked.int32(0),
-    rootFileName           = cms.untracked.string("pixelTree-mc.root"),
+    rootFileName           = cms.untracked.string(rootFileName),
     trajectoryInputLabel   = cms.untracked.string('TrackRefitterP5'),
     muonCollectionLabel    = cms.untracked.string('muons'),
     trackCollectionLabel   = cms.untracked.string('TrackRefitterP5'),
@@ -74,6 +80,6 @@ process.p = cms.Path(
     process.PixelTree
     )
 
-#process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 #process.MessageLogger.cerr.threshold = 'INFO'
 #process.TrackerDigiGeometryESModule.applyAlignment = True

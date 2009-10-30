@@ -1,3 +1,4 @@
+import os
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("Demo")
@@ -23,7 +24,7 @@ process.source = cms.Source(
     #firstRun = cms.untracked.uint32(64108),
     #interval = cms.uint32(1),
     fileNames = cms.untracked.vstring(
-    "/store/data/CRAFT09/Cosmics/RAW-RECO/SuperPointing-CRAFT09_R_V4_CosmicsSeq_v1/0001/5EB78190-85B8-DE11-A18E-0030486790B8.root"
+    "/store/data/CRAFT09/Cosmics/RAW-RECO/SuperPointing-CRAFT09_R_V4_CosmicsSeq_v1/0002/8C3BBB87-9DB8-DE11-B758-001731AF65CF.root"
     )
     )
 
@@ -38,10 +39,15 @@ process.TrackRefitterP5.TrajectoryInEvent = True
 #process.load("RecoTracker.TransientTrackingRecHit.TransientTrackingRecHitBuilderWithoutRefit_cfi")
 
 # -- the tree filler
+try:
+    rootFileName = os.environ["JOB"] + ".root"
+except KeyError:
+    rootFileName = "pixel-data.root"
+
 process.PixelTree = cms.EDAnalyzer(
     "PixelTree",
     verbose                = cms.untracked.int32(0),
-    rootFileName           = cms.untracked.string("pixelTree-data.root"),
+    rootFileName           = cms.untracked.string(rootFileName),
     trajectoryInputLabel   = cms.untracked.string('TrackRefitterP5'),
     muonCollectionLabel    = cms.untracked.string('muons'),
     trackCollectionLabel   = cms.untracked.string('TrackRefitterP5'),

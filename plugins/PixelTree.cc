@@ -862,23 +862,15 @@ void PixelTree::analyze(const edm::Event& iEvent,
     if (dynamic_cast<PixelGeomDetUnit*>((*it)) != 0){ 
       DetId detId = (*it)->geographicalId();
 
-      //int nofclOnTrack = 0, nofclOffTrack=0; 
-      uint32_t DBlayer=10, DBdisk=10; 
-      //float z=0.; 
-      //set layer/disk
-      if (DetId::DetId(detId).subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel)) {
-	DBlayer = PixelBarrelName::PixelBarrelName(DetId::DetId(detId)).layerName();
-      }
-      if (DetId::DetId(detId).subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap)) {
-	DBdisk = PixelEndcapName::PixelEndcapName(DetId::DetId(detId )).diskName();
-      }
       edmNew::DetSetVector<SiPixelCluster>::const_iterator isearch = clustColl.find(detId);
       if (isearch != clustColl.end()) {  // Not an empty iterator
 	edmNew::DetSet<SiPixelCluster>::const_iterator  di;
 	for (di=isearch->begin(); di!=isearch->end(); di++) {
 	  unsigned int temp = clusterSet.size();
 	  clusterSet.insert(*di);
-	  if (clusterSet.size()>temp) {
+	  if (clusterSet.size() > temp) {
+	    cout << "looking at a trackless cluster" << endl;
+  
 	    const TrackerGeometry& theTracker(*theTrackerGeometry);
 	    const PixelGeomDetUnit* theGeomDet = dynamic_cast<const PixelGeomDetUnit*> (theTracker.idToDet(detId) );
 	    if (theGeomDet == 0) {
@@ -888,8 +880,9 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	    const RectangularPixelTopology *topol = dynamic_cast<const RectangularPixelTopology*>(&(theGeomDet->specificTopology()));
 	    
 	    // -- find location of hit (barrel or endcap, same for cluster)
-	    bool barrel = DetId::DetId((*di).geographicalId()).subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel);
-	    bool endcap = DetId::DetId((*di).geographicalId()).subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap);
+	    bool barrel = detId.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel);
+	    bool endcap = detId.subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap);
+
 	    if (!barrel && !endcap) {
 	      continue;
 	    }
@@ -917,7 +910,8 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	    int DBlayer, DBladder, DBmodule, DBdisk, DBblade, DBpanel; 
 
 	    if (barrel) {
-	      bpixNames(DetId::DetId((*di).geographicalId()), DBlayer, DBladder, DBmodule); 
+	      bpixNames(detId, DBlayer, DBladder, DBmodule); 
+	      cout << ".....B: " << DBlayer << " " << DBladder << " " << DBmodule << endl;
 	      fClLayer[fClN]     = DBlayer;
 	      fClLadder[fClN]    = DBladder; 
 	      fClModule[fClN]    = DBmodule;
@@ -928,7 +922,8 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	    } 
 
 	    if (endcap) {
-	      fpixNames(DetId::DetId((*di).geographicalId()), DBdisk, DBblade, DBpanel, DBmodule); 
+	      fpixNames(detId, DBdisk, DBblade, DBpanel, DBmodule); 
+	      cout << ".....F: " << DBdisk << " " << DBblade << " " << DBpanel << " " << DBmodule << endl;
 	      fClLayer[fClN]     = -99;
 	      fClLadder[fClN]    = -99; 
 	      fClModule[fClN]    = -99;
