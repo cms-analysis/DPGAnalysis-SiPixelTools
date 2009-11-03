@@ -215,10 +215,10 @@ void PixelTree::beginJob(const edm::EventSetup& es) {
   fTree->Branch("ClLyE",        fClLye,         "ClLyE[ClN]/F");
   fTree->Branch("ClGx",         fClGx,          "ClGx[ClN]/F");
   fTree->Branch("ClGy",         fClGy,          "ClGy[ClN]/F");
-  fTree->Branch("ClSize",       fClSize,        "ClSize[ClN]/F");
-  fTree->Branch("ClSizeX",      fClSizeX,       "ClSizeX[ClN]/F");
-  fTree->Branch("ClSizeY",      fClSizeY,       "ClSizeY[ClN]/F");
   fTree->Branch("ClGz",         fClGz,          "ClGz[ClN]/F");
+  fTree->Branch("ClSize",       fClSize,        "ClSize[ClN]/I");
+  fTree->Branch("ClSizeX",      fClSizeX,       "ClSizeX[ClN]/I");
+  fTree->Branch("ClSizeY",      fClSizeY,       "ClSizeY[ClN]/I");
   fTree->Branch("ClFlipped",    fClFlipped,     "ClFlipped[ClN]/I");
   fTree->Branch("ClLayer",      fClLayer,       "ClLayer[ClN]/I");
   fTree->Branch("ClLadder",     fClLadder,      "ClLadder[ClN]/I");
@@ -227,6 +227,7 @@ void PixelTree::beginJob(const edm::EventSetup& es) {
   fTree->Branch("ClBlade",      fClBlade,       "ClBlade[ClN]/I");
   fTree->Branch("ClPanel",      fClPanel,       "ClPanel[ClN]/I");
   fTree->Branch("ClPlaquette",  fClPlaquette,   "ClPlaquette[ClN]/I");
+  fTree->Branch("ClDetId",      fClDetId,       "ClDetId[ClN]/I");
   fTree->Branch("ClCharge",     fClCharge,      "ClCharge[ClN]/F");
   fTree->Branch("ClChargeCorr", fClChargeCorr,  "ClChargeCorr[ClN]/F");
   fTree->Branch("ClType",       fClType,        "ClType[ClN]/I");
@@ -640,7 +641,8 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	float alpha = atan2(localDir.z(), localDir.x());
 	float beta = atan2(localDir.z(), localDir.y());
 
-	int DBlayer, DBladder, DBmodule, DBdisk, DBblade, DBpanel; 
+	int DBlayer, DBladder, DBmodule, DBdisk, DBblade, DBpanel, DBdetid; 
+	DBdetid = hit->geographicalId().rawId();
 	if (barrel) {
 	  bpixNames(DetId::DetId((*hit).geographicalId()), DBlayer, DBladder, DBmodule); 
 	} else {
@@ -711,6 +713,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	    fClPlaquette[fClN] =  DBmodule;
 	  }
 
+	  fClDetId[fClN]   = DBdetid;
 	  fClType[fClN]    = 0; 
 	  fClTkI[fClN]     = fTkN;  // ?? FIXME: A cluster can belong to more than one track
 
@@ -778,6 +781,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	    fClPanel[fClN]     =  DBpanel;
 	    fClPlaquette[fClN] =  DBmodule;
 	  }
+	  fClDetId[fClN]   = DBdetid;
 
 	  fClFlipped[fClN] = isFlipped;
 
@@ -934,6 +938,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	      fClPanel[fClN]     =  DBpanel;
 	      fClPlaquette[fClN] =  DBmodule;
 	    }
+	    fClDetId[fClN]  = detId;
 	    
 	    // -- Flipped module?
 	    float tmp1 = theGeomDet->surface().toGlobal(Local3DPoint(0.,0.,0.)).perp();
