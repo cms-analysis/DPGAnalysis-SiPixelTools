@@ -18,7 +18,7 @@
 
   using namespace std;
   bool DEBUG=false;
-  int Nfiles=630;
+  int Nfiles=628;
   
 void mergeHisto(const char*,TH1F*,bool=false);
 void mergeHisto(TH1F*,bool=false);			//NEW, TAKES NAME FROM MERGED
@@ -82,7 +82,7 @@ void merge(){
 
   TH1F* validVsAlphaMerged = new TH1F("validVsAlphaMerged","validVsAlphaMerged",200,-3.5,3.5);
   TH1F* validVsCotanAlphaMerged = new TH1F("validVsCotanAlphaMerged","validVsCotanAlphaMerged",200,-3.5,3.5);
-  TH1F* validVsAlphaBPixMerged = new TH1F("validVsAlphaBPixMerged","validVsAlphaMerged",200,-3.5,3.5);
+  TH1F* validVsAlphaBPixMerged = new TH1F("validVsAlphaBPixMerged","validVsAlphaBPixMerged",200,-3.5,3.5);
   TH1F* validVsAlphaFPixMerged = new TH1F("validVsAlphaFPixMerged","validVsAlphaFPixMerged",200,-3.5,3.5);
   TH1F* missingVsAlphaMerged = new TH1F("missingVsAlphaMerged","missingVsAlphaMerged",200,-3.5,3.5);
   TH1F* missingVsCotanAlphaMerged = new TH1F("missingVsCotanAlphaMerged","missingVsCotanAlphaMerged",200,-3.5,3.5);
@@ -99,10 +99,10 @@ void merge(){
   TH2F* missingAlphaBetaMerged = new TH2F("missingAlphaBetaMerged","missingAlphaBetaMerged",50,-3.5,3.5,50,-3.5,3.5);
   TH2F* alphaBetaEfficiency    = new TH2F("alphaBetaEfficiency"   ,"alphaBetaEfficiency"   ,50,-3.5,3.5,50,-3.5,3.5);
   
-  TH1F* validVsLocalXMerged = new TH1F("validVsLocalXMerged","validVsLocalXMerged",100,-1.5,1.5);
-  TH1F* validVsLocalYMerged = new TH1F("validVsLocalYMerged","validVsLocalYMerged",100,-4.,4.);
-  TH1F* missingVsLocalXMerged = new TH1F("missingVsLocalXMerged","missingVsLocalXMerged",100,-1.5,1.5);
-  TH1F* missingVsLocalYMerged = new TH1F("missingVsLocalYMerged","missingVsLocalYMerged",100,-4.,4.);
+  TH1F* validVsLocalXMerged = new TH1F("validVsLocalXMerged","validVsLocalXMerged;X [cm];nValid",100,-1.5,1.5);
+  TH1F* validVsLocalYMerged = new TH1F("validVsLocalYMerged","validVsLocalYMerged;X [cm];nValid",100,-4.,4.);
+  TH1F* missingVsLocalXMerged = new TH1F("missingVsLocalXMerged","missingVsLocalXMerged;X [cm];nMissing",100,-1.5,1.5);
+  TH1F* missingVsLocalYMerged = new TH1F("missingVsLocalYMerged","missingVsLocalYMerged;X [cm];nMissing",100,-4.,4.);
 
   TH1F* validVsMuontimePre68094Merged    = new TH1F("validVsMuontimePre68094Merged","validVsMuontimePre68094Merged",50,-40.,80.);
   TH1F* missingVsMuontimePre68094Merged  = new TH1F("missingVsMuontimePre68094Merged","missingVsMuontimePre68094Merged",50,-40.,80.);
@@ -112,10 +112,10 @@ void merge(){
   TH1F* validVsPTMerged   = new TH1F("validVsPTMerged","validVsPTMerged",100,0.,50.);
   TH1F* missingVsPTMerged = new TH1F("missingVsPTMerged","missingVsPTMerged",100,0.,50.);
 
-  TH1F* validVsLocalXBigMerged     = new TH1F("validVsLocalXBigMerged","validVsLocalXBigMerged",100,-1.5,1.5);
-  TH1F* missingVsLocalXBigMerged   = new TH1F("missingVsLocalXBigMerged","missingVsLocalXBigMerged",100,-1.5,1.5);
-  TH1F* validVsLocalXSmallMerged   = new TH1F("validVsLocalXSmallMerged","validVsLocalXSmallMerged",100,-1.5,1.5);
-  TH1F* missingVsLocalXSmallMerged = new TH1F("missingVsLocalXSmallMerged","missingVsLocalXSmallMerged",100,-1.5,1.5);
+  TH1F* validVsLocalXBigMerged     = new TH1F("validVsLocalXBigMerged","validVsLocalXBigMerged;X [cm];nValid",100,-1.5,1.5);
+  TH1F* missingVsLocalXBigMerged   = new TH1F("missingVsLocalXBigMerged","missingVsLocalXBigMerged;X [cm];nMissing",100,-1.5,1.5);
+  TH1F* validVsLocalXSmallMerged   = new TH1F("validVsLocalXSmallMerged","validVsLocalXSmallMerged;X [cm];nValid",100,-1.5,1.5);
+  TH1F* missingVsLocalXSmallMerged = new TH1F("missingVsLocalXSmallMerged","missingVsLocalXSmallMerged;X [cm];nMissing",100,-1.5,1.5);
 
   TH1F* localXBigEfficiency   = new TH1F("localXBigEfficiency","localXBigEfficiency",100,-1.5,1.5);
   TH1F* localXSmallEfficiency = new TH1F("localXSmallEfficiency","localXSmallEfficiency",100,-1.5,1.5);
@@ -296,13 +296,13 @@ void merge(){
   TH1F* tunningMuonValMerged = new TH1F("tunningMuonValMerged","tunningMuonValMerged",40,0,40);
   TH1F* tunningMuonMisMerged = new TH1F("tunningMuonMisMerged","tunningMuonMisMerged",40,0,40);
     
-  TH1F* histAlphaAnalysis      = new TH1F("histAlphaAnalysis", "hist", 200, -3.5,3.5);
-  TH1F* histAlphaAnalysisBPix  = new TH1F("histAlphaAnalysisBPix", "hist", 200, -3.5,3.5);
-  TH1F* histAlphaAnalysisFPix  = new TH1F("histAlphaAnalysisFPix", "hist", 200, -3.5,3.5);
-  TH1F* histCotanAlphaAnalysis = new TH1F("histCotanAlphaAnalysis", "hist:cotan(#alpha)", 200, -3.5,3.5); 
-  TH1F* histBetaAnalysis       = new TH1F("histBetaAnalysis", "hist", 200, -3.5,3.5); 
-  TH1F* histBetaAnalysisBPix   = new TH1F("histBetaAnalysisBPix", "hist", 200, -3.5,3.5); 
-  TH1F* histBetaAnalysisFPix   = new TH1F("histBetaAnalysisFPix", "hist", 200, -3.5,3.5); 
+  TH1F* histAlphaAnalysis      = new TH1F("histAlphaAnalysis", "histAlphaAnalysis", 200, -3.5,3.5);
+  TH1F* histAlphaAnalysisBPix  = new TH1F("histAlphaAnalysisBPix", "histAlphaAnalysisBPix", 200, -3.5,3.5);
+  TH1F* histAlphaAnalysisFPix  = new TH1F("histAlphaAnalysisFPix", "histAlphaAnalysisFPix", 200, -3.5,3.5);
+  TH1F* histCotanAlphaAnalysis = new TH1F("histCotanAlphaAnalysis", "histCotanAlphaAnalysis", 200, -3.5,3.5); 
+  TH1F* histBetaAnalysis       = new TH1F("histBetaAnalysis", "histBetaAnalysis", 200, -3.5,3.5); 
+  TH1F* histBetaAnalysisBPix   = new TH1F("histBetaAnalysisBPix", "histBetaAnalysisBPix", 200, -3.5,3.5); 
+  TH1F* histBetaAnalysisFPix   = new TH1F("histBetaAnalysisFPix", "histBetaAnalysisFPix", 200, -3.5,3.5); 
   
   TGraphAsymmErrors*  histAlphaAnalysisBPixGraph;
   TGraphAsymmErrors*  histBetaAnalysisBPixGraph;
@@ -333,8 +333,12 @@ void merge(){
  TH1F* muonTimeErrorDistriMerged         = new TH1F("muonTimeErrorDistriMerged","muonTimeErrorDistriMerged",80,0,40);
  TH1F* validVSMuonTimeErrorMerged        = new TH1F("validVSMuonTimeErrorMerged","validVSMuonTimeErrorMerged",80,0,40);
  TH1F* missingVSMuonTimeErrorMerged      = new TH1F("missingVSMuonTimeErrorMerged","missingVSMuonTimeErrorMerged",80,0,40);
+ TH1F* muonTimeNdofDistriMerged          = new TH1F("muonTimeNdofDistriMerged","muonTimeNdofDistriMerged",50,0,50);
+ TH1F* validVSMuonTimeNdofMerged         = new TH1F("validVSMuonTimeNdofMerged","validVSMuonTimeNdofMerged",50,0,50);
+ TH1F* missingVSMuonTimeNdofMerged       = new TH1F("missingVSMuonTimeNdofMerged","missingVSMuonTimeNdofMerged",50,0,50);
 
  TH1F* efficiencyVSMuonTimeError         = new TH1F("efficiencyVSMuonTimeError","efficiencyVSMuonTimeError",80,0,40);
+ TH1F* efficiencyVSMuonTimeNdof         = new TH1F("efficiencyVSMuonTimeNdof","efficiencyVSMuonTimeNdof",50,0,50);
  TH1F* meanMuonTimeVSRunNumber           = new TH1F("meanMuonTimeVSRunNumber","meanMuonTimeVSRunNumber",200,0,200);
  TH1F* meanMuonTimeErrorVSRunNumber       = new TH1F("meanMuonTimeErrorVSRunNumber","meanMuonTimeErrorVSRunNumber",200,0,200);
 
@@ -407,6 +411,9 @@ void merge(){
     mergeHisto("muonTimeErrorDistri",muonTimeErrorDistriMerged);
     mergeHisto("validVSMuonTimeError",validVSMuonTimeErrorMerged);
     mergeHisto("missingVSMuonTimeError",missingVSMuonTimeErrorMerged);
+    mergeHisto("muonTimeNdofDistri",muonTimeNdofDistriMerged);
+    mergeHisto("validVSMuonTimeNdof",validVSMuonTimeNdofMerged);
+    mergeHisto("missingVSMuonTimeNdof",missingVSMuonTimeNdofMerged);
     
 
     if(DEBUG) cout<<"********* NOW MERGING ANALYSIS FOR TRAJECTORY ************"<<endl;
@@ -442,12 +449,9 @@ void merge(){
     mergeHisto("missingPerTrack",missingPerTrackMerged);
     
     mergeHisto("checkoutValidityFlag",checkoutValidityFlagMerged);
-    
- 
+
 
     if(DEBUG) cout<<"********* NOW MERGING analysis for numerator and denominator ************"<<endl;
-   
-   
    
     mergeHisto("xPosFracVal",xPosFracValMerged,true);
     mergeHisto("xPosFracMis",xPosFracMisMerged,true);
@@ -681,6 +685,7 @@ void merge(){
   setSameLabel(muonTimeErrorVSRunNumberMerged,meanMuonTimeErrorVSRunNumber);
   
   makeEfficiency(validVSMuonTimeErrorMerged,missingVSMuonTimeErrorMerged,efficiencyVSMuonTimeError);
+  makeEfficiency(validVSMuonTimeNdofMerged,missingVSMuonTimeNdofMerged,efficiencyVSMuonTimeNdof);
   makeOperation(muonTimeVSRunNumberMerged,nMuonTimeVSRunNumberMerged,meanMuonTimeVSRunNumber,"/");
   makeOperation(muonTimeErrorVSRunNumberMerged,nMuonTimeErrorVSRunNumberMerged,meanMuonTimeErrorVSRunNumber,"/");
   
@@ -1357,10 +1362,16 @@ void merge(){
   int totDen=0;
   int wholeNum=0;
   int wholeDen=0;
+  double minLayer1=1;
+  double minLayer2=1;
+  double minLayer3=1;
+  
   for (int mod=1;mod<=8;mod++){
     for (int lad=1;lad<=22;lad++){
       totNum+=(int)layer1valid->GetBinContent(mod,lad);
       totDen+=(int)layer1valid->GetBinContent(mod,lad)+(int)layer1missing->GetBinContent(mod,lad);
+      if(layer1->GetBinContent(mod,lad)<minLayer1 && layer1->GetBinContent(mod,lad)>0)
+        minLayer1=layer1->GetBinContent(mod,lad);
     }
   }
   wholeNum+=totNum;  wholeDen+=totDen;
@@ -1374,6 +1385,8 @@ void merge(){
     for (int lad=1;lad<=32;lad++){
       totNum+=(int)layer2valid->GetBinContent(mod,lad);
       totDen+=(int)layer2valid->GetBinContent(mod,lad)+(int)layer2missing->GetBinContent(mod,lad);
+      if(layer2->GetBinContent(mod,lad)<minLayer2 && layer2->GetBinContent(mod,lad)>0)
+        minLayer2=layer2->GetBinContent(mod,lad);
     }
   }
   wholeNum+=totNum;  wholeDen+=totDen;
@@ -1387,6 +1400,8 @@ void merge(){
     for (int lad=1;lad<=44;lad++){
       totNum+=(int)layer3valid->GetBinContent(mod,lad);
       totDen+=(int)layer3valid->GetBinContent(mod,lad)+(int)layer3missing->GetBinContent(mod,lad);
+      if(layer3->GetBinContent(mod,lad)<minLayer3 && layer3->GetBinContent(mod,lad)>0)
+        minLayer3=layer3->GetBinContent(mod,lad);
     }
   }
   wholeNum+=totNum;  wholeDen+=totDen;
@@ -1452,8 +1467,9 @@ void merge(){
   TH2F* layer1publication =  new TH2F("layer1publication","layer1publication",8,1,9 ,20,1,21);
   TH2F* layer2publication =  new TH2F("layer2publication","layer2publication",8,1,9 ,32,1,33);
   TH2F* layer3publication =  new TH2F("layer3publication","layer3publication",8,1,9 ,44,1,45);
-  layer2publication->GetZaxis()->SetRangeUser(0.97,1.);
-  layer3publication->GetZaxis()->SetRangeUser(0.93,1.);
+  layer1publication->GetZaxis()->SetRangeUser(minLayer1*0.98,1.);
+  layer2publication->GetZaxis()->SetRangeUser(minLayer2*0.98,1.);
+  layer3publication->GetZaxis()->SetRangeUser(minLayer3*0.98,1.);
 
   for (int mod=1;mod<=8;mod++){
     for (int lad=1;lad<=22;lad++){
@@ -1465,8 +1481,8 @@ void merge(){
 
   for (int mod=1;mod<=8;mod++){
     for (int lad=1;lad<=32;lad++){
-      if ( (layer2RelativeErr->GetBinContent(mod,lad)>0.1)||
-           (mod==2&&lad==4)||(mod==8&&lad==9)||(mod==5&&lad==16)||(mod==7&&lad==21)||(mod==1&&lad==22)||(mod==8&&lad==24) )
+      if ( (layer2RelativeErr->GetBinContent(mod,lad)>0.1))
+           //|| (mod==2&&lad==4)||(mod==8&&lad==9)||(mod==5&&lad==16)||(mod==7&&lad==21)||(mod==1&&lad==22)||(mod==8&&lad==24) )
         layer2publication->SetBinContent(mod,lad,0.);
       else layer2publication->SetBinContent(mod,lad,layer2->GetBinContent(mod,lad));
     }
@@ -1474,8 +1490,8 @@ void merge(){
 
   for (int mod=1;mod<=8;mod++){
     for (int lad=1;lad<=44;lad++){
-      if (layer3RelativeErr->GetBinContent(mod,lad)>0.1 || 
-          (mod==2&&lad==8)||(mod==5&&lad==21)||(mod==8&&lad==21)||(mod==8&&lad==34)||(mod==6&&lad==44) )
+      if (layer3RelativeErr->GetBinContent(mod,lad)>0.1)
+          //|| (mod==2&&lad==8)||(mod==5&&lad==21)||(mod==8&&lad==21)||(mod==8&&lad==34)||(mod==6&&lad==44) )
         layer3publication->SetBinContent(mod,lad,0);
       else layer3publication->SetBinContent(mod,lad,layer3->GetBinContent(mod,lad));
     }
@@ -1644,7 +1660,12 @@ void merge(){
   missingVsLocalYMerged->Write();
   validVsLocalXMerged->Write();
   validVsLocalYMerged->Write();  
-
+  
+  validVsLocalXBigMerged->Write();  
+  missingVsLocalXBigMerged->Write();  
+  validVsLocalXSmallMerged->Write();  
+  missingVsLocalXSmallMerged->Write();  
+  
   windowSearchMerged->Write();
   windowSearchSameModuleMerged->Write();
   windowSearchBPixMerged->Write();
@@ -1730,6 +1751,11 @@ void merge(){
   missingVSMuonTimeErrorMerged->Write();
 
 
+  efficiencyVSMuonTimeNdof->Write();
+  muonTimeNdofDistriMerged->Write();
+  validVSMuonTimeNdofMerged->Write();
+  missingVSMuonTimeNdofMerged->Write();
+  
   //******* EFFICIENCY PLOTS WRITING ************
   TCanvas* c1 = new TCanvas("c1","c1");
   c1->cd();
@@ -2106,6 +2132,17 @@ void merge(){
   localYAnalysis->Draw();
   c1->Print("localYAnalysis.png","png");
   
+  
+  validVsLocalXBigMerged->Draw();
+  c1->Print("validVsLocalXBigMerged.png","png");
+  missingVsLocalXBigMerged->Draw();
+  c1->Print("missingVsLocalXBigMerged.png","png");
+  validVsLocalXSmallMerged->Draw();
+  c1->Print("validVsLocalXSmallMerged.png","png");
+  missingVsLocalXSmallMerged->Draw();
+  c1->Print("missingVsLocalXSmallMerged.png","png");
+  
+  
   histSummary->Draw();
   c1->Print("histSummary.png","png");
   histSubdetectors->Draw();
@@ -2123,18 +2160,24 @@ void merge(){
   c1->Print("layer1missing.png","png");
   layer1valid->Draw("colz");
   c1->Print("layer1valid.png","png");
+  layer1inactive->Draw("colz");
+  c1->Print("layer1inactive.png","png");
   layer2->Draw("colz");
   c1->Print("layer2.png","png");
   layer2missing->Draw("colz");
   c1->Print("layer2missing.png","png");
   layer2valid->Draw("colz");
   c1->Print("layer2valid.png","png");
+  layer2inactive->Draw("colz");
+  c1->Print("layer2inactive.png","png");
   layer3->Draw("colz");
   c1->Print("layer3.png","png");
   layer3missing->Draw("colz");
   c1->Print("layer3missing.png","png");
   layer3valid->Draw("colz");
   c1->Print("layer3valid.png","png");
+  layer1inactive->Draw("colz");
+  c1->Print("layer1inactive.png","png");
 
   layer1RelativeErr->GetXaxis()->SetTitle("module");
   layer1RelativeErr->GetYaxis()->SetTitle("ladder");
