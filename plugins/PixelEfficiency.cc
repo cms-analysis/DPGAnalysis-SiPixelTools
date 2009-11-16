@@ -106,6 +106,8 @@ private:
   
   edm::ParameterSet listOfCuts_;
   
+  std::string dataType_;
+  
   bool skip0TRuns_;
   bool keep0TRuns_;
   bool keep38TRuns_;
@@ -114,6 +116,8 @@ private:
   
   double peak_MuonCut_;
   double window_MuonCut_;
+  double timeErr_MuonCut_;
+  double timeNdof_MuonCut_;
   double nSigma_EdgeCut_;
 
   TH1F*  histo;
@@ -140,7 +144,8 @@ private:
   TH1F*  windowSearchFPix;
   TH1F*  missingButClusterOnSameModule;
   TH1F*  missingButCluster;
- 
+
+  vector<TH1F*> windowSearch_pT; 
          
   TH1F*  chargeDistriPreCuts;
   TH1F*  numbPixInClusterPreCuts;
@@ -287,7 +292,7 @@ private:
   TH1F* histoMethod2AfterFPix;
   TH1F* histoMethod2FPix;
   
-  //track analysis, muonj time analysis
+  //track analysis, muon time analysis
   TH1F* numTracksVsMuonTime;
   TH1F* denTracksVsMuonTime;
   
@@ -300,6 +305,9 @@ private:
   TH1F* muonTimeErrorDistri;
   TH1F* validVSMuonTimeError;
   TH1F* missingVSMuonTimeError;
+  TH1F* muonTimeNdofDistri;
+  TH1F* validVSMuonTimeNdof;
+  TH1F* missingVSMuonTimeNdof;
 
   TH2F* muonTimeVsRunNumber2D;
 
@@ -315,6 +323,8 @@ private:
   double globalXTree, globalYTree, globalZTree;
 
   bool badRun;  
+  int ptranges;
+
 };
 
 //
@@ -336,6 +346,7 @@ PixelEfficiency::PixelEfficiency(const edm::ParameterSet& iConfig) :
   TkTag0T_( iConfig.getParameter<edm::InputTag>("TkTag0T") ),
   trajectoryInput_( iConfig.getParameter<edm::InputTag>("trajectoryInput") ),
   pixelClusterInput_( iConfig.getParameter<edm::InputTag>("pixelClusterInput") ),
+  dataType_( iConfig.getUntrackedParameter<string>("dataType",std::string("collision")) ),
   skip0TRuns_( iConfig.getUntrackedParameter<bool>("skip0TRuns")),
   keep0TRuns_( iConfig.getUntrackedParameter<bool>("keep0TRuns")),
   keep38TRuns_( iConfig.getUntrackedParameter<bool>("keep38TRuns")),
@@ -343,6 +354,8 @@ PixelEfficiency::PixelEfficiency(const edm::ParameterSet& iConfig) :
   skipBadModules_( iConfig.getUntrackedParameter<bool>("skipBadModules")),
   peak_MuonCut_( iConfig.getUntrackedParameter<double>("peak_MuonCut")),
   window_MuonCut_( iConfig.getUntrackedParameter<double>("window_MuonCut")),
+  timeErr_MuonCut_( iConfig.getUntrackedParameter<double>("timeErr_MuonCut")),
+  timeNdof_MuonCut_( iConfig.getUntrackedParameter<double>("timeNdof_MuonCut")),
   nSigma_EdgeCut_( iConfig.getUntrackedParameter<double>("nSigma_EdgeCut"))
 {   
  //now do what ever initialization is needed
@@ -372,13 +385,12 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
   using namespace edm;
   using namespace std;
-
   
   unsigned int runNumber=iEvent.id().run();
-  
+    
   //skip 0T runs for reprocessing errors
   //CRAFT08
-  /*if ( skip0TRuns_ && (
+  if ( skip0TRuns_ && (
   runNumber==69557 || runNumber==69559|| runNumber==69564|| runNumber==69572|| runNumber==69573|| runNumber==69587|| runNumber==69594||
   runNumber==69728|| runNumber==69743|| runNumber==70147|| runNumber==70170|| runNumber==70195|| runNumber==70344 || runNumber==70347 ||
   runNumber==70410|| runNumber==70411||
@@ -388,7 +400,7 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
        (runNumber>=67264 && runNumber<=67432) ||
        (runNumber>=67676 && runNumber<=67777) ||
        (runNumber>=69536 && runNumber<=69671) ||
-       (runNumber>=70196 && runNumber<=99999)) ) return;*/
+       (runNumber>=70196 && runNumber<=99999)) ) return;
   
   //CRAFT 09 @ 0T     
   if ( keep0TRuns_ && (
@@ -462,19 +474,17 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   // get the ccmuons
   edm::Handle<MuonCollection> MuonHandle;
 
-  if(DEBUG) std::cout<<"previous the try"<<std::endl;
+  if(DEBUG) std::cout<<"Trying to get all the collections"<<std::endl;
 
 
-try{
-
-  if(DEBUG) std::cout<<"after try"<<std::endl;
-
-
-  iEvent.getByLabel(trajectoryInput_,trajTrackCollectionHandle);
+  try{iEvent.getByLabel(trajectoryInput_,trajTrackCollectionHandle);}
+  catch(...){std::cout<<"trajTrackCollectionHandle was not retrieved successfully ..."<<endl;return;}
  
 
   edm::Handle< edmNew::DetSetVector<SiPixelCluster> > theClusters;
-  iEvent.getByLabel(pixelClusterInput_, theClusters);
+  try{iEvent.getByLabel(pixelClusterInput_, theClusters);}
+  catch(...){std::cout<<"Clusters were not retrieved successfully ..."<<endl;return;}
+  
 
   const edmNew::DetSetVector<SiPixelCluster>& input = *theClusters;
 
@@ -484,8 +494,12 @@ try{
   checkoutTraj->Fill(NbrTracks);
   consistencyCheck->Fill(2,NbrTracks); //2 = each track //*************
   
-  iEvent.getByLabel("muons", MuonHandle);
-  
+  //iEvent.getByLabel("muons", MuonHandle);
+  //iEvent.getByLabel("muons1Leg", MuonHandle);//NEW
+  if(dataType_=="cosmics"){
+    try{iEvent.getByLabel("muons1Leg", MuonHandle);}
+    catch(...){std::cout<<"Clusters were not retrieved successfully ..."<<endl;return;}
+  }
   //******** MUON CUT ************
   
   std::map<double,bool> muonTimingMap;
@@ -493,16 +507,19 @@ try{
   int nmuon = 0;
   double time = -999;
   double timerr = 999;
-  for(MuonCollection::const_iterator itmuon = MuonHandle->begin(), itmuonEnd = MuonHandle->end(); itmuon!=itmuonEnd;++itmuon){   
-    if(nmuon>1) break;
-  
-    if(itmuon->isTimeValid() == false) continue;
+  double timendof = -999;
+  if(dataType_=="cosmics"){
+    for(MuonCollection::const_iterator itmuon = MuonHandle->begin(), itmuonEnd = MuonHandle->end(); itmuon!=itmuonEnd;++itmuon){   
+      if(nmuon>1) break;
+      if(itmuon->isTimeValid() == false) continue;
    
-    if(itmuon->time().timeAtIpInOutErr<timerr){
-      time = itmuon->time().timeAtIpInOut;
-      timerr = itmuon->time().timeAtIpInOutErr;
+      if(itmuon->time().timeAtIpInOutErr<timerr && itmuon->time().nDof!=0){//NEW
+        time = itmuon->time().timeAtIpInOut;
+        timerr = itmuon->time().timeAtIpInOutErr;
+        timendof = itmuon->time().nDof;
+      }
+      nmuon++;
     }
-    nmuon++;
   }
     
   double peak=-8;    //For CRAFT08
@@ -510,20 +527,20 @@ try{
   peak = peak_MuonCut_; //from config file
   for(double t=0;t<20;t+=0.5){
     hasGoodTiming=false;
-    if(runNumber<68094 && time<peak+t && time>peak-t && timerr<10)
+    if(runNumber<68094 && time<peak+t && time>peak-t && timerr<timeErr_MuonCut_ && timendof>timeNdof_MuonCut_)
       hasGoodTiming=true;
-    if(runNumber>=68094 && time<peak+9+t && time>peak+9-t && timerr<10)
+    if(runNumber>=68094 && time<peak+9+t && time>peak+9-t && timerr<timeErr_MuonCut_ && timendof>timeNdof_MuonCut_)
       hasGoodTiming=true;
     muonTimingMap[2.*t]=hasGoodTiming;
   }
 
 
   hasGoodTiming = false;
-  double muonwindow = 5;
-  muonwindow = window_MuonCut_;
-  if(runNumber<68094 && time<peak+muonwindow && time>peak-muonwindow && timerr<10)
+  double muonwindow = 5; //For CRAFT08
+  muonwindow = window_MuonCut_; //from config file
+  if(runNumber<68094 && time<peak+muonwindow && time>peak-muonwindow && timerr<timeErr_MuonCut_ && timendof>timeNdof_MuonCut_)
      hasGoodTiming=true;
-  if(runNumber>=68094 && time<peak+9+muonwindow && time>peak+9-muonwindow && timerr<10)
+  if(runNumber>=68094 && time<peak+9+muonwindow && time>peak+9-muonwindow && timerr<timeErr_MuonCut_ && timendof>timeNdof_MuonCut_)
     hasGoodTiming=true;
    
   TrajectoryStateCombiner tsoscomb;
@@ -736,8 +753,7 @@ try{
 	 //map for the TH2
 	 std::map <double,bool> edgeCutMap;
 
-	 for (int divideMe=0;divideMe<50;divideMe++)
-	   {
+	 for (int divideMe=0;divideMe<50;divideMe++){
 	   double sigma=divideMe/10.;
 	   
           LocalPoint  exageratedMap;
@@ -756,9 +772,9 @@ try{
 	     edgeCutMap[sigma] = true;
 	   else if( pixelExageratedMap.second>ncols || pixelExageratedMap.second<0)
 	      edgeCutMap[sigma] = true;
-	    else edgeCutMap[sigma] = false;	   
+	   else edgeCutMap[sigma] = false;	   
 	  
-	   }
+	 }
 	 
 	 //PERCENTAGE CUT
 	 //bool isNotInMiddle = false;
@@ -1050,10 +1066,14 @@ try{
 	  }
   	}
 	
-	if((*testhit).getType()==TrackingRecHit::valid)
+	if((*testhit).getType()==TrackingRecHit::valid){
 	  validVSMuonTimeError->Fill(timerr);
-	if((*testhit).getType()==TrackingRecHit::missing)
+	  validVSMuonTimeNdof->Fill(timendof);
+	}
+	if((*testhit).getType()==TrackingRecHit::missing){
 	  missingVSMuonTimeError->Fill(timerr);
+	  missingVSMuonTimeNdof->Fill(timendof);
+	}
 	
   
   	//************************************ HERE IS THE CUT *****************************************************
@@ -1457,6 +1477,11 @@ try{
 	windowSearchBPix->Fill(minDistance);
 	if (goodModule) windowSearchGoodModulesBPix->Fill(minDistance);
 	
+	for (int p=0;p<ptranges;p++)
+	  if (PT>(double)p && PT<=(double)(p+1)) windowSearch_pT[p]->Fill(minDistance);
+	if (PT>(double)(ptranges))  windowSearch_pT[ptranges]->Fill(minDistance);
+	  
+
 	if(minDistance!=999999)
 	  hasCluster=true;
 	if(minDistanceOnSameModule!=999999)
@@ -1537,6 +1562,10 @@ try{
 	windowSearchFPix->Fill(minDistance); 
 	windowSearch->Fill(minDistance);
 	
+	if (PT<5.)            windowSearch_pT[0]->Fill(minDistance);
+	if (PT>=5. && PT<10.) windowSearch_pT[1]->Fill(minDistance);
+	if (PT>=10.)          windowSearch_pT[2]->Fill(minDistance);
+
 	if(minDistance!=999999)
 	  hasCluster=true;
 	if(minDistanceOnSameModule!=999999)
@@ -1580,7 +1609,8 @@ try{
 	     
     }//end-for of Trajectories
 
-  }catch ( ... ) {std::cout<<"I've had a problem, skipped the try !!"<<std::endl;}
+  //not needed anymore ...
+  //}catch ( ... ) {std::cout<<"I've had a problem, skipped the try !!"<<std::endl;}
 
   if(DEBUG) cout<<"End of Analyze"<<endl;
 
@@ -1593,6 +1623,8 @@ PixelEfficiency::beginJob(const edm::EventSetup& iSetup)
 {
  if(DEBUG) std::cout<<"Begin job"<<std::endl;
 
+ ptranges=11;  //the last one is the right tail of the distribution 
+ 
  fOutputFile = new TFile(fOutputFileName.c_str(), "RECREATE"); 
 
 //test
@@ -1629,7 +1661,15 @@ PixelEfficiency::beginJob(const edm::EventSetup& iSetup)
  missingButClusterOnSameModule = new TH1F("missingButClusterOnSameModule","missingButClusterOnSameModule",2,0,2);
  missingButCluster = new TH1F("missingButCluster","missingButCluster",2,0,2);
  
- 
+ for (int p=0;p<=ptranges;p++)
+   windowSearch_pT.push_back(0);
+ for (int p=0;p<=ptranges;p++){
+   char basename[20];
+   sprintf (basename,"windowSearch_pT_range%i",p) ;
+   std::string m_baseName = basename ;
+   windowSearch_pT[p]= new TH1F( (m_baseName).c_str(),(m_baseName).c_str(), 500,0,0.50);;
+   }
+     
  chargeDistri = new TH1F("chargeDistri","chargeDistri",200,0,100000);
  numbPixInCluster = new TH1F("numbPixInCluster","numbPixInCluster",50,0,50);
  chargeDistriBPix = new TH1F("chargeDistriBPix","chargeDistriBPix",200,0,100000);
@@ -1677,6 +1717,9 @@ PixelEfficiency::beginJob(const edm::EventSetup& iSetup)
  muonTimeErrorDistri       = new TH1F("muonTimeErrorDistri","muonTimeErrorDistri",80,0,40);
  validVSMuonTimeError      = new TH1F("validVSMuonTimeError","validVSMuonTimeError",80,0,40);
  missingVSMuonTimeError    = new TH1F("missingVSMuonTimeError","missingVSMuonTimeError",80,0,40);
+ muonTimeNdofDistri        = new TH1F("muonTimeNdofDistri","muonTimeNdofDistri",50,0,50);
+ validVSMuonTimeNdof       = new TH1F("validVSMuonTimeNdof","validVSMuonTimeNdof",50,0,50);
+ missingVSMuonTimeNdof     = new TH1F("missingVSMuonTimeNdof","missingVSMuonTimeNdof",50,0,50);
  
 //
  validVsAlpha = new TH1F("validVsAlpha","validVsAlpha",200,-3.5,3.5);
@@ -1841,6 +1884,9 @@ PixelEfficiency::endJob() {
   missingButClusterOnSameModule->Write();
   missingButCluster->Write();
   
+  for (int p=0;p<=ptranges;p++)
+    windowSearch_pT[p]->Write();
+  
   chargeDistri->Write();
   numbPixInCluster->Write();
   chargeDistriBPix->Write();
@@ -1959,6 +2005,9 @@ PixelEfficiency::endJob() {
   muonTimeErrorDistri->Write();
   validVSMuonTimeError->Write();
   missingVSMuonTimeError->Write();
+  muonTimeNdofDistri->Write();
+  validVSMuonTimeNdof->Write();
+  missingVSMuonTimeNdof->Write();
   
   
   //
