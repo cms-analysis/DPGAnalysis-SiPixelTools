@@ -71,8 +71,6 @@ using namespace edm;
 using namespace reco;
 using namespace TMath;
 
- const bool DEBUG = false;
-
  const unsigned int kBPIX = PixelSubdetector::PixelBarrel;
  const unsigned int kFPIX = PixelSubdetector::PixelEndcap;
 
@@ -106,8 +104,11 @@ private:
   
   edm::ParameterSet listOfCuts_;
   
+  bool DEBUG;
+  
   std::string dataType_;
   
+  bool keepAllRuns_;
   bool skip0TRuns_;
   bool keep0TRuns_;
   bool keep38TRuns_;
@@ -346,7 +347,9 @@ PixelEfficiency::PixelEfficiency(const edm::ParameterSet& iConfig) :
   TkTag0T_( iConfig.getParameter<edm::InputTag>("TkTag0T") ),
   trajectoryInput_( iConfig.getParameter<edm::InputTag>("trajectoryInput") ),
   pixelClusterInput_( iConfig.getParameter<edm::InputTag>("pixelClusterInput") ),
+  DEBUG( iConfig.getUntrackedParameter<bool>("debug",false)),
   dataType_( iConfig.getUntrackedParameter<string>("dataType",std::string("collision")) ),
+  keepAllRuns_( iConfig.getUntrackedParameter<bool>("keepAllRuns",true)),
   skip0TRuns_( iConfig.getUntrackedParameter<bool>("skip0TRuns")),
   keep0TRuns_( iConfig.getUntrackedParameter<bool>("keep0TRuns")),
   keep38TRuns_( iConfig.getUntrackedParameter<bool>("keep38TRuns")),
@@ -390,7 +393,7 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     
   //skip 0T runs for reprocessing errors
   //CRAFT08
-  if ( skip0TRuns_ && (
+  if ( !keepAllRuns_ && skip0TRuns_ && (
   runNumber==69557 || runNumber==69559|| runNumber==69564|| runNumber==69572|| runNumber==69573|| runNumber==69587|| runNumber==69594||
   runNumber==69728|| runNumber==69743|| runNumber==70147|| runNumber==70170|| runNumber==70195|| runNumber==70344 || runNumber==70347 ||
   runNumber==70410|| runNumber==70411||
@@ -403,7 +406,7 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
        (runNumber>=70196 && runNumber<=99999)) ) return;
   
   //CRAFT 09 @ 0T     
-  if ( keep0TRuns_ && (
+  if ( !keepAllRuns_ && keep0TRuns_ && (
   runNumber!=108483 && runNumber!=108498 && runNumber!=108521
   && runNumber!=108526 && runNumber!=108562 && runNumber!=108597
   && runNumber!=108624 && runNumber!=108645 && runNumber!=108662
@@ -424,7 +427,7 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   && runNumber!=110341 ) ) return;
    
   //CRAFT 09 @ 3.8T     
-  if ( keep38TRuns_ && (
+  if ( !keepAllRuns_ && keep38TRuns_ && (
   runNumber!=109032 && runNumber!=109035 && runNumber!=109037 && runNumber!=109039
   && runNumber!=109043 && runNumber!=109046 && runNumber!=109049 && runNumber!=109134
   && runNumber!=109142 && runNumber!=109143 && runNumber!=109144 && runNumber!=109146
