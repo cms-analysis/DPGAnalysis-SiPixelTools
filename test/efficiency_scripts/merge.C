@@ -47,7 +47,7 @@ void merge(){
 
   if(DEBUG) cout<<"********* CREATING MERGED HISTO/TTREE ************"<<endl;
 
-
+  
   TH1F* histoMerged = new TH1F("histoMerged", "histoMerged", 3, 0, 3);
 
   TH1F* histLayer1Merged = new TH1F("histLayer1Merged", "histLayer1Merged", 3, 0, 3);
