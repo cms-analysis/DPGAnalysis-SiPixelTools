@@ -175,6 +175,17 @@ void merge(){
   TH1F* windowSearchFPixMerged = new  TH1F("windowSearchFPixMerged","windowSearchFPixMerged",(int)(maxwindowsearch*1000),0,maxwindowsearch);
   TH1F* missingButClusterOnSameModuleMerged = new TH1F("missingButClusterOnSameModuleMerged","missingButClusterOnSameModuleMerged",2,0,2);
   TH1F* missingButClusterMerged = new TH1F("missingButClusterMerged","missingButClusterMerged",2,0,2);
+
+  vector<TH1F*> windowSearch_pTMerged;
+  int ptranges=11;
+  for (int p=0;p<=ptranges;p++)
+    windowSearch_pTMerged.push_back(0);
+  for (int p=0;p<=ptranges;p++){
+    char basename[20];
+    sprintf (basename,"windowSearch_pTMerged_range%i",p) ;
+    std::string m_baseName = basename ;
+    windowSearch_pTMerged[p]= new TH1F( (m_baseName).c_str(),(m_baseName).c_str(),(int)(maxwindowsearch*1000),0,maxwindowsearch);;
+    }
    
   TH1F* histoMethod2Merged = new TH1F("histoMethod2Merged", "histoMethod2Merged", 2, 0, 2);
   TH1F* histoMethod2AfterMerged = new TH1F("histoMethod2AfterMerged", "histoMethod2AfterMerged", 2, 0, 2);
@@ -575,6 +586,12 @@ void merge(){
     mergeHisto(windowSearchBPixMerged,true);
     mergeHisto(windowSearchGoodModulesBPixMerged,true);
     mergeHisto(windowSearchFPixMerged,true);
+    for (int p=0;p<ptranges;p++){
+      char auxname[20];
+      sprintf(auxname,"windowSearch_pT_range%d",p);
+      std::string auxstring=auxname;
+      mergeHisto( (auxstring).c_str(),windowSearch_pTMerged[p],true);
+      }
     
     mergeHisto(missingButClusterOnSameModuleMerged);
     mergeHisto(missingButClusterMerged);
@@ -1052,7 +1069,46 @@ void merge(){
     error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
     histEndCapEfficiencyComparison->SetBinError(4,error);
     histEndCapEfficiencyComparison->GetXaxis()->SetBinLabel(4,"Method 2 s-curve");
-  
+
+
+    //pTdependent SCURVE ***********
+    vector<TH1F*> scurve_pT;
+    vector<TF1*>  fitSC_pT;
+
+    for (int p=0;p<=ptranges;p++){
+      scurve_pT.push_back(0);
+      fitSC_pT.push_back(0);
+    }
+    for (int p=0;p<=ptranges;p++){
+      char basename[10];
+      sprintf (basename,"scurve_pT_range%i",p) ;
+      std::string m_baseName = basename ;
+      scurve_pT[p] = new TH1F( (m_baseName).c_str(),(m_baseName).c_str(),windowSearchMerged->GetNbinsX(), 0, windowSearchMerged->GetXaxis()->GetBinUpEdge(windowSearchMerged->GetNbinsX()));;
+      sprintf (basename,"fitSC_pT_range%i",p) ;
+      std::string fit_baseName = basename ;
+      fitSC_pT[p] = new TF1( (fit_baseName).c_str(),"[0]", down, up);
+    }
+
+    for (int p=0;p<=ptranges;p++){
+      totalHit=0.; validHit=0.;
+      for (int bin=1;bin<=windowSearchMerged->GetNbinsX()+1; bin++) //201 includes overflow=definitevely missing
+        totalHit+=windowSearch_pTMerged[p]->GetBinContent(bin);
+      std::cout<<"diiicaaaa: "<<totalHit<<std::endl;
+      for (int bin=1; bin<=scurve_pT[p]->GetNbinsX(); bin++){
+        validHit+=windowSearch_pTMerged[p]->GetBinContent(bin);
+        scurve_pT[p]->SetBinContent(bin, validHit/totalHit);
+        }
+      scurve_pT[p]->GetXaxis()->SetTitle("#Delta R [cm]");
+      scurve_pT[p]->GetYaxis()->SetTitle("#epsilon_hit(#Delta R)");
+      scurve_pT[p]->GetXaxis()->SetLabelSize(0.03);
+      scurve_pT[p]->GetYaxis()->SetLabelSize(0.03);
+
+      fitSC_pT[p]->SetParName(0,"asympt_eff_ptdependent");
+      fitSC_pT[p]->SetParameter(0, 0.7);
+      //scurve_pT[p]->Fit( fitSC_pT[p]->GetTitle(),"R");
+      }
+      
+
   //********* efficiency FreyaPlot
   for (int i=1;i<denTracksVsMuonTimeMerged->GetNbinsX();i++){
     double iNum=numTracksVsMuonTimeMerged->GetBinContent(i);
@@ -1673,6 +1729,8 @@ void merge(){
   windowSearchFPixMerged->Write();
   missingButClusterMerged->Write();
   missingButClusterOnSameModuleMerged->Write();
+  for (int p=0;p<=ptranges;p++)
+    windowSearch_pTMerged[p]->Write();
   
   checkoutTrajMerged->Write();
   checkoutValidityFlagMerged->Write(); 
@@ -2028,6 +2086,11 @@ void merge(){
   legComp->Draw("same");
   c1->Print("scurveBPixCompareWOcleaning.png","png");
     
+  for (int p=0;p<=ptranges;p++){
+    scurve_pT[p]->Write();    
+    scurve_pT[p]->Draw();
+    c1->Print((scurve_pT[p]->GetTitle()+std::string(".png")).c_str(),"png");
+    }
   
   goodStatEfficiency->GetXaxis()->SetBinLabel(1,"Layer 1");
   goodStatEfficiency->GetXaxis()->SetBinLabel(2,"Layer 2");
