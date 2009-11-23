@@ -957,7 +957,7 @@ void merge(){
 
   
     //Total SCURVE ***********
-    double totalHit=0., validHit=0.;
+    double totalHit=0., validHit=0.; 
 
     TH1F* scurve = new TH1F("scurve", "scurve", windowSearchMerged->GetNbinsX(), 0, windowSearchMerged->GetXaxis()->GetBinUpEdge(windowSearchMerged->GetNbinsX()));
     for (int bin=1;bin<=windowSearchMerged->GetNbinsX()+1; bin++) //+1 includes overflow := definitevely missing
