@@ -123,7 +123,7 @@ class PixelTree : public edm::EDAnalyzer {
 
   // -- clusters
   static const int CLUSTERMAX = 100000; 
-  static const int DGPERCLMAX = 50;  
+  static const int DGPERCLMAX = 100;  
   int   fClN;
   int   fClSize[CLUSTERMAX], fClSizeX[CLUSTERMAX], fClSizeY[CLUSTERMAX]; 
   float fClRow[CLUSTERMAX], fClCol[CLUSTERMAX];  //??

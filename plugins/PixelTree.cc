@@ -616,7 +616,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
 	const GeomDetUnit* detUnit = hit->detUnit();
 	if (0 == detUnit) {
-	  cout << "-- PixelTree> Did not find hit->detUnit()" << endl;
+	  if (fVerbose > 0) cout << "-- PixelTree> Did not find hit->detUnit()" << endl;
 	  continue;
 	}
 
