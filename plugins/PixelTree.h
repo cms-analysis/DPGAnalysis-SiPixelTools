@@ -72,7 +72,9 @@ class PixelTree : public edm::EDAnalyzer {
 
  private:
   int             fVerbose; 
-  std::string     fRootFileName, fTrajectoryInputLabel;
+  std::string     fRootFileName; 
+  int             fDumpAllEvents;
+  std::string     fTrajectoryInputLabel;
   edm::InputTag   fMuonCollectionLabel, fTrackCollectionLabel, fPixelClusterLabel;
   std::string     fL1GTReadoutRecordLabel; 
   edm::InputTag   fL1GTmapLabel;
@@ -84,7 +86,8 @@ class PixelTree : public edm::EDAnalyzer {
 
 
   // -- general stuff
-  unsigned int fRun, fEvent, fLumiBlock, fBX, fOrbit; 
+  unsigned int fRun, fEvent, fLumiBlock; 
+  int          fBX, fOrbit; 
   unsigned int fTimeLo, fTimeHi; 
   
   float fBz;

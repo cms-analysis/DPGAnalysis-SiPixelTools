@@ -87,6 +87,7 @@ using namespace reco;
 PixelTree::PixelTree(edm::ParameterSet const& iConfig): 
   fVerbose(iConfig.getUntrackedParameter<int>("verbose", 0)),
   fRootFileName(iConfig.getUntrackedParameter<string>("rootFileName", string("pixelTree.root"))),
+  fDumpAllEvents(iConfig.getUntrackedParameter<int>("dumpAllEvents", 0)),
   fTrajectoryInputLabel(iConfig.getUntrackedParameter<string>("trajectoryInputLabel", string("ctfRefitter"))),
   fMuonCollectionLabel(iConfig.getUntrackedParameter<string>("muonCollectionLabel", string("muons"))),
   fTrackCollectionLabel(iConfig.getUntrackedParameter<string>("trackCollectionLabel", string("ctfWithMaterialTracksP5"))),
@@ -98,6 +99,7 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
   cout << "---  verbose:                         " << fVerbose << endl;
+  cout << "---  dumpAllEvents:                   " << fDumpAllEvents << endl;
   cout << "---  rootFileName:                    " << fRootFileName << endl;
   cout << "---  trajectoryInputLabel:            " << fTrajectoryInputLabel.c_str() << endl;
   cout << "---  muonCollectionLabel:             " << fMuonCollectionLabel << endl;
@@ -294,12 +296,6 @@ void PixelTree::analyze(const edm::Event& iEvent,
   const edm::Timestamp timeStamp = iEvent.time();
   unsigned int high = timeStamp.value() >> 32;       // seconds
   unsigned int low = 0xffffffff & timeStamp.value(); // microseconds  
-  //   Caveat: bitset() ctor only uses the lower 32 bits for initialization!
-  //   unsigned long long ltime = timeStamp.value(); 
-  //   cout << "timeStamp: " << std::bitset<64>(timeStamp.value()) << " " << timeStamp.value() << endl;
-  //   cout << "ltime:     "; for (int i = 63; i >= 0; --i) cout << (ltime & (0x1LL <<i)? '1': '0'); cout << endl;
-  //   cout << "high:      " << std::bitset<32>(high) << " " << high << endl;
-  //   cout << "low:       " << std::bitset<32>(low) << " " << low << endl;
 
   fTimeLo    = low;
   fTimeHi    = high;
@@ -377,7 +373,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
     for (CItAlgo itAlgo = algorithmMap.begin(); itAlgo != algorithmMap.end(); itAlgo++) {
       std::string aName = itAlgo->first;
       int algBitNumber = (itAlgo->second).algoBitNumber();
-      if (fVerbose > 2) cout << "i = " << algBitNumber << " -> " << aName << endl;
+      if (fVerbose > 5) cout << "i = " << algBitNumber << " -> " << aName << endl;
       fL1Thist->GetXaxis()->SetBinLabel(algBitNumber+1, aName.c_str());
     }
 
@@ -400,7 +396,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
     //  bool l1SingleEG15 = menu->gtAlgorithmResult( "L1_SingleEG15", gtDecisionWordBeforeMask);
     //    bool algResult = l1AlgorithmResult(iEvent, evSetup, algoName);
 
-    if (fVerbose > 1) {
+    if (fVerbose > 2) {
       cout << "L1 trigger accept: " << fL1T << endl;
       cout << " 3         2         1         0" << endl;
       cout << "10987654321098765432109876543210" << endl;
@@ -434,7 +430,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
     TriggerNames triggerNames;
     triggerNames.init(*hHLTresults);
     fHLT = hHLTresults->accept();
-    if (fVerbose > 1) cout << "hHLTresults->size() = " << hHLTresults->size() << " and HLT accept = " << fHLT << endl;
+    if (fVerbose > 5) cout << "hHLTresults->size() = " << hHLTresults->size() << " and HLT accept = " << fHLT << endl;
 
     vector<string>  hlNames;
     hlNames = triggerNames.triggerNames();
@@ -446,7 +442,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
       hlterr  = hHLTresults->error(iTrig); 
       itrig = iTrig%32; 
 
-      if (fVerbose > 2) cout << iTrig << " " << triggerNames.triggerName(iTrig) 
+      if (fVerbose > 5) cout << iTrig << " " << triggerNames.triggerName(iTrig) 
 			     << " -> " << hlNames[iTrig] << "  " 
 			     << " at " << triggerNames.triggerIndex(hlNames[iTrig]) << ",  " 
 			     << iTrig << "%32=" << itrig 
@@ -473,7 +469,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
       }
     }
 
-    if (fVerbose > 1)  {
+    if (fVerbose > 2)  {
       cout << "HLT trigger accept/run: " << fHLT<< endl;
       cout << " 3         2         1         0" << endl;
       cout << "10987654321098765432109876543210" << endl;
@@ -559,13 +555,14 @@ void PixelTree::analyze(const edm::Event& iEvent,
   }
   if (hTrackCollection.isValid()) {
     const std::vector<reco::Track> trackColl = *(hTrackCollection.product());
+    if (fVerbose > 0) cout << "--> Track collection size: " << trackColl.size() << endl;
   } else {
     cout << "--> No valid track collection" << endl;
   }
 
   // -- Track trajectory association map
   edm::Handle<TrajTrackAssociationCollection> hTTAC;
-  iEvent.getByLabel(fTrackCollectionLabel, hTTAC);
+  iEvent.getByLabel(fTrajectoryInputLabel, hTTAC);
 
   // -- Pixel cluster
   edm::Handle< edmNew::DetSetVector<SiPixelCluster> > hClusterColl;
@@ -998,15 +995,21 @@ void PixelTree::analyze(const edm::Event& iEvent,
   }
 
   // -- That's it
-  if (fVerbose > 0) {
+  if (fVerbose > 1) {
     cout << nevt << "(" << fRun << "/" << fEvent << ")" 
+	 << " orbit: " << fOrbit << " BX: " << fBX
+	 << " time: " << fTimeHi << "/" << fTimeLo
 	 << " MuN: " << fMuN << " TkN: " << fTkN << " ClN: " << fClN << " DgN: " << fDgN 
 	 << " FEDs: " << nbpixfeds << "/" << nfpixfeds
 	 << endl;
   }
 
-  if (fMuN > 0 || fTkN > 0 || fClN > 0 || fDgN > 0) {
+  if (fDumpAllEvents > 0) {
     fTree->Fill();
+  } else {
+    if (fMuN > 0 || fTkN > 0 || fClN > 0 || fDgN > 0) {
+      fTree->Fill();
+    }
   }
 } 
 
