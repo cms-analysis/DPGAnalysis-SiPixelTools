@@ -576,7 +576,9 @@ void PixelTree::analyze(const edm::Event& iEvent,
   TrajectoryStateCombiner tsoscomb;
   if (hTTAC.isValid()) {
     const TrajTrackAssociationCollection ttac = *(hTTAC.product());
+    // cout << "   hTTAC.isValid()" << endl;
     for (TrajTrackAssociationCollection::const_iterator it = ttac.begin(); it !=  ttac.end(); ++it) {
+      // cout << "      TracjTrackAssociationCollection iterating" << endl;
       const edm::Ref<std::vector<Trajectory> > refTraj = it->key;  
       reco::TrackRef trackref = it->val;
 
@@ -584,8 +586,9 @@ void PixelTree::analyze(const edm::Event& iEvent,
       bool isBpixTrack(false), isFpixTrack(false); 
       isPixelTrack(refTraj, isBpixTrack, isFpixTrack);
       if (!isBpixTrack && !isFpixTrack) {
+	// cout << "  not a pixel track" << endl;
 	continue; 
-      }
+      } 
 
       fTkCharge[fTkN] = trackref->charge();
       fTkChi2[fTkN]   = trackref->chi2();
@@ -1002,7 +1005,9 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	 << endl;
   }
 
-  fTree->Fill();
+  if (fMuN > 0 || fTkN > 0 || fClN > 0 || fDgN > 0) {
+    fTree->Fill();
+  }
 } 
 
 
