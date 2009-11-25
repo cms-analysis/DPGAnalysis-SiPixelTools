@@ -52,7 +52,7 @@ process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
 # -- skimming
 process.superPointingFilter = cms.EDFilter(
     "HLTMuonPointingFilter",
-    SALabel = cms.string("globalTracks"),
+    SALabel = cms.string("generalTracks"),
     PropagatorName = cms.string("SteppingHelixPropagatorAny"),
     radius = cms.double(10.0),
     maxZ = cms.double(50.0)
@@ -85,7 +85,7 @@ process.PixelTree = cms.EDAnalyzer(
 
 # -- Path
 process.p = cms.Path(
-    process.superPointingFilter*
+#    process.superPointingFilter*
     process.TrackRefitter*
     process.PixelTree
     )
