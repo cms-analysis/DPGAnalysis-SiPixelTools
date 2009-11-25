@@ -555,7 +555,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
   }
   if (hTrackCollection.isValid()) {
     const std::vector<reco::Track> trackColl = *(hTrackCollection.product());
-    if (fVerbose > 0) cout << "--> Track collection size: " << trackColl.size() << endl;
+    if (fVerbose > 1) cout << "--> Track collection size: " << trackColl.size() << endl;
   } else {
     cout << "--> No valid track collection" << endl;
   }
@@ -616,7 +616,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
 	const GeomDetUnit* detUnit = hit->detUnit();
 	if (0 == detUnit) {
-	  if (fVerbose > 0) cout << "-- PixelTree> Did not find hit->detUnit()" << endl;
+	  if (fVerbose > 1) cout << "-- PixelTree> Did not find hit->detUnit()" << endl;
 	  continue;
 	}
 
@@ -995,7 +995,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
   }
 
   // -- That's it
-  if (fVerbose > 1) {
+  if (fVerbose > 0) {
     cout << nevt << "(" << fRun << "/" << fEvent << ")" 
 	 << " orbit: " << fOrbit << " BX: " << fBX
 	 << " time: " << fTimeHi << "/" << fTimeLo
