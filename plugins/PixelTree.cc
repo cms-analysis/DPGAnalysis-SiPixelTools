@@ -234,7 +234,7 @@ void PixelTree::beginJob(const edm::EventSetup& es) {
   fTree->Branch("ClChargeCorr", fClChargeCorr,  "ClChargeCorr[ClN]/F");
   fTree->Branch("ClType",       fClType,        "ClType[ClN]/I");
   fTree->Branch("ClTkI",        fClTkI,         "ClTkI[ClN]/I");
-  fTree->Branch("ClDgI",        fClDgI,         "ClDgI[TkN][100]/I");    //FIXME: This should be variable?
+  fTree->Branch("ClDgI",        fClDgI,         "ClDgI[ClN][100]/I");    //FIXME: This should be variable?
 
   fTree->Branch("DgN",          &fDgN,          "DgN/I");
   fTree->Branch("DgRow",        fDgRow,         "DgRow[DgN]/I");
