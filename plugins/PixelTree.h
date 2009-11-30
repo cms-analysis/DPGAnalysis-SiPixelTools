@@ -82,7 +82,7 @@ class PixelTree : public edm::EDAnalyzer {
   int             fVerbose; 
   std::string     fRootFileName; 
   int             fDumpAllEvents;
-  std::string     fTrajectoryInputLabel;
+  edm::InputTag   fTrajectoryInputLabel;
   edm::InputTag   fMuonCollectionLabel, fTrackCollectionLabel, fPixelClusterLabel;
   std::string     fL1GTReadoutRecordLabel; 
   edm::InputTag   fL1GTmapLabel;

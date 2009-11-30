@@ -99,9 +99,9 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fVerbose(iConfig.getUntrackedParameter<int>("verbose", 0)),
   fRootFileName(iConfig.getUntrackedParameter<string>("rootFileName", string("pixelTree.root"))),
   fDumpAllEvents(iConfig.getUntrackedParameter<int>("dumpAllEvents", 0)),
-  fTrajectoryInputLabel(iConfig.getUntrackedParameter<string>("trajectoryInputLabel", string("ctfRefitter"))),
-  fMuonCollectionLabel(iConfig.getUntrackedParameter<string>("muonCollectionLabel", string("muons"))),
-  fTrackCollectionLabel(iConfig.getUntrackedParameter<string>("trackCollectionLabel", string("ctfWithMaterialTracksP5"))),
+  fTrajectoryInputLabel(iConfig.getUntrackedParameter<InputTag>("trajectoryInputLabel", edm::InputTag("ctfRefitter"))),
+  fMuonCollectionLabel(iConfig.getUntrackedParameter<InputTag>("muonCollectionLabel", edm::InputTag("muons"))),
+  fTrackCollectionLabel(iConfig.getUntrackedParameter<InputTag>("trackCollectionLabel", edm::InputTag("generalTracks"))),
   fPixelClusterLabel(iConfig.getUntrackedParameter<string>("pixelClusterLabel", string("siPixelClusters"))), 
   fL1GTReadoutRecordLabel(iConfig.getUntrackedParameter<std::string> ("L1GTReadoutRecordLabel")),
   fL1GTmapLabel(iConfig.getUntrackedParameter<InputTag> ("hltL1GtObjectMap")),
@@ -112,7 +112,7 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   cout << "---  verbose:                         " << fVerbose << endl;
   cout << "---  dumpAllEvents:                   " << fDumpAllEvents << endl;
   cout << "---  rootFileName:                    " << fRootFileName << endl;
-  cout << "---  trajectoryInputLabel:            " << fTrajectoryInputLabel.c_str() << endl;
+  cout << "---  trajectoryInputLabel:            " << fTrajectoryInputLabel << endl;
   cout << "---  muonCollectionLabel:             " << fMuonCollectionLabel << endl;
   cout << "---  trackCollectionLabel:            " << fTrackCollectionLabel << endl;
   cout << "---  pixelClusterLabel:               " << fPixelClusterLabel << endl;
@@ -342,7 +342,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
     std::vector<int> feds = runInfo->m_fed_in;
     uint32_t ifed(0); 
     for (size_t fedindex = 0; fedindex < feds.size(); fedindex++) {
-      // cout << "FED " << fedindex << ": " << (uint32_t)feds[fedindex] << endl;
+      //      cout << "FED " << fedindex << ": " << (uint32_t)feds[fedindex] << endl;
       ifed = (uint32_t)feds[fedindex]; 
       if (ifed >= (totbpixfeds + totfpixfeds))	   continue;
       
@@ -360,9 +360,9 @@ void PixelTree::analyze(const edm::Event& iEvent,
     if (nfpixfeds == totfpixfeds) fFED2 |= (0x1 << 11); 
 
     //     cout << "number of feds in run: BPIX " << nbpixfeds << ", FPIX " << nfpixfeds 
-    // 	 << " fFED1 = " << std::bitset<32>(fFED1)
-    // 	 << " fFED2 = " << std::bitset<32>(fFED2)
-    // 	 << endl;
+    //      	 << " fFED1 = " << std::bitset<32>(fFED1)
+    //        	 << " fFED2 = " << std::bitset<32>(fFED2)
+    //        	 << endl;
   } 
 
   // ----------------------------------------------------------------------
@@ -1016,9 +1016,10 @@ void PixelTree::analyze(const edm::Event& iEvent,
   // -- That's it
   if (fVerbose > 0) {
     cout << nevt << "(" << fRun << "/" << fEvent << ")" 
+	 << " lumi section: " << fLumiBlock 
 	 << " orbit: " << fOrbit << " BX: " << fBX
 	 << " time: " << fTimeHi << "/" << fTimeLo
-	 << " MuN: " << fMuN << " TkN: " << fTkN << " ClN: " << fClN << " DgN: " << fDgN 
+	 << " TkN: " << fTkN << " ClN: " << fClN << " DgN: " << fDgN 
 	 << " FEDs: " << nbpixfeds << "/" << nfpixfeds
 	 << endl;
   }
