@@ -19,17 +19,24 @@
  *
  ************************************************************/
 
+
+#include "CondFormats/SiPixelObjects/interface/SiPixelFedCablingMap.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHitCollection.h"
+
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "FWCore/Framework/interface/EDAnalyzer.h"
+
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
-#include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHitCollection.h"
-#include "DQM/TrackerMonitorTrack/interface/MonitorTrackResiduals.h"
+
 #include "TrackingTools/PatternTools/interface/TrajectoryFitter.h"
 #include "TrackingTools/TrackFitters/interface/TrajectoryStateCombiner.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
+
 #include "Alignment/OfflineValidation/interface/TrackerValidationVariables.h"
 #include "TrackingTools/TrackAssociator/interface/TrackAssociatorParameters.h"
 #include "TrackingTools/TrackAssociator/interface/TrackDetectorAssociator.h"
+
 #include "TObject.h"
 
 using namespace reco;
@@ -61,6 +68,7 @@ class PixelTree : public edm::EDAnalyzer {
   void bpixNames(const DetId &pID, int &DBlayer, int &DBladder, int &DBmodule);
   void fpixNames(const DetId &pID, int &DBdisk, int &DBblade, int &DBpanel, int &DBplaquette);
 
+  void onlineRocColRow(const DetId &pID, int offlineRow, int offlineCol, int &roc, int &col, int &row);
 
   void readOffsets();
   void sectorAndWheel(const reco::Muon &muon0, int &w0, int &s0);
@@ -79,6 +87,8 @@ class PixelTree : public edm::EDAnalyzer {
   std::string     fL1GTReadoutRecordLabel; 
   edm::InputTag   fL1GTmapLabel;
   edm::InputTag   fHLTResultsLabel;
+
+  edm::ESHandle<SiPixelFedCablingMap> fCablingMap;
 
   TFile *fFile; 
   TH1D  *fL1Thist, *fHLThist; 
@@ -143,6 +153,7 @@ class PixelTree : public edm::EDAnalyzer {
   float fDgGx[DIGIMAX], fDgGy[DIGIMAX], fDgGz[DIGIMAX];
   float fDgAdc[DIGIMAX], fDgCharge[DIGIMAX];
   int   fDgClI[DIGIMAX];
+  int   fDgRoc[DIGIMAX], fDgRocR[DIGIMAX], fDgRocC[DIGIMAX];
 
   // -- muon auxiliary variables
   float fsbias[5][15];
