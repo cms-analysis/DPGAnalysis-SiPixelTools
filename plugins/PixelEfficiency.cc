@@ -131,6 +131,7 @@ private:
   TH1F*  histEndcap;
   TH1F*  validPerSubdetector;
   TH1F*  missingPerSubdetector;
+  TH1F*  inactivePerSubdetector;
 
   TH1F*  consistencyCheck;
   TH1F*  consistencyCheckTraj;
@@ -1101,7 +1102,6 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	if(listOfCuts_.getParameter<bool>("loose_cut") && numOfOtherValid<1 ) continue;
 
         if((*testhit).getType()==TrackingRecHit::missing){
-	  
 	  missingChiSquare->Fill(chiSquare);
           missingChiSquareNdf->Fill(chiSquareNdf);
           missingInTrack++;
@@ -1155,19 +1155,16 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	 //type of invalid recHiT
 	
 	 //let's observe better invalid not missing recHits
-         int specificInvalid = 0;  //something else than inactive or missing or bad
-	 if ( ! ((*testhit).isValid()) )
-	   {
-	   if ( (*testhit).getType()==TrackingRecHit::inactive )     specificInvalid = 1;
-	   if ( (*testhit).getType()==TrackingRecHit::bad )          specificInvalid = 2;
-	   if ( (*testhit).getType()==TrackingRecHit::missing )      specificInvalid = 3;
-	   }
+         int specificInvalid = 0.5;  //something else than inactive or missing or bad
+	 if ( ! ((*testhit).isValid()) ){
+	   if ( (*testhit).getType()==TrackingRecHit::inactive )     specificInvalid = 1.5;
+	   if ( (*testhit).getType()==TrackingRecHit::bad )          specificInvalid = 2.5;
+	   if ( (*testhit).getType()==TrackingRecHit::missing )      specificInvalid = 3.5;
+	 }
 	 if ( ( (*testhit).isValid() && badModule ) )
-	   {
-	   specificInvalid = 4;
-	   }
+	   specificInvalid = 4.5;
 	 
-	 if ( ! ((*testhit).isValid()) ) histInvalidRecHitCollection->Fill(specificInvalid);
+	 histInvalidRecHitCollection->Fill(specificInvalid);
 	 
 	 //histWithBadmoduleList
 	 //fill 4th bin when we have a valid recHit belonging to badModule list: we expect 0 !!!
@@ -1262,6 +1259,13 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	   if(layer==3) missingPerSubdetector->Fill(2.5);
 	   if(type==int(kFPIX) && globalZ < 0.0) missingPerSubdetector->Fill(3.5);
 	   if(type==int(kFPIX) && globalZ >= 0.0) missingPerSubdetector->Fill(4.5);
+	 }
+	 else if ( (*testhit).getType()==TrackingRecHit::inactive ){
+	   if(layer==1) inactivePerSubdetector->Fill(0.5);
+	   if(layer==2) inactivePerSubdetector->Fill(1.5);
+	   if(layer==3) inactivePerSubdetector->Fill(2.5);
+	   if(type==int(kFPIX) && globalZ < 0.0) inactivePerSubdetector->Fill(3.5);
+	   if(type==int(kFPIX) && globalZ >= 0.0) inactivePerSubdetector->Fill(4.5);
 	 }
 	 
 
@@ -1647,6 +1651,7 @@ PixelEfficiency::beginJob(const edm::EventSetup& iSetup)
  histEndcap = new TH1F("histEndcap", "histEndcap", 3, 0, 3);
  validPerSubdetector = new TH1F("validPerSubdetector", "validPerSubdetector", 5, 0, 5);
  missingPerSubdetector = new TH1F("missingPerSubdetector", "missingPerSubdetector", 5, 0, 5);
+ inactivePerSubdetector = new TH1F("inactivePerSubdetector", "inactivePerSubdetector", 5, 0, 5);
   
   
  histInvalidRecHitCollection = new TH1F("histInvalidRecHitCollection","histInvalidRecHitCollection",5,0,5);
@@ -1871,6 +1876,7 @@ PixelEfficiency::endJob() {
   histEndcap->Write();  
   validPerSubdetector->Write();  
   missingPerSubdetector->Write();  
+  inactivePerSubdetector->Write();  
   
   histInvalidRecHitCollection->Write();
   histInvalidRecHitWithBadmoduleList->Write();
