@@ -43,7 +43,12 @@ cp -f merge.C ${DIR}/merge.C
 #./pythonTemplateGenerator.csh 1 filelist_DelayScan_419-421-424.txt
 #./pythonTemplateGenerator.csh 1 filelist_DelayScan_717-864.txt
 #./pythonTemplateGenerator.csh 1 filelist_DelayScan_868-873.txt
-./pythonTemplateGenerator.csh 1 filelistCRAFT09_SPv4.txt
+#./pythonTemplateGenerator.csh 1 filelistCRAFT09_SPv4_new.txt
+#./pythonTemplateGenerator.csh 3 filelistCRAFT09_relval.txt
+#./pythonTemplateGenerator.csh 1 filelistCRAFT09_SPrepro_malgieri.txt 
+#./pythonTemplateGenerator.csh 3 filelistPreProd327.txt
+./pythonTemplateGenerator.csh 1 filelistCRAFT09_rePro_SP_RV4_CosmicSeq.txt
+#./pythonTemplateGenerator.csh 10 filelistCRAFT09_rePro_TP_RV4_CosmicSeq.txt
 
 let i=0
 
@@ -66,7 +71,7 @@ rm -fr temp
 
 cd $DIR
 
-bsub -q cmscaf1nd -J job_$i < submit_$i.csh
+bsub -q cmscaf1nh -J job_$i < submit_$i.csh
 
 cd ..
 done
