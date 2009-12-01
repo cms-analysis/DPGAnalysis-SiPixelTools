@@ -44,7 +44,7 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
 
 
  protected:
-  void fillTrackOnly(const edm::Event&, const edm::EventSetup &, int, int, int, const Track&);
+  void fillTrackOnly(const edm::Event&, const edm::EventSetup &, int, int, int, const TrackRef&);
   void fillEvt(const edm::Event&,int NbrTracks);
   void fillDet(const DetId &, uint, const PixelGeomDetUnit*);
   void fillVertex(const PixelGeomDetUnit*);
@@ -53,6 +53,8 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
   void fillSim(std::vector<PSimHit>::const_iterator, unsigned int, const PixelGeomDetUnit *,
   	       const RectangularPixelTopology *, const edm::SimTrackContainer& );
   void fillTrack(TrajectoryStateOnSurface&,const Trajectory&, int);
+
+ void isPixelTrack(const edm::Ref<std::vector<Trajectory> > &refTraj, bool &isBpixtrack, bool &isFpixtrack);
   
   bool isValidMuonAssoc(const edm::Event& iEvent);		   
   bool isOffTrackHits(const edm::Event& iEvent,const SiPixelCluster& matchIt, const edm::EventSetup& iSetup,const RectangularPixelTopology*, uint32_t geoId, TrajectoryStateOnSurface& tsos );		   
@@ -60,6 +62,11 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
   void readOffsets();
   void sectorAndWheel(const  reco::Muon & muon0 ,int & w0,int & s0 );
   float correctedTime(const  reco::Muon & muon0);
+
+ void bpixNames(const DetId &pID, int &DBlayer, int &DBladder, int &DBmodule);
+  void fpixNames(const DetId &pID, int &DBdisk, int &DBblade, int &DBpanel, int &DBplaquette);
+
+
 
 
  private:

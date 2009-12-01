@@ -13,8 +13,7 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = "STARTUP31X_V7::All"
-
+process.GlobalTag.globaltag = "STARTUP3X_V8D::All"
 # -- Input files
 process.source = cms.Source(
     "PoolSource",
@@ -24,7 +23,8 @@ process.source = cms.Source(
     #firstRun = cms.untracked.uint32(64108),
     #interval = cms.uint32(1),
     fileNames = cms.untracked.vstring(
- "/store/mc/Summer09/TkCosmics38T/RAW-RECO/STARTUP31X_V3_SuperPointing-v1/0005/C8D3D828-05B4-DE11-AFBA-001EC9AA9996.root"
+     'rfio:/castor/cern.ch/cms/store/mc/Summer09/MinBias/GEN-SIM-RECO/STARTUP3X_V8D_900GeV-v1/0005/E4B3A7BE-3AD7-DE11-9230-002618943939.root'
+
     )
     )
 
@@ -33,10 +33,10 @@ process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(1000)
     )
 
+
+# -- Trajectory producer
 process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
-process.TrackRefitterP5.src = 'ctfWithMaterialTracksP5'
-process.TrackRefitterP5.TrajectoryInEvent = True
-#process.load("RecoTracker.TransientTrackingRecHit.TransientTrackingRecHitBuilderWithoutRefit_cfi")
+
 
 # -- the tree filler
 try:
@@ -46,16 +46,20 @@ except KeyError:
 
 process.PixelTree = cms.EDAnalyzer(
     "PixelTree",
-    verbose                = cms.untracked.int32(0),
+    verbose                = cms.untracked.int32(1),
     rootFileName           = cms.untracked.string(rootFileName),
-    trajectoryInputLabel   = cms.untracked.string('TrackRefitterP5'),
-    muonCollectionLabel    = cms.untracked.string('muons'),
-    trackCollectionLabel   = cms.untracked.string('TrackRefitterP5'),
+    dumpAllEvents          = cms.untracked.int32(1),
+    muonCollectionLabel    = cms.untracked.InputTag('muons'),
+    trajectoryInputLabel   = cms.untracked.InputTag('TrackRefitter'),
+    trackCollectionLabel   = cms.untracked.InputTag('generalTracks'),
     pixelClusterLabel      = cms.untracked.string('siPixelClusters'),
     L1GTReadoutRecordLabel = cms.untracked.string("gtDigis"), 
     hltL1GtObjectMap       = cms.untracked.InputTag("hltL1GtObjectMap"), 
     HLTResultsLabel        = cms.untracked.InputTag("TriggerResults::HLT")
     )
+
+
+
 
 
 
@@ -76,10 +80,10 @@ process.p = cms.Path(
     #    process.rsRefitter*
     #    process.cosmRefitter*
     # run ntuplizers
-    process.TrackRefitterP5*
+    process.TrackRefitter*
     process.PixelTree
     )
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
-#process.MessageLogger.cerr.threshold = 'INFO'
+process.MessageLogger.cerr.threshold = 'DEBUG'
 #process.TrackerDigiGeometryESModule.applyAlignment = True

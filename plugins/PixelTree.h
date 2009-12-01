@@ -121,7 +121,7 @@ class PixelTree : public edm::EDAnalyzer {
   int   fTkN; 
   int   fTkCharge[TRACKMAX];
   float fTkChi2[TRACKMAX], fTkNdof[TRACKMAX];
-  float fTkPt[TRACKMAX], fTkTheta[TRACKMAX], fTkPhi[TRACKMAX];
+  float fTkPt[TRACKMAX], fTkTheta[TRACKMAX], fTkEta[TRACKMAX], fTkPhi[TRACKMAX];
   float fTkD0[TRACKMAX], fTkDz[TRACKMAX];
   float fTkVx[TRACKMAX], fTkVy[TRACKMAX],    fTkVz[TRACKMAX];
   float fTkAlpha[TRACKMAX][CLPERTRACKMAX],   fTkBeta[TRACKMAX][CLPERTRACKMAX]; 

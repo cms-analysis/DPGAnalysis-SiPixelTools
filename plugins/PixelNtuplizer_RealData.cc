@@ -29,7 +29,8 @@
 #include "TrackingTools/TrackAssociator/interface/TrackDetectorAssociator.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
-
+#include "DataFormats/SiPixelDetId/interface/PixelBarrelName.h"
+#include "DataFormats/SiPixelDetId/interface/PixelEndcapName.h"
 // SimDataFormats
 #include "SimDataFormats/TrackingHit/interface/PSimHitContainer.h"
 #include "SimTracker/TrackerHitAssociation/interface/TrackerHitAssociator.h"
@@ -284,7 +285,7 @@ bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent){
 // Functions that get called by framework every event
 void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-  LogDebug("MuonTOFFilter_trackQuality") << " analyze " << std::endl;
+ LogDebug("MuonTOFFilter_trackQuality") << " analyze " << std::endl;
   int TrackNumber = 0;
   dummyhist->Fill(0.5);
   maxsize_AllPixInfoStruct_ = 200;
@@ -299,133 +300,189 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
   init();
 
   trackonly_.init();
-  // run the muon association for cosmics... the content is used by the fillTrackOnly method too.
-  if(isCosmic == true) isValidMuonAssoc(iEvent);
+ 
+  // -- Does this belong into beginJob()?
+  ESHandle<TrackerGeometry> TG;
+  iSetup.get<TrackerDigiGeometryRecord>().get(TG);
+  const TrackerGeometry* theTrackerGeometry = TG.product();
+ 
 
-  //--- Get the trajectory-track association collection
-  edm::Handle<TrajTrackAssociationCollection> trajTrackCollectionHandle;
-  iEvent.getByLabel(conf_.getParameter<std::string>("trajectoryInput"),trajTrackCollectionHandle);
+  // -- Track trajectory association map
+  edm::Handle<TrajTrackAssociationCollection> hTTAC;
+  iEvent.getByLabel(conf_.getParameter<std::string>("trajectoryInput"), hTTAC);
+  
+  std::set<SiPixelCluster> clusterSet;
   TrajectoryStateCombiner tsoscomb;
-  int NbrTracks =  trajTrackCollectionHandle->size();
-  //std::cout << " track measurements " << trajTrackCollectionHandle->size()  << std::endl;
 
-  for(TrajTrackAssociationCollection::const_iterator it = trajTrackCollectionHandle->begin(), itEnd = trajTrackCollectionHandle->end(); it!=itEnd;++it){
+  if (hTTAC.isValid()) {
+    int NbrTracks =  hTTAC->size();
+    //cout << " nbr tracks " << NbrTracks << endl;
+    const TrajTrackAssociationCollection ttac = *(hTTAC.product());
+   
+    // cout << "   hTTAC.isValid()" << endl;
+    for (TrajTrackAssociationCollection::const_iterator it = ttac.begin(); it !=  ttac.end(); ++it) {
 
-    TrackNumber++;
-    int pixelHits = 0;
-    int stripHits = 0;
-    const Track&      track = *it->val;
-    const Trajectory& traj  = *it->key;
-    std::vector<TrajectoryMeasurement> checkColl = traj.measurements();
-    for(std::vector<TrajectoryMeasurement>::const_iterator checkTraj = checkColl.begin(), checkTrajEnd = checkColl.end();
-	checkTraj != checkTrajEnd; ++checkTraj) {
-      if(! checkTraj->updatedState().isValid()) continue;
-      TransientTrackingRecHit::ConstRecHitPointer testhit = checkTraj->recHit();
-      if(! testhit->isValid() || testhit->geographicalId().det() != DetId::Tracker ) continue;
-      uint testSubDetID = (testhit->geographicalId().subdetId());
-      if(testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap) pixelHits++;
-      else if (testSubDetID == StripSubdetector::TIB || testSubDetID == StripSubdetector::TOB ||
-	       testSubDetID == StripSubdetector::TID || testSubDetID == StripSubdetector::TEC) stripHits++;
-    }
+      TrackNumber++;
+      int pixelHits = 0;
+      int stripHits = 0;
 
-    fillTrackOnly(iEvent,iSetup, pixelHits, stripHits, TrackNumber, track);
+      // cout << "      TracjTrackAssociationCollection iterating" << endl;
+      const edm::Ref<std::vector<Trajectory> > refTraj = it->key;  
+      reco::TrackRef trackref = it->val;
+
+      std::vector<TrajectoryMeasurement> checkColl = refTraj->measurements();
+
+      //count number of pixel and strip hits
+      for(std::vector<TrajectoryMeasurement>::const_iterator checkTraj = checkColl.begin(), checkTrajEnd = checkColl.end();checkTraj != checkTrajEnd; ++checkTraj) {
+	if(! checkTraj->updatedState().isValid()) continue;
+	TransientTrackingRecHit::ConstRecHitPointer testhit = checkTraj->recHit();
+	if(! testhit->isValid() || testhit->geographicalId().det() != DetId::Tracker ) continue;
+	uint testSubDetID = (testhit->geographicalId().subdetId());
+	if(testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap) pixelHits++;
+	else if (testSubDetID == StripSubdetector::TIB || testSubDetID == StripSubdetector::TOB ||
+		 testSubDetID == StripSubdetector::TID || testSubDetID == StripSubdetector::TEC) stripHits++;
+      }//end of for trajectory loop 
+
+      fillTrackOnly(iEvent,iSetup, pixelHits, stripHits, TrackNumber, trackref);
     //++++++++++
-    tt_->Fill();
+      tt_->Fill();
     //++++++++++
 
-    // std::cout << " pixelHits " << pixelHits << std::endl;
 
-    if (pixelHits == 0) continue;
+       // -- Clusters associated with a track
+      std::vector<TrajectoryMeasurement> tmeasColl =refTraj->measurements();
+      int iCluster(0); 
+      for (std::vector<TrajectoryMeasurement>::const_iterator tmeasIt = tmeasColl.begin(); tmeasIt!=tmeasColl.end(); tmeasIt++){   
+	if (!tmeasIt->updatedState().isValid()) continue; 
+	TrajectoryStateOnSurface tsos = tsoscomb(tmeasIt->forwardPredictedState(), tmeasIt->backwardPredictedState());
+	TransientTrackingRecHit::ConstRecHitPointer hit = tmeasIt->recHit();
 
-    std::vector<TrajectoryMeasurement> tmColl = traj.measurements();
-    for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = tmColl.begin(), itTrajEnd = tmColl.end();
-	itTraj != itTrajEnd; ++itTraj) {
+	if (hit->geographicalId().det() != DetId::Tracker) {
+	  continue; 
+	} 
 
-      if(! itTraj->updatedState().isValid()) continue;
-
-      TrajectoryStateOnSurface tsos = tsoscomb( itTraj->forwardPredictedState(), itTraj->backwardPredictedState() );
-      TransientTrackingRecHit::ConstRecHitPointer hit = itTraj->recHit();
-      if(! hit->isValid() || hit->geographicalId().det() != DetId::Tracker ) {
-	continue; 
-      } else {
-	const DetId & hit_detId = hit->geographicalId();
-	//	uint IntRawDetID = (hit_detId.rawId()); // currently unused
-	uint IntSubDetID = (hit_detId.subdetId());
-	
-	if(IntSubDetID == 0 )
+	const GeomDetUnit* detUnit = hit->detUnit();
+	if (0 == detUnit) {
+	  //cout << "-- PixelTree> Did not find hit->detUnit()" << endl;
 	  continue;
+	}
+	double dPhi = -999, dR = -999, dZ = -999;
+
+
+	bool barrel = DetId::DetId(hit->geographicalId()).subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel);
+	bool endcap = DetId::DetId(hit->geographicalId()).subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap);
+	if (!barrel && !endcap) {  
+	  continue;
+	}
+
 	
+	
+	const Surface &surface = hit->detUnit()->surface();
+	LocalPoint lPModule(0.,0.,0.), lPhiDirection(1.,0.,0.), lROrZDirection(0.,1.,0.);
+	GlobalPoint gPModule       = surface.toGlobal(lPModule),
+	  gPhiDirection  = surface.toGlobal(lPhiDirection),
+	  gROrZDirection = surface.toGlobal(lROrZDirection);
+
+
+	float phiorientation = deltaPhi(gPhiDirection.phi(), gPModule.phi()) >= 0 ? +1. : -1.;
+	
+	LocalTrajectoryParameters ltp = tsos.localParameters();
+	LocalVector localDir = ltp.momentum()/ltp.momentum().mag();
+
+	float alpha = atan2(localDir.z(), localDir.x());
+	float beta = atan2(localDir.z(), localDir.y());
+
+	int DBlayer, DBladder, DBmodule, DBdisk, DBblade, DBpanel, DBdetid; 
+	DBdetid = hit->geographicalId().rawId();
+	if (barrel) {
+	  bpixNames(DetId::DetId((*hit).geographicalId()), DBlayer, DBladder, DBmodule); 
+	} else {
+	  fpixNames(DetId::DetId((*hit).geographicalId()), DBdisk, DBblade, DBpanel, DBmodule); 
+	}
+
+	const DetId &hit_detId = hit->geographicalId();
+	uint IntSubDetID = (hit_detId.subdetId());
+	if (IntSubDetID == 0) continue;
+	const TrackerGeometry &theTracker(*theTrackerGeometry);
+	const PixelGeomDetUnit *theGeomDet = dynamic_cast<const PixelGeomDetUnit*> (theTracker.idToDet(hit_detId) );
+	if (theGeomDet == 0) {
+	  continue; 	  // skip strip modules
+	}
+
+	// Flipped module?
+	float tmp1 = theGeomDet->surface().toGlobal(Local3DPoint(0.,0.,0.)).perp();
+	float tmp2 = theGeomDet->surface().toGlobal(Local3DPoint(0.,0.,1.)).perp();
+	int isFlipped(0); 
+	if (tmp2 < tmp1) isFlipped = 1;
+	else isFlipped = 0;
+
+	const RectangularPixelTopology * topol = dynamic_cast<const RectangularPixelTopology*>(&(theGeomDet->specificTopology()));
+
+	// -- Missing hits
+	if (hit->getType() == TrackingRecHit::missing)continue;
+
+
+
+	const TrackingRecHit *persistentHit = hit->hit();
+	if (persistentHit != 0) {
+	  if (typeid(*persistentHit) != typeid(SiPixelRecHit))  continue;
+	}
+	const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>(hit->hit());
+	edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster> const& clust = (*pixhit).cluster();
+
 	align::LocalVector res = tsos.localPosition() - hit->localPosition();
 	LocalError err1 = tsos.localError().positionError();
 	LocalError err2 = hit->localPositionError();
 	float errX = std::sqrt( err1.xx() + err2.xx() );
 	float errY = std::sqrt( err1.yy() + err2.yy() );
-	
-	// begin partly copied from Tifanalyser 
+       
 
-	const GeomDetUnit* detUnit = hit->detUnit();
-	double dPhi = -999, dR = -999, dZ = -999, phiorientation = -999;
-
-	if(detUnit) {
-	  const Surface& surface = hit->detUnit()->surface();
-	  LocalPoint lPModule(0.,0.,0.), lPhiDirection(1.,0.,0.), lROrZDirection(0.,1.,0.);
-	  GlobalPoint gPModule = surface.toGlobal(lPModule),
-	              gPhiDirection  = surface.toGlobal(lPhiDirection),
-	              gROrZDirection = surface.toGlobal(lROrZDirection);
-	  phiorientation = deltaPhi(gPhiDirection.phi(),gPModule.phi()) >= 0 ? +1. : -1.;
-	  dPhi = tsos.globalPosition().phi() - hit->globalPosition().phi();
+	if (clust.isNonnull()) {
+	  muoninfo_.init();
+	  init();
+	  rechit_.localX = hit->localPosition().x();
+	  rechit_.localY = hit->localPosition().y();
+	  rechit_.globalX = hit->globalPosition().x();
+	  rechit_.globalY = hit->globalPosition().y();
+	  rechit_.globalZ = hit->globalPosition().z();
+	  rechit_.residualX = res.x();
+	  rechit_.resErrX = errX;
+	  rechit_.resErrY = errY;
+	  rechit_.hit_errX = sqrt(err2.xx());
+	  rechit_.hit_errY = sqrt(err2.yy());
+	  rechit_.resXprime = (res.x())*(phiorientation );
+	  rechit_.resXprimeErr = errX;
+	  dZ = gROrZDirection.z() - gPModule.z();
+	  if(dR != -999) rechit_.residualY = dR;
+	  else if(dZ != -999) rechit_.residualY = res.y() * (dZ >=0.? +1 : -1) ;
+	  else rechit_.residualY = res.y();
 	  
-	  if(IntSubDetID == PixelSubdetector::PixelBarrel || IntSubDetID == PixelSubdetector::PixelEndcap) {
 
-            const TrackerGeometry& theTracker(*tkGeom_);
-	    const PixelGeomDetUnit* theGeomDet = dynamic_cast<const PixelGeomDetUnit*> (theTracker.idToDet(hit_detId) );
-            const RectangularPixelTopology * topol = dynamic_cast<const RectangularPixelTopology*>(&(theGeomDet->specificTopology()));
+	  if(isCosmic == true) isValidMuonAssoc(iEvent);
 
-            // get the enclosed persistent hit
-            const TrackingRecHit *persistentHit = hit->hit();
-            // check if it's not null, and if it's a valid pixel hit
-            if ((persistentHit != 0) && (typeid(*persistentHit) == typeid(SiPixelRecHit))) {
-              // tell the C++ compiler that the hit is a pixel hit
-              const SiPixelRecHit* pixhit = dynamic_cast<const SiPixelRecHit*>( hit->hit() );
-              // get the edm::Ref to the cluster
-              edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster> const& clust = (*pixhit).cluster();
-              //  check if the ref is not null
-              if (clust.isNonnull()) {
-		muoninfo_.init();
-		init();
-		rechit_.localX = hit->localPosition().x();
-		rechit_.localY = hit->localPosition().y();
-		rechit_.globalX = hit->globalPosition().x();
-		rechit_.globalY = hit->globalPosition().y();
-		rechit_.globalZ = hit->globalPosition().z();
-		rechit_.residualX = res.x();
-		rechit_.resErrX = errX;
-		rechit_.resErrY = errY;
-		rechit_.hit_errX = sqrt(err2.xx());
-		rechit_.hit_errY = sqrt(err2.yy());
-	        rechit_.resXprime = (res.x())*(phiorientation );
-	        rechit_.resXprimeErr = errX;
-		dZ = gROrZDirection.z() - gPModule.z();
-		if(dR != -999) rechit_.residualY = dR;
-		else if(dZ != -999) rechit_.residualY = res.y() * (dZ >=0.? +1 : -1) ;
-		else rechit_.residualY = res.y();
+	  //  isOffTrackHits(iEvent,*clust, iSetup,topol,theGeomDet->geographicalId().rawId(),tsos);
+	  
 
-		if(isCosmic == true) isValidMuonAssoc(iEvent);
+	  // get the contents
+	  fillEvt(iEvent,NbrTracks);
+	  fillDet(hit_detId, IntSubDetID, theGeomDet);
+	  fillVertex(theGeomDet);
+	  fillClust(*clust, topol, theGeomDet, tsos);
+	  fillPix(*clust, topol, theGeomDet);
+	  fillTrack(tsos, *refTraj, TrackNumber);
 
-		isOffTrackHits(iEvent,*clust, iSetup,topol,theGeomDet->geographicalId().rawId(),tsos);
-
-                // fill simulated hits if applicable
-                if(isSim == true) {
-                  edm::Handle<edm::SimTrackContainer> simtracks;
-                  iEvent.getByLabel("g4SimHits", simtracks);
-                  TrackerHitAssociator* associate = new TrackerHitAssociator(iEvent);
-                  std::vector<PSimHit> matched;
-                  matched.clear();
-                  matched = associate->associateHit(*persistentHit);
-                  LocalPoint lp = topol->localPosition(MeasurementPoint(clust->x(),clust->y()));
-                  float rechitx = lp.x();
-                  float rechity = lp.y();
-
+	  // fill simulated hits if applicable
+	  if(isSim == true) {
+	    edm::Handle<edm::SimTrackContainer> simtracks;
+	    iEvent.getByLabel("g4SimHits", simtracks);
+	    TrackerHitAssociator* associate = new TrackerHitAssociator(iEvent);
+	    std::vector<PSimHit> matched;
+	    matched.clear();
+	    matched = associate->associateHit(*persistentHit);
+	    LocalPoint lp = topol->localPosition(MeasurementPoint(clust->x(),clust->y()));
+	    float rechitx = lp.x();
+	    float rechity = lp.y();
+	    
                   if ( !matched.empty() ) {
 	            bool found_hit_from_generated_particle = false;
 
@@ -452,29 +509,21 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
                   } //end if ( !matched.empty() )
                 } // end if(isSim == true)
 
-                // get the contents
-                fillEvt(iEvent,NbrTracks);
-                fillDet(hit_detId, IntSubDetID, theGeomDet);
-		fillVertex(theGeomDet);
-                fillClust(*clust, topol, theGeomDet, tsos);
-                fillPix(*clust, topol, theGeomDet);
-                fillTrack(tsos, traj, TrackNumber);
+		
 
-      	        //++++++++++
-	        t_->Fill();
-	        //++++++++++
+	  //++++++++++
+	  t_->Fill();
+	  //++++++++++
+	  
 
-              } // end if(cluster is valid)
-            } // end if(hit is pixel hit)
+	}//check if cluster is nonnull
+	
 
-	  } else {
-	    //std::cout << "@SUB=PixelNtuplizer_RealData::fillHitQuantities" 
-	    //  << "No valid pixel subdetector " << IntSubDetID;
-	  }  // if-else to differentiate pixel hits vs other hits	  
-	}  // end if(good detUnit)
-      }  // end else (if-else to screen out invalid hits)
-    }  // end loop over trajectory measurements (rec hits) 
-  }  // end loop over trajectories
+      }//IN TRAJECTORY LOOP
+
+
+    }
+  }
 }  // end analyze function
 
 
@@ -529,7 +578,7 @@ bool PixelNtuplizer_RealData::isOffTrackHits(const edm::Event& iEvent,const SiPi
      found_det_unit = true;
 
      edm::Handle<SiPixelRecHitCollection> recHitColl;
-     iEvent.getByLabel( "siPixelRecHits", recHitColl );
+     iEvent.getByLabel("siPixelRecHits", recHitColl );
 			  
      SiPixelRecHitCollection::const_iterator dsmatch = recHitColl->find(detId);
      if (dsmatch == recHitColl->end()) continue;
@@ -611,7 +660,7 @@ return true;
 }
 
 
-void PixelNtuplizer_RealData::fillTrackOnly(const edm::Event& iEvent, const edm::EventSetup& iSetup, int pixelHits, int stripHits, int TrackNumber, const Track& track)
+void PixelNtuplizer_RealData::fillTrackOnly(const edm::Event& iEvent, const edm::EventSetup& iSetup, int pixelHits, int stripHits, int TrackNumber, const TrackRef& track)
 {
   if(pixelHits > 0) trackonly_.pixelTrack = 1;
   trackonly_.tracknum = TrackNumber;
@@ -619,22 +668,22 @@ void PixelNtuplizer_RealData::fillTrackOnly(const edm::Event& iEvent, const edm:
   trackonly_.evtnum = iEvent.id().event();
   trackonly_.NumPixelHits = pixelHits;
   trackonly_.NumStripHits = stripHits;
-  trackonly_.chi2 = track.chi2();
-  trackonly_.ndof = track.ndof();
-  trackonly_.charge = track.charge();
-  trackonly_.theta = track.theta();
-  trackonly_.d0 = track.d0();
-  trackonly_.dz = track.dz();
-  trackonly_.p = track.p();
-  trackonly_.pt = track.pt();
-  trackonly_.px = track.px();
-  trackonly_.py = track.py();
-  trackonly_.pz = track.pz();
-  trackonly_.phi = track.phi();
-  trackonly_.eta = track.eta();
-  trackonly_.vx = track.vx();
-  trackonly_.vy = track.vy();
-  trackonly_.vz = track.vz();
+  trackonly_.chi2 = track->chi2();
+  trackonly_.ndof = track->ndof();
+  trackonly_.charge = track->charge();
+  trackonly_.theta = track->theta();
+  trackonly_.d0 = track->d0();
+  trackonly_.dz = track->dz();
+  trackonly_.p = track->p();
+  trackonly_.pt = track->pt();
+  trackonly_.px = track->px();
+  trackonly_.py = track->py();
+  trackonly_.pz = track->pz();
+  trackonly_.phi = track->phi();
+  trackonly_.eta = track->eta();
+  trackonly_.vx = track->vx();
+  trackonly_.vy = track->vy();
+  trackonly_.vz = track->vz();
 
   if(isCosmic == true){
     if(muoninfo_.errorTime[0]<0)
@@ -677,7 +726,7 @@ void PixelNtuplizer_RealData::fillDet(const DetId &tofill, uint subdetid, const 
            if (det_.ladder<=8&&det_.ladder>=1)   det_.ladder = 9-det_.ladder;
       else if (det_.ladder<=24&&det_.ladder>=9)  det_.ladder = 8-det_.ladder;
       else if (det_.ladder<=32&&det_.ladder>=25) det_.ladder = 41-det_.ladder;
-    } if (det_.layer==3) {
+    }else if (det_.layer==3) {
            if (det_.ladder<=11&&det_.ladder>=1)  det_.ladder = 12-det_.ladder;
       else if (det_.ladder<=33&&det_.ladder>=12) det_.ladder = 11-det_.ladder;
       else if (det_.ladder<=44&&det_.ladder>=34) det_.ladder = 56-det_.ladder;
@@ -697,6 +746,9 @@ void PixelNtuplizer_RealData::fillDet(const DetId &tofill, uint subdetid, const 
       det_.panel     =  PXFDetId::PXFDetId(tofill).panel();
       det_.plaquette =  PXFDetId::PXFDetId(tofill).module();
   }
+
+
+  //cout << " layer " << det_.layer << " disk "<< det_.disk << endl;
 
   det_.thickness = PixGeom->specificSurface().bounds().thickness();
   det_.cols = PixGeom->specificTopology().ncolumns();
@@ -1121,6 +1173,58 @@ float PixelNtuplizer_RealData::correctedTime(const  reco::Muon & aMuon)
  
  return time;
 }
+
+
+// ----------------------------------------------------------------------
+void PixelNtuplizer_RealData::bpixNames(const DetId &pID, int &DBlayer, int &DBladder, int &DBmodule) {
+  PixelBarrelName::Shell DBshell = PixelBarrelName::PixelBarrelName(pID).shell();
+  DBlayer  = PixelBarrelName::PixelBarrelName(pID).layerName();
+  DBladder = PixelBarrelName::PixelBarrelName(pID).ladderName();
+  DBmodule = PixelBarrelName::PixelBarrelName(pID).moduleName();
+  
+  if (DBshell == PixelBarrelName::mO) {
+    DBladder *= -1;
+    DBmodule *= -1;
+  }
+  
+  if (DBshell == PixelBarrelName::mI) {
+    DBmodule *= -1;
+  }
+  
+  if (DBshell == PixelBarrelName::pO) {
+    DBladder *= -1;
+  }
+
+}
+
+// ----------------------------------------------------------------------
+void PixelNtuplizer_RealData::fpixNames(const DetId &pID, int &DBdisk, int &DBblade, int &DBpanel, int &DBmodule) {
+
+  PixelEndcapName::HalfCylinder DBside = PixelEndcapName::PixelEndcapName(pID).halfCylinder();
+  DBdisk   = PixelEndcapName::PixelEndcapName(pID).diskName();
+  DBblade  = PixelEndcapName::PixelEndcapName(pID).bladeName();
+  DBpanel  = PixelEndcapName::PixelEndcapName(pID).pannelName();
+  DBmodule = PixelEndcapName::PixelEndcapName(pID).plaquetteName();
+  
+  if (DBside == PixelEndcapName::mO) {
+    DBdisk   *= -1; 
+    DBblade  *= -1;
+    DBpanel  *= -1;
+    DBmodule *= -1;
+  }
+  
+  if (DBside == PixelEndcapName::mI) {
+    DBdisk   *= -1; 
+  }
+  
+  if (DBside == PixelEndcapName::pO) {
+    DBblade  *= -1;
+    DBpanel  *= -1;
+    DBmodule *= -1;
+  }
+
+}
+
 
 
 // define this as a plug-in

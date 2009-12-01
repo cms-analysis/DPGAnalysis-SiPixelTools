@@ -201,6 +201,7 @@ void PixelTree::beginJob(const edm::EventSetup& es) {
   fTree->Branch("TkNdof",       fTkNdof,        "TkNdof[TkN]/F");
   fTree->Branch("TkPt",         fTkPt,          "TkPt[TkN]/F");
   fTree->Branch("TkTheta",      fTkTheta,       "TkTheta[TkN]/F");
+  fTree->Branch("TkEta",        fTkEta,         "TkEta[TkN]/F");
   fTree->Branch("TkPhi",        fTkPhi,         "TkPhi[TkN]/F");
   fTree->Branch("TkD0",         fTkD0,          "TkD0[TkN]/F");
   fTree->Branch("TkDz",         fTkDz,          "TkDz[TkN]/F");
@@ -568,13 +569,13 @@ void PixelTree::analyze(const edm::Event& iEvent,
   try {
     iEvent.getByLabel(fTrackCollectionLabel, hTrackCollection);
   } catch (cms::Exception &ex) {
-    cout << "No Track collection with label " << fTrackCollectionLabel << endl;
+    //cout << "No Track collection with label " << fTrackCollectionLabel << endl;
   }
   if (hTrackCollection.isValid()) {
     const std::vector<reco::Track> trackColl = *(hTrackCollection.product());
     if (fVerbose > 1) cout << "--> Track collection size: " << trackColl.size() << endl;
   } else {
-    cout << "--> No valid track collection" << endl;
+    //cout << "--> No valid track collection" << endl;
   }
 
   // -- Track trajectory association map
@@ -609,6 +610,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
       fTkNdof[fTkN]   = trackref->ndof();
       fTkPt[fTkN]     = trackref->pt();
       fTkTheta[fTkN]  = trackref->theta();
+      fTkEta[fTkN]    = trackref->eta();
       fTkPhi[fTkN]    = trackref->phi();
       fTkD0[fTkN]     = trackref->d0();
       fTkDz[fTkN]     = trackref->dz();
@@ -633,7 +635,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
 	const GeomDetUnit* detUnit = hit->detUnit();
 	if (0 == detUnit) {
-	  if (fVerbose > 1) cout << "-- PixelTree> Did not find hit->detUnit()" << endl;
+	  if (fVerbose > 2) cout << "-- PixelTree> Did not find hit->detUnit()" << endl;
 	  continue;
 	}
 
@@ -1014,7 +1016,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
   }
 
   // -- That's it
-  if (fVerbose > 0) {
+  if (fVerbose > 2) {
     cout << nevt << "(" << fRun << "/" << fEvent << ")" 
 	 << " lumi section: " << fLumiBlock 
 	 << " orbit: " << fOrbit << " BX: " << fBX

@@ -13,7 +13,7 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = "GR09_P_V6::All"
+process.GlobalTag.globaltag = "GR09_E_V6::All"
 
 # -- Input files
 process.source = cms.Source(
@@ -25,19 +25,10 @@ process.source = cms.Source(
     #interval = cms.uint32(1),
     fileNames = cms.untracked.vstring(
 #    "file:/afs/cern.ch/cms/CAF/CMSCOMM/COMM_GLOBAL/bit40or41skim.root"
-    "/store/express/BeamCommissioning09/ExpressPhysics/FEVT/v2/000/122/314/F6E6E5CD-60D8-DE11-A93B-0019B9F705A3.root",
-    "/store/express/BeamCommissioning09/ExpressPhysics/FEVT/v2/000/122/314/CECE0A1C-60D8-DE11-8B50-001D09F26C5C.root",
-    "/store/express/BeamCommissioning09/ExpressPhysics/FEVT/v2/000/122/314/C4F34BCE-60D8-DE11-BA15-0019B9F581C9.root",
-    "/store/express/BeamCommissioning09/ExpressPhysics/FEVT/v2/000/122/314/7C08033A-62D8-DE11-A81E-001D09F2A49C.root",
-    "/store/express/BeamCommissioning09/ExpressPhysics/FEVT/v2/000/122/314/66828337-62D8-DE11-A665-001D09F24024.root",
-    "/store/express/BeamCommissioning09/ExpressPhysics/FEVT/v2/000/122/314/64194B3A-62D8-DE11-9730-001D09F27067.root",
-    "/store/express/BeamCommissioning09/ExpressPhysics/FEVT/v2/000/122/314/4259728C-61D8-DE11-BE08-000423D6A6F4.root",
-    "/store/express/BeamCommissioning09/ExpressPhysics/FEVT/v2/000/122/314/3290CD36-62D8-DE11-B029-001D09F24DDF.root",
-    "/store/express/BeamCommissioning09/ExpressPhysics/FEVT/v2/000/122/314/2E6A82EE-60D8-DE11-B655-001D09F2423B.root",
-    "/store/express/BeamCommissioning09/ExpressPhysics/FEVT/v2/000/122/314/245448AF-5ED8-DE11-9E67-001D09F2527B.root",
-    "/store/express/BeamCommissioning09/ExpressPhysics/FEVT/v2/000/122/314/2288321E-60D8-DE11-B57D-001D09F2AF1E.root",
-    "/store/express/BeamCommissioning09/ExpressPhysics/FEVT/v2/000/122/314/1653DF8D-61D8-DE11-A283-00304879FBB2.root",
-    "/store/express/BeamCommissioning09/ExpressPhysics/FEVT/v2/000/122/314/04E779D1-60D8-DE11-9811-001D09F24498.root"
+
+'rfio:/castor/cern.ch/user/c/chiochia/09_beam_commissioning/BSCskim_123151_Express_bit40-41.root'
+    
+
     )
     )
 
@@ -65,22 +56,25 @@ process.superPointingFilter = cms.EDFilter(
 try:
     rootFileName = os.environ["JOB"] + ".root"
 except KeyError:
-    rootFileName = "pixel-collision.root"
+    rootFileName = "collisions_900GeV_ntuplizer.root"
 
 process.PixelTree = cms.EDAnalyzer(
     "PixelTree",
-    verbose                = cms.untracked.int32(1),
+    verbose                = cms.untracked.int32(2),
     rootFileName           = cms.untracked.string(rootFileName),
     dumpAllEvents          = cms.untracked.int32(1),
-    muonCollectionLabel    = cms.untracked.string('muons'),
-    trajectoryInputLabel   = cms.untracked.string('TrackRefitter'),
-    trackCollectionLabel   = cms.untracked.string('generalTracks'),
+    muonCollectionLabel    = cms.untracked.InputTag('muons'),
+    trajectoryInputLabel   = cms.untracked.InputTag('TrackRefitter'),
+    trackCollectionLabel   = cms.untracked.InputTag('generalTracks::EXPRESS'),
     pixelClusterLabel      = cms.untracked.string('siPixelClusters'),
-    L1GTReadoutRecordLabel = cms.untracked.string("gtDigis"), 
-    hltL1GtObjectMap       = cms.untracked.InputTag("hltL1GtObjectMap"), 
+    L1GTReadoutRecordLabel = cms.untracked.string("gtDigis"),
+    hltL1GtObjectMap       = cms.untracked.InputTag("hltL1GtObjectMap"),
     HLTResultsLabel        = cms.untracked.InputTag("TriggerResults::HLT")
     )
 
+
+
+    
 
 
 # -- Path
@@ -91,5 +85,5 @@ process.p = cms.Path(
     )
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
-#process.MessageLogger.cerr.threshold = 'INFO'
+process.MessageLogger.cerr.threshold = 'DEBUG'
 #process.TrackerDigiGeometryESModule.applyAlignment = True
