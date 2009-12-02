@@ -31,6 +31,7 @@
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/SiPixelDetId/interface/PixelBarrelName.h"
 #include "DataFormats/SiPixelDetId/interface/PixelEndcapName.h"
+#include "CondFormats/Alignment/interface/Definitions.h"
 // SimDataFormats
 #include "SimDataFormats/TrackingHit/interface/PSimHitContainer.h"
 #include "SimTracker/TrackerHitAssociation/interface/TrackerHitAssociator.h"
@@ -54,8 +55,8 @@ using namespace reco;
 
 PixelNtuplizer_RealData::PixelNtuplizer_RealData(edm::ParameterSet const& iConfig) : 
   conf_(iConfig),
-  t_(0),
-  tt_(0),
+  PixHitTree_(0),
+  TrackTree_(0),
   maxsize_PixInfoStruct_(200)
 {
 
@@ -88,73 +89,73 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
   useAllPixel = conf_.getParameter<bool>("useAllPixel");
 
   // but after that it is ok to create a tree..
-  t_ = new TTree("PixNtuple", "Pixel hit analyzer ntuple");
-  tt_ = new TTree("TrackNtuple", "Counters filled every track");
+  PixHitTree_ = new TTree("PixNtuple", "Pixel hit analyzer ntuple");
+  TrackTree_ = new TTree("TrackNtuple", "Counters filled every track");
   int bufsize = 64000;
   // Create one branch. If splitlevel is set, event is a superbranch
   // creating a sub branch for each data member of the Event object.
   //  std::cout << "Making evt branch:" << std::endl;
-  t_->Branch("evt", &evt_, "run/I:evtnum:nbrTracks", bufsize);
+  PixHitTree_->Branch("evt", &evt_, "run/i:evtnum:lumiBlock:trackNumber:bunchCrossing/I:orbit", bufsize);
   //  std::cout << "Making det branch:" << std::endl;
-  t_->Branch("det", &det_, "thickness/F:cols/I:rows/I:layer/I:ladder/I:module/I:disk/I:blade/I:panel/I:plaquette/I:isflipped/I", bufsize);
+  PixHitTree_->Branch("det", &det_, "thickness/F:cols/I:rows/I:layer/I:ladder/I:module/I:disk/I:blade/I:panel/I:plaquette/I:isflipped/I", bufsize);
   //  std::cout << "Making vertex branch:" << std::endl;
-  t_->Branch("vertex",   &vertex_,   "r/F:z", bufsize);
+  PixHitTree_->Branch("vertex",   &vertex_,   "r/F:z", bufsize);
   //  std::cout << "Making clust branch:" << std::endl;
-  t_->Branch("Cluster", &clust_, "row/F:col:x:y:charge:normalized_charge:size/I:size_x:size_y:maxPixelCol:maxPixelRow:minPixelCol:minPixelRow:geoId/i:edgeHitX/I:edgeHitY:clust_alpha/F:clust_beta:n_neighbour_clust/I", bufsize);
+  PixHitTree_->Branch("Cluster", &clust_, "row/F:col:x:y:charge:normalized_charge:size/I:size_x:size_y:maxPixelCol:maxPixelRow:minPixelCol:minPixelRow:geoId/i:edgeHitX/I:edgeHitY:clust_alpha/F:clust_beta:n_neighbour_clust/I", bufsize);
   //  std::cout << "Making sim branch:" << std::endl;
-  if(isSim == true) t_->Branch("sim",   &sim_, "localX/F:localY/F:eloss/F:localPhi/F:localTheta/F:alpha/F:beta/F:charge/F:particleID/I:trackID/i:vertexID/I:entryPointLocalX/F:exitPointLocalX/F:entryPointLocalY/F:exitPointLocalY/F:entryPointLocalZ/F:exitPointLocalZ/F:entryPointRow/F:exitPointRow/F:entryPointColumn/F:exitPointColumn/F:entryPointGlobalX/F:exitPointGlobalX/F:entryPointGlobalY/F:exitPointGlobalY/F:entryPointGlobalZ/F:exitPointGlobalZ/F:processID/I:p/F:px/F:py/F:pz/F:globalEta/F:globalPhi/F:globalTheta/F", bufsize);
+  if(isSim == true) PixHitTree_->Branch("sim",   &sim_, "localX/F:localY/F:eloss/F:localPhi/F:localTheta/F:alpha/F:beta/F:charge/F:particleID/I:trackID/i:vertexID/I:entryPointLocalX/F:exitPointLocalX/F:entryPointLocalY/F:exitPointLocalY/F:entryPointLocalZ/F:exitPointLocalZ/F:entryPointRow/F:exitPointRow/F:entryPointColumn/F:exitPointColumn/F:entryPointGlobalX/F:exitPointGlobalX/F:entryPointGlobalY/F:exitPointGlobalY/F:entryPointGlobalZ/F:exitPointGlobalZ/F:processID/I:p/F:px/F:py/F:pz/F:globalEta/F:globalPhi/F:globalTheta/F", bufsize);
   //  std::cout << "Making pixinfo branch:" << std::endl;
-  t_->Branch("npix", &pixinfo_.npix, "npix/I", bufsize);
-  t_->Branch("hasOverFlow",&pixinfo_.hasOverFlow, "hasOverFlow/I",bufsize);
-  t_->Branch("rowpix", pixinfo_.row, "row[npix]/F", bufsize);
-  t_->Branch("colpix", pixinfo_.col, "col[npix]/F", bufsize);
-  t_->Branch("adc", pixinfo_.adc, "adc[npix]/F", bufsize);
-  t_->Branch("xpix", pixinfo_.x, "x[npix]/F", bufsize);
-  t_->Branch("ypix", pixinfo_.y, "y[npix]/F", bufsize);
-  t_->Branch("gxpix", pixinfo_.gx, "gx[npix]/F", bufsize);
-  t_->Branch("gypix", pixinfo_.gy, "gy[npix]/F", bufsize);
-  t_->Branch("gzpix", pixinfo_.gz, "gz[npix]/F", bufsize);
+  PixHitTree_->Branch("npix", &pixinfo_.npix, "npix/I", bufsize);
+  PixHitTree_->Branch("hasOverFlow",&pixinfo_.hasOverFlow, "hasOverFlow/I",bufsize);
+  PixHitTree_->Branch("rowpix", pixinfo_.row, "row[npix]/F", bufsize);
+  PixHitTree_->Branch("colpix", pixinfo_.col, "col[npix]/F", bufsize);
+  PixHitTree_->Branch("adc", pixinfo_.adc, "adc[npix]/F", bufsize);
+  PixHitTree_->Branch("xpix", pixinfo_.x, "x[npix]/F", bufsize);
+  PixHitTree_->Branch("ypix", pixinfo_.y, "y[npix]/F", bufsize);
+  PixHitTree_->Branch("gxpix", pixinfo_.gx, "gx[npix]/F", bufsize);
+  PixHitTree_->Branch("gypix", pixinfo_.gy, "gy[npix]/F", bufsize);
+  PixHitTree_->Branch("gzpix", pixinfo_.gz, "gz[npix]/F", bufsize);
 
   if(useAllPixel == true){
     //    std::cout << "Making allpixinfo branch:" << std::endl;
-    t_->Branch("allpix_npix", &allpixinfo_.allpix_npix, "allpix_npix/I", bufsize);
-    t_->Branch("allpix_hasOverFlow",&allpixinfo_.allpix_hasOverFlow, "allpix_hasOverFlow/I",bufsize);
-    t_->Branch("allpixInfo",&allpixinfo_,"allpix_row[200]/F:allpix_col[200]/F:allpix_adc[200]/F",bufsize);
+    PixHitTree_->Branch("allpix_npix", &allpixinfo_.allpix_npix, "allpix_npix/I", bufsize);
+    PixHitTree_->Branch("allpix_hasOverFlow",&allpixinfo_.allpix_hasOverFlow, "allpix_hasOverFlow/I",bufsize);
+    PixHitTree_->Branch("allpixInfo",&allpixinfo_,"allpix_row[200]/F:allpix_col[200]/F:allpix_adc[200]/F",bufsize);
   }
   // std::cout << "Making allclustinfo branch:" << std::endl;
-  t_->Branch("allclust_hasOverFlow", &allclustinfo_.allclust_hasOverFlow, "allclust_hasOverFlow/I"                 , bufsize);
-  t_->Branch("n_allclust"          , &allclustinfo_.n_allclust         , "n_allclust/I"                           , bufsize);
-  t_->Branch("allclust_row"        , allclustinfo_.allclust_row        , "allclust_row[n_allclust]/F"        , bufsize);
-  t_->Branch("allclust_col"        , allclustinfo_.allclust_col        , "allclust_col[n_allclust]/F"        , bufsize);
-  t_->Branch("allclust_x"          , allclustinfo_.allclust_x          , "allclust_x[n_allclust]/F"          , bufsize);
-  t_->Branch("allclust_y"          , allclustinfo_.allclust_y          , "allclust_y[n_allclust]/F"          , bufsize);
-  t_->Branch("allclust_charge"     , allclustinfo_.allclust_charge     , "allclust_charge[n_allclust]/F"     , bufsize);
-  t_->Branch("allclust_nor_charge" , allclustinfo_.allclust_nor_charge , "allclust_nor_charge[n_allclust]/F" , bufsize);
-  t_->Branch("allclust_size"       , allclustinfo_.allclust_size       , "allclust_size[n_allclust]/F"       , bufsize);
-  t_->Branch("allclust_size_x"     , allclustinfo_.allclust_size_x     , "allclust_size_x[n_allclust]/F"     , bufsize);
-  t_->Branch("allclust_size_y"     , allclustinfo_.allclust_size_y     , "allclust_size_y[n_allclust]/F"     , bufsize);
-  t_->Branch("allclust_maxPixelCol", allclustinfo_.allclust_maxPixelCol, "allclust_maxPixelCol[n_allclust]/F", bufsize);
-  t_->Branch("allclust_maxPixelRow", allclustinfo_.allclust_maxPixelRow, "allclust_maxPixelRow[n_allclust]/F", bufsize);
-  t_->Branch("allclust_minPixelCol", allclustinfo_.allclust_minPixelCol, "allclust_minPixelCol[n_allclust]/F", bufsize);
-  t_->Branch("allclust_minPixelRow", allclustinfo_.allclust_minPixelRow, "allclust_minPixelRow[n_allclust]/F", bufsize);
-  t_->Branch("allclust_geoId"      , allclustinfo_.allclust_geoId      , "allclust_geoId[n_allclust]/F"      , bufsize);
-  t_->Branch("allclust_edgeHitX"   , allclustinfo_.allclust_edgeHitX   , "allclust_edgeHitX[n_allclust]/F"   , bufsize);
-  t_->Branch("allclust_edgeHitY"   , allclustinfo_.allclust_edgeHitY   , "allclust_edgeHitY[n_allclust]/F"   , bufsize);
-  t_->Branch("allclust_dist"       , allclustinfo_.allclust_dist       , "allclust_dist[n_allclust]/F"       , bufsize);
+  PixHitTree_->Branch("allclust_hasOverFlow", &allclustinfo_.allclust_hasOverFlow, "allclust_hasOverFlow/I"                 , bufsize);
+  PixHitTree_->Branch("n_allclust"          , &allclustinfo_.n_allclust         , "n_allclust/I"                           , bufsize);
+  PixHitTree_->Branch("allclust_row"        , allclustinfo_.allclust_row        , "allclust_row[n_allclust]/F"        , bufsize);
+  PixHitTree_->Branch("allclust_col"        , allclustinfo_.allclust_col        , "allclust_col[n_allclust]/F"        , bufsize);
+  PixHitTree_->Branch("allclust_x"          , allclustinfo_.allclust_x          , "allclust_x[n_allclust]/F"          , bufsize);
+  PixHitTree_->Branch("allclust_y"          , allclustinfo_.allclust_y          , "allclust_y[n_allclust]/F"          , bufsize);
+  PixHitTree_->Branch("allclust_charge"     , allclustinfo_.allclust_charge     , "allclust_charge[n_allclust]/F"     , bufsize);
+  PixHitTree_->Branch("allclust_nor_charge" , allclustinfo_.allclust_nor_charge , "allclust_nor_charge[n_allclust]/F" , bufsize);
+  PixHitTree_->Branch("allclust_size"       , allclustinfo_.allclust_size       , "allclust_size[n_allclust]/F"       , bufsize);
+  PixHitTree_->Branch("allclust_size_x"     , allclustinfo_.allclust_size_x     , "allclust_size_x[n_allclust]/F"     , bufsize);
+  PixHitTree_->Branch("allclust_size_y"     , allclustinfo_.allclust_size_y     , "allclust_size_y[n_allclust]/F"     , bufsize);
+  PixHitTree_->Branch("allclust_maxPixelCol", allclustinfo_.allclust_maxPixelCol, "allclust_maxPixelCol[n_allclust]/F", bufsize);
+  PixHitTree_->Branch("allclust_maxPixelRow", allclustinfo_.allclust_maxPixelRow, "allclust_maxPixelRow[n_allclust]/F", bufsize);
+  PixHitTree_->Branch("allclust_minPixelCol", allclustinfo_.allclust_minPixelCol, "allclust_minPixelCol[n_allclust]/F", bufsize);
+  PixHitTree_->Branch("allclust_minPixelRow", allclustinfo_.allclust_minPixelRow, "allclust_minPixelRow[n_allclust]/F", bufsize);
+  PixHitTree_->Branch("allclust_geoId"      , allclustinfo_.allclust_geoId      , "allclust_geoId[n_allclust]/F"      , bufsize);
+  PixHitTree_->Branch("allclust_edgeHitX"   , allclustinfo_.allclust_edgeHitX   , "allclust_edgeHitX[n_allclust]/F"   , bufsize);
+  PixHitTree_->Branch("allclust_edgeHitY"   , allclustinfo_.allclust_edgeHitY   , "allclust_edgeHitY[n_allclust]/F"   , bufsize);
+  PixHitTree_->Branch("allclust_dist"       , allclustinfo_.allclust_dist       , "allclust_dist[n_allclust]/F"       , bufsize);
 
   //  std::cout << "Making muon branch:" << std::endl;
   if(isCosmic == true){
-    t_->Branch("MuonInfo",&muoninfo_,"timeAtIpInOut[2]/F:corrTimeAtIpInOut[2]/F:errorTime[2]/F:IsGlobalMuon[2]/F:IsStandAloneMuon[2]/F:IsTrackerMuon[2]/F:IsTimeValid[2]/F:HasGlobalTrack[2]/F:HasPixelHit[2]/F:trackpt[2]/F:tracketa[2]/F:trackphi[2]/F",bufsize);
-    t_->Branch("nMuon",&muoninfo_.nMuon,"nMuon/I",bufsize);
-    t_->Branch("nMuonHasOverFlow",&muoninfo_.HasOverFlow,"nMuonHasOverFlow/I",bufsize);
-    t_->Branch("Muon_meanTime",&muoninfo_.mean_Time,"Muon_meanTime/F",bufsize);
+    PixHitTree_->Branch("MuonInfo",&muoninfo_,"timeAtIpInOut[2]/F:corrTimeAtIpInOut[2]/F:errorTime[2]/F:IsGlobalMuon[2]/F:IsStandAloneMuon[2]/F:IsTrackerMuon[2]/F:IsTimeValid[2]/F:HasGlobalTrack[2]/F:HasPixelHit[2]/F:trackpt[2]/F:tracketa[2]/F:trackphi[2]/F",bufsize);
+    PixHitTree_->Branch("nMuon",&muoninfo_.nMuon,"nMuon/I",bufsize);
+    PixHitTree_->Branch("nMuonHasOverFlow",&muoninfo_.HasOverFlow,"nMuonHasOverFlow/I",bufsize);
+    PixHitTree_->Branch("Muon_meanTime",&muoninfo_.mean_Time,"Muon_meanTime/F",bufsize);
   }
   //  std::cout << "Making rechit branch:" << std::endl;
-  t_->Branch("RecHit", &rechit_, "localX/F:localY:globalX:globalY:globalZ:residualX:residualY:resErrX:resErrY:hit_errX:hit_errY:resXprime:resXprimeErr", bufsize);
+  PixHitTree_->Branch("RecHit", &rechit_, "localX/F:localY:globalX:globalY:globalZ:residualX:residualY:resErrX:resErrY:hit_errX:hit_errY:resXprime:resXprimeErr:clusterProb:probX:probY:qualWord/i:qBin/I:onEdge:badPixels:spansTwoROCs", bufsize);
   //  std::cout << "Making track branch:" << std::endl;
-  t_->Branch("track", &track_, "pt/F:p:px:py:pz:globalTheta:globalEta:globalPhi:localTheta:localPhi:chi2:ndof:foundHits/I:tracknum", bufsize);
+  PixHitTree_->Branch("track", &track_, "pt/F:p:px:py:pz:globalTheta:globalEta:globalPhi:localTheta:localPhi:chi2:ndof:foundHits/I:tracknum", bufsize);
   //  std::cout << "Making track only branch:" << std::endl;
-  tt_->Branch("TrackInfo", &trackonly_, "run/I:evtnum:tracknum:pixelTrack:NumPixelHits:NumStripHits:charge:chi2/F:ndof:theta:d0:dz:p:pt:px:py:pz:phi:eta:vx:vy:vz:muonT0:muondT0", bufsize);
+  TrackTree_->Branch("TrackInfo", &trackonly_, "run/I:evtnum:tracknum:pixelTrack:NumPixelHits:NumStripHits:charge:chi2/F:ndof:theta:d0:dz:p:pt:px:py:pz:phi:eta:vx:vy:vz:muonT0:muondT0", bufsize);
   edm::LogInfo("PixelNuplizer_RealData") << "Made all branches." << std::endl;
 
 }
@@ -345,13 +346,12 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 
       fillTrackOnly(iEvent,iSetup, pixelHits, stripHits, TrackNumber, trackref);
     //++++++++++
-      tt_->Fill();
+      TrackTree_->Fill();
     //++++++++++
 
 
        // -- Clusters associated with a track
       std::vector<TrajectoryMeasurement> tmeasColl =refTraj->measurements();
-      int iCluster(0); 
       for (std::vector<TrajectoryMeasurement>::const_iterator tmeasIt = tmeasColl.begin(); tmeasIt!=tmeasColl.end(); tmeasIt++){   
 	if (!tmeasIt->updatedState().isValid()) continue; 
 	TrajectoryStateOnSurface tsos = tsoscomb(tmeasIt->forwardPredictedState(), tmeasIt->backwardPredictedState());
@@ -366,7 +366,8 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 	  //cout << "-- PixelTree> Did not find hit->detUnit()" << endl;
 	  continue;
 	}
-	double dPhi = -999, dR = -999, dZ = -999;
+	double dR = -999, dZ = -999;
+	//double dPhi = -999;
 
 
 	bool barrel = DetId::DetId(hit->geographicalId()).subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel);
@@ -388,9 +389,6 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 	
 	LocalTrajectoryParameters ltp = tsos.localParameters();
 	LocalVector localDir = ltp.momentum()/ltp.momentum().mag();
-
-	float alpha = atan2(localDir.z(), localDir.x());
-	float beta = atan2(localDir.z(), localDir.y());
 
 	int DBlayer, DBladder, DBmodule, DBdisk, DBblade, DBpanel, DBdetid; 
 	DBdetid = hit->geographicalId().rawId();
@@ -445,6 +443,22 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 	  rechit_.globalX = hit->globalPosition().x();
 	  rechit_.globalY = hit->globalPosition().y();
 	  rechit_.globalZ = hit->globalPosition().z();
+          rechit_.qualWord = pixhit->rawQualityWord();
+          rechit_.qBin = pixhit->qBin();
+	  if (pixhit->hasFilledProb() == true) {
+            rechit_.clusterProb = pixhit->clusterProbability(0);
+            rechit_.probX = pixhit->probabilityX();
+            rechit_.probY = pixhit->probabilityY();
+	  }
+	  if (pixhit->isOnEdge() == true) {
+	    rechit_.onEdge = 1;
+	  } else rechit_.onEdge = 0;
+	  if (pixhit->hasBadPixels() == true) {
+	    rechit_.badPixels = 1;
+	  } else rechit_.badPixels = 0;
+	  if (pixhit->spansTwoROCs() == true) {
+	    rechit_.spansTwoROCs = 1;
+	  } else rechit_.spansTwoROCs = 0;
 	  rechit_.residualX = res.x();
 	  rechit_.resErrX = errX;
 	  rechit_.resErrY = errY;
@@ -512,7 +526,7 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 		
 
 	  //++++++++++
-	  t_->Fill();
+	  PixHitTree_->Fill();
 	  //++++++++++
 	  
 
@@ -708,7 +722,10 @@ void PixelNtuplizer_RealData::fillEvt(const edm::Event& iEvent,int NbrTracks)
 {
   evt_.run = iEvent.id().run();
   evt_.evtnum = iEvent.id().event();
-  evt_.nbrTracks = NbrTracks;
+  evt_.lumiBlock = iEvent.luminosityBlock();
+  evt_.trackNumber = NbrTracks;
+  evt_.bunchCrossing = iEvent.bunchCrossing();
+  evt_.orbit = iEvent.orbitNumber();
 }
 
 
@@ -941,9 +958,14 @@ void PixelNtuplizer_RealData::init()
 void PixelNtuplizer_RealData::EvtStruct::init()
 {
   int dummy_int = -9999;
+  uint32_t dummy_uint = 0;
 
-  run = dummy_int;
-  evtnum = dummy_int;
+  run = dummy_uint;
+  evtnum = dummy_uint;
+  lumiBlock = dummy_uint;
+  trackNumber = dummy_uint;
+  bunchCrossing = dummy_int;
+  orbit = dummy_int;
 }
 
 void PixelNtuplizer_RealData::DetStruct::init()
@@ -1009,6 +1031,8 @@ void PixelNtuplizer_RealData::PixInfoStruct::init()
 void PixelNtuplizer_RealData::RecHitStruct::init()
 {
   float dummy_float = -9999.0;
+  int dummy_int = -9999;
+  uint32_t dummy_uint = 9999;
 
   localX = dummy_float;
   localY = dummy_float;
@@ -1022,7 +1046,15 @@ void PixelNtuplizer_RealData::RecHitStruct::init()
   hit_errX = dummy_float;
   hit_errY = dummy_float;
   resXprime = dummy_float;
-  resXprimeErr = dummy_float;  
+  resXprimeErr = dummy_float;
+  clusterProb = dummy_float;
+  probX = dummy_float;
+  probY = dummy_float;
+  qualWord = dummy_uint;
+  qBin = dummy_int;
+  onEdge = dummy_int;
+  badPixels = dummy_int;
+  spansTwoROCs = dummy_int;
 }
 
 void PixelNtuplizer_RealData::TrackStruct::init()

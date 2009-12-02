@@ -76,8 +76,8 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
 
 
   TH1D *dummyhist;
-  TTree* t_;  // tree filled on every pixel rec hit
-  TTree* tt_; // tree filled every track
+  TTree* PixHitTree_;  // tree filled on every pixel rec hit
+  TTree* TrackTree_; // tree filled every track
 
   float bias[5][15][5][15];
   float rms[5][15][5][15];
@@ -98,9 +98,12 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
 
   struct EvtStruct {
 
-    int run;
-    int evtnum;
-    int nbrTracks;
+    uint32_t run;
+    uint32_t evtnum;
+    uint32_t lumiBlock;
+    uint32_t trackNumber;
+    int bunchCrossing;
+    int orbit;
 
     void init();
   } evt_;
@@ -335,6 +338,14 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
     float hit_errY;
     float resXprime;
     float resXprimeErr;
+    float clusterProb;
+    float probX;
+    float probY;
+    uint32_t qualWord;
+    int qBin;
+    int onEdge;
+    int badPixels;
+    int spansTwoROCs;
 
     void init();
     } rechit_;

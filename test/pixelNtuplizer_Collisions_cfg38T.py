@@ -11,13 +11,11 @@ process.load("CondCore.DBCommon.CondDBCommon_cfi")
 process.load("CondCore.DBCommon.CondDBSetup_cfi")
 
 # conditions
-process.load('Configuration.StandardSequences.MixingNoPileUp_cff')
-process.load('Configuration.StandardSequences.GeometryIdeal_cff')
+process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
-#process.GlobalTag.connect = "frontier://FrontierProd/CMS_COND_21X_GLOBALTAG"
-process.GlobalTag.globaltag = "MC_31X_V5::All"
+process.GlobalTag.globaltag = "FIRSTCOLL::All"
 process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource','GlobalTag')
 
 ##
@@ -27,7 +25,7 @@ process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource','GlobalTag')
 #process.AlignmentTrackSelector.ptMin = 3.0
 
 # reconstruction sequence for Cosmics
-process.load("Configuration.StandardSequences.RawToDigi_cff")
+process.load("Configuration.StandardSequences.RawToDigi_Data_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 
 ##
@@ -67,7 +65,7 @@ process.MuonTOFFilter_trackQuality.max_chi2_ndof = 15
 
 process.load("DPGAnalysis.SiPixelTools.PixelNtuplizer_RealData_cfi")
 process.PixelNtuplizer_RealData.isCosmic = False
-process.PixelNtuplizer_RealData.isSim = True
+process.PixelNtuplizer_RealData.isSim = False
 process.PixelNtuplizer_RealData.useAllPixel = False
 
 # also run 3 times:
@@ -96,7 +94,18 @@ process.source = cms.Source("PoolSource",
     #firstRun = cms.untracked.uint32(64108),
     #interval = cms.uint32(1),
     fileNames = cms.untracked.vstring(
-    'rfio:/castor/cern.ch/user/a/andrewdc/TestInput312.root'
+    'rfio:/castor/cern.ch/user/c/chiochia/09_beam_commissioning/BSCskim_123151_Express.root'
+#        '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/151/FA9D48E2-14DE-DE11-BB11-001D09F291D2.root',
+#        '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/151/F0604FD7-19DE-DE11-9A21-003048D37560.root',
+#        '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/151/E4184AB2-0BDE-DE11-8B34-001D09F25208.root',
+#        '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/151/DA87351C-01DE-DE11-B84D-0030487A18A4.root',
+#        '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/151/D0985A13-15DE-DE11-81D9-001D09F29524.root',
+#        '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/151/BC27D9E4-1CDE-DE11-B7DC-001D09F2A690.root',
+#        '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/151/6ADC6A1B-01DE-DE11-8FBD-00304879FA4A.root',
+#        '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/151/68216223-19DE-DE11-85D3-0030487A18A4.root',
+#        '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/151/54F707ED-0FDE-DE11-B8E3-000423D6CA02.root',
+#        '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/151/46BC540A-17DE-DE11-B913-003048D2BED6.root',
+#        '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/151/104086E4-1CDE-DE11-BE78-001D09F291D7.root'
 
   )
 )
@@ -110,18 +119,19 @@ process.source.inputCommand = cms.untracked.vstring("drop *_*_*_FU"
 ## number of events
 ##
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1) )
+    input = cms.untracked.int32(100) )
 
 ##
 ## executionpath
 ##
 process.p = cms.Path(
     # mixing module (only for sim data)
-    process.mix*
+#    process.mix*
     # filters:
 #    process.fedInRunFilter*
     # standard reco sequence
-    process.RawToDigi*process.reconstruction_withRS*
+    process.RawToDigi*
+    process.reconstruction_withRS*
     # more filters:
 #    process.MuonTOFFilter_trackQuality *
     # create rechits
