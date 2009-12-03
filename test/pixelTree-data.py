@@ -48,13 +48,13 @@ process.PixelTree = cms.EDAnalyzer(
     "PixelTree",
     verbose                = cms.untracked.int32(0),
     rootFileName           = cms.untracked.string(rootFileName),
-    trajectoryInputLabel   = cms.untracked.string('TrackRefitterP5'),
-    muonCollectionLabel    = cms.untracked.string('muons'),
-    trackCollectionLabel   = cms.untracked.string('TrackRefitterP5'),
-    pixelClusterLabel      = cms.untracked.string('siPixelClusters'),
-    L1GTReadoutRecordLabel = cms.untracked.string("gtDigis"), 
-    hltL1GtObjectMap       = cms.untracked.InputTag("hltL1GtObjectMap"), 
-    HLTResultsLabel        = cms.untracked.InputTag("TriggerResults::HLT")
+    trajectoryInputLabel   = cms.untracked.InputTag('TrackRefitterP5'),
+    muonCollectionLabel    = cms.untracked.InputTag('muons'),
+    trackCollectionLabel   = cms.untracked.InputTag('TrackRefitterP5'),
+    pixelClusterLabel      = cms.untracked.InputTag('siPixelClusters'),
+    L1GTReadoutRecordLabel = cms.untracked.InputTag('gtDigis'), 
+    hltL1GtObjectMap       = cms.untracked.InputTag('hltL1GtObjectMap'), 
+    HLTResultsLabel        = cms.untracked.InputTag('TriggerResults::HLT')
     )
 
 

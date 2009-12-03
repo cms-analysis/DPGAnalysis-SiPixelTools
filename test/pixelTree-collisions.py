@@ -25,10 +25,7 @@ process.source = cms.Source(
     #interval = cms.uint32(1),
     fileNames = cms.untracked.vstring(
 #    "file:/afs/cern.ch/cms/CAF/CMSCOMM/COMM_GLOBAL/bit40or41skim.root"
-
-'rfio:/castor/cern.ch/user/c/chiochia/09_beam_commissioning/BSCskim_123151_Express_bit40-41.root'
-    
-
+    'rfio:/castor/cern.ch/user/c/chiochia/09_beam_commissioning/BSCskim_123151_Express_bit40-41.root'
     )
     )
 

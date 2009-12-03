@@ -22,6 +22,7 @@
 
 #include "CondFormats/SiPixelObjects/interface/SiPixelFedCablingMap.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHitCollection.h"
+#include "DataFormats/MuonReco/interface/MuonFwd.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -56,7 +57,7 @@ class PixelTree : public edm::EDAnalyzer {
   virtual void beginJob(const edm::EventSetup& iSetup);
   virtual void endJob();
   virtual void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-
+  
  protected:
   void init();
   void fillEvent();
@@ -64,15 +65,15 @@ class PixelTree : public edm::EDAnalyzer {
   void fillRecHits();
   void fillVertex();
   void fillDigis();
-
+  
   void bpixNames(const DetId &pID, int &DBlayer, int &DBladder, int &DBmodule);
   void fpixNames(const DetId &pID, int &DBdisk, int &DBblade, int &DBpanel, int &DBplaquette);
-
+  
   void onlineRocColRow(const DetId &pID, int offlineRow, int offlineCol, int &roc, int &col, int &row);
-
+  
   void readOffsets();
-  void sectorAndWheel(const reco::Muon &muon0, int &w0, int &s0);
-  float correctedTime(const reco::Muon &muon0);
+  void sectorAndWheel(const Muon &muon0, int &w0, int &s0);
+  float correctedTime(const Muon &muon0);
   void dumpDetIds(const edm::EventSetup& iSetup);
 
   void isPixelTrack(const edm::Ref<std::vector<Trajectory> > &refTraj, bool &isBpixtrack, bool &isFpixtrack);
@@ -82,11 +83,9 @@ class PixelTree : public edm::EDAnalyzer {
   int             fVerbose; 
   std::string     fRootFileName; 
   int             fDumpAllEvents;
-  edm::InputTag   fTrajectoryInputLabel;
-  edm::InputTag   fMuonCollectionLabel, fTrackCollectionLabel, fPixelClusterLabel;
-  std::string     fL1GTReadoutRecordLabel; 
-  edm::InputTag   fL1GTmapLabel;
-  edm::InputTag   fHLTResultsLabel;
+  edm::InputTag   fPrimaryVertexCollectionLabel;
+  edm::InputTag   fMuonCollectionLabel, fTrackCollectionLabel, fTrajectoryInputLabel, fPixelClusterLabel;
+  edm::InputTag   fL1GTReadoutRecordLabel, fL1GTmapLabel, fHLTResultsLabel;
 
   edm::ESHandle<SiPixelFedCablingMap> fCablingMap;
 
@@ -107,6 +106,13 @@ class PixelTree : public edm::EDAnalyzer {
   unsigned int fHLT, fHLTa0, fHLTa1, fHLTa2, fHLTa3, 
     fHLTr0, fHLTr1, fHLTr2, fHLTr3, 
     fHLTe0, fHLTe1, fHLTe2, fHLTe3; 
+
+  // -- primary vertices
+  static const int PVMAX = 100; 
+  int fPvN; 
+  float fPvX[PVMAX], fPvY[PVMAX],  fPvZ[PVMAX], fPvXe[PVMAX], fPvYe[PVMAX],  fPvZe[PVMAX],  fPvChi2[PVMAX], fPvNdof[PVMAX];
+  int   fPvIsFake[PVMAX];
+
 
   // -- muons
   static const int MUMAX = 100; 
@@ -129,18 +135,19 @@ class PixelTree : public edm::EDAnalyzer {
   float fTkResXe[TRACKMAX][CLPERTRACKMAX],   fTkResYe[TRACKMAX][CLPERTRACKMAX];
   float fTkRes2X[TRACKMAX][CLPERTRACKMAX];
   float fTkRes2Xe[TRACKMAX][CLPERTRACKMAX];
-  int   fTkType[TRACKMAX], fTkMuI[TRACKMAX], fTkClI[TRACKMAX][CLPERTRACKMAX]; 
+  int   fTkType[TRACKMAX], fTkMuI[TRACKMAX], fTkClN[TRACKMAX], fTkClI[TRACKMAX][CLPERTRACKMAX]; 
 
   // -- clusters
   static const int CLUSTERMAX = 100000; 
   static const int DGPERCLMAX = 100;  
+  static const int TKPERCLMAX = 100;  
   int   fClN;
   int   fClSize[CLUSTERMAX], fClSizeX[CLUSTERMAX], fClSizeY[CLUSTERMAX]; 
   float fClRow[CLUSTERMAX], fClCol[CLUSTERMAX];  //??
   float fClLx[CLUSTERMAX], fClLy[CLUSTERMAX], fClLxe[CLUSTERMAX], fClLye[CLUSTERMAX];
   float fClGx[CLUSTERMAX], fClGy[CLUSTERMAX], fClGz[CLUSTERMAX];
   float fClCharge[CLUSTERMAX],  fClChargeCorr[CLUSTERMAX];
-  int   fClType[CLUSTERMAX], fClTkI[CLUSTERMAX], fClDgI[CLUSTERMAX][DGPERCLMAX]; 
+  int   fClType[CLUSTERMAX], fClTkN[CLUSTERMAX], fClTkI[CLUSTERMAX][TKPERCLMAX], fClDgN[CLUSTERMAX], fClDgI[CLUSTERMAX][DGPERCLMAX]; 
   int   fClDetId[CLUSTERMAX];
   int   fClLayer[CLUSTERMAX],  fClLadder[CLUSTERMAX], fClModule[CLUSTERMAX];
   int   fClFlipped[CLUSTERMAX], fClDisk[CLUSTERMAX],  fClBlade[CLUSTERMAX], fClPanel[CLUSTERMAX], fClPlaquette[CLUSTERMAX];
@@ -149,11 +156,12 @@ class PixelTree : public edm::EDAnalyzer {
   static const int DIGIMAX = 1000000; 
   int fDgN; 
   int   fDgRow[DIGIMAX], fDgCol[DIGIMAX];
+  int   fDgDetId[DIGIMAX];
+  int   fDgRoc[DIGIMAX], fDgRocR[DIGIMAX], fDgRocC[DIGIMAX];
   float fDgLx[DIGIMAX], fDgLy[DIGIMAX];
   float fDgGx[DIGIMAX], fDgGy[DIGIMAX], fDgGz[DIGIMAX];
   float fDgAdc[DIGIMAX], fDgCharge[DIGIMAX];
   int   fDgClI[DIGIMAX];
-  int   fDgRoc[DIGIMAX], fDgRocR[DIGIMAX], fDgRocC[DIGIMAX];
 
   // -- muon auxiliary variables
   float fsbias[5][15];

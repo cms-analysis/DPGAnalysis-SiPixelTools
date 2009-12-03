@@ -19,6 +19,8 @@
 #include <vector>
 #include <bitset>
 
+#include "PixelTree.h"
+
 #include "CondFormats/RunInfo/interface/RunSummary.h"
 #include "CondFormats/RunInfo/interface/RunInfo.h"
 #include "CondFormats/DataRecord/interface/RunSummaryRcd.h"
@@ -39,7 +41,6 @@
 #include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
 #include "DataFormats/Math/interface/deltaR.h"
-#include "DataFormats/MuonReco/interface/MuonFwd.h"
 #include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/MuonReco/interface/MuonTime.h"
 #include "DataFormats/MuonDetId/interface/DTChamberId.h"
@@ -52,6 +53,7 @@
 #include "DataFormats/SiPixelDigi/interface/PixelDigi.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHitCollection.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
 
 #include "DQM/SiStripCommon/interface/SiStripFolderOrganizer.h"
 
@@ -82,7 +84,8 @@
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/PatternTools/interface/TrajTrackAssociation.h"
 
-#include "PixelTree.h"
+#include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
+#include <DataFormats/VertexReco/interface/VertexFwd.h>
 
 #include <TROOT.h>
 #include <TTree.h>
@@ -99,13 +102,14 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fVerbose(iConfig.getUntrackedParameter<int>("verbose", 0)),
   fRootFileName(iConfig.getUntrackedParameter<string>("rootFileName", string("pixelTree.root"))),
   fDumpAllEvents(iConfig.getUntrackedParameter<int>("dumpAllEvents", 0)),
-  fTrajectoryInputLabel(iConfig.getUntrackedParameter<InputTag>("trajectoryInputLabel", edm::InputTag("ctfRefitter"))),
+  fPrimaryVertexCollectionLabel(iConfig.getUntrackedParameter<InputTag>("PrimaryVertexCollectionLabel", edm::InputTag("offlinePrimaryVertices"))),
   fMuonCollectionLabel(iConfig.getUntrackedParameter<InputTag>("muonCollectionLabel", edm::InputTag("muons"))),
   fTrackCollectionLabel(iConfig.getUntrackedParameter<InputTag>("trackCollectionLabel", edm::InputTag("generalTracks"))),
-  fPixelClusterLabel(iConfig.getUntrackedParameter<string>("pixelClusterLabel", string("siPixelClusters"))), 
-  fL1GTReadoutRecordLabel(iConfig.getUntrackedParameter<std::string> ("L1GTReadoutRecordLabel")),
-  fL1GTmapLabel(iConfig.getUntrackedParameter<InputTag> ("hltL1GtObjectMap")),
-  fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag> ("HLTResultsLabel"))
+  fTrajectoryInputLabel(iConfig.getUntrackedParameter<InputTag>("trajectoryInputLabel", edm::InputTag("ctfRefitter"))),
+  fPixelClusterLabel(iConfig.getUntrackedParameter<InputTag>("pixelClusterLabel", edm::InputTag("siPixelClusters"))), 
+  fL1GTReadoutRecordLabel(iConfig.getUntrackedParameter<InputTag>("L1GTReadoutRecordLabel", edm::InputTag("gtDigis"))),
+  fL1GTmapLabel(iConfig.getUntrackedParameter<InputTag>("hltL1GtObjectMap", edm::InputTag("hltL1GtObjectMap"))),
+  fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag>("HLTResultsLabel", edm::InputTag("TriggerResults::HLT")))
 {
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
@@ -184,6 +188,15 @@ void PixelTree::beginJob(const edm::EventSetup& es) {
   fTree->Branch("hlte2",        &fHLTe2,        "hlte2/i");
   fTree->Branch("hlte3",        &fHLTe3,        "hlte3/i");
 
+  fTree->Branch("PvN",          &fPvN,          "PvN/I");
+  fTree->Branch("PvX",          fPvX,           "PvX[PvN]/F");
+  fTree->Branch("PvY",          fPvY,           "PvY[PvN]/F");
+  fTree->Branch("PvZ",          fPvZ,           "PvZ[PvN]/F");
+  fTree->Branch("PvChi2",       fPvChi2,        "PvChi2[PvN]/F");
+  fTree->Branch("PvNdof",       fPvNdof,        "PvNdof[PvN]/F");
+  fTree->Branch("PvIsFake",     fPvIsFake,      "PvIsFake[PvN]/I");
+
+
   fTree->Branch("MuN",          &fMuN,          "MuN/I");
   fTree->Branch("MuType",       fMuType,        "MuType[MuN]/I");
   fTree->Branch("MuTkI",        fMuTkI,         "MuTkI[MuN]/I");
@@ -216,6 +229,7 @@ void PixelTree::beginJob(const edm::EventSetup& es) {
   fTree->Branch("TkResYe",      fTkResYe,       "TkResYe[TkN][20]/F");  //FIXME: This should be variable?
   fTree->Branch("TkRes2X",      fTkRes2X,       "TkRes2X[TkN][20]/F");  //FIXME: This should be variable?
   fTree->Branch("TkRes2Xe",     fTkRes2Xe,      "TkRes2Xe[TkN][20]/F"); //FIXME: This should be variable?
+  fTree->Branch("TkClN",        fTkClN,         "TkClN[TkN]/I");
   fTree->Branch("TkClI",        fTkClI,         "TkClI[TkN][20]/I");    //FIXME: This should be variable?
   fTree->Branch("TkType",       fTkType,        "TkType[TkN]/I");
   fTree->Branch("TkMuI",        fTkMuI,         "TkMuI[TkN]/I");
@@ -245,12 +259,15 @@ void PixelTree::beginJob(const edm::EventSetup& es) {
   fTree->Branch("ClCharge",     fClCharge,      "ClCharge[ClN]/F");
   fTree->Branch("ClChargeCorr", fClChargeCorr,  "ClChargeCorr[ClN]/F");
   fTree->Branch("ClType",       fClType,        "ClType[ClN]/I");
-  fTree->Branch("ClTkI",        fClTkI,         "ClTkI[ClN]/I");
+  fTree->Branch("ClTkN",        fClTkN,         "ClTkN[ClN]/I");
+  fTree->Branch("ClTkI",        fClTkI,         "ClTkI[ClN][100]/I");
+  fTree->Branch("ClDgN",        fClDgN,         "ClDgN[ClN]/I");
   fTree->Branch("ClDgI",        fClDgI,         "ClDgI[ClN][100]/I");    //FIXME: This should be variable?
 
   fTree->Branch("DgN",          &fDgN,          "DgN/I");
   fTree->Branch("DgRow",        fDgRow,         "DgRow[DgN]/I");
   fTree->Branch("DgCol",        fDgCol,         "DgCol[DgN]/I");
+  fTree->Branch("DgDetid",      fDgDetId,       "DgDetId[DgN]/I");
   fTree->Branch("DgRoc",        fDgRoc,         "DgRoc[DgN]/I");
   fTree->Branch("DgRocR",       fDgRocR,        "DgRocR[DgN]/I");
   fTree->Branch("DgRocC",       fDgRocC,        "DgRocC[DgN]/I");
@@ -274,6 +291,8 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
   static int nevt(0); 
   static unsigned int oldRun(0); 
+
+  int nCl0(0), nCl1(0), nCl2(0), nTk(0); 
 
   if (oldRun == 0) {
     fL1Thist = new TH1D(Form("L1T_%d", fRun), Form("L1T names for run %d", fRun), 128, 0., 128.); fL1Thist->SetDirectory(fFile); 
@@ -501,6 +520,50 @@ void PixelTree::analyze(const edm::Event& iEvent,
   }
 
 
+  // ----------------------------------------------------------------------
+  // -- Primary vertices
+  // ----------------------------------------------------------------------
+  edm::Handle<reco::VertexCollection> hVertices;
+  bool goodVertices(false);
+  try{ 
+    iEvent.getByLabel(fPrimaryVertexCollectionLabel, hVertices);
+    goodVertices = true; 
+  } catch (cms::Exception &ex) {
+    cout << "No Vertex collection with label " << fPrimaryVertexCollectionLabel << endl;
+  }
+
+  if (goodVertices) {
+    for (reco::VertexCollection::const_iterator iv = hVertices->begin(); iv != hVertices->end(); ++iv) {
+      fPvX[fPvN] = iv->x();
+      fPvY[fPvN] = iv->y();
+      fPvZ[fPvN] = iv->z();
+
+      fPvXe[fPvN] = iv->xError();
+      fPvYe[fPvN] = iv->yError();
+      fPvZe[fPvN] = iv->zError();
+      
+      fPvChi2[fPvN] = iv->chi2(); 
+      fPvNdof[fPvN] = iv->ndof(); 
+
+      fPvIsFake[fPvN] = (iv->isFake()?1:0); 
+      
+      //       cout << "Recvtx "<< std::setw(3) << std::setfill(' ')<< fPvN
+      // 	   << "#trk " << std::setw(3) << iv->tracksSize() 
+      // 	   << " chi2 " << std::setw(4) << iv->chi2() 
+      // 	   << " ndof " << std::setw(3) << iv->ndof() << std::endl 
+      // 	   << " x "  << std::setw(8) <<std::fixed << std::setprecision(4) << iv->x() 
+      // 	   << " dx " << std::setw(8) << iv->xError()<< std::endl
+      // 	   << " y "  << std::setw(8) << iv->y() 
+      // 	   << " dy " << std::setw(8) << iv->yError()<< std::endl
+      // 	   << " z "  << std::setw(8) << iv->z() 
+      // 	   << " dz " << std::setw(8) << iv->zError()
+      // 	   << std::endl;
+      ++fPvN; 
+    }
+  }
+  
+
+
 
   // ----------------------------------------------------------------------
   // -- Fill muons
@@ -573,7 +636,8 @@ void PixelTree::analyze(const edm::Event& iEvent,
   }
   if (hTrackCollection.isValid()) {
     const std::vector<reco::Track> trackColl = *(hTrackCollection.product());
-    if (fVerbose > 1) cout << "--> Track collection size: " << trackColl.size() << endl;
+    nTk = trackColl.size();
+    if (fVerbose > 1) cout << "--> Track collection size: " << nTk << endl;
   } else {
     //cout << "--> No valid track collection" << endl;
   }
@@ -734,15 +798,30 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
 	  fClDetId[fClN]   = DBdetid;
 	  fClType[fClN]    = 0; 
-	  fClTkI[fClN]     = fTkN;  // ?? FIXME: A cluster can belong to more than one track
+
+	  int it(0); 
+	  while (fClTkI[fClN][it] > -1) {
+	    ++it;
+	  }
+	  fClTkI[fClN][it] = fTkN;
+	  fClTkN[fClN]    += 1;
+
+	  fClDgN[fClN]     = 0;
+
+	  if (iCluster < CLPERTRACKMAX) {
+	    fTkClI[fTkN][iCluster]  = fClN;
+	    fTkClN[fTkN] = iCluster+1;
+	  }  
 
 	  fTkAlpha[fTkN][iCluster] = alpha;
 	  fTkBeta[fTkN][iCluster] = beta;
 
+	  ++nCl0;
+
 	  ++fClN;
 	  ++iCluster;
 	  continue;
-	}
+	} // -- end missing hits
 
 	const TrackingRecHit *persistentHit = hit->hit();
 	if (persistentHit != 0) {
@@ -753,6 +832,117 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster> const& clust = (*pixhit).cluster();
 	if (clust.isNonnull()) {
 	  clusterSet.insert(*clust);
+
+	  align::LocalVector res = tsos.localPosition() - hit->localPosition();
+	  LocalError err1 = tsos.localError().positionError();
+	  LocalError err2 = hit->localPositionError();
+	  float errX = std::sqrt( err1.xx() + err2.xx() );
+	  float errY = std::sqrt( err1.yy() + err2.yy() );
+	  float resy(0.);
+	  double dZ = gROrZDirection.z() - gPModule.z();
+	  if (dZ > -999.) resy = res.y() * (dZ >=0.? +1 : -1) ;
+	  else resy = res.y();
+
+	  // 	  cout << "cluster at "
+	  // 	       << " detID = " << DBdetid
+	  // 	       << " charge = " << clust->charge()
+	  // 	       << " x/y = " << clust->x() << "/" << clust->y()
+	  // 	       << endl;
+	      
+	  // -- If this cluster is already in ntuple, do not add it, but finish filling Tk* information
+	  int alreadyAt(-1);
+	  for (int ic = 0; ic < fClN; ++ic) {
+	    if ((fClDetId[ic] == DBdetid) 
+		&& (static_cast<int>(clust->x()) == static_cast<int>(fClRow[ic]))
+		&& (static_cast<int>(clust->y()) == static_cast<int>(fClCol[ic]))
+		) {
+	      alreadyAt = ic; 
+	      break; 
+	    } 
+	  }
+
+	  // -- Some cluster insertions do not increase clusterSet.size(), but a printout shows that they have not been included previously??
+	  // 	  unsigned int temp = clusterSet.size();
+	  // 	  clusterSet.insert(*clust);
+	  // 	  if (clusterSet.size() == temp) {
+	  // 	    if (alreadyAt > -1) {
+	  // 	      cout << " correctly found duplicate for "
+	  // 		   << " detID = " << DBdetid
+	  // 		   << " charge = " << clust->charge()
+	  // 		   << " x/y = " << clust->x() << "/" << clust->y()
+	  // 		   << " already at position " << alreadyAt
+	  // 		   << endl;
+	  // 	    }  else { 
+	  // 	      cout << " DUPLICATE NOT FOUND for "
+	  // 		   << " detID = " << DBdetid
+	  // 		   << " charge = " << clust->charge()
+	  // 		   << " x/y = " << clust->x() << "/" << clust->y()
+	  // 		   << endl;
+	  // 	    }
+	  // 	  }
+
+
+	  if (alreadyAt > -1) {
+	    int it(0); 
+	    while (fClTkI[alreadyAt][it] > -1) {
+	      ++it;
+	    }
+	    fClTkI[alreadyAt][it] = fTkN;
+	    fClTkN[alreadyAt]    += 1;
+
+	    // 	    cout << "Skipping duplicate cluster: detID = " << DBdetid
+	    // 		 << " charge = " << clust->charge()
+	    // 		 << " x/y = " << clust->x() << "/" << clust->y()
+	    // 		 << " already at position " << alreadyAt
+	    // 		 << " CkTkI[" << it << "] = " << fTkN
+	    // 		 << endl;
+
+	    if (iCluster < CLPERTRACKMAX) {
+	      fTkResX[fTkN][iCluster]   = res.x();
+	      fTkResXe[fTkN][iCluster]  = errX;
+	      fTkRes2X[fTkN][iCluster]  = (res.x())*phiorientation;
+	      fTkRes2Xe[fTkN][iCluster] = errX;
+	      
+	      fTkResY[fTkN][iCluster]  = resy;
+	      fTkResYe[fTkN][iCluster]  = errY;
+	      
+	      fTkAlpha[fTkN][iCluster] = alpha;
+	      fTkBeta[fTkN][iCluster] = beta;
+	      fTkClN[fTkN] = iCluster+1;
+	      fTkClI[fTkN][iCluster] = alreadyAt;
+	    } else {
+	      fTkAlpha[fTkN][CLPERTRACKMAX-1] = -98.;
+	      fTkBeta[fTkN][CLPERTRACKMAX-1]  = -98.;
+	      fTkClN[fTkN] = CLPERTRACKMAX-1;
+	      fTkClI[fTkN][CLPERTRACKMAX-1]   = -98;
+	    }
+	    
+	    ++iCluster;
+	    continue; 
+	  }
+
+
+	  if (iCluster < CLPERTRACKMAX) {
+	    fTkResX[fTkN][iCluster]   = res.x();
+	    fTkResXe[fTkN][iCluster]  = errX;
+	    fTkRes2X[fTkN][iCluster]  = (res.x())*phiorientation;
+	    fTkRes2Xe[fTkN][iCluster] = errX;
+
+	    fTkResY[fTkN][iCluster]  = resy;
+	    fTkResYe[fTkN][iCluster]  = errY;
+	    
+	    fTkAlpha[fTkN][iCluster] = alpha;
+	    fTkBeta[fTkN][iCluster] = beta;
+	    fTkClN[fTkN] = iCluster+1;
+	    fTkClI[fTkN][iCluster] = fClN;
+	  } else {
+	    fTkAlpha[fTkN][CLPERTRACKMAX-1] = -98.;
+	    fTkBeta[fTkN][CLPERTRACKMAX-1]  = -98.;
+	    fTkClN[fTkN] = CLPERTRACKMAX-1;
+	    fTkClI[fTkN][CLPERTRACKMAX-1]   = -98;
+	  }
+
+
 
 	  float clCharge = (clust->charge())/1000.0; // convert electrons to kilo-electrons
 	  float clChargeCorr = clust->charge() * sqrt( 1.0 / ( 1.0/pow( tan(alpha), 2 ) + 
@@ -808,36 +998,14 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	  fClChargeCorr[fClN] = clChargeCorr;
 
 	  fClType[fClN]    = 1; 
-	  fClTkI[fClN]     = fTkN;  // ?? FIXME: A cluster can belong to more than one track
-	  
-	  if (iCluster < CLPERTRACKMAX) {
-	    align::LocalVector res = tsos.localPosition() - hit->localPosition();
-	    LocalError err1 = tsos.localError().positionError();
-	    LocalError err2 = hit->localPositionError();
-	    float errX = std::sqrt( err1.xx() + err2.xx() );
-	    float errY = std::sqrt( err1.yy() + err2.yy() );
 
-	    fTkResX[fTkN][iCluster]   = res.x();
-	    fTkResXe[fTkN][iCluster]  = errX;
-	    fTkRes2X[fTkN][iCluster]  = (res.x())*phiorientation;
-	    fTkRes2Xe[fTkN][iCluster] = errX;
-
-	    float resy(0.);
-	    double dZ = gROrZDirection.z() - gPModule.z();
-	    if (dZ > -999.) resy = res.y() * (dZ >=0.? +1 : -1) ;
-	    else resy = res.y();
-	    fTkResY[fTkN][iCluster]  = resy;
-	    fTkResYe[fTkN][iCluster]  = errY;
-	    
-	    fTkAlpha[fTkN][iCluster] = alpha;
-	    fTkBeta[fTkN][iCluster] = beta;
-	    fTkClI[fTkN][iCluster] = fClN;
-	  } else {
-	    fTkAlpha[fTkN][CLPERTRACKMAX-1] = -98.;
-	    fTkBeta[fTkN][CLPERTRACKMAX-1]  = -98.;
-	    fTkClI[fTkN][CLPERTRACKMAX-1]   = -98;
+	  int it(0); 
+	  while (fClTkI[fClN][it] > -1) {
+	    ++it;
 	  }
-
+	  fClTkI[fClN][it] = fTkN;
+	  fClTkN[fClN]    += 1;
+	  
 	  // -- Get digis of this cluster
 	  const std::vector<SiPixelCluster::Pixel>& pixvector = clust->pixels();
 	  //	  cout << "  Found " << pixvector.size() << " pixels for this cluster " << endl;
@@ -846,6 +1014,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	    
 	    fDgRow[fDgN]    = holdpix.x;
 	    fDgCol[fDgN]    = holdpix.y;
+	    fDgDetId[fDgN]  = DBdetid;
 	    onlineRocColRow(DBdetid, fDgRow[fDgN], fDgCol[fDgN], fDgRoc[fDgN], fDgRocC[fDgN], fDgRocR[fDgN]);
 	    fDgAdc[fDgN]    = -99.;
 	    fDgCharge[fDgN] = holdpix.adc/1000.;
@@ -864,13 +1033,17 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	    // -- fill pointer to this digi in cluster digi index array
 	    if ((signed)i < DGPERCLMAX) {
 	      fClDgI[fClN][i] = fDgN;
+	      fClDgN[fClN] += 1;
 	    } else {
 	      fClDgI[fClN][DGPERCLMAX-1] = -98;
+	      fClDgN[fClN] = 99;
 	    }
 
 	    ++fDgN;
 
 	  }
+
+	  ++nCl1;
 
 	  ++fClN;
 	  ++iCluster;
@@ -895,9 +1068,23 @@ void PixelTree::analyze(const edm::Event& iEvent,
       if (isearch != clustColl.end()) {  // Not an empty iterator
 	edmNew::DetSet<SiPixelCluster>::const_iterator  di;
 	for (di=isearch->begin(); di!=isearch->end(); di++) {
-	  unsigned int temp = clusterSet.size();
+	  // unsigned int temp = clusterSet.size();
 	  clusterSet.insert(*di);
-	  if (clusterSet.size() > temp) {
+	  // if (clusterSet.size() > temp) {
+
+	  // -- If this cluster is already in ntuple, do not add it, but finish filling Tk* information
+	  int alreadyAt(-1);
+	  for (int ic = 0; ic < fClN; ++ic) {
+	    if ((static_cast<int>(detId) == fClDetId[ic]) 
+		&& (static_cast<int>(di->x()) == static_cast<int>(fClRow[ic]))
+		&& (static_cast<int>(di->y()) == static_cast<int>(fClCol[ic]))
+		) {
+	      alreadyAt = ic; 
+	      break; 
+	    } 
+	  }
+
+	  if (alreadyAt == -1) {
   
 	    const TrackerGeometry& theTracker(*theTrackerGeometry);
 	    const PixelGeomDetUnit* theGeomDet = dynamic_cast<const PixelGeomDetUnit*> (theTracker.idToDet(detId) );
@@ -981,6 +1168,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	      
 	      fDgRow[fDgN]    = holdpix.x;
 	      fDgCol[fDgN]    = holdpix.y;
+	      fDgDetId[fDgN]  = detId;
 	      onlineRocColRow(detId, fDgRow[fDgN], fDgCol[fDgN], fDgRoc[fDgN], fDgRocC[fDgN], fDgRocR[fDgN]);
 	      fDgAdc[fDgN]    = -99.;
 	      fDgCharge[fDgN] = holdpix.adc/1000.;
@@ -999,14 +1187,17 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	      // -- fill pointer to this digi in cluster digi index array
 	      if ((signed)i < DGPERCLMAX) { 
 		fClDgI[fClN][i] = fDgN;
+		fClDgN[fClN] += 1;
 	      } else {
 		fClDgI[fClN][DGPERCLMAX-1] = -98;
+		fClDgN[fClN] = 99;
 	      }
 	      
 	      ++fDgN;
 
 	    }
 
+	    ++nCl2;
 	    ++fClN;
 
 	  }
@@ -1016,12 +1207,17 @@ void PixelTree::analyze(const edm::Event& iEvent,
   }
 
   // -- That's it
-  if (fVerbose > 2) {
-    cout << nevt << "(" << fRun << "/" << fEvent << ")" 
-	 << " lumi section: " << fLumiBlock 
-	 << " orbit: " << fOrbit << " BX: " << fBX
-	 << " time: " << fTimeHi << "/" << fTimeLo
-	 << " TkN: " << fTkN << " ClN: " << fClN << " DgN: " << fDgN 
+  if (fVerbose > 0) {
+    cout << nevt << " (" << fRun << "/" << fEvent << ")" 
+	 << " lumiSec: " << fLumiBlock 
+	 << " orb: " << fOrbit << " BX: " << fBX
+        // << " time: " << fTimeHi << "/" << fTimeLo
+	 << " TkN: " << fTkN 
+	 << " reco: " << nTk
+	 << " ClN: " << fClN 
+	 << "(0: " << nCl0 << "/1: " << nCl1 << "/2: " << nCl2 << "/1+2: " << nCl1+nCl2 << ")"
+	 << " reco: " << clusterSet.size()  
+	 << " DgN: " << fDgN 
 	 << " FEDs: " << nbpixfeds << "/" << nfpixfeds
 	 << endl;
   }
@@ -1039,6 +1235,12 @@ void PixelTree::analyze(const edm::Event& iEvent,
 // ----------------------------------------------------------------------
 void PixelTree::init() {
 
+  fPvN = 0; 
+  for (int i = 0; i < PVMAX; ++i) {
+    fPvX[i] = fPvY[i] = fPvZ[i] =  fPvXe[i] = fPvYe[i] = fPvZe[i] = fPvChi2[i] = -9999.;
+    fPvNdof[i] = fPvIsFake[fPvN] = -9999; 
+  }
+
   fMuN = 0; 
   fMuTmean = -9999.;
   for (int i = 0; i < MUMAX; ++i) {
@@ -1050,11 +1252,12 @@ void PixelTree::init() {
   fTkN = 0; 
   for (int i = 0; i < TRACKMAX; ++i) {
     fTkCharge[i] = -9999; 
-    fTkChi2[i] = fTkNdof[i] = -9999.;
-    fTkPt[i] = fTkTheta[i] = fTkPhi[i] = -9999.;
-    fTkD0[i] = fTkDz[i] = -9999.;
-    fTkVx[i] = fTkVy[i] = fTkVz[i] = -9999.;
-    fTkType[i] = fTkMuI[i] = -9999;
+    fTkChi2[i]   = fTkNdof[i] = -9999.;
+    fTkPt[i]     = fTkTheta[i] = fTkPhi[i] = -9999.;
+    fTkD0[i]     = fTkDz[i] = -9999.;
+    fTkVx[i]     = fTkVy[i] = fTkVz[i] = -9999.;
+    fTkType[i]   = fTkMuI[i] = -9999;
+    fTkClN[i]    = 0;
     for (int j = 0; j < CLPERTRACKMAX; ++j) {
       fTkClI[i][j] = -9999;
       fTkAlpha[i][j] = fTkBeta[i][j] = -9999.;
@@ -1072,10 +1275,15 @@ void PixelTree::init() {
     fClLxe[i] = fClLye[i] = -9999.;
     fClGx[i] = fClGy[i] = fClGz[i] = -9999.;
     fClCharge[i] = fClChargeCorr[i] = -9999.;
-    fClType[i] = fClTkI[i] = -9999;
+    fClType[i] = -9999;
     for (int j = 0; j < DGPERCLMAX; ++j) {
       fClDgI[i][j] = -9999;
     }
+    for (int j = 0; j < TKPERCLMAX; ++j) {
+      fClTkI[i][j] = -9999;
+    }
+    fClDgN[i] = 0;
+    fClTkN[i] = 0;
 
     fClLayer[i] = fClLadder[i] = fClModule[i] = fClFlipped[i] = -9999;
     fClDisk[i] = fClBlade[i] = fClPanel[i] = fClPlaquette[i] = -9999;
