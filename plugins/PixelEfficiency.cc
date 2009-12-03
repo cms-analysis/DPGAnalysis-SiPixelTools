@@ -120,6 +120,8 @@ private:
   double timeErr_MuonCut_;
   double timeNdof_MuonCut_;
   double nSigma_EdgeCut_;
+  double minHits_TrackCut_;
+  string quality_TrackCut_;
 
   TH1F*  histo;
   TH1F*  histLayer1;
@@ -249,6 +251,18 @@ private:
 
   TH1F*  validVsPT;
   TH1F*  missingVsPT;
+  TH1F*  validVsPT_lowpt;
+  TH1F*  missingVsPT_lowpt;
+  
+  TH1F*  validVsEta;
+  TH1F*  missingVsEta;
+  TH1F*  validVsPhi;
+  TH1F*  missingVsPhi;
+  
+  TH1F*  validPerMinHitsOnTrackBPix;
+  TH1F*  validPerMinHitsOnTrackFPix;
+  TH1F*  missingPerMinHitsOnTrackBPix;
+  TH1F*  missingPerMinHitsOnTrackFPix;
   //
   TH1F*  checkoutValidityFlag;
   TH1F*  checkoutTraj;
@@ -360,10 +374,12 @@ PixelEfficiency::PixelEfficiency(const edm::ParameterSet& iConfig) :
   window_MuonCut_( iConfig.getUntrackedParameter<double>("window_MuonCut")),
   timeErr_MuonCut_( iConfig.getUntrackedParameter<double>("timeErr_MuonCut")),
   timeNdof_MuonCut_( iConfig.getUntrackedParameter<double>("timeNdof_MuonCut")),
-  nSigma_EdgeCut_( iConfig.getUntrackedParameter<double>("nSigma_EdgeCut"))
+  nSigma_EdgeCut_( iConfig.getUntrackedParameter<double>("nSigma_EdgeCut")),
+  minHits_TrackCut_( iConfig.getUntrackedParameter<double>("minHits_TrackCut")),
+  quality_TrackCut_( iConfig.getUntrackedParameter<string>("quality_TrackCut"))
 {   
  //now do what ever initialization is needed
- std::cout<<"debug constructor"<<std::endl;
+ if(DEBUG) std::cout<<"Starting constructor"<<std::endl;
  listOfCuts_ = iConfig.getUntrackedParameter<edm::ParameterSet>("ListOfCuts");
  BadModuleList_ = iConfig.getUntrackedParameter<Parameters>("BadModuleList");
 
@@ -504,8 +520,9 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     try{iEvent.getByLabel("muons1Leg", MuonHandle);}
     catch(...){std::cout<<"Clusters were not retrieved successfully ..."<<endl;return;}
   }
-  //******** MUON CUT ************
   
+  
+  //******** MUON CUT ************
   std::map<double,bool> muonTimingMap;
   bool hasGoodTiming=false;
   int nmuon = 0;
@@ -546,7 +563,9 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
      hasGoodTiming=true;
   if(runNumber>=68094 && time<peak+9+muonwindow && time>peak+9-muonwindow && timerr<timeErr_MuonCut_ && timendof>timeNdof_MuonCut_)
     hasGoodTiming=true;
-   
+
+
+  //********  STARTING TO LOOP OVER TRACKS
   TrajectoryStateCombiner tsoscomb;
   for(TrajTrackAssociationCollection::const_iterator it = trajTrackCollectionHandle->begin(),
       itEnd = trajTrackCollectionHandle->end(); it!=itEnd;++it){
@@ -558,13 +577,15 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     float chiSquare = traj.chiSquared();
     float chiSquareNdf;
     chiSquareNdf = traj.chiSquared()/traj.ndof();
+    float eta = track.eta();
+    float phi = track.phi();
 
     std::vector<TrajectoryMeasurement> tmColl = traj.measurements();
     
     float missingInTrack=0.;
     float validInTrack=0.;
        
-    consistencyCheckTraj->Fill(0);//number of total trajectories
+    
 
 //*************
 
@@ -609,13 +630,23 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       if(testSubDetID == kFPIX && (*testhit).isValid())                             isInEndCap =true;
     }
     
-        
+    consistencyCheckTraj->Fill(0);//number of total trajectories
     if(isInTracker) consistencyCheckTraj->Fill(1);
-    if(isInPixel) consistencyCheckTraj->Fill(2);
-    if(isInBarrel) consistencyCheckTraj->Fill(3);
-    if(isInEndCap) consistencyCheckTraj->Fill(4);  
-      
-     
+    if(isInPixel)   consistencyCheckTraj->Fill(2);
+    if(isInBarrel)  consistencyCheckTraj->Fill(3);
+    if(isInEndCap)  consistencyCheckTraj->Fill(4);  
+        
+    //******** TRACK CUT **********
+    bool isTrackGood = true;
+    if(track.recHitsSize()<minHits_TrackCut_)
+      isTrackGood = false;
+    //!!!!!!!!!!!!!   NOT IMPLEMENTED YET
+    //if(quality_TrackCut!="none")
+    //  isTrackGood = false;
+    
+    if( (!isTrackGood) && listOfCuts_.getParameter<bool>("track_cut"))
+      continue;
+    
     //********  IN PIXEL VOLUME *********  
     if(track.d0()<9 && fabs(track.dz())<30){
     
@@ -641,7 +672,6 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       nMuonTimeVSRunNumber->Fill(testLabel,1);
       muonTimeErrorVSRunNumber->Fill(testLabel,timerr);
       nMuonTimeErrorVSRunNumber->Fill(testLabel,1);
-    
       muonTimeErrorDistri->Fill(timerr);
     }
     
@@ -912,15 +942,7 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	}
       }
       
-      //********** Fill efficiency VS pT for all cuts but pTcut ************
-      // do you want with or without cuts earlier...
-      //if( isTelescopeGood && isNotInMiddle && hasGoodTiming )
-      {
-        if( (*testhit).isValid() )
-	  validVsPT->Fill(PT);
-        if( (*testhit).getType()==TrackingRecHit::missing )
-	  missingVsPT->Fill(PT);
-      }
+      
 
   	//************************ Fill the HISTOS for the analysis on the Selection Cuts Quality  *****************************
         /*legend:
@@ -1122,7 +1144,39 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	   if(type==int(kBPIX)) hitsPassingCutsValBPix->Fill(9.5);
 	   if(type==int(kFPIX)) hitsPassingCutsValFPix->Fill(9.5);
 	}
-	 
+	 //********** Fill efficiency VS pT, eta, phi ************
+      
+        if( (*testhit).isValid() ){
+	  validVsPT->Fill(PT);
+	  validVsPT_lowpt->Fill(PT);
+	  validVsEta->Fill(eta);
+	  validVsPhi->Fill(phi);
+	}
+        if( (*testhit).getType()==TrackingRecHit::missing ){
+	  missingVsPT->Fill(PT);
+	  missingVsPT_lowpt->Fill(PT);
+	  missingVsEta->Fill(eta);
+	  missingVsPhi->Fill(phi);
+	}
+	
+	
+	for(int nHits = 1;nHits<=12;++nHits){
+	  if(track.recHitsSize()>=nHits){
+            if((*testhit).isValid()){
+	      if(type==int(kBPIX))
+	        validPerMinHitsOnTrackBPix->Fill(nHits);
+	      if(type==int(kFPIX))
+	        validPerMinHitsOnTrackFPix->Fill(nHits);
+	    }
+            if( (*testhit).getType()==TrackingRecHit::missing ){
+	      if(type==int(kBPIX))
+	        missingPerMinHitsOnTrackBPix->Fill(nHits);
+	      if(type==int(kFPIX))
+	        missingPerMinHitsOnTrackFPix->Fill(nHits);
+	    }
+	  }
+	}
+	
 	//cout<<"tunning2 VAL"<<tunningVal->GetBinContent(11,11)<<endl;
 	//cout<<"hits VAL"<<hitsPassingCutsValFPix->GetBinContent(9)+hitsPassingCutsValBPix->GetBinContent(9)<<endl;
 	
@@ -1155,7 +1209,7 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	 //type of invalid recHiT
 	
 	 //let's observe better invalid not missing recHits
-         int specificInvalid = 0.5;  //something else than inactive or missing or bad
+         double specificInvalid = 0.5;  //something else than inactive or missing or bad
 	 if ( ! ((*testhit).isValid()) ){
 	   if ( (*testhit).getType()==TrackingRecHit::inactive )     specificInvalid = 1.5;
 	   if ( (*testhit).getType()==TrackingRecHit::bad )          specificInvalid = 2.5;
@@ -1796,8 +1850,19 @@ PixelEfficiency::beginJob(const edm::EventSetup& iSetup)
      
  validVsPT = new TH1F("validVsPT","validVsPT",100,0.,50.);
  missingVsPT = new TH1F("missingVsPT","missingVsPT",100,0.,50.);
+ validVsPT_lowpt = new TH1F("validVsPT_lowpt","validVsPT_lowpt",200,0.,5.);
+ missingVsPT_lowpt = new TH1F("missingVsPT_lowpt","missingVsPT_lowpt",200,0.,5.);
+      
+ validVsEta = new TH1F("validVsEta","validVsEta",50,-5.,5.);
+ missingVsEta = new TH1F("missingVsEta","missingVsEta",50,-5.,5.);
+ validVsPhi = new TH1F("validVsPhi","validVsPhi",64,-3.2,3.2);
+ missingVsPhi = new TH1F("missingVsPhi","missingVsPhi",64,-3.2,3.2);
 
- //
+ validPerMinHitsOnTrackBPix   = new TH1F("validPerMinHitsOnTrackBPix","validPerMinHitsOnTrackBPix",12,1,13);
+ validPerMinHitsOnTrackFPix   = new TH1F("validPerMinHitsOnTrackFPix","validPerMinHitsOnTrackFPix",12,1,13);
+ missingPerMinHitsOnTrackBPix = new TH1F("missingPerMinHitsOnTrackBPix","missingPerMinHitsOnTrackBPix",12,1,13);
+ missingPerMinHitsOnTrackFPix = new TH1F("missingPerMinHitsOnTrackFPix","missingPerMinHitsOnTrackFPix",12,1,13);
+ 
  checkoutValidityFlag = new TH1F("checkoutValidityFlag","checkoutValidityFlag", 4, 0,4);
  checkoutTraj = new TH1F("checkoutTraj","checkoutTraj",10,0,10);
  //
@@ -1985,6 +2050,13 @@ PixelEfficiency::endJob() {
      
   validVsPT->Write();
   missingVsPT->Write();
+  validVsPT_lowpt->Write();
+  missingVsPT_lowpt->Write();
+  
+  validVsEta->Write();
+  missingVsEta->Write();
+  validVsPhi->Write();
+  missingVsPhi->Write();
 
   validAlphaLocalXBig->Write();
   missingAlphaLocalXBig->Write();
@@ -2018,8 +2090,11 @@ PixelEfficiency::endJob() {
   validVSMuonTimeNdof->Write();
   missingVSMuonTimeNdof->Write();
   
+  validPerMinHitsOnTrackBPix->Write();
+  validPerMinHitsOnTrackFPix->Write();
+  missingPerMinHitsOnTrackBPix->Write();
+  missingPerMinHitsOnTrackFPix->Write();
   
-  //
   checkoutValidityFlag->Write();
   checkoutTraj->Write();
   //

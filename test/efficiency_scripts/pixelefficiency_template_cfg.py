@@ -20,8 +20,8 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")#with MF
 #process.load("Configuration.GlobalRuns.ForceZeroTeslaField_cff")#0T
 
 # reconstruction sequence for Cosmics
-process.load("Configuration.StandardSequences.RawToDigi_Data_cff")
-process.load("Configuration.StandardSequences.ReconstructionCosmics_cff")
+#process.load("Configuration.StandardSequences.RawToDigi_Data_cff")
+#process.load("Configuration.StandardSequences.ReconstructionCosmics_cff")
 #process.MeasurementTracker.pixelClusterProducer = cms.string('')
 
 
@@ -40,8 +40,9 @@ process.GlobalTag.connect = "frontier://FrontierProd/CMS_COND_31X_GLOBALTAG" # F
 #process.GlobalTag.globaltag = "CRAFT09_R_V3::All"
 #process.GlobalTag.globaltag = "GR09_31X_V6P::All"
 #process.GlobalTag.globaltag = "CRAFT0831X_V1::All"
-process.GlobalTag.globaltag = "CRAFT09_R_V4::All"
+#process.GlobalTag.globaltag = "CRAFT09_R_V4::All"
 #process.GlobalTag.globaltag = "CRAFT08_R_V1::All"
+process.GlobalTag.globaltag = "GR09_P_V7::All"
 
 #process.test = cms.ESSource("PoolDBESSource",
 #                                        DBParameters = cms.PSet(
@@ -101,9 +102,9 @@ process.checkCosmicTF = cms.EDAnalyzer('PixelEfficiency',
 		
 		skip0TRuns           = cms.untracked.bool(False),#for CRAFT08 only
 		keep0TRuns           = cms.untracked.bool(False),
-		keep38TRuns          = cms.untracked.bool(True),
-		keepOnlyOneTrackEvts = cms.untracked.bool(True),
-		skipBadModules       = cms.untracked.bool(True),
+		keep38TRuns          = cms.untracked.bool(False),
+		keepOnlyOneTrackEvts = cms.untracked.bool(False),
+		skipBadModules       = cms.untracked.bool(False),
   		
 		########### MUON CUT ###############
 		#peak for muon cut (-8 CRAFT08 ; 10 MC08 ; -20=-11-9 CRAFT09)
@@ -119,12 +120,20 @@ process.checkCosmicTF = cms.EDAnalyzer('PixelEfficiency',
 		#nSigma for edge cut (1 CRAFT08 ; 1 MC08 ; 1 CRAFT09)
 		nSigma_EdgeCut = cms.untracked.double(1.),
 		
+		########### TACK CUT ###############
+		#min number of hits on the track
+		minHits_TrackCut = cms.untracked.double(6),
+		#quality of the track: none (ie no quality cut), loose,good,tight
+		quality_TrackCut = cms.untracked.string('none'),
+		
+		
 		ListOfCuts = cms.untracked.PSet(
 		  pT_cut        = cms.bool(False),
 		  edge_cut      = cms.bool(False),
 		  telescope_cut = cms.bool(False),
 		  muon_cut      = cms.bool(False),
-		  loose_cut     = cms.bool(False)
+		  loose_cut     = cms.bool(False),
+		  track_cut     = cms.bool(False)
 		),
 		
 
@@ -180,7 +189,10 @@ process.checkCosmicTF = cms.EDAnalyzer('PixelEfficiency',
 
 	)		
 )		
-		
+process.load("DPGAnalysis.SiPixelTools.EventFilter_forTimingRun_cfi")
+process.timingRunFilter.maxOrbit = 99999999999
+process.timingRunFilter.minOrbit = 21600000
+	
 #list from /CMSSW/CondTools/SiPixel/test/SiPixelBadModuleByHandBuilder_cfg.py    
 # new list from same file under CMSSW
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
@@ -211,11 +223,13 @@ process.MessageLogger.cerr.threshold = 'INFO'#32X version
 #process.trackReconstruction = cms.Sequence(process.trackerReco*process.trackerLocalReco*process.offlineBeamSpot*process.recopixelvertexing*process.tracksP5) 
 
 #process.p = cms.Path(process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
+process.p = cms.Path(process.timingRunFilter*process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
+#process.p = cms.Path(process.RawToDigi*process.reconstructionCosmics*process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
 #process.p = cms.Path(process.RawToDigi*process.reconstructionCosmics*process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
 #process.p = cms.Path(process.RawToDigi*process.reconstructionCosmics*process.fedInRunFilter*process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
 #process.p = cms.Path(process.trackReconstruction*process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
 #process.p = cms.Path(process.trackerCosmics*process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
-process.p = cms.Path(process.fedInRunFilter*process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
+#process.p = cms.Path(process.fedInRunFilter*process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
 #process.p = cms.Path(process.fedInRunFilter*process.MuonTOFFilter_trackQuality*process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
 
     
