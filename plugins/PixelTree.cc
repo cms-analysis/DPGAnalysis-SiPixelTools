@@ -21,6 +21,7 @@
 
 #include "PixelTree.h"
 
+#include "CondFormats/Alignment/interface/Definitions.h"
 #include "CondFormats/RunInfo/interface/RunSummary.h"
 #include "CondFormats/RunInfo/interface/RunInfo.h"
 #include "CondFormats/DataRecord/interface/RunSummaryRcd.h"
