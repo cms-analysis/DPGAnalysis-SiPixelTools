@@ -17,6 +17,7 @@ public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
 
+
    // Declaration of leaf types
    Int_t           run;
    Int_t           lumiblock;
@@ -29,6 +30,9 @@ public :
    UInt_t          fed1;
    UInt_t          fed2;
    UInt_t          l1t;
+   UInt_t          l1ta[4];
+   UInt_t          l1tt[4];
+   UInt_t          hlta[4];
    UInt_t          l1ta0;
    UInt_t          l1ta1;
    UInt_t          l1ta2;
@@ -47,90 +51,94 @@ public :
    UInt_t          hlte2;
    UInt_t          hlte3;
    Int_t           PvN;
-   Float_t         PvX[100];   //[PvN]
-   Float_t         PvY[100];   //[PvN]
-   Float_t         PvZ[100];   //[PvN]
-   Float_t         PvChi2[100];   //[PvN]
-   Float_t         PvNdof[100];   //[PvN]
-   Int_t           PvIsFake[100];   //[PvN]
+   Float_t         PvX[9441];   //[PvN]
+   Float_t         PvY[9441];   //[PvN]
+   Float_t         PvZ[9441];   //[PvN]
+   Float_t         PvXe[9441];   //[PvN]
+   Float_t         PvYe[9441];   //[PvN]
+   Float_t         PvZe[9441];   //[PvN]
+   Float_t         PvChi2[9441];   //[PvN]
+   Float_t         PvNdof[9441];   //[PvN]
+   Int_t           PvIsFake[9441];   //[PvN]
    Int_t           MuN;
-   Int_t           MuType[100];   //[MuN]
-   Int_t           MuTkI[100];   //[MuN]
-   Float_t         MuPt[100];   //[MuN]
-   Float_t         MuTheta[100];   //[MuN]
-   Float_t         MuPhi[100];   //[MuN]
-   Float_t         MuT[100];   //[MuN]
-   Float_t         MuTcorr[100];   //[MuN]
-   Float_t         MuTerr[100];   //[MuN]
+   Int_t           MuType[1];   //[MuN]
+   Int_t           MuTkI[1];   //[MuN]
+   Float_t         MuPt[1];   //[MuN]
+   Float_t         MuTheta[1];   //[MuN]
+   Float_t         MuPhi[1];   //[MuN]
+   Float_t         MuT[1];   //[MuN]
+   Float_t         MuTcorr[1];   //[MuN]
+   Float_t         MuTerr[1];   //[MuN]
    Float_t         MuTmean;
    Int_t           TkN;
-   Int_t           TkCharge[10000];   //[TkN]
-   Float_t         TkChi2[10000];   //[TkN]
-   Float_t         TkNdof[10000];   //[TkN]
-   Float_t         TkPt[10000];   //[TkN]
-   Float_t         TkTheta[10000];   //[TkN]
-   Float_t         TkPhi[10000];   //[TkN]
-   Float_t         TkD0[10000];   //[TkN]
-   Float_t         TkDz[10000];   //[TkN]
-   Float_t         TkVx[10000];   //[TkN]
-   Float_t         TkVy[10000];   //[TkN]
-   Float_t         TkVz[10000];   //[TkN]
-   Float_t         TkAlpha[10000][20];   //[TkN]
-   Float_t         TkBeta[10000][20];   //[TkN]
-   Float_t         TkResX[10000][20];   //[TkN]
-   Float_t         TkResY[10000][20];   //[TkN]
-   Float_t         TkResXe[10000][20];   //[TkN]
-   Float_t         TkResYe[10000][20];   //[TkN]
-   Float_t         TkRes2X[10000][20];   //[TkN]
-   Float_t         TkRes2Xe[10000][20];   //[TkN]
-   Int_t           TkClN[10000];   //[TkN]
-   Int_t           TkClI[10000][20];   //[TkN]
-   Int_t           TkType[10000];   //[TkN]
-   Int_t           TkMuI[10000];   //[TkN]
+   Int_t           TkCharge[172];   //[TkN]
+   Float_t         TkChi2[172];   //[TkN]
+   Float_t         TkNdof[172];   //[TkN]
+   Float_t         TkPt[172];   //[TkN]
+   Float_t         TkTheta[172];   //[TkN]
+   Float_t         TkEta[172];   //[TkN]
+   Float_t         TkPhi[172];   //[TkN]
+   Float_t         TkD0[172];   //[TkN]
+   Float_t         TkDz[172];   //[TkN]
+   Float_t         TkVx[172];   //[TkN]
+   Float_t         TkVy[172];   //[TkN]
+   Float_t         TkVz[172];   //[TkN]
+   Float_t         TkAlpha[172][20];   //[TkN]
+   Float_t         TkBeta[172][20];   //[TkN]
+   Float_t         TkResX[172][20];   //[TkN]
+   Float_t         TkResY[172][20];   //[TkN]
+   Float_t         TkResXe[172][20];   //[TkN]
+   Float_t         TkResYe[172][20];   //[TkN]
+   Float_t         TkRes2X[172][20];   //[TkN]
+   Float_t         TkRes2Xe[172][20];   //[TkN]
+   Int_t           TkClN[172];   //[TkN]
+   Int_t           TkClI[172][20];   //[TkN]
+   Int_t           TkType[172];   //[TkN]
+   Int_t           TkMuI[172];   //[TkN]
    Int_t           ClN;
-   Float_t         ClRow[100000];   //[ClN]
-   Float_t         ClCol[100000];   //[ClN]
-   Float_t         ClLx[100000];   //[ClN]
-   Float_t         ClLxE[100000];   //[ClN]
-   Float_t         ClLy[100000];   //[ClN]
-   Float_t         ClLyE[100000];   //[ClN]
-   Float_t         ClGx[100000];   //[ClN]
-   Float_t         ClGy[100000];   //[ClN]
-   Float_t         ClGz[100000];   //[ClN]
-   Int_t           ClSize[100000];   //[ClN]
-   Int_t           ClSizeX[100000];   //[ClN]
-   Int_t           ClSizeY[100000];   //[ClN]
-   Int_t           ClFlipped[100000];   //[ClN]
-   Int_t           ClLayer[100000];   //[ClN]
-   Int_t           ClLadder[100000];   //[ClN]
-   Int_t           ClModule[100000];   //[ClN]
-   Int_t           ClDisk[100000];   //[ClN]
-   Int_t           ClBlade[100000];   //[ClN]
-   Int_t           ClPanel[100000];   //[ClN]
-   Int_t           ClPlaquette[100000];   //[ClN]
-   Int_t           ClDetId[100000];   //[ClN]
-   Float_t         ClCharge[100000];   //[ClN]
-   Float_t         ClChargeCorr[100000];   //[ClN]
-   Int_t           ClType[100000];   //[ClN]
-   Int_t           ClTkN[100000];   //[ClN]
-   Int_t           ClTkI[100000][100];   //[ClN]
-   Int_t           ClDgN[100000];   //[ClN]
-   Int_t           ClDgI[100000][100];   //[ClN]
+   Float_t         ClRow[1274];   //[ClN]
+   Float_t         ClCol[1274];   //[ClN]
+   Float_t         ClLx[1274];   //[ClN]
+   Float_t         ClLxE[1274];   //[ClN]
+   Float_t         ClLy[1274];   //[ClN]
+   Float_t         ClLyE[1274];   //[ClN]
+   Float_t         ClGx[1274];   //[ClN]
+   Float_t         ClGy[1274];   //[ClN]
+   Float_t         ClGz[1274];   //[ClN]
+   Int_t           ClSize[1274];   //[ClN]
+   Int_t           ClSizeX[1274];   //[ClN]
+   Int_t           ClSizeY[1274];   //[ClN]
+   Int_t           ClFlipped[1274];   //[ClN]
+   Int_t           ClLayer[1274];   //[ClN]
+   Int_t           ClLadder[1274];   //[ClN]
+   Int_t           ClModule[1274];   //[ClN]
+   Int_t           ClDisk[1274];   //[ClN]
+   Int_t           ClBlade[1274];   //[ClN]
+   Int_t           ClPanel[1274];   //[ClN]
+   Int_t           ClPlaquette[1274];   //[ClN]
+   Int_t           ClDetId[1274];   //[ClN]
+   Float_t         ClCharge[1274];   //[ClN]
+   Float_t         ClChargeCorr[1274];   //[ClN]
+   Int_t           ClType[1274];   //[ClN]
+   Int_t           ClTkN[1274];   //[ClN]
+   Int_t           ClTkI[1274][100];   //[ClN]
+   Int_t           ClDgN[1274];   //[ClN]
+   Int_t           ClDgI[1274][100];   //[ClN]
    Int_t           DgN;
-   Int_t           DgRow[1000000];   //[DgN]
-   Int_t           DgCol[1000000];   //[DgN]
-   Int_t           DgDetid[1000000];   //[DgN]
-   Int_t           DgRoc[1000000];   //[DgN]
-   Int_t           DgRocR[1000000];   //[DgN]
-   Int_t           DgRocC[1000000];   //[DgN]
-   Float_t         DgLx[1000000];   //[DgN]
-   Float_t         DgLy[1000000];   //[DgN]
-   Float_t         DgGx[1000000];   //[DgN]
-   Float_t         DgGy[1000000];   //[DgN]
-   Float_t         DgGz[1000000];   //[DgN]
-   Float_t         DgAdc[1000000];   //[DgN]
-   Float_t         DgCharge[1000000];   //[DgN]
-   Int_t           DgClI[1000000];   //[DgN]
+   Int_t           DgRow[5605];   //[DgN]
+   Int_t           DgCol[5605];   //[DgN]
+   Int_t           DgDetid[5605];   //[DgN]
+   Int_t           DgRoc[5605];   //[DgN]
+   Int_t           DgRocR[5605];   //[DgN]
+   Int_t           DgRocC[5605];   //[DgN]
+   Float_t         DgLx[5605];   //[DgN]
+   Float_t         DgLy[5605];   //[DgN]
+   Float_t         DgGx[5605];   //[DgN]
+   Float_t         DgGy[5605];   //[DgN]
+   Float_t         DgGz[5605];   //[DgN]
+   Float_t         DgAdc[5605];   //[DgN]
+   Float_t         DgCharge[5605];   //[DgN]
+   Int_t           DgClI[5605];   //[DgN]
 
    // List of branches
    TBranch        *b_run;   //!
@@ -144,6 +152,9 @@ public :
    TBranch        *b_fed1;   //!
    TBranch        *b_fed2;   //!
    TBranch        *b_l1t;   //!
+   TBranch        *b_l1ta;   //!
+   TBranch        *b_l1tt;   //!
+   TBranch        *b_hlta;   //!
    TBranch        *b_l1ta0;   //!
    TBranch        *b_l1ta1;   //!
    TBranch        *b_l1ta2;   //!
@@ -165,6 +176,9 @@ public :
    TBranch        *b_PvX;   //!
    TBranch        *b_PvY;   //!
    TBranch        *b_PvZ;   //!
+   TBranch        *b_PvXe;   //!
+   TBranch        *b_PvYe;   //!
+   TBranch        *b_PvZe;   //!
    TBranch        *b_PvChi2;   //!
    TBranch        *b_PvNdof;   //!
    TBranch        *b_PvIsFake;   //!
@@ -184,6 +198,7 @@ public :
    TBranch        *b_TkNdof;   //!
    TBranch        *b_TkPt;   //!
    TBranch        *b_TkTheta;   //!
+   TBranch        *b_TkEta;   //!
    TBranch        *b_TkPhi;   //!
    TBranch        *b_TkD0;   //!
    TBranch        *b_TkDz;   //!
@@ -327,6 +342,9 @@ void anaPixelTree::Init(TTree *tree)
    fChain->SetBranchAddress("fed1", &fed1, &b_fed1);
    fChain->SetBranchAddress("fed2", &fed2, &b_fed2);
    fChain->SetBranchAddress("l1t", &l1t, &b_l1t);
+   fChain->SetBranchAddress("l1ta", l1ta, &b_l1ta);
+   fChain->SetBranchAddress("l1tt", l1tt, &b_l1tt);
+   fChain->SetBranchAddress("hlta", hlta, &b_hlta);
    fChain->SetBranchAddress("l1ta0", &l1ta0, &b_l1ta0);
    fChain->SetBranchAddress("l1ta1", &l1ta1, &b_l1ta1);
    fChain->SetBranchAddress("l1ta2", &l1ta2, &b_l1ta2);
@@ -348,6 +366,9 @@ void anaPixelTree::Init(TTree *tree)
    fChain->SetBranchAddress("PvX", PvX, &b_PvX);
    fChain->SetBranchAddress("PvY", PvY, &b_PvY);
    fChain->SetBranchAddress("PvZ", PvZ, &b_PvZ);
+   fChain->SetBranchAddress("PvXe", PvXe, &b_PvXe);
+   fChain->SetBranchAddress("PvYe", PvYe, &b_PvYe);
+   fChain->SetBranchAddress("PvZe", PvZe, &b_PvZe);
    fChain->SetBranchAddress("PvChi2", PvChi2, &b_PvChi2);
    fChain->SetBranchAddress("PvNdof", PvNdof, &b_PvNdof);
    fChain->SetBranchAddress("PvIsFake", PvIsFake, &b_PvIsFake);
@@ -367,6 +388,7 @@ void anaPixelTree::Init(TTree *tree)
    fChain->SetBranchAddress("TkNdof", TkNdof, &b_TkNdof);
    fChain->SetBranchAddress("TkPt", TkPt, &b_TkPt);
    fChain->SetBranchAddress("TkTheta", TkTheta, &b_TkTheta);
+   fChain->SetBranchAddress("TkEta", TkEta, &b_TkEta);
    fChain->SetBranchAddress("TkPhi", TkPhi, &b_TkPhi);
    fChain->SetBranchAddress("TkD0", TkD0, &b_TkD0);
    fChain->SetBranchAddress("TkDz", TkDz, &b_TkDz);
