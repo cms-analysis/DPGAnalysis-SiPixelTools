@@ -90,7 +90,7 @@ class PixelTree : public edm::EDAnalyzer {
   edm::ESHandle<SiPixelFedCablingMap> fCablingMap;
 
   TFile *fFile; 
-  TH1D  *fL1Thist, *fHLThist; 
+  TH1D  *fL1Thist, *fL1TThist, *fHLThist; 
   TTree *fTree;
 
 
@@ -106,6 +106,7 @@ class PixelTree : public edm::EDAnalyzer {
   unsigned int fHLT, fHLTa0, fHLTa1, fHLTa2, fHLTa3, 
     fHLTr0, fHLTr1, fHLTr2, fHLTr3, 
     fHLTe0, fHLTe1, fHLTe2, fHLTe3; 
+  unsigned int fL1TA[4], fL1TT[4], fHLTA[4];
 
   // -- primary vertices
   static const int PVMAX = 100; 

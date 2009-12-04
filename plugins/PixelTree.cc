@@ -170,6 +170,10 @@ void PixelTree::beginJob(const edm::EventSetup& es) {
   fTree->Branch("fed2",         &fFED2,         "fed2/i");
 
   fTree->Branch("l1t",          &fL1T,          "l1t/i");
+  fTree->Branch("l1ta",         fL1TA,          "l1ta[4]/i");
+  fTree->Branch("l1tt",         fL1TT,          "l1tt[4]/i");
+  fTree->Branch("hlta",         fHLTA,          "hlta[4]/i");
+
   fTree->Branch("l1ta0",        &fL1T0,         "l1ta0/i");
   fTree->Branch("l1ta1",        &fL1T1,         "l1ta1/i");
   fTree->Branch("l1ta2",        &fL1T2,         "l1ta2/i");
@@ -300,6 +304,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
   if (oldRun == 0) {
     fL1Thist = new TH1D(Form("L1T_%d", fRun), Form("L1T names for run %d", fRun), 128, 0., 128.); fL1Thist->SetDirectory(fFile); 
+    fL1TThist= new TH1D(Form("L1TT_%d",fRun), Form("L1TT names for run %d", fRun), 128, 0., 128.); fL1TThist->SetDirectory(fFile); 
     fHLThist = new TH1D(Form("HLT_%d", fRun), Form("HLT names for run %d", fRun), 128, 0., 128.); fHLThist->SetDirectory(fFile); 
     oldRun = 1; 
   }
@@ -327,6 +332,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
   if (fRun != oldRun) {
     fL1Thist = new TH1D(Form("L1T_%d", fRun), Form("L1T names for run %d", fRun), 128, 0., 128.); fL1Thist->SetDirectory(fFile); 
+    fL1TThist= new TH1D(Form("L1TT_%d",fRun), Form("L1TT names for run %d", fRun), 128, 0., 128.); fL1TThist->SetDirectory(fFile); 
     fHLThist = new TH1D(Form("HLT_%d", fRun), Form("HLT names for run %d", fRun), 128, 0., 128.); fHLThist->SetDirectory(fFile); 
     oldRun = fRun; 
   }
@@ -394,7 +400,6 @@ void PixelTree::analyze(const edm::Event& iEvent,
   // ----------------------------------------------------------------------
 
   // -- L1
-  fL1T = fL1T0 = fL1T1 = fL1T2 = fL1T3 = 0; 
   Handle<L1GlobalTriggerReadoutRecord> L1GTRR;
   iEvent.getByLabel(fL1GTReadoutRecordLabel,L1GTRR);
   Handle<L1GlobalTriggerObjectMapRecord> hL1GTmap; 
@@ -415,18 +420,34 @@ void PixelTree::analyze(const edm::Event& iEvent,
       fL1Thist->GetXaxis()->SetBinLabel(algBitNumber+1, aName.c_str());
     }
 
+
+    const AlgorithmMap& algorithmTTMap = l1GtMenu->gtTechnicalTriggerMap();
+    for (CItAlgo itAlgo = algorithmTTMap.begin(); itAlgo != algorithmTTMap.end(); itAlgo++) {
+      std::string aName = itAlgo->first;
+      int algBitNumber = (itAlgo->second).algoBitNumber();
+      if (fVerbose > 5) cout << "i = " << algBitNumber << " -> " << aName << endl;
+      fL1TThist->GetXaxis()->SetBinLabel(algBitNumber+1, aName.c_str());
+    }
+
     int itrig(0); 
     for (unsigned int iTrig = 0; iTrig < L1GTRR->decisionWord().size(); ++iTrig) {
       int l1flag = L1GTRR->decisionWord()[iTrig]; 
+      int t1flag = L1GTRR->technicalTriggerWord()[iTrig]; 
       itrig = iTrig%32; 
       if (iTrig < 32) {
 	if (l1flag) fL1T0 |= (0x1 << itrig);
+	if (l1flag) fL1TA[0] |= (0x1 << itrig);
+	if (t1flag) fL1TT[0] |= (0x1 << itrig);
       } else if (iTrig < 64) {
 	if (l1flag) fL1T1 |= (0x1 << itrig);
+	if (l1flag) fL1TA[1] |= (0x1 << itrig);
+	if (t1flag) fL1TT[1] |= (0x1 << itrig);
       } else if (iTrig < 96) {
 	if (l1flag) fL1T2 |= (0x1 << itrig);
+	if (l1flag) fL1TA[2] |= (0x1 << itrig);
       } else if (iTrig < 128) {
 	if (l1flag) fL1T3 |= (0x1 << itrig);
+	if (l1flag) fL1TA[3] |= (0x1 << itrig);
       }
     }
 
@@ -449,10 +470,6 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
 
   // -- HLT: see http://cmslxr.fnal.gov/lxr/source/HLTrigger/HLTanalyzers/src/HLTrigReport.cc
-  fHLT = fHLTa0 = fHLTa1 = fHLTa2 = fHLTa3 
-    = fHLTr0 = fHLTr1 = fHLTr2 = fHLTr3 
-    = fHLTe0 = fHLTe1 = fHLTe2 = fHLTe3 
-    = 0; 
   
   Handle<TriggerResults> hHLTresults;
   bool hltF = true;
@@ -489,21 +506,25 @@ void PixelTree::analyze(const edm::Event& iEvent,
       fHLThist->GetXaxis()->SetBinLabel(iTrig+1, hlNames[iTrig].c_str()); 
 
       if (iTrig < 32) {
-	if (hltacc) fHLTa0 |= (0x1 << itrig);
-	if (hltrun) fHLTr0 |= (0x1 << itrig);
-	if (hlterr) fHLTe0 |= (0x1 << itrig);
+	if (hltacc) fHLTa0   |= (0x1 << itrig);
+	if (hltrun) fHLTr0   |= (0x1 << itrig);
+	if (hlterr) fHLTe0   |= (0x1 << itrig);
+	if (hltacc) fHLTA[0] |= (0x1 << itrig);
       } else if (iTrig < 64) {
-	if (hltacc) fHLTa1 |= (0x1 << itrig);
-	if (hltrun) fHLTr1 |= (0x1 << itrig);
-	if (hlterr) fHLTe1 |= (0x1 << itrig);
+	if (hltacc) fHLTa1   |= (0x1 << itrig);
+	if (hltrun) fHLTr1   |= (0x1 << itrig);
+	if (hlterr) fHLTe1   |= (0x1 << itrig);
+	if (hltacc) fHLTA[1] |= (0x1 << itrig);
       } else if (iTrig < 96) {
-	if (hltacc) fHLTa2 |= (0x1 << itrig);
-	if (hltrun) fHLTr2 |= (0x1 << itrig);
-	if (hlterr) fHLTe2 |= (0x1 << itrig);
+	if (hltacc) fHLTa2   |= (0x1 << itrig);
+	if (hltrun) fHLTr2   |= (0x1 << itrig);
+	if (hlterr) fHLTe2   |= (0x1 << itrig);
+	if (hltacc) fHLTA[2] |= (0x1 << itrig);
       } else if (iTrig < 128) {
-	if (hltacc) fHLTa3 |= (0x1 << itrig);
-	if (hltrun) fHLTr3 |= (0x1 << itrig);
-	if (hlterr) fHLTe3 |= (0x1 << itrig);
+	if (hltacc) fHLTa3   |= (0x1 << itrig);
+	if (hltrun) fHLTr3   |= (0x1 << itrig);
+	if (hlterr) fHLTe3   |= (0x1 << itrig);
+	if (hltacc) fHLTA[4] |= (0x1 << itrig);
       }
     }
 
@@ -1238,6 +1259,17 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
 // ----------------------------------------------------------------------
 void PixelTree::init() {
+
+  for (int i = 0; i < 4; ++i) {
+    fL1TA[i] = fL1TT[i] = fHLTA[i] = 0;
+  }
+
+  fL1T = fL1T0 = fL1T1 = fL1T2 = fL1T3 = 0; 
+  fHLT = fHLTa0 = fHLTa1 = fHLTa2 = fHLTa3 
+    = fHLTr0 = fHLTr1 = fHLTr2 = fHLTr3 
+    = fHLTe0 = fHLTe1 = fHLTe2 = fHLTe3 
+    = 0; 
+
 
   fPvN = 0; 
   for (int i = 0; i < PVMAX; ++i) {

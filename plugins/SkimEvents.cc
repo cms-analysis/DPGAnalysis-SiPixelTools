@@ -44,6 +44,7 @@ private:
 
   int fNpv, fNtk, fNpx; 
   int fNfailed, fNpassed; 
+  int fEvent; 
 
 };
 
@@ -69,7 +70,7 @@ SkimEvents::SkimEvents(const edm::ParameterSet& iConfig):
   cout << "----------------------------------------------------------------------" << endl;
 
   fNpv = fNtk = fNpx = 0; 
-  fNfailed = fNpassed = 0; 
+  fEvent = fNfailed = fNpassed = 0; 
   
 }
 
@@ -84,6 +85,7 @@ SkimEvents::~SkimEvents() {
 // ----------------------------------------------------------------------
 bool SkimEvents::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {    
   bool result(false);
+  ++fEvent; 
 
   edm::Handle<reco::VertexCollection> hVertices;
   int goodVertices(-1);
@@ -91,7 +93,7 @@ bool SkimEvents::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     iEvent.getByLabel(fPrimaryVertexCollectionLabel, hVertices);
     const reco::VertexCollection vertices = *(hVertices.product());
     goodVertices = 0; 
-    for (int i = 0; i < vertices.size(); ++i) {
+    for (unsigned int i = 0; i < vertices.size(); ++i) {
       if (vertices[i].isFake()) {
       } else {
 	++goodVertices;
@@ -139,7 +141,9 @@ bool SkimEvents::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
   }
 
   if (fVerbose > 1) {
-    cout << "SkimEvents: " 
+    char line[20]; 
+    sprintf(line, "%7d", fEvent);
+    cout << "SkimEvents: " << line
 	 << " result: " << (result? "true ":"false")
 	 << " PV: " << (goodPv?1:0)
 	 << " Tk: " << (goodTk?1:0)
