@@ -193,6 +193,9 @@ void PixelTree::beginJob(const edm::EventSetup& es) {
   fTree->Branch("PvX",          fPvX,           "PvX[PvN]/F");
   fTree->Branch("PvY",          fPvY,           "PvY[PvN]/F");
   fTree->Branch("PvZ",          fPvZ,           "PvZ[PvN]/F");
+  fTree->Branch("PvXe",         fPvXe,          "PvXe[PvN]/F");
+  fTree->Branch("PvYe",         fPvYe,          "PvYe[PvN]/F");
+  fTree->Branch("PvZe",         fPvZe,          "PvZe[PvN]/F");
   fTree->Branch("PvChi2",       fPvChi2,        "PvChi2[PvN]/F");
   fTree->Branch("PvNdof",       fPvNdof,        "PvNdof[PvN]/F");
   fTree->Branch("PvIsFake",     fPvIsFake,      "PvIsFake[PvN]/I");
@@ -633,14 +636,14 @@ void PixelTree::analyze(const edm::Event& iEvent,
   try {
     iEvent.getByLabel(fTrackCollectionLabel, hTrackCollection);
   } catch (cms::Exception &ex) {
-    //cout << "No Track collection with label " << fTrackCollectionLabel << endl;
+    if (fVerbose > 1) cout << "No Track collection with label " << fTrackCollectionLabel << endl;
   }
   if (hTrackCollection.isValid()) {
     const std::vector<reco::Track> trackColl = *(hTrackCollection.product());
     nTk = trackColl.size();
     if (fVerbose > 1) cout << "--> Track collection size: " << nTk << endl;
   } else {
-    //cout << "--> No valid track collection" << endl;
+    if (fVerbose > 1) cout << "--> No valid track collection" << endl;
   }
 
   // -- Track trajectory association map
