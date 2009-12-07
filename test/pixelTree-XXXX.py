@@ -55,7 +55,8 @@ process.PixelFilter = cms.EDFilter(
     trackCollectionLabel         = cms.untracked.InputTag('generalTracks'),
     filterOnPixelCluster         = cms.untracked.int32(1),
     PixelClusterCollectionLabel  = cms.untracked.InputTag('siPixelClusters'),
-    
+    filterOnL1TechnicalTriggerBits = cms.untracked.int32(0),
+    L1TechnicalTriggerBits         = cms.untracked.vint32(40, 41)
     )
 
 

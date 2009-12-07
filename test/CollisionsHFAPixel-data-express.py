@@ -27,7 +27,9 @@ process.GlobalTag.globaltag = "GR09_P_V6::All"
 process.source = cms.Source(
     "PoolSource", 
     fileNames = cms.untracked.vstring(
-    "/store/express/BeamCommissioning09/ExpressPhysics/FEVT/v2/000/123/151/DC4465B0-F6DD-DE11-A7F1-000423D6B444.root"
+      "/store/express/BeamCommissioning09/ExpressPhysics/FEVT/v2/000/123/592/5E32F723-1EE2-DE11-ACC5-001D09F252E9.root", 
+      "/store/express/BeamCommissioning09/ExpressPhysics/FEVT/v2/000/123/592/A6C66722-1EE2-DE11-BCFC-001D09F25208.root",
+      "/store/express/BeamCommissioning09/ExpressPhysics/FEVT/v2/000/123/592/5865B623-1EE2-DE11-82E2-001D09F2545B.root"
     )
     )
 
@@ -42,7 +44,7 @@ process.TrackRefitter.src = 'generalTracks::EXPRESS'
 try:
     rootFileName = os.environ["JOB"] + "-pixel.root"
 except KeyError:
-    rootFileName = "collisions-pixel-XXXX.root"
+    rootFileName = "pixelTree-ExpressPhysics-FEVT-123592.root"
 
 process.PixelTree = cms.EDAnalyzer(
     "PixelTree",
@@ -60,13 +62,15 @@ process.PixelTree = cms.EDAnalyzer(
 # ----------------------------------------------------------------------
 process.PixelFilter = cms.EDFilter(
     "SkimEvents",
-    verbose                      = cms.untracked.int32(2),
-    filterOnPrimaryVertex        = cms.untracked.int32(1),
-    primaryVertexCollectionLabel = cms.untracked.InputTag('offlinePrimaryVertices::EXPRESS'),
-    filterOnTracks               = cms.untracked.int32(1),
-    trackCollectionLabel         = cms.untracked.InputTag('generalTracks::EXPRESS'),
-    filterOnPixelCluster         = cms.untracked.int32(1),
-    PixelClusterCollectionLabel  = cms.untracked.InputTag('siPixelClusters::EXPRESS'),
+    verbose                        = cms.untracked.int32(2),
+    filterOnPrimaryVertex          = cms.untracked.int32(1),
+    primaryVertexCollectionLabel   = cms.untracked.InputTag('offlinePrimaryVertices::EXPRESS'),
+    filterOnTracks                 = cms.untracked.int32(1),
+    trackCollectionLabel           = cms.untracked.InputTag('generalTracks::EXPRESS'),
+    filterOnPixelCluster           = cms.untracked.int32(1),
+    PixelClusterCollectionLabel    = cms.untracked.InputTag('siPixelClusters::EXPRESS'),
+    filterOnL1TechnicalTriggerBits = cms.untracked.int32(0),
+    L1TechnicalTriggerBits         = cms.untracked.vint32(40, 41)
     
     )
 
@@ -85,7 +89,7 @@ process.genParticles = cms.EDProducer(
 
 
 # ----------------------------------------------------------------------
-process.genDump = cms.EDFilter(
+process.genDump = cms.EDAnalyzer(
     "HFDumpGenerator",
     generatorCandidates = cms.untracked.string('genParticles'),
     generatorEvent = cms.untracked.string('generator')
@@ -102,27 +106,27 @@ process.tree = cms.EDAnalyzer(
     "HFTree",
     verbose  = cms.untracked.int32(0),
     requireCand =  cms.untracked.bool(True),
-    fileName = cms.string(rootFileName)
+    fileName = cms.untracked.string(rootFileName)
     )
 
 
 # ----------------------------------------------------------------------
 process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
 process.load("SimTracker.TrackAssociation.TrackAssociatorByHits_cfi")
-process.trkDump = cms.EDFilter(
+process.trkDump = cms.EDAnalyzer(
     "HFDumpTracks",
     verbose = cms.untracked.int32(0),
-    generatorEventLabel = cms.untracked.string('generator'),
+    generatorEventLabel = cms.untracked.InputTag('generator'),
     muonsLabel = cms.untracked.InputTag("muons::EXPRESS"),
-    trackingParticlesLabel = cms.untracked.string('trackingParticles'),
-    associatorLabel = cms.untracked.string('TrackAssociatorByHits'),
+    trackingParticlesLabel = cms.untracked.InputTag('trackingParticles'),
+    associatorLabel = cms.untracked.InputTag('TrackAssociatorByHits'),
     doTruthMatching = cms.untracked.int32(0),
-    tracksLabel = cms.untracked.string('generalTracks::EXPRESS'),
-    simTracksLabel = cms.untracked.string('allLayer1TrackCands')
+    tracksLabel = cms.untracked.InputTag('generalTracks::EXPRESS'),
+    simTracksLabel = cms.untracked.InputTag('allLayer1TrackCands')
     )
 
 # ----------------------------------------------------------------------
-process.muonDump = cms.EDFilter(
+process.muonDump = cms.EDAnalyzer(
     "HFDumpMuons",
     verbose = cms.untracked.int32(0),
     muonsLabel = cms.untracked.InputTag("muons::EXPRESS"),
@@ -131,7 +135,7 @@ process.muonDump = cms.EDFilter(
 
 
 # ----------------------------------------------------------------------
-process.triggerDump = cms.EDFilter(
+process.triggerDump = cms.EDAnalyzer(
     "HFDumpTrigger",
     verbose                 = cms.untracked.int32(0),
     L1GTReadoutRecordLabel  = cms.untracked.string("gtDigis"), 
@@ -143,11 +147,11 @@ process.triggerDump = cms.EDFilter(
     )
 
 # ----------------------------------------------------------------------
-process.bmtDump = cms.EDFilter(
+process.bmtDump = cms.EDAnalyzer(
     "HFMuonAndTrack",
     verbose = cms.untracked.int32(0), 
     muonsLabel = cms.untracked.InputTag("muons::EXPRESS"),
-    tracksLabel = cms.untracked.string('generalTracks::EXPRESS'),
+    tracksLabel = cms.untracked.InputTag('generalTracks::EXPRESS'),
     muonPt = cms.untracked.double(1.0),
     trackPt = cms.untracked.double(0.5),
     type = cms.untracked.int32(1300), 
@@ -156,11 +160,11 @@ process.bmtDump = cms.EDFilter(
     )
 
 # ----------------------------------------------------------------------
-process.bmmDump = cms.EDFilter(
+process.bmmDump = cms.EDAnalyzer(
     "HFDimuons",
     verbose = cms.untracked.int32(0), 
     muonsLabel = cms.untracked.InputTag("muons::EXPRESS"),
-    tracksLabel = cms.untracked.string('generalTracks::EXPRESS'),
+    tracksLabel = cms.untracked.InputTag('generalTracks::EXPRESS'),
     muonPt = cms.untracked.double(1.0),
     type = cms.untracked.int32(531), 
     massLow  = cms.untracked.double(4.0), 
@@ -168,22 +172,22 @@ process.bmmDump = cms.EDFilter(
     )
 
 # ----------------------------------------------------------------------
-process.bupsikpDump = cms.EDFilter(
+process.bupsikpDump = cms.EDAnalyzer(
     "HFBu2JpsiKp",
     verbose = cms.untracked.int32(0), 
     muonsLabel = cms.untracked.InputTag("muons::EXPRESS"),
-    tracksLabel = cms.untracked.string('generalTracks::EXPRESS'),
+    tracksLabel = cms.untracked.InputTag('generalTracks::EXPRESS'),
     muonPt = cms.untracked.double(1.0),
     trackPt = cms.untracked.double(0.1),
     type = cms.untracked.int32(100521) 
     )
 
 # ----------------------------------------------------------------------
-process.bdpsikstarDump = cms.EDFilter(
+process.bdpsikstarDump = cms.EDAnalyzer(
     "HFBd2JpsiKstar",
     verbose = cms.untracked.int32(0), 
     muonsLabel = cms.untracked.InputTag("muons::EXPRESS"),
-    tracksLabel = cms.untracked.string('generalTracks::EXPRESS'),
+    tracksLabel = cms.untracked.InputTag('generalTracks::EXPRESS'),
     muonPt = cms.untracked.double(1.0),
     kaonPt = cms.untracked.double(0.1),
     pionPt = cms.untracked.double(0.1),
@@ -191,22 +195,22 @@ process.bdpsikstarDump = cms.EDFilter(
     )
 
 # ----------------------------------------------------------------------
-process.bspsiphiDump = cms.EDFilter(
+process.bspsiphiDump = cms.EDAnalyzer(
     "HFBs2JpsiPhi",
     verbose = cms.untracked.int32(0), 
     muonsLabel = cms.untracked.InputTag("muons::EXPRESS"),
-    tracksLabel = cms.untracked.string('generalTracks::EXPRESS'),
+    tracksLabel = cms.untracked.InputTag('generalTracks::EXPRESS'),
     muonPt = cms.untracked.double(1.0),
     trackPt = cms.untracked.double(0.1),
     type = cms.untracked.int32(100531) 
     )
 
 # ----------------------------------------------------------------------
-process.b2muD0Dump = cms.EDFilter(
+process.b2muD0Dump = cms.EDAnalyzer(
     "HFB2muD0",
     verbose = cms.untracked.int32(0), 
     muonsLabel = cms.untracked.InputTag("muons::EXPRESS"),
-    tracksLabel = cms.untracked.string('generalTracks::EXPRESS'),
+    tracksLabel = cms.untracked.InputTag('generalTracks::EXPRESS'),
     muonPt = cms.untracked.double(1.0),
     trackPt = cms.untracked.double(0.1),
     deltaR =  cms.untracked.double(1.5),

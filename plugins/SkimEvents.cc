@@ -4,6 +4,10 @@
 #include "DataFormats/TrackReco/interface/Track.h"
 #include <DataFormats/VertexReco/interface/VertexFwd.h>
 #include <DataFormats/VertexReco/interface/Vertex.h>
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutSetupFwd.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutSetup.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerObjectMapRecord.h"
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDFilter.h"
@@ -16,6 +20,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 
 #include <iostream>
+#include <vector>
 
 using namespace std;
 using namespace edm;
@@ -42,10 +47,14 @@ private:
   int          filterOnPixelCluster; 
   InputTag     fPixelClusterCollectionLabel;
 
-  int fNpv, fNtk, fNpx; 
+  InputTag     fL1GTReadoutRecordLabel; 
+  int          filterOnL1TriggerBits, filterOnL1TechnicalTriggerBits, filterOnHLTriggerBits;
+
+  int fNpv, fNtk, fNpx, fL1T, fL1TT, fHLT; 
   int fNfailed, fNpassed; 
   int fEvent; 
 
+  vector<int> fL1TriggerBits, fL1TechnicalTriggerBits, fHLTriggerBits;
 };
 
 // ----------------------------------------------------------------------
@@ -56,8 +65,17 @@ SkimEvents::SkimEvents(const edm::ParameterSet& iConfig):
   filterOnTracks(iConfig.getUntrackedParameter<int>("filterOnTracks", 1)),
   fTrackCollectionLabel(iConfig.getUntrackedParameter<InputTag>("TrackCollectionLabel", edm::InputTag("generalTracks"))),
   filterOnPixelCluster(iConfig.getUntrackedParameter<int>("filterOnPixelCluster", 1)),
-  fPixelClusterCollectionLabel(iConfig.getUntrackedParameter<InputTag>("PixelClusterCollectionLabel", edm::InputTag("siPixelClusters")))
+  fPixelClusterCollectionLabel(iConfig.getUntrackedParameter<InputTag>("PixelClusterCollectionLabel", edm::InputTag("siPixelClusters"))),
+  fL1GTReadoutRecordLabel(iConfig.getUntrackedParameter<InputTag>("L1GTReadoutRecordLabel", edm::InputTag("gtDigis"))),
+  filterOnL1TriggerBits(iConfig.getUntrackedParameter<int>("filterOnL1TriggerBits", 0)),
+  filterOnL1TechnicalTriggerBits(iConfig.getUntrackedParameter<int>("filterOnL1TechnicalTriggerBits", 0)),
+  filterOnHLTriggerBits(iConfig.getUntrackedParameter<int>("filterOnHLTriggerBits", 0))
 {
+  vector<int> defa; defa.push_back(0); 
+  fL1TriggerBits          = iConfig.getUntrackedParameter<vector<int> >("L1TriggerBits", defa);
+  fL1TechnicalTriggerBits = iConfig.getUntrackedParameter<vector<int> >("L1TechnicalTriggerBits", defa);
+  fHLTriggerBits          = iConfig.getUntrackedParameter<vector<int> >("HLTriggerBits", defa);
+
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- SkimEvents constructor" << endl;
   cout << "---  verbose:                         " << fVerbose << endl;
@@ -67,9 +85,22 @@ SkimEvents::SkimEvents(const edm::ParameterSet& iConfig):
   cout << "---  TrackCollectionLabel:            " << fTrackCollectionLabel << endl;
   cout << "---  filterOnPixelCluster:            " << filterOnPixelCluster << endl;
   cout << "---  PixelClusterCollectionLabel:     " << fPixelClusterCollectionLabel << endl;
+  cout << "---  L1GTReadoutRecordLabel:          " << fL1GTReadoutRecordLabel << endl;
+  cout << "---  filterOnL1TriggerBits:           " << filterOnL1TriggerBits << endl;
+  cout << "---  filterOnL1TechnicalTriggerBits:  " << filterOnL1TechnicalTriggerBits << endl;
+  cout << "---  filterOnHLTriggerBits:           " << filterOnHLTriggerBits << endl;
+  cout << "---  fL1TriggerBits:                  "; 
+  for (unsigned int i = 0; i < fL1TriggerBits.size(); ++i) cout << fL1TriggerBits[i] << "  "; 
+  cout << endl;
+  cout << "---  fL1TechnicalTriggerBits:         "; 
+  for (unsigned int i = 0; i < fL1TechnicalTriggerBits.size(); ++i) cout << fL1TechnicalTriggerBits[i] << "  "; 
+  cout << endl;
+  cout << "---  fL1TriggerBits:                  "; 
+  for (unsigned int i = 0; i < fHLTriggerBits.size(); ++i) cout << fHLTriggerBits[i] << "  "; 
+  cout << endl;
   cout << "----------------------------------------------------------------------" << endl;
 
-  fNpv = fNtk = fNpx = 0; 
+  fNpv = fNtk = fNpx = fL1T = fL1TT = fHLT = 0; 
   fEvent = fNfailed = fNpassed = 0; 
   
 }
@@ -86,6 +117,68 @@ SkimEvents::~SkimEvents() {
 bool SkimEvents::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {    
   bool result(false);
   ++fEvent; 
+
+  int goodL1Technical(0); 
+  if (filterOnL1TechnicalTriggerBits || filterOnL1TriggerBits) {
+    Handle<L1GlobalTriggerReadoutRecord> L1GTRR;
+    iEvent.getByLabel(fL1GTReadoutRecordLabel,L1GTRR);
+    
+    if (filterOnL1TechnicalTriggerBits) {
+      for (unsigned int iTrig = 0; iTrig < fL1TechnicalTriggerBits.size(); ++iTrig) {
+	goodL1Technical = L1GTRR->technicalTriggerWord()[fL1TechnicalTriggerBits[iTrig]]; 
+	if (goodL1Technical) {
+	  goodL1Technical = fL1TechnicalTriggerBits[iTrig];
+	  result = true; 
+	  break;
+	} 
+      }
+    }
+    
+    int l1flag(0); 
+    if (filterOnL1TriggerBits) {
+      for (unsigned int iTrig = 0; iTrig < fL1TriggerBits.size(); ++iTrig) {
+	l1flag = L1GTRR->decisionWord()[fL1TriggerBits[iTrig]]; 
+	if (l1flag) result = true; 
+	break;
+      }
+    }
+
+    // -- when filtering on trigger bits, skip rest if untriggered event
+    if (!result) {
+      return result; 
+    }
+      
+  }
+
+  
+
+//   if (filterOnHLTriggerBits) {
+//     Handle<TriggerResults> hHLTresults;
+//     bool hltF = true;
+//     try {
+//       iEvent.getByLabel(fHLTResultsLabel, hHLTresults);
+//     } catch (cms::Exception &ex) {
+//       //    cout << ex.explainSelf() << endl;
+//       cout << "==>SkimEvents> Triggerresults  " << fHLTResultsLabel << " not found " << endl;
+//       hltF = false;
+//     }
+    
+//     if (hltF && hHLTresults.isValid()) {
+//       TriggerNames triggerNames;
+//       triggerNames.init(*hHLTresults);
+//       fHLT = hHLTresults->accept();
+//       if (fVerbose > 5) cout << "hHLTresults->size() = " << hHLTresults->size() << " and HLT accept = " << fHLT << endl;
+      
+//       vector<string>  hlNames;
+//       hlNames = triggerNames.triggerNames();
+      
+//       int hltacc(0), hltrun(0), hlterr(0), itrig(0); 
+//       for (unsigned int iTrig = 0; iTrig < hlNames.size(); ++iTrig) {
+// 	hltacc = hHLTresults->accept(iTrig); 
+//       }
+//     }
+//   }
+
 
   edm::Handle<reco::VertexCollection> hVertices;
   int goodVertices(-1);
@@ -145,9 +238,10 @@ bool SkimEvents::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     sprintf(line, "%7d", fEvent);
     cout << "SkimEvents: " << line
 	 << " result: " << (result? "true ":"false")
-	 << " PV: " << (goodPv?1:0)
-	 << " Tk: " << (goodTk?1:0)
-	 << " Px: " << (goodPx?1:0)
+	 << " PV: " << (goodPv?goodVertices:0)
+	 << " Tk: " << (goodTk?goodTracks:0)
+	 << " Px: " << (goodPx?goodPixel:0)
+	 << " L1TT: " << (goodL1Technical?goodL1Technical:0)
 	 << endl;
   }
 
