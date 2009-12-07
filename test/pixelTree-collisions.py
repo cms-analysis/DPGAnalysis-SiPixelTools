@@ -13,7 +13,8 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = "GR09_E_V6::All"
+#process.GlobalTag.globaltag = "GR09_E_V6::All"
+process.GlobalTag.globaltag = "FIRSTCOLL::All"
 
 # -- Input files
 process.source = cms.Source(
@@ -25,7 +26,10 @@ process.source = cms.Source(
     #interval = cms.uint32(1),
     fileNames = cms.untracked.vstring(
 #    "file:/afs/cern.ch/cms/CAF/CMSCOMM/COMM_GLOBAL/bit40or41skim.root"
-    'rfio:/castor/cern.ch/user/c/chiochia/09_beam_commissioning/BSCskim_123151_Express_bit40-41.root'
+    #'rfio:/castor/cern.ch/user/c/chiochia/09_beam_commissioning/BSCskim_123151_Express_bit40-41.root'
+    #'rfio:/castor/cern.ch/user/c/chiochia/09_beam_commissioning/BSCskim_123615_Express_bit40-41_LS72-88.root'
+    'file:/nfs/data6/CMS_DATA/BSCskim_123615_Express_bit40-41_LS72-88.root'
+    #'rfio:/castor/cern.ch/user/c/chiochia/09_beam_commissioning/BSCskim_123596_Express_bit40-41_LS69-129.root'
     )
     )
 
@@ -63,10 +67,11 @@ process.PixelTree = cms.EDAnalyzer(
     muonCollectionLabel    = cms.untracked.InputTag('muons'),
     trajectoryInputLabel   = cms.untracked.InputTag('TrackRefitter'),
     trackCollectionLabel   = cms.untracked.InputTag('generalTracks::EXPRESS'),
-    pixelClusterLabel      = cms.untracked.string('siPixelClusters'),
-    L1GTReadoutRecordLabel = cms.untracked.string("gtDigis"),
+    pixelClusterLabel      = cms.untracked.InputTag('siPixelClusters'),
+    L1GTReadoutRecordLabel = cms.untracked.InputTag("gtDigis"),
     hltL1GtObjectMap       = cms.untracked.InputTag("hltL1GtObjectMap"),
-    HLTResultsLabel        = cms.untracked.InputTag("TriggerResults::HLT")
+    HLTResultsLabel        = cms.untracked.InputTag("TriggerResults::HLT"),
+    storeRecHit        = cms.untracked.int32(1)
     )
 
 

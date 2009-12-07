@@ -110,7 +110,8 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fPixelClusterLabel(iConfig.getUntrackedParameter<InputTag>("pixelClusterLabel", edm::InputTag("siPixelClusters"))), 
   fL1GTReadoutRecordLabel(iConfig.getUntrackedParameter<InputTag>("L1GTReadoutRecordLabel", edm::InputTag("gtDigis"))),
   fL1GTmapLabel(iConfig.getUntrackedParameter<InputTag>("hltL1GtObjectMap", edm::InputTag("hltL1GtObjectMap"))),
-  fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag>("HLTResultsLabel", edm::InputTag("TriggerResults::HLT")))
+  fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag>("HLTResultsLabel", edm::InputTag("TriggerResults::HLT"))),
+  fStoreRecHit(iConfig.getUntrackedParameter<int>("storeRecHit",0))
 {
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
@@ -272,6 +273,26 @@ void PixelTree::beginJob(const edm::EventSetup& es) {
   fTree->Branch("ClDgN",        fClDgN,         "ClDgN[ClN]/I");
   fTree->Branch("ClDgI",        fClDgI,         "ClDgI[ClN][100]/I");    //FIXME: This should be variable?
 
+
+  if( fStoreRecHit == 1){
+    fTree->Branch("RecHitLx", fRecHitLx,  "RecHitLx[ClN]/F");    
+    fTree->Branch("RecHitLy", fRecHitLy,  "RecHitLy[ClN]/F");  
+    fTree->Branch("RecHitGx", fRecHitGx,  "RecHitGx[ClN]/F");    
+    fTree->Branch("RecHitGy", fRecHitGy,  "RecHitGy[ClN]/F");  
+    fTree->Branch("RecHitGz", fRecHitGz,  "RecHitGz[ClN]/F");  
+    
+    fTree->Branch("RecHitProb",       fRecHitProb,       "RecHitProb[ClN]/F");
+    fTree->Branch("RecHitProbX",      fRecHitProbX,       "RecHitProbX[ClN]/F");
+    fTree->Branch("RecHitProbY",      fRecHitProbY,       "RecHitProbY[ClN]/F");
+    fTree->Branch("RecHitQualWord",   fRecHitQualWord,    "RecHitQualWord[ClN]/i");
+    fTree->Branch("RecHitqBin",       fRecHitqBin,        "RecHitqBin[ClN]/I");
+    //    fTree->Branch("RecHitSpansTwoROCs",fRecHitSpansTwoROCs,"RecHitSpansTwoROCs[ClN]/I");
+    // fTree->Branch("RecHitIsOnEdge"    ,fRecHitIsOnEdge,    "RecHitIsOnEdge[ClN]/I");
+    //fTree->Branch("RecHitHasBadPixels"    ,fRecHitHasBadPixels,    "RecHitHasBadPixels[ClN]/I");
+  }
+
+
+
   fTree->Branch("DgN",          &fDgN,          "DgN/I");
   fTree->Branch("DgRow",        fDgRow,         "DgRow[DgN]/I");
   fTree->Branch("DgCol",        fDgCol,         "DgCol[DgN]/I");
@@ -413,7 +434,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
     fL1T = (L1GTRR->decision()? 1: 0);
 
     const AlgorithmMap& algorithmMap = l1GtMenu->gtAlgorithmMap();
-    for (CItAlgo itAlgo = algorithmMap.begin(); itAlgo != algorithmMap.end(); itAlgo++) {
+    for (CItAlgo itAlgo = algorithmMap.begin(); itAlgo != algorithmMap.end(); ++itAlgo) {
       std::string aName = itAlgo->first;
       int algBitNumber = (itAlgo->second).algoBitNumber();
       if (fVerbose > 5) cout << "i = " << algBitNumber << " -> " << aName << endl;
@@ -422,7 +443,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
 
     const AlgorithmMap& algorithmTTMap = l1GtMenu->gtTechnicalTriggerMap();
-    for (CItAlgo itAlgo = algorithmTTMap.begin(); itAlgo != algorithmTTMap.end(); itAlgo++) {
+    for (CItAlgo itAlgo = algorithmTTMap.begin(); itAlgo != algorithmTTMap.end(); ++itAlgo) {
       std::string aName = itAlgo->first;
       int algBitNumber = (itAlgo->second).algoBitNumber();
       if (fVerbose > 5) cout << "i = " << algBitNumber << " -> " << aName << endl;
@@ -713,7 +734,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
       // -- Clusters associated with a track
       std::vector<TrajectoryMeasurement> tmeasColl =refTraj->measurements();
       int iCluster(0); 
-      for (std::vector<TrajectoryMeasurement>::const_iterator tmeasIt = tmeasColl.begin(); tmeasIt!=tmeasColl.end(); tmeasIt++){   
+      for (std::vector<TrajectoryMeasurement>::const_iterator tmeasIt = tmeasColl.begin(); tmeasIt!=tmeasColl.end(); ++tmeasIt){   
 	if (!tmeasIt->updatedState().isValid()) continue; 
 	TrajectoryStateOnSurface tsos = tsoscomb(tmeasIt->forwardPredictedState(), tmeasIt->backwardPredictedState());
 	TransientTrackingRecHit::ConstRecHitPointer hit = tmeasIt->recHit();
@@ -782,6 +803,28 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	  const RectangularPixelTopology * topol = dynamic_cast<const RectangularPixelTopology*>(&(theGeomDet->specificTopology()));
 	  LocalPoint clustlp = topol->localPosition( MeasurementPoint(xcenter, ycenter) );
 	  GlobalPoint clustgp = theGeomDet->surface().toGlobal( clustlp );
+
+	  //recHit variables
+
+	   if( fStoreRecHit == 1){
+	 
+	     fRecHitLx[fClN] = -9999;
+	     fRecHitLy[fClN] = -9999;
+	     fRecHitGx[fClN] = -9999;
+	     fRecHitGy[fClN] = -9999;
+	     fRecHitGz[fClN] = -9999;
+	     
+	     fRecHitProb[fClN]  = -9999;
+	     fRecHitProbX[fClN]  = -9999;
+	     fRecHitProbY[fClN]  = -9999;
+	     fRecHitQualWord[fClN]  = 9999;
+	     fRecHitqBin[fClN]  =- 9999;
+	     //    fRecHitSpansTwoROCs[fClN]   =- 9999;
+	     //fRecHitIsOnEdge[fClN] =- 9999;
+	     // fRecHitHasBadPixels[fClN] =- 9999;
+
+	   }
+
 	  
 	  fClLx[fClN]      = clustlp.x();
 	  fClLy[fClN]      = clustlp.y();
@@ -792,29 +835,29 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
 	  fClFlipped[fClN] = isFlipped;
 
-	  fClSize[fClN]   = -99;
-	  fClSizeX[fClN]  = -99;
-	  fClSizeY[fClN]  = -99;
-	  fClRow[fClN]    = -99;
-	  fClCol[fClN]    = -99;
+	  fClSize[fClN]   = -9999;
+	  fClSizeX[fClN]  = -9999;
+	  fClSizeY[fClN]  = -9999;
+	  fClRow[fClN]    = -9999;
+	  fClCol[fClN]    = -9999;
 
-	  fClCharge[fClN]     = -99.;
-	  fClChargeCorr[fClN] = -99.;
+	  fClCharge[fClN]     = -9999.;
+	  fClChargeCorr[fClN] = -9999.;
 
 	  if (barrel) {
 	    fClLayer[fClN]     = DBlayer;
 	    fClLadder[fClN]    = DBladder; 
 	    fClModule[fClN]    = DBmodule;
-	    fClDisk[fClN]      = -99;
-	    fClBlade[fClN]     = -99;
-	    fClPanel[fClN]     = -99;
-	    fClPlaquette[fClN] = -99;
+	    fClDisk[fClN]      = -9999;
+	    fClBlade[fClN]     = -9999;
+	    fClPanel[fClN]     = -9999;
+	    fClPlaquette[fClN] = -9999;
 	  } 
 
 	  if (endcap) {
-	    fClLayer[fClN]     = -99;
-	    fClLadder[fClN]    = -99; 
-	    fClModule[fClN]    = -99;
+	    fClLayer[fClN]     = -9999;
+	    fClLadder[fClN]    = -9999; 
+	    fClModule[fClN]    = -9999;
 	    fClDisk[fClN]      =  DBdisk;
 	    fClBlade[fClN]     =  DBblade;
 	    fClPanel[fClN]     =  DBpanel;
@@ -980,6 +1023,47 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	  const RectangularPixelTopology * topol = dynamic_cast<const RectangularPixelTopology*>(&(theGeomDet->specificTopology()));
 	  LocalPoint clustlp = topol->localPosition( MeasurementPoint(xcenter, ycenter) );
 	  GlobalPoint clustgp = theGeomDet->surface().toGlobal( clustlp );
+
+
+	   if( fStoreRecHit == 1){
+	 
+	     fRecHitLx[fClN] = hit->localPosition().x();
+	     fRecHitLy[fClN] = hit->localPosition().y();
+	     fRecHitGx[fClN] = hit->globalPosition().x();
+	     fRecHitGy[fClN] = hit->globalPosition().y();
+	     fRecHitGz[fClN] = hit->globalPosition().z();
+	     fRecHitQualWord[fClN]  = pixhit->rawQualityWord();
+	     
+
+	     fRecHitqBin[fClN]   = pixhit->qBin();
+	     /*
+	     if (pixhit->isOnEdge() == true) {
+	       fRecHitIsOnEdge[fClN] = 1;
+	     } else fRecHitIsOnEdge[fClN] = 0;
+	     if (pixhit->hasBadPixels() == true) {
+	       fRecHitHasBadPixels[fClN] = 1;
+	     } else fRecHitHasBadPixels[fClN] = 0;
+	     if (pixhit->spansTwoROCs() == true) {
+	       fRecHitSpansTwoROCs[fClN] = 1;
+	     } else fRecHitSpansTwoROCs[fClN] = 0;
+	     */
+
+
+	     if (pixhit->hasFilledProb() == true) {
+	       fRecHitProb[fClN]  = pixhit->clusterProbability(0);
+	       fRecHitProbX[fClN]  = pixhit->probabilityX();
+	       fRecHitProbY[fClN]  = pixhit->probabilityY();
+	       
+	     }
+	     else{
+	       fRecHitProb[fClN]  = -9999;
+	       fRecHitProbX[fClN]  = -9999;
+	       fRecHitProbY[fClN]  = -9999;
+
+
+	     }
+	   }//end of asking if fStoreRecHit is true
+
 	  
 	  fClSize[fClN]   = clust->size();
 	  fClSizeX[fClN]  = clust->sizeX();
@@ -1000,16 +1084,16 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	    fClLayer[fClN]     = DBlayer;
 	    fClLadder[fClN]    = DBladder; 
 	    fClModule[fClN]    = DBmodule;
-	    fClDisk[fClN]      = -99;
-	    fClBlade[fClN]     = -99;
-	    fClPanel[fClN]     = -99;
-	    fClPlaquette[fClN] = -99;
+	    fClDisk[fClN]      = -9999;
+	    fClBlade[fClN]     = -9999;
+	    fClPanel[fClN]     = -9999;
+	    fClPlaquette[fClN] = -9999;
 	  } 
 
 	  if (endcap) {
-	    fClLayer[fClN]     = -99;
-	    fClLadder[fClN]    = -99; 
-	    fClModule[fClN]    = -99;
+	    fClLayer[fClN]     = -9999;
+	    fClLadder[fClN]    = -9999; 
+	    fClModule[fClN]    = -9999;
 	    fClDisk[fClN]      =  DBdisk;
 	    fClBlade[fClN]     =  DBblade;
 	    fClPanel[fClN]     =  DBpanel;
@@ -1041,7 +1125,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	    fDgCol[fDgN]    = holdpix.y;
 	    fDgDetId[fDgN]  = DBdetid;
 	    onlineRocColRow(DBdetid, fDgRow[fDgN], fDgCol[fDgN], fDgRoc[fDgN], fDgRocC[fDgN], fDgRocR[fDgN]);
-	    fDgAdc[fDgN]    = -99.;
+	    fDgAdc[fDgN]    = -9999.;
 	    fDgCharge[fDgN] = holdpix.adc/1000.;
 
 	    LocalPoint lp = topol->localPosition(MeasurementPoint(holdpix.x, holdpix.y));
@@ -1061,7 +1145,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	      fClDgN[fClN] += 1;
 	    } else {
 	      fClDgI[fClN][DGPERCLMAX-1] = -98;
-	      fClDgN[fClN] = 99;
+	      fClDgN[fClN] = 9999;
 	    }
 
 	    ++fDgN;
@@ -1085,14 +1169,20 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
   // ----------------------------------------------------------------------
   // -- Clusters without tracks
-  for (TrackerGeometry::DetContainer::const_iterator it = TG->dets().begin(); it != TG->dets().end(); it++){
+  for (TrackerGeometry::DetContainer::const_iterator it = TG->dets().begin(); it != TG->dets().end(); ++it){
     if (dynamic_cast<PixelGeomDetUnit*>((*it)) != 0){ 
       DetId detId = (*it)->geographicalId();
+
+      edm::Handle<SiPixelRecHitCollection> recHitColl;
+      iEvent.getByLabel("siPixelRecHits", recHitColl );
+			  
+      
+     
 
       edmNew::DetSetVector<SiPixelCluster>::const_iterator isearch = clustColl.find(detId);
       if (isearch != clustColl.end()) {  // Not an empty iterator
 	edmNew::DetSet<SiPixelCluster>::const_iterator  di;
-	for (di=isearch->begin(); di!=isearch->end(); di++) {
+	for (di=isearch->begin(); di!=isearch->end(); ++di) {
 	  // unsigned int temp = clusterSet.size();
 	  clusterSet.insert(*di);
 	  // if (clusterSet.size() > temp) {
@@ -1146,6 +1236,22 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	    fClGx[fClN] = clustgp.x();
 	    fClGy[fClN] = clustgp.y();
 	    fClGz[fClN] = clustgp.z();
+
+
+	    if( fStoreRecHit == 1){ 
+	      fRecHitProb[fClN]  = -9999;
+	      fRecHitProbX[fClN]  = -9999;
+	      fRecHitProbY[fClN]  = -9999;
+	      fRecHitQualWord[fClN]  = 9999;
+	      fRecHitqBin[fClN]  = -9999;
+	      //  fRecHitSpansTwoROCs[fClN]   = -9999;
+	      
+	      fRecHitLx[fClN] = -9999;
+	      fRecHitLy[fClN] = -9999;
+	      fRecHitGx[fClN] = -9999;
+	      fRecHitGy[fClN] = -9999;
+	      fRecHitGz[fClN] = -9999;
+	    }
 	    
 	    int DBlayer, DBladder, DBmodule, DBdisk, DBblade, DBpanel; 
 
@@ -1154,17 +1260,17 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	      fClLayer[fClN]     = DBlayer;
 	      fClLadder[fClN]    = DBladder; 
 	      fClModule[fClN]    = DBmodule;
-	      fClDisk[fClN]      = -99;
-	      fClBlade[fClN]     = -99;
-	      fClPanel[fClN]     = -99;
-	      fClPlaquette[fClN] = -99;
+	      fClDisk[fClN]      = -9999;
+	      fClBlade[fClN]     = -9999;
+	      fClPanel[fClN]     = -9999;
+	      fClPlaquette[fClN] = -9999;
 	    } 
 
 	    if (endcap) {
 	      fpixNames(detId, DBdisk, DBblade, DBpanel, DBmodule); 
-	      fClLayer[fClN]     = -99;
-	      fClLadder[fClN]    = -99; 
-	      fClModule[fClN]    = -99;
+	      fClLayer[fClN]     = -9999;
+	      fClLadder[fClN]    = -9999; 
+	      fClModule[fClN]    = -9999;
 	      fClDisk[fClN]      =  DBdisk;
 	      fClBlade[fClN]     =  DBblade;
 	      fClPanel[fClN]     =  DBpanel;
@@ -1195,7 +1301,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	      fDgCol[fDgN]    = holdpix.y;
 	      fDgDetId[fDgN]  = detId;
 	      onlineRocColRow(detId, fDgRow[fDgN], fDgCol[fDgN], fDgRoc[fDgN], fDgRocC[fDgN], fDgRocR[fDgN]);
-	      fDgAdc[fDgN]    = -99.;
+	      fDgAdc[fDgN]    = -9999.;
 	      fDgCharge[fDgN] = holdpix.adc/1000.;
 	      
 	      LocalPoint lp = topol->localPosition(MeasurementPoint(holdpix.x, holdpix.y));
@@ -1323,6 +1429,12 @@ void PixelTree::init() {
 
     fClLayer[i] = fClLadder[i] = fClModule[i] = fClFlipped[i] = -9999;
     fClDisk[i] = fClBlade[i] = fClPanel[i] = fClPlaquette[i] = -9999;
+
+  fRecHitLx[i]= fRecHitLy[i]=fRecHitGx[i]= fRecHitGy[i]= fRecHitGz[i]= fRecHitProb[i]= fRecHitProbX[i]=  fRecHitProbY[i]= -9999.;
+  fRecHitqBin[i]= -9999;
+  // fRecHitIsOnEdge[i]=fRecHitHasBadPixels[i]= -9999;
+  fRecHitQualWord[i] = 9999;
+
   }
 
   fDgN = 0; 
@@ -1394,7 +1506,7 @@ float PixelTree::correctedTime(const  reco::Muon & aMuon) {
 void PixelTree::isPixelTrack(const edm::Ref<std::vector<Trajectory> > &refTraj, bool &isBpixtrack, bool &isFpixtrack) {
   std::vector<TrajectoryMeasurement> tmeasColl = refTraj->measurements();
   std::vector<TrajectoryMeasurement>::const_iterator tmeasIt;
-  for (tmeasIt = tmeasColl.begin(); tmeasIt != tmeasColl.end(); tmeasIt++) {
+  for (tmeasIt = tmeasColl.begin(); tmeasIt != tmeasColl.end(); ++tmeasIt) {
     if (!tmeasIt->updatedState().isValid()) continue; 
     TransientTrackingRecHit::ConstRecHitPointer testhit = tmeasIt->recHit();
     if (!testhit->isValid() || testhit->geographicalId().det() != DetId::Tracker) continue; 
@@ -1418,7 +1530,7 @@ void PixelTree::dumpDetIds(const edm::EventSetup& iSetup) {
   cout << " *** I have " << pDD->dets().size() <<" detectors"<<std::endl;
   cout << " *** I have " << pDD->detTypes().size() <<" types"<<std::endl;
   
-  for (TrackerGeometry::DetContainer::const_iterator it = pDD->dets().begin(); it != pDD->dets().end(); it++){
+  for (TrackerGeometry::DetContainer::const_iterator it = pDD->dets().begin(); it != pDD->dets().end(); ++it){
     
     if(dynamic_cast<PixelGeomDetUnit*>((*it))!=0){
       DetId detId = (*it)->geographicalId();

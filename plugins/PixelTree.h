@@ -86,6 +86,7 @@ class PixelTree : public edm::EDAnalyzer {
   edm::InputTag   fPrimaryVertexCollectionLabel;
   edm::InputTag   fMuonCollectionLabel, fTrackCollectionLabel, fTrajectoryInputLabel, fPixelClusterLabel;
   edm::InputTag   fL1GTReadoutRecordLabel, fL1GTmapLabel, fHLTResultsLabel;
+  int             fStoreRecHit;
 
   edm::ESHandle<SiPixelFedCablingMap> fCablingMap;
 
@@ -152,6 +153,12 @@ class PixelTree : public edm::EDAnalyzer {
   int   fClDetId[CLUSTERMAX];
   int   fClLayer[CLUSTERMAX],  fClLadder[CLUSTERMAX], fClModule[CLUSTERMAX];
   int   fClFlipped[CLUSTERMAX], fClDisk[CLUSTERMAX],  fClBlade[CLUSTERMAX], fClPanel[CLUSTERMAX], fClPlaquette[CLUSTERMAX];
+
+  float fRecHitLx[CLUSTERMAX], fRecHitLy[CLUSTERMAX],fRecHitGx[CLUSTERMAX], fRecHitGy[CLUSTERMAX], fRecHitGz[CLUSTERMAX];
+  float fRecHitProb[CLUSTERMAX], fRecHitProbX[CLUSTERMAX],  fRecHitProbY[CLUSTERMAX];
+  uint32_t fRecHitQualWord[CLUSTERMAX];
+  int fRecHitqBin[CLUSTERMAX];
+  //int   fRecHitIsOnEdge[CLUSTERMAX],fRecHitHasBadPixels[CLUSTERMAX], fRecHitSpansTwoROCs[CLUSTERMAX];
 
   // -- digis
   static const int DIGIMAX = 1000000; 
