@@ -59,43 +59,46 @@ process.maxEvents = cms.untracked.PSet(
 process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
 process.TrackRefitter.src = 'generalTracks::EXPRESS'
 
-# -- skimming
-process.superPointingFilter = cms.EDFilter(
-    "HLTMuonPointingFilter",
-    SALabel = cms.string("generalTracks"),
-    PropagatorName = cms.string("SteppingHelixPropagatorAny"),
-    radius = cms.double(10.0),
-    maxZ = cms.double(50.0)
+# ----------------------------------------------------------------------
+process.PixelFilter = cms.EDFilter(
+    "SkimEvents",
+    verbose                        = cms.untracked.int32(2),
+    filterOnPrimaryVertex          = cms.untracked.int32(1),
+    primaryVertexCollectionLabel   = cms.untracked.InputTag('offlinePrimaryVertices::EXPRESS'),
+    filterOnTracks                 = cms.untracked.int32(1),
+    trackCollectionLabel           = cms.untracked.InputTag('generalTracks::EXPRESS'),
+    filterOnPixelCluster           = cms.untracked.int32(1),
+    PixelClusterCollectionLabel    = cms.untracked.InputTag('siPixelClusters::EXPRESS'),
+    filterOnL1TechnicalTriggerBits = cms.untracked.int32(0),
+    L1TechnicalTriggerBits         = cms.untracked.vint32(40, 41)
     )
-
-
-
 
 # -- the tree filler
 try:
     rootFileName = os.environ["JOB"] + ".root"
 except KeyError:
-    rootFileName = "/afs/cern.ch/user/u/ursl/scratch0/pixel-123151-ExpressPhysics2.root"
+    rootFileName = "pixel-123151-ExpressPhysics.root"
 
 process.PixelTree = cms.EDAnalyzer(
     "PixelTree",
-    verbose                = cms.untracked.int32(0),
-    rootFileName           = cms.untracked.string(rootFileName),
-    dumpAllEvents          = cms.untracked.int32(0),
-    muonCollectionLabel    = cms.untracked.InputTag('muons'),
-    trajectoryInputLabel   = cms.untracked.InputTag('TrackRefitter'),
-    trackCollectionLabel   = cms.untracked.InputTag('generalTracks::EXPRESS'),
-    pixelClusterLabel      = cms.untracked.InputTag('siPixelClusters'),
-    L1GTReadoutRecordLabel = cms.untracked.InputTag('gtDigis'), 
-    hltL1GtObjectMap       = cms.untracked.InputTag('hltL1GtObjectMap'), 
-    HLTResultsLabel        = cms.untracked.InputTag('TriggerResults::HLT')
+    verbose                      = cms.untracked.int32(0),
+    rootFileName                 = cms.untracked.string(rootFileName),
+    dumpAllEvents                = cms.untracked.int32(0),
+    PrimaryVertexCollectionLabel = cms.untracked.InputTag('offlinePrimaryVertices::EXPRESS'),
+    muonCollectionLabel          = cms.untracked.InputTag('muons'),
+    trajectoryInputLabel         = cms.untracked.InputTag('TrackRefitter'),
+    trackCollectionLabel         = cms.untracked.InputTag('generalTracks::EXPRESS'),
+    pixelClusterLabel            = cms.untracked.InputTag('siPixelClusters::EXPRESS'),
+    L1GTReadoutRecordLabel       = cms.untracked.InputTag('gtDigis'), 
+    hltL1GtObjectMap             = cms.untracked.InputTag('hltL1GtObjectMap'), 
+    HLTResultsLabel              = cms.untracked.InputTag('TriggerResults::HLT')
     )
 
 
 
 # -- Path
 process.p = cms.Path(
-#    process.superPointingFilter*
+    process.PixelFilter* 
     process.TrackRefitter*
     process.PixelTree
     )
