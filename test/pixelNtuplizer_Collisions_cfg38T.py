@@ -131,7 +131,7 @@ process.p = cms.Path(
 #    process.fedInRunFilter*
     # standard reco sequence
     process.RawToDigi*
-    process.reconstruction_withRS*
+    process.reconstruction*
     # more filters:
 #    process.MuonTOFFilter_trackQuality *
     # create rechits

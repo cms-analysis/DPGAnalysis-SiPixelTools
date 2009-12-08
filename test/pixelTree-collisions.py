@@ -14,7 +14,7 @@ process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #process.GlobalTag.globaltag = "GR09_E_V6::All"
-process.GlobalTag.globaltag = "FIRSTCOLL::All"
+process.GlobalTag.globaltag = "GR09_p_V7::All"
 
 # -- Input files
 process.source = cms.Source(
@@ -37,6 +37,10 @@ process.source = cms.Source(
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
     )
+
+#process.load("Configuration.StandardSequences.RawToDigi_Data_cff")
+#process.load("Configuration.StandardSequences.Reconstruction_cff")
+
 
 # -- Trajectory producer
 process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
@@ -61,17 +65,17 @@ except KeyError:
 
 process.PixelTree = cms.EDAnalyzer(
     "PixelTree",
-    verbose                = cms.untracked.int32(2),
+    verbose                = cms.untracked.int32(0),
     rootFileName           = cms.untracked.string(rootFileName),
     dumpAllEvents          = cms.untracked.int32(1),
     muonCollectionLabel    = cms.untracked.InputTag('muons'),
     trajectoryInputLabel   = cms.untracked.InputTag('TrackRefitter'),
-    trackCollectionLabel   = cms.untracked.InputTag('generalTracks::EXPRESS'),
+    trackCollectionLabel   = cms.untracked.InputTag('generalTracks'),
     pixelClusterLabel      = cms.untracked.InputTag('siPixelClusters'),
     L1GTReadoutRecordLabel = cms.untracked.InputTag("gtDigis"),
     hltL1GtObjectMap       = cms.untracked.InputTag("hltL1GtObjectMap"),
     HLTResultsLabel        = cms.untracked.InputTag("TriggerResults::HLT"),
-    storeRecHit        = cms.untracked.int32(1)
+    storeRecHit            = cms.untracked.int32(1)
     )
 
 

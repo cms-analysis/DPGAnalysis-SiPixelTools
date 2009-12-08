@@ -34,8 +34,14 @@ process.maxEvents = cms.untracked.PSet(
     )
 
 
+#process.load("Configuration.StandardSequences.RawToDigi_Data_cff")
+#process.load("Configuration.StandardSequences.Reconstruction_cff")
+
+
 # -- Trajectory producer
 process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
+
+
 
 
 # -- the tree filler
@@ -46,15 +52,16 @@ except KeyError:
 
 process.PixelTree = cms.EDAnalyzer(
     "PixelTree",
-    verbose                = cms.untracked.int32(1),
+    verbose                = cms.untracked.int32(0),
     rootFileName           = cms.untracked.string(rootFileName),
-    trajectoryInputLabel   = cms.untracked.InputTag('TrackRefitterP5'),
+    trajectoryInputLabel   = cms.untracked.InputTag('TrackRefitter'),
     muonCollectionLabel    = cms.untracked.InputTag('muons'),
-    trackCollectionLabel   = cms.untracked.InputTag('TrackRefitterP5'),
+    trackCollectionLabel   = cms.untracked.InputTag('generalTracks'),
     pixelClusterLabel      = cms.untracked.InputTag('siPixelClusters'),
     L1GTReadoutRecordLabel = cms.untracked.InputTag('gtDigis'), 
     hltL1GtObjectMap       = cms.untracked.InputTag('hltL1GtObjectMap'), 
-    HLTResultsLabel        = cms.untracked.InputTag('TriggerResults::HLT')
+    HLTResultsLabel        = cms.untracked.InputTag('TriggerResults::HLT'),
+    storeRecHit            = cms.untracked.int32(1)
     )
 
 
@@ -67,7 +74,7 @@ process.p = cms.Path(
     # filters:
     #process.fedInRunFilter*
     # standard reco sequence
-    # process.RawToDigi*process.reconstructionCosmics*
+#    process.RawToDigi*process.reconstructionCosmics*
     #process.trackReconstruction*
     # more filters:
     #process.MuonTOFFilter_trackQuality *
