@@ -286,6 +286,13 @@ void PixelTree::beginJob(const edm::EventSetup& es) {
     fTree->Branch("RecHitProbY",      fRecHitProbY,       "RecHitProbY[ClN]/F");
     fTree->Branch("RecHitQualWord",   fRecHitQualWord,    "RecHitQualWord[ClN]/i");
     fTree->Branch("RecHitqBin",       fRecHitqBin,        "RecHitqBin[ClN]/I");
+    /*  fTree->Branch("RecHitResidualX",  fRecHitResidualX,   "RecHitResidualX[ClN]/F");
+    fTree->Branch("RecHitResidualY",  fRecHitResidualY,   "RecHitResidualY[ClN]/F");
+    fTree->Branch("RecHitResErrX",    fRecHitResErrX,      "RecHitResErrX[ClN]/F");
+    fTree->Branch("RecHitResErrY",    fRecHitResErrY,      "RecHitResErrY[ClN]/F");
+    fTree->Branch("RecHit_hit_errX",  fRecHit_hit_errX,      "RecHit_hit_errX[ClN]/F");
+    fTree->Branch("RecHit_hit_errY",  fRecHit_hit_errY,      "RecHit_hit_errY[ClN]/F");*/
+   
     //    fTree->Branch("RecHitSpansTwoROCs",fRecHitSpansTwoROCs,"RecHitSpansTwoROCs[ClN]/I");
     // fTree->Branch("RecHitIsOnEdge"    ,fRecHitIsOnEdge,    "RecHitIsOnEdge[ClN]/I");
     //fTree->Branch("RecHitHasBadPixels"    ,fRecHitHasBadPixels,    "RecHitHasBadPixels[ClN]/I");
@@ -715,6 +722,23 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	continue; 
       } 
 
+      int pixelHits = 0;
+      int stripHits = 0;
+
+      std::vector<TrajectoryMeasurement> checkColl = refTraj->measurements();
+
+      //count number of pixel and strip hits
+      for(std::vector<TrajectoryMeasurement>::const_iterator checkTraj = checkColl.begin(), checkTrajEnd = checkColl.end();checkTraj != checkTrajEnd; ++checkTraj) {
+	if(! checkTraj->updatedState().isValid()) continue;
+	TransientTrackingRecHit::ConstRecHitPointer testhit = checkTraj->recHit();
+	if(! testhit->isValid() || testhit->geographicalId().det() != DetId::Tracker ) continue;
+	uint testSubDetID = (testhit->geographicalId().subdetId());
+	if(testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap) pixelHits++;
+	else if (testSubDetID == StripSubdetector::TIB || testSubDetID == StripSubdetector::TOB ||
+		 testSubDetID == StripSubdetector::TID || testSubDetID == StripSubdetector::TEC) stripHits++;
+      }//end of for trajectory loop 
+
+
       fTkCharge[fTkN] = trackref->charge();
       fTkChi2[fTkN]   = trackref->chi2();
       fTkNdof[fTkN]   = trackref->ndof();
@@ -729,7 +753,8 @@ void PixelTree::analyze(const edm::Event& iEvent,
       fTkVz[fTkN]     = trackref->vz();
       fTkType[fTkN]   = 1;
       fTkMuI[fTkN]    = -1;
-
+      fTkNumPixelHits[fTkN] = pixelHits;
+  
       // ----------------------------------------------------------------------
       // -- Clusters associated with a track
       std::vector<TrajectoryMeasurement> tmeasColl =refTraj->measurements();
@@ -819,6 +844,12 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	     fRecHitProbY[fClN]  = -9999;
 	     fRecHitQualWord[fClN]  = 9999;
 	     fRecHitqBin[fClN]  =- 9999;
+	     /*  fRecHitResidualX =- 9999;
+	     fRecHitResidualY =- 9999;
+	     fRecHitResErrX =- 9999;
+	     fRecHitResErrY =- 9999;
+	     fRecHit_hit_errX =- 9999;
+	     fRecHit_hit_errY =- 9999;*/
 	     //    fRecHitSpansTwoROCs[fClN]   =- 9999;
 	     //fRecHitIsOnEdge[fClN] =- 9999;
 	     // fRecHitHasBadPixels[fClN] =- 9999;
@@ -883,6 +914,8 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
 	  fTkAlpha[fTkN][iCluster] = alpha;
 	  fTkBeta[fTkN][iCluster] = beta;
+
+	 
 
 	  ++nCl0;
 
@@ -1025,6 +1058,16 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	  GlobalPoint clustgp = theGeomDet->surface().toGlobal( clustlp );
 
 
+	  /*double dR = -999, dZ = -999;
+
+	  align::LocalVector res = tsos.localPosition() - hit->localPosition();
+	  LocalError err1 = tsos.localError().positionError();
+	  LocalError err2 = hit->localPositionError();
+	  float errX = std::sqrt( err1.xx() + err2.xx() );
+	  float errY = std::sqrt( err1.yy() + err2.yy() );
+	  */
+
+
 	   if( fStoreRecHit == 1){
 	 
 	     fRecHitLx[fClN] = hit->localPosition().x();
@@ -1035,7 +1078,19 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	     fRecHitQualWord[fClN]  = pixhit->rawQualityWord();
 	     
 
-	     fRecHitqBin[fClN]   = pixhit->qBin();
+	     /* fRecHitqBin[fClN]   = pixhit->qBin();
+
+	     fRecHitResidualX =res.x();
+	     fRecHitResErrX = errX;
+	     fRecHitResErrY = errY;
+	     fRecHit_hit_errX = sqrt(err2.xx());
+	     fRecHit_hit_errY = sqrt(err2.yy());
+	     dZ = gROrZDirection.z() - gPModule.z();
+	     if(dR != -999)  fRecHitResidualY = dR;
+	     else if(dZ != -999)  fRecHitResidualY = res.y() * (dZ >=0.? +1 : -1) ;
+	     else  fRecHitResidualY = res.y();
+	     */
+
 	     /*
 	     if (pixhit->isOnEdge() == true) {
 	       fRecHitIsOnEdge[fClN] = 1;
@@ -1157,6 +1212,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	  ++fClN;
 	  ++iCluster;
 	}
+	
 
       }
 

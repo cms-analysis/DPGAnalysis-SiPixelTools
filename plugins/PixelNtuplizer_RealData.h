@@ -54,6 +54,8 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
   	       const RectangularPixelTopology *, const edm::SimTrackContainer& );
   void fillTrack(TrajectoryStateOnSurface&,const Trajectory&, int);
 
+  void fillTrig(const edm::Event&);
+
  void isPixelTrack(const edm::Ref<std::vector<Trajectory> > &refTraj, bool &isBpixtrack, bool &isFpixtrack);
   
   bool isValidMuonAssoc(const edm::Event& iEvent);		   
@@ -104,6 +106,7 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
     uint32_t trackNumber;
     int bunchCrossing;
     int orbit;
+    unsigned int  L1TT[4];
 
     void init();
   } evt_;

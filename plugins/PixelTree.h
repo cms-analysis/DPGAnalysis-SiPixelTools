@@ -138,6 +138,7 @@ class PixelTree : public edm::EDAnalyzer {
   float fTkRes2X[TRACKMAX][CLPERTRACKMAX];
   float fTkRes2Xe[TRACKMAX][CLPERTRACKMAX];
   int   fTkType[TRACKMAX], fTkMuI[TRACKMAX], fTkClN[TRACKMAX], fTkClI[TRACKMAX][CLPERTRACKMAX]; 
+  int fTkNumPixelHits[TRACKMAX];
 
   // -- clusters
   static const int CLUSTERMAX = 100000; 
@@ -158,6 +159,12 @@ class PixelTree : public edm::EDAnalyzer {
   float fRecHitProb[CLUSTERMAX], fRecHitProbX[CLUSTERMAX],  fRecHitProbY[CLUSTERMAX];
   uint32_t fRecHitQualWord[CLUSTERMAX];
   int fRecHitqBin[CLUSTERMAX];
+  float fRecHitResidualX;
+  float fRecHitResidualY;
+  float fRecHitResErrX;
+  float fRecHitResErrY;
+  float fRecHit_hit_errX;
+  float fRecHit_hit_errY;
   //int   fRecHitIsOnEdge[CLUSTERMAX],fRecHitHasBadPixels[CLUSTERMAX], fRecHitSpansTwoROCs[CLUSTERMAX];
 
   // -- digis

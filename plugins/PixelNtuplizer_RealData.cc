@@ -6,6 +6,10 @@
 //          Freya Blekman, Cornell
 //
 //
+
+
+#include <bitset>
+
 #include "DataFormats/MuonReco/interface/MuonFwd.h"
 #include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/MuonReco/interface/MuonTime.h"
@@ -35,6 +39,21 @@
 // SimDataFormats
 #include "SimDataFormats/TrackingHit/interface/PSimHitContainer.h"
 #include "SimTracker/TrackerHitAssociation/interface/TrackerHitAssociator.h"
+
+#include "CondFormats/DataRecord/interface/L1GtTriggerMenuRcd.h"
+#include "CondFormats/L1TObjects/interface/L1GtTriggerMenu.h"
+#include "CondFormats/L1TObjects/interface/L1GtTriggerMenuFwd.h"
+
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutSetupFwd.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutSetup.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerObjectMapRecord.h"
+#include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
+
+#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
+
+#include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
 
 // For ROOT
 #include <TROOT.h>
@@ -96,6 +115,8 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
   // creating a sub branch for each data member of the Event object.
   //  std::cout << "Making evt branch:" << std::endl;
   PixHitTree_->Branch("evt", &evt_, "run/i:evtnum:lumiBlock:trackNumber:bunchCrossing/I:orbit", bufsize);
+  PixHitTree_->Branch("l1tt",         evt_.L1TT,          "l1tt[4]/i");
+
   //  std::cout << "Making det branch:" << std::endl;
   PixHitTree_->Branch("det", &det_, "thickness/F:cols/I:rows/I:layer/I:ladder/I:module/I:disk/I:blade/I:panel/I:plaquette/I:isflipped/I", bufsize);
   //  std::cout << "Making vertex branch:" << std::endl;
@@ -478,13 +499,16 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 	  
 
 	  // get the contents
+	 
 	  fillEvt(iEvent,NbrTracks);
 	  fillDet(hit_detId, IntSubDetID, theGeomDet);
 	  fillVertex(theGeomDet);
 	  fillClust(*clust, topol, theGeomDet, tsos);
 	  fillPix(*clust, topol, theGeomDet);
 	  fillTrack(tsos, *refTraj, TrackNumber);
+	  fillTrig(iEvent);
 
+	  
 	  // fill simulated hits if applicable
 	  if(isSim == true) {
 	    edm::Handle<edm::SimTrackContainer> simtracks;
@@ -726,7 +750,44 @@ void PixelNtuplizer_RealData::fillEvt(const edm::Event& iEvent,int NbrTracks)
   evt_.trackNumber = NbrTracks;
   evt_.bunchCrossing = iEvent.bunchCrossing();
   evt_.orbit = iEvent.orbitNumber();
+
+
+
 }
+
+void PixelNtuplizer_RealData::fillTrig(const edm::Event& iEvent){
+
+// -- L1
+	  Handle<L1GlobalTriggerReadoutRecord> L1GTRR;
+	  iEvent.getByLabel("gtDigis",L1GTRR);
+	  Handle<L1GlobalTriggerObjectMapRecord> hL1GTmap; 
+	  iEvent.getByLabel("hltL1GtObjectMap", hL1GTmap);
+
+	  if (L1GTRR.isValid()) {
+
+	      int itrig(0); 
+	      for (unsigned int iTrig = 0; iTrig < L1GTRR->decisionWord().size(); ++iTrig) {
+		int t1flag = L1GTRR->technicalTriggerWord()[iTrig]; 
+		itrig = iTrig%32; 
+		if (iTrig < 32) {
+		  if (t1flag) evt_.L1TT[0] |= (0x1 << itrig);
+		} else if (iTrig < 64) {
+		  if (t1flag) evt_.L1TT[1] |= (0x1 << itrig);
+		} else if (iTrig < 96) {
+		 
+		} else if (iTrig < 128) {
+		 
+		}
+	      }
+	  }
+  
+	  // cout << " trig " << std::bitset<32>(evt_.L1TT[1]) << endl;
+
+
+
+
+}
+
 
 
 void PixelNtuplizer_RealData::fillDet(const DetId &tofill, uint subdetid, const PixelGeomDetUnit* PixGeom)
