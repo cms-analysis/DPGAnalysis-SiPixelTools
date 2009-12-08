@@ -41,7 +41,7 @@ process.TrackRefitter.src = 'generalTracks::EXPRESS'
 # ----------------------------------------------------------------------
 process.PixelFilter = cms.EDFilter(
     "SkimEvents",
-    verbose                        = cms.untracked.int32(2),
+    verbose                        = cms.untracked.int32(0),
     filterOnPrimaryVertex          = cms.untracked.int32(1),
     primaryVertexCollectionLabel   = cms.untracked.InputTag('offlinePrimaryVertices::EXPRESS'),
     filterOnTracks                 = cms.untracked.int32(1),
