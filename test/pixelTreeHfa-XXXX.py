@@ -6,7 +6,7 @@ process = cms.Process("HFA")
 # ----------------------------------------------------------------------
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
 # ----------------------------------------------------------------------
@@ -32,33 +32,14 @@ process.source = cms.Source(
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 
-# ----------------------------------------------------------------------
-# -- PixelTree
+# -- Trajectory producer
 process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
 process.TrackRefitter.src = 'generalTracks'
 
-try:
-    rootFileName = os.environ["JOB"] + "-pixel.root"
-except KeyError:
-    rootFileName = "rfio:/castor/cern.ch/cms/store/group/tracker/pixel/PixelTree/test/pixelTree-XXXX.root"
-
-process.PixelTree = cms.EDAnalyzer(
-    "PixelTree",
-    verbose                = cms.untracked.int32(2),
-    rootFileName           = cms.untracked.string(rootFileName),
-    muonCollectionLabel    = cms.untracked.InputTag('muons'),
-    trackCollectionLabel   = cms.untracked.InputTag('generalTracks'),
-    trajectoryInputLabel   = cms.untracked.InputTag('TrackRefitter'),
-    pixelClusterLabel      = cms.untracked.InputTag('siPixelClusters'),
-    L1GTReadoutRecordLabel = cms.untracked.InputTag("gtDigis"), 
-    hltL1GtObjectMap       = cms.untracked.InputTag("hltL1GtObjectMap"), 
-    HLTResultsLabel        = cms.untracked.InputTag("TriggerResults::HLT")
-    )
-
-# ----------------------------------------------------------------------
+# -- skimming
 process.PixelFilter = cms.EDFilter(
     "SkimEvents",
-    verbose                        = cms.untracked.int32(2),
+    verbose                        = cms.untracked.int32(0),
     filterOnPrimaryVertex          = cms.untracked.int32(1),
     primaryVertexCollectionLabel   = cms.untracked.InputTag('offlinePrimaryVertices'),
     filterOnTracks                 = cms.untracked.int32(1),
@@ -68,6 +49,25 @@ process.PixelFilter = cms.EDFilter(
     filterOnL1TechnicalTriggerBits = cms.untracked.int32(1),
     L1TechnicalTriggerBits         = cms.untracked.vint32(40, 41)
     
+    )
+
+# -- the tree filler
+try:
+    rootFileName = os.environ["JOB"] + "-pixel.root"
+except KeyError:
+    rootFileName = "rfio:/castor/cern.ch/cms/store/group/tracker/pixel/PixelTree/reco/pixelTree-XXXX.root"
+
+process.PixelTree = cms.EDAnalyzer(
+    "PixelTree",
+    verbose                = cms.untracked.int32(0),
+    rootFileName           = cms.untracked.string(rootFileName),
+    muonCollectionLabel    = cms.untracked.InputTag('muons'),
+    trackCollectionLabel   = cms.untracked.InputTag('generalTracks'),
+    trajectoryInputLabel   = cms.untracked.InputTag('TrackRefitter'),
+    pixelClusterLabel      = cms.untracked.InputTag('siPixelClusters'),
+    L1GTReadoutRecordLabel = cms.untracked.InputTag("gtDigis"), 
+    hltL1GtObjectMap       = cms.untracked.InputTag("hltL1GtObjectMap"), 
+    HLTResultsLabel        = cms.untracked.InputTag("TriggerResults::HLT")
     )
 
 
@@ -96,7 +96,7 @@ process.genDump = cms.EDAnalyzer(
 try:
     rootFileName = os.environ["JOB"] + "-hfa.root"
 except KeyError:
-    rootFileName = "rfio:/castor/cern.ch/cms/store/group/tracker/pixel/PixelTree/test/hfa-XXXX.root"
+    rootFileName = "rfio:/castor/cern.ch/cms/store/group/tracker/pixel/PixelTree/reco/hfa-XXXX.root"
 
 process.tree = cms.EDAnalyzer(
     "HFTree",
@@ -222,7 +222,7 @@ process.b2muD0Dump = cms.EDAnalyzer(
     deltaMDs     = cms.untracked.double(0.3)
     )
 
-# ----------------------------------------------------------------------
+# -- Path
 process.p = cms.Path(
     process.PixelFilter* 
     process.TrackRefitter*

@@ -127,6 +127,7 @@ bool SkimEvents::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
       for (unsigned int iTrig = 0; iTrig < fL1TechnicalTriggerBits.size(); ++iTrig) {
 	goodL1Technical = L1GTRR->technicalTriggerWord()[fL1TechnicalTriggerBits[iTrig]]; 
 	if (goodL1Technical) {
+	  if (fVerbose > 1) cout << "==>SkimEvents> trigger bit " << fL1TechnicalTriggerBits[iTrig] << " set" << endl;
 	  goodL1Technical = fL1TechnicalTriggerBits[iTrig];
 	  result = true; 
 	  break;
@@ -145,6 +146,8 @@ bool SkimEvents::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
     // -- when filtering on trigger bits, skip rest if untriggered event
     if (!result) {
+      if (fVerbose > 1) cout << "==>SkimEvents> trigger bits not set, skipping event" << endl;
+      ++fNfailed;
       return result; 
     }
       
@@ -264,11 +267,11 @@ void  SkimEvents::beginJob(const edm::EventSetup&) {
 void  SkimEvents::endJob() {
 
     cout << "SkimEvents: " 
-	 << "passed events: " << fNpassed
-	 << "failed events: " << fNfailed
-	 << "fNpv: " << fNpv
-	 << "fNtk: " << fNtk
-	 << "fNpx: " << fNpx
+	 << " passed events: " << fNpassed
+	 << " failed events: " << fNfailed
+	 << " fNpv: " << fNpv
+	 << " fNtk: " << fNtk
+	 << " fNpx: " << fNpx
 	 << endl;
 
 }

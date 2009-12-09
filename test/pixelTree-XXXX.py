@@ -5,8 +5,12 @@ import os
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("Demo")
+
+# ----------------------------------------------------------------------
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
+process.MessageLogger.cerr.threshold = 'INFO'
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
 # -- Database configuration
 process.load("CondCore.DBCommon.CondDBCommon_cfi")
@@ -54,7 +58,7 @@ process.PixelFilter = cms.EDFilter(
 try:
     rootFileName = os.environ["JOB"] + ".root"
 except KeyError:
-    rootFileName = "rfio:/castor/cern.ch/cms/store/group/tracker/pixel/PixelTree/test/pixelTree-XXXX.root"
+    rootFileName = "rfio:/castor/cern.ch/cms/store/group/tracker/pixel/PixelTree/reco/pixelTree-XXXX.root"
 
 process.PixelTree = cms.EDAnalyzer(
     "PixelTree",
