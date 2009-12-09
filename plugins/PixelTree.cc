@@ -152,7 +152,7 @@ void PixelTree::beginJob(const edm::EventSetup& es) {
 
   // -- switch to direct TFile as a *** glibc detected *** corrupted double-linked list: 0x13389518 ***
   //    leaves the TFileService empty...
-  fFile = new TFile(fRootFileName.c_str(), "RECREATE");
+  fFile = TFile::Open(fRootFileName.c_str(), "RECREATE");
   fFile->cd();
 
   fTree = new TTree("pixelTree", "pixelTree");
