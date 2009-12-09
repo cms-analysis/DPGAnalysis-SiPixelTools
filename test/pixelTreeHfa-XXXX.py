@@ -96,7 +96,7 @@ process.genDump = cms.EDAnalyzer(
 try:
     rootFileName = os.environ["JOB"] + "-hfa.root"
 except KeyError:
-    rootFileName = "rfio:/castor/cern.ch/cms/store/group/tracker/pixel/PixelTree/reco/hfa-XXXX.root"
+    rootFileName = "rfio:/castor/cern.ch/user/u/ursl/root/hfa/hfa-XXXX.root"
 
 process.tree = cms.EDAnalyzer(
     "HFTree",
