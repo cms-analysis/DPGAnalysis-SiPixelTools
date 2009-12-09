@@ -159,8 +159,8 @@ process.bmtDump = cms.EDAnalyzer(
     muonPt        = cms.untracked.double(1.0),
     trackPt       = cms.untracked.double(0.5),
     type          = cms.untracked.int32(1300), 
-    massLow       = cms.untracked.double(1.5), 
-    massHigh      = cms.untracked.double(11.0)
+    massLow       = cms.untracked.double(0.5), 
+    massHigh      = cms.untracked.double(12.0)
     )
 
 # ----------------------------------------------------------------------
@@ -170,9 +170,9 @@ process.bmmDump = cms.EDAnalyzer(
     muonsLabel   = cms.untracked.InputTag("muons::EXPRESS"),
     tracksLabel  = cms.untracked.InputTag('generalTracks::EXPRESS'),
     muonPt       = cms.untracked.double(1.0),
-    type         = cms.untracked.int32(531), 
-    massLow      = cms.untracked.double(4.0), 
-    massHigh     = cms.untracked.double(6.0)
+    type         = cms.untracked.int32(1313), 
+    massLow      = cms.untracked.double(0.5), 
+    massHigh     = cms.untracked.double(12.0)
     )
 
 # ----------------------------------------------------------------------
