@@ -3,6 +3,7 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("Demo")
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 # -- Database configuration
 process.load("CondCore.DBCommon.CondDBCommon_cfi")
@@ -18,11 +19,6 @@ process.GlobalTag.globaltag = "GR09_P_V6::All"
 # -- Input files
 process.source = cms.Source(
     "PoolSource",
-    # replace with your files
-    #lastRun = cms.untracked.uint32(64789),
-    #timetype = cms.string('runnumber'),
-    #firstRun = cms.untracked.uint32(64108),
-    #interval = cms.uint32(1),
     fileNames = cms.untracked.vstring(
     #    "file:/afs/cern.ch/cms/CAF/CMSCOMM/COMM_GLOBAL/bit40or41skim.root"
     #    "rfio:/castor/cern.ch/user/c/chiochia/09_beam_commissioning/BSCskim_123151_Express.root"
@@ -69,7 +65,7 @@ process.PixelFilter = cms.EDFilter(
     trackCollectionLabel           = cms.untracked.InputTag('generalTracks::EXPRESS'),
     filterOnPixelCluster           = cms.untracked.int32(1),
     PixelClusterCollectionLabel    = cms.untracked.InputTag('siPixelClusters::EXPRESS'),
-    filterOnL1TechnicalTriggerBits = cms.untracked.int32(0),
+    filterOnL1TechnicalTriggerBits = cms.untracked.int32(1),
     L1TechnicalTriggerBits         = cms.untracked.vint32(40, 41)
     )
 
@@ -94,15 +90,9 @@ process.PixelTree = cms.EDAnalyzer(
     HLTResultsLabel              = cms.untracked.InputTag('TriggerResults::HLT')
     )
 
-
-
 # -- Path
 process.p = cms.Path(
     process.PixelFilter* 
     process.TrackRefitter*
     process.PixelTree
     )
-
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
-#process.MessageLogger.cerr.threshold = 'INFO'
-#process.TrackerDigiGeometryESModule.applyAlignment = True

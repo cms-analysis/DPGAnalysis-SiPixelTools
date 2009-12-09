@@ -1,8 +1,12 @@
+# ----------------------------------------------------------------------
+# -- RECO py template file for dumping the PixelTree only
+# ----------------------------------------------------------------------
 import os
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("Demo")
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 # -- Database configuration
 process.load("CondCore.DBCommon.CondDBCommon_cfi")
@@ -18,11 +22,6 @@ process.GlobalTag.globaltag = "GR09_P_V6::All"
 # -- Input files
 process.source = cms.Source(
     "PoolSource",
-    # replace with your files
-    #lastRun = cms.untracked.uint32(64789),
-    #timetype = cms.string('runnumber'),
-    #firstRun = cms.untracked.uint32(64108),
-    #interval = cms.uint32(1),
     fileNames = cms.untracked.vstring(
     REPLACEFILES
     )
@@ -38,14 +37,6 @@ process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
 process.TrackRefitter.src = 'generalTracks'
 
 # -- skimming
-process.superPointingFilter = cms.EDFilter(
-    "HLTMuonPointingFilter",
-    SALabel = cms.string("generalTracks"),
-    PropagatorName = cms.string("SteppingHelixPropagatorAny"),
-    radius = cms.double(10.0),
-    maxZ = cms.double(50.0)
-    )
-
 process.PixelFilter = cms.EDFilter(
     "SkimEvents",
     verbose                      = cms.untracked.int32(0),
@@ -55,17 +46,15 @@ process.PixelFilter = cms.EDFilter(
     trackCollectionLabel         = cms.untracked.InputTag('generalTracks'),
     filterOnPixelCluster         = cms.untracked.int32(1),
     PixelClusterCollectionLabel  = cms.untracked.InputTag('siPixelClusters'),
-    filterOnL1TechnicalTriggerBits = cms.untracked.int32(0),
+    filterOnL1TechnicalTriggerBits = cms.untracked.int32(1),
     L1TechnicalTriggerBits         = cms.untracked.vint32(40, 41)
     )
-
-
 
 # -- the tree filler
 try:
     rootFileName = os.environ["JOB"] + ".root"
 except KeyError:
-    rootFileName = "/afs/cern.ch/user/u/ursl/scratch0/pixelTree-XXXX.root"
+    rootFileName = "rfio:/castor/cern.ch/cms/store/group/tracker/pixel/PixelTree/test/pixelTree-XXXX.root"
 
 process.PixelTree = cms.EDAnalyzer(
     "PixelTree",
@@ -81,16 +70,9 @@ process.PixelTree = cms.EDAnalyzer(
     HLTResultsLabel        = cms.untracked.InputTag('TriggerResults::HLT')
     )
 
-
-
 # -- Path
 process.p = cms.Path(
-#    process.superPointingFilter*
     process.PixelFilter*
     process.TrackRefitter*
     process.PixelTree
     )
-
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
-#process.MessageLogger.cerr.threshold = 'INFO'
-#process.TrackerDigiGeometryESModule.applyAlignment = True
