@@ -142,7 +142,7 @@ process.muonDump = cms.EDAnalyzer(
 process.triggerDump = cms.EDAnalyzer(
     "HFDumpTrigger",
     verbose                 = cms.untracked.int32(0),
-    L1GTReadoutRecordLabel  = cms.untracked.string("gtDigis"), 
+    L1GTReadoutRecordLabel  = cms.untracked.InputTag("gtDigis"), 
     hltL1GtObjectMap        = cms.untracked.InputTag("hltL1GtObjectMap"), 
     L1MuonsLabel            = cms.untracked.InputTag("hltL1extraParticles"), 
     HLTResultsLabel         = cms.untracked.InputTag("TriggerResults::HLT"), 
