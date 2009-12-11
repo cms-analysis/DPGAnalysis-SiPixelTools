@@ -17,7 +17,7 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 #process.GlobalTag.connect = "frontier://FrontierProd/CMS_COND_21X_GLOBALTAG"
-process.GlobalTag.globaltag = "MC_31X_V5::All"
+process.GlobalTag.globaltag = "STARTUP3X_V8D::All"
 process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource','GlobalTag')
 
 ##
@@ -67,7 +67,7 @@ process.MuonTOFFilter_trackQuality.max_chi2_ndof = 15
 
 process.load("DPGAnalysis.SiPixelTools.PixelNtuplizer_RealData_cfi")
 process.PixelNtuplizer_RealData.isCosmic = False
-process.PixelNtuplizer_RealData.isSim = True
+process.PixelNtuplizer_RealData.isSim = False
 process.PixelNtuplizer_RealData.useAllPixel = False
 
 # also run 3 times:
@@ -96,7 +96,19 @@ process.source = cms.Source("PoolSource",
     #firstRun = cms.untracked.uint32(64108),
     #interval = cms.uint32(1),
     fileNames = cms.untracked.vstring(
-    'rfio:/castor/cern.ch/user/a/andrewdc/TestInput312.root'
+   
+
+   '/store/mc/Summer09/MinBias/GEN-SIM-RECO/STARTUP3X_V8D_900GeV-v1/0005/E4B3A7BE-3AD7-DE11-9230-002618943939.root',
+        '/store/mc/Summer09/MinBias/GEN-SIM-RECO/STARTUP3X_V8D_900GeV-v1/0005/E4590360-4CD7-DE11-8CB4-002618943896.root',
+        '/store/mc/Summer09/MinBias/GEN-SIM-RECO/STARTUP3X_V8D_900GeV-v1/0005/AAE638A2-3BD7-DE11-B6A8-002618943944.root',
+        '/store/mc/Summer09/MinBias/GEN-SIM-RECO/STARTUP3X_V8D_900GeV-v1/0005/A0AFB73F-38D7-DE11-82F3-0026189438B4.root',
+        '/store/mc/Summer09/MinBias/GEN-SIM-RECO/STARTUP3X_V8D_900GeV-v1/0005/702846CC-38D7-DE11-8C11-0026189438E2.root',
+        '/store/mc/Summer09/MinBias/GEN-SIM-RECO/STARTUP3X_V8D_900GeV-v1/0005/5A2ACAFC-47D7-DE11-9A9F-002618943935.root',
+        '/store/mc/Summer09/MinBias/GEN-SIM-RECO/STARTUP3X_V8D_900GeV-v1/0004/BEDB1206-36D7-DE11-9B65-002354EF3BE4.root',
+        '/store/mc/Summer09/MinBias/GEN-SIM-RECO/STARTUP3X_V8D_900GeV-v1/0004/72A7CB53-23D7-DE11-A681-00261894389E.root',
+        '/store/mc/Summer09/MinBias/GEN-SIM-RECO/STARTUP3X_V8D_900GeV-v1/0004/2A33F2AE-17D7-DE11-9668-003048679030.root',
+        '/store/mc/Summer09/MinBias/GEN-SIM-RECO/STARTUP3X_V8D_900GeV-v1/0003/FE95B543-06D7-DE11-B3A1-00261894385A.root'
+    
 
   )
 )
@@ -110,23 +122,23 @@ process.source.inputCommand = cms.untracked.vstring("drop *_*_*_FU"
 ## number of events
 ##
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1) )
+    input = cms.untracked.int32(100) )
 
 ##
 ## executionpath
 ##
 process.p = cms.Path(
     # mixing module (only for sim data)
-    process.mix*
+    #process.mix*
     # filters:
 #    process.fedInRunFilter*
     # standard reco sequence
-    process.RawToDigi*process.reconstruction_withRS*
+ #   process.RawToDigi*process.reconstruction_withRS*
     # more filters:
 #    process.MuonTOFFilter_trackQuality *
     # create rechits
     # (rechits are transient data members so are not saved in CMSSW .root files)
-    process.offlineBeamSpot*
+   # process.offlineBeamSpot*
 #   refitters for all tracking algos (thse are what actually create the rechits)
     process.ckfRefitter*
     process.rsRefitter*

@@ -242,6 +242,7 @@ void PixelTree::beginJob(const edm::EventSetup& es) {
   fTree->Branch("TkClI",        fTkClI,         "TkClI[TkN][20]/I");    //FIXME: This should be variable?
   fTree->Branch("TkType",       fTkType,        "TkType[TkN]/I");
   fTree->Branch("TkMuI",        fTkMuI,         "TkMuI[TkN]/I");
+  fTree->Branch("TkNumPixelHits", fTkNumPixelHits, "TkNumPixelHits[TkN]/F");
 
   fTree->Branch("ClN",          &fClN,          "ClN/I");
   fTree->Branch("ClRow",        fClRow,         "ClRow[ClN]/F");
@@ -453,7 +454,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
     for (CItAlgo itAlgo = algorithmTTMap.begin(); itAlgo != algorithmTTMap.end(); ++itAlgo) {
       std::string aName = itAlgo->first;
       int algBitNumber = (itAlgo->second).algoBitNumber();
-      if (fVerbose > 5) cout << "i = " << algBitNumber << " -> " << aName << endl;
+      if (fVerbose > 0) cout << "i = " << algBitNumber << " -> " << aName << endl;
       fL1TThist->GetXaxis()->SetBinLabel(algBitNumber+1, aName.c_str());
     }
 
@@ -487,6 +488,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
       cout << "L1 trigger accept: " << fL1T << endl;
       cout << " 3         2         1         0" << endl;
       cout << "10987654321098765432109876543210" << endl;
+	     
       cout << "--------------------------------" << endl;
       cout << std::bitset<32>(fL1T0) << endl
 	   << std::bitset<32>(fL1T1) << endl
