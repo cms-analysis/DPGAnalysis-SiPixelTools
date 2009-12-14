@@ -56,6 +56,15 @@
 #include "DataFormats/MuonReco/interface/MuonTime.h"
 #include "DataFormats/MuonReco/interface/MuonFwd.h"
 
+//Triggers
+#include "CondFormats/DataRecord/interface/L1GtTriggerMenuRcd.h"
+#include "CondFormats/L1TObjects/interface/L1GtTriggerMenu.h"
+#include "CondFormats/L1TObjects/interface/L1GtTriggerMenuFwd.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutSetupFwd.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutSetup.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerObjectMapRecord.h"
+
 //TRoot classes
 #include "TH1F.h"
 #include "TH2F.h"
@@ -255,9 +264,11 @@ private:
   TH1F*  missingVsPT_lowpt;
   
   TH1F*  validVsEta;
-  TH1F*  missingVsEta;
   TH1F*  validVsPhi;
+  TH1F*  missingVsEta;
   TH1F*  missingVsPhi;
+  TH1F*  inactiveVsEta;
+  TH1F*  inactiveVsPhi;
   
   TH1F*  validPerMinHitsOnTrackBPix;
   TH1F*  validPerMinHitsOnTrackFPix;
@@ -330,6 +341,28 @@ private:
   TH2F* xy_standardDev;
   TH2F* xy_standardDev_insideModule;
   
+  //Technical Trigger
+  TH2F* validPerTriggerBPix;
+  TH2F* missingPerTriggerBPix;
+  TH2F* inactivePerTriggerBPix;
+  TH2F* validPerTriggerFPix;
+  TH2F* missingPerTriggerFPix;
+  TH2F* inactivePerTriggerFPix;
+  
+  TH2F* validMapLayer1;
+  TH2F* validMapLayer2;
+  TH2F* validMapLayer3;
+  TH2F* missingMapLayer1;
+  TH2F* missingMapLayer2;
+  TH2F* missingMapLayer3;
+  TH2F* inactiveMapLayer1;
+  TH2F* inactiveMapLayer2;
+  TH2F* inactiveMapLayer3;
+  
+  TH1F* validPerPixHitOnTrack;
+  TH1F* missingPerPixHitOnTrack;
+  TH1F* inactivePerPixHitOnTrack;
+ 
   //"maps" for module analysis: <rawModuleID, counterOn[inactive,missing,valid]>
   vector< vector<int> > badModuleMap;  
   vector< vector<double> > goodModuleMap; //but interesting only in-active!!
@@ -505,7 +538,15 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   try{iEvent.getByLabel(pixelClusterInput_, theClusters);}
   catch(...){std::cout<<"Clusters were not retrieved successfully ..."<<endl;return;}
   
-
+  edm::Handle<L1GlobalTriggerReadoutRecord> L1GTRR;
+  try{iEvent.getByLabel("gtDigis",L1GTRR);}
+  catch(...){cout<<"The L1 Trigger branch was not correctly taken"<<endl;}
+  
+  /*edm::ESHandle<L1GtTriggerMenu> hL1GtMenu;
+  try{iSetup.get<L1GtTriggerMenuRcd>().get(hL1GtMenu);}
+  catch(...){cout<<"The L1 Trigger menu was not correctly taken"<<endl;}
+  const L1GtTriggerMenu* l1GtMenu = hL1GtMenu.product();*/
+  
   const edmNew::DetSetVector<SiPixelCluster>& input = *theClusters;
 
   int NbrTracks =  trajTrackCollectionHandle->size();
@@ -679,6 +720,7 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     float numPixHit=0;
     float numInactiveHit=0;
     float numMissingHit=0;
+    float numValidHit=0;
     int numofhit=0;
     
     //***********  LOOP OVER HITS    
@@ -730,8 +772,27 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
          globalZ = theGeomDet->surface().position().z();
 	 
 	 TrajectoryStateOnSurface tsos = tsoscomb( itTraj->forwardPredictedState(), itTraj->backwardPredictedState() );
-
-
+	 double gX = tsos.globalPosition().x();
+	 double gY = tsos.globalPosition().y();
+	 double gZ = tsos.globalPosition().z();
+	 
+         //2D maps of the hits
+	 if(layer==1){
+	   if((*testhit).getType()==TrackingRecHit::valid) validMapLayer1->Fill(gZ,atan2(gY,gX));
+	   if((*testhit).getType()==TrackingRecHit::missing) missingMapLayer1->Fill(gZ,atan2(gY,gX));
+	   if((*testhit).getType()==TrackingRecHit::inactive) inactiveMapLayer1->Fill(gZ,atan2(gY,gX));
+	 }
+	 if(layer==2){
+	   if((*testhit).getType()==TrackingRecHit::valid) validMapLayer2->Fill(gZ,atan2(gY,gX));
+	   if((*testhit).getType()==TrackingRecHit::missing) missingMapLayer2->Fill(gZ,atan2(gY,gX));
+	   if((*testhit).getType()==TrackingRecHit::inactive) inactiveMapLayer2->Fill(gZ,atan2(gY,gX));
+	 }
+	 if(layer==3){
+	   if((*testhit).getType()==TrackingRecHit::valid) validMapLayer3->Fill(gZ,atan2(gY,gX));
+	   if((*testhit).getType()==TrackingRecHit::missing) missingMapLayer3->Fill(gZ,atan2(gY,gX));
+	   if((*testhit).getType()==TrackingRecHit::inactive) inactiveMapLayer3->Fill(gZ,atan2(gY,gX));
+	 }
+	 
 	 //****** compute the  pT cut **********
 
     	 bool hasHighPT = false;
@@ -1101,6 +1162,28 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	  missingVSMuonTimeNdof->Fill(timendof);
 	}
 	
+	//FILLING TRIGGER PLOTS
+	if (L1GTRR.isValid()) {
+          for(Int_t iTrig1 = 0;iTrig1<64;++iTrig1){
+	    for(Int_t iTrig2 = 0;iTrig2<64;++iTrig2){
+	      if(L1GTRR->technicalTriggerWord()[iTrig1] && L1GTRR->technicalTriggerWord()[iTrig2]){
+	        if(type==int(kBPIX)){
+		  if((*testhit).getType()==TrackingRecHit::missing)  missingPerTriggerBPix->Fill(iTrig1,iTrig2);
+		  if((*testhit).getType()==TrackingRecHit::valid)    validPerTriggerBPix->Fill(iTrig1,iTrig2);
+		  if((*testhit).getType()==TrackingRecHit::inactive) inactivePerTriggerBPix->Fill(iTrig1,iTrig2);
+		}
+	        if(type==int(kFPIX)){
+		  if((*testhit).getType()==TrackingRecHit::missing)  missingPerTriggerFPix->Fill(iTrig1,iTrig2);
+		  if((*testhit).getType()==TrackingRecHit::valid)    validPerTriggerFPix->Fill(iTrig1,iTrig2);
+		  if((*testhit).getType()==TrackingRecHit::inactive) inactivePerTriggerFPix->Fill(iTrig1,iTrig2);
+		}
+	      }
+	    }
+	  }
+	}
+	
+	
+	
   
   	//************************************ HERE IS THE CUT *****************************************************
         //different tightness in the cuts: 
@@ -1158,10 +1241,13 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	  missingVsEta->Fill(eta);
 	  missingVsPhi->Fill(phi);
 	}
-	
+	if( (*testhit).getType()==TrackingRecHit::inactive ){
+	  inactiveVsEta->Fill(eta);
+	  inactiveVsPhi->Fill(phi);
+	}
 	
 	for(int nHits = 1;nHits<=12;++nHits){
-	  if(track.recHitsSize()>=nHits){
+	  if(int(track.recHitsSize())>=nHits){
             if((*testhit).isValid()){
 	      if(type==int(kBPIX))
 	        validPerMinHitsOnTrackBPix->Fill(nHits);
@@ -1204,6 +1290,7 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       //THIS IS ONLY TO CHECK THE DEFINITION OF INACTIVE-FLAG!!!
 	 if ( (*testhit).getType()==TrackingRecHit::inactive )  numInactiveHit++;
 	 if ( (*testhit).getType()==TrackingRecHit::missing )   numMissingHit++;
+	 if ( (*testhit).getType()==TrackingRecHit::valid )   numValidHit++;
 	  
 	 //***********************************
 	 //type of invalid recHiT
@@ -1435,6 +1522,9 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       double clusterXPos=-999;
       double clusterYPos=-999;
       
+      //LocalError tsosErr = tsos.localError().positionError();
+      //double error
+      
       if ( testSubDetID==int(kBPIX) ){
 
       DetId hitDetId = (testhit->geographicalId());
@@ -1665,6 +1755,10 @@ PixelEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
        missingPerTrack->Fill( (numMissingHit/numPixHit)*100.);
        //****************
        
+       validPerPixHitOnTrack->Fill(numPixHit,numValidHit);
+       missingPerPixHitOnTrack->Fill(numPixHit,numMissingHit);
+       inactivePerPixHitOnTrack->Fill(numPixHit,numInactiveHit);
+       
        missPerTrackVsChiSquareNdf->Fill(chiSquareNdf,missingInTrack);
        missPerTrackPercentVsChiSquareNdf->Fill(chiSquareNdf,missingInTrack/(missingInTrack+validInTrack));
 	     
@@ -1855,8 +1949,10 @@ PixelEfficiency::beginJob(const edm::EventSetup& iSetup)
       
  validVsEta = new TH1F("validVsEta","validVsEta",50,-5.,5.);
  missingVsEta = new TH1F("missingVsEta","missingVsEta",50,-5.,5.);
+ inactiveVsEta = new TH1F("inactiveVsEta","inactiveVsEta",50,-5.,5.);
  validVsPhi = new TH1F("validVsPhi","validVsPhi",64,-3.2,3.2);
  missingVsPhi = new TH1F("missingVsPhi","missingVsPhi",64,-3.2,3.2);
+ inactiveVsPhi = new TH1F("inactiveVsPhi","inactiveVsPhi",64,-3.2,3.2);
 
  validPerMinHitsOnTrackBPix   = new TH1F("validPerMinHitsOnTrackBPix","validPerMinHitsOnTrackBPix",12,1,13);
  validPerMinHitsOnTrackFPix   = new TH1F("validPerMinHitsOnTrackFPix","validPerMinHitsOnTrackFPix",12,1,13);
@@ -1881,8 +1977,8 @@ PixelEfficiency::beginJob(const edm::EventSetup& iSetup)
 
  validChiSquare   = new TH1F("validChiSquare","validChiSquare",200, 0., 100.);
  missingChiSquare = new TH1F("missingChiSquare","missingChiSquare",200, 0., 100.);;
- validChiSquareNdf   = new TH1F("validChiSquareNdf","validChiSquareNdf",200, 0., 100.);
- missingChiSquareNdf = new TH1F("missingChiSquareNdf","missingChiSquareNdf",200, 0., 100.);;
+ validChiSquareNdf   = new TH1F("validChiSquareNdf","validChiSquareNdf",100, 0., 30.);
+ missingChiSquareNdf = new TH1F("missingChiSquareNdf","missingChiSquareNdf",100, 0., 30.);;
 
  missPerTrackVsChiSquareNdf = new TH2F("missPerTrackVsChiSquareNdf","missPerTrackVsChiSquareNdf", 200,0.,100., 5,0,4);
  missPerTrackPercentVsChiSquareNdf = new TH2F("missPerTrackPercentVsChiSquareNdf","missPerTrackPercentVsChiSquareNdf", 200,0.,100.,100,0,1.);
@@ -1900,6 +1996,27 @@ PixelEfficiency::beginJob(const edm::EventSetup& iSetup)
  xy_standardDev = new TH2F("xy_standardDev","xy_standardDev",100,0,1.5,300,0,4);
  xy_standardDev_insideModule = new TH2F("xy_standardDev_insideModule","xy_standardDev_insideModule",100,0,1.5,300,0,4);
 
+ validPerTriggerBPix    = new TH2F("validPerTriggerBPix","validPerTriggerBPix",64,-0.5,63.5,64,-0.5,63.5);
+ missingPerTriggerBPix  = new TH2F("missingPerTriggerBPix","missingPerTriggerBPix",64,-0.5,63.5,64,-0.5,63.5);
+ inactivePerTriggerBPix = new TH2F("inactivePerTriggerBPix","inactivePerTriggerBPix",64,-0.5,63.5,64,-0.5,63.5);
+ validPerTriggerFPix    = new TH2F("validPerTriggerFPix","validPerTriggerFPix",64,-0.5,63.5,64,-0.5,63.5);
+ missingPerTriggerFPix  = new TH2F("missingPerTriggerFPix","missingPerTriggerFPix",64,-0.5,63.5,64,-0.5,63.5);
+ inactivePerTriggerFPix = new TH2F("inactivePerTriggerFPix","inactivePerTriggerFPix",64,-0.5,63.5,64,-0.5,63.5);
+ 
+ validMapLayer1    = new TH2F("validMapLayer1","validMapLayer1",1000,-30.,30.,1000,-3.15,3.15);
+ validMapLayer2    = new TH2F("validMapLayer2","validMapLayer2",1000,-30.,30.,1000,-3.15,3.15);
+ validMapLayer3    = new TH2F("validMapLayer3","validMapLayer3",1000,-30.,30.,1000,-3.15,3.15);
+ missingMapLayer1  = new TH2F("missingMapLayer1","missingMapLayer1",1000,-30.,30.,1000,-3.15,3.15);
+ missingMapLayer2  = new TH2F("missingMapLayer2","missingMapLayer2",1000,-30.,30.,1000,-3.15,3.15);
+ missingMapLayer3  = new TH2F("missingMapLayer3","missingMapLayer3",1000,-30.,30.,1000,-3.15,3.15);
+ inactiveMapLayer1 = new TH2F("inactiveMapLayer1","inactiveMapLayer1",1000,-30.,30.,1000,-3.15,3.15);
+ inactiveMapLayer2 = new TH2F("inactiveMapLayer2","inactiveMapLayer2",1000,-30.,30.,1000,-3.15,3.15);
+ inactiveMapLayer3 = new TH2F("inactiveMapLayer3","inactiveMapLayer3",1000,-30.,30.,1000,-3.15,3.15);
+ 
+ validPerPixHitOnTrack    = new TH1F("validPerPixHitOnTrack","validPerPixHitOnTrack",8,1,9);
+ missingPerPixHitOnTrack  = new TH1F("missingPerPixHitOnTrack","missingPerPixHitOnTrack",8,1,9);
+ inactivePerPixHitOnTrack = new TH1F("inactivePerPixHitOnTrack","inactivePerPixHitOnTrack",8,1,9);
+ 
  tree = new TTree("moduleAnalysis","moduleAnalysis");
  tree->Branch("id",&idTree,"id/I");
  tree->Branch("isModuleBad",&isModuleBadTree,"isModuleBad/I");
@@ -2054,9 +2171,11 @@ PixelEfficiency::endJob() {
   missingVsPT_lowpt->Write();
   
   validVsEta->Write();
-  missingVsEta->Write();
   validVsPhi->Write();
+  missingVsEta->Write();
   missingVsPhi->Write();
+  inactiveVsEta->Write();
+  inactiveVsPhi->Write();
 
   validAlphaLocalXBig->Write();
   missingAlphaLocalXBig->Write();
@@ -2137,6 +2256,29 @@ PixelEfficiency::endJob() {
 
   xy_standardDev->Write();
   xy_standardDev_insideModule->Write();
+  
+  validPerTriggerBPix->Write();
+  missingPerTriggerBPix->Write();
+  inactivePerTriggerBPix->Write();
+  validPerTriggerFPix->Write();
+  missingPerTriggerFPix->Write();
+  inactivePerTriggerFPix->Write();
+  
+  validMapLayer1->Write();
+  validMapLayer2->Write();
+  validMapLayer3->Write();
+  missingMapLayer1->Write();
+  missingMapLayer2->Write();
+  missingMapLayer3->Write();
+  inactiveMapLayer1->Write();
+  inactiveMapLayer2->Write();
+  inactiveMapLayer3->Write();
+  
+  
+  validPerPixHitOnTrack->Write();
+  missingPerPixHitOnTrack->Write();
+  inactivePerPixHitOnTrack->Write();
+  
   
     isModuleBadTree=1;
     for (unsigned int l=0; l<badModuleMap.size(); l++)

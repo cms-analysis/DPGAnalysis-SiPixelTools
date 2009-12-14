@@ -2,7 +2,7 @@
 
 DIR=$1_`date '+%d%m20%y_%H%M'`
 storedir=`pwd`/${DIR}
-useCRAB=1
+useCRAB=0
 tracktag=ctfPixelLess
 
 if [ ! -d ${DIR} ]; then 
@@ -16,7 +16,17 @@ cp -f merge.C ${DIR}/merge.C
 
 #./pythonTemplateGenerator.csh 1 filelistCRAFT09_rePro_SP_RV4_CosmicSeq.txt
 #./pythonTemplateGenerator.csh 10 filelistCRAFT09_rePro_TP_RV4_CosmicSeq.txt
-./pythonTemplateGenerator.csh 100 filelist123151.txt
+#./pythonTemplateGenerator.csh 1 filelist123592.txt
+#./pythonTemplateGenerator.csh 1 filelist123592_PROMPT.txt
+#./pythonTemplateGenerator.csh 1 filelist123615.txt
+#./pythonTemplateGenerator.csh 1 filelist123596_PROMPT.txt
+#./pythonTemplateGenerator.csh 1 filelist123615_PROMPT.txt
+#./pythonTemplateGenerator.csh 1 filelist123596_Rereco_GR09Pv7.txt
+#./pythonTemplateGenerator.csh 1 filelist123815.txt
+#./pythonTemplateGenerator.csh 1 filelist123818.txt
+
+#./pythonTemplateGenerator.csh 1 filelist123596_DNDETA.txt
+./pythonTemplateGenerator.csh 1 filelist123596_DNDETA_v5.txt
 
 let i=0
 
@@ -43,7 +53,7 @@ for file in template*; do
   cd $DIR
 
   if [  ${useCRAB} -ne "1" ]; then
-    bsub -q cmscaf1nd -J job_$i < submit_$i.csh
+    bsub -q cmscaf1nd -J job_$i -R "type==SLC4_64 || type==SLC5_64" < submit_$i.csh
   fi
 
   cd ..

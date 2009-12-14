@@ -43,6 +43,7 @@ process.GlobalTag.connect = "frontier://FrontierProd/CMS_COND_31X_GLOBALTAG" # F
 #process.GlobalTag.globaltag = "CRAFT09_R_V4::All"
 #process.GlobalTag.globaltag = "CRAFT08_R_V1::All"
 process.GlobalTag.globaltag = "GR09_P_V7::All"
+#process.GlobalTag.globaltag = "STARTUP3X_V8I::All"
 
 #process.test = cms.ESSource("PoolDBESSource",
 #                                        DBParameters = cms.PSet(
@@ -66,9 +67,9 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(NUMOFEVENTS)
 process.source = cms.Source("PoolSource",
    #comment this line when ALCARECO
    #inputCommands = cms.untracked.vstring('keep *',"drop *_*_*_FU"),
-   #lastRun = cms.untracked.uint32(109624),
+   #lastRun = cms.untracked.uint32(123596),
    #timetype = cms.string('runnumber'),
-   #firstRun = cms.untracked.uint32(109011),
+   #firstRun = cms.untracked.uint32(123596),
    #interval = cms.uint32(1),
 
 #replace 'myfile.root' with the source file you want to use
@@ -78,8 +79,9 @@ STRINGTOCHANGE
 )
 
 process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
-process.TrackRefitterP5.src = 'TRACKINPUTTAG'
-process.TrackRefitterP5.TrajectoryInEvent = True
+process.TrackRefitter.src = 'TRACKINPUTTAG'
+process.TrackRefitter.TrajectoryInEvent = True
+process.KFFittingSmootherWithOutliersRejectionAndRK.NoInvalidHitsBeginEnd = False
 
 process.load("RecoTracker.TransientTrackingRecHit.TransientTrackingRecHitBuilderWithoutRefit_cfi")
 
@@ -93,7 +95,7 @@ process.checkCosmicTF = cms.EDAnalyzer('PixelEfficiency',
                 TkTag = cms.InputTag("TRACKINPUTTAG"),
 		TkTag0T = cms.InputTag("TRACKINPUTTAG0T"),	
 
-                trajectoryInput = cms.InputTag('TrackRefitterP5'),
+                trajectoryInput = cms.InputTag('TrackRefitter'),
 		
 		pixelClusterInput=cms.InputTag("siPixelClusters"),
 		
@@ -190,9 +192,17 @@ process.checkCosmicTF = cms.EDAnalyzer('PixelEfficiency',
 	)		
 )		
 process.load("DPGAnalysis.SiPixelTools.EventFilter_forTimingRun_cfi")
-process.timingRunFilter.maxOrbit = 99999999999
-process.timingRunFilter.minOrbit = 21600000
-	
+process.timingRunFilter.OrbitCut = False 
+process.timingRunFilter.minOrbit = 72269887
+process.timingRunFilter.maxOrbit = 999999999999999
+process.timingRunFilter.L1TechCut = True 
+process.timingRunFilter.HLTCut = False
+process.timingRunFilter.BXCut = False
+process.timingRunFilter.L1TechVetoPaths_byBit = cms.vint32()
+process.timingRunFilter.L1TechPaths_byBit = cms.vint32(40)
+
+
+
 #list from /CMSSW/CondTools/SiPixel/test/SiPixelBadModuleByHandBuilder_cfg.py    
 # new list from same file under CMSSW
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
@@ -200,7 +210,10 @@ process.MessageLogger.cerr.threshold = 'INFO'#32X version
 #process.MessageLogger.cerr.threshold = 'Info' #22X version
 
 #RECONSTRUCTION FROM DQM
-#process.load("Configuration.StandardSequences.Reconstruction_cff")
+process.load("Configuration.StandardSequences.Reconstruction_cff")
+process.load('Configuration.StandardSequences.RawToDigi_cff')
+process.load('Configuration.StandardSequences.L1Reco_cff')
+
 #process.load("EventFilter.SiPixelRawToDigi.SiPixelRawToDigi_cfi")
 #process.siPixelDigis.InputLabel = 'source'
 #process.load("RecoLocalTracker.SiPixelClusterizer.SiPixelClusterizer_cfi")
@@ -222,8 +235,11 @@ process.MessageLogger.cerr.threshold = 'INFO'#32X version
 #process.trackerLocalReco = cms.Sequence(process.siPixelLocalReco*process.siStripLocalReco)
 #process.trackReconstruction = cms.Sequence(process.trackerReco*process.trackerLocalReco*process.offlineBeamSpot*process.recopixelvertexing*process.tracksP5) 
 
-#process.p = cms.Path(process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
-process.p = cms.Path(process.timingRunFilter*process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('123596:68-123596:128')
+
+#process.p = cms.Path(process.offlineBeamSpot*process.TrackRefitter*process.checkCosmicTF)
+process.p = cms.Path(process.timingRunFilter*process.offlineBeamSpot*process.TrackRefitter*process.checkCosmicTF)
+#process.p = cms.Path(process.RawToDigi*process.L1Reco*process.reconstruction_withPixellessTk*process.timingRunFilter*process.offlineBeamSpot*process.TrackRefitter*process.checkCosmicTF)
 #process.p = cms.Path(process.RawToDigi*process.reconstructionCosmics*process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
 #process.p = cms.Path(process.RawToDigi*process.reconstructionCosmics*process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)
 #process.p = cms.Path(process.RawToDigi*process.reconstructionCosmics*process.fedInRunFilter*process.offlineBeamSpot*process.TrackRefitterP5*process.checkCosmicTF)

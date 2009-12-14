@@ -18,8 +18,8 @@
 
   using namespace std;
   bool DEBUG=false;
-  int Nfiles=628;
-  bool useInactive=false;//To compute efficiencies (!! Just for few plots)
+  int Nfiles=300;
+  bool useInactive=true;//To compute efficiencies (!! Just for few plots)
   
 void mergeHisto(const char*,TH1F*,bool=false);
 void mergeHisto(TH1F*,bool=false);			//NEW, TAKES NAME FROM MERGED
@@ -27,8 +27,11 @@ void mergeHisto(const char*,TH2F*,bool=false);
 void mergeHisto(TH2F*,bool=false);			//NEW, TAKES NAME FROM MERGED
 void mergeHistoWithLabel(char*,TH1F*);
 void makeEfficiency(TH1F*,TH1F*,TH1F*,bool=true);
+void makeEfficiency(TH1F*,TH1F*,TH1F*,TH1F*,bool=true); //valid, missing, inactive, efficiciency
 void makeEfficiency(TH1F*,bool=true);			//NEW, TAKES NAME FROM MERGED --- NEEDS TO BE valid*, missing*, efficiency*
 void makeEfficiency(TH2F*,TH2F*,TH2F*);
+void makeEfficiency(TH2F*,TH2F*,TH2F*,TH2F*);
+void makeEfficiency(TH2F*);		        //NEW, TAKES NAME FROM MERGED --- NEEDS TO BE valid*, missing*, efficiency*
 void makeEfficiencyGraph(TH1F*,TH1F*,TH1F*);
 TH1F* makeOperation(TH1F*,TH1F*,TH1F*,char*);
 void makeMean(TH1F*, TH1F*, TH1F*);//useless, replaced by makeOperation()
@@ -142,17 +145,18 @@ void merge(){
   TH1F* missingVsPT_lowptMerged = new TH1F("missingVsPT_lowptMerged","missingVsPT_lowptMerged",200,0.,5.);
 
   TH1F* validVsEtaMerged   = new TH1F("validVsEtaMerged","validVsEtaMerged;track.Eta;# valid hits",50,-5.,5.);
-  TH1F* missingVsEtaMerged = new TH1F("missingVsEtaMerged","missingVsEtaMerged;track.Eta;# missing hits",50,-5.,5.);
   TH1F* validVsPhiMerged   = new TH1F("validVsPhiMerged","validVsPhiMerged;track.Phi;# valid hits",64,-3.2,3.2);
+  TH1F* missingVsEtaMerged = new TH1F("missingVsEtaMerged","missingVsEtaMerged;track.Eta;# missing hits",50,-5.,5.);
   TH1F* missingVsPhiMerged = new TH1F("missingVsPhiMerged","missingVsPhiMerged;track.Phi;# missing hits",64,-3.2,3.2);
+  TH1F* inactiveVsEtaMerged = new TH1F("inactiveVsEtaMerged","inactiveVsEtaMerged;track.Eta;# inactive hits",50,-5.,5.);
+  TH1F* inactiveVsPhiMerged = new TH1F("inactiveVsPhiMerged","inactiveVsPhiMerged;track.Phi;# inactive hits",64,-3.2,3.2);
   
-  TH1F* validPerMinHitsOnTrackBPixMerged   = new TH1F("validPerMinHitsOnTrackBPixMerged","validPerMinHitsOnTrackBPixMerged",12,1,13);
-  TH1F* validPerMinHitsOnTrackFPixMerged   = new TH1F("validPerMinHitsOnTrackFPixMerged","validPerMinHitsOnTrackFPixMerged",12,1,13);
-  TH1F* missingPerMinHitsOnTrackBPixMerged = new TH1F("missingPerMinHitsOnTrackBPixMerged","missingPerMinHitsOnTrackBPixMerged",12,1,13);
-  TH1F* missingPerMinHitsOnTrackFPixMerged = new TH1F("missingPerMinHitsOnTrackFPixMerged","missingPerMinHitsOnTrackFPixMerged",12,1,13);
-  TH1F* efficiencyPerMinHitsOnTrackBPix    = new TH1F("efficiencyPerMinHitsOnTrackBPix","efficiencyPerMinHitsOnTrackBPix",12,1,13);
-  TH1F* efficiencyPerMinHitsOnTrackFPix    = new TH1F("efficiencyPerMinHitsOnTrackFPix","efficiencyPerMinHitsOnTrackFPix",12,1,13);
-  
+  TH1F* validPerMinHitsOnTrackBPixMerged   = new TH1F("validPerMinHitsOnTrackBPixMerged","validPerMinHitsOnTrackBPixMerged;min # hits on track;# valid hits",12,1,13);
+  TH1F* validPerMinHitsOnTrackFPixMerged   = new TH1F("validPerMinHitsOnTrackFPixMerged","validPerMinHitsOnTrackFPixMerged;min # hits on track;# valid hits",12,1,13);
+  TH1F* missingPerMinHitsOnTrackBPixMerged = new TH1F("missingPerMinHitsOnTrackBPixMerged","missingPerMinHitsOnTrackBPixMerged;min # hits on track;# missing hits",12,1,13);
+  TH1F* missingPerMinHitsOnTrackFPixMerged = new TH1F("missingPerMinHitsOnTrackFPixMerged","missingPerMinHitsOnTrackFPixMerged;min # hits on track;# missing hits",12,1,13);
+  TH1F* efficiencyPerMinHitsOnTrackBPix    = new TH1F("efficiencyPerMinHitsOnTrackBPix","efficiencyPerMinHitsOnTrackBPix;min # hits on track;#epsilon_{hit}",12,1,13);
+  TH1F* efficiencyPerMinHitsOnTrackFPix    = new TH1F("efficiencyPerMinHitsOnTrackFPix","efficiencyPerMinHitsOnTrackFPix;min # hits on track;#epsilon_{hit}",12,1,13);
   
   TH1F* validVsLocalXBigMerged     = new TH1F("validVsLocalXBigMerged","validVsLocalXBigMerged;X [cm];nValid",100,-1.5,1.5);
   TH1F* missingVsLocalXBigMerged   = new TH1F("missingVsLocalXBigMerged","missingVsLocalXBigMerged;X [cm];nMissing",100,-1.5,1.5);
@@ -201,9 +205,9 @@ void merge(){
   TH1F* missingChiSquareMerged = new TH1F("missingChiSquareMerged","missingChiSquareMerged",200, 0., 100.);
   TH1F* chiSquareEfficiency    = new TH1F("chiSquareEfficiency","chiSquareEfficiency",200, 0., 100.);
 
-  TH1F* validChiSquareNdfMerged   = new TH1F("validChiSquareNdfMerged","validChiSquareNdfMerged",200, 0., 100.);
-  TH1F* missingChiSquareNdfMerged = new TH1F("missingChiSquareNdfMerged","missingChiSquareNdfMerged",200, 0., 100.);
-  TH1F* chiSquareNdfEfficiency    = new TH1F("chiSquareNdfEfficiency","chiSquareNdfEfficiency",200, 0., 100.);
+  TH1F* validChiSquareNdfMerged   = new TH1F("validChiSquareNdfMerged","validChiSquareNdfMerged",100, 0., 30.);
+  TH1F* missingChiSquareNdfMerged = new TH1F("missingChiSquareNdfMerged","missingChiSquareNdfMerged",100, 0., 30.);
+  TH1F* chiSquareNdfEfficiency    = new TH1F("chiSquareNdfEfficiency","chiSquareNdfEfficiency",100, 0., 30.);
 
   TH2F* missPerTrackVsChiSquareNdfMerged = new TH2F("missPerTrackVsChiSquareNdfMerged","missPerTrackVsChiSquareNdfMerged", 200,0.,100., 5,0,4);
   TH2F* missPerTrackPercentVsChiSquareNdfMerged = new TH2F("missPerTrackPercentVsChiSquareNdfMerged","missPerTrackPercentVsChiSquareNdfMerged", 200,0.,100.,100,0,1.);
@@ -409,14 +413,44 @@ void merge(){
  TH1F* missingVSMuonTimeNdofMerged       = new TH1F("missingVSMuonTimeNdofMerged","missingVSMuonTimeNdofMerged",50,0,50);
 
  TH1F* efficiencyVSMuonTimeError         = new TH1F("efficiencyVSMuonTimeError","efficiencyVSMuonTimeError",80,0,40);
- TH1F* efficiencyVSMuonTimeNdof         = new TH1F("efficiencyVSMuonTimeNdof","efficiencyVSMuonTimeNdof",50,0,50);
+ TH1F* efficiencyVSMuonTimeNdof          = new TH1F("efficiencyVSMuonTimeNdof","efficiencyVSMuonTimeNdof",50,0,50);
  TH1F* meanMuonTimeVSRunNumber           = new TH1F("meanMuonTimeVSRunNumber","meanMuonTimeVSRunNumber",200,0,200);
- TH1F* meanMuonTimeErrorVSRunNumber       = new TH1F("meanMuonTimeErrorVSRunNumber","meanMuonTimeErrorVSRunNumber",200,0,200);
+ TH1F* meanMuonTimeErrorVSRunNumber      = new TH1F("meanMuonTimeErrorVSRunNumber","meanMuonTimeErrorVSRunNumber",200,0,200);
 
+ TH2F* validPerTriggerBPixMerged    = new TH2F("validPerTriggerBPixMerged","validPerTriggerBPixMerged;Technical trigger bits;Technical trigger bits",64,-0.5,63.5,64,-0.5,63.5);
+ TH2F* missingPerTriggerBPixMerged  = new TH2F("missingPerTriggerBPixMerged","missingPerTriggerBPixMerged;Technical trigger bits;Technical trigger bits",64,-0.5,63.5,64,-0.5,63.5);
+ TH2F* inactivePerTriggerBPixMerged = new TH2F("inactivePerTriggerBPixMerged","inactivePerTriggerBPixMerged;Technical trigger bits;Technical trigger bits",64,-0.5,63.5,64,-0.5,63.5);
+ TH2F* validPerTriggerFPixMerged    = new TH2F("validPerTriggerFPixMerged","validPerTriggerFPixMerged;Technical trigger bits;Technical trigger bits",64,-0.5,63.5,64,-0.5,63.5);
+ TH2F* missingPerTriggerFPixMerged  = new TH2F("missingPerTriggerFPixMerged","missingPerTriggerFPixMerged;Technical trigger bits;Technical trigger bits",64,-0.5,63.5,64,-0.5,63.5);
+ TH2F* inactivePerTriggerFPixMerged = new TH2F("inactivePerTriggerFPixMerged","inactivePerTriggerFPixMerged;Technical trigger bits;Technical trigger bits",64,-0.5,63.5,64,-0.5,63.5);
+ 
+ TH2F* efficiencyPerTriggerBPix = new TH2F("efficiencyPerTriggerBPix","efficiencyPerTriggerBPix;Technical trigger bits;Technical trigger bits",64,-0.5,63.5,64,-0.5,63.5);
+ TH2F* efficiencyPerTriggerFPix = new TH2F("efficiencyPerTriggerFPix","efficiencyPerTriggerFPix;Technical trigger bits;Technical trigger bits",64,-0.5,63.5,64,-0.5,63.5);
+ TH1F* efficiencyPerTriggerBPix_1D = new TH1F("efficiencyPerTriggerBPix_1D","efficiencyPerTriggerBPix_1D;Technical trigger bits;efficiency",64,-0.5,63.5);
+ TH1F* efficiencyPerTriggerFPix_1D = new TH1F("efficiencyPerTriggerFPix_1D","efficiencyPerTriggerFPix_1D;Technical trigger bits;efficiency",64,-0.5,63.5);
+ 
+ TH2F* validMapLayer1Merged    = new TH2F("validMapLayer1Merged","validMapLayer1Merged;Z (cm);Phi (rad)",1000,-30.,30.,1000,-3.15,3.15);
+ TH2F* validMapLayer2Merged    = new TH2F("validMapLayer2Merged","validMapLayer2Merged;Z (cm);Phi (rad)",1000,-30.,30.,1000,-3.15,3.15);
+ TH2F* validMapLayer3Merged    = new TH2F("validMapLayer3Merged","validMapLayer3Merged;Z (cm);Phi (rad)",1000,-30.,30.,1000,-3.15,3.15);
+ TH2F* missingMapLayer1Merged  = new TH2F("missingMapLayer1Merged","missingMapLayer1Merged;Z (cm);Phi (rad)",1000,-30.,30.,1000,-3.15,3.15);
+ TH2F* missingMapLayer2Merged  = new TH2F("missingMapLayer2Merged","missingMapLayer2Merged;Z (cm);Phi (rad)",1000,-30.,30.,1000,-3.15,3.15);
+ TH2F* missingMapLayer3Merged  = new TH2F("missingMapLayer3Merged","missingMapLayer3Merged;Z (cm);Phi (rad)",1000,-30.,30.,1000,-3.15,3.15);
+ TH2F* inactiveMapLayer1Merged = new TH2F("inactiveMapLayer1Merged","inactiveMapLayer1Merged;Z (cm);Phi (rad)",1000,-30.,30.,1000,-3.15,3.15);
+ TH2F* inactiveMapLayer2Merged = new TH2F("inactiveMapLayer2Merged","inactiveMapLayer2Merged;Z (cm);Phi (rad)",1000,-30.,30.,1000,-3.15,3.15);
+ TH2F* inactiveMapLayer3Merged = new TH2F("inactiveMapLayer3Merged","inactiveMapLayer3Merged;Z (cm);Phi (rad)",1000,-30.,30.,1000,-3.15,3.15);
+ TH2F* efficiencyMapLayer1     = new TH2F("efficiencyMapLayer1","efficiencyMapLayer1;Z (cm);Phi (rad)",1000,-30.,30.,1000,-3.15,3.15);
+ TH2F* efficiencyMapLayer2     = new TH2F("efficiencyMapLayer2","efficiencyMapLayer2;Z (cm);Phi (rad)",1000,-30.,30.,1000,-3.15,3.15);
+ TH2F* efficiencyMapLayer3     = new TH2F("efficiencyMapLayer3","efficiencyMapLayer3;Z (cm);Phi (rad)",1000,-30.,30.,1000,-3.15,3.15);
+ 
+ TH1F* validPerPixHitOnTrackMerged    = new TH1F("validPerPixHitOnTrackMerged","validPerPixHitOnTrackMerged;# pixel hits on track;# valid hits",8,1,9);
+ TH1F* missingPerPixHitOnTrackMerged = new TH1F("missingPerPixHitOnTrackMerged","missingPerPixHitOnTrackMerged;# pixel hits on track;# missing hits",8,1,9);
+ TH1F* inactivePerPixHitOnTrackMerged = new TH1F("inactivePerPixHitOnTrackMerged","inactivePerPixHitOnTrackMerged;# pixel hits on track;# inactive hits",8,1,9);
+ TH1F* efficiencyPerPixHitOnTrack = new TH1F("efficiencyPerPixHitOnTrack","efficiencyPerPixHitOnTrack;# pixel hits on track;#epsilon_{hit}",8,1,9);
+ 
   char name[120];
   for(int i=1;i<=Nfiles;i++){
   
-    sprintf(name,"pixelEfficiency1_%d.root",i);
+    sprintf(name,"pixelEfficiency%d.root",i);
         
     cout<<name<<endl;
   
@@ -609,9 +643,11 @@ void merge(){
     mergeHisto("missingVsPT_lowpt",missingVsPT_lowptMerged);
     
     mergeHisto(validVsEtaMerged);
-    mergeHisto(missingVsEtaMerged);
     mergeHisto(validVsPhiMerged);
+    mergeHisto(missingVsEtaMerged);
     mergeHisto(missingVsPhiMerged);
+    mergeHisto(inactiveVsEtaMerged);
+    mergeHisto(inactiveVsPhiMerged);
 
     if(DEBUG) cout<<"********* NOW MERGING *tuning* analysis ************"<<endl;
     mergeHisto("tunningEdgeVal",tunningEdgeValMerged);
@@ -678,6 +714,29 @@ void merge(){
     mergeHisto(missingButClusterOnSameModuleMerged);
     mergeHisto(missingButClusterMerged);
         
+    mergeHisto("validPerTriggerBPix",validPerTriggerBPixMerged);
+    mergeHisto("missingPerTriggerBPix",missingPerTriggerBPixMerged);
+    mergeHisto("inactivePerTriggerBPix",inactivePerTriggerBPixMerged);
+    mergeHisto("validPerTriggerFPix",validPerTriggerFPixMerged);
+    mergeHisto("missingPerTriggerFPix",missingPerTriggerFPixMerged);
+    mergeHisto("inactivePerTriggerFPix",inactivePerTriggerFPixMerged); 
+ 
+ 
+    mergeHisto("validMapLayer1",validMapLayer1Merged);
+    mergeHisto("validMapLayer2",validMapLayer2Merged);
+    mergeHisto("validMapLayer3",validMapLayer3Merged);
+    mergeHisto("missingMapLayer1",missingMapLayer1Merged);
+    mergeHisto("missingMapLayer2",missingMapLayer2Merged);
+    mergeHisto("missingMapLayer3",missingMapLayer3Merged);
+    mergeHisto("inactiveMapLayer1",inactiveMapLayer1Merged);
+    mergeHisto("inactiveMapLayer2",inactiveMapLayer2Merged);
+    mergeHisto("inactiveMapLayer3",inactiveMapLayer3Merged);
+    
+    mergeHisto(validPerPixHitOnTrackMerged);
+    mergeHisto(missingPerPixHitOnTrackMerged);
+    mergeHisto(inactivePerPixHitOnTrackMerged);
+ 
+ 
     if(DEBUG) cout<<"********* ALL HISTO WERE SUCCESSFULLY MERGED ************"<<endl;
     if(DEBUG) cout<<"*********    NOW STARTING TO MERGE TTREE     ************"<<endl;
 
@@ -886,18 +945,10 @@ void merge(){
   error=0;if((a+b)!=0) error=sqrt(((a)/(a+b))*(1-((a)/(a+b)))/(a+b));
   histSummary->SetBinError(3,error);
   histSummary->GetXaxis()->SetBinLabel(3,"total");
-  
-  if(useInactive){
-    makeOperation(missingPerSubdetectorMerged,inactivePerSubdetectorMerged,missingPerSubdetectorMerged,"+");
-    makeOperation(missingSummaryMerged,inactiveSummaryMerged,missingSummaryMerged,"+");
-  }
-  makeEfficiency(validPerSubdetectorMerged,missingPerSubdetectorMerged,efficiencyPerSubdetector);
-  makeEfficiency(validSummaryMerged,missingSummaryMerged,efficiencySummary);
-  if(useInactive){
-    makeOperation(missingPerSubdetectorMerged,inactivePerSubdetectorMerged,missingPerSubdetectorMerged,"-");
-    makeOperation(missingSummaryMerged,inactiveSummaryMerged,missingSummaryMerged,"-");
-  }
-  
+      
+  makeEfficiency(validPerSubdetectorMerged,missingPerSubdetectorMerged,inactivePerSubdetectorMerged,efficiencyPerSubdetector);
+  makeEfficiency(validSummaryMerged,missingSummaryMerged,inactiveSummaryMerged,efficiencySummary);
+    
   TH1F* auxDen = new TH1F("auxDen","auxDen",validVsBetaBPixMerged->GetNbinsX(),validVsBetaBPixMerged->GetMinimumBin(),validVsBetaBPixMerged->GetMaximumBin());
   makeOperation(validVsBetaBPixMerged,missingVsBetaBPixMerged,auxDen,"+");
   histBetaAnalysisBPixGraph = new TGraphAsymmErrors (validVsBetaBPixMerged,auxDen);  
@@ -941,11 +992,21 @@ void merge(){
   makeEfficiency(validVsPTMerged,missingVsPTMerged,PTEfficiency);
   makeEfficiency(validVsPT_lowptMerged,missingVsPT_lowptMerged,PTEfficiency_lowpt);
   
-  makeEfficiency(efficiencyVsEta);
-  makeEfficiency(efficiencyVsPhi);
+  makeEfficiency(validVsEtaMerged,missingVsEtaMerged,inactiveVsEtaMerged,efficiencyVsEta);
+  makeEfficiency(validVsPhiMerged,missingVsPhiMerged,inactiveVsPhiMerged,efficiencyVsPhi);
   makeEfficiency(efficiencyPerMinHitsOnTrackBPix);
   makeEfficiency(efficiencyPerMinHitsOnTrackFPix);
 
+  makeEfficiency(validMapLayer1Merged,missingMapLayer1Merged,inactiveMapLayer1Merged,efficiencyMapLayer1);
+  makeEfficiency(validMapLayer2Merged,missingMapLayer2Merged,inactiveMapLayer2Merged,efficiencyMapLayer2);
+  makeEfficiency(validMapLayer3Merged,missingMapLayer3Merged,inactiveMapLayer3Merged,efficiencyMapLayer3);    
+    
+  makeEfficiency(efficiencyPerPixHitOnTrack);
+    
+    
+    
+    
+    
   TH1F* localXAnalysis = new TH1F("localXAnalysis", "hist", 100,-1.5,1.5); 
   for (int bin=1;bin<=100;bin++){
     double val=validVsLocalXMerged->GetBinContent(bin);
@@ -1726,6 +1787,17 @@ void merge(){
   makeEfficiency(tunningEdgeValMerged, tunningEdgeMisMerged, tunningEdgeEfficiency);
   makeEfficiency(tunningMuonValMerged, tunningMuonMisMerged, tunningMuonEfficiency);
   
+  //Trigger Efficiencies 
+  makeEfficiency(validPerTriggerBPixMerged,missingPerTriggerBPixMerged,efficiencyPerTriggerBPix);
+  makeEfficiency(validPerTriggerFPixMerged,missingPerTriggerFPixMerged,efficiencyPerTriggerFPix);
+  for(unsigned int itrig = 1;itrig<=efficiencyPerTriggerBPix->GetNbinsX();++itrig){
+    efficiencyPerTriggerBPix_1D->SetBinContent(itrig,efficiencyPerTriggerBPix->GetBinContent(itrig,itrig));
+    efficiencyPerTriggerBPix_1D->SetBinError(itrig,efficiencyPerTriggerBPix->GetBinError(itrig,itrig));
+    efficiencyPerTriggerFPix_1D->SetBinContent(itrig,efficiencyPerTriggerFPix->GetBinContent(itrig,itrig));
+    efficiencyPerTriggerFPix_1D->SetBinError(itrig,efficiencyPerTriggerFPix->GetBinError(itrig,itrig));
+  }
+  
+  
   for (int bin=1; bin<=40; bin++){ 
     tunningSlice->SetBinContent(bin,tunningEfficiency->GetBinContent(10,bin));
     int nTot=(int)tunningValMerged->GetBinContent(10,bin)+(int)tunningMisMerged->GetBinContent(10,bin);
@@ -2468,6 +2540,38 @@ void merge(){
   c1->Print("histAlphaAnlaysisANDvalidstatistic.png","png");
   
   
+  validPerTriggerBPixMerged->Write();
+  missingPerTriggerBPixMerged->Write();
+  inactivePerTriggerBPixMerged->Write();
+  validPerTriggerFPixMerged->Write();
+  missingPerTriggerFPixMerged->Write();
+  inactivePerTriggerFPixMerged->Write();
+  efficiencyPerTriggerBPix->Write();
+  efficiencyPerTriggerFPix->Write();
+  efficiencyPerTriggerBPix_1D->Write();
+  efficiencyPerTriggerFPix_1D->Write();
+  
+  
+  validMapLayer1Merged->Write();
+  validMapLayer2Merged->Write();
+  validMapLayer3Merged->Write();
+  missingMapLayer1Merged->Write();
+  missingMapLayer2Merged->Write();
+  missingMapLayer3Merged->Write();
+  inactiveMapLayer1Merged->Write();
+  inactiveMapLayer2Merged->Write();
+  inactiveMapLayer3Merged->Write();
+  
+  efficiencyMapLayer1->Write();
+  efficiencyMapLayer2->Write();
+  efficiencyMapLayer3->Write();
+  
+ 
+  validPerPixHitOnTrackMerged->Write();
+  missingPerPixHitOnTrackMerged->Write();
+  inactivePerPixHitOnTrackMerged->Write();
+  efficiencyPerPixHitOnTrack->Write();
+  
   
   //************************************************
   //****************    SUMMARY   ******************
@@ -2479,9 +2583,9 @@ void merge(){
   if(summary.is_open()){
     summary<<"1. Total number of events :          "<<consistencyCheckMerged->GetBinContent(1)<<endl;
     summary<<"2. Total number of tracks :          "<<consistencyCheckMerged->GetBinContent(2)<<endl;
-    summary<<"3. With at least 1 hit in pixel :    "<<consistencyCheckTrajMerged->GetBinContent(4)<<endl;
-    summary<<"4. With at least 1 hit in BPIX  :    "<<consistencyCheckTrajMerged->GetBinContent(5)<<endl;
-    summary<<"5. With at least 1 hit in FPIX  :    "<<consistencyCheckTrajMerged->GetBinContent(6)<<endl;
+    summary<<"3. With at least 1 hit in pixel :    "<<consistencyCheckTrajMerged->GetBinContent(3)<<endl;
+    summary<<"4. With at least 1 hit in BPIX  :    "<<consistencyCheckTrajMerged->GetBinContent(4)<<endl;
+    summary<<"5. With at least 1 hit in FPIX  :    "<<consistencyCheckTrajMerged->GetBinContent(5)<<endl;
     summary<<"6. In pix volume with $\\chi^2<15$  : "<<trackingEfficiencyMerged->GetBinContent(1)<<endl;
     summary<<"7. In pix volume with $\\chi^2<15$"<<endl;
     summary<<"    and at least 1 pixel hit :       "<<trackingEfficiencyMerged->GetBinContent(2)<<endl;
@@ -2597,6 +2701,20 @@ void makeEfficiency(TH1F* valid, TH1F* missing, TH1F* efficiency, bool withError
   efficiency->GetYaxis()->SetTitle("#epsilon_{hit}");
 }
 
+void makeEfficiency(TH1F* valid, TH1F* missing, TH1F* inactive, TH1F* efficiency, bool withError){
+  for(int i=1;i<=efficiency->GetNbinsX();i++){
+    double val = valid->GetBinContent(i);
+    double mis = missing->GetBinContent(i)+inactive->GetBinContent(i);
+    if( (val+mis)!=0 ){
+      double eff = val / (val+mis);
+      double err = sqrt(eff*(1-eff)/(val+mis));
+      efficiency->SetBinContent(i,eff);
+      if(withError) efficiency->SetBinError(i,err);
+    }
+  }
+  efficiency->GetYaxis()->SetTitle("#epsilon_{hit}");
+}
+
 void makeEfficiency(TH1F* efficiency, bool withError){
   TString name = efficiency->GetName();
   name=name.Replace(0,10,0,0);
@@ -2625,10 +2743,35 @@ void makeEfficiency(TH2F* valid, TH2F* missing, TH2F* efficiency){
       double mis = missing->GetBinContent(i,j);
       if( (val+mis)!=0 ){
         double eff = val / (val+mis);
+        double err = sqrt(eff*(1-eff)/(val+mis));
         efficiency->SetBinContent(i,j,eff);
+        efficiency->SetBinError(i,j,err);
       }
     }
   }
+}
+
+void makeEfficiency(TH2F* valid, TH2F* missing, TH2F* inactive, TH2F* efficiency){
+  for(int i=1;i<=efficiency->GetNbinsX();i++){
+    for(int j=1;j<=efficiency->GetNbinsY();j++){
+      double val = valid->GetBinContent(i,j);
+      double mis = missing->GetBinContent(i,j)+inactive->GetBinContent(i,j);
+      if( (val+mis)!=0 ){
+        double eff = val / (val+mis);
+        double err = sqrt(eff*(1-eff)/(val+mis));
+        efficiency->SetBinContent(i,j,eff);
+        efficiency->SetBinError(i,j,err);
+      }
+    }
+  }
+}
+
+void makeEfficiency(TH2F* efficiency){
+  TString name = efficiency->GetName();
+  name=name.Replace(0,10,0,0);
+  TH2F* valid = (TH2F*) gDirectory->Get("valid"+name+"Merged");
+  TH2F* missing = (TH2F*) gDirectory->Get("missing"+name+"Merged");
+  makeEfficiency(valid,missing,efficiency);
 }
 
 void makeEfficiencyGraph(TH1F* valid, TH1F* missing, TH1F* efficiency){
