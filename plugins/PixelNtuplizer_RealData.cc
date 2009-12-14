@@ -174,7 +174,7 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
   //  std::cout << "Making rechit branch:" << std::endl;
   PixHitTree_->Branch("RecHit", &rechit_, "localX/F:localY:globalX:globalY:globalZ:residualX:residualY:resErrX:resErrY:hit_errX:hit_errY:resXprime:resXprimeErr:clusterProb:probX:probY:qualWord/i:qBin/I:onEdge:badPixels:spansTwoROCs", bufsize);
   //  std::cout << "Making track branch:" << std::endl;
-  PixHitTree_->Branch("track", &track_, "pt/F:p:px:py:pz:globalTheta:globalEta:globalPhi:localTheta:localPhi:chi2:ndof:foundHits/I:tracknum", bufsize);
+  PixHitTree_->Branch("track", &track_, "pt/F:p:px:py:pz:globalTheta:globalEta:globalPhi:localTheta:localPhi:chi2:ndof:foundHits/I:tracknum:d0/F:dz", bufsize);
   //  std::cout << "Making track only branch:" << std::endl;
   TrackTree_->Branch("TrackInfo", &trackonly_, "run/I:evtnum:tracknum:pixelTrack:NumPixelHits:NumStripHits:charge:chi2/F:ndof:theta:d0:dz:p:pt:px:py:pz:phi:eta:vx:vy:vz:muonT0:muondT0", bufsize);
   edm::LogInfo("PixelNuplizer_RealData") << "Made all branches." << std::endl;
@@ -495,7 +495,7 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 
 	  if(isCosmic == true) isValidMuonAssoc(iEvent);
 
-	  //  isOffTrackHits(iEvent,*clust, iSetup,topol,theGeomDet->geographicalId().rawId(),tsos);
+	  if( useAllPixel == true)isOffTrackHits(iEvent,*clust, iSetup,topol,theGeomDet->geographicalId().rawId(),tsos);
 	  
 
 	  // get the contents
@@ -505,7 +505,7 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 	  fillVertex(theGeomDet);
 	  fillClust(*clust, topol, theGeomDet, tsos);
 	  fillPix(*clust, topol, theGeomDet);
-	  fillTrack(tsos, *refTraj, TrackNumber);
+	  fillTrack(tsos, *refTraj, TrackNumber, trackref);
 	  fillTrig(iEvent);
 
 	  
@@ -662,7 +662,7 @@ bool PixelNtuplizer_RealData::isOffTrackHits(const edm::Event& iEvent,const SiPi
 						      (clust_y - allclustinfo_.allclust_y[n_clust-1])*
 						      (clust_y - allclustinfo_.allclust_y[n_clust-1]) );
 
-         // std::cout << " distance " << allclustinfo_.allclust_dist[n_clust-1] << "clustx " << clust_x << " allclust dist " << allclustinfo_.allclust_x[n_clust-1] << std::endl;
+	 //  std::cout << " distance " << allclustinfo_.allclust_dist[n_clust-1] << "clustx " << clust_x << " allclust dist " << allclustinfo_.allclust_x[n_clust-1] << std::endl;
 
          const std::vector<SiPixelCluster::Pixel>& pixvector = pixeliter->cluster()->pixels();
 					    
@@ -910,10 +910,10 @@ void PixelNtuplizer_RealData::fillPix(const SiPixelCluster & LocPix, const Recta
       pixinfo_.gy[pixinfo_.npix] = GP.y();
       pixinfo_.gz[pixinfo_.npix] = GP.z();
     }
-}
+} 
 
 
-void PixelNtuplizer_RealData::fillTrack(TrajectoryStateOnSurface& tsos,const Trajectory &traj, int TrackNumber) 
+void PixelNtuplizer_RealData::fillTrack(TrajectoryStateOnSurface& tsos,const Trajectory &traj, int TrackNumber, const TrackRef& track) 
 {
   track_.pt = tsos.globalMomentum().perp();
   track_.p = tsos.globalMomentum().mag();
@@ -929,6 +929,8 @@ void PixelNtuplizer_RealData::fillTrack(TrajectoryStateOnSurface& tsos,const Tra
   track_.ndof = traj.ndof();
   track_.foundHits = traj.foundHits();
   track_.tracknum = TrackNumber;
+  track_.d0 = track->d0();
+  track_.dz = track->dz();
 
 }
 

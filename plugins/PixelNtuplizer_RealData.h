@@ -52,7 +52,7 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
   void fillPix(const SiPixelCluster&, const RectangularPixelTopology*, const PixelGeomDetUnit*);
   void fillSim(std::vector<PSimHit>::const_iterator, unsigned int, const PixelGeomDetUnit *,
   	       const RectangularPixelTopology *, const edm::SimTrackContainer& );
-  void fillTrack(TrajectoryStateOnSurface&,const Trajectory&, int);
+  void fillTrack(TrajectoryStateOnSurface&,const Trajectory&, int, const TrackRef& track);
 
   void fillTrig(const edm::Event&);
 
@@ -369,6 +369,8 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
     float ndof;
     int foundHits;
     int tracknum;     // number of track processed (correlates with others)
+   float d0;
+    float dz;
 
     void init();
     } track_;
