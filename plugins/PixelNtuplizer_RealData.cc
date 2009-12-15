@@ -174,7 +174,7 @@ void PixelNtuplizer_RealData::beginJob(const edm::EventSetup& es)
   //  std::cout << "Making rechit branch:" << std::endl;
   PixHitTree_->Branch("RecHit", &rechit_, "localX/F:localY:globalX:globalY:globalZ:residualX:residualY:resErrX:resErrY:hit_errX:hit_errY:resXprime:resXprimeErr:clusterProb:probX:probY:qualWord/i:qBin/I:onEdge:badPixels:spansTwoROCs", bufsize);
   //  std::cout << "Making track branch:" << std::endl;
-  PixHitTree_->Branch("track", &track_, "pt/F:p:px:py:pz:globalTheta:globalEta:globalPhi:localTheta:localPhi:chi2:ndof:foundHits/I:tracknum:d0/F:dz", bufsize);
+  PixHitTree_->Branch("track", &track_, "pt/F:p:px:py:pz:globalTheta:globalEta:globalPhi:localTheta:localPhi:chi2:ndof:foundHits/I:tracknum:d0/F:dz:qualityMask/I:algo/I", bufsize);
   //  std::cout << "Making track only branch:" << std::endl;
   TrackTree_->Branch("TrackInfo", &trackonly_, "run/I:evtnum:tracknum:pixelTrack:NumPixelHits:NumStripHits:charge:chi2/F:ndof:theta:d0:dz:p:pt:px:py:pz:phi:eta:vx:vy:vz:muonT0:muondT0", bufsize);
   edm::LogInfo("PixelNuplizer_RealData") << "Made all branches." << std::endl;
@@ -931,7 +931,8 @@ void PixelNtuplizer_RealData::fillTrack(TrajectoryStateOnSurface& tsos,const Tra
   track_.tracknum = TrackNumber;
   track_.d0 = track->d0();
   track_.dz = track->dz();
-
+  track_.qualityMask = track->qualityMask();
+  track_.algo = track->algo();
 }
 
 

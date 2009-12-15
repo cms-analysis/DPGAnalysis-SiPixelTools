@@ -369,8 +369,10 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
     float ndof;
     int foundHits;
     int tracknum;     // number of track processed (correlates with others)
-   float d0;
+    float d0;
     float dz;
+    int qualityMask;
+    int algo;
 
     void init();
     } track_;
