@@ -171,7 +171,7 @@ process.source.inputCommand = cms.untracked.vstring("drop *_*_*_FU"
 ## number of events
 ##
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000) )
+    input = cms.untracked.int32(10000) )
 
 ##
 ## executionpath

@@ -781,7 +781,7 @@ void PixelNtuplizer_RealData::fillTrig(const edm::Event& iEvent){
 	      }
 	  }
   
-	  // cout << " trig " << std::bitset<32>(evt_.L1TT[1]) << endl;
+	  //  cout << " trig " << std::bitset<32>(evt_.L1TT[1]) << endl;
 
 
 
@@ -1005,8 +1005,15 @@ void PixelNtuplizer_RealData::fillSim(std::vector<PSimHit>::const_iterator isim,
 
 void PixelNtuplizer_RealData::init() 
 {
+
+  for (int i = 0; i < 4; ++i) {
+    evt_.L1TT[i] = 0;
+  }
+
+
   evt_.init();
   det_.init();
+
   vertex_.init();
   clust_.init();
   pixinfo_.init();

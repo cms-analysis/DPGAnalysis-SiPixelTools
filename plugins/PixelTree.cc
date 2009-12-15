@@ -671,7 +671,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
       }
       ++fMuN;
     }
-    fMuTmean = meanTime/meanTimeW2;
+    if(hMuonCollection->size() > 0)fMuTmean = meanTime/meanTimeW2;
   }
 
 

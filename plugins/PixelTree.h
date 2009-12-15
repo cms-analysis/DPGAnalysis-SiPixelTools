@@ -120,8 +120,7 @@ class PixelTree : public edm::EDAnalyzer {
   static const int MUMAX = 100; 
   int fMuN; 
   int fMuType[MUMAX], fMuTkI[MUMAX];
-  float fMuPt[MUMAX], fMuTheta[MUMAX], fMuPhi[MUMAX], 
-    fMuT[MUMAX], fMuTcorr[MUMAX], fMuTerr[MUMAX], fMuTmean;
+  float fMuPt[MUMAX], fMuTheta[MUMAX], fMuPhi[MUMAX],fMuT[MUMAX], fMuTcorr[MUMAX], fMuTerr[MUMAX], fMuTmean;
 
   // -- tracks
   static const int TRACKMAX = 10000; 
