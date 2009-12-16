@@ -4,6 +4,8 @@
 import os
 import FWCore.ParameterSet.Config as cms
 
+process = cms.Process("Demo")
+
 # ----------------------------------------------------------------------
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
@@ -65,7 +67,7 @@ process.PixelTree = cms.EDAnalyzer(
     dumpAllEvents                = cms.untracked.int32(0),
     PrimaryVertexCollectionLabel = cms.untracked.InputTag('offlinePrimaryVertices::EXPRESS'),
     muonCollectionLabel          = cms.untracked.InputTag('muons'),
-    trajectoryInputLabel         = cms.untracked.InputTag('TrackRefitter'),
+    trajectoryInputLabel         = cms.untracked.InputTag('TrackRefitter::Demo'),
     trackCollectionLabel         = cms.untracked.InputTag('generalTracks::EXPRESS'),
     pixelClusterLabel            = cms.untracked.InputTag('siPixelClusters::EXPRESS'),
     L1GTReadoutRecordLabel       = cms.untracked.InputTag('gtDigis'), 
