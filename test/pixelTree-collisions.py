@@ -94,7 +94,7 @@ process.source = cms.Source(
 
 # -- number of events
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(100)
     )
 
 #process.load("Configuration.StandardSequences.RawToDigi_Data_cff")

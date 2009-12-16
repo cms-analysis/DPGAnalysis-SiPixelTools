@@ -1,3 +1,4 @@
+
 // ----------------------------------------------------------------------
 // PixelTree
 // ---------
@@ -243,6 +244,7 @@ void PixelTree::beginJob(const edm::EventSetup& es) {
   fTree->Branch("TkType",       fTkType,        "TkType[TkN]/I");
   fTree->Branch("TkMuI",        fTkMuI,         "TkMuI[TkN]/I");
   fTree->Branch("TkNumPixelHits", fTkNumPixelHits, "TkNumPixelHits[TkN]/F");
+  fTree->Branch("TkQualityMask", fTkQualityMask, "TkQualityMask[TkN]/I");
 
   fTree->Branch("ClN",          &fClN,          "ClN/I");
   fTree->Branch("ClRow",        fClRow,         "ClRow[ClN]/F");
@@ -756,6 +758,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
       fTkType[fTkN]   = 1;
       fTkMuI[fTkN]    = -1;
       fTkNumPixelHits[fTkN] = pixelHits;
+      fTkQualityMask[fTkN]= trackref->qualityMask();
   
       // ----------------------------------------------------------------------
       // -- Clusters associated with a track
@@ -1457,6 +1460,7 @@ void PixelTree::init() {
     fTkD0[i]     = fTkDz[i] = -9999.;
     fTkVx[i]     = fTkVy[i] = fTkVz[i] = -9999.;
     fTkType[i]   = fTkMuI[i] = -9999;
+    fTkQualityMask[i]= 0;
     fTkClN[i]    = 0;
     for (int j = 0; j < CLPERTRACKMAX; ++j) {
       fTkClI[i][j] = -9999;
@@ -1775,3 +1779,23 @@ void PixelTree::onlineRocColRow(const DetId &pID, int offlineRow, int offlineCol
 
 // define this as a plug-in
 DEFINE_FWK_MODULE(PixelTree);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

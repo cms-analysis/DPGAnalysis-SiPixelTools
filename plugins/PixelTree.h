@@ -138,6 +138,7 @@ class PixelTree : public edm::EDAnalyzer {
   float fTkRes2Xe[TRACKMAX][CLPERTRACKMAX];
   int   fTkType[TRACKMAX], fTkMuI[TRACKMAX], fTkClN[TRACKMAX], fTkClI[TRACKMAX][CLPERTRACKMAX]; 
   int fTkNumPixelHits[TRACKMAX];
+  int fTkQualityMask[TRACKMAX];
 
   // -- clusters
   static const int CLUSTERMAX = 100000; 
