@@ -229,16 +229,16 @@ process.p = cms.Path(
     process.PixelTree*
 #    process.genParticles* 
 #    process.genDump*
-    process.trkDump*
     process.stuffDump*
+    process.trkDump*
     process.muonDump*
     process.triggerDump*
     process.bmmDump*
     process.bmtDump*
-    process.bupsikpDump*
-    process.bdpsikstarDump*
-    process.bspsiphiDump*
-    process.b2muD0Dump*
+#    process.bupsikpDump*
+#    process.bdpsikstarDump*
+#    process.bspsiphiDump*
+#    process.b2muD0Dump*
     process.tree
 )
 

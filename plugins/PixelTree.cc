@@ -559,6 +559,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
   if (goodVertices) {
     for (reco::VertexCollection::const_iterator iv = hVertices->begin(); iv != hVertices->end(); ++iv) {
+      if (fPvN > PVMAX - 1) break;
       fPvX[fPvN] = iv->x();
       fPvY[fPvN] = iv->y();
       fPvZ[fPvN] = iv->z();
@@ -607,6 +608,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
   if (hMuonCollection.isValid()) {
     int idx(0); 
     for (MuonCollection::const_iterator it = hMuonCollection->begin(), itEnd = hMuonCollection->end(); it != itEnd; ++it){
+      if (fMuN > MUMAX - 1) break;
 
       // -- Get reference to track
       if ((it->globalTrack()).isNull()) {
@@ -682,6 +684,8 @@ void PixelTree::analyze(const edm::Event& iEvent,
     const TrajTrackAssociationCollection ttac = *(hTTAC.product());
     // cout << "   hTTAC.isValid()" << endl;
     for (TrajTrackAssociationCollection::const_iterator it = ttac.begin(); it !=  ttac.end(); ++it) {
+      if (fTkN > TRACKMAX - 1) break;
+
       // cout << "      TracjTrackAssociationCollection iterating" << endl;
       const edm::Ref<std::vector<Trajectory> > refTraj = it->key;  
       reco::TrackRef trackref = it->val;
@@ -1035,6 +1039,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	  const std::vector<SiPixelCluster::Pixel>& pixvector = clust->pixels();
 	  //	  cout << "  Found " << pixvector.size() << " pixels for this cluster " << endl;
 	  for (unsigned int i = 0; i < pixvector.size(); ++i) {
+	    if (fDgN > DIGIMAX - 1) break;
 	    SiPixelCluster::Pixel holdpix = pixvector[i];
 	    
 	    fDgRow[fDgN]    = holdpix.x;
@@ -1093,6 +1098,8 @@ void PixelTree::analyze(const edm::Event& iEvent,
       if (isearch != clustColl.end()) {  // Not an empty iterator
 	edmNew::DetSet<SiPixelCluster>::const_iterator  di;
 	for (di=isearch->begin(); di!=isearch->end(); di++) {
+	  if (fClN > CLUSTERMAX - 1) break;
+
 	  // unsigned int temp = clusterSet.size();
 	  clusterSet.insert(*di);
 	  // if (clusterSet.size() > temp) {
@@ -1189,6 +1196,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	    // -- Get digis of this cluster
 	    const std::vector<SiPixelCluster::Pixel>& pixvector = di->pixels();
 	    for (unsigned int i = 0; i < pixvector.size(); ++i) {
+	      if (fDgN > DIGIMAX - 1) break;
 	      SiPixelCluster::Pixel holdpix = pixvector[i];
 	      
 	      fDgRow[fDgN]    = holdpix.x;
