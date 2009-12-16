@@ -524,7 +524,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	if (hltacc) fHLTa3   |= (0x1 << itrig);
 	if (hltrun) fHLTr3   |= (0x1 << itrig);
 	if (hlterr) fHLTe3   |= (0x1 << itrig);
-	if (hltacc) fHLTA[4] |= (0x1 << itrig);
+	if (hltacc) fHLTA[3] |= (0x1 << itrig);
       }
     }
 
@@ -588,9 +588,6 @@ void PixelTree::analyze(const edm::Event& iEvent,
     }
   }
   
-
-
-
   // ----------------------------------------------------------------------
   // -- Fill muons
   // ----------------------------------------------------------------------
@@ -672,6 +669,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
   // -- Track trajectory association map
   edm::Handle<TrajTrackAssociationCollection> hTTAC;
   iEvent.getByLabel(fTrajectoryInputLabel, hTTAC);
+  cout << "===========> trajectory collection size: " << hTTAC->size() << endl;
 
   // -- Pixel cluster
   edm::Handle< edmNew::DetSetVector<SiPixelCluster> > hClusterColl;
