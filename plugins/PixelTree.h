@@ -19,8 +19,12 @@
  *
  ************************************************************/
 
+#include <map>
 
+#include "CondFormats/SiPixelObjects/interface/SiPixelFrameConverter.h"
 #include "CondFormats/SiPixelObjects/interface/SiPixelFedCablingMap.h"
+#include "CondFormats/DataRecord/interface/SiPixelFedCablingMapRcd.h"
+
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHitCollection.h"
 #include "DataFormats/MuonReco/interface/MuonFwd.h"
 
@@ -37,6 +41,8 @@
 #include "Alignment/OfflineValidation/interface/TrackerValidationVariables.h"
 #include "TrackingTools/TrackAssociator/interface/TrackAssociatorParameters.h"
 #include "TrackingTools/TrackAssociator/interface/TrackDetectorAssociator.h"
+
+
 
 #include "TObject.h"
 
@@ -70,6 +76,7 @@ class PixelTree : public edm::EDAnalyzer {
   void fpixNames(const DetId &pID, int &DBdisk, int &DBblade, int &DBpanel, int &DBplaquette);
   
   void onlineRocColRow(const DetId &pID, int offlineRow, int offlineCol, int &roc, int &col, int &row);
+  //  void onlineRocColRow2(const DetId &pID, int offlineRow, int offlineCol, int &roc, int &col, int &row);
   
   void readOffsets();
   void sectorAndWheel(const Muon &muon0, int &w0, int &s0);
@@ -93,6 +100,9 @@ class PixelTree : public edm::EDAnalyzer {
   TH1D  *fL1Thist, *fL1TThist, *fHLThist; 
   TTree *fTree;
 
+  int                    fInit; 
+  std::map<int, int>     fFEDID; 
+  SiPixelFrameConverter *fPFC[40]; 
 
   // -- general stuff
   unsigned int fRun, fEvent, fLumiBlock; 

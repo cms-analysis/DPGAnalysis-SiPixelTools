@@ -30,8 +30,6 @@
 #include "CondFormats/L1TObjects/interface/L1GtTriggerMenuFwd.h"
 
 #include "CondFormats/SiPixelObjects/interface/DetectorIndex.h"
-#include "CondFormats/SiPixelObjects/interface/SiPixelFrameConverter.h"
-#include "CondFormats/DataRecord/interface/SiPixelFedCablingMapRcd.h"
 
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
@@ -110,7 +108,8 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fPixelClusterLabel(iConfig.getUntrackedParameter<InputTag>("pixelClusterLabel", edm::InputTag("siPixelClusters"))), 
   fL1GTReadoutRecordLabel(iConfig.getUntrackedParameter<InputTag>("L1GTReadoutRecordLabel", edm::InputTag("gtDigis"))),
   fL1GTmapLabel(iConfig.getUntrackedParameter<InputTag>("hltL1GtObjectMap", edm::InputTag("hltL1GtObjectMap"))),
-  fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag>("HLTResultsLabel", edm::InputTag("TriggerResults::HLT")))
+  fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag>("HLTResultsLabel", edm::InputTag("TriggerResults::HLT"))),
+  fInit(0)
 {
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
@@ -125,6 +124,14 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   cout << "---  hltL1GtObjectMap:                " << fL1GTmapLabel << endl;
   cout << "---  HLTResultsLabel:                 " << fHLTResultsLabel << endl;
   cout << "----------------------------------------------------------------------" << endl;
+
+  fPvN = PVMAX; 
+  fMuN = MUMAX; 
+  fTkN = TRACKMAX; 
+  fClN = CLUSTERMAX; 
+  fDgN = DIGIMAX; 
+  init();
+
 }
 
 // ----------------------------------------------------------------------
@@ -141,6 +148,11 @@ void PixelTree::endJob() {
   fFile->Write();
   fFile->Close();
   delete fFile;
+
+  for (int i = 0; i < 40; ++i) {
+    delete fPFC[i];
+  }
+
 }
 
 // ----------------------------------------------------------------------
@@ -309,6 +321,34 @@ void PixelTree::analyze(const edm::Event& iEvent,
     oldRun = 1; 
   }
 
+  if (0 == fInit) {
+    fInit = 1; 
+    // -- Setup cabling map and its map to detIDs
+    iSetup.get<SiPixelFedCablingMapRcd>().get(fCablingMap);
+    for (int i = 0; i < 40; ++i) {
+      fPFC[i] = new SiPixelFrameConverter(fCablingMap.product(), i);
+    }
+    
+    
+    edm::ESHandle<TrackerGeometry> pDD;
+    iSetup.get<TrackerDigiGeometryRecord>().get(pDD);
+
+    for (TrackerGeometry::DetContainer::const_iterator it = pDD->dets().begin(); it != pDD->dets().end(); it++){
+      if(dynamic_cast<PixelGeomDetUnit*>((*it))!=0){
+	DetId detId = (*it)->geographicalId();
+	uint32_t newDetId = detId;
+	
+	for (int fedid = 0; fedid < 40; ++fedid) {
+	  if (fPFC[fedid]->hasDetUnit(newDetId)) {
+	    fFEDID.insert(make_pair(newDetId, fedid)); 
+	    break;
+	  }
+	}
+      }
+    }
+
+  }
+
   // -- produce list of detID and modules
   if (0) {
     if (0 == nevt) dumpDetIds(iSetup); 
@@ -321,7 +361,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
   ESHandle<TrackerGeometry> TG;
   iSetup.get<TrackerDigiGeometryRecord>().get(TG);
   const TrackerGeometry* theTrackerGeometry = TG.product();
- 
+  const TrackerGeometry& theTracker(*theTrackerGeometry);
 
   // ----------------------------------------------------------------------
   // -- Event information
@@ -648,9 +688,6 @@ void PixelTree::analyze(const edm::Event& iEvent,
   // -- Fill tracks
   // ----------------------------------------------------------------------
 
-  iSetup.get<SiPixelFedCablingMapRcd>().get(fCablingMap);
-
-
   // -- Tracks
   edm::Handle<std::vector<reco::Track> > hTrackCollection;
   try {
@@ -669,14 +706,14 @@ void PixelTree::analyze(const edm::Event& iEvent,
   // -- Track trajectory association map
   edm::Handle<TrajTrackAssociationCollection> hTTAC;
   iEvent.getByLabel(fTrajectoryInputLabel, hTTAC);
-  cout << "===========> trajectory collection size: " << hTTAC->size() << endl;
+  //  cout << "===========> trajectory collection size: " << hTTAC->size() << endl;
 
   // -- Pixel cluster
   edm::Handle< edmNew::DetSetVector<SiPixelCluster> > hClusterColl;
   iEvent.getByLabel(fPixelClusterLabel, hClusterColl );
   const edmNew::DetSetVector<SiPixelCluster> clustColl = *(hClusterColl.product());
 
-  std::set<SiPixelCluster> clusterSet;
+  //  std::set<SiPixelCluster> clusterSet;
   TrajectoryStateCombiner tsoscomb;
   if (hTTAC.isValid()) {
     const TrajTrackAssociationCollection ttac = *(hTTAC.product());
@@ -762,7 +799,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	const DetId &hit_detId = hit->geographicalId();
 	uint IntSubDetID = (hit_detId.subdetId());
 	if (IntSubDetID == 0) continue;
-	const TrackerGeometry &theTracker(*theTrackerGeometry);
+	//	const TrackerGeometry &theTracker(*theTrackerGeometry); //?????????????????????
 	const PixelGeomDetUnit *theGeomDet = dynamic_cast<const PixelGeomDetUnit*> (theTracker.idToDet(hit_detId) );
 	if (theGeomDet == 0) {
 	  continue; 	  // skip strip modules
@@ -858,7 +895,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>(hit->hit());
 	edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster> const& clust = (*pixhit).cluster();
 	if (clust.isNonnull()) {
-	  clusterSet.insert(*clust);
+	  //	  clusterSet.insert(*clust);
 
 	  align::LocalVector res = tsos.localPosition() - hit->localPosition();
 	  LocalError err1 = tsos.localError().positionError();
@@ -1044,6 +1081,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	    fDgCol[fDgN]    = holdpix.y;
 	    fDgDetId[fDgN]  = DBdetid;
 	    onlineRocColRow(DBdetid, fDgRow[fDgN], fDgCol[fDgN], fDgRoc[fDgN], fDgRocC[fDgN], fDgRocR[fDgN]);
+
 	    fDgAdc[fDgN]    = -99.;
 	    fDgCharge[fDgN] = holdpix.adc/1000.;
 
@@ -1099,7 +1137,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	  if (fClN > CLUSTERMAX - 1) break;
 
 	  // unsigned int temp = clusterSet.size();
-	  clusterSet.insert(*di);
+	  //	  clusterSet.insert(*di);
 	  // if (clusterSet.size() > temp) {
 
 	  // -- If this cluster is already in ntuple, do not add it, but finish filling Tk* information
@@ -1116,7 +1154,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
 	  if (alreadyAt == -1) {
   
-	    const TrackerGeometry& theTracker(*theTrackerGeometry);
+	    //	    const TrackerGeometry& theTracker(*theTrackerGeometry); //??????????????????????
 	    const PixelGeomDetUnit* theGeomDet = dynamic_cast<const PixelGeomDetUnit*> (theTracker.idToDet(detId) );
 	    if (theGeomDet == 0) {
 	      cout << "NO THEGEOMDET" << endl;
@@ -1200,6 +1238,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	      fDgRow[fDgN]    = holdpix.x;
 	      fDgCol[fDgN]    = holdpix.y;
 	      fDgDetId[fDgN]  = detId;
+
 	      onlineRocColRow(detId, fDgRow[fDgN], fDgCol[fDgN], fDgRoc[fDgN], fDgRocC[fDgN], fDgRocR[fDgN]);
 	      fDgAdc[fDgN]    = -99.;
 	      fDgCharge[fDgN] = holdpix.adc/1000.;
@@ -1247,7 +1286,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	 << " reco: " << nTk
 	 << " ClN: " << fClN 
 	 << "(0: " << nCl0 << "/1: " << nCl1 << "/2: " << nCl2 << "/1+2: " << nCl1+nCl2 << ")"
-	 << " reco: " << clusterSet.size()  
+      //	 << " reco: " << clusterSet.size()  
 	 << " DgN: " << fDgN 
 	 << " FEDs: " << nbpixfeds << "/" << nfpixfeds
 	 << endl;
@@ -1260,6 +1299,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
       fTree->Fill();
     }
   }
+
 } 
 
 
@@ -1277,22 +1317,21 @@ void PixelTree::init() {
     = 0; 
 
 
-  fPvN = 0; 
-  for (int i = 0; i < PVMAX; ++i) {
+  for (int i = 0; i < fPvN; ++i) {
     fPvX[i] = fPvY[i] = fPvZ[i] =  fPvXe[i] = fPvYe[i] = fPvZe[i] = fPvChi2[i] = -9999.;
-    fPvNdof[i] = fPvIsFake[fPvN] = -9999; 
+    fPvNdof[i] = fPvIsFake[i] = -9999; 
   }
+  fPvN = 0; 
 
-  fMuN = 0; 
   fMuTmean = -9999.;
-  for (int i = 0; i < MUMAX; ++i) {
+  for (int i = 0; i < fMuN; ++i) {
     fMuPt[i]   = fMuPhi[i] = fMuTheta[i] = -9999.;
     fMuT[i] = fMuTcorr[i] = fMuTerr[i] = -9999.;
     fMuType[i] = fMuTkI[i] = -1; 
   }
+  fMuN = 0; 
 
-  fTkN = 0; 
-  for (int i = 0; i < TRACKMAX; ++i) {
+  for (int i = 0; i < fTkN; ++i) {
     fTkCharge[i] = -9999; 
     fTkChi2[i]   = fTkNdof[i] = -9999.;
     fTkPt[i]     = fTkTheta[i] = fTkPhi[i] = -9999.;
@@ -1308,9 +1347,9 @@ void PixelTree::init() {
       fTkRes2X[i][j] = fTkRes2Xe[i][j] = -9999.;
     }
   }
+  fTkN = 0; 
 
-  fClN = 0; 
-  for (int i = 0; i < CLUSTERMAX; ++i) {
+  for (int i = 0; i < fClN; ++i) {
     fClSize[i] = fClSizeX[i] = fClSizeY[i] = -9999; 
     fClRow[i] = fClCol[i] = -9999; 
     fClLx[i] = fClLy[i] = -9999.;
@@ -1330,15 +1369,16 @@ void PixelTree::init() {
     fClLayer[i] = fClLadder[i] = fClModule[i] = fClFlipped[i] = -9999;
     fClDisk[i] = fClBlade[i] = fClPanel[i] = fClPlaquette[i] = -9999;
   }
+  fClN = 0; 
 
-  fDgN = 0; 
-  for (int i = 0; i < DIGIMAX; ++i) {
+  for (int i = 0; i < fDgN; ++i) {
     fDgRow[i] = fDgCol[i] = -9999;
     fDgLx[i] = fDgLy[i] = fDgGx[i] = fDgGy[i] = fDgGz[i] = -9999.;
     fDgAdc[i] = fDgCharge[i] = -9999.;
     fDgClI[i] = -9999;
     fDgRoc[i] = fDgRocR[i] = fDgRocC[i] = -9999;
   }
+  fDgN = 0; 
     
 }
 
@@ -1407,6 +1447,7 @@ void PixelTree::isPixelTrack(const edm::Ref<std::vector<Trajectory> > &refTraj, 
     uint testSubDetID = (testhit->geographicalId().subdetId()); 
     if (testSubDetID==PixelSubdetector::PixelBarrel) isBpixtrack = true;
     if (testSubDetID==PixelSubdetector::PixelEndcap) isFpixtrack = true;
+    if (isBpixtrack && isFpixtrack) break;
   }
 
 }
@@ -1568,19 +1609,24 @@ void PixelTree::fpixNames(const DetId &pID, int &DBdisk, int &DBblade, int &DBpa
 // copied from DQM/SiPixelMonitorClient/src/SiPixelInformationExtractor.cc
 void PixelTree::onlineRocColRow(const DetId &pID, int offlineRow, int offlineCol, int &roc, int &col, int &row) {
   int realfedID = -1;
-  for (int fedid = 0; fedid <= 40; ++fedid){
-    SiPixelFrameConverter converter(fCablingMap.product(), fedid);
-    uint32_t newDetId = pID;
-    if (converter.hasDetUnit(newDetId)){
-      realfedID = fedid;
-      break;   
-    }
-  }
+  uint32_t newDetId = pID;
 
-  SiPixelFrameConverter formatter(fCablingMap.product(), realfedID);
+  //   for (int fedid = 0; fedid < 40; ++fedid){
+  //     if (fPFC[fedid]->hasDetUnit(newDetId)){
+  //       realfedID = fedid;
+  //       break;   
+  //     }    
+  //   }
+  //   if (realfedID != fFEDID[newDetId]) {
+  //     cout << "========XXXXXXXXXXXXXX============ " << realfedID << " <-> " << fFEDID[newDetId] << endl;
+  //   }
+
+  //  SiPixelFrameConverter formatter(fCablingMap.product(), realfedID);
   sipixelobjects::ElectronicIndex cabling; 
   sipixelobjects::DetectorIndex detector = {pID, offlineRow, offlineCol};      
-  formatter.toCabling(cabling, detector);
+
+  realfedID = fFEDID[newDetId];
+  fPFC[realfedID]->toCabling(cabling, detector);
   // cabling should now contain cabling.roc and cabling.dcol  and cabling.pxid
   // however, the coordinates now need to be converted from dcl,pxid to the row,col coordinates used in the calibration info 
   sipixelobjects::LocalPixel::DcolPxid loc;
@@ -1606,6 +1652,52 @@ void PixelTree::onlineRocColRow(const DetId &pID, int offlineRow, int offlineCol
   row = locpixel.rocRow();
 
 }
+
+
+
+
+// // ----------------------------------------------------------------------
+// // copied from DQM/SiPixelMonitorClient/src/SiPixelInformationExtractor.cc
+// void PixelTree::onlineRocColRow2(const DetId &pID, int offlineRow, int offlineCol, int &roc, int &col, int &row) {
+//   int realfedID = -1;
+//   for (int fedid = 0; fedid < 40; ++fedid){
+//     uint32_t newDetId = pID;
+//     SiPixelFrameConverter converter(fCablingMap.product(), fedid);
+//     if (converter.hasDetUnit(newDetId)){
+//       realfedID = fedid;
+//       break;   
+//     }
+//   }
+
+//   SiPixelFrameConverter formatter(fCablingMap.product(), realfedID);
+//   sipixelobjects::ElectronicIndex cabling; 
+//   sipixelobjects::DetectorIndex detector = {pID, offlineRow, offlineCol};      
+//   formatter.toCabling(cabling, detector);
+//   // cabling should now contain cabling.roc and cabling.dcol  and cabling.pxid
+//   // however, the coordinates now need to be converted from dcl,pxid to the row,col coordinates used in the calibration info 
+//   sipixelobjects::LocalPixel::DcolPxid loc;
+//   loc.dcol = cabling.dcol;
+//   loc.pxid = cabling.pxid;
+
+//   sipixelobjects::LocalPixel locpixel(loc);
+//   sipixelobjects::CablingPathToDetUnit path = {realfedID, cabling.link, cabling.roc};  
+//   const sipixelobjects::PixelROC *theRoc = fCablingMap->findItem(path);
+
+//   roc = theRoc->idInDetUnit();
+//   uint32_t detSubId = pID.subdetId();
+//   if (detSubId == 1) {
+//     PixelBarrelName nameworker(pID);
+//     std::string outputname = nameworker.name();
+//     bool HalfModule = nameworker.isHalfModule();
+//     if ((outputname.find("mO") != string::npos || outputname.find("mI") != string::npos) && (HalfModule)) {
+//       roc = theRoc->idInDetUnit() + 8;
+//     }
+//   }
+  
+//   col = locpixel.rocCol();
+//   row = locpixel.rocRow();
+
+// }
 
 
 
