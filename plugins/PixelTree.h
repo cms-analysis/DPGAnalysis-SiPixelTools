@@ -91,7 +91,7 @@ class PixelTree : public edm::EDAnalyzer {
   std::string     fRootFileName; 
   int             fDumpAllEvents;
   edm::InputTag   fPrimaryVertexCollectionLabel;
-  edm::InputTag   fMuonCollectionLabel, fTrackCollectionLabel, fTrajectoryInputLabel, fPixelClusterLabel;
+  edm::InputTag   fMuonCollectionLabel, fTrackCollectionLabel, fTrajectoryInputLabel, fPixelClusterLabel, fPixelRecHitLabel;
   edm::InputTag   fL1GTReadoutRecordLabel, fL1GTmapLabel, fHLTResultsLabel;
 
   edm::ESHandle<SiPixelFedCablingMap> fCablingMap;
@@ -152,16 +152,21 @@ class PixelTree : public edm::EDAnalyzer {
   static const int CLUSTERMAX = 100000; 
   static const int DGPERCLMAX = 100;  
   static const int TKPERCLMAX = 100;  
-  int   fClN;
-  int   fClSize[CLUSTERMAX], fClSizeX[CLUSTERMAX], fClSizeY[CLUSTERMAX]; 
-  float fClRow[CLUSTERMAX], fClCol[CLUSTERMAX];  //??
-  float fClLx[CLUSTERMAX], fClLy[CLUSTERMAX], fClLxe[CLUSTERMAX], fClLye[CLUSTERMAX];
-  float fClGx[CLUSTERMAX], fClGy[CLUSTERMAX], fClGz[CLUSTERMAX];
-  float fClCharge[CLUSTERMAX],  fClChargeCorr[CLUSTERMAX];
-  int   fClType[CLUSTERMAX], fClTkN[CLUSTERMAX], fClTkI[CLUSTERMAX][TKPERCLMAX], fClDgN[CLUSTERMAX], fClDgI[CLUSTERMAX][DGPERCLMAX]; 
-  int   fClDetId[CLUSTERMAX];
-  int   fClLayer[CLUSTERMAX],  fClLadder[CLUSTERMAX], fClModule[CLUSTERMAX];
-  int   fClFlipped[CLUSTERMAX], fClDisk[CLUSTERMAX],  fClBlade[CLUSTERMAX], fClPanel[CLUSTERMAX], fClPlaquette[CLUSTERMAX];
+  int          fClN;
+  int          fClSize[CLUSTERMAX], fClSizeX[CLUSTERMAX], fClSizeY[CLUSTERMAX]; 
+  float        fClRow[CLUSTERMAX], fClCol[CLUSTERMAX];  //??
+  float        fClLx[CLUSTERMAX], fClLy[CLUSTERMAX], fClLxe[CLUSTERMAX], fClLye[CLUSTERMAX];
+  float        fClGx[CLUSTERMAX], fClGy[CLUSTERMAX], fClGz[CLUSTERMAX];
+  float        fClCharge[CLUSTERMAX],  fClChargeCorr[CLUSTERMAX];
+  int          fClType[CLUSTERMAX], fClTkN[CLUSTERMAX], fClTkI[CLUSTERMAX][TKPERCLMAX], fClDgN[CLUSTERMAX], fClDgI[CLUSTERMAX][DGPERCLMAX]; 
+  int          fClDetId[CLUSTERMAX];
+  int          fClLayer[CLUSTERMAX],  fClLadder[CLUSTERMAX], fClModule[CLUSTERMAX];
+  int          fClFlipped[CLUSTERMAX], fClDisk[CLUSTERMAX],  fClBlade[CLUSTERMAX], fClPanel[CLUSTERMAX], fClPlaquette[CLUSTERMAX];
+  float        fClRhLx[CLUSTERMAX], fClRhLy[CLUSTERMAX], fClRhGx[CLUSTERMAX], fClRhGy[CLUSTERMAX], fClRhGz[CLUSTERMAX];
+  float        fClRhProb[CLUSTERMAX], fClRhProbX[CLUSTERMAX], fClRhProbY[CLUSTERMAX];
+  unsigned int fClRhQualWord[CLUSTERMAX]; 
+  int          fClRhqBin[CLUSTERMAX], fClRhSpansTwoROCs[CLUSTERMAX], fClRhIsOnEdge[CLUSTERMAX], fClRhHasBadPixels[CLUSTERMAX]; 
+
 
   // -- digis
   static const int DIGIMAX = 1000000; 
@@ -179,8 +184,6 @@ class PixelTree : public edm::EDAnalyzer {
   float fsrms[5][15];
   float fspoints[5][15];
   
-
- 
 };
 
 #endif

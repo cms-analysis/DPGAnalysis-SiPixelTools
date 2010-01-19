@@ -106,6 +106,7 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fTrackCollectionLabel(iConfig.getUntrackedParameter<InputTag>("trackCollectionLabel", edm::InputTag("generalTracks"))),
   fTrajectoryInputLabel(iConfig.getUntrackedParameter<InputTag>("trajectoryInputLabel", edm::InputTag("ctfRefitter"))),
   fPixelClusterLabel(iConfig.getUntrackedParameter<InputTag>("pixelClusterLabel", edm::InputTag("siPixelClusters"))), 
+  fPixelRecHitLabel(iConfig.getUntrackedParameter<InputTag>("pixelRecHitLabel", edm::InputTag("siPixelRecHits"))), 
   fL1GTReadoutRecordLabel(iConfig.getUntrackedParameter<InputTag>("L1GTReadoutRecordLabel", edm::InputTag("gtDigis"))),
   fL1GTmapLabel(iConfig.getUntrackedParameter<InputTag>("hltL1GtObjectMap", edm::InputTag("hltL1GtObjectMap"))),
   fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag>("HLTResultsLabel", edm::InputTag("TriggerResults::HLT"))),
@@ -254,35 +255,48 @@ void PixelTree::beginJob(const edm::EventSetup& es) {
   fTree->Branch("TkType",       fTkType,        "TkType[TkN]/I");
   fTree->Branch("TkMuI",        fTkMuI,         "TkMuI[TkN]/I");
 
-  fTree->Branch("ClN",          &fClN,          "ClN/I");
-  fTree->Branch("ClRow",        fClRow,         "ClRow[ClN]/F");
-  fTree->Branch("ClCol",        fClCol,         "ClCol[ClN]/F");
-  fTree->Branch("ClLx",         fClLx,          "ClLx[ClN]/F");
-  fTree->Branch("ClLxE",        fClLxe,         "ClLxE[ClN]/F");
-  fTree->Branch("ClLy",         fClLy,          "ClLy[ClN]/F");
-  fTree->Branch("ClLyE",        fClLye,         "ClLyE[ClN]/F");
-  fTree->Branch("ClGx",         fClGx,          "ClGx[ClN]/F");
-  fTree->Branch("ClGy",         fClGy,          "ClGy[ClN]/F");
-  fTree->Branch("ClGz",         fClGz,          "ClGz[ClN]/F");
-  fTree->Branch("ClSize",       fClSize,        "ClSize[ClN]/I");
-  fTree->Branch("ClSizeX",      fClSizeX,       "ClSizeX[ClN]/I");
-  fTree->Branch("ClSizeY",      fClSizeY,       "ClSizeY[ClN]/I");
-  fTree->Branch("ClFlipped",    fClFlipped,     "ClFlipped[ClN]/I");
-  fTree->Branch("ClLayer",      fClLayer,       "ClLayer[ClN]/I");
-  fTree->Branch("ClLadder",     fClLadder,      "ClLadder[ClN]/I");
-  fTree->Branch("ClModule",     fClModule,      "ClModules[ClN]/I");
-  fTree->Branch("ClDisk",       fClDisk,        "ClDisk[ClN]/I");
-  fTree->Branch("ClBlade",      fClBlade,       "ClBlade[ClN]/I");
-  fTree->Branch("ClPanel",      fClPanel,       "ClPanel[ClN]/I");
-  fTree->Branch("ClPlaquette",  fClPlaquette,   "ClPlaquette[ClN]/I");
-  fTree->Branch("ClDetId",      fClDetId,       "ClDetId[ClN]/I");
-  fTree->Branch("ClCharge",     fClCharge,      "ClCharge[ClN]/F");
-  fTree->Branch("ClChargeCorr", fClChargeCorr,  "ClChargeCorr[ClN]/F");
-  fTree->Branch("ClType",       fClType,        "ClType[ClN]/I");
-  fTree->Branch("ClTkN",        fClTkN,         "ClTkN[ClN]/I");
-  fTree->Branch("ClTkI",        fClTkI,         "ClTkI[ClN][100]/I");
-  fTree->Branch("ClDgN",        fClDgN,         "ClDgN[ClN]/I");
-  fTree->Branch("ClDgI",        fClDgI,         "ClDgI[ClN][100]/I");    //FIXME: This should be variable?
+  fTree->Branch("ClN",              &fClN,            "ClN/I");
+  fTree->Branch("ClRow",            fClRow,           "ClRow[ClN]/F");
+  fTree->Branch("ClCol",            fClCol,           "ClCol[ClN]/F");
+  fTree->Branch("ClLx",             fClLx,            "ClLx[ClN]/F");
+  fTree->Branch("ClLxE",            fClLxe,           "ClLxE[ClN]/F");
+  fTree->Branch("ClLy",             fClLy,            "ClLy[ClN]/F");
+  fTree->Branch("ClLyE",            fClLye,           "ClLyE[ClN]/F");
+  fTree->Branch("ClGx",             fClGx,            "ClGx[ClN]/F");
+  fTree->Branch("ClGy",             fClGy,            "ClGy[ClN]/F");
+  fTree->Branch("ClGz",             fClGz,            "ClGz[ClN]/F");
+  fTree->Branch("ClSize",           fClSize,          "ClSize[ClN]/I");
+  fTree->Branch("ClSizeX",          fClSizeX,         "ClSizeX[ClN]/I");
+  fTree->Branch("ClSizeY",          fClSizeY,         "ClSizeY[ClN]/I");
+  fTree->Branch("ClFlipped",        fClFlipped,       "ClFlipped[ClN]/I");
+  fTree->Branch("ClLayer",          fClLayer,         "ClLayer[ClN]/I");
+  fTree->Branch("ClLadder",         fClLadder,        "ClLadder[ClN]/I");
+  fTree->Branch("ClModule",         fClModule,        "ClModules[ClN]/I");
+  fTree->Branch("ClDisk",           fClDisk,          "ClDisk[ClN]/I");
+  fTree->Branch("ClBlade",          fClBlade,         "ClBlade[ClN]/I");
+  fTree->Branch("ClPanel",          fClPanel,         "ClPanel[ClN]/I");
+  fTree->Branch("ClPlaquette",      fClPlaquette,     "ClPlaquette[ClN]/I");
+  fTree->Branch("ClDetId",          fClDetId,         "ClDetId[ClN]/I");
+  fTree->Branch("ClCharge",         fClCharge,        "ClCharge[ClN]/F");
+  fTree->Branch("ClChargeCorr",     fClChargeCorr,    "ClChargeCorr[ClN]/F");
+  fTree->Branch("ClType",           fClType,          "ClType[ClN]/I");
+  fTree->Branch("ClRhLx",           fClRhLx,          "ClRhLx[ClN]/F");    
+  fTree->Branch("ClRhLy",           fClRhLy,          "ClRhLy[ClN]/F");  
+  fTree->Branch("ClRhGx",           fClRhGx,          "ClRhGx[ClN]/F");    
+  fTree->Branch("ClRhGy",           fClRhGy,          "ClRhGy[ClN]/F");  
+  fTree->Branch("ClRhGz",           fClRhGz,          "ClRhGz[ClN]/F");  
+  fTree->Branch("ClRhProb",         fClRhProb,        "ClRhProb[ClN]/F");
+  fTree->Branch("ClRhProbX",        fClRhProbX,       "ClRhProbX[ClN]/F");
+  fTree->Branch("ClRhProbY",        fClRhProbY,       "ClRhProbY[ClN]/F");
+  fTree->Branch("ClRhQualWord",     fClRhQualWord,    "ClRhQualWord[ClN]/i");
+  fTree->Branch("ClRhqBin",         fClRhqBin,        "ClRhqBin[ClN]/I");
+  fTree->Branch("ClRhSpansTwoROCs", fClRhSpansTwoROCs,"ClRhSpansTwoROCs[ClN]/I");
+  fTree->Branch("ClRhIsOnEdge"    , fClRhIsOnEdge,    "ClRhIsOnEdge[ClN]/I");
+  fTree->Branch("ClRhHasBadPixels", fClRhHasBadPixels,"ClRhHasBadPixels[ClN]/I");
+  fTree->Branch("ClTkN",            fClTkN,           "ClTkN[ClN]/I");
+  fTree->Branch("ClTkI",            fClTkI,           "ClTkI[ClN][100]/I");
+  fTree->Branch("ClDgN",            fClDgN,           "ClDgN[ClN]/I");
+  fTree->Branch("ClDgI",            fClDgI,           "ClDgI[ClN][100]/I");    //FIXME: This should be variable?
 
   fTree->Branch("DgN",          &fDgN,          "DgN/I");
   fTree->Branch("DgRow",        fDgRow,         "DgRow[DgN]/I");
@@ -401,7 +415,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
     //record not found
     cout << "Record \"RunInfoRcd" << "\" does not exist " << endl;
     fFED1 = 0; 
-    fFED2 = (0x1 < 12) ; 
+    fFED2 = (0x1 << 12) ; 
   } else {
 
     edm::ESHandle<RunInfo> runInfoHandle;
@@ -710,10 +724,12 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
   // -- Pixel cluster
   edm::Handle< edmNew::DetSetVector<SiPixelCluster> > hClusterColl;
-  iEvent.getByLabel(fPixelClusterLabel, hClusterColl );
+  iEvent.getByLabel(fPixelClusterLabel, hClusterColl);
   const edmNew::DetSetVector<SiPixelCluster> clustColl = *(hClusterColl.product());
+  // -- Pixel RecHit
+  edm::Handle<SiPixelRecHitCollection> hRecHitColl;
+  iEvent.getByLabel(fPixelRecHitLabel, hRecHitColl); 
 
-  //  std::set<SiPixelCluster> clusterSet;
   TrajectoryStateCombiner tsoscomb;
   if (hTTAC.isValid()) {
     const TrajTrackAssociationCollection ttac = *(hTTAC.product());
@@ -863,6 +879,21 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	  fClDetId[fClN]   = DBdetid;
 	  fClType[fClN]    = 0; 
 
+	  fClRhLx[fClN]           = clustlp.x();
+	  fClRhLy[fClN]           = clustlp.y();
+	  fClRhGx[fClN]           = clustgp.x();
+	  fClRhGy[fClN]           = clustgp.y();
+	  fClRhGz[fClN]           = clustgp.z();
+	  
+	  fClRhProb[fClN]         = -9999;
+	  fClRhProbX[fClN]        = -9999;
+	  fClRhProbY[fClN]        = -9999;
+	  fClRhQualWord[fClN]     = 9999;
+	  fClRhqBin[fClN]         = -9999;
+	  fClRhSpansTwoROCs[fClN] = -9999;
+	  fClRhIsOnEdge[fClN]     = -9999;
+	  fClRhHasBadPixels[fClN] = -9999;
+
 	  int it(0); 
 	  while (fClTkI[fClN][it] > -1) {
 	    ++it;
@@ -895,7 +926,6 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>(hit->hit());
 	edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster> const& clust = (*pixhit).cluster();
 	if (clust.isNonnull()) {
-	  //	  clusterSet.insert(*clust);
 
 	  align::LocalVector res = tsos.localPosition() - hit->localPosition();
 	  LocalError err1 = tsos.localError().positionError();
@@ -925,27 +955,6 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	    } 
 	  }
 
-	  // -- Some cluster insertions do not increase clusterSet.size(), but a printout shows that they have not been included previously??
-	  // 	  unsigned int temp = clusterSet.size();
-	  // 	  clusterSet.insert(*clust);
-	  // 	  if (clusterSet.size() == temp) {
-	  // 	    if (alreadyAt > -1) {
-	  // 	      cout << " correctly found duplicate for "
-	  // 		   << " detID = " << DBdetid
-	  // 		   << " charge = " << clust->charge()
-	  // 		   << " x/y = " << clust->x() << "/" << clust->y()
-	  // 		   << " already at position " << alreadyAt
-	  // 		   << endl;
-	  // 	    }  else { 
-	  // 	      cout << " DUPLICATE NOT FOUND for "
-	  // 		   << " detID = " << DBdetid
-	  // 		   << " charge = " << clust->charge()
-	  // 		   << " x/y = " << clust->x() << "/" << clust->y()
-	  // 		   << endl;
-	  // 	    }
-	  // 	  }
-
-
 	  if (alreadyAt > -1) {
 	    int it(0); 
 	    while (fClTkI[alreadyAt][it] > -1) {
@@ -953,13 +962,6 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	    }
 	    fClTkI[alreadyAt][it] = fTkN;
 	    fClTkN[alreadyAt]    += 1;
-
-	    // 	    cout << "Skipping duplicate cluster: detID = " << DBdetid
-	    // 		 << " charge = " << clust->charge()
-	    // 		 << " x/y = " << clust->x() << "/" << clust->y()
-	    // 		 << " already at position " << alreadyAt
-	    // 		 << " CkTkI[" << it << "] = " << fTkN
-	    // 		 << endl;
 
 	    if (iCluster < CLPERTRACKMAX) {
 	      fTkResX[fTkN][iCluster]   = res.x();
@@ -1034,6 +1036,40 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	  fClGx[fClN] = clustgp.x();
 	  fClGy[fClN] = clustgp.y();
 	  fClGz[fClN] = clustgp.z();
+
+	  fClRhLx[fClN]           = hit->localPosition().x();
+	  fClRhLy[fClN]           = hit->localPosition().y();
+	  fClRhGx[fClN]           = hit->globalPosition().x();
+	  fClRhGy[fClN]           = hit->globalPosition().y();
+	  fClRhGz[fClN]           = hit->globalPosition().z();
+
+	  fClRhQualWord[fClN]     = pixhit->rawQualityWord();
+	  fClRhqBin[fClN]         = pixhit->qBin();;
+
+	  if (pixhit->hasFilledProb()) {
+	    fClRhProb[fClN]         = pixhit->clusterProbability(0);
+	    fClRhProbX[fClN]        = pixhit->probabilityX();
+	    fClRhProbY[fClN]        = pixhit->probabilityY();
+	  } else {
+	    fClRhProb[fClN]         = -98;
+	    fClRhProbX[fClN]        = -98;
+	    fClRhProbY[fClN]        = -98;
+	  }
+	  if (pixhit->spansTwoROCs()) {
+	    fClRhSpansTwoROCs[fClN] = 1;
+	  } else {
+	    fClRhSpansTwoROCs[fClN] = 0;
+	  }
+	  if (pixhit->isOnEdge()) {
+	    fClRhIsOnEdge[fClN]     = 1;
+	  } else {
+	    fClRhIsOnEdge[fClN]     = 0;
+	  }
+	  if (pixhit->hasBadPixels()) {
+	    fClRhHasBadPixels[fClN] = 1;
+	  } else {
+	    fClRhHasBadPixels[fClN] = 0;
+	  }
 
 	  if (barrel) {
 	    fClLayer[fClN]     = DBlayer;
@@ -1130,17 +1166,21 @@ void PixelTree::analyze(const edm::Event& iEvent,
     if (dynamic_cast<PixelGeomDetUnit*>((*it)) != 0){ 
       DetId detId = (*it)->geographicalId();
 
+      // -- clusters on this det
       edmNew::DetSetVector<SiPixelCluster>::const_iterator isearch = clustColl.find(detId);
+      // -- rechits on this det
+      SiPixelRecHitCollection::const_iterator dsmatch = hRecHitColl->find(detId);
+      SiPixelRecHitCollection::DetSet rhRange = *dsmatch;
+      SiPixelRecHitCollection::DetSet::const_iterator rhIteratorBegin = rhRange.begin();
+      SiPixelRecHitCollection::DetSet::const_iterator rhIteratorEnd = rhRange.end();
+      SiPixelRecHitCollection::DetSet::const_iterator iRh;
+
       if (isearch != clustColl.end()) {  // Not an empty iterator
 	edmNew::DetSet<SiPixelCluster>::const_iterator  di;
-	for (di=isearch->begin(); di!=isearch->end(); di++) {
+	for (di = isearch->begin(); di != isearch->end(); ++di) {
 	  if (fClN > CLUSTERMAX - 1) break;
 
-	  // unsigned int temp = clusterSet.size();
-	  //	  clusterSet.insert(*di);
-	  // if (clusterSet.size() > temp) {
-
-	  // -- If this cluster is already in ntuple, do not add it, but finish filling Tk* information
+	  // -- If this cluster is already in ntuple, do not add it
 	  int alreadyAt(-1);
 	  for (int ic = 0; ic < fClN; ++ic) {
 	    if ((static_cast<int>(detId) == fClDetId[ic]) 
@@ -1152,10 +1192,8 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	    } 
 	  }
 
-	  if (alreadyAt == -1) {
-  
-	    //	    const TrackerGeometry& theTracker(*theTrackerGeometry); //??????????????????????
-	    const PixelGeomDetUnit* theGeomDet = dynamic_cast<const PixelGeomDetUnit*> (theTracker.idToDet(detId) );
+	  if (-1 == alreadyAt) {
+  	    const PixelGeomDetUnit* theGeomDet = dynamic_cast<const PixelGeomDetUnit*> (theTracker.idToDet(detId) );
 	    if (theGeomDet == 0) {
 	      cout << "NO THEGEOMDET" << endl;
 	      continue;
@@ -1229,6 +1267,65 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	    
 	    fClType[fClN]    = 2; 
 	    
+
+	    cout << "=========> " << di->x() << " " << di->y() 
+		 << " " << clustgp.x() << " " << clustgp.y() << " " << clustgp.z()
+		 << endl;
+	    
+	    int rhx(0), rhy(0), foundRH(0); 
+	    for (iRh = rhIteratorBegin; iRh != rhIteratorEnd; ++iRh) {
+	      rhx = static_cast<int>(iRh->cluster()->x()); 
+	      rhy = static_cast<int>(iRh->cluster()->y()); 
+	      if ((rhx == static_cast<int>(di->x())) && (rhy == static_cast<int>(di->y()))) {
+		foundRH = 1; 
+		break;
+	      }
+	    }
+	    
+	    if (1 == foundRH) {
+	      GlobalPoint GP  =  theGeomDet->surface().toGlobal(Local3DPoint(iRh->localPosition().x(),
+									     iRh->localPosition().y(),
+									     iRh->localPosition().x()));
+	      cout << "  " << iRh->cluster()->x() << " "  << iRh->cluster()->y() << " " << endl;
+	      cout << "  " << GP.x() << " "  << GP.y() << " " << GP.z() << endl;
+
+
+	      fClRhLx[fClN]           = iRh->localPosition().x();
+	      fClRhLy[fClN]           = iRh->localPosition().y();
+	      
+	      // 	    fClRhGx[fClN]           = iRh->globalPosition().x();
+	      // 	    fClRhGy[fClN]           = iRh->globalPosition().y();
+	      // 	    fClRhGz[fClN]           = iRh->globalPosition().z();
+	      
+	      fClRhQualWord[fClN]     = iRh->rawQualityWord();
+	      fClRhqBin[fClN]         = iRh->qBin();;
+	      
+	      if (iRh->hasFilledProb()) {
+		fClRhProb[fClN]         = iRh->clusterProbability(0);
+		fClRhProbX[fClN]        = iRh->probabilityX();
+		fClRhProbY[fClN]        = iRh->probabilityY();
+	      } else {
+		fClRhProb[fClN]         = -98;
+		fClRhProbX[fClN]        = -98;
+		fClRhProbY[fClN]        = -98;
+	      }
+	      if (iRh->spansTwoROCs()) {
+		fClRhSpansTwoROCs[fClN] = 1;
+	      } else {
+		fClRhSpansTwoROCs[fClN] = 0;
+	      }
+	      if (iRh->isOnEdge()) {
+		fClRhIsOnEdge[fClN]     = 1;
+	      } else {
+		fClRhIsOnEdge[fClN]     = 0;
+	      }
+	      if (iRh->hasBadPixels()) {
+		fClRhHasBadPixels[fClN] = 1;
+	      } else {
+		fClRhHasBadPixels[fClN] = 0;
+	      }
+	    }
+
 	    // -- Get digis of this cluster
 	    const std::vector<SiPixelCluster::Pixel>& pixvector = di->pixels();
 	    for (unsigned int i = 0; i < pixvector.size(); ++i) {
@@ -1368,6 +1465,21 @@ void PixelTree::init() {
 
     fClLayer[i] = fClLadder[i] = fClModule[i] = fClFlipped[i] = -9999;
     fClDisk[i] = fClBlade[i] = fClPanel[i] = fClPlaquette[i] = -9999;
+
+    fClRhLx[i] = -9999;
+    fClRhLy[i] = -9999;
+    fClRhGx[i] = -9999;
+    fClRhGy[i] = -9999;
+    fClRhGz[i] = -9999;
+    
+    fClRhProb[i]  = -9999;
+    fClRhProbX[i]  = -9999;
+    fClRhProbY[i]  = -9999;
+    fClRhQualWord[i]  = 9999;
+    fClRhqBin[i]  = -9999;
+    fClRhSpansTwoROCs[i] = -9999;
+    fClRhIsOnEdge[i] = -9999;
+    fClRhHasBadPixels[i] = -9999;
   }
   fClN = 0; 
 
