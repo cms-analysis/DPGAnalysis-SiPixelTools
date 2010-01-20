@@ -162,7 +162,8 @@ class PixelTree : public edm::EDAnalyzer {
   int          fClDetId[CLUSTERMAX];
   int          fClLayer[CLUSTERMAX],  fClLadder[CLUSTERMAX], fClModule[CLUSTERMAX];
   int          fClFlipped[CLUSTERMAX], fClDisk[CLUSTERMAX],  fClBlade[CLUSTERMAX], fClPanel[CLUSTERMAX], fClPlaquette[CLUSTERMAX];
-  float        fClRhLx[CLUSTERMAX], fClRhLy[CLUSTERMAX], fClRhGx[CLUSTERMAX], fClRhGy[CLUSTERMAX], fClRhGz[CLUSTERMAX];
+  float        fClRhLx[CLUSTERMAX], fClRhLy[CLUSTERMAX], fClRhLxE[CLUSTERMAX], fClRhLyE[CLUSTERMAX];
+  float        fClRhGx[CLUSTERMAX], fClRhGy[CLUSTERMAX], fClRhGz[CLUSTERMAX];
   float        fClRhProb[CLUSTERMAX], fClRhProbX[CLUSTERMAX], fClRhProbY[CLUSTERMAX];
   unsigned int fClRhQualWord[CLUSTERMAX]; 
   int          fClRhqBin[CLUSTERMAX], fClRhSpansTwoROCs[CLUSTERMAX], fClRhIsOnEdge[CLUSTERMAX], fClRhHasBadPixels[CLUSTERMAX]; 

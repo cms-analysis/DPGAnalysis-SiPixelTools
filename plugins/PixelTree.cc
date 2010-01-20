@@ -281,7 +281,9 @@ void PixelTree::beginJob(const edm::EventSetup& es) {
   fTree->Branch("ClChargeCorr",     fClChargeCorr,    "ClChargeCorr[ClN]/F");
   fTree->Branch("ClType",           fClType,          "ClType[ClN]/I");
   fTree->Branch("ClRhLx",           fClRhLx,          "ClRhLx[ClN]/F");    
+  fTree->Branch("ClRhLxE",          fClRhLxE,         "ClRhLxE[ClN]/F");    
   fTree->Branch("ClRhLy",           fClRhLy,          "ClRhLy[ClN]/F");  
+  fTree->Branch("ClRhLyE",          fClRhLyE,         "ClRhLyE[ClN]/F");  
   fTree->Branch("ClRhGx",           fClRhGx,          "ClRhGx[ClN]/F");    
   fTree->Branch("ClRhGy",           fClRhGy,          "ClRhGy[ClN]/F");  
   fTree->Branch("ClRhGz",           fClRhGz,          "ClRhGz[ClN]/F");  
@@ -880,7 +882,9 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	  fClType[fClN]    = 0; 
 
 	  fClRhLx[fClN]           = clustlp.x();
+	  //	  fClRhLxE[fClN]          = TMath::Sqrt(hit->localPositionError().xx());
 	  fClRhLy[fClN]           = clustlp.y();
+	  //	  fClRhLyE[fClN]          = TMath::Sqrt(hit->localPositionError().yy());
 	  fClRhGx[fClN]           = clustgp.x();
 	  fClRhGy[fClN]           = clustgp.y();
 	  fClRhGz[fClN]           = clustgp.z();
@@ -1038,7 +1042,9 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	  fClGz[fClN] = clustgp.z();
 
 	  fClRhLx[fClN]           = hit->localPosition().x();
+	  fClRhLxE[fClN]          = TMath::Sqrt(hit->localPositionError().xx());
 	  fClRhLy[fClN]           = hit->localPosition().y();
+	  fClRhLyE[fClN]          = TMath::Sqrt(hit->localPositionError().yy());
 	  fClRhGx[fClN]           = hit->globalPosition().x();
 	  fClRhGy[fClN]           = hit->globalPosition().y();
 	  fClRhGz[fClN]           = hit->globalPosition().z();
@@ -1267,11 +1273,6 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	    
 	    fClType[fClN]    = 2; 
 	    
-
-	    cout << "=========> " << di->x() << " " << di->y() 
-		 << " " << clustgp.x() << " " << clustgp.y() << " " << clustgp.z()
-		 << endl;
-	    
 	    int rhx(0), rhy(0), foundRH(0); 
 	    for (iRh = rhIteratorBegin; iRh != rhIteratorEnd; ++iRh) {
 	      rhx = static_cast<int>(iRh->cluster()->x()); 
@@ -1286,12 +1287,11 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	      GlobalPoint GP  =  theGeomDet->surface().toGlobal(Local3DPoint(iRh->localPosition().x(),
 									     iRh->localPosition().y(),
 									     iRh->localPosition().x()));
-	      cout << "  " << iRh->cluster()->x() << " "  << iRh->cluster()->y() << " " << endl;
-	      cout << "  " << GP.x() << " "  << GP.y() << " " << GP.z() << endl;
-
 
 	      fClRhLx[fClN]           = iRh->localPosition().x();
+	      fClRhLxE[fClN]          = TMath::Sqrt(iRh->localPositionError().xx());
 	      fClRhLy[fClN]           = iRh->localPosition().y();
+	      fClRhLyE[fClN]          = TMath::Sqrt(iRh->localPositionError().yy());
 	      
 	      // 	    fClRhGx[fClN]           = iRh->globalPosition().x();
 	      // 	    fClRhGy[fClN]           = iRh->globalPosition().y();
@@ -1466,11 +1466,13 @@ void PixelTree::init() {
     fClLayer[i] = fClLadder[i] = fClModule[i] = fClFlipped[i] = -9999;
     fClDisk[i] = fClBlade[i] = fClPanel[i] = fClPlaquette[i] = -9999;
 
-    fClRhLx[i] = -9999;
-    fClRhLy[i] = -9999;
-    fClRhGx[i] = -9999;
-    fClRhGy[i] = -9999;
-    fClRhGz[i] = -9999;
+    fClRhLx[i]  = -9999;
+    fClRhLy[i]  = -9999;
+    fClRhLxE[i] = -9999;
+    fClRhLyE[i] = -9999;
+    fClRhGx[i]  = -9999;
+    fClRhGy[i]  = -9999;
+    fClRhGz[i]  = -9999;
     
     fClRhProb[i]  = -9999;
     fClRhProbX[i]  = -9999;
