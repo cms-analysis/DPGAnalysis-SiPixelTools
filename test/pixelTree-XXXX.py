@@ -40,16 +40,19 @@ process.maxEvents = cms.untracked.PSet(
 process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
 process.TrackRefitter.src = 'generalTracks'
 
+# -- RecHit production
+process.load("RecoLocalTracker.SiPixelRecHits.SiPixelRecHits_cfi")
+
 # -- skimming
 process.PixelFilter = cms.EDFilter(
     "SkimEvents",
-    verbose                      = cms.untracked.int32(0),
-    filterOnPrimaryVertex        = cms.untracked.int32(1),
-    primaryVertexCollectionLabel = cms.untracked.InputTag('offlinePrimaryVertices'),
-    filterOnTracks               = cms.untracked.int32(1),
-    trackCollectionLabel         = cms.untracked.InputTag('generalTracks'),
-    filterOnPixelCluster         = cms.untracked.int32(1),
-    PixelClusterCollectionLabel  = cms.untracked.InputTag('siPixelClusters'),
+    verbose                        = cms.untracked.int32(0),
+    filterOnPrimaryVertex          = cms.untracked.int32(1),
+    primaryVertexCollectionLabel   = cms.untracked.InputTag('offlinePrimaryVertices'),
+    filterOnTracks                 = cms.untracked.int32(1),
+    trackCollectionLabel           = cms.untracked.InputTag('generalTracks'),
+    filterOnPixelCluster           = cms.untracked.int32(1),
+    PixelClusterCollectionLabel    = cms.untracked.InputTag('siPixelClusters'),
     filterOnL1TechnicalTriggerBits = cms.untracked.int32(1),
     L1TechnicalTriggerBits         = cms.untracked.vint32(40, 41)
     )
@@ -69,6 +72,7 @@ process.PixelTree = cms.EDAnalyzer(
     trajectoryInputLabel   = cms.untracked.InputTag('TrackRefitter::Demo'),
     trackCollectionLabel   = cms.untracked.InputTag('generalTracks'),
     pixelClusterLabel      = cms.untracked.InputTag('siPixelClusters'),
+    pixelRecHitLabel       = cms.untracked.InputTag('siPixelRecHits'),
     L1GTReadoutRecordLabel = cms.untracked.InputTag('gtDigis'), 
     hltL1GtObjectMap       = cms.untracked.InputTag('hltL1GtObjectMap'), 
     HLTResultsLabel        = cms.untracked.InputTag('TriggerResults::HLT')
@@ -77,6 +81,7 @@ process.PixelTree = cms.EDAnalyzer(
 # -- Path
 process.p = cms.Path(
     process.PixelFilter*
+    process.siPixelRecHits*
     process.TrackRefitter*
     process.PixelTree
     )

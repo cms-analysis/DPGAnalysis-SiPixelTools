@@ -40,6 +40,10 @@ process.maxEvents = cms.untracked.PSet(
 process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
 process.TrackRefitter.src = 'generalTracks::EXPRESS'
 
+# -- RecHit production
+process.load("RecoLocalTracker.SiPixelRecHits.SiPixelRecHits_cfi")
+process.SiPixelRecHits.src = 'siPixelClusters::EXPRESS'
+
 # -- skimming
 process.PixelFilter = cms.EDFilter(
     "SkimEvents",
@@ -70,6 +74,7 @@ process.PixelTree = cms.EDAnalyzer(
     trajectoryInputLabel         = cms.untracked.InputTag('TrackRefitter::Demo'),
     trackCollectionLabel         = cms.untracked.InputTag('generalTracks::EXPRESS'),
     pixelClusterLabel            = cms.untracked.InputTag('siPixelClusters::EXPRESS'),
+    pixelRecHitLabel             = cms.untracked.InputTag('siPixelRecHits::EXPRESS'),
     L1GTReadoutRecordLabel       = cms.untracked.InputTag('gtDigis'), 
     hltL1GtObjectMap             = cms.untracked.InputTag('hltL1GtObjectMap'), 
     HLTResultsLabel              = cms.untracked.InputTag('TriggerResults::HLT')
@@ -78,6 +83,7 @@ process.PixelTree = cms.EDAnalyzer(
 # -- Path
 process.p = cms.Path(
     process.PixelFilter* 
+    process.siPixelRecHits*
     process.TrackRefitter*
     process.PixelTree
     )
