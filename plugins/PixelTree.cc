@@ -419,7 +419,6 @@ void PixelTree::analyze(const edm::Event& iEvent,
     fFED1 = 0; 
     fFED2 = (0x1 << 12) ; 
   } else {
-
     edm::ESHandle<RunInfo> runInfoHandle;
     iSetup.get<RunInfoRcd>().get(runInfoHandle);
     const RunInfo *runInfo = runInfoHandle.product();
@@ -526,7 +525,6 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
 
   // -- HLT: see http://cmslxr.fnal.gov/lxr/source/HLTrigger/HLTanalyzers/src/HLTrigReport.cc
-  
   Handle<TriggerResults> hHLTresults;
   bool hltF = true;
   try {
@@ -899,7 +897,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	  fClRhHasBadPixels[fClN] = -9999;
 
 	  int it(0); 
-	  while (fClTkI[fClN][it] > -1) {
+	  while (fClTkI[fClN][it] > -1 && it < TKPERCLMAX) {
 	    ++it;
 	  }
 	  fClTkI[fClN][it] = fTkN;
@@ -961,7 +959,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
 	  if (alreadyAt > -1) {
 	    int it(0); 
-	    while (fClTkI[alreadyAt][it] > -1) {
+	    while (fClTkI[alreadyAt][it] > -1 && it < TKPERCLMAX) {
 	      ++it;
 	    }
 	    fClTkI[alreadyAt][it] = fTkN;
@@ -1106,7 +1104,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	  fClType[fClN]    = 1; 
 
 	  int it(0); 
-	  while (fClTkI[fClN][it] > -1) {
+	  while (fClTkI[fClN][it] > -1 && it < TKPERCLMAX) {
 	    ++it;
 	  }
 	  fClTkI[fClN][it] = fTkN;
@@ -1176,7 +1174,10 @@ void PixelTree::analyze(const edm::Event& iEvent,
       edmNew::DetSetVector<SiPixelCluster>::const_iterator isearch = clustColl.find(detId);
       // -- rechits on this det
       SiPixelRecHitCollection::const_iterator dsmatch = hRecHitColl->find(detId);
-      SiPixelRecHitCollection::DetSet rhRange = *dsmatch;
+      SiPixelRecHitCollection::DetSet rhRange;
+      if (dsmatch != hRecHitColl->end()) { 
+	rhRange = *dsmatch;
+      }
       SiPixelRecHitCollection::DetSet::const_iterator rhIteratorBegin = rhRange.begin();
       SiPixelRecHitCollection::DetSet::const_iterator rhIteratorEnd = rhRange.end();
       SiPixelRecHitCollection::DetSet::const_iterator iRh;
@@ -1449,6 +1450,7 @@ void PixelTree::init() {
   for (int i = 0; i < fClN; ++i) {
     fClSize[i] = fClSizeX[i] = fClSizeY[i] = -9999; 
     fClRow[i] = fClCol[i] = -9999; 
+    fClDetId[i] = -9999; 
     fClLx[i] = fClLy[i] = -9999.;
     fClLxe[i] = fClLye[i] = -9999.;
     fClGx[i] = fClGy[i] = fClGz[i] = -9999.;
