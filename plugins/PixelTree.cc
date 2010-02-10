@@ -29,6 +29,7 @@
 #include "CondFormats/L1TObjects/interface/L1GtTriggerMenu.h"
 #include "CondFormats/L1TObjects/interface/L1GtTriggerMenuFwd.h"
 
+
 #include "CondFormats/SiPixelObjects/interface/DetectorIndex.h"
 
 #include "DataFormats/Common/interface/DetSetVector.h"
@@ -37,6 +38,7 @@
 #include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutSetup.h"
 #include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
 #include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerObjectMapRecord.h"
+#include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
 #include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
 #include "DataFormats/Math/interface/deltaR.h"
@@ -112,8 +114,10 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag>("HLTResultsLabel", edm::InputTag("TriggerResults::HLT"))),
   fInit(0)
 {
+  static char *rcsid="$Id $";
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
+  cout << "--- " << rcsid << endl;
   cout << "---  verbose:                         " << fVerbose << endl;
   cout << "---  dumpAllEvents:                   " << fDumpAllEvents << endl;
   cout << "---  rootFileName:                    " << fRootFileName << endl;
@@ -154,10 +158,12 @@ void PixelTree::endJob() {
     delete fPFC[i];
   }
 
+  cout << "==>PixelTree> Succesfully gracefully ended job" << endl;
+
 }
 
 // ----------------------------------------------------------------------
-void PixelTree::beginJob(const edm::EventSetup& es) {
+void PixelTree::beginJob() {
   
   // -- a 'feature' of TFileService is that it does not like to add trees until a histogram is also created.
   //  edm::Service<TFileService> fs;
@@ -187,24 +193,11 @@ void PixelTree::beginJob(const edm::EventSetup& es) {
   fTree->Branch("l1tt",         fL1TT,          "l1tt[4]/i");
   fTree->Branch("hlta",         fHLTA,          "hlta[4]/i");
 
-  fTree->Branch("l1ta0",        &fL1T0,         "l1ta0/i");
-  fTree->Branch("l1ta1",        &fL1T1,         "l1ta1/i");
-  fTree->Branch("l1ta2",        &fL1T2,         "l1ta2/i");
-  fTree->Branch("l1ta3",        &fL1T3,         "l1ta3/i");
+  fTree->Branch("ttA",          fTtA,           "ttA[64]/O");
+  fTree->Branch("l1A",          fL1A,           "l1A[128]/O");
+  fTree->Branch("hlA",          fHlA,           "hlA[128]/O");
 
   fTree->Branch("hlt",          &fHLT,          "hlt/i");
-  fTree->Branch("hlta0",        &fHLTa0,        "hlta0/i");
-  fTree->Branch("hlta1",        &fHLTa1,        "hlta1/i");
-  fTree->Branch("hlta2",        &fHLTa2,        "hlta2/i");
-  fTree->Branch("hlta3",        &fHLTa3,        "hlta3/i");
-  fTree->Branch("hltr0",        &fHLTr0,        "hltr0/i");
-  fTree->Branch("hltr1",        &fHLTr1,        "hltr1/i");
-  fTree->Branch("hltr2",        &fHLTr2,        "hltr2/i");
-  fTree->Branch("hltr3",        &fHLTr3,        "hltr3/i");
-  fTree->Branch("hlte0",        &fHLTe0,        "hlte0/i");
-  fTree->Branch("hlte1",        &fHLTe1,        "hlte1/i");
-  fTree->Branch("hlte2",        &fHLTe2,        "hlte2/i");
-  fTree->Branch("hlte3",        &fHLTe3,        "hlte3/i");
 
   fTree->Branch("PvN",          &fPvN,          "PvN/I");
   fTree->Branch("PvX",          fPvX,           "PvX[PvN]/F");
@@ -229,7 +222,13 @@ void PixelTree::beginJob(const edm::EventSetup& es) {
   fTree->Branch("MuTerr",       fMuTerr,        "MuTerr[MuN]/F");
   fTree->Branch("MuTmean",      &fMuTmean,      "MuTmean/F");
 
+  fTree->Branch("HfEplus",      &fEtPlus,       "HfEplus/F");
+  fTree->Branch("HfEminus",     &fEtMinus,      "HfEminus/F");
+  fTree->Branch("HfTplus",      &fTplus,        "HfTplus/F");
+  fTree->Branch("HfTminus",     &fTminus,       "HfTminus/F");
+
   fTree->Branch("TkN",          &fTkN,          "TkN/I");
+  fTree->Branch("TkQuality",    fTkQuality,     "TkQuality[TkN]/I");
   fTree->Branch("TkCharge",     fTkCharge,      "TkCharge[TkN]/I");
   fTree->Branch("TkChi2",       fTkChi2,        "TkChi2[TkN]/F");
   fTree->Branch("TkNdof",       fTkNdof,        "TkNdof[TkN]/F");
@@ -488,20 +487,31 @@ void PixelTree::analyze(const edm::Event& iEvent,
     for (unsigned int iTrig = 0; iTrig < L1GTRR->decisionWord().size(); ++iTrig) {
       int l1flag = L1GTRR->decisionWord()[iTrig]; 
       int t1flag = L1GTRR->technicalTriggerWord()[iTrig]; 
+
+      if (iTrig < 64) {
+	if (t1flag) {
+	  fTtA[iTrig] = true; 
+	} else {
+	  fTtA[iTrig] = false; 
+	}
+      }
+
+      if (l1flag) {
+	fL1A[iTrig] = true; 
+      } else {
+	fL1A[iTrig] = false; 
+      }
+
       itrig = iTrig%32; 
       if (iTrig < 32) {
-	if (l1flag) fL1T0 |= (0x1 << itrig);
 	if (l1flag) fL1TA[0] |= (0x1 << itrig);
 	if (t1flag) fL1TT[0] |= (0x1 << itrig);
       } else if (iTrig < 64) {
-	if (l1flag) fL1T1 |= (0x1 << itrig);
 	if (l1flag) fL1TA[1] |= (0x1 << itrig);
 	if (t1flag) fL1TT[1] |= (0x1 << itrig);
       } else if (iTrig < 96) {
-	if (l1flag) fL1T2 |= (0x1 << itrig);
 	if (l1flag) fL1TA[2] |= (0x1 << itrig);
       } else if (iTrig < 128) {
-	if (l1flag) fL1T3 |= (0x1 << itrig);
 	if (l1flag) fL1TA[3] |= (0x1 << itrig);
       }
     }
@@ -515,10 +525,10 @@ void PixelTree::analyze(const edm::Event& iEvent,
       cout << " 3         2         1         0" << endl;
       cout << "10987654321098765432109876543210" << endl;
       cout << "--------------------------------" << endl;
-      cout << std::bitset<32>(fL1T0) << endl
-	   << std::bitset<32>(fL1T1) << endl
-	   << std::bitset<32>(fL1T2) << endl
-	   << std::bitset<32>(fL1T3) << endl;
+      cout << std::bitset<32>(fL1TA[0]) << endl
+	   << std::bitset<32>(fL1TA[1]) << endl
+	   << std::bitset<32>(fL1TA[2]) << endl
+	   << std::bitset<32>(fL1TA[3]) << endl;
     }
 
   } 
@@ -559,42 +569,32 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
       fHLThist->GetXaxis()->SetBinLabel(iTrig+1, hlNames[iTrig].c_str()); 
 
+      if (hltacc) {
+	fHlA[iTrig] = true; 
+      } else {
+	fHlA[iTrig] = false; 
+      }
+
       if (iTrig < 32) {
-	if (hltacc) fHLTa0   |= (0x1 << itrig);
-	if (hltrun) fHLTr0   |= (0x1 << itrig);
-	if (hlterr) fHLTe0   |= (0x1 << itrig);
 	if (hltacc) fHLTA[0] |= (0x1 << itrig);
       } else if (iTrig < 64) {
-	if (hltacc) fHLTa1   |= (0x1 << itrig);
-	if (hltrun) fHLTr1   |= (0x1 << itrig);
-	if (hlterr) fHLTe1   |= (0x1 << itrig);
 	if (hltacc) fHLTA[1] |= (0x1 << itrig);
       } else if (iTrig < 96) {
-	if (hltacc) fHLTa2   |= (0x1 << itrig);
-	if (hltrun) fHLTr2   |= (0x1 << itrig);
-	if (hlterr) fHLTe2   |= (0x1 << itrig);
 	if (hltacc) fHLTA[2] |= (0x1 << itrig);
       } else if (iTrig < 128) {
-	if (hltacc) fHLTa3   |= (0x1 << itrig);
-	if (hltrun) fHLTr3   |= (0x1 << itrig);
-	if (hlterr) fHLTe3   |= (0x1 << itrig);
 	if (hltacc) fHLTA[3] |= (0x1 << itrig);
       }
     }
 
     if (fVerbose > 2)  {
-      cout << "HLT trigger accept/run: " << fHLT<< endl;
+      cout << "HLT trigger accept: " << fHLT<< endl;
       cout << " 3         2         1         0" << endl;
       cout << "10987654321098765432109876543210" << endl;
       cout << "--------------------------------" << endl;
-      cout << std::bitset<32>(fHLTa0) << endl
-	   << std::bitset<32>(fHLTr0) << endl << endl
-	   << std::bitset<32>(fHLTa1) << endl
-	   << std::bitset<32>(fHLTr1) << endl<< endl
-	   << std::bitset<32>(fHLTa2) << endl
-	   << std::bitset<32>(fHLTr2) << endl << endl
-	   << std::bitset<32>(fHLTa3) << endl
-	   << std::bitset<32>(fHLTr3) << endl;
+      cout << std::bitset<32>(fHLTA[0]) << endl
+	   << std::bitset<32>(fHLTA[1]) << endl
+	   << std::bitset<32>(fHLTA[2]) << endl
+	   << std::bitset<32>(fHLTA[3]) << endl;
     }   
   }
 
@@ -698,6 +698,62 @@ void PixelTree::analyze(const edm::Event& iEvent,
   }
 
 
+  //---------------------------------------------------------------------
+  //---Fill HF information (code originally written  by D.Marlow)
+  //---------------------------------------------------------------------
+  Handle<HFRecHitCollection> hHf;
+  if (!iEvent.getByLabel("hfreco", hHf)) {
+    cout << "Could not get rec hits! Tried with label: hfreco" << endl;
+  }
+  
+  ESHandle<CaloGeometry> caloGeometry ;
+  iSetup.get<CaloGeometryRecord>().get(caloGeometry);
+  
+  int nHits = 0;
+  double eSum = 0.;
+  double ePlus = 0;
+  double EtPlus = 0.;
+  double tPlus = 0.;
+  double eMinus = 0.;
+  float EtMinus = 0.;
+  double tMinus = 0.;
+  
+  if (hHf.isValid()) {
+    for (unsigned int i = 0; i < hHf->size(); ++i) {
+      double energy = (*hHf)[i].energy();
+      double time = (*hHf)[i].time();
+      HcalDetId cell((*hHf)[i].id());
+      
+      const CaloCellGeometry* cellGeometry = caloGeometry->getSubdetectorGeometry(cell)->getGeometry (cell);
+      if (cellGeometry == 0) cout << "No cell geometry " << cell.rawId() << endl;
+      double fEta = cellGeometry->getPosition().eta();
+      double fTheta = cellGeometry->getPosition().theta();
+      
+      if (energy > 1.) { nHits++;}
+      eSum += energy;
+      if (fEta > 0.) {
+	if (energy > 0.) {
+	  ePlus += energy;
+	  tPlus += energy*time;
+	}
+	EtPlus += energy*sin(fTheta);
+      } else {
+	if (energy > 0.) {
+	  eMinus += energy;
+	  tMinus += energy*time;
+	}
+	EtMinus += energy*sin(fTheta);
+      }
+    }
+    if (ePlus > 0.) {tPlus = tPlus/ePlus;}
+    if (eMinus > 0.) {tMinus = tMinus/eMinus;}
+    fEtPlus  = EtPlus;
+    fEtMinus = EtMinus;
+    fTplus   = tPlus;
+    fTminus  = tMinus;
+   }
+
+
   // ----------------------------------------------------------------------
   // -- Fill tracks
   // ----------------------------------------------------------------------
@@ -749,6 +805,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	continue; 
       } 
 
+      fTkQuality[fTkN]= trackref->qualityMask(); // see: CMSSW/DataFormats/TrackReco/interface/TrackBase.h
       fTkCharge[fTkN] = trackref->charge();
       fTkChi2[fTkN]   = trackref->chi2();
       fTkNdof[fTkN]   = trackref->ndof();
@@ -1407,13 +1464,14 @@ void PixelTree::init() {
   for (int i = 0; i < 4; ++i) {
     fL1TA[i] = fL1TT[i] = fHLTA[i] = 0;
   }
-
-  fL1T = fL1T0 = fL1T1 = fL1T2 = fL1T3 = 0; 
-  fHLT = fHLTa0 = fHLTa1 = fHLTa2 = fHLTa3 
-    = fHLTr0 = fHLTr1 = fHLTr2 = fHLTr3 
-    = fHLTe0 = fHLTe1 = fHLTe2 = fHLTe3 
-    = 0; 
-
+  
+  for (int i = 0; i < 64; ++i) {
+    fTtA[i]    = false; 
+    fL1A[i]    = false; 
+    fL1A[i+64] = false; 
+    fHlA[i]    = false; 
+    fHlA[i+64] = false; 
+  }
 
   for (int i = 0; i < fPvN; ++i) {
     fPvX[i] = fPvY[i] = fPvZ[i] =  fPvXe[i] = fPvYe[i] = fPvZe[i] = fPvChi2[i] = -9999.;
@@ -1430,6 +1488,7 @@ void PixelTree::init() {
   fMuN = 0; 
 
   for (int i = 0; i < fTkN; ++i) {
+    fTkQuality[i]= -9999; 
     fTkCharge[i] = -9999; 
     fTkChi2[i]   = fTkNdof[i] = -9999.;
     fTkPt[i]     = fTkTheta[i] = fTkPhi[i] = -9999.;
