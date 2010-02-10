@@ -47,13 +47,13 @@ process.load("RecoLocalTracker.SiPixelRecHits.SiPixelRecHits_cfi")
 process.PixelFilter = cms.EDFilter(
     "SkimEvents",
     verbose                        = cms.untracked.int32(0),
-    filterOnPrimaryVertex          = cms.untracked.int32(1),
+    filterOnPrimaryVertex          = cms.untracked.int32(0),
     primaryVertexCollectionLabel   = cms.untracked.InputTag('offlinePrimaryVertices'),
-    filterOnTracks                 = cms.untracked.int32(1),
+    filterOnTracks                 = cms.untracked.int32(0),
     trackCollectionLabel           = cms.untracked.InputTag('generalTracks'),
     filterOnPixelCluster           = cms.untracked.int32(1),
     PixelClusterCollectionLabel    = cms.untracked.InputTag('siPixelClusters'),
-    filterOnL1TechnicalTriggerBits = cms.untracked.int32(1),
+    filterOnL1TechnicalTriggerBits = cms.untracked.int32(0),
     L1TechnicalTriggerBits         = cms.untracked.vint32(40, 41)
     )
 
@@ -80,7 +80,7 @@ process.PixelTree = cms.EDAnalyzer(
 
 # -- Path
 process.p = cms.Path(
-    process.PixelFilter*
+#    process.PixelFilter*
     process.siPixelRecHits*
     process.TrackRefitter*
     process.PixelTree

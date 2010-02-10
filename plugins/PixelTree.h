@@ -60,7 +60,7 @@ class PixelTree : public edm::EDAnalyzer {
   
   explicit PixelTree(const edm::ParameterSet& ps);
   virtual ~PixelTree();
-  virtual void beginJob(const edm::EventSetup& iSetup);
+  virtual void beginJob();
   virtual void endJob();
   virtual void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
   
@@ -112,11 +112,9 @@ class PixelTree : public edm::EDAnalyzer {
   float fBz;
   int fFED1, fFED2; 
 
-  unsigned int fL1T, fL1T0,  fL1T1,  fL1T2,  fL1T3; 
-  unsigned int fHLT, fHLTa0, fHLTa1, fHLTa2, fHLTa3, 
-    fHLTr0, fHLTr1, fHLTr2, fHLTr3, 
-    fHLTe0, fHLTe1, fHLTe2, fHLTe3; 
+  unsigned int fL1T, fHLT; 
   unsigned int fL1TA[4], fL1TT[4], fHLTA[4];
+  bool         fTtA[64], fL1A[128], fHlA[128]; 
 
   // -- primary vertices
   static const int PVMAX = 100; 
@@ -132,11 +130,15 @@ class PixelTree : public edm::EDAnalyzer {
   float fMuPt[MUMAX], fMuTheta[MUMAX], fMuPhi[MUMAX], 
     fMuT[MUMAX], fMuTcorr[MUMAX], fMuTerr[MUMAX], fMuTmean;
 
+  // -- HF
+  float fEtPlus, fEtMinus, fTplus, fTminus; 
+
+
   // -- tracks
   static const int TRACKMAX = 10000; 
   static const int CLPERTRACKMAX = 20; 
   int   fTkN; 
-  int   fTkCharge[TRACKMAX];
+  int   fTkQuality[TRACKMAX], fTkCharge[TRACKMAX];
   float fTkChi2[TRACKMAX], fTkNdof[TRACKMAX];
   float fTkPt[TRACKMAX], fTkTheta[TRACKMAX], fTkEta[TRACKMAX], fTkPhi[TRACKMAX];
   float fTkD0[TRACKMAX], fTkDz[TRACKMAX];
