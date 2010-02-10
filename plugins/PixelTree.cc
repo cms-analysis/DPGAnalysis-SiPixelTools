@@ -114,10 +114,10 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag>("HLTResultsLabel", edm::InputTag("TriggerResults::HLT"))),
   fInit(0)
 {
-  static char *rcsid="$Id$";
+  static char *rcsid="$Id: PixelTree.cc,v 1.28 2010/02/10 14:27:22 ursl Exp $";
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
-  cout << "--- " << rcsid << endl;
+  cout << "---  version:                         " << rcsid << endl;
   cout << "---  verbose:                         " << fVerbose << endl;
   cout << "---  dumpAllEvents:                   " << fDumpAllEvents << endl;
   cout << "---  rootFileName:                    " << fRootFileName << endl;
