@@ -75,8 +75,6 @@
 #include "MagneticField/Engine/interface/MagneticField.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 
-#include "PhysicsTools/UtilAlgos/interface/TFileService.h"
-
 #include "RecoMuon/GlobalTrackingTools/interface/GlobalMuonTrackMatcher.h"
 
 #include "TrackingTools/TrackAssociator/interface/TrackDetectorAssociator.h"
@@ -114,7 +112,7 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag>("HLTResultsLabel", edm::InputTag("TriggerResults::HLT"))),
   fInit(0)
 {
-  static char *rcsid="$Id: PixelTree.cc,v 1.28 2010/02/10 14:27:22 ursl Exp $";
+  static char *rcsid="$Id: PixelTree.cc,v 1.29 2010/02/10 14:38:28 ursl Exp $";
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
   cout << "---  version:                         " << rcsid << endl;
