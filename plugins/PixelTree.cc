@@ -112,7 +112,7 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag>("HLTResultsLabel", edm::InputTag("TriggerResults::HLT"))),
   fInit(0)
 {
-  static char *rcsid="$Id: PixelTree.cc,v 1.32 2010/03/30 11:14:02 ursl Exp $";
+  static char *rcsid="$Id: PixelTree.cc,v 1.33 2010/03/30 16:27:32 ursl Exp $";
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
   cout << "---  version:                         " << rcsid << endl;
@@ -331,7 +331,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
   if (oldRun == 0) {
     fL1Thist = new TH1D(Form("L1T_%d", fRun), Form("L1T names for run %d", fRun), 128, 0., 128.); fL1Thist->SetDirectory(fFile); 
     fL1TThist= new TH1D(Form("L1TT_%d",fRun), Form("L1TT names for run %d", fRun), 128, 0., 128.); fL1TThist->SetDirectory(fFile); 
-    fHLThist = new TH1D(Form("HLT_%d", fRun), Form("HLT names for run %d", fRun), 128, 0., 128.); fHLThist->SetDirectory(fFile); 
+    fHLThist = new TH1D(Form("HLT_%d", fRun), Form("HLT names for run %d", fRun), 2*128, 0., 2*128.); fHLThist->SetDirectory(fFile); 
     oldRun = 1; 
   }
 
