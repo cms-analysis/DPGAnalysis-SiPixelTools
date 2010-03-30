@@ -21,7 +21,7 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = "GR09_P_V6::All"
+process.GlobalTag.globaltag = "GR10_P_V4::All"
 
 # -- Input files
 process.source = cms.Source(
@@ -42,7 +42,7 @@ process.TrackRefitter.src = 'generalTracks::EXPRESS'
 
 # -- RecHit production
 process.load("RecoLocalTracker.SiPixelRecHits.SiPixelRecHits_cfi")
-process.SiPixelRecHits.src = 'siPixelClusters::EXPRESS'
+process.siPixelRecHits.src = 'siPixelClusters::EXPRESS'
 
 # -- skimming
 process.PixelFilter = cms.EDFilter(
@@ -62,7 +62,7 @@ process.PixelFilter = cms.EDFilter(
 try:
     rootFileName = os.environ["JOB"] + ".root"
 except KeyError:
-    rootFileName = "rfio:/castor/cern.ch/cms/store/group/tracker/pixel/PixelTree/express/pixelTree-ExpressPhysics-XXXX.root"
+    rootFileName = "rfio:/castor/cern.ch/cms/store/group/tracker/pixel/PixelTree/express/r23/pixelTree-ExpressPhysics-XXXX.root"
 
 process.PixelTree = cms.EDAnalyzer(
     "PixelTree",
@@ -82,7 +82,7 @@ process.PixelTree = cms.EDAnalyzer(
 
 # -- Path
 process.p = cms.Path(
-    process.PixelFilter* 
+#    process.PixelFilter* 
     process.siPixelRecHits*
     process.TrackRefitter*
     process.PixelTree

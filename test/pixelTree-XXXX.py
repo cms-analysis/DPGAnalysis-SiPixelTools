@@ -65,17 +65,18 @@ except KeyError:
 
 process.PixelTree = cms.EDAnalyzer(
     "PixelTree",
-    verbose                = cms.untracked.int32(0),
-    rootFileName           = cms.untracked.string(rootFileName),
-    dumpAllEvents          = cms.untracked.int32(0),
-    muonCollectionLabel    = cms.untracked.InputTag('muons'),
-    trajectoryInputLabel   = cms.untracked.InputTag('TrackRefitter::Demo'),
-    trackCollectionLabel   = cms.untracked.InputTag('generalTracks'),
-    pixelClusterLabel      = cms.untracked.InputTag('siPixelClusters'),
-    pixelRecHitLabel       = cms.untracked.InputTag('siPixelRecHits'),
-    L1GTReadoutRecordLabel = cms.untracked.InputTag('gtDigis'), 
-    hltL1GtObjectMap       = cms.untracked.InputTag('hltL1GtObjectMap'), 
-    HLTResultsLabel        = cms.untracked.InputTag('TriggerResults::HLT')
+    verbose                      = cms.untracked.int32(0),
+    rootFileName                 = cms.untracked.string(rootFileName),
+    dumpAllEvents                = cms.untracked.int32(0),
+    PrimaryVertexCollectionLabel = cms.untracked.InputTag('offlinePrimaryVertices'),
+    muonCollectionLabel          = cms.untracked.InputTag('muons'),
+    trajectoryInputLabel         = cms.untracked.InputTag('TrackRefitter::Demo'),
+    trackCollectionLabel         = cms.untracked.InputTag('generalTracks'),
+    pixelClusterLabel            = cms.untracked.InputTag('siPixelClusters'),
+    pixelRecHitLabel             = cms.untracked.InputTag('siPixelRecHits'),
+    L1GTReadoutRecordLabel       = cms.untracked.InputTag('gtDigis'), 
+    hltL1GtObjectMap             = cms.untracked.InputTag('hltL1GtObjectMap'), 
+    HLTResultsLabel              = cms.untracked.InputTag('TriggerResults::HLT')
     )
 
 # -- Path
