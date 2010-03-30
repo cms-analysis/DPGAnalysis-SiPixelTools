@@ -112,7 +112,7 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag>("HLTResultsLabel", edm::InputTag("TriggerResults::HLT"))),
   fInit(0)
 {
-  static char *rcsid="$Id: PixelTree.cc,v 1.31 2010/03/30 08:22:01 ursl Exp $";
+  static char *rcsid="$Id: PixelTree.cc,v 1.32 2010/03/30 11:14:02 ursl Exp $";
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
   cout << "---  version:                         " << rcsid << endl;
@@ -123,6 +123,7 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   cout << "---  muonCollectionLabel:             " << fMuonCollectionLabel << endl;
   cout << "---  trackCollectionLabel:            " << fTrackCollectionLabel << endl;
   cout << "---  pixelClusterLabel:               " << fPixelClusterLabel << endl;
+  cout << "---  pixelRecHitLabel                 " << fPixelRecHitLabel << endl;
   cout << "---  L1GTReadoutRecordLabel:          " << fL1GTReadoutRecordLabel << endl;
   cout << "---  hltL1GtObjectMap:                " << fL1GTmapLabel << endl;
   cout << "---  HLTResultsLabel:                 " << fHLTResultsLabel << endl;

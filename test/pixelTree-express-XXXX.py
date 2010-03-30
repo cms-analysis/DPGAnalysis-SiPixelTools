@@ -74,10 +74,10 @@ process.PixelTree = cms.EDAnalyzer(
     trajectoryInputLabel         = cms.untracked.InputTag('TrackRefitter::Demo'),
     trackCollectionLabel         = cms.untracked.InputTag('generalTracks::EXPRESS'),
     pixelClusterLabel            = cms.untracked.InputTag('siPixelClusters::EXPRESS'),
-    pixelRecHitLabel             = cms.untracked.InputTag('siPixelRecHits::EXPRESS'),
-    L1GTReadoutRecordLabel       = cms.untracked.InputTag('gtDigis'), 
-    hltL1GtObjectMap             = cms.untracked.InputTag('hltL1GtObjectMap'), 
-    HLTResultsLabel              = cms.untracked.InputTag('TriggerResults::HLT')
+    pixelRecHitLabel             = cms.untracked.InputTag('siPixelRecHits::Demo'),
+    L1GTReadoutRecordLabel       = cms.untracked.InputTag('gtDigis::EXPRESS'), 
+    hltL1GtObjectMap             = cms.untracked.InputTag('hltL1GtObjectMap::HLT'), 
+    HLTResultsLabel              = cms.untracked.InputTag('TriggerResults::EXPRESS')
     )
 
 # -- Path
