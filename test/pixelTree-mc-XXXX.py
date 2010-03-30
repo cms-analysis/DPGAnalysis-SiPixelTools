@@ -19,7 +19,7 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = "STARTUP3X_V8D::All"
+process.GlobalTag.globaltag = "START3X_V25::All"
 # -- Input files
 process.source = cms.Source(
     "PoolSource",
@@ -64,7 +64,7 @@ except KeyError:
 
 process.PixelTree = cms.EDAnalyzer(
     "PixelTree",
-    verbose                      = cms.untracked.int32(1),
+    verbose                      = cms.untracked.int32(0),
     rootFileName                 = cms.untracked.string(rootFileName),
     dumpAllEvents                = cms.untracked.int32(0),
     PrimaryVertexCollectionLabel = cms.untracked.InputTag('offlinePrimaryVertices'),
@@ -81,7 +81,7 @@ process.PixelTree = cms.EDAnalyzer(
 
 # -- Path
 process.p = cms.Path(
-    process.PixelFilter* 
+#    process.PixelFilter* 
     process.siPixelRecHits*
     process.TrackRefitter*
     process.PixelTree
