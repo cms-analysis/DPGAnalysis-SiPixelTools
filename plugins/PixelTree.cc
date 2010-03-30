@@ -112,7 +112,7 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag>("HLTResultsLabel", edm::InputTag("TriggerResults::HLT"))),
   fInit(0)
 {
-  static char *rcsid="$Id: PixelTree.cc,v 1.30 2010/03/17 12:52:33 ursl Exp $";
+  static char *rcsid="$Id: PixelTree.cc,v 1.31 2010/03/30 08:22:01 ursl Exp $";
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
   cout << "---  version:                         " << rcsid << endl;
@@ -189,11 +189,11 @@ void PixelTree::beginJob() {
   fTree->Branch("l1t",          &fL1T,          "l1t/i");
   fTree->Branch("l1ta",         fL1TA,          "l1ta[4]/i");
   fTree->Branch("l1tt",         fL1TT,          "l1tt[4]/i");
-  fTree->Branch("hlta",         fHLTA,          "hlta[4]/i");
+  fTree->Branch("hlta",         fHLTA,          "hlta[8]/i");
 
   fTree->Branch("ttA",          fTtA,           "ttA[64]/O");
   fTree->Branch("l1A",          fL1A,           "l1A[128]/O");
-  fTree->Branch("hlA",          fHlA,           "hlA[128]/O");
+  fTree->Branch("hlA",          fHlA,           "hlA[256]/O");
 
   fTree->Branch("hlt",          &fHLT,          "hlt/i");
 
@@ -581,6 +581,14 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	if (hltacc) fHLTA[2] |= (0x1 << itrig);
       } else if (iTrig < 128) {
 	if (hltacc) fHLTA[3] |= (0x1 << itrig);
+      } else if (iTrig < 160) {
+	if (hltacc) fHLTA[4] |= (0x1 << itrig);
+      } else if (iTrig < 192) {
+	if (hltacc) fHLTA[5] |= (0x1 << itrig);
+      } else if (iTrig < 224) {
+	if (hltacc) fHLTA[6] |= (0x1 << itrig);
+      } else if (iTrig < 256) {
+	if (hltacc) fHLTA[7] |= (0x1 << itrig);
       }
     }
 
@@ -592,7 +600,11 @@ void PixelTree::analyze(const edm::Event& iEvent,
       cout << std::bitset<32>(fHLTA[0]) << endl
 	   << std::bitset<32>(fHLTA[1]) << endl
 	   << std::bitset<32>(fHLTA[2]) << endl
-	   << std::bitset<32>(fHLTA[3]) << endl;
+	   << std::bitset<32>(fHLTA[3]) << endl
+	   << std::bitset<32>(fHLTA[4]) << endl
+	   << std::bitset<32>(fHLTA[5]) << endl
+	   << std::bitset<32>(fHLTA[6]) << endl
+	   << std::bitset<32>(fHLTA[7]) << endl;
     }   
   }
 
@@ -1460,15 +1472,22 @@ void PixelTree::analyze(const edm::Event& iEvent,
 void PixelTree::init() {
 
   for (int i = 0; i < 4; ++i) {
-    fL1TA[i] = fL1TT[i] = fHLTA[i] = 0;
+    fL1TA[i] = fL1TT[i] = 0;
+  }
+
+  for (int i = 0; i < 8; ++i) {
+    fHLTA[i] = 0;
   }
   
   for (int i = 0; i < 64; ++i) {
     fTtA[i]    = false; 
     fL1A[i]    = false; 
     fL1A[i+64] = false; 
+
     fHlA[i]    = false; 
     fHlA[i+64] = false; 
+    fHlA[i+128]= false; 
+    fHlA[i+192]= false; 
   }
 
   for (int i = 0; i < fPvN; ++i) {
