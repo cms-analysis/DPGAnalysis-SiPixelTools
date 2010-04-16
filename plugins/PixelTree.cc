@@ -112,7 +112,7 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag>("HLTResultsLabel", edm::InputTag("TriggerResults::HLT"))),
   fInit(0)
 {
-  static char *rcsid="$Id: PixelTree.cc,v 1.33 2010/03/30 16:27:32 ursl Exp $";
+  static char *rcsid="$Id: PixelTree.cc,v 1.34 2010/03/30 18:23:54 ursl Exp $";
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
   cout << "---  version:                         " << rcsid << endl;
@@ -1578,8 +1578,8 @@ void PixelTree::init() {
 
 // ----------------------------------------------------------------------
 void PixelTree::readOffsets() {
-  for(int i = 0; i < 6; i++){
-    for(int j = 0; j < 16; j++){
+  for(int i = 0; i < 5; i++){
+    for(int j = 0; j < 15; j++){
       fspoints[i][j] =  -10000;
       fsbias[i][j] =  -10000;
       fsrms[i][j] =  -10000;
