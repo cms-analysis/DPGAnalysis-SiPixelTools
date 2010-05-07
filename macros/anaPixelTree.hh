@@ -17,7 +17,6 @@ public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
 
-
    // Declaration of leaf types
    Int_t           run;
    Int_t           lumiblock;
@@ -32,113 +31,120 @@ public :
    UInt_t          l1t;
    UInt_t          l1ta[4];
    UInt_t          l1tt[4];
-   UInt_t          hlta[4];
-   UInt_t          l1ta0;
-   UInt_t          l1ta1;
-   UInt_t          l1ta2;
-   UInt_t          l1ta3;
+   UInt_t          hlta[8];
+   Bool_t          ttA[64];
+   Bool_t          l1A[128];
+   Bool_t          hlA[256];
    UInt_t          hlt;
-   UInt_t          hlta0;
-   UInt_t          hlta1;
-   UInt_t          hlta2;
-   UInt_t          hlta3;
-   UInt_t          hltr0;
-   UInt_t          hltr1;
-   UInt_t          hltr2;
-   UInt_t          hltr3;
-   UInt_t          hlte0;
-   UInt_t          hlte1;
-   UInt_t          hlte2;
-   UInt_t          hlte3;
    Int_t           PvN;
-   Float_t         PvX[9441];   //[PvN]
-   Float_t         PvY[9441];   //[PvN]
-   Float_t         PvZ[9441];   //[PvN]
-   Float_t         PvXe[9441];   //[PvN]
-   Float_t         PvYe[9441];   //[PvN]
-   Float_t         PvZe[9441];   //[PvN]
-   Float_t         PvChi2[9441];   //[PvN]
-   Float_t         PvNdof[9441];   //[PvN]
-   Int_t           PvIsFake[9441];   //[PvN]
+   Float_t         PvX[100];   //[PvN]
+   Float_t         PvY[100];   //[PvN]
+   Float_t         PvZ[100];   //[PvN]
+   Float_t         PvXe[100];   //[PvN]
+   Float_t         PvYe[100];   //[PvN]
+   Float_t         PvZe[100];   //[PvN]
+   Float_t         PvChi2[100];   //[PvN]
+   Float_t         PvNdof[100];   //[PvN]
+   Int_t           PvIsFake[100];   //[PvN]
    Int_t           MuN;
-   Int_t           MuType[1];   //[MuN]
-   Int_t           MuTkI[1];   //[MuN]
-   Float_t         MuPt[1];   //[MuN]
-   Float_t         MuTheta[1];   //[MuN]
-   Float_t         MuPhi[1];   //[MuN]
-   Float_t         MuT[1];   //[MuN]
-   Float_t         MuTcorr[1];   //[MuN]
-   Float_t         MuTerr[1];   //[MuN]
+   Int_t           MuType[100];   //[MuN]
+   Int_t           MuTkI[100];   //[MuN]
+   Float_t         MuPt[100];   //[MuN]
+   Float_t         MuTheta[100];   //[MuN]
+   Float_t         MuPhi[100];   //[MuN]
+   Float_t         MuT[100];   //[MuN]
+   Float_t         MuTcorr[100];   //[MuN]
+   Float_t         MuTerr[100];   //[MuN]
    Float_t         MuTmean;
+   Float_t         HfEplus;
+   Float_t         HfEminus;
+   Float_t         HfTplus;
+   Float_t         HfTminus;
    Int_t           TkN;
-   Int_t           TkCharge[172];   //[TkN]
-   Float_t         TkChi2[172];   //[TkN]
-   Float_t         TkNdof[172];   //[TkN]
-   Float_t         TkPt[172];   //[TkN]
-   Float_t         TkTheta[172];   //[TkN]
-   Float_t         TkEta[172];   //[TkN]
-   Float_t         TkPhi[172];   //[TkN]
-   Float_t         TkD0[172];   //[TkN]
-   Float_t         TkDz[172];   //[TkN]
-   Float_t         TkVx[172];   //[TkN]
-   Float_t         TkVy[172];   //[TkN]
-   Float_t         TkVz[172];   //[TkN]
-   Float_t         TkAlpha[172][20];   //[TkN]
-   Float_t         TkBeta[172][20];   //[TkN]
-   Float_t         TkResX[172][20];   //[TkN]
-   Float_t         TkResY[172][20];   //[TkN]
-   Float_t         TkResXe[172][20];   //[TkN]
-   Float_t         TkResYe[172][20];   //[TkN]
-   Float_t         TkRes2X[172][20];   //[TkN]
-   Float_t         TkRes2Xe[172][20];   //[TkN]
-   Int_t           TkClN[172];   //[TkN]
-   Int_t           TkClI[172][20];   //[TkN]
-   Int_t           TkType[172];   //[TkN]
-   Int_t           TkMuI[172];   //[TkN]
+   Int_t           TkQuality[10000];   //[TkN]
+   Int_t           TkCharge[10000];   //[TkN]
+   Float_t         TkChi2[10000];   //[TkN]
+   Float_t         TkNdof[10000];   //[TkN]
+   Float_t         TkPt[10000];   //[TkN]
+   Float_t         TkTheta[10000];   //[TkN]
+   Float_t         TkEta[10000];   //[TkN]
+   Float_t         TkPhi[10000];   //[TkN]
+   Float_t         TkD0[10000];   //[TkN]
+   Float_t         TkDz[10000];   //[TkN]
+   Float_t         TkVx[10000];   //[TkN]
+   Float_t         TkVy[10000];   //[TkN]
+   Float_t         TkVz[10000];   //[TkN]
+   Float_t         TkAlpha[10000][20];   //[TkN]
+   Float_t         TkBeta[10000][20];   //[TkN]
+   Float_t         TkResX[10000][20];   //[TkN]
+   Float_t         TkResY[10000][20];   //[TkN]
+   Float_t         TkResXe[10000][20];   //[TkN]
+   Float_t         TkResYe[10000][20];   //[TkN]
+   Float_t         TkRes2X[10000][20];   //[TkN]
+   Float_t         TkRes2Xe[10000][20];   //[TkN]
+   Int_t           TkClN[10000];   //[TkN]
+   Int_t           TkClI[10000][20];   //[TkN]
+   Int_t           TkType[10000];   //[TkN]
+   Int_t           TkMuI[10000];   //[TkN]
    Int_t           ClN;
-   Float_t         ClRow[1274];   //[ClN]
-   Float_t         ClCol[1274];   //[ClN]
-   Float_t         ClLx[1274];   //[ClN]
-   Float_t         ClLxE[1274];   //[ClN]
-   Float_t         ClLy[1274];   //[ClN]
-   Float_t         ClLyE[1274];   //[ClN]
-   Float_t         ClGx[1274];   //[ClN]
-   Float_t         ClGy[1274];   //[ClN]
-   Float_t         ClGz[1274];   //[ClN]
-   Int_t           ClSize[1274];   //[ClN]
-   Int_t           ClSizeX[1274];   //[ClN]
-   Int_t           ClSizeY[1274];   //[ClN]
-   Int_t           ClFlipped[1274];   //[ClN]
-   Int_t           ClLayer[1274];   //[ClN]
-   Int_t           ClLadder[1274];   //[ClN]
-   Int_t           ClModule[1274];   //[ClN]
-   Int_t           ClDisk[1274];   //[ClN]
-   Int_t           ClBlade[1274];   //[ClN]
-   Int_t           ClPanel[1274];   //[ClN]
-   Int_t           ClPlaquette[1274];   //[ClN]
-   Int_t           ClDetId[1274];   //[ClN]
-   Float_t         ClCharge[1274];   //[ClN]
-   Float_t         ClChargeCorr[1274];   //[ClN]
-   Int_t           ClType[1274];   //[ClN]
-   Int_t           ClTkN[1274];   //[ClN]
-   Int_t           ClTkI[1274][100];   //[ClN]
-   Int_t           ClDgN[1274];   //[ClN]
-   Int_t           ClDgI[1274][100];   //[ClN]
+   Float_t         ClRow[100000];   //[ClN]
+   Float_t         ClCol[100000];   //[ClN]
+   Float_t         ClLx[100000];   //[ClN]
+   Float_t         ClLxE[100000];   //[ClN]
+   Float_t         ClLy[100000];   //[ClN]
+   Float_t         ClLyE[100000];   //[ClN]
+   Float_t         ClGx[100000];   //[ClN]
+   Float_t         ClGy[100000];   //[ClN]
+   Float_t         ClGz[100000];   //[ClN]
+   Int_t           ClSize[100000];   //[ClN]
+   Int_t           ClSizeX[100000];   //[ClN]
+   Int_t           ClSizeY[100000];   //[ClN]
+   Int_t           ClFlipped[100000];   //[ClN]
+   Int_t           ClLayer[100000];   //[ClN]
+   Int_t           ClLadder[100000];   //[ClN]
+   Int_t           ClModule[100000];   //[ClN]
+   Int_t           ClDisk[100000];   //[ClN]
+   Int_t           ClBlade[100000];   //[ClN]
+   Int_t           ClPanel[100000];   //[ClN]
+   Int_t           ClPlaquette[100000];   //[ClN]
+   Int_t           ClDetId[100000];   //[ClN]
+   Float_t         ClCharge[100000];   //[ClN]
+   Float_t         ClChargeCorr[100000];   //[ClN]
+   Int_t           ClType[100000];   //[ClN]
+   Float_t         ClRhLx[100000];   //[ClN]
+   Float_t         ClRhLxE[100000];   //[ClN]
+   Float_t         ClRhLy[100000];   //[ClN]
+   Float_t         ClRhLyE[100000];   //[ClN]
+   Float_t         ClRhGx[100000];   //[ClN]
+   Float_t         ClRhGy[100000];   //[ClN]
+   Float_t         ClRhGz[100000];   //[ClN]
+   Float_t         ClRhProb[100000];   //[ClN]
+   Float_t         ClRhProbX[100000];   //[ClN]
+   Float_t         ClRhProbY[100000];   //[ClN]
+   UInt_t          ClRhQualWord[100000];   //[ClN]
+   Int_t           ClRhqBin[100000];   //[ClN]
+   Int_t           ClRhSpansTwoROCs[100000];   //[ClN]
+   Int_t           ClRhIsOnEdge[100000];   //[ClN]
+   Int_t           ClRhHasBadPixels[100000];   //[ClN]
+   Int_t           ClTkN[100000];   //[ClN]
+   Int_t           ClTkI[100000][100];   //[ClN]
+   Int_t           ClDgN[100000];   //[ClN]
+   Int_t           ClDgI[100000][100];   //[ClN]
    Int_t           DgN;
-   Int_t           DgRow[5605];   //[DgN]
-   Int_t           DgCol[5605];   //[DgN]
-   Int_t           DgDetid[5605];   //[DgN]
-   Int_t           DgRoc[5605];   //[DgN]
-   Int_t           DgRocR[5605];   //[DgN]
-   Int_t           DgRocC[5605];   //[DgN]
-   Float_t         DgLx[5605];   //[DgN]
-   Float_t         DgLy[5605];   //[DgN]
-   Float_t         DgGx[5605];   //[DgN]
-   Float_t         DgGy[5605];   //[DgN]
-   Float_t         DgGz[5605];   //[DgN]
-   Float_t         DgAdc[5605];   //[DgN]
-   Float_t         DgCharge[5605];   //[DgN]
-   Int_t           DgClI[5605];   //[DgN]
+   Int_t           DgRow[1000000];   //[DgN]
+   Int_t           DgCol[1000000];   //[DgN]
+   Int_t           DgDetid[1000000];   //[DgN]
+   Int_t           DgRoc[1000000];   //[DgN]
+   Int_t           DgRocR[1000000];   //[DgN]
+   Int_t           DgRocC[1000000];   //[DgN]
+   Float_t         DgLx[1000000];   //[DgN]
+   Float_t         DgLy[1000000];   //[DgN]
+   Float_t         DgGx[1000000];   //[DgN]
+   Float_t         DgGy[1000000];   //[DgN]
+   Float_t         DgGz[1000000];   //[DgN]
+   Float_t         DgAdc[1000000];   //[DgN]
+   Float_t         DgCharge[1000000];   //[DgN]
+   Int_t           DgClI[1000000];   //[DgN]
 
    // List of branches
    TBranch        *b_run;   //!
@@ -155,23 +161,10 @@ public :
    TBranch        *b_l1ta;   //!
    TBranch        *b_l1tt;   //!
    TBranch        *b_hlta;   //!
-   TBranch        *b_l1ta0;   //!
-   TBranch        *b_l1ta1;   //!
-   TBranch        *b_l1ta2;   //!
-   TBranch        *b_l1ta3;   //!
+   TBranch        *b_ttA;   //!
+   TBranch        *b_l1A;   //!
+   TBranch        *b_hlA;   //!
    TBranch        *b_hlt;   //!
-   TBranch        *b_hlta0;   //!
-   TBranch        *b_hlta1;   //!
-   TBranch        *b_hlta2;   //!
-   TBranch        *b_hlta3;   //!
-   TBranch        *b_hltr0;   //!
-   TBranch        *b_hltr1;   //!
-   TBranch        *b_hltr2;   //!
-   TBranch        *b_hltr3;   //!
-   TBranch        *b_hlte0;   //!
-   TBranch        *b_hlte1;   //!
-   TBranch        *b_hlte2;   //!
-   TBranch        *b_hlte3;   //!
    TBranch        *b_PvN;   //!
    TBranch        *b_PvX;   //!
    TBranch        *b_PvY;   //!
@@ -192,7 +185,12 @@ public :
    TBranch        *b_MuTcorr;   //!
    TBranch        *b_MuTerr;   //!
    TBranch        *b_MuTmean;   //!
+   TBranch        *b_HfEplus;   //!
+   TBranch        *b_HfEminus;   //!
+   TBranch        *b_HfTplus;   //!
+   TBranch        *b_HfTminus;   //!
    TBranch        *b_TkN;   //!
+   TBranch        *b_TkQuality;   //!
    TBranch        *b_TkCharge;   //!
    TBranch        *b_TkChi2;   //!
    TBranch        *b_TkNdof;   //!
@@ -242,6 +240,21 @@ public :
    TBranch        *b_ClCharge;   //!
    TBranch        *b_ClChargeCorr;   //!
    TBranch        *b_ClType;   //!
+   TBranch        *b_ClRhLx;   //!
+   TBranch        *b_ClRhLxE;   //!
+   TBranch        *b_ClRhLy;   //!
+   TBranch        *b_ClRhLyE;   //!
+   TBranch        *b_ClRhGx;   //!
+   TBranch        *b_ClRhGy;   //!
+   TBranch        *b_ClRhGz;   //!
+   TBranch        *b_ClRhProb;   //!
+   TBranch        *b_ClRhProbX;   //!
+   TBranch        *b_ClRhProbY;   //!
+   TBranch        *b_ClRhQualWord;   //!
+   TBranch        *b_ClRhqBin;   //!
+   TBranch        *b_ClRhSpansTwoROCs;   //!
+   TBranch        *b_ClRhIsOnEdge;   //!
+   TBranch        *b_ClRhHasBadPixels;   //!
    TBranch        *b_ClTkN;   //!
    TBranch        *b_ClTkI;   //!
    TBranch        *b_ClDgN;   //!
@@ -345,23 +358,10 @@ void anaPixelTree::Init(TTree *tree)
    fChain->SetBranchAddress("l1ta", l1ta, &b_l1ta);
    fChain->SetBranchAddress("l1tt", l1tt, &b_l1tt);
    fChain->SetBranchAddress("hlta", hlta, &b_hlta);
-   fChain->SetBranchAddress("l1ta0", &l1ta0, &b_l1ta0);
-   fChain->SetBranchAddress("l1ta1", &l1ta1, &b_l1ta1);
-   fChain->SetBranchAddress("l1ta2", &l1ta2, &b_l1ta2);
-   fChain->SetBranchAddress("l1ta3", &l1ta3, &b_l1ta3);
+   fChain->SetBranchAddress("ttA", ttA, &b_ttA);
+   fChain->SetBranchAddress("l1A", l1A, &b_l1A);
+   fChain->SetBranchAddress("hlA", hlA, &b_hlA);
    fChain->SetBranchAddress("hlt", &hlt, &b_hlt);
-   fChain->SetBranchAddress("hlta0", &hlta0, &b_hlta0);
-   fChain->SetBranchAddress("hlta1", &hlta1, &b_hlta1);
-   fChain->SetBranchAddress("hlta2", &hlta2, &b_hlta2);
-   fChain->SetBranchAddress("hlta3", &hlta3, &b_hlta3);
-   fChain->SetBranchAddress("hltr0", &hltr0, &b_hltr0);
-   fChain->SetBranchAddress("hltr1", &hltr1, &b_hltr1);
-   fChain->SetBranchAddress("hltr2", &hltr2, &b_hltr2);
-   fChain->SetBranchAddress("hltr3", &hltr3, &b_hltr3);
-   fChain->SetBranchAddress("hlte0", &hlte0, &b_hlte0);
-   fChain->SetBranchAddress("hlte1", &hlte1, &b_hlte1);
-   fChain->SetBranchAddress("hlte2", &hlte2, &b_hlte2);
-   fChain->SetBranchAddress("hlte3", &hlte3, &b_hlte3);
    fChain->SetBranchAddress("PvN", &PvN, &b_PvN);
    fChain->SetBranchAddress("PvX", PvX, &b_PvX);
    fChain->SetBranchAddress("PvY", PvY, &b_PvY);
@@ -373,16 +373,21 @@ void anaPixelTree::Init(TTree *tree)
    fChain->SetBranchAddress("PvNdof", PvNdof, &b_PvNdof);
    fChain->SetBranchAddress("PvIsFake", PvIsFake, &b_PvIsFake);
    fChain->SetBranchAddress("MuN", &MuN, &b_MuN);
-   fChain->SetBranchAddress("MuType", &MuType, &b_MuType);
-   fChain->SetBranchAddress("MuTkI", &MuTkI, &b_MuTkI);
-   fChain->SetBranchAddress("MuPt", &MuPt, &b_MuPt);
-   fChain->SetBranchAddress("MuTheta", &MuTheta, &b_MuTheta);
-   fChain->SetBranchAddress("MuPhi", &MuPhi, &b_MuPhi);
-   fChain->SetBranchAddress("MuT", &MuT, &b_MuT);
-   fChain->SetBranchAddress("MuTcorr", &MuTcorr, &b_MuTcorr);
-   fChain->SetBranchAddress("MuTerr", &MuTerr, &b_MuTerr);
+   fChain->SetBranchAddress("MuType", MuType, &b_MuType);
+   fChain->SetBranchAddress("MuTkI", MuTkI, &b_MuTkI);
+   fChain->SetBranchAddress("MuPt", MuPt, &b_MuPt);
+   fChain->SetBranchAddress("MuTheta", MuTheta, &b_MuTheta);
+   fChain->SetBranchAddress("MuPhi", MuPhi, &b_MuPhi);
+   fChain->SetBranchAddress("MuT", MuT, &b_MuT);
+   fChain->SetBranchAddress("MuTcorr", MuTcorr, &b_MuTcorr);
+   fChain->SetBranchAddress("MuTerr", MuTerr, &b_MuTerr);
    fChain->SetBranchAddress("MuTmean", &MuTmean, &b_MuTmean);
+   fChain->SetBranchAddress("HfEplus", &HfEplus, &b_HfEplus);
+   fChain->SetBranchAddress("HfEminus", &HfEminus, &b_HfEminus);
+   fChain->SetBranchAddress("HfTplus", &HfTplus, &b_HfTplus);
+   fChain->SetBranchAddress("HfTminus", &HfTminus, &b_HfTminus);
    fChain->SetBranchAddress("TkN", &TkN, &b_TkN);
+   fChain->SetBranchAddress("TkQuality", TkQuality, &b_TkQuality);
    fChain->SetBranchAddress("TkCharge", TkCharge, &b_TkCharge);
    fChain->SetBranchAddress("TkChi2", TkChi2, &b_TkChi2);
    fChain->SetBranchAddress("TkNdof", TkNdof, &b_TkNdof);
@@ -432,6 +437,21 @@ void anaPixelTree::Init(TTree *tree)
    fChain->SetBranchAddress("ClCharge", ClCharge, &b_ClCharge);
    fChain->SetBranchAddress("ClChargeCorr", ClChargeCorr, &b_ClChargeCorr);
    fChain->SetBranchAddress("ClType", ClType, &b_ClType);
+   fChain->SetBranchAddress("ClRhLx", ClRhLx, &b_ClRhLx);
+   fChain->SetBranchAddress("ClRhLxE", ClRhLxE, &b_ClRhLxE);
+   fChain->SetBranchAddress("ClRhLy", ClRhLy, &b_ClRhLy);
+   fChain->SetBranchAddress("ClRhLyE", ClRhLyE, &b_ClRhLyE);
+   fChain->SetBranchAddress("ClRhGx", ClRhGx, &b_ClRhGx);
+   fChain->SetBranchAddress("ClRhGy", ClRhGy, &b_ClRhGy);
+   fChain->SetBranchAddress("ClRhGz", ClRhGz, &b_ClRhGz);
+   fChain->SetBranchAddress("ClRhProb", ClRhProb, &b_ClRhProb);
+   fChain->SetBranchAddress("ClRhProbX", ClRhProbX, &b_ClRhProbX);
+   fChain->SetBranchAddress("ClRhProbY", ClRhProbY, &b_ClRhProbY);
+   fChain->SetBranchAddress("ClRhQualWord", ClRhQualWord, &b_ClRhQualWord);
+   fChain->SetBranchAddress("ClRhqBin", ClRhqBin, &b_ClRhqBin);
+   fChain->SetBranchAddress("ClRhSpansTwoROCs", ClRhSpansTwoROCs, &b_ClRhSpansTwoROCs);
+   fChain->SetBranchAddress("ClRhIsOnEdge", ClRhIsOnEdge, &b_ClRhIsOnEdge);
+   fChain->SetBranchAddress("ClRhHasBadPixels", ClRhHasBadPixels, &b_ClRhHasBadPixels);
    fChain->SetBranchAddress("ClTkN", ClTkN, &b_ClTkN);
    fChain->SetBranchAddress("ClTkI", ClTkI, &b_ClTkI);
    fChain->SetBranchAddress("ClDgN", ClDgN, &b_ClDgN);
