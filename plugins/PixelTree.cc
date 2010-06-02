@@ -25,19 +25,30 @@
 #include "CondFormats/RunInfo/interface/RunSummary.h"
 #include "CondFormats/RunInfo/interface/RunInfo.h"
 #include "CondFormats/DataRecord/interface/RunSummaryRcd.h"
+
 #include "CondFormats/DataRecord/interface/L1GtTriggerMenuRcd.h"
 #include "CondFormats/L1TObjects/interface/L1GtTriggerMenu.h"
 #include "CondFormats/L1TObjects/interface/L1GtTriggerMenuFwd.h"
 
+#include "DataFormats/L1Trigger/interface/L1MuonParticle.h"
+#include "DataFormats/L1Trigger/interface/L1MuonParticleFwd.h"
+#include "DataFormats/L1Trigger/interface/L1ParticleMap.h"
+#include "DataFormats/L1Trigger/interface/L1ParticleMapFwd.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerObjectMapRecord.h"
+#include "DataFormats/HLTReco/interface/TriggerEventWithRefs.h"
+#include "DataFormats/HLTReco/interface/TriggerObject.h"
+#include "DataFormats/HLTReco/interface/TriggerFilterObjectWithRefs.h"
+#include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
+#include "DataFormats/HLTReco/interface/TriggerEvent.h"
+
+#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
+#include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
 
 #include "CondFormats/SiPixelObjects/interface/DetectorIndex.h"
 
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
-#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutSetupFwd.h"
-#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutSetup.h"
-#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
-#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerObjectMapRecord.h"
 #include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
 #include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
@@ -60,7 +71,7 @@
 
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/TriggerNames.h"
+#include "FWCore/Common/interface/TriggerNames.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -107,12 +118,13 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fTrajectoryInputLabel(iConfig.getUntrackedParameter<InputTag>("trajectoryInputLabel", edm::InputTag("ctfRefitter"))),
   fPixelClusterLabel(iConfig.getUntrackedParameter<InputTag>("pixelClusterLabel", edm::InputTag("siPixelClusters"))), 
   fPixelRecHitLabel(iConfig.getUntrackedParameter<InputTag>("pixelRecHitLabel", edm::InputTag("siPixelRecHits"))), 
+  fHLTProcessName(iConfig.getUntrackedParameter<string>("HLTProcessName")),
   fL1GTReadoutRecordLabel(iConfig.getUntrackedParameter<InputTag>("L1GTReadoutRecordLabel", edm::InputTag("gtDigis"))),
   fL1GTmapLabel(iConfig.getUntrackedParameter<InputTag>("hltL1GtObjectMap", edm::InputTag("hltL1GtObjectMap"))),
   fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag>("HLTResultsLabel", edm::InputTag("TriggerResults::HLT"))),
   fInit(0)
 {
-  static char *rcsid="$Id: PixelTree.cc,v 1.34 2010/03/30 18:23:54 ursl Exp $";
+  string rcsid = string("$Id: PixelTree.cc,v 1.35 2010/04/16 06:16:29 ursl Exp $");
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
   cout << "---  version:                         " << rcsid << endl;
@@ -124,6 +136,7 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   cout << "---  trackCollectionLabel:            " << fTrackCollectionLabel << endl;
   cout << "---  pixelClusterLabel:               " << fPixelClusterLabel << endl;
   cout << "---  pixelRecHitLabel                 " << fPixelRecHitLabel << endl;
+  cout << "---  HLT process name                 " << fHLTProcessName << endl;
   cout << "---  L1GTReadoutRecordLabel:          " << fL1GTReadoutRecordLabel << endl;
   cout << "---  hltL1GtObjectMap:                " << fL1GTmapLabel << endl;
   cout << "---  HLTResultsLabel:                 " << fHLTResultsLabel << endl;
@@ -452,162 +465,95 @@ void PixelTree::analyze(const edm::Event& iEvent,
   // -- Trigger information
   // ----------------------------------------------------------------------
 
-  // -- L1
   Handle<L1GlobalTriggerReadoutRecord> L1GTRR;
   iEvent.getByLabel(fL1GTReadoutRecordLabel,L1GTRR);
   Handle<L1GlobalTriggerObjectMapRecord> hL1GTmap; 
   iEvent.getByLabel("hltL1GtObjectMap", hL1GTmap);
 
-  edm::ESHandle<L1GtTriggerMenu> hL1GtMenu;
-  iSetup.get<L1GtTriggerMenuRcd>().get(hL1GtMenu);
-  const L1GtTriggerMenu* l1GtMenu = hL1GtMenu.product();
+  L1GtUtils l1GtUtils;
+  l1GtUtils.retrieveL1EventSetup(iSetup);
+  // cout << "L1 trigger menu: ";
+  // cout << l1GtUtils.l1TriggerMenu() << endl;
 
-  if (L1GTRR.isValid()) {
-    fL1T = (L1GTRR->decision()? 1: 0);
+  edm::ESHandle<L1GtTriggerMenu> menuRcd;
+  iSetup.get<L1GtTriggerMenuRcd>().get(menuRcd) ;
+  const L1GtTriggerMenu* menu = menuRcd.product();
 
-    const AlgorithmMap& algorithmMap = l1GtMenu->gtAlgorithmMap();
-    for (CItAlgo itAlgo = algorithmMap.begin(); itAlgo != algorithmMap.end(); itAlgo++) {
-      std::string aName = itAlgo->first;
-      int algBitNumber = (itAlgo->second).algoBitNumber();
-      if (fVerbose > 5) cout << "i = " << algBitNumber << " -> " << aName << endl;
-      fL1Thist->GetXaxis()->SetBinLabel(algBitNumber+1, aName.c_str());
-    }
+  string algoname; 
+  int    algobit(-1); 
+  bool   result(false); 
+  int    prescale(0); 
+  int    mask(0); 
+  int    iErrorCode(0); 
 
+  for (CItAlgo algo = menu->gtAlgorithmMap().begin(); algo!=menu->gtAlgorithmMap().end(); ++algo) {
+    algoname = (algo->second).algoName();
+    algobit  = (algo->second).algoBitNumber();
+    result   = l1GtUtils.decisionAfterMask(iEvent, algoname, iErrorCode);
+    mask     = l1GtUtils.triggerMask(iEvent, algoname, iErrorCode);
+    prescale = l1GtUtils.prescaleFactor(iEvent, algoname, iErrorCode);
 
-    const AlgorithmMap& algorithmTTMap = l1GtMenu->gtTechnicalTriggerMap();
-    for (CItAlgo itAlgo = algorithmTTMap.begin(); itAlgo != algorithmTTMap.end(); itAlgo++) {
-      std::string aName = itAlgo->first;
-      int algBitNumber = (itAlgo->second).algoBitNumber();
-      if (fVerbose > 5) cout << "i = " << algBitNumber << " -> " << aName << endl;
-      fL1TThist->GetXaxis()->SetBinLabel(algBitNumber+1, aName.c_str());
-    }
+    fL1Thist->GetXaxis()->SetBinLabel(algobit+1, algoname.c_str());
+    fL1A[algobit]   = result;
+  }
 
-    int itrig(0); 
-    for (unsigned int iTrig = 0; iTrig < L1GTRR->decisionWord().size(); ++iTrig) {
-      int l1flag = L1GTRR->decisionWord()[iTrig]; 
-      int t1flag = L1GTRR->technicalTriggerWord()[iTrig]; 
+  for (CItAlgo algo = menu->gtTechnicalTriggerMap().begin(); algo != menu->gtTechnicalTriggerMap().end(); ++algo) {
+    algoname = (algo->second).algoName();
+    algobit  = (algo->second).algoBitNumber();
+    result   = l1GtUtils.decisionAfterMask(iEvent, algoname, iErrorCode);
+    mask     = l1GtUtils.triggerMask(iEvent, algoname, iErrorCode);
+    prescale = l1GtUtils.prescaleFactor(iEvent, algoname, iErrorCode);
+    fL1TThist->GetXaxis()->SetBinLabel(algobit+1, algoname.c_str());
+    fTtA[algobit] = result; 
+  }
 
-      if (iTrig < 64) {
-	if (t1flag) {
-	  fTtA[iTrig] = true; 
-	} else {
-	  fTtA[iTrig] = false; 
-	}
-      }
+  // -- Read HLT configuration and names
+  HLTConfigProvider hltConfig;
+  bool hltConfigInitSuccess = hltConfig.init(fHLTProcessName);
+  
+  vector<string> validTriggerNames;
+  if (hltConfigInitSuccess) validTriggerNames = hltConfig.triggerNames();
+  //can assert?!  hltConfig.dump("PrescaleTable");
 
-      if (l1flag) {
-	fL1A[iTrig] = true; 
-      } else {
-	fL1A[iTrig] = false; 
-      }
+  if (validTriggerNames.size() < 1) {
+    cout << "==>HFDumpTrigger: NO valid trigger names returned by HLT config provided!!??" << endl;
+    return;
+  }
 
-      itrig = iTrig%32; 
-      if (iTrig < 32) {
-	if (l1flag) fL1TA[0] |= (0x1 << itrig);
-	if (t1flag) fL1TT[0] |= (0x1 << itrig);
-      } else if (iTrig < 64) {
-	if (l1flag) fL1TA[1] |= (0x1 << itrig);
-	if (t1flag) fL1TT[1] |= (0x1 << itrig);
-      } else if (iTrig < 96) {
-	if (l1flag) fL1TA[2] |= (0x1 << itrig);
-      } else if (iTrig < 128) {
-	if (l1flag) fL1TA[3] |= (0x1 << itrig);
-      }
-    }
-
-    //  const  DecisionWord& gtDecisionWordBeforeMask = gtReadoutRecord->decisionWord();
-    //  bool l1SingleEG15 = menu->gtAlgorithmResult( "L1_SingleEG15", gtDecisionWordBeforeMask);
-    //    bool algResult = l1AlgorithmResult(iEvent, evSetup, algoName);
-
-    if (fVerbose > 2) {
-      cout << "L1 trigger accept: " << fL1T << endl;
-      cout << " 3         2         1         0" << endl;
-      cout << "10987654321098765432109876543210" << endl;
-      cout << "--------------------------------" << endl;
-      cout << std::bitset<32>(fL1TA[0]) << endl
-	   << std::bitset<32>(fL1TA[1]) << endl
-	   << std::bitset<32>(fL1TA[2]) << endl
-	   << std::bitset<32>(fL1TA[3]) << endl;
-    }
-
-  } 
-
-
-  // -- HLT: see http://cmslxr.fnal.gov/lxr/source/HLTrigger/HLTanalyzers/src/HLTrigReport.cc
   Handle<TriggerResults> hHLTresults;
   bool hltF = true;
   try {
     iEvent.getByLabel(fHLTResultsLabel, hHLTresults);
   } catch (cms::Exception &ex) {
-    //    cout << ex.explainSelf() << endl;
-    cout << "==>PixelTree> Triggerresults  " << fHLTResultsLabel.encode() << " not found " << endl;
+    if (fVerbose > 0) cout << "==>HFDumpTrigger> Triggerresults  " << fHLTResultsLabel.encode() << " not found " << endl;
     hltF = false;
   }
+  
+  if (hltF) {
+    const TriggerNames &trigName = iEvent.triggerNames(*hHLTresults);
 
-  if (hltF && hHLTresults.isValid()) {
-    TriggerNames triggerNames;
-    triggerNames.init(*hHLTresults);
-    fHLT = hHLTresults->accept();
-    if (fVerbose > 5) cout << "hHLTresults->size() = " << hHLTresults->size() << " and HLT accept = " << fHLT << endl;
-
-    vector<string>  hlNames;
-    hlNames = triggerNames.triggerNames();
-
-    int hltacc(0), hltrun(0), hlterr(0), itrig(0); 
-    for (unsigned int iTrig = 0; iTrig < hlNames.size(); ++iTrig) {
-      hltacc = hHLTresults->accept(iTrig); 
-      hltrun  = hHLTresults->wasrun(iTrig); 
-      hlterr  = hHLTresults->error(iTrig); 
-      itrig = iTrig%32; 
-
-      if (fVerbose > 5) cout << iTrig << " " << triggerNames.triggerName(iTrig) 
-			     << " -> " << hlNames[iTrig] << "  " 
-			     << " at " << triggerNames.triggerIndex(hlNames[iTrig]) << ",  " 
-			     << iTrig << "%32=" << itrig 
-			     << endl;
-
-      fHLThist->GetXaxis()->SetBinLabel(iTrig+1, hlNames[iTrig].c_str()); 
-
-      if (hltacc) {
-	fHlA[iTrig] = true; 
+    unsigned int index(999); 
+    bool wasrun(false), result(false), error(false);
+    int prescale(1); 
+    int psSet = -1; //hltConfig.prescaleSet(iEvent, iSetup);
+    for (unsigned int it = 0; it < validTriggerNames.size(); ++it) {
+      index    = trigName.triggerIndex(validTriggerNames[it]); 
+      result   = (index < validTriggerNames.size() && hHLTresults->accept(index));
+      wasrun   = (index < validTriggerNames.size() && hHLTresults->wasrun(index));
+      error    = (index < validTriggerNames.size() && hHLTresults->error(index));
+      if (psSet > -1) {
+        prescale = hltConfig.prescaleValue(psSet, validTriggerNames[it]);
       } else {
-	fHlA[iTrig] = false; 
+        //      cout << "==>HFDumpTrigger> error in prescale set!?" << endl;
+        prescale = 0;
       }
 
-      if (iTrig < 32) {
-	if (hltacc) fHLTA[0] |= (0x1 << itrig);
-      } else if (iTrig < 64) {
-	if (hltacc) fHLTA[1] |= (0x1 << itrig);
-      } else if (iTrig < 96) {
-	if (hltacc) fHLTA[2] |= (0x1 << itrig);
-      } else if (iTrig < 128) {
-	if (hltacc) fHLTA[3] |= (0x1 << itrig);
-      } else if (iTrig < 160) {
-	if (hltacc) fHLTA[4] |= (0x1 << itrig);
-      } else if (iTrig < 192) {
-	if (hltacc) fHLTA[5] |= (0x1 << itrig);
-      } else if (iTrig < 224) {
-	if (hltacc) fHLTA[6] |= (0x1 << itrig);
-      } else if (iTrig < 256) {
-	if (hltacc) fHLTA[7] |= (0x1 << itrig);
-      }
+      fHLThist->GetXaxis()->SetBinLabel(index+1, validTriggerNames[it].c_str()); 
+      fHlA[index] = result; 
     }
-
-    if (fVerbose > 2)  {
-      cout << "HLT trigger accept: " << fHLT<< endl;
-      cout << " 3         2         1         0" << endl;
-      cout << "10987654321098765432109876543210" << endl;
-      cout << "--------------------------------" << endl;
-      cout << std::bitset<32>(fHLTA[0]) << endl
-	   << std::bitset<32>(fHLTA[1]) << endl
-	   << std::bitset<32>(fHLTA[2]) << endl
-	   << std::bitset<32>(fHLTA[3]) << endl
-	   << std::bitset<32>(fHLTA[4]) << endl
-	   << std::bitset<32>(fHLTA[5]) << endl
-	   << std::bitset<32>(fHLTA[6]) << endl
-	   << std::bitset<32>(fHLTA[7]) << endl;
-    }   
   }
+  
+
 
 
   // ----------------------------------------------------------------------

@@ -92,8 +92,8 @@ class PixelTree : public edm::EDAnalyzer {
   int             fDumpAllEvents;
   edm::InputTag   fPrimaryVertexCollectionLabel;
   edm::InputTag   fMuonCollectionLabel, fTrackCollectionLabel, fTrajectoryInputLabel, fPixelClusterLabel, fPixelRecHitLabel;
-  edm::InputTag   fL1GTReadoutRecordLabel, fL1GTmapLabel, fHLTResultsLabel;
-
+  std::string     fHLTProcessName; 
+  edm::InputTag   fL1GTReadoutRecordLabel, fL1GTmapLabel, fHLTResultsLabel; 
   edm::ESHandle<SiPixelFedCablingMap> fCablingMap;
 
   TFile *fFile; 

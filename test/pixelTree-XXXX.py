@@ -21,7 +21,8 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = "GR10_P_V4::All"
+#process.GlobalTag.globaltag = "GR10_P_V5::All"
+process.GlobalTag.globaltag = "GR_R_36X_V11A::All"
 
 # -- Input files
 process.source = cms.Source(
@@ -74,6 +75,7 @@ process.PixelTree = cms.EDAnalyzer(
     trackCollectionLabel         = cms.untracked.InputTag('generalTracks'),
     pixelClusterLabel            = cms.untracked.InputTag('siPixelClusters'),
     pixelRecHitLabel             = cms.untracked.InputTag('siPixelRecHits'),
+    HLTProcessName               = cms.untracked.string('HLT'), 
     L1GTReadoutRecordLabel       = cms.untracked.InputTag('gtDigis'), 
     hltL1GtObjectMap             = cms.untracked.InputTag('hltL1GtObjectMap'), 
     HLTResultsLabel              = cms.untracked.InputTag('TriggerResults::HLT')
