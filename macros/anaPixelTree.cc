@@ -4,8 +4,6 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 
-#include <iostream>
-
 void anaPixelTree::Loop(int nevt) {
 //   In a ROOT session, you can do:
 //      Root > .L anaPixelTree.cc++

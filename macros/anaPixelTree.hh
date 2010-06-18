@@ -8,9 +8,14 @@
 #ifndef anaPixelTree_h
 #define anaPixelTree_h
 
+#include <iostream>
+#include <fstream>
+
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
+
+using namespace std;
 
 class anaPixelTree {
 public :
@@ -289,13 +294,30 @@ public :
 #endif
 
 #ifdef anaPixelTree_cxx
-anaPixelTree::anaPixelTree(const char *dir, int ischain)
-{
+anaPixelTree::anaPixelTree(const char *dir, int ischain) {
   TChain *chain = new TChain("pixelTree","");
   if (1 == ischain) {
-    chain->Add(Form("%s/*", dir));
+    chain->Add(Form("%s/*", dir)); // single directory
+  } else if (2 == ischain) {
+    char pName[2000]; 
+    int nentries; 
+    TString meta = dir;
+    ifstream is(meta);  
+    while(meta.ReadLine(is) && (!meta.IsNull())){ 
+      nentries = -1;
+      if (meta.Data()[0] == '#') continue; 
+      sscanf(meta.Data(), "%s %d", pName, &nentries); 
+      if (nentries > -1) {
+	cout << pName << " -> " << nentries << " entries" << endl; 
+	chain->Add(pName, nentries); 
+      } else {
+	cout << meta << endl;
+	chain->Add(meta); 
+      }
+    }
+    is.close();
   } else {
-    chain->Add(dir); 
+    chain->Add(dir);  // single file
   }
   Init(chain);
 
