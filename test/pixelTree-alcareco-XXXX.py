@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------
-# -- RECO py template file for dumping the PixelTree only
+# -- ALCARECO py template file for dumping the PixelTree only
 # ----------------------------------------------------------------------
 import os
 import FWCore.ParameterSet.Config as cms
@@ -19,11 +19,12 @@ process.load("CondCore.DBCommon.CondDBCommon_cfi")
 process.load("CondCore.DBCommon.CondDBSetup_cfi")
 
 # -- Conditions
-process.load("Configuration.StandardSequences.MagneticField_38T_cff")
+process.load("Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff")
+#process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = "GR_R_36X_V11A::All"
+process.GlobalTag.globaltag = "GR10_P_V6::All"
 
 # -- Input files
 process.source = cms.Source(
@@ -39,24 +40,30 @@ process.maxEvents = cms.untracked.PSet(
     )
 
 # -- Trajectory producer
+process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
 process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
-process.TrackRefitter.src = 'generalTracks'
+process.TrackRefitter.src = 'ALCARECOTkAlMinBias'
+
+# -- Beamspot producer
+process.load("RecoVertex.PrimaryVertexProducer.OfflinePrimaryVertices_cfi")
+process.offlinePrimaryVertices.TrackLabel = "ALCARECOTkAlMinBias"
 
 # -- RecHit production
 process.load("RecoLocalTracker.SiPixelRecHits.SiPixelRecHits_cfi")
+process.siPixelRecHits.src = "ALCARECOTkAlMinBias"
 
-# -- skimming
-process.PixelFilter = cms.EDFilter(
-    "SkimEvents",
-    verbose                        = cms.untracked.int32(0),
-    filterOnPrimaryVertex          = cms.untracked.int32(0),
-    primaryVertexCollectionLabel   = cms.untracked.InputTag('offlinePrimaryVertices'),
-    filterOnTracks                 = cms.untracked.int32(0),
-    trackCollectionLabel           = cms.untracked.InputTag('generalTracks'),
-    filterOnPixelCluster           = cms.untracked.int32(1),
-    PixelClusterCollectionLabel    = cms.untracked.InputTag('siPixelClusters'),
-    filterOnL1TechnicalTriggerBits = cms.untracked.int32(0),
-    L1TechnicalTriggerBits         = cms.untracked.vint32(40, 41)
+# -- Trigger information printout
+process.hltrep = cms.EDAnalyzer(
+    "HLTrigReport",
+    HLTriggerResults = cms.InputTag("TriggerResults","","HLT")
+    )
+
+
+process.load("L1Trigger.GlobalTriggerAnalyzer.l1GtTrigReport_cfi")
+process.l1trep = cms.EDAnalyzer(
+    "L1GtTrigReport",
+    UseL1GlobalTriggerRecord = cms.bool( False ),
+    L1GtRecordInputTag = cms.InputTag( "gtDigis" )
     )
 
 # -- the tree filler
@@ -73,8 +80,8 @@ process.PixelTree = cms.EDAnalyzer(
     PrimaryVertexCollectionLabel = cms.untracked.InputTag('offlinePrimaryVertices'),
     muonCollectionLabel          = cms.untracked.InputTag('muons'),
     trajectoryInputLabel         = cms.untracked.InputTag('TrackRefitter::Demo'),
-    trackCollectionLabel         = cms.untracked.InputTag('generalTracks'),
-    pixelClusterLabel            = cms.untracked.InputTag('siPixelClusters'),
+    trackCollectionLabel         = cms.untracked.InputTag('ALCARECOTkAlMinBias'),
+    pixelClusterLabel            = cms.untracked.InputTag('ALCARECOTkAlMinBias'),
     pixelRecHitLabel             = cms.untracked.InputTag('siPixelRecHits'),
     HLTProcessName               = cms.untracked.string('HLT'), 
     L1GTReadoutRecordLabel       = cms.untracked.InputTag('gtDigis'), 
@@ -85,7 +92,10 @@ process.PixelTree = cms.EDAnalyzer(
 # -- Path
 process.p = cms.Path(
 #    process.PixelFilter*
+    process.offlineBeamSpot*
+    process.offlinePrimaryVertices*
     process.siPixelRecHits*
     process.TrackRefitter*
     process.PixelTree
+    *process.hltrep*process.l1trep
     )
