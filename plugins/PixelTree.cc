@@ -124,7 +124,7 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag>("HLTResultsLabel", edm::InputTag("TriggerResults::HLT"))),
   fInit(0)
 {
-  string rcsid = string("$Id: PixelTree.cc,v 1.35 2010/04/16 06:16:29 ursl Exp $");
+  string rcsid = string("$Id: PixelTree.cc,v 1.36 2010/06/02 08:17:36 ursl Exp $");
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
   cout << "---  version:                         " << rcsid << endl;
@@ -660,7 +660,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
   //---------------------------------------------------------------------
   Handle<HFRecHitCollection> hHf;
   if (!iEvent.getByLabel("hfreco", hHf)) {
-    cout << "Could not get rec hits! Tried with label: hfreco" << endl;
+    if (fVerbose > 0) cout << "Could not get rec hits! Tried with label: hfreco" << endl;
   }
   
   ESHandle<CaloGeometry> caloGeometry ;
