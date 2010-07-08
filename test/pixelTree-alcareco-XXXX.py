@@ -76,7 +76,7 @@ process.PixelTree = cms.EDAnalyzer(
     "PixelTree",
     verbose                      = cms.untracked.int32(0),
     rootFileName                 = cms.untracked.string(rootFileName),
-    dumpAllEvents                = cms.untracked.int32(0),
+    dumpAllEvents                = cms.untracked.int32(1),
     PrimaryVertexCollectionLabel = cms.untracked.InputTag('offlinePrimaryVertices'),
     muonCollectionLabel          = cms.untracked.InputTag('muons'),
     trajectoryInputLabel         = cms.untracked.InputTag('TrackRefitter::Demo'),
