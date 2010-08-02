@@ -76,12 +76,6 @@ class PixelTree : public edm::EDAnalyzer {
   void fpixNames(const DetId &pID, int &DBdisk, int &DBblade, int &DBpanel, int &DBplaquette);
   
   void onlineRocColRow(const DetId &pID, int offlineRow, int offlineCol, int &roc, int &col, int &row);
-  //  void onlineRocColRow2(const DetId &pID, int offlineRow, int offlineCol, int &roc, int &col, int &row);
-  
-  void readOffsets();
-  void sectorAndWheel(const Muon &muon0, int &w0, int &s0);
-  float correctedTime(const Muon &muon0);
-  void dumpDetIds(const edm::EventSetup& iSetup);
 
   void isPixelTrack(const edm::Ref<std::vector<Trajectory> > &refTraj, bool &isBpixtrack, bool &isFpixtrack);
 

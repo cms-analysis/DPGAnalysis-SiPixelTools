@@ -124,7 +124,7 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag>("HLTResultsLabel", edm::InputTag("TriggerResults::HLT"))),
   fInit(0)
 {
-  string rcsid = string("$Id: PixelTree.cc,v 1.36 2010/06/02 08:17:36 ursl Exp $");
+  string rcsid = string("$Id: PixelTree.cc,v 1.37 2010/07/01 15:43:04 ursl Exp $");
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
   cout << "---  version:                         " << rcsid << endl;
@@ -327,8 +327,6 @@ void PixelTree::beginJob() {
   fTree->Branch("DgCharge",     fDgCharge,      "DgCharge[DgN]/F");
   fTree->Branch("DgClI",        fDgClI,         "DgClI[DgN]/I");      //FIXME: This should be an array?
 
-  readOffsets();
-
 }
 
 
@@ -374,11 +372,6 @@ void PixelTree::analyze(const edm::Event& iEvent,
       }
     }
 
-  }
-
-  // -- produce list of detID and modules
-  if (0) {
-    if (0 == nevt) dumpDetIds(iSetup); 
   }
 
   ++nevt; 
@@ -611,7 +604,6 @@ void PixelTree::analyze(const edm::Event& iEvent,
      cout << "No Muon collection with label " << fMuonCollectionLabel << endl;
    }
   
-  float meanTime(0.), meanTimeW2(0.);
   vector<int> muTkRef;
   if (hMuonCollection.isValid()) {
     int idx(0); 
@@ -638,20 +630,16 @@ void PixelTree::analyze(const edm::Event& iEvent,
       if (it->isTimeValid()) type &= 0x8; 
       fMuType[fMuN]  = type;
       fMuT[fMuN]     = it->time().timeAtIpInOut;
-      fMuTcorr[fMuN] = correctedTime(*it);
+      fMuTcorr[fMuN] = 0; 
       fMuTerr[fMuN]  = it->time().timeAtIpInOutErr;
 
       fMuPt[fMuN]    =  it->globalTrack()->pt();
       fMuPhi[fMuN]   =  it->globalTrack()->phi();
       fMuTheta[fMuN] =  it->globalTrack()->theta();
 
-      if (it->isTimeValid() && (fMuTerr[fMuN] < 15) && (fMuTerr[fMuN] > 0.)) {
-	meanTime   += fMuTcorr[fMuN]/(fMuTerr[fMuN]*fMuTerr[fMuN]);
-	meanTimeW2 += 1./(fMuTerr[fMuN]*fMuTerr[fMuN]);
-      }
       ++fMuN;
     }
-    fMuTmean = meanTime/meanTimeW2;
+    fMuTmean = 0;
   }
 
 
@@ -1523,59 +1511,6 @@ void PixelTree::init() {
 
 
 // ----------------------------------------------------------------------
-void PixelTree::readOffsets() {
-  for(int i = 0; i < 5; i++){
-    for(int j = 0; j < 15; j++){
-      fspoints[i][j] =  -10000;
-      fsbias[i][j] =  -10000;
-      fsrms[i][j] =  -10000;
-    }
-  }
-
-  ifstream f1("muons_input-singleOffset.txt");
-  while(!f1.eof())  {
-   int w0,s0;
-   float b,r,p;
-
-   f1 >>  w0 >> s0 >> p >>  b >> r;
-   if (!f1.good()) break;
-
-   fspoints[w0][s0] = p;
-   fsbias[w0][s0] = b;
-   fsrms[w0][s0] = r;
-   cout << " muon offsets " << w0 << " " << s0 << " " << b << " " << p << " " << r <<  endl;
-  }
-}
-
-
-// ----------------------------------------------------------------------
-void PixelTree::sectorAndWheel(const reco::Muon & muon0,int &w0, int &s0) {
- w0=0;
- s0=0;
- for (trackingRecHit_iterator match = muon0.bestTrack()->recHitsBegin(); match != muon0.bestTrack()->recHitsEnd(); ++match) {
-  DetId did=(*match)->geographicalId() ;
-  if(did.det() == 2 && did.subdetId() == MuonSubdetId::DT)  {
-    DTChamberId * id =  new DTChamberId(did);
-    w0=id->wheel();
-    s0=id->sector();
- 
-    delete id;
-    break;
-  }
- }
-}
-
-// ----------------------------------------------------------------------
-float PixelTree::correctedTime(const  reco::Muon & aMuon) {
-  int s0,w0;
-  sectorAndWheel(aMuon,w0,s0);
-  float time = -10000;
-  if(fspoints[w0+2][s0]>20) time = aMuon.time().timeAtIpInOut-fsbias[w0+2][s0];
-  return time;
-}
-
-
-// ----------------------------------------------------------------------
 void PixelTree::isPixelTrack(const edm::Ref<std::vector<Trajectory> > &refTraj, bool &isBpixtrack, bool &isFpixtrack) {
   std::vector<TrajectoryMeasurement> tmeasColl = refTraj->measurements();
   std::vector<TrajectoryMeasurement>::const_iterator tmeasIt;
@@ -1588,107 +1523,6 @@ void PixelTree::isPixelTrack(const edm::Ref<std::vector<Trajectory> > &refTraj, 
     if (testSubDetID==PixelSubdetector::PixelEndcap) isFpixtrack = true;
     if (isBpixtrack && isFpixtrack) break;
   }
-
-}
-
-
-// ----------------------------------------------------------------------
-// this has nothing to do with the PixelTree...
-void PixelTree::dumpDetIds(const edm::EventSetup& iSetup) {
-
-  edm::ESHandle<TrackerGeometry> pDD;
-  iSetup.get<TrackerDigiGeometryRecord>().get( pDD );
-
-  cout << "**********************************************************************" << endl;
-  cout << " *** Geometry node for TrackerGeom is  "<<&(*pDD)<<std::endl;
-  cout << " *** I have " << pDD->dets().size() <<" detectors"<<std::endl;
-  cout << " *** I have " << pDD->detTypes().size() <<" types"<<std::endl;
-  
-  for (TrackerGeometry::DetContainer::const_iterator it = pDD->dets().begin(); it != pDD->dets().end(); it++){
-    
-    if(dynamic_cast<PixelGeomDetUnit*>((*it))!=0){
-      DetId detId = (*it)->geographicalId();
-      if (detId.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel)) {
-
-	PixelBarrelName::Shell DBshell = PixelBarrelName::PixelBarrelName(detId).shell();
-	int DBlayer  = PixelBarrelName::PixelBarrelName(detId).layerName();
-	int DBladder = PixelBarrelName::PixelBarrelName(detId).ladderName();
-	int DBmodule = PixelBarrelName::PixelBarrelName(detId).moduleName();
-	int DBsector = PixelBarrelName::PixelBarrelName(detId).sectorName();
-
-	string quad; 
-	if (DBshell == PixelBarrelName::mO) {
-	  quad = string("BmO");
-	}
-	if (DBshell == PixelBarrelName::pO) {
-	  quad = string("BpO");
-	}
-	if (DBshell == PixelBarrelName::mI) {
-	  quad = string("BmI");
-	}
-	if (DBshell == PixelBarrelName::pI) {
-	  quad = string("BpI");
-	}
-	
-	cout << "BPix_" << quad << "_SEC" << DBsector << "_LYR" << DBlayer << "_LDR" << DBladder << "_MOD" << DBmodule << "  " << detId.rawId() << endl;
-	
-	if (DBshell == PixelBarrelName::mO) {
-	  DBladder *= -1;
-	  DBmodule *= -1;
-	}
-	
-	if (DBshell == PixelBarrelName::mI) {
-	  DBmodule *= -1;
-	}
-	
-	if (DBshell == PixelBarrelName::pO) {
-	  DBladder *= -1;
-	}
-
-      }	else if(detId.subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap)) {
-	uint32_t id = detId();
-       
-        PixelEndcapName::HalfCylinder side = PixelEndcapName::PixelEndcapName(DetId::DetId(id)).halfCylinder();
-        int disk   = PixelEndcapName::PixelEndcapName(DetId::DetId(id)).diskName();
-        int blade  = PixelEndcapName::PixelEndcapName(DetId::DetId(id)).bladeName();
-        int panel  = PixelEndcapName::PixelEndcapName(DetId::DetId(id)).pannelName();
-        int module = PixelEndcapName::PixelEndcapName(DetId::DetId(id)).plaquetteName();
-
-
-	string quad; 
-	if (side == PixelEndcapName::mO) {
-	  quad = string("BmO");
-	}
-	if (side == PixelEndcapName::pO) {
-	  quad = string("BpO");
-	}
-	if (side == PixelEndcapName::mI) {
-	  quad = string("BmI");
-	}
-	if (side == PixelEndcapName::pI) {
-	  quad = string("BpI");
-	}
-	
-
-	cout << "FPix_" << quad << "_D" << disk << "_BLD" << blade << "_PNL" << panel << "  " << detId.rawId() << endl;
-	cout << "=FPix_" << quad << "_D" << disk << "_BLD" << blade << "_PNL" << panel << "_MOD" << module << "  " << detId.rawId() << endl;
-
-
-	// 	cout << " ---> Adding Endcap Module " <<  detId.rawId() 
-	// 	     << " at hc = " << side << " disk = " << disk << " blade = " << blade << " panel = " << panel << " module = " << module
-	// 	     << endl;
-	
-        char sside[80];  sprintf(sside,  "HalfCylinder_%i",side);
-        char sdisk[80];  sprintf(sdisk,  "Disk_%i",disk);
-        char sblade[80]; sprintf(sblade, "Blade_%02i",blade);
-        char spanel[80]; sprintf(spanel, "Panel_%i",panel);
-        char smodule[80];sprintf(smodule,"Module_%i",module);
-        std::string side_str = sside;
-	std::string disk_str = sdisk;
-      }
-    }
-  }
-
 
 }
 
@@ -1791,53 +1625,6 @@ void PixelTree::onlineRocColRow(const DetId &pID, int offlineRow, int offlineCol
   row = locpixel.rocRow();
 
 }
-
-
-
-
-// // ----------------------------------------------------------------------
-// // copied from DQM/SiPixelMonitorClient/src/SiPixelInformationExtractor.cc
-// void PixelTree::onlineRocColRow2(const DetId &pID, int offlineRow, int offlineCol, int &roc, int &col, int &row) {
-//   int realfedID = -1;
-//   for (int fedid = 0; fedid < 40; ++fedid){
-//     uint32_t newDetId = pID;
-//     SiPixelFrameConverter converter(fCablingMap.product(), fedid);
-//     if (converter.hasDetUnit(newDetId)){
-//       realfedID = fedid;
-//       break;   
-//     }
-//   }
-
-//   SiPixelFrameConverter formatter(fCablingMap.product(), realfedID);
-//   sipixelobjects::ElectronicIndex cabling; 
-//   sipixelobjects::DetectorIndex detector = {pID, offlineRow, offlineCol};      
-//   formatter.toCabling(cabling, detector);
-//   // cabling should now contain cabling.roc and cabling.dcol  and cabling.pxid
-//   // however, the coordinates now need to be converted from dcl,pxid to the row,col coordinates used in the calibration info 
-//   sipixelobjects::LocalPixel::DcolPxid loc;
-//   loc.dcol = cabling.dcol;
-//   loc.pxid = cabling.pxid;
-
-//   sipixelobjects::LocalPixel locpixel(loc);
-//   sipixelobjects::CablingPathToDetUnit path = {realfedID, cabling.link, cabling.roc};  
-//   const sipixelobjects::PixelROC *theRoc = fCablingMap->findItem(path);
-
-//   roc = theRoc->idInDetUnit();
-//   uint32_t detSubId = pID.subdetId();
-//   if (detSubId == 1) {
-//     PixelBarrelName nameworker(pID);
-//     std::string outputname = nameworker.name();
-//     bool HalfModule = nameworker.isHalfModule();
-//     if ((outputname.find("mO") != string::npos || outputname.find("mI") != string::npos) && (HalfModule)) {
-//       roc = theRoc->idInDetUnit() + 8;
-//     }
-//   }
-  
-//   col = locpixel.rocCol();
-//   row = locpixel.rocRow();
-
-// }
-
 
 
 // define this as a plug-in
