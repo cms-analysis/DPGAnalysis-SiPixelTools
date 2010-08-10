@@ -24,12 +24,15 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = "GR10_P_V4::All"
 
 # -- Input files
-process.source = cms.Source(
-    "PoolSource",
-    fileNames = cms.untracked.vstring(
-    REPLACEFILES
-    )
-    )
+# POOLSOURCE
+
+# -- Input files
+#process.source = cms.Source(
+#    "PoolSource",
+#    fileNames = cms.untracked.vstring(
+#    REPLACEFILES
+#    )
+#    )
 
 # -- number of events
 process.maxEvents = cms.untracked.PSet(

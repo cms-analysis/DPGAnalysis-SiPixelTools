@@ -51,7 +51,7 @@ public :
   Float_t         PvChi2[100];   //[PvN] chi2 of primary vertex fit
   Float_t         PvNdof[100];   //[PvN] number of degrees of freedom of primary vertex fit
   Int_t           PvIsFake[100]; //[PvN] if this is 1, then the primary vertex is fake (= it is the beamspot)
-  Int_t           MuN;           // The muon block is mostly from the cosmic muon running 
+  Int_t           MuN;           // The muon block is DEPRECATED. Do not use it anymore.
   Int_t           MuType[100];   //[MuN]
   Int_t           MuTkI[100];    //[MuN]
   Float_t         MuPt[100];     //[MuN]
@@ -65,91 +65,91 @@ public :
   Float_t         HfEminus;      // HF energy in backward direction
   Float_t         HfTplus;       // HF time in forward direction
   Float_t         HfTminus;      // HF time in backward direction
-  Int_t           TkN;
-  Int_t           TkQuality[10000];   //[TkN]
-  Int_t           TkCharge[10000];    //[TkN]
-  Float_t         TkChi2[10000];      //[TkN]
-  Float_t         TkNdof[10000];      //[TkN]
-  Float_t         TkPt[10000];        //[TkN]
-  Float_t         TkTheta[10000];     //[TkN]
-  Float_t         TkEta[10000];       //[TkN]
-  Float_t         TkPhi[10000];       //[TkN]
-  Float_t         TkD0[10000];        //[TkN]
-  Float_t         TkDz[10000];        //[TkN]
-  Float_t         TkVx[10000];        //[TkN]
-  Float_t         TkVy[10000];        //[TkN]
-  Float_t         TkVz[10000];        //[TkN]
-  Float_t         TkAlpha[10000][20]; //[TkN]
-  Float_t         TkBeta[10000][20];  //[TkN]
-  Float_t         TkResX[10000][20];  //[TkN]
-  Float_t         TkResY[10000][20];  //[TkN]
-  Float_t         TkResXe[10000][20]; //[TkN]
-  Float_t         TkResYe[10000][20]; //[TkN]
-  Float_t         TkRes2X[10000][20]; //[TkN]
-  Float_t         TkRes2Xe[10000][20];//[TkN]
-  Int_t           TkClN[10000];       //[TkN]
-  Int_t           TkClI[10000][20];   //[TkN]
-  Int_t           TkType[10000];      //[TkN]
-  Int_t           TkMuI[10000];       //[TkN]
-  Int_t           ClN;
-  Float_t         ClRow[100000];   //[ClN]
-  Float_t         ClCol[100000];   //[ClN]
-  Float_t         ClLx[100000];   //[ClN]
-  Float_t         ClLxE[100000];   //[ClN]
-  Float_t         ClLy[100000];   //[ClN]
-  Float_t         ClLyE[100000];   //[ClN]
-  Float_t         ClGx[100000];   //[ClN]
-  Float_t         ClGy[100000];   //[ClN]
-  Float_t         ClGz[100000];   //[ClN]
-  Int_t           ClSize[100000];   //[ClN]
-  Int_t           ClSizeX[100000];   //[ClN]
-  Int_t           ClSizeY[100000];   //[ClN]
-  Int_t           ClFlipped[100000];   //[ClN]
-  Int_t           ClLayer[100000];   //[ClN]
-  Int_t           ClLadder[100000];   //[ClN]
-  Int_t           ClModule[100000];   //[ClN]
-  Int_t           ClDisk[100000];   //[ClN]
-  Int_t           ClBlade[100000];   //[ClN]
-  Int_t           ClPanel[100000];   //[ClN]
-  Int_t           ClPlaquette[100000];   //[ClN]
-  Int_t           ClDetId[100000];   //[ClN]
-  Float_t         ClCharge[100000];   //[ClN]
-  Float_t         ClChargeCorr[100000];   //[ClN]
-  Int_t           ClType[100000];   //[ClN]
-  Float_t         ClRhLx[100000];   //[ClN]
-  Float_t         ClRhLxE[100000];   //[ClN]
-  Float_t         ClRhLy[100000];   //[ClN]
-  Float_t         ClRhLyE[100000];   //[ClN]
-  Float_t         ClRhGx[100000];   //[ClN]
-  Float_t         ClRhGy[100000];   //[ClN]
-  Float_t         ClRhGz[100000];   //[ClN]
-  Float_t         ClRhProb[100000];   //[ClN]
-  Float_t         ClRhProbX[100000];   //[ClN]
-  Float_t         ClRhProbY[100000];   //[ClN]
-  UInt_t          ClRhQualWord[100000];   //[ClN]
-  Int_t           ClRhqBin[100000];   //[ClN]
-  Int_t           ClRhSpansTwoROCs[100000];   //[ClN]
-  Int_t           ClRhIsOnEdge[100000];   //[ClN]
-  Int_t           ClRhHasBadPixels[100000];   //[ClN]
-  Int_t           ClTkN[100000];   //[ClN]
-  Int_t           ClTkI[100000][100];   //[ClN]
-  Int_t           ClDgN[100000];   //[ClN]
-  Int_t           ClDgI[100000][100];   //[ClN]
-  Int_t           DgN;
-  Int_t           DgRow[1000000];   //[DgN]
-  Int_t           DgCol[1000000];   //[DgN]
-  Int_t           DgDetid[1000000];   //[DgN]
-  Int_t           DgRoc[1000000];   //[DgN]
-  Int_t           DgRocR[1000000];   //[DgN]
-  Int_t           DgRocC[1000000];   //[DgN]
-  Float_t         DgLx[1000000];   //[DgN]
-  Float_t         DgLy[1000000];   //[DgN]
-  Float_t         DgGx[1000000];   //[DgN]
-  Float_t         DgGy[1000000];   //[DgN]
-  Float_t         DgGz[1000000];   //[DgN]
-  Float_t         DgAdc[1000000];   //[DgN]
-  Float_t         DgCharge[1000000];   //[DgN]
-  Int_t           DgClI[1000000];   //[DgN]
+  Int_t           TkN;           // Number of tracks
+  Int_t           TkQuality[10000];   //[TkN] see: CMSSW/DataFormats/TrackReco/interface/TrackBase.h
+  Int_t           TkCharge[10000];    //[TkN] positive or negative in elementary charge units
+  Float_t         TkChi2[10000];      //[TkN] track fit chi2
+  Float_t         TkNdof[10000];      //[TkN] track fit numbers of degrees of freedom
+  Float_t         TkPt[10000];        //[TkN] track transverse momentum
+  Float_t         TkTheta[10000];     //[TkN] track polar angle
+  Float_t         TkEta[10000];       //[TkN] track pseudorapidity
+  Float_t         TkPhi[10000];       //[TkN] track azimuthal angle
+  Float_t         TkD0[10000];        //[TkN] track transverse impact parameter
+  Float_t         TkDz[10000];        //[TkN] track longitudinal impact parameter
+  Float_t         TkVx[10000];        //[TkN] ?
+  Float_t         TkVy[10000];        //[TkN] ?
+  Float_t         TkVz[10000];        //[TkN] ?
+  Float_t         TkAlpha[10000][20]; //[TkN] track local angle alpha (better resolution direction)
+  Float_t         TkBeta[10000][20];  //[TkN] track local angle beta (worse resolution direction)
+  Float_t         TkResX[10000][20];  //[TkN] Residual in local x of cluster from reconstructed track
+  Float_t         TkResY[10000][20];  //[TkN] Residual in local y of cluster from reconstructed track
+  Float_t         TkResXe[10000][20]; //[TkN] Error of residual in x
+  Float_t         TkResYe[10000][20]; //[TkN] Error of residual in y
+  Float_t         TkRes2X[10000][20]; //[TkN] ?
+  Float_t         TkRes2Xe[10000][20];//[TkN] ?
+  Int_t           TkClN[10000];       //[TkN] Number of clusters on this track
+  Int_t           TkClI[10000][20];   //[TkN] Indices to clusters on this track
+  Int_t           TkType[10000];      //[TkN] not filled
+  Int_t           TkMuI[10000];       //[TkN] do not use
+  Int_t           ClN;             // Number of clusters
+  Float_t         ClRow[100000];   //[ClN] Row of center of cluster
+  Float_t         ClCol[100000];   //[ClN] Column of center of cluster
+  Float_t         ClLx[100000];   //[ClN]  Local x position of cluster on module
+  Float_t         ClLxE[100000];   //[ClN] Error of local x position of cluster on module
+  Float_t         ClLy[100000];   //[ClN]  Local y position of cluster on module	 
+  Float_t         ClLyE[100000];   //[ClN] Error of local y position of cluster on module
+  Float_t         ClGx[100000];   //[ClN]  Global x position of cluster
+  Float_t         ClGy[100000];   //[ClN]  Global y position of cluster
+  Float_t         ClGz[100000];   //[ClN]  Global z position of cluster
+  Int_t           ClSize[100000];   //[ClN] Number of pixels in cluster
+  Int_t           ClSizeX[100000];   //[ClN] Number of pixels in cluster along x
+  Int_t           ClSizeY[100000];   //[ClN] Number of pixels in cluster along y
+  Int_t           ClFlipped[100000];   //[ClN] Flipped module or not
+  Int_t           ClLayer[100000];   //[ClN]  BPIX layer number
+  Int_t           ClLadder[100000];   //[ClN] BPIX ladder number
+  Int_t           ClModule[100000];   //[ClN] BPIX module number
+  Int_t           ClDisk[100000];   //[ClN]   FPIX disk number
+  Int_t           ClBlade[100000];   //[ClN]  FPIX blade number
+  Int_t           ClPanel[100000];   //[ClN]  FPIX panel number
+  Int_t           ClPlaquette[100000];   //[ClN] FPIX plaquette number
+  Int_t           ClDetId[100000];   //[ClN]     detector ID number
+  Float_t         ClCharge[100000];   //[ClN]    cluster charge in kilo-electrons
+  Float_t         ClChargeCorr[100000];   //[ClN] cluster charg in ke, corrected for path length
+  Int_t           ClType[100000];   //[ClN]  0: missing hit, 1: on track, 2: not on track
+  Float_t         ClRhLx[100000];   //[ClN]  RecHit local x
+  Float_t         ClRhLxE[100000];   //[ClN] RecHit local x error 
+  Float_t         ClRhLy[100000];   //[ClN]  RecHit local y
+  Float_t         ClRhLyE[100000];   //[ClN] RecHit local y error
+  Float_t         ClRhGx[100000];   //[ClN]  RecHit global x
+  Float_t         ClRhGy[100000];   //[ClN]  RecHit global y
+  Float_t         ClRhGz[100000];   //[ClN]  RecHit global z
+  Float_t         ClRhProb[100000];   //[ClN] RecHit template probability
+  Float_t         ClRhProbX[100000];   //[ClN] RecHit template probability of x projection
+  Float_t         ClRhProbY[100000];   //[ClN] RecHit template probability of y projection
+  UInt_t          ClRhQualWord[100000];   //[ClN] RecHit template quality word
+  Int_t           ClRhqBin[100000];   //[ClN]    RecHit charge bin
+  Int_t           ClRhSpansTwoROCs[100000];   //[ClN] ...
+  Int_t           ClRhIsOnEdge[100000];   //[ClN]  ...
+  Int_t           ClRhHasBadPixels[100000];   //[ClN] ...
+  Int_t           ClTkN[100000];   //[ClN] Number of tracks this cluster is on
+  Int_t           ClTkI[100000][100];   //[ClN] Indices of tracks this cluster is on
+  Int_t           ClDgN[100000];   //[ClN] Number of digis this cluster is made from 
+  Int_t           ClDgI[100000][100];   //[ClN] Indices of digis this cluster is made from
+  Int_t           DgN; // Number of digis
+  Int_t           DgRow[1000000];   //[DgN] digi row 
+  Int_t           DgCol[1000000];   //[DgN] digi column
+  Int_t           DgDetid[1000000];   //[DgN] detector ID of module/plaquette for this digi
+  Int_t           DgRoc[1000000];   //[DgN] which ROC is this digi on
+  Int_t           DgRocR[1000000];   //[DgN] which ROC row is this digi on
+  Int_t           DgRocC[1000000];   //[DgN] which ROC column is this digi on
+  Float_t         DgLx[1000000];   //[DgN]  Digi local x
+  Float_t         DgLy[1000000];   //[DgN]  Digi local y
+  Float_t         DgGx[1000000];   //[DgN]  Digi global x
+  Float_t         DgGy[1000000];   //[DgN]  Digi global y
+  Float_t         DgGz[1000000];   //[DgN]  Digi global z
+  Float_t         DgAdc[1000000];   //[DgN] not filled
+  Float_t         DgCharge[1000000];   //[DgN] digi charge in ke
+  Int_t           DgClI[1000000];   //[DgN] index of cluster this digi is on
 
   // List of branches
   TBranch        *b_run;   //!
@@ -291,9 +291,6 @@ public :
   virtual void     Show(Long64_t entry = -1);
 };
 
-#endif
-
-#ifdef anaPixelTree_cxx
 anaPixelTree::anaPixelTree(const char *dir, int ischain) {
   TChain *chain = new TChain("pixelTree","");
   if (1 == ischain) {
@@ -521,4 +518,5 @@ Int_t anaPixelTree::Cut(Long64_t entry)
 // returns -1 otherwise.
    return 1;
 }
-#endif // #ifdef anaPixelTree_cxx
+
+#endif 

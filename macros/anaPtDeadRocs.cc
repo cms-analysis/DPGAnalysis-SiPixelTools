@@ -1,9 +1,10 @@
-#include "anaPixelTree.hh"
+#include "anaPtDeadRocs.hh"
 
-void anaPixelTree::Loop(int nevt) {
+void anaPtDeadRocs::Loop(int nevt) {
 //   In a ROOT session, you can do:
 //      Root > .L anaPixelTree.cc++
-//      Root > anaPixelTree t("/afs/cern.ch/user/u/ursl/scratch0/pixel-test.root", 0)
+//      Root > .L anaPtDeadRocs.cc++
+//      Root > anaPtDeadRocs t("rfio:/castor/cern.ch/cms/store/caf/user/pixel/PixelTree/r24/142/pixelTree-alcareco-r24-0142558-0002.root", 0)
 //      Root > t.Loop(20);      // Loop on two entries
 //      Root > t.GetEntry(12); // Fill t data members with entry number 12
 //      Root > t.Show();       // Show values of entry 12

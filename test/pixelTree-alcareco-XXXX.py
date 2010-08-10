@@ -27,17 +27,15 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = "GR10_P_V6::All"
 
 # -- Input files
-process.source = cms.Source(
-    "PoolSource",
-    fileNames = cms.untracked.vstring(
-    REPLACEFILES
-    )
-    )
+# POOLSOURCE
 
-# -- number of events
-process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
-    )
+# -- Input files
+#process.source = cms.Source(
+#    "PoolSource",
+#    fileNames = cms.untracked.vstring(
+#    REPLACEFILES
+#    )
+#    )
 
 # -- Trajectory producer
 process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
