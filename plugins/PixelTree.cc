@@ -124,7 +124,7 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag>("HLTResultsLabel", edm::InputTag("TriggerResults::HLT"))),
   fInit(0)
 {
-  string rcsid = string("$Id: PixelTree.cc,v 1.37 2010/07/01 15:43:04 ursl Exp $");
+  string rcsid = string("$Id: PixelTree.cc,v 1.38 2010/08/02 09:45:54 ursl Exp $");
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
   cout << "---  version:                         " << rcsid << endl;
@@ -477,27 +477,44 @@ void PixelTree::analyze(const edm::Event& iEvent,
   bool   result(false); 
   int    prescale(0); 
   int    mask(0); 
-  int    iErrorCode(0); 
+  int    iErrorCode(0);
+  bool   unmaskedResult(false);
 
   for (CItAlgo algo = menu->gtAlgorithmMap().begin(); algo!=menu->gtAlgorithmMap().end(); ++algo) {
     algoname = (algo->second).algoName();
     algobit  = (algo->second).algoBitNumber();
     result   = l1GtUtils.decisionAfterMask(iEvent, algoname, iErrorCode);
-    mask     = l1GtUtils.triggerMask(iEvent, algoname, iErrorCode);
+    unmaskedResult = l1GtUtils.decisionBeforeMask(iEvent, algoname, iErrorCode);
+    mask    = l1GtUtils.triggerMask(iEvent, algoname, iErrorCode);
     prescale = l1GtUtils.prescaleFactor(iEvent, algoname, iErrorCode);
 
     fL1Thist->GetXaxis()->SetBinLabel(algobit+1, algoname.c_str());
     fL1A[algobit]   = result;
+    if(unmaskedResult) {
+      int offset = algobit/32; 
+      int index  = algobit%32; 
+      if( offset<4 && index<32 ) fL1TA[offset] |= ( 0x1 << index );
+      //cout<<algoname<<" "<<algobit<<" "<<result<<" "<<mask<<" "<<prescale<< " "<<unmaskedResult
+      //  <<" "<<hex<<fL1TA[offset]<<dec<<" "<<offset<<" "<<index<<endl;
+    }
   }
 
   for (CItAlgo algo = menu->gtTechnicalTriggerMap().begin(); algo != menu->gtTechnicalTriggerMap().end(); ++algo) {
     algoname = (algo->second).algoName();
     algobit  = (algo->second).algoBitNumber();
     result   = l1GtUtils.decisionAfterMask(iEvent, algoname, iErrorCode);
+    unmaskedResult = l1GtUtils.decisionBeforeMask(iEvent, algoname, iErrorCode);
     mask     = l1GtUtils.triggerMask(iEvent, algoname, iErrorCode);
     prescale = l1GtUtils.prescaleFactor(iEvent, algoname, iErrorCode);
     fL1TThist->GetXaxis()->SetBinLabel(algobit+1, algoname.c_str());
     fTtA[algobit] = result; 
+    if(unmaskedResult) {
+      int offset = algobit/32; 
+      int index  = algobit%32; 
+      if( offset<4 && index<32 ) fL1TT[offset] |= ( 0x1 << index );
+      //cout<<algoname<<" "<<algobit<<" "<<result<<" "<<mask<<" "<<prescale<< " "<<unmaskedResult
+      //  <<" "<<hex<<fL1TT[offset]<<dec<<" "<<offset<<" "<<index<<endl;
+    }
   }
 
   // -- Read HLT configuration and names
