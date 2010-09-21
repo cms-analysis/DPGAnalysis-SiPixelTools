@@ -42,7 +42,6 @@
 #include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
 #include "DataFormats/HLTReco/interface/TriggerEvent.h"
 
-#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 #include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
 
 #include "CondFormats/SiPixelObjects/interface/DetectorIndex.h"
@@ -124,7 +123,7 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag>("HLTResultsLabel", edm::InputTag("TriggerResults::HLT"))),
   fInit(0)
 {
-  string rcsid = string("$Id: PixelTree.cc,v 1.38 2010/08/02 09:45:54 ursl Exp $");
+  string rcsid = string("$Id: PixelTree.cc,v 1.39 2010/09/20 06:38:03 dkotlins Exp $");
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
   cout << "---  version:                         " << rcsid << endl;
@@ -331,6 +330,19 @@ void PixelTree::beginJob() {
 
 
 // ----------------------------------------------------------------------
+void  PixelTree::beginRun(const Run &run, const EventSetup &iSetup) {
+  bool hasChanged;
+  fValidHLTConfig = fHltConfig.init(run,iSetup,fHLTProcessName,hasChanged);
+}
+
+// ----------------------------------------------------------------------
+void PixelTree::endRun(Run const&run, EventSetup const&iSetup) {
+  fValidHLTConfig = false;
+} 
+
+
+
+// ----------------------------------------------------------------------
 void PixelTree::analyze(const edm::Event& iEvent, 
 			const edm::EventSetup& iSetup) {
 
@@ -518,51 +530,50 @@ void PixelTree::analyze(const edm::Event& iEvent,
   }
 
   // -- Read HLT configuration and names
-  HLTConfigProvider hltConfig;
-  bool hltConfigInitSuccess = hltConfig.init(fHLTProcessName);
-  
   vector<string> validTriggerNames;
-  if (hltConfigInitSuccess) validTriggerNames = hltConfig.triggerNames();
-  //can assert?!  hltConfig.dump("PrescaleTable");
+  if (fValidHLTConfig) validTriggerNames = fHltConfig.triggerNames();
+  else cout << "==> PixelTree: No valid Trigger configuration!!!" << endl;
 
   if (validTriggerNames.size() < 1) {
-    cout << "==>HFDumpTrigger: NO valid trigger names returned by HLT config provided!!??" << endl;
-    return;
-  }
+    cout << "==>PixelTree: NO valid trigger names returned by HLT config provided!!??" << endl;
+  } else {
 
-  Handle<TriggerResults> hHLTresults;
-  bool hltF = true;
-  try {
-    iEvent.getByLabel(fHLTResultsLabel, hHLTresults);
-  } catch (cms::Exception &ex) {
-    if (fVerbose > 0) cout << "==>HFDumpTrigger> Triggerresults  " << fHLTResultsLabel.encode() << " not found " << endl;
-    hltF = false;
-  }
-  
-  if (hltF) {
-    const TriggerNames &trigName = iEvent.triggerNames(*hHLTresults);
-
-    unsigned int index(999); 
-    bool wasrun(false), result(false), error(false);
-    int prescale(1); 
-    int psSet = -1; //hltConfig.prescaleSet(iEvent, iSetup);
-    for (unsigned int it = 0; it < validTriggerNames.size(); ++it) {
-      index    = trigName.triggerIndex(validTriggerNames[it]); 
-      result   = (index < validTriggerNames.size() && hHLTresults->accept(index));
-      wasrun   = (index < validTriggerNames.size() && hHLTresults->wasrun(index));
-      error    = (index < validTriggerNames.size() && hHLTresults->error(index));
-      if (psSet > -1) {
-        prescale = hltConfig.prescaleValue(psSet, validTriggerNames[it]);
-      } else {
-        //      cout << "==>HFDumpTrigger> error in prescale set!?" << endl;
-        prescale = 0;
-      }
-
-      fHLThist->GetXaxis()->SetBinLabel(index+1, validTriggerNames[it].c_str()); 
-      fHlA[index] = result; 
+    
+    Handle<TriggerResults> hHLTresults;
+    bool hltF = true;
+    try {
+      iEvent.getByLabel(fHLTResultsLabel, hHLTresults);
+    } catch (cms::Exception &ex) {
+      if (fVerbose > 0) cout << "==>HFDumpTrigger> Triggerresults  " << fHLTResultsLabel.encode() << " not found " << endl;
+      hltF = false;
     }
-  }
   
+    if (hltF) {
+      const TriggerNames &trigName = iEvent.triggerNames(*hHLTresults);
+      unsigned int index(999); 
+      bool wasrun(false), result(false), error(false);
+      int prescale(1); 
+      int psSet = -1; 
+      psSet = fHltConfig.prescaleSet(iEvent, iSetup);
+      for (unsigned int it = 0; it < validTriggerNames.size(); ++it) {
+	index    = trigName.triggerIndex(validTriggerNames[it]); 
+	result   = (index < validTriggerNames.size() && hHLTresults->accept(index));
+	wasrun   = (index < validTriggerNames.size() && hHLTresults->wasrun(index));
+	error    = (index < validTriggerNames.size() && hHLTresults->error(index));
+
+	if (psSet > -1) {
+	  prescale = fHltConfig.prescaleValue(psSet, validTriggerNames[it]);
+	} else {
+	  //	cout << "==>HFDumpTrigger> error in prescale set!?" << endl;
+	  prescale = 0;
+	}
+
+	fHLThist->GetXaxis()->SetBinLabel(index+1, validTriggerNames[it].c_str()); 
+	fHlA[index] = result; 
+      }
+    }
+
+  }
 
 
 

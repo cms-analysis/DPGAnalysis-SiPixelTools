@@ -42,7 +42,7 @@
 #include "TrackingTools/TrackAssociator/interface/TrackAssociatorParameters.h"
 #include "TrackingTools/TrackAssociator/interface/TrackDetectorAssociator.h"
 
-
+#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 
 #include "TObject.h"
 
@@ -61,6 +61,8 @@ class PixelTree : public edm::EDAnalyzer {
   explicit PixelTree(const edm::ParameterSet& ps);
   virtual ~PixelTree();
   virtual void beginJob();
+  virtual void beginRun(const edm::Run &, const edm::EventSetup &);
+  virtual void endRun(edm::Run const&, edm::EventSetup const&);
   virtual void endJob();
   virtual void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
   
@@ -180,7 +182,10 @@ class PixelTree : public edm::EDAnalyzer {
   float fsbias[5][15];
   float fsrms[5][15];
   float fspoints[5][15];
-  
+
+
+  HLTConfigProvider fHltConfig;  
+  bool fValidHLTConfig;
 };
 
 #endif
