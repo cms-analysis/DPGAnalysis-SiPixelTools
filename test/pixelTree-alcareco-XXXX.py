@@ -68,7 +68,7 @@ process.l1trep = cms.EDAnalyzer(
 try:
     rootFileName = os.environ["JOB"] + ".root"
 except KeyError:
-    rootFileName = "rfio:/castor/cern.ch/cms/store/group/tracker/pixel/PixelTree/reco/pixelTree-XXXX.root"
+    rootFileName = "pixelTree-XXXX.root"
 
 process.PixelTree = cms.EDAnalyzer(
     "PixelTree",
