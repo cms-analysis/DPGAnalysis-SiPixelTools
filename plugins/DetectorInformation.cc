@@ -109,7 +109,7 @@ DetectorInformation::DetectorInformation(edm::ParameterSet const& iConfig):
   fRootFileName(iConfig.getUntrackedParameter<string>("rootFileName", string("pixelTree.root"))),
   fInit(0)
 {
-  string rcsid = string("$Id: DetectorInformation.cc,v 1.37 2010/07/01 15:43:04 ursl Exp $");
+  string rcsid = string("$Id: DetectorInformation.cc,v 1.1 2010/08/02 09:45:54 ursl Exp $");
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- DetectorInformation constructor" << endl;
   cout << "---  version:                         " << rcsid << endl;
@@ -324,7 +324,7 @@ void DetectorInformation::dumpDetIds(const edm::EventSetup& iSetup) {
 	  quad = string("BpI");
 	}
 	
-	cout << "FPix_" << quad << "_D" << disk << "_BLD" << blade << "_PNL" << panel 
+	cout << "FPix_" << quad << "_D" << disk << "_BLD" << blade << "_PNL" << panel << "_MOD" << module
 	     << "  " << detId.rawId() 
 	     << " with ROCs: ";
 
