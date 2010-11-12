@@ -135,6 +135,7 @@ class PixelTree : public edm::EDAnalyzer {
   static const int CLPERTRACKMAX = 20; 
   int   fTkN; 
   int   fTkQuality[TRACKMAX], fTkCharge[TRACKMAX];
+  float fTkNHits[TRACKMAX], fTkLHits[TRACKMAX];
   float fTkChi2[TRACKMAX], fTkNdof[TRACKMAX];
   float fTkPt[TRACKMAX], fTkTheta[TRACKMAX], fTkEta[TRACKMAX], fTkPhi[TRACKMAX];
   float fTkD0[TRACKMAX], fTkDz[TRACKMAX];

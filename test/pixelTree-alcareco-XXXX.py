@@ -24,7 +24,7 @@ process.load("Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cf
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = "GR10_E_V9::All"
+process.GlobalTag.globaltag = "GR10_P_V12::All"
 
 # -- Input files
 # POOLSOURCE

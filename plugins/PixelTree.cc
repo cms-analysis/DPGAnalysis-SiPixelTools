@@ -123,7 +123,7 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag>("HLTResultsLabel", edm::InputTag("TriggerResults::HLT"))),
   fInit(0)
 {
-  string rcsid = string("$Id: PixelTree.cc,v 1.39 2010/09/20 06:38:03 dkotlins Exp $");
+  string rcsid = string("$Id: PixelTree.cc,v 1.40 2010/09/21 06:28:26 ursl Exp $");
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
   cout << "---  version:                         " << rcsid << endl;
@@ -263,6 +263,8 @@ void PixelTree::beginJob() {
   fTree->Branch("TkClN",        fTkClN,         "TkClN[TkN]/I");
   fTree->Branch("TkClI",        fTkClI,         "TkClI[TkN][20]/I");    //FIXME: This should be variable?
   fTree->Branch("TkType",       fTkType,        "TkType[TkN]/I");
+  fTree->Branch("TkNHits",      fTkNHits,       "TkNHits[TkN]/I");
+  fTree->Branch("TkLHits",      fTkLHits,       "TkLHits[TkN]/I");
   fTree->Branch("TkMuI",        fTkMuI,         "TkMuI[TkN]/I");
 
   fTree->Branch("ClN",              &fClN,            "ClN/I");
@@ -791,6 +793,8 @@ void PixelTree::analyze(const edm::Event& iEvent,
       fTkVx[fTkN]     = trackref->vx();
       fTkVy[fTkN]     = trackref->vy();
       fTkVz[fTkN]     = trackref->vz();
+      fTkNHits[fTkN]  = trackref->hitPattern().numberOfValidHits();
+      fTkLHits[fTkN]  = trackref->hitPattern().numberOfLostHits();
       fTkType[fTkN]   = 1;
       fTkMuI[fTkN]    = -1;
 
@@ -1082,8 +1086,10 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
 	  if (pixhit->hasFilledProb()) {
 	    fClRhProb[fClN]         = pixhit->clusterProbability(0);
-	    fClRhProbX[fClN]        = pixhit->probabilityX();
-	    fClRhProbY[fClN]        = pixhit->probabilityY();
+	    // 	    fClRhProbX[fClN]        = pixhit->probabilityX();
+	    // 	    fClRhProbY[fClN]        = pixhit->probabilityY();
+	    fClRhProbX[fClN]        = pixhit->probabilityXY();
+	    fClRhProbY[fClN]        = pixhit->probabilityQ();
 	  } else {
 	    fClRhProb[fClN]         = -98;
 	    fClRhProbX[fClN]        = -98;
@@ -1470,6 +1476,7 @@ void PixelTree::init() {
   for (int i = 0; i < fTkN; ++i) {
     fTkQuality[i]= -9999; 
     fTkCharge[i] = -9999; 
+    fTkNHits[i]  = fTkLHits[i] = 0;
     fTkChi2[i]   = fTkNdof[i] = -9999.;
     fTkPt[i]     = fTkTheta[i] = fTkPhi[i] = -9999.;
     fTkD0[i]     = fTkDz[i] = -9999.;
