@@ -72,8 +72,8 @@
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 
-#include <Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h>
-#include "Geometry/TrackerTopology/interface/RectangularPixelTopology.h"
+#include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
+#include "Geometry/TrackerGeometryBuilder/interface/RectangularPixelTopology.h"
 
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 
@@ -109,7 +109,7 @@ DetectorInformation::DetectorInformation(edm::ParameterSet const& iConfig):
   fRootFileName(iConfig.getUntrackedParameter<string>("rootFileName", string("pixelTree.root"))),
   fInit(0)
 {
-  string rcsid = string("$Id: DetectorInformation.cc,v 1.1 2010/08/02 09:45:54 ursl Exp $");
+  string rcsid = string("$Id: DetectorInformation.cc,v 1.2 2010/09/21 08:26:18 ursl Exp $");
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- DetectorInformation constructor" << endl;
   cout << "---  version:                         " << rcsid << endl;

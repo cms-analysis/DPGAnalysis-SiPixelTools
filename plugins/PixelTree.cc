@@ -75,8 +75,7 @@
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 
-#include <Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h>
-#include "Geometry/TrackerTopology/interface/RectangularPixelTopology.h"
+#include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 
@@ -97,6 +96,7 @@
 #include <DataFormats/VertexReco/interface/VertexFwd.h>
 
 #include <TROOT.h>
+#include <TSystem.h>
 #include <TTree.h>
 #include <TFile.h>
 #include <TH1F.h>
@@ -110,6 +110,8 @@ using namespace reco;
 PixelTree::PixelTree(edm::ParameterSet const& iConfig): 
   fVerbose(iConfig.getUntrackedParameter<int>("verbose", 0)),
   fRootFileName(iConfig.getUntrackedParameter<string>("rootFileName", string("pixelTree.root"))),
+  fGlobalTag(iConfig.getParameter<string>("globalTag").c_str()),
+  fType(iConfig.getUntrackedParameter<string>("type", string("somepin"))),
   fDumpAllEvents(iConfig.getUntrackedParameter<int>("dumpAllEvents", 0)),
   fPrimaryVertexCollectionLabel(iConfig.getUntrackedParameter<InputTag>("PrimaryVertexCollectionLabel", edm::InputTag("offlinePrimaryVertices"))),
   fMuonCollectionLabel(iConfig.getUntrackedParameter<InputTag>("muonCollectionLabel", edm::InputTag("muons"))),
@@ -123,10 +125,12 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag>("HLTResultsLabel", edm::InputTag("TriggerResults::HLT"))),
   fInit(0)
 {
-  string rcsid = string("$Id: PixelTree.cc,v 1.40 2010/09/21 06:28:26 ursl Exp $");
+  string rcsid = string("$Id: PixelTree.cc,v 1.41 2010/11/12 10:03:35 ursl Exp $");
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
   cout << "---  version:                         " << rcsid << endl;
+  cout << "---  type:                            " << fType << endl;
+  cout << "---  global tag:                      " << fGlobalTag << endl;
   cout << "---  verbose:                         " << fVerbose << endl;
   cout << "---  dumpAllEvents:                   " << fDumpAllEvents << endl;
   cout << "---  rootFileName:                    " << fRootFileName << endl;
@@ -156,6 +160,18 @@ PixelTree::~PixelTree() { }
 // ----------------------------------------------------------------------
 void PixelTree::endJob() { 
   fFile->cd();
+
+  // -- (kind of) from M. Verzetti
+  TObjString SwRelease(Form("%s", (char*)gSystem->Getenv("CMSSW_VERSION")));
+  SwRelease.Write("SwRelease");
+  TObjString GlobalTag(fGlobalTag.c_str());
+  GlobalTag.Write("GlobalTag");
+  TObjString Type(fType.c_str());
+  Type.Write("Type");
+  TObjString rcsid("$Id: PixelTree.cc,v 1.41 2010/11/12 10:03:35 ursl Exp $");
+  rcsid.Write("Rcsid");
+
+
 
   fTree->Write();
   //   fL1Thist->Write(); 
@@ -606,18 +622,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
       fPvNdof[fPvN] = iv->ndof(); 
 
       fPvIsFake[fPvN] = (iv->isFake()?1:0); 
-      
-      //       cout << "Recvtx "<< std::setw(3) << std::setfill(' ')<< fPvN
-      // 	   << "#trk " << std::setw(3) << iv->tracksSize() 
-      // 	   << " chi2 " << std::setw(4) << iv->chi2() 
-      // 	   << " ndof " << std::setw(3) << iv->ndof() << std::endl 
-      // 	   << " x "  << std::setw(8) <<std::fixed << std::setprecision(4) << iv->x() 
-      // 	   << " dx " << std::setw(8) << iv->xError()<< std::endl
-      // 	   << " y "  << std::setw(8) << iv->y() 
-      // 	   << " dy " << std::setw(8) << iv->yError()<< std::endl
-      // 	   << " z "  << std::setw(8) << iv->z() 
-      // 	   << " dz " << std::setw(8) << iv->zError()
-      // 	   << std::endl;
+     
       ++fPvN; 
     }
   }
@@ -751,7 +756,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
   // -- Track trajectory association map
   edm::Handle<TrajTrackAssociationCollection> hTTAC;
   iEvent.getByLabel(fTrajectoryInputLabel, hTTAC);
-  //  cout << "===========> trajectory collection size: " << hTTAC->size() << endl;
+  if (fVerbose > 1) cout << "===========> trajectory collection size: " << hTTAC->size() << endl;
 
   // -- Pixel cluster
   edm::Handle< edmNew::DetSetVector<SiPixelCluster> > hClusterColl;
@@ -764,11 +769,11 @@ void PixelTree::analyze(const edm::Event& iEvent,
   TrajectoryStateCombiner tsoscomb;
   if (hTTAC.isValid()) {
     const TrajTrackAssociationCollection ttac = *(hTTAC.product());
-    // cout << "   hTTAC.isValid()" << endl;
+    if (fVerbose > 1) cout << "   hTTAC.isValid()" << endl;
     for (TrajTrackAssociationCollection::const_iterator it = ttac.begin(); it !=  ttac.end(); ++it) {
       if (fTkN > TRACKMAX - 1) break;
 
-      // cout << "      TracjTrackAssociationCollection iterating" << endl;
+      if (fVerbose > 1) cout << "      TracjTrackAssociationCollection iterating" << endl;
       const edm::Ref<std::vector<Trajectory> > refTraj = it->key;  
       reco::TrackRef trackref = it->val;
 
@@ -776,7 +781,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
       bool isBpixTrack(false), isFpixTrack(false); 
       isPixelTrack(refTraj, isBpixTrack, isFpixTrack);
       if (!isBpixTrack && !isFpixTrack) {
-	// cout << "  not a pixel track" << endl;
+	if (fVerbose > 1) cout << "  not a pixel track" << endl;
 	continue; 
       } 
 
@@ -868,7 +873,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	  LocalPoint mhPos = tsos.localPosition();
 	  float xcenter = mhPos.x();
 	  float ycenter = mhPos.y();
-	  const RectangularPixelTopology * topol = dynamic_cast<const RectangularPixelTopology*>(&(theGeomDet->specificTopology()));
+	  const PixelTopology * topol = &(theGeomDet->specificTopology());
 	  LocalPoint clustlp = topol->localPosition( MeasurementPoint(xcenter, ycenter) );
 	  GlobalPoint clustgp = theGeomDet->surface().toGlobal( clustlp );
 	  
@@ -973,11 +978,11 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	  if (dZ > -999.) resy = res.y() * (dZ >=0.? +1 : -1) ;
 	  else resy = res.y();
 
-	  // 	  cout << "cluster at "
-	  // 	       << " detID = " << DBdetid
-	  // 	       << " charge = " << clust->charge()
-	  // 	       << " x/y = " << clust->x() << "/" << clust->y()
-	  // 	       << endl;
+ 	  if (fVerbose > 1) cout << "cluster at "
+				 << " detID = " << DBdetid
+				 << " charge = " << clust->charge()
+				 << " x/y = " << clust->x() << "/" << clust->y()
+				 << endl;
 	      
 	  // -- If this cluster is already in ntuple, do not add it, but finish filling Tk* information
 	  int alreadyAt(-1);
@@ -1054,7 +1059,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	  
 	  float xcenter = clust->x();
 	  float ycenter = clust->y();
-	  const RectangularPixelTopology * topol = dynamic_cast<const RectangularPixelTopology*>(&(theGeomDet->specificTopology()));
+	  const PixelTopology * topol = &(theGeomDet->specificTopology());
 	  LocalPoint clustlp = topol->localPosition( MeasurementPoint(xcenter, ycenter) );
 	  GlobalPoint clustgp = theGeomDet->surface().toGlobal( clustlp );
 	  
@@ -1148,7 +1153,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	  
 	  // -- Get digis of this cluster
 	  const std::vector<SiPixelCluster::Pixel>& pixvector = clust->pixels();
-	  //	  cout << "  Found " << pixvector.size() << " pixels for this cluster " << endl;
+	  if (fVerbose > 1) cout << "  Found " << pixvector.size() << " pixels for this cluster " << endl;
 	  for (unsigned int i = 0; i < pixvector.size(); ++i) {
 	    if (fDgN > DIGIMAX - 1) break;
 	    SiPixelCluster::Pixel holdpix = pixvector[i];
@@ -1241,7 +1246,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	      cout << "NO THEGEOMDET" << endl;
 	      continue;
 	    }
-	    const RectangularPixelTopology *topol = dynamic_cast<const RectangularPixelTopology*>(&(theGeomDet->specificTopology()));
+	    const PixelTopology * topol = &(theGeomDet->specificTopology());
 	    
 	    // -- find location of hit (barrel or endcap, same for cluster)
 	    bool barrel = detId.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel);

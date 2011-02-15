@@ -1,9 +1,29 @@
 # ----------------------------------------------------------------------
 # -- ALCARECO py template file for dumping the PixelTree only
 # ----------------------------------------------------------------------
+
+# ----------------------------------------------------------------------
+def getDataset(filename):
+    "Interface with the DBS API to get the dataset used"
+    from xml.dom.minidom import parseString
+    from DBSAPI.dbsApi import DbsApi
+    args = {}
+    args['url']='http://cmsdbsprod.cern.ch/cms_dbs_prod_global/servlet/DBSServlet'
+    args['version']='DBS_2_0_9'
+    args['mode']='POST'
+    api = DbsApi(args)
+    data = api.executeQuery("find dataset where file="+filename)
+    domresults = parseString(data)
+    dbs = domresults.getElementsByTagName('dbs')
+    result = dbs[0].getElementsByTagName('results')
+    rows=result[0].getElementsByTagName('row')
+    dataset=(rows[0].getElementsByTagName('dataset'))[0] #rows should have only one element and produce a one element array
+    node=(dataset.childNodes)[0] #childNodes should be a one element array
+    return str(node.data) #The output is in unicode, so it has to be translated through str
+
+# ----------------------------------------------------------------------
 import os
 import FWCore.ParameterSet.Config as cms
-
 process = cms.Process("Demo")
 
 # ----------------------------------------------------------------------
@@ -24,7 +44,7 @@ process.load("Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cf
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = "GR10_P_V12::All"
+process.GlobalTag.globaltag = "GR_E_V13::All"
 
 # -- Input files
 # POOLSOURCE
@@ -74,6 +94,8 @@ process.PixelTree = cms.EDAnalyzer(
     "PixelTree",
     verbose                      = cms.untracked.int32(0),
     rootFileName                 = cms.untracked.string(rootFileName),
+    type                         = cms.untracked.string(getDataset(process.source.fileNames[0])),
+    globalTag                    = process.GlobalTag.globaltag,
     dumpAllEvents                = cms.untracked.int32(1),
     PrimaryVertexCollectionLabel = cms.untracked.InputTag('offlinePrimaryVertices'),
     muonCollectionLabel          = cms.untracked.InputTag('muons'),

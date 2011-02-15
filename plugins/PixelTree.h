@@ -34,7 +34,7 @@
 
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 
-#include "TrackingTools/PatternTools/interface/TrajectoryFitter.h"
+#include "TrackingTools/TrackFitters/interface/TrajectoryFitter.h"
 #include "TrackingTools/TrackFitters/interface/TrajectoryStateCombiner.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 
@@ -85,12 +85,14 @@ class PixelTree : public edm::EDAnalyzer {
  private:
   int             fVerbose; 
   std::string     fRootFileName; 
+  std::string     fGlobalTag, fType;
   int             fDumpAllEvents;
   edm::InputTag   fPrimaryVertexCollectionLabel;
   edm::InputTag   fMuonCollectionLabel, fTrackCollectionLabel, fTrajectoryInputLabel, fPixelClusterLabel, fPixelRecHitLabel;
   std::string     fHLTProcessName; 
   edm::InputTag   fL1GTReadoutRecordLabel, fL1GTmapLabel, fHLTResultsLabel; 
   edm::ESHandle<SiPixelFedCablingMap> fCablingMap;
+
 
   TFile *fFile; 
   TH1D  *fL1Thist, *fL1TThist, *fHLThist; 

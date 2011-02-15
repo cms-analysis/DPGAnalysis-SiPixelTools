@@ -1,10 +1,31 @@
 # ----------------------------------------------------------------------
 # -- py template file for dumping the PixelTree in MC
 # ----------------------------------------------------------------------
+
+# ----------------------------------------------------------------------
+def getDataset(filename):
+    "Interface with the DBS API to get the dataset used"
+    from xml.dom.minidom import parseString
+    from DBSAPI.dbsApi import DbsApi
+    args = {}
+    args['url']='http://cmsdbsprod.cern.ch/cms_dbs_prod_global/servlet/DBSServlet'
+    args['version']='DBS_2_0_9'
+    args['mode']='POST'
+    api = DbsApi(args)
+    data = api.executeQuery("find dataset where file="+filename)
+    domresults = parseString(data)
+    dbs = domresults.getElementsByTagName('dbs')
+    result = dbs[0].getElementsByTagName('results')
+    rows=result[0].getElementsByTagName('row')
+    dataset=(rows[0].getElementsByTagName('dataset'))[0] #rows should have only one element and produce a one element array
+    node=(dataset.childNodes)[0] #childNodes should be a one element array
+    return str(node.data) #The output is in unicode, so it has to be translated through str
+
+# ----------------------------------------------------------------------
 import os
 import FWCore.ParameterSet.Config as cms
-
 process = cms.Process("Demo")
+
 # ----------------------------------------------------------------------
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
@@ -19,19 +40,18 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = "START3X_V25::All"
-# -- Input files
-process.source = cms.Source(
-    "PoolSource",
-    fileNames = cms.untracked.vstring(
-    REPLACEFILES
-    )
-    )
+process.GlobalTag.globaltag = "START311_V1::All"
 
-# -- number of events
-process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
-    )
+# -- Input files
+# POOLSOURCE
+
+# -- Input files
+#process.source = cms.Source(
+#    "PoolSource",
+#    fileNames = cms.untracked.vstring(
+#    REPLACEFILES
+#    )
+#    )
 
 
 # -- Trajectory producer
@@ -66,6 +86,8 @@ process.PixelTree = cms.EDAnalyzer(
     "PixelTree",
     verbose                      = cms.untracked.int32(0),
     rootFileName                 = cms.untracked.string(rootFileName),
+    type                         = cms.untracked.string(getDataset(process.source.fileNames[0])),
+    globalTag                    = process.GlobalTag.globaltag,
     dumpAllEvents                = cms.untracked.int32(0),
     PrimaryVertexCollectionLabel = cms.untracked.InputTag('offlinePrimaryVertices'),
     muonCollectionLabel          = cms.untracked.InputTag('muons'),
