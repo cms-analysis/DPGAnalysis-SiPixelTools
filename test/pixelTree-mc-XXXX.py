@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------
-# -- py template file for dumping the PixelTree in MC
+# -- RECO py template file for dumping the PixelTree only
 # ----------------------------------------------------------------------
 
 # ----------------------------------------------------------------------
@@ -29,7 +29,10 @@ process = cms.Process("Demo")
 # ----------------------------------------------------------------------
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.categories.append('HLTrigReport')
+process.MessageLogger.categories.append('L1GtTrigReport')
+process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
 # -- Database configuration
 process.load("CondCore.DBCommon.CondDBCommon_cfi")
@@ -53,10 +56,14 @@ process.GlobalTag.globaltag = "START311_V1::All"
 #    )
 #    )
 
+# -- number of events
+#process.maxEvents = cms.untracked.PSet(
+#    input = cms.untracked.int32(-1)
+#    )
 
 # -- Trajectory producer
 process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
-process.TrackRefitter.src = 'generalTracks'
+process.TrackRefitter.src = 'splittedTracksP5'
 
 # -- RecHit production
 process.load("RecoLocalTracker.SiPixelRecHits.SiPixelRecHits_cfi")
@@ -65,9 +72,9 @@ process.load("RecoLocalTracker.SiPixelRecHits.SiPixelRecHits_cfi")
 process.PixelFilter = cms.EDFilter(
     "SkimEvents",
     verbose                        = cms.untracked.int32(0),
-    filterOnPrimaryVertex          = cms.untracked.int32(1),
+    filterOnPrimaryVertex          = cms.untracked.int32(0),
     primaryVertexCollectionLabel   = cms.untracked.InputTag('offlinePrimaryVertices'),
-    filterOnTracks                 = cms.untracked.int32(1),
+    filterOnTracks                 = cms.untracked.int32(0),
     trackCollectionLabel           = cms.untracked.InputTag('generalTracks'),
     filterOnPixelCluster           = cms.untracked.int32(1),
     PixelClusterCollectionLabel    = cms.untracked.InputTag('siPixelClusters'),
@@ -75,12 +82,11 @@ process.PixelFilter = cms.EDFilter(
     L1TechnicalTriggerBits         = cms.untracked.vint32(40, 41)
     )
 
-
 # -- the tree filler
 try:
     rootFileName = os.environ["JOB"] + ".root"
 except KeyError:
-    rootFileName = "pixel-mc-XXXX.root"
+    rootFileName = "pixelTree-XXXX.root"
 
 process.PixelTree = cms.EDAnalyzer(
     "PixelTree",
@@ -95,17 +101,16 @@ process.PixelTree = cms.EDAnalyzer(
     trackCollectionLabel         = cms.untracked.InputTag('generalTracks'),
     pixelClusterLabel            = cms.untracked.InputTag('siPixelClusters'),
     pixelRecHitLabel             = cms.untracked.InputTag('siPixelRecHits'),
+    HLTProcessName               = cms.untracked.string('HLT'), 
     L1GTReadoutRecordLabel       = cms.untracked.InputTag('gtDigis'), 
     hltL1GtObjectMap             = cms.untracked.InputTag('hltL1GtObjectMap'), 
     HLTResultsLabel              = cms.untracked.InputTag('TriggerResults::HLT')
     )
 
-
 # -- Path
 process.p = cms.Path(
-#    process.PixelFilter* 
+#    process.PixelFilter*
     process.siPixelRecHits*
     process.TrackRefitter*
     process.PixelTree
     )
-

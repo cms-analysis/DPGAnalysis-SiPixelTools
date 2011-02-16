@@ -55,9 +55,9 @@ process.GlobalTag.globaltag = "GR_E_V13::All"
 #    )
 
 # -- number of events
-process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
-    )
+#process.maxEvents = cms.untracked.PSet(
+#    input = cms.untracked.int32(-1)
+#    )
 
 # -- Trajectory producer
 process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
