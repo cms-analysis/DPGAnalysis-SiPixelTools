@@ -139,7 +139,7 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
 
   fInit(0)
 {
-  string rcsid = string("$Id: PixelTree.cc,v 1.42 2011/02/15 16:33:03 ursl Exp $");
+  string rcsid = string("$Id: PixelTree.cc,v 1.43 2011/02/18 20:51:25 ggiurgiu Exp $");
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
   cout << "---  version:                         " << rcsid << endl;
@@ -183,7 +183,7 @@ void PixelTree::endJob() {
   GlobalTag.Write("GlobalTag");
   TObjString Type(fType.c_str());
   Type.Write("Type");
-  TObjString rcsid("$Id: PixelTree.cc,v 1.42 2011/02/15 16:33:03 ursl Exp $");
+  TObjString rcsid("$Id: PixelTree.cc,v 1.43 2011/02/18 20:51:25 ggiurgiu Exp $");
   rcsid.Write("Rcsid");
 
 
@@ -1092,7 +1092,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 		//create a vector for the track ids in the digisimlinks
 		
 		std::vector<int>   simTrackIdV;      
-		std::vector<int>   simTrackFrV;   
+		std::vector<float> simTrackFrV;   
 		
 		std::vector<int>   simTrackId2V; 
 		std::vector<int>   simTrackTypeV;
@@ -1640,7 +1640,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 		    edm::DetSet<PixelDigiSimLink>::const_iterator linkiter = digiLink.data.begin();
 		    //create a vector for the track ids in the digisimlinks
 		    std::vector<int> simTrackIdV;    
-		    std::vector<int> simTrackFrV;
+		    std::vector<float> simTrackFrV;
 		    
 		    std::vector<int>   simTrackId2V; 
 		    std::vector<int>   simTrackTypeV;
