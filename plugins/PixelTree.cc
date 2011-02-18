@@ -95,6 +95,17 @@
 #include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
 #include <DataFormats/VertexReco/interface/VertexFwd.h>
 
+// gavril: begin : for SimHit association ================================================
+
+#include "SimDataFormats/TrackingHit/interface/PSimHit.h"  
+#include "SimTracker/TrackerHitAssociation/interface/TrackerHitAssociator.h" 
+
+#include "SimDataFormats/TrackerDigiSimLink/interface/PixelDigiSimLink.h"
+#include "DataFormats/SiPixelDigi/interface/PixelDigi.h"
+#include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
+
+// gavril: end : for SimHit association ================================================
+
 #include <TROOT.h>
 #include <TSystem.h>
 #include <TTree.h>
@@ -123,9 +134,12 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fL1GTReadoutRecordLabel(iConfig.getUntrackedParameter<InputTag>("L1GTReadoutRecordLabel", edm::InputTag("gtDigis"))),
   fL1GTmapLabel(iConfig.getUntrackedParameter<InputTag>("hltL1GtObjectMap", edm::InputTag("hltL1GtObjectMap"))),
   fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag>("HLTResultsLabel", edm::InputTag("TriggerResults::HLT"))),
+
+  fAccessSimHitInfo(iConfig.getUntrackedParameter<bool>( "accessSimHitInfo", false) ),
+
   fInit(0)
 {
-  string rcsid = string("$Id: PixelTree.cc,v 1.41 2010/11/12 10:03:35 ursl Exp $");
+  string rcsid = string("$Id: PixelTree.cc,v 1.42 2011/02/15 16:33:03 ursl Exp $");
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
   cout << "---  version:                         " << rcsid << endl;
@@ -143,6 +157,7 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   cout << "---  L1GTReadoutRecordLabel:          " << fL1GTReadoutRecordLabel << endl;
   cout << "---  hltL1GtObjectMap:                " << fL1GTmapLabel << endl;
   cout << "---  HLTResultsLabel:                 " << fHLTResultsLabel << endl;
+  cout << "---  (int)fAccessSimHitInfo           " << (int)fAccessSimHitInfo << endl;
   cout << "----------------------------------------------------------------------" << endl;
 
   fPvN = PVMAX; 
@@ -168,7 +183,7 @@ void PixelTree::endJob() {
   GlobalTag.Write("GlobalTag");
   TObjString Type(fType.c_str());
   Type.Write("Type");
-  TObjString rcsid("$Id: PixelTree.cc,v 1.41 2010/11/12 10:03:35 ursl Exp $");
+  TObjString rcsid("$Id: PixelTree.cc,v 1.42 2011/02/15 16:33:03 ursl Exp $");
   rcsid.Write("Rcsid");
 
 
@@ -328,6 +343,40 @@ void PixelTree::beginJob() {
   fTree->Branch("ClDgN",            fClDgN,           "ClDgN[ClN]/I");
   fTree->Branch("ClDgI",            fClDgI,           "ClDgI[ClN][100]/I");    //FIXME: This should be variable?
 
+  // Sim hit info start ==============================================================
+
+  fTree->Branch("ClSimHitN",        fClSimHitN,       "ClSimHitN[ClN]/I");
+  fTree->Branch("ClSimHitPID",      fClSimHitPID,     "ClSimHitPID[ClN][10]/I");
+  fTree->Branch("ClSimHitPRC",      fClSimHitPRC,     "ClSimHitPRC[ClN][10]/I");
+  fTree->Branch("ClSimHitTrkID",    fClSimHitTrkID,   "ClSimHitTrkID[ClN][10]/I");
+  fTree->Branch("ClSimHitLx",       fClSimHitLx,      "ClSimHitLx[ClN][10]/F");
+  fTree->Branch("ClSimHitLy",       fClSimHitLy,      "ClSimHitLy[ClN][10]/F");
+  fTree->Branch("ClSimHitThe",      fClSimHitThe,     "ClSimHitThe[ClN][10]/F");
+  fTree->Branch("ClSimHitPhi",      fClSimHitPhi,     "ClSimHitPhi[ClN][10]/F");
+  fTree->Branch("ClSimHitMom",      fClSimHitMom,     "ClSimHitMom[ClN][10]/F");
+
+  fTree->Branch("ClSimTrN",        fClSimTrN,       "ClSimTrN[ClN]/I");
+  fTree->Branch("ClSimTrID",       fClSimTrID,      "ClSimTrID[ClN][10]/I");
+  fTree->Branch("ClSimTrFr",       fClSimTrFr,      "ClSimTrFr[ClN][10]/F");
+
+  fTree->Branch("ClSimTrID2",       fClSimTrID2,      "ClSimTrID2[ClN][10]/I");
+  fTree->Branch("ClSimTrType",      fClSimTrType,     "ClSimTrType[ClN][10]/I");
+  fTree->Branch("ClSimTrQ",         fClSimTrQ,        "ClSimTrQ[ClN][10]/I");  
+  fTree->Branch("ClSimTrPx",        fClSimTrPx,       "ClSimTrPx[ClN][10]/F");  
+  fTree->Branch("ClSimTrPy",        fClSimTrPy,       "ClSimTrPy[ClN][10]/F");
+  fTree->Branch("ClSimTrPz",        fClSimTrPz,       "ClSimTrPz[ClN][10]/F"); 
+  fTree->Branch("ClSimTrEn",        fClSimTrEn,       "ClSimTrEn[ClN][10]/F"); 
+  
+  fTree->Branch("ClSimTrEta",       fClSimTrEta,      "ClSimTrEta[ClN][10]/F");
+  fTree->Branch("ClSimTrPhi",       fClSimTrPhi,      "ClSimTrPhi[ClN][10]/F");
+  fTree->Branch("ClSimTrPt",        fClSimTrPt,       "ClSimTrPt[ClN][10]/F");
+  
+  fTree->Branch("ClSimTrVx",        fClSimTrVx,       "ClSimTrVx[ClN][10]/F");
+  fTree->Branch("ClSimTrVy",        fClSimTrVy,       "ClSimTrVy[ClN][10]/F");
+  fTree->Branch("ClSimTrVz",        fClSimTrVz,       "ClSimTrVz[ClN][10]/F");
+
+  // Sim hit info end ==============================================================
+
   fTree->Branch("DgN",          &fDgN,          "DgN/I");
   fTree->Branch("DgRow",        fDgRow,         "DgRow[DgN]/I");
   fTree->Branch("DgCol",        fDgCol,         "DgCol[DgN]/I");
@@ -362,8 +411,28 @@ void PixelTree::endRun(Run const&run, EventSetup const&iSetup) {
 
 // ----------------------------------------------------------------------
 void PixelTree::analyze(const edm::Event& iEvent, 
-			const edm::EventSetup& iSetup) {
+			const edm::EventSetup& iSetup) 
+{
 
+  // gavril : start : sim hit info ==================================
+
+  std::vector<PSimHit> vec_simhits_assoc;
+  TrackerHitAssociator associate(iEvent);
+  
+  edm::Handle< edm::DetSetVector<PixelDigiSimLink> > pixeldigisimlink;
+  iEvent.getByLabel("simSiPixelDigis", pixeldigisimlink);
+  
+  edm::Handle<SimTrackContainer> simTrackCollection;
+  iEvent.getByLabel("g4SimHits", simTrackCollection);
+  const SimTrackContainer simTC = *(simTrackCollection.product());
+  
+  edm::Handle<SimVertexContainer> simVertexCollection;
+  iEvent.getByLabel("g4SimHits", simVertexCollection);
+  const SimVertexContainer simVC = *(simVertexCollection.product());
+  
+  // gavril : end : sim hit info ==================================
+
+  
   static int nevt(0); 
   static unsigned int oldRun(0); 
 
@@ -958,52 +1027,274 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	  ++iCluster;
 	  continue;
 	} // -- end missing hits
-
+	
 	const TrackingRecHit *persistentHit = hit->hit();
-	if (persistentHit != 0) {
-	  if (typeid(*persistentHit) != typeid(SiPixelRecHit))  continue;
-	}
+	if ( persistentHit != 0 ) 
+	  {
+	    if ( typeid(*persistentHit) != typeid(SiPixelRecHit) )  
+	      continue;
+	  }
 	
 	const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>(hit->hit());
+	
+
+
+        // gavril : begin associate and store simhit info
+
+	if ( fAccessSimHitInfo )
+	  {
+	    vec_simhits_assoc.clear();
+	    vec_simhits_assoc = associate.associateHit(*pixhit);
+	    
+	    fClSimHitN[fClN] = (int)vec_simhits_assoc.size();
+	    int iSimHit = 0;
+	    
+	    for (std::vector<PSimHit>::const_iterator m = vec_simhits_assoc.begin(); 
+		 m < vec_simhits_assoc.end() && iSimHit < SIMHITPERCLMAX; ++m) 
+	      {
+		
+		fClSimHitPID[fClN][iSimHit]   = (int)( m->particleType() );
+		fClSimHitPRC[fClN][iSimHit]   = (int)( m->processType()  );
+		fClSimHitTrkID[fClN][iSimHit] = (int)( m->trackId()      );
+		
+		fClSimHitLx[fClN][iSimHit]    = ( m->entryPoint().x() + m->exitPoint().x() ) / 2.0;
+		fClSimHitLy[fClN][iSimHit]    = ( m->entryPoint().y() + m->exitPoint().y() ) / 2.0;
+		
+		fClSimHitThe[fClN][iSimHit]   =  m->thetaAtEntry();
+		fClSimHitPhi[fClN][iSimHit]   =  m->phiAtEntry();
+		fClSimHitMom[fClN][iSimHit]   =  m->pabs();
+		
+		++iSimHit;
+		
+	      } // end sim hit loop
+	    
+	  } // 	if ( fAccessSimHitInfo )
+
+	// gavril : end: associate and store simhit info
+	    
+
 	edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster> const& clust = (*pixhit).cluster();
-	if (clust.isNonnull()) {
-
-	  align::LocalVector res = tsos.localPosition() - hit->localPosition();
-	  LocalError err1 = tsos.localError().positionError();
-	  LocalError err2 = hit->localPositionError();
-	  float errX = std::sqrt( err1.xx() + err2.xx() );
-	  float errY = std::sqrt( err1.yy() + err2.yy() );
-	  float resy(0.);
-	  double dZ = gROrZDirection.z() - gPModule.z();
-	  if (dZ > -999.) resy = res.y() * (dZ >=0.? +1 : -1) ;
-	  else resy = res.y();
-
- 	  if (fVerbose > 1) cout << "cluster at "
-				 << " detID = " << DBdetid
-				 << " charge = " << clust->charge()
-				 << " x/y = " << clust->x() << "/" << clust->y()
-				 << endl;
+	if ( clust.isNonnull() ) 
+	  { 
+	    
+	    // gavril : begin : access sim tracks associated with current cluster
+	    if ( fAccessSimHitInfo )
+	      {
+		int minPixelRow = (*clust).minPixelRow();
+		int maxPixelRow = (*clust).maxPixelRow();
+		int minPixelCol = (*clust).minPixelCol();
+		int maxPixelCol = (*clust).maxPixelCol();
+		
+		edm::DetSetVector<PixelDigiSimLink>::const_iterator isearch = pixeldigisimlink->find( DBdetid );
+		edm::DetSet<PixelDigiSimLink> digiLink = (*isearch);
+		
+		edm::DetSet<PixelDigiSimLink>::const_iterator linkiter = digiLink.data.begin();
+		//create a vector for the track ids in the digisimlinks
+		
+		std::vector<int>   simTrackIdV;      
+		std::vector<int>   simTrackFrV;   
+		
+		std::vector<int>   simTrackId2V; 
+		std::vector<int>   simTrackTypeV;
+		std::vector<int>   simTrackQV;   
+		std::vector<float> simTrackPxV;  
+		std::vector<float> simTrackPyV;  
+		std::vector<float> simTrackPzV;  
+		std::vector<float> simTrackEnV;  
+		
+		std::vector<float> simTrackEtaV; 
+		std::vector<float> simTrackPhiV; 
+		std::vector<float> simTrackPtV;  
+		
+		std::vector<float> simTrackVxV;  
+		std::vector<float> simTrackVyV;  
+		std::vector<float> simTrackVzV;  
+		
+		simTrackIdV.clear();
+		simTrackFrV.clear();  
+		
+		simTrackId2V.clear(); 
+		simTrackTypeV.clear();
+		simTrackQV.clear();   
+		simTrackPxV.clear();  
+		simTrackPyV.clear();  
+		simTrackPzV.clear();  
+		simTrackEnV.clear();  
+		
+		simTrackEtaV.clear(); 
+		simTrackPhiV.clear(); 
+		simTrackPtV.clear();  
+		
+		simTrackVxV.clear();  
+		simTrackVyV.clear();  
+		simTrackVzV.clear();  
+		
+		for( ; linkiter != digiLink.data.end(); linkiter++) 
+		  { // loop over all digisimlinks
+		    
+		    std::pair<int,int> pixel_coord = PixelDigi::channelToPixel(linkiter->channel());
+		    
+		    // is the digisimlink inside the cluster boundaries?
+		    if ( pixel_coord.first  <= maxPixelRow &&
+			 pixel_coord.first  >= minPixelRow &&
+			 pixel_coord.second <= maxPixelCol &&
+			 pixel_coord.second >= minPixelCol ) 
+		      {
+			
+			bool inStock(false); // did we see this simTrackId before? - We will check later
+			
+			std::vector<int>::const_iterator sTIter = simTrackIdV.begin();
+			for ( ; sTIter < simTrackIdV.end(); sTIter++) 
+			  {
+			    if ( (*sTIter) == (int)linkiter->SimTrackId() ) 
+			      {
+				inStock=true; // now we saw this id before
+			      }
+			  }
+			
+			
+			if ( !inStock ) 
+			  {
+			    
+			    int simtrkid = linkiter->SimTrackId();      			      
+			    bool found_sim_trk = false;
+			    
+			    for (SimTrackContainer::const_iterator simTrack=simTC.begin(); simTrack!=simTC.end(); simTrack++)
+			      {
+				
+				if ( (int)simTrack->trackId() == simtrkid )
+				  {
+				    found_sim_trk = true;
+				    
+				    simTrackIdV.push_back(   linkiter->SimTrackId()    ); // add the track id to the vector
+				    simTrackFrV.push_back(   linkiter->fraction()      ); 
+				    
+				    simTrackId2V.push_back(  (int)simTrack->trackId()  );
+				    simTrackTypeV.push_back( simTrack->type()          ); 
+				    simTrackQV.push_back(    simTrack->charge()        );
+				    simTrackPxV.push_back(   simTrack->momentum().x()  );
+				    simTrackPyV.push_back(   simTrack->momentum().y()  );
+				    simTrackPzV.push_back(   simTrack->momentum().z()  );
+				    simTrackEnV.push_back(   simTrack->momentum().t()  );
+				    
+				    simTrackEtaV.push_back(  simTrack->momentum().eta()             );
+				    simTrackPhiV.push_back(  simTrack->momentum().phi()             );
+				    simTrackPtV.push_back(   simTrack->momentum().pt()              );
+				    
+				    simTrackVxV.push_back(   simVC[simTrack->vertIndex()].position().x() );
+				    simTrackVyV.push_back(   simVC[simTrack->vertIndex()].position().y() );
+				    simTrackVzV.push_back(   simVC[simTrack->vertIndex()].position().z() );
+				    
+				    break;
+				    
+				  } // if ( (int)simTrack->trackId() == simtrkid )
+				
+			      } // for (SimTrackContainer::const_iterator simTrack=simTC.begin(); simTrack!=simTC.end(); simTrack++)
+			    
+			    // gavril : check this !!!
+			    //if ( !found_sim_trk )
+			    //cout << "Din not find sim tracks with ID = " << simtrkid << "   !!!!!!!!!!!!!!!!!!!!!!!" << endl; 
+			    
+			  } // if ( !inStock )
+			
+		      } // if ( pixel_coord.first  <= maxPixelRow && ... )
+		    
+		  } // for( ; linkiter != digiLink.data.end(); linkiter++) 
+		
+		
+		fClSimTrN[fClN] = (int)simTrackIdV.size();
+		
+		for ( int iSimTrk = 0; iSimTrk < fClSimTrN[fClN]; iSimTrk++  )
+		  {
+		    fClSimTrID[fClN][iSimTrk] = simTrackIdV[iSimTrk]; 
+		    fClSimTrFr[fClN][iSimTrk] = simTrackFrV[iSimTrk];
+		    
+		    fClSimTrID2[fClN][iSimTrk]       = simTrackId2V[iSimTrk];
+		    fClSimTrType[fClN][iSimTrk]      = simTrackTypeV[iSimTrk];
+		    fClSimTrQ[fClN][iSimTrk]         = simTrackQV[iSimTrk];
+		    fClSimTrPx[fClN][iSimTrk]        = simTrackPxV[iSimTrk];
+		    fClSimTrPy[fClN][iSimTrk]        = simTrackPyV[iSimTrk];
+		    fClSimTrPz[fClN][iSimTrk]        = simTrackPzV[iSimTrk];
+		    fClSimTrEn[fClN][iSimTrk]        = simTrackEnV[iSimTrk];
+		    
+		    fClSimTrEta[fClN][iSimTrk]       = simTrackEtaV[iSimTrk];
+		    fClSimTrPhi[fClN][iSimTrk]       = simTrackPhiV[iSimTrk];
+		    fClSimTrPt[fClN][iSimTrk]        = simTrackPtV[iSimTrk];
+		    
+		    fClSimTrVx[fClN][iSimTrk]   = simTrackVxV[iSimTrk];
+		    fClSimTrVy[fClN][iSimTrk]   = simTrackVyV[iSimTrk];
+		    fClSimTrVz[fClN][iSimTrk]   = simTrackVzV[iSimTrk];
+		    
+		  }
+		
+	      } //  if ( fAccessSimHitInfo )
 	      
-	  // -- If this cluster is already in ntuple, do not add it, but finish filling Tk* information
-	  int alreadyAt(-1);
-	  for (int ic = 0; ic < fClN; ++ic) {
-	    if ((fClDetId[ic] == DBdetid) 
-		&& (static_cast<int>(clust->x()) == static_cast<int>(fClRow[ic]))
-		&& (static_cast<int>(clust->y()) == static_cast<int>(fClCol[ic]))
-		) {
-	      alreadyAt = ic; 
-	      break; 
-	    } 
-	  }
-
-	  if (alreadyAt > -1) {
-	    int it(0); 
-	    while (fClTkI[alreadyAt][it] > -1 && it < TKPERCLMAX) {
-	      ++it;
+	    // gavril : end : access sim tracks associated with current cluster
+	    
+	
+		
+	    
+	    align::LocalVector res = tsos.localPosition() - hit->localPosition();
+	    LocalError err1 = tsos.localError().positionError();
+	    LocalError err2 = hit->localPositionError();
+	    float errX = std::sqrt( err1.xx() + err2.xx() );
+	    float errY = std::sqrt( err1.yy() + err2.yy() );
+	    float resy(0.);
+	    double dZ = gROrZDirection.z() - gPModule.z();
+	    if (dZ > -999.) resy = res.y() * (dZ >=0.? +1 : -1) ;
+	    else resy = res.y();
+	    
+	    if (fVerbose > 1) cout << "cluster at "
+				   << " detID = " << DBdetid
+				   << " charge = " << clust->charge()
+				   << " x/y = " << clust->x() << "/" << clust->y()
+				   << endl;
+	    
+	    // -- If this cluster is already in ntuple, do not add it, but finish filling Tk* information
+	    int alreadyAt(-1);
+	    for (int ic = 0; ic < fClN; ++ic) {
+	      if ((fClDetId[ic] == DBdetid) 
+		  && (static_cast<int>(clust->x()) == static_cast<int>(fClRow[ic]))
+		  && (static_cast<int>(clust->y()) == static_cast<int>(fClCol[ic]))
+		  ) {
+		alreadyAt = ic; 
+		break; 
+	      } 
 	    }
-	    fClTkI[alreadyAt][it] = fTkN;
-	    fClTkN[alreadyAt]    += 1;
-
+	    
+	    if (alreadyAt > -1) {
+	      int it(0); 
+	      while (fClTkI[alreadyAt][it] > -1 && it < TKPERCLMAX) {
+		++it;
+	      }
+	      fClTkI[alreadyAt][it] = fTkN;
+	      fClTkN[alreadyAt]    += 1;
+	      
+	      if (iCluster < CLPERTRACKMAX) {
+		fTkResX[fTkN][iCluster]   = res.x();
+		fTkResXe[fTkN][iCluster]  = errX;
+		fTkRes2X[fTkN][iCluster]  = (res.x())*phiorientation;
+		fTkRes2Xe[fTkN][iCluster] = errX;
+		
+		fTkResY[fTkN][iCluster]  = resy;
+		fTkResYe[fTkN][iCluster]  = errY;
+		
+		fTkAlpha[fTkN][iCluster] = alpha;
+		fTkBeta[fTkN][iCluster] = beta;
+		fTkClN[fTkN] = iCluster+1;
+		fTkClI[fTkN][iCluster] = alreadyAt;
+	      } else {
+		fTkAlpha[fTkN][CLPERTRACKMAX-1] = -98.;
+		fTkBeta[fTkN][CLPERTRACKMAX-1]  = -98.;
+		fTkClN[fTkN] = CLPERTRACKMAX-1;
+		fTkClI[fTkN][CLPERTRACKMAX-1]   = -98;
+	      }
+	      
+	      ++iCluster;
+	      continue; 
+	    }
+	    
+	    
 	    if (iCluster < CLPERTRACKMAX) {
 	      fTkResX[fTkN][iCluster]   = res.x();
 	      fTkResXe[fTkN][iCluster]  = errX;
@@ -1016,7 +1307,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	      fTkAlpha[fTkN][iCluster] = alpha;
 	      fTkBeta[fTkN][iCluster] = beta;
 	      fTkClN[fTkN] = iCluster+1;
-	      fTkClI[fTkN][iCluster] = alreadyAt;
+	      fTkClI[fTkN][iCluster] = fClN;
 	    } else {
 	      fTkAlpha[fTkN][CLPERTRACKMAX-1] = -98.;
 	      fTkBeta[fTkN][CLPERTRACKMAX-1]  = -98.;
@@ -1024,186 +1315,166 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	      fTkClI[fTkN][CLPERTRACKMAX-1]   = -98;
 	    }
 	    
-	    ++iCluster;
-	    continue; 
-	  }
-
-
-	  if (iCluster < CLPERTRACKMAX) {
-	    fTkResX[fTkN][iCluster]   = res.x();
-	    fTkResXe[fTkN][iCluster]  = errX;
-	    fTkRes2X[fTkN][iCluster]  = (res.x())*phiorientation;
-	    fTkRes2Xe[fTkN][iCluster] = errX;
-
-	    fTkResY[fTkN][iCluster]  = resy;
-	    fTkResYe[fTkN][iCluster]  = errY;
 	    
-	    fTkAlpha[fTkN][iCluster] = alpha;
-	    fTkBeta[fTkN][iCluster] = beta;
-	    fTkClN[fTkN] = iCluster+1;
-	    fTkClI[fTkN][iCluster] = fClN;
-	  } else {
-	    fTkAlpha[fTkN][CLPERTRACKMAX-1] = -98.;
-	    fTkBeta[fTkN][CLPERTRACKMAX-1]  = -98.;
-	    fTkClN[fTkN] = CLPERTRACKMAX-1;
-	    fTkClI[fTkN][CLPERTRACKMAX-1]   = -98;
-	  }
-
-
-
-	  float clCharge = (clust->charge())/1000.0; // convert electrons to kilo-electrons
-	  float clChargeCorr = clust->charge() * sqrt( 1.0 / ( 1.0/pow( tan(alpha), 2 ) + 
-							       1.0/pow( tan(beta ), 2 ) + 
-							       1.0 )
-						       )/1000.;
-	  
-	  float xcenter = clust->x();
-	  float ycenter = clust->y();
-	  const PixelTopology * topol = &(theGeomDet->specificTopology());
-	  LocalPoint clustlp = topol->localPosition( MeasurementPoint(xcenter, ycenter) );
-	  GlobalPoint clustgp = theGeomDet->surface().toGlobal( clustlp );
-	  
-	  fClSize[fClN]   = clust->size();
-	  fClSizeX[fClN]  = clust->sizeX();
-	  fClSizeY[fClN]  = clust->sizeY();
-	  fClRow[fClN]    = clust->x();
-	  fClCol[fClN]    = clust->y();
-	  
-	  fClLx[fClN]      = clustlp.x();
-	  fClLy[fClN]      = clustlp.y();
-	  fClLxe[fClN]     = sqrt(hit->localPositionError().xx());  // FIXME: check this
-	  fClLye[fClN]     = sqrt(hit->localPositionError().yy());
-	  
-	  fClGx[fClN] = clustgp.x();
-	  fClGy[fClN] = clustgp.y();
-	  fClGz[fClN] = clustgp.z();
-
-	  fClRhLx[fClN]           = hit->localPosition().x();
-	  fClRhLxE[fClN]          = TMath::Sqrt(hit->localPositionError().xx());
-	  fClRhLy[fClN]           = hit->localPosition().y();
-	  fClRhLyE[fClN]          = TMath::Sqrt(hit->localPositionError().yy());
-	  fClRhGx[fClN]           = hit->globalPosition().x();
-	  fClRhGy[fClN]           = hit->globalPosition().y();
-	  fClRhGz[fClN]           = hit->globalPosition().z();
-
-	  fClRhQualWord[fClN]     = pixhit->rawQualityWord();
-	  fClRhqBin[fClN]         = pixhit->qBin();;
-
-	  if (pixhit->hasFilledProb()) {
-	    fClRhProb[fClN]         = pixhit->clusterProbability(0);
-	    // 	    fClRhProbX[fClN]        = pixhit->probabilityX();
-	    // 	    fClRhProbY[fClN]        = pixhit->probabilityY();
-	    fClRhProbX[fClN]        = pixhit->probabilityXY();
-	    fClRhProbY[fClN]        = pixhit->probabilityQ();
-	  } else {
-	    fClRhProb[fClN]         = -98;
-	    fClRhProbX[fClN]        = -98;
-	    fClRhProbY[fClN]        = -98;
-	  }
-	  if (pixhit->spansTwoROCs()) {
-	    fClRhSpansTwoROCs[fClN] = 1;
-	  } else {
-	    fClRhSpansTwoROCs[fClN] = 0;
-	  }
-	  if (pixhit->isOnEdge()) {
-	    fClRhIsOnEdge[fClN]     = 1;
-	  } else {
-	    fClRhIsOnEdge[fClN]     = 0;
-	  }
-	  if (pixhit->hasBadPixels()) {
-	    fClRhHasBadPixels[fClN] = 1;
-	  } else {
-	    fClRhHasBadPixels[fClN] = 0;
-	  }
-
-	  if (barrel) {
-	    fClLayer[fClN]     = DBlayer;
-	    fClLadder[fClN]    = DBladder; 
-	    fClModule[fClN]    = DBmodule;
-	    fClDisk[fClN]      = -99;
-	    fClBlade[fClN]     = -99;
-	    fClPanel[fClN]     = -99;
-	    fClPlaquette[fClN] = -99;
-	  } 
-
-	  if (endcap) {
-	    fClLayer[fClN]     = -99;
-	    fClLadder[fClN]    = -99; 
-	    fClModule[fClN]    = -99;
-	    fClDisk[fClN]      =  DBdisk;
-	    fClBlade[fClN]     =  DBblade;
-	    fClPanel[fClN]     =  DBpanel;
-	    fClPlaquette[fClN] =  DBmodule;
-	  }
-	  fClDetId[fClN]   = DBdetid;
-
-	  fClFlipped[fClN] = isFlipped;
-
-	  fClCharge[fClN]     = clCharge;
-	  fClChargeCorr[fClN] = clChargeCorr;
-
-	  fClType[fClN]    = 1; 
-
-	  int it(0); 
-	  while (fClTkI[fClN][it] > -1 && it < TKPERCLMAX) {
-	    ++it;
-	  }
-	  fClTkI[fClN][it] = fTkN;
-	  fClTkN[fClN]    += 1;
-	  
-	  // -- Get digis of this cluster
-	  const std::vector<SiPixelCluster::Pixel>& pixvector = clust->pixels();
-	  if (fVerbose > 1) cout << "  Found " << pixvector.size() << " pixels for this cluster " << endl;
-	  for (unsigned int i = 0; i < pixvector.size(); ++i) {
-	    if (fDgN > DIGIMAX - 1) break;
-	    SiPixelCluster::Pixel holdpix = pixvector[i];
 	    
-	    fDgRow[fDgN]    = holdpix.x;
-	    fDgCol[fDgN]    = holdpix.y;
-	    fDgDetId[fDgN]  = DBdetid;
-	    onlineRocColRow(DBdetid, fDgRow[fDgN], fDgCol[fDgN], fDgRoc[fDgN], fDgRocC[fDgN], fDgRocR[fDgN]);
-
-	    fDgAdc[fDgN]    = -99.;
-	    fDgCharge[fDgN] = holdpix.adc/1000.;
-
-	    LocalPoint lp = topol->localPosition(MeasurementPoint(holdpix.x, holdpix.y));
-	    fDgLx[fDgN] = lp.x();
-	    fDgLy[fDgN] = lp.y();
-
-	    GlobalPoint GP =  theGeomDet->surface().toGlobal(Local3DPoint(lp.x(),lp.y(),lp.z()));
-	    fDgGx[fDgN] = GP.x();      
-	    fDgGy[fDgN] = GP.y();
-	    fDgGz[fDgN] = GP.z();
-
-	    fDgClI[fDgN] = fClN;
-
-	    // -- fill pointer to this digi in cluster digi index array
-	    if ((signed)i < DGPERCLMAX) {
-	      fClDgI[fClN][i] = fDgN;
-	      fClDgN[fClN] += 1;
+	    float clCharge = (clust->charge())/1000.0; // convert electrons to kilo-electrons
+	    float clChargeCorr = clust->charge() * sqrt( 1.0 / ( 1.0/pow( tan(alpha), 2 ) + 
+								 1.0/pow( tan(beta ), 2 ) + 
+								 1.0 )
+							 )/1000.;
+	    
+	    float xcenter = clust->x();
+	    float ycenter = clust->y();
+	    const PixelTopology * topol = &(theGeomDet->specificTopology());
+	    LocalPoint clustlp = topol->localPosition( MeasurementPoint(xcenter, ycenter) );
+	    GlobalPoint clustgp = theGeomDet->surface().toGlobal( clustlp );
+	    
+	    fClSize[fClN]   = clust->size();
+	    fClSizeX[fClN]  = clust->sizeX();
+	    fClSizeY[fClN]  = clust->sizeY();
+	    fClRow[fClN]    = clust->x();
+	    fClCol[fClN]    = clust->y();
+	    
+	    fClLx[fClN]      = clustlp.x();
+	    fClLy[fClN]      = clustlp.y();
+	    fClLxe[fClN]     = sqrt(hit->localPositionError().xx());  // FIXME: check this
+	    fClLye[fClN]     = sqrt(hit->localPositionError().yy());
+	    
+	    fClGx[fClN] = clustgp.x();
+	    fClGy[fClN] = clustgp.y();
+	    fClGz[fClN] = clustgp.z();
+	    
+	    fClRhLx[fClN]           = hit->localPosition().x();
+	    fClRhLxE[fClN]          = TMath::Sqrt(hit->localPositionError().xx());
+	    fClRhLy[fClN]           = hit->localPosition().y();
+	    fClRhLyE[fClN]          = TMath::Sqrt(hit->localPositionError().yy());
+	    fClRhGx[fClN]           = hit->globalPosition().x();
+	    fClRhGy[fClN]           = hit->globalPosition().y();
+	    fClRhGz[fClN]           = hit->globalPosition().z();
+	    
+	    fClRhQualWord[fClN]     = pixhit->rawQualityWord();
+	    fClRhqBin[fClN]         = pixhit->qBin();;
+	    
+	    if (pixhit->hasFilledProb()) {
+	      fClRhProb[fClN]         = pixhit->clusterProbability(0);
+	      // 	    fClRhProbX[fClN]        = pixhit->probabilityX();
+	      // 	    fClRhProbY[fClN]        = pixhit->probabilityY();
+	      fClRhProbX[fClN]        = pixhit->probabilityXY();
+	      fClRhProbY[fClN]        = pixhit->probabilityQ();
 	    } else {
-	      fClDgI[fClN][DGPERCLMAX-1] = -98;
-	      fClDgN[fClN] = 99;
+	      fClRhProb[fClN]         = -98;
+	      fClRhProbX[fClN]        = -98;
+	      fClRhProbY[fClN]        = -98;
 	    }
+	    if (pixhit->spansTwoROCs()) {
+	      fClRhSpansTwoROCs[fClN] = 1;
+	    } else {
+	      fClRhSpansTwoROCs[fClN] = 0;
+	    }
+	    if (pixhit->isOnEdge()) {
+	      fClRhIsOnEdge[fClN]     = 1;
+	    } else {
+	      fClRhIsOnEdge[fClN]     = 0;
+	    }
+	    if (pixhit->hasBadPixels()) {
+	      fClRhHasBadPixels[fClN] = 1;
+	    } else {
+	      fClRhHasBadPixels[fClN] = 0;
+	    }
+	    
+	    if (barrel) {
+	      fClLayer[fClN]     = DBlayer;
+	      fClLadder[fClN]    = DBladder; 
+	      fClModule[fClN]    = DBmodule;
+	      fClDisk[fClN]      = -99;
+	      fClBlade[fClN]     = -99;
+	      fClPanel[fClN]     = -99;
+	      fClPlaquette[fClN] = -99;
+	    } 
+	    
+	    if (endcap) {
+	      fClLayer[fClN]     = -99;
+	      fClLadder[fClN]    = -99; 
+	      fClModule[fClN]    = -99;
+	      fClDisk[fClN]      =  DBdisk;
+	      fClBlade[fClN]     =  DBblade;
+	      fClPanel[fClN]     =  DBpanel;
+	      fClPlaquette[fClN] =  DBmodule;
+	    }
+	    fClDetId[fClN]   = DBdetid;
+	    
+	    fClFlipped[fClN] = isFlipped;
+	    
+	    fClCharge[fClN]     = clCharge;
+	    fClChargeCorr[fClN] = clChargeCorr;
+	    
+	    fClType[fClN]    = 1; 
+	    
+	    int it(0); 
+	    while (fClTkI[fClN][it] > -1 && it < TKPERCLMAX) {
+	      ++it;
+	    }
+	    fClTkI[fClN][it] = fTkN;
+	    fClTkN[fClN]    += 1;
+	    
+	    // -- Get digis of this cluster
+	    const std::vector<SiPixelCluster::Pixel>& pixvector = clust->pixels();
+	    if (fVerbose > 1) cout << "  Found " << pixvector.size() << " pixels for this cluster " << endl;
+	    for (unsigned int i = 0; i < pixvector.size(); ++i) {
+	      if (fDgN > DIGIMAX - 1) break;
+	      SiPixelCluster::Pixel holdpix = pixvector[i];
+	      
+	      fDgRow[fDgN]    = holdpix.x;
+	      fDgCol[fDgN]    = holdpix.y;
+	      fDgDetId[fDgN]  = DBdetid;
+	      onlineRocColRow(DBdetid, fDgRow[fDgN], fDgCol[fDgN], fDgRoc[fDgN], fDgRocC[fDgN], fDgRocR[fDgN]);
+	      
+	      fDgAdc[fDgN]    = -99.;
+	      fDgCharge[fDgN] = holdpix.adc/1000.;
+	      
+	      LocalPoint lp = topol->localPosition(MeasurementPoint(holdpix.x, holdpix.y));
+	      fDgLx[fDgN] = lp.x();
+	      fDgLy[fDgN] = lp.y();
+	      
+	      GlobalPoint GP =  theGeomDet->surface().toGlobal(Local3DPoint(lp.x(),lp.y(),lp.z()));
+	      fDgGx[fDgN] = GP.x();      
+	      fDgGy[fDgN] = GP.y();
+	      fDgGz[fDgN] = GP.z();
+	      
+	      fDgClI[fDgN] = fClN;
+	      
+	      // -- fill pointer to this digi in cluster digi index array
+	      if ((signed)i < DGPERCLMAX) {
+		fClDgI[fClN][i] = fDgN;
+		fClDgN[fClN] += 1;
+	      } else {
+		fClDgI[fClN][DGPERCLMAX-1] = -98;
+		fClDgN[fClN] = 99;
+	      }
+	      
+	      ++fDgN;
+	      
+	    }
+	    
+	    ++nCl1;
+	    
+	    ++fClN;
+	    ++iCluster;
 
-	    ++fDgN;
-
-	  }
-
-	  ++nCl1;
-
-	  ++fClN;
-	  ++iCluster;
-	}
-
-      }
-
+	  } // if ( clust.isNonnull() )
+	else 
+	  cout << "Pixel rechits with no associated cluster ?!?!?!!!!!!!!!!!!!!!!!!!!!!! " << endl;
+	
+      }  // for (std::vector<TrajectoryMeasurement>::const_iterator tmeasIt = tmeasColl.begin(); ...
+      
       ++fTkN;
     }
-  } else {
-    cout << "--> No valid track trajectory association" << endl;
-  }
-
+  } 
+  else 
+    {
+      cout << "--> No valid track trajectory association" << endl;
+    }
+  
 
   // ----------------------------------------------------------------------
   // -- Clusters without tracks
@@ -1325,23 +1596,214 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	      }
 	    }
 	    
-	    if (1 == foundRH) {
-	      GlobalPoint GP  =  theGeomDet->surface().toGlobal(Local3DPoint(iRh->localPosition().x(),
-									     iRh->localPosition().y(),
-									     iRh->localPosition().x()));
+	    if ( 1 == foundRH ) 
+	      {
+		
+		// gavril : begin : associate and store simhit info
+		if ( fAccessSimHitInfo )
+		  {
+		    vec_simhits_assoc.clear();
+		    vec_simhits_assoc = associate.associateHit(*iRh);
+		    
+		    fClSimHitN[fClN] = (int)vec_simhits_assoc.size();
+		    int iSimHit = 0;
+		    
+		    for (std::vector<PSimHit>::const_iterator m = vec_simhits_assoc.begin(); 
+			 m < vec_simhits_assoc.end() && iSimHit < SIMHITPERCLMAX; ++m) 
+		      {
+			//cout << "iSimHit = " << iSimHit << endl;
+			
+			fClSimHitPID[fClN][iSimHit]   = (int)( m->particleType() );
+			fClSimHitPRC[fClN][iSimHit]   = (int)( m->processType()  );
+			fClSimHitTrkID[fClN][iSimHit] = (int)( m->trackId()      );
+			
+			fClSimHitLx[fClN][iSimHit]    = ( m->entryPoint().x() + m->exitPoint().x() ) / 2.0;
+			fClSimHitLy[fClN][iSimHit]    = ( m->entryPoint().y() + m->exitPoint().y() ) / 2.0;
+			
+			fClSimHitThe[fClN][iSimHit]   =  m->thetaAtEntry();
+			fClSimHitPhi[fClN][iSimHit]   =  m->phiAtEntry();
+			fClSimHitMom[fClN][iSimHit]   =  m->pabs();
+			
+			++iSimHit;
+			
+		      } // end sim hit loop
+		    
+		    int minPixelRow = (*di).minPixelRow();
+		    int maxPixelRow = (*di).maxPixelRow();
+		    int minPixelCol = (*di).minPixelCol();
+		    int maxPixelCol = (*di).maxPixelCol();
+		    
+		    int DBdetid = iRh->geographicalId().rawId();
+		    edm::DetSetVector<PixelDigiSimLink>::const_iterator ipdgl = pixeldigisimlink->find( DBdetid );
+		    edm::DetSet<PixelDigiSimLink> digiLink = (*ipdgl);
+		    
+		    edm::DetSet<PixelDigiSimLink>::const_iterator linkiter = digiLink.data.begin();
+		    //create a vector for the track ids in the digisimlinks
+		    std::vector<int> simTrackIdV;    
+		    std::vector<int> simTrackFrV;
+		    
+		    std::vector<int>   simTrackId2V; 
+		    std::vector<int>   simTrackTypeV;
+		    std::vector<int>   simTrackQV;   
+		    std::vector<float> simTrackPxV;  
+		    std::vector<float> simTrackPyV;  
+		    std::vector<float> simTrackPzV;  
+		    std::vector<float> simTrackEnV;  
+		    
+		    std::vector<float> simTrackEtaV; 
+		    std::vector<float> simTrackPhiV; 
+		    std::vector<float> simTrackPtV;  
+		    
+		    std::vector<float> simTrackVxV;  
+		    std::vector<float> simTrackVyV;  
+		    std::vector<float> simTrackVzV;  
+		    
+		    simTrackIdV.clear();    
+		    simTrackFrV.clear();
+		    
+		    simTrackId2V.clear(); 
+		    simTrackTypeV.clear();
+		    simTrackQV.clear();   
+		    simTrackPxV.clear();  
+		    simTrackPyV.clear();  
+		    simTrackPzV.clear();  
+		    simTrackEnV.clear();  
+		    
+		    simTrackEtaV.clear(); 
+		    simTrackPhiV.clear(); 
+		    simTrackPtV.clear();  
+		    
+		    simTrackVxV.clear();  
+		    simTrackVyV.clear();  
+		    simTrackVzV.clear();
+		    
+		    
+		    for( ; linkiter != digiLink.data.end(); linkiter++) 
+		      { // loop over all digisimlinks
+			
+			std::pair<int,int> pixel_coord = PixelDigi::channelToPixel(linkiter->channel());
+			
+			// is the digisimlink inside the cluster boundaries?
+			if ( pixel_coord.first  <= maxPixelRow &&
+			     pixel_coord.first  >= minPixelRow &&
+			     pixel_coord.second <= maxPixelCol &&
+			     pixel_coord.second >= minPixelCol ) 
+			  {
+			    
+			    bool inStock(false); // did we see this simTrackId before? - We will check later
+			    
+			    std::vector<int>::const_iterator sTIter =  simTrackIdV.begin();
+			    for ( ; sTIter < simTrackIdV.end(); sTIter++) 
+			      {
+				if ( (*sTIter) == (int)linkiter->SimTrackId() ) 
+				  {
+				    inStock=true; // now we saw this id before
+				  }
+			      }
+			    
+			    if ( !inStock ) 
+			      {
+				
+				int simtrkid = linkiter->SimTrackId();      			      
+				bool found_sim_trk = false;
+				
+				for (SimTrackContainer::const_iterator simTrack=simTC.begin(); simTrack!=simTC.end(); simTrack++)
+				  {
+				    
+				    if ( (int)simTrack->trackId() == simtrkid )
+				      {
+					found_sim_trk = true;
+					
+					simTrackIdV.push_back(   linkiter->SimTrackId()    ); // add the track id to the vector
+					simTrackFrV.push_back(   linkiter->fraction()      ); 
+					
+					simTrackId2V.push_back(  (int)simTrack->trackId()  );
+					simTrackTypeV.push_back( simTrack->type()          ); 
+					simTrackQV.push_back(    simTrack->charge()        );
+					simTrackPxV.push_back(   simTrack->momentum().x()  );
+					simTrackPyV.push_back(   simTrack->momentum().y()  );
+					simTrackPzV.push_back(   simTrack->momentum().z()  );
+					simTrackEnV.push_back(   simTrack->momentum().t()  );
+					
+					simTrackEtaV.push_back(  simTrack->momentum().eta()             );
+					simTrackPhiV.push_back(  simTrack->momentum().phi()             );
+					simTrackPtV.push_back(   simTrack->momentum().pt()              );
+					
+					simTrackVxV.push_back(   simVC[simTrack->vertIndex()].position().x() );
+					simTrackVyV.push_back(   simVC[simTrack->vertIndex()].position().y() );
+					simTrackVzV.push_back(   simVC[simTrack->vertIndex()].position().z() );
+					
+					break;
+					
+				      } // if ( (int)simTrack->trackId() == simtrkid )
+				    
+				  } // for (SimTrackContainer::const_iterator simTrack=simTC.begin(); ...)
+				
+				// gavril : check this 
+				//  if ( !found_sim_trk )
+				//cout << "2 Din not find sim tracks with ID = " << simtrkid << "   !!!!!!!!!!!!!!!!!!!" << endl;
+				
+			      } // if ( !inStock )
+			    
+			  } // if ( pixel_coord.first  <= maxPixelRow && ... )
+			
+		      } // for( ; linkiter != digiLink.data.end(); linkiter++) 
+		    
+		    fClSimTrN[fClN] = (int)simTrackIdV.size();
+		    
+		    for ( int iSimTrk = 0; iSimTrk < fClSimTrN[fClN]; iSimTrk++  )
+		      {
+			fClSimTrID[fClN][iSimTrk] = simTrackIdV[iSimTrk]; 
+			fClSimTrFr[fClN][iSimTrk] = simTrackFrV[iSimTrk];
+			
+			fClSimTrID2[fClN][iSimTrk]       = simTrackId2V[iSimTrk];
+			fClSimTrType[fClN][iSimTrk]      = simTrackTypeV[iSimTrk];
+			fClSimTrQ[fClN][iSimTrk]         = simTrackQV[iSimTrk];
+			fClSimTrPx[fClN][iSimTrk]        = simTrackPxV[iSimTrk];
+			fClSimTrPy[fClN][iSimTrk]        = simTrackPyV[iSimTrk];
+			fClSimTrPz[fClN][iSimTrk]        = simTrackPzV[iSimTrk];
+			fClSimTrEn[fClN][iSimTrk]        = simTrackEnV[iSimTrk];
+			
+			fClSimTrEta[fClN][iSimTrk]       = simTrackEtaV[iSimTrk];
+			fClSimTrPhi[fClN][iSimTrk]       = simTrackPhiV[iSimTrk];
+			fClSimTrPt[fClN][iSimTrk]        = simTrackPtV[iSimTrk];
+			
+			fClSimTrVx[fClN][iSimTrk]   = simTrackVxV[iSimTrk];
+			fClSimTrVy[fClN][iSimTrk]   = simTrackVyV[iSimTrk];
+			fClSimTrVz[fClN][iSimTrk]   = simTrackVzV[iSimTrk];
+			
+			
+		      } // for ( int iSimTrk = 0; iSimTrk < fClSimTrN[fClN]; iSimTrk++  )
+		
+		    
+		  } // 	if ( fAccessSimHitInfo ) 
 
-	      fClRhLx[fClN]           = iRh->localPosition().x();
-	      fClRhLxE[fClN]          = TMath::Sqrt(iRh->localPositionError().xx());
-	      fClRhLy[fClN]           = iRh->localPosition().y();
-	      fClRhLyE[fClN]          = TMath::Sqrt(iRh->localPositionError().yy());
-	      
-	      // 	    fClRhGx[fClN]           = iRh->globalPosition().x();
-	      // 	    fClRhGy[fClN]           = iRh->globalPosition().y();
-	      // 	    fClRhGz[fClN]           = iRh->globalPosition().z();
-	      
-	      fClRhQualWord[fClN]     = iRh->rawQualityWord();
-	      fClRhqBin[fClN]         = iRh->qBin();;
-	      
+		// gavril : end : associate and store simhit info
+	       
+
+
+
+
+
+
+		
+		
+		GlobalPoint GP  =  theGeomDet->surface().toGlobal(Local3DPoint(iRh->localPosition().x(),
+									       iRh->localPosition().y(),
+									       iRh->localPosition().x()));
+		
+		fClRhLx[fClN]           = iRh->localPosition().x();
+		fClRhLxE[fClN]          = TMath::Sqrt(iRh->localPositionError().xx());
+		fClRhLy[fClN]           = iRh->localPosition().y();
+		fClRhLyE[fClN]          = TMath::Sqrt(iRh->localPositionError().yy());
+		
+		// 	    fClRhGx[fClN]           = iRh->globalPosition().x();
+		// 	    fClRhGy[fClN]           = iRh->globalPosition().y();
+		// 	    fClRhGz[fClN]           = iRh->globalPosition().z();
+		
+		fClRhQualWord[fClN]     = iRh->rawQualityWord();
+		fClRhqBin[fClN]         = iRh->qBin();;
+		
 	      if (iRh->hasFilledProb()) {
 		fClRhProb[fClN]         = iRh->clusterProbability(0);
 		fClRhProbX[fClN]        = iRh->probabilityX();
@@ -1535,9 +1997,67 @@ void PixelTree::init() {
     fClRhSpansTwoROCs[i] = -9999;
     fClRhIsOnEdge[i] = -9999;
     fClRhHasBadPixels[i] = -9999;
-  }
-  fClN = 0; 
+  
 
+
+
+
+
+    
+    // gavril : sim hit info
+    
+    if ( fAccessSimHitInfo )
+      {
+	for (int j=0; j<SIMHITPERCLMAX; ++j)
+	  {
+	    fClSimHitPID[i][j]   = -9999;   // PID of the particle that produced the simHit associated with the cluster/rechit
+	    fClSimHitPRC[i][j]   = -9999;   // procces type ( 2 = primary, ... )
+	    fClSimHitLx[i][j]    = -9999;   // X local position of simhit 
+	    fClSimHitLy[i][j]    = -9999;   // Y local position of simhit
+	    fClSimHitTrkID[i][j] = -9999;   // 
+	    fClSimHitThe[i][j]    = -9999; 
+	    fClSimHitPhi[i][j]    = -9999; 
+	    fClSimHitMom[i][j]    = -9999; 
+	    
+	    
+	  }
+	fClSimHitN[i] = 0;
+	
+	for (int j=0; j<SIMTRKPERCLMAX; ++j)
+	  {
+	    fClSimTrID[i][j]   = -9999;  
+	    fClSimTrFr[i][j]   = -9999;  
+	    
+	    fClSimTrID2 [i][j]   = -9999;
+	    fClSimTrType[i][j]   = -9999;
+	    fClSimTrQ   [i][j]   = -9999;  
+	    fClSimTrPx  [i][j]   = -9999;  
+	    fClSimTrPy  [i][j]   = -9999;
+	    fClSimTrPz  [i][j]   = -9999; 
+	    fClSimTrEn  [i][j]   = -9999; 
+	    
+	    fClSimTrEta [i][j]   = -9999;
+	    fClSimTrPhi [i][j]   = -9999;
+	    fClSimTrPt  [i][j]   = -9999;
+	    
+	    fClSimTrVx  [i][j]   = -9999;
+	    fClSimTrVy  [i][j]   = -9999;
+	    fClSimTrVz  [i][j]   = -9999;
+	    
+	  }
+	fClSimTrN[i] = 0;
+	
+      }
+    
+  }
+  
+  
+  
+  
+  
+  
+  fClN = 0; 
+  
   for (int i = 0; i < fDgN; ++i) {
     fDgRow[i] = fDgCol[i] = -9999;
     fDgLx[i] = fDgLy[i] = fDgGx[i] = fDgGy[i] = fDgGz[i] = -9999.;
@@ -1546,9 +2066,9 @@ void PixelTree::init() {
     fDgRoc[i] = fDgRocR[i] = fDgRocC[i] = -9999;
   }
   fDgN = 0; 
-    
+  
 }
-
+  
 
 // ----------------------------------------------------------------------
 void PixelTree::isPixelTrack(const edm::Ref<std::vector<Trajectory> > &refTraj, bool &isBpixtrack, bool &isFpixtrack) {

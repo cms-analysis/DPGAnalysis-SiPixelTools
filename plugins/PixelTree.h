@@ -93,6 +93,7 @@ class PixelTree : public edm::EDAnalyzer {
   edm::InputTag   fL1GTReadoutRecordLabel, fL1GTmapLabel, fHLTResultsLabel; 
   edm::ESHandle<SiPixelFedCablingMap> fCablingMap;
 
+  bool fAccessSimHitInfo;
 
   TFile *fFile; 
   TH1D  *fL1Thist, *fL1TThist, *fHLThist; 
@@ -168,6 +169,45 @@ class PixelTree : public edm::EDAnalyzer {
   float        fClRhProb[CLUSTERMAX], fClRhProbX[CLUSTERMAX], fClRhProbY[CLUSTERMAX];
   unsigned int fClRhQualWord[CLUSTERMAX]; 
   int          fClRhqBin[CLUSTERMAX], fClRhSpansTwoROCs[CLUSTERMAX], fClRhIsOnEdge[CLUSTERMAX], fClRhHasBadPixels[CLUSTERMAX]; 
+
+
+
+
+  // gavril@jhu.edu: Start: Add sim hit and sim track info ===========================================================
+
+  static const int SIMHITPERCLMAX = 10;             // max number of simhits associated with a cluster/rechit
+  int   fClSimHitN[CLUSTERMAX];                     // actual number of simhits associated with a cluster/rechit
+  int   fClSimHitPID[CLUSTERMAX][SIMHITPERCLMAX];   // PID of the particle that produced the simHit associated with the cluster/rechit
+  int   fClSimHitPRC[CLUSTERMAX][SIMHITPERCLMAX];   // procces type ( 2 = primary, ... )
+  float fClSimHitLx[CLUSTERMAX][SIMHITPERCLMAX];    // X local position of simhit 
+  float fClSimHitLy[CLUSTERMAX][SIMHITPERCLMAX];    // Y local position of simhit
+  int   fClSimHitTrkID[CLUSTERMAX][SIMHITPERCLMAX]; // track ID
+  float fClSimHitThe[CLUSTERMAX][SIMHITPERCLMAX];   // thetaAtEntry
+  float fClSimHitPhi[CLUSTERMAX][SIMHITPERCLMAX];   // phiAtEntry
+  float fClSimHitMom[CLUSTERMAX][SIMHITPERCLMAX];   // momentum at entry
+
+  static const int SIMTRKPERCLMAX = 10;             // max number of sim tracks associated with a cluster
+  int   fClSimTrN[CLUSTERMAX];                      // actual number of sim tracks associated with a cluster
+  int   fClSimTrID[CLUSTERMAX][SIMTRKPERCLMAX];     // ID of the sim track
+  float fClSimTrFr[CLUSTERMAX][SIMTRKPERCLMAX];     // fraction of cluster churge due to this sim track ???
+  
+  int   fClSimTrID2[CLUSTERMAX][SIMTRKPERCLMAX]    ; // same as fClSimTrID ???
+  int   fClSimTrType[CLUSTERMAX][SIMTRKPERCLMAX]   ;
+  int   fClSimTrQ[CLUSTERMAX][SIMTRKPERCLMAX]      ;
+  float fClSimTrPx[CLUSTERMAX][SIMTRKPERCLMAX]     ;
+  float fClSimTrPy[CLUSTERMAX][SIMTRKPERCLMAX]     ;
+  float fClSimTrPz[CLUSTERMAX][SIMTRKPERCLMAX]     ;
+  float fClSimTrEn[CLUSTERMAX][SIMTRKPERCLMAX]     ;
+  
+  float fClSimTrEta[CLUSTERMAX][SIMTRKPERCLMAX]    ;
+  float fClSimTrPhi[CLUSTERMAX][SIMTRKPERCLMAX]    ;
+  float fClSimTrPt[CLUSTERMAX][SIMTRKPERCLMAX]     ;
+  
+  float fClSimTrVx[CLUSTERMAX][SIMTRKPERCLMAX]     ;
+  float fClSimTrVy[CLUSTERMAX][SIMTRKPERCLMAX]     ;
+  float fClSimTrVz[CLUSTERMAX][SIMTRKPERCLMAX]     ;
+
+  // gavril: End: Add sim hit and sim track info ===========================================================
 
 
   // -- digis
