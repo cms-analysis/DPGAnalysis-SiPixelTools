@@ -30,6 +30,11 @@
 #include "CondFormats/L1TObjects/interface/L1GtTriggerMenu.h"
 #include "CondFormats/L1TObjects/interface/L1GtTriggerMenuFwd.h"
 
+#include "DataFormats/L1GlobalMuonTrigger/interface/L1MuRegionalCand.h"
+#include "DataFormats/L1GlobalMuonTrigger/interface/L1MuGMTReadoutCollection.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GtPsbWord.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GtFdlWord.h"
+
 #include "DataFormats/L1Trigger/interface/L1MuonParticle.h"
 #include "DataFormats/L1Trigger/interface/L1MuonParticleFwd.h"
 #include "DataFormats/L1Trigger/interface/L1ParticleMap.h"
@@ -95,8 +100,6 @@
 #include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
 #include <DataFormats/VertexReco/interface/VertexFwd.h>
 
-// gavril: begin : for SimHit association ================================================
-
 #include "SimDataFormats/TrackingHit/interface/PSimHit.h"  
 #include "SimTracker/TrackerHitAssociation/interface/TrackerHitAssociator.h" 
 
@@ -104,7 +107,6 @@
 #include "DataFormats/SiPixelDigi/interface/PixelDigi.h"
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 
-// gavril: end : for SimHit association ================================================
 
 #include <TROOT.h>
 #include <TSystem.h>
@@ -134,12 +136,11 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fL1GTReadoutRecordLabel(iConfig.getUntrackedParameter<InputTag>("L1GTReadoutRecordLabel", edm::InputTag("gtDigis"))),
   fL1GTmapLabel(iConfig.getUntrackedParameter<InputTag>("hltL1GtObjectMap", edm::InputTag("hltL1GtObjectMap"))),
   fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag>("HLTResultsLabel", edm::InputTag("TriggerResults::HLT"))),
-
+  fL1MuGMTLabel(iConfig.getUntrackedParameter<InputTag>("l1muGmtLabel", edm::InputTag("gtDigis"))),
   fAccessSimHitInfo(iConfig.getUntrackedParameter<bool>( "accessSimHitInfo", false) ),
-
   fInit(0)
 {
-  string rcsid = string("$Id: PixelTree.cc,v 1.43 2011/02/18 20:51:25 ggiurgiu Exp $");
+  string rcsid = string("$Id: PixelTree.cc,v 1.44 2011/02/18 22:59:28 ggiurgiu Exp $");
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
   cout << "---  version:                         " << rcsid << endl;
@@ -157,6 +158,7 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   cout << "---  L1GTReadoutRecordLabel:          " << fL1GTReadoutRecordLabel << endl;
   cout << "---  hltL1GtObjectMap:                " << fL1GTmapLabel << endl;
   cout << "---  HLTResultsLabel:                 " << fHLTResultsLabel << endl;
+  cout << "---  L1MuGMTLabel:                    " << fL1MuGMTLabel << endl;
   cout << "---  (int)fAccessSimHitInfo           " << (int)fAccessSimHitInfo << endl;
   cout << "----------------------------------------------------------------------" << endl;
 
@@ -183,7 +185,7 @@ void PixelTree::endJob() {
   GlobalTag.Write("GlobalTag");
   TObjString Type(fType.c_str());
   Type.Write("Type");
-  TObjString rcsid("$Id: PixelTree.cc,v 1.43 2011/02/18 20:51:25 ggiurgiu Exp $");
+  TObjString rcsid("$Id: PixelTree.cc,v 1.44 2011/02/18 22:59:28 ggiurgiu Exp $");
   rcsid.Write("Rcsid");
 
 
@@ -263,6 +265,7 @@ void PixelTree::beginJob() {
   fTree->Branch("MuTcorr",      fMuTcorr,       "MuTcorr[MuN]/F");
   fTree->Branch("MuTerr",       fMuTerr,        "MuTerr[MuN]/F");
   fTree->Branch("MuTmean",      &fMuTmean,      "MuTmean/F");
+  fTree->Branch("MuTrigger",    &fMuTrigger,    "MuTrigger/I");
 
   fTree->Branch("HfEplus",      &fEtPlus,       "HfEplus/F");
   fTree->Branch("HfEminus",     &fEtMinus,      "HfEminus/F");
@@ -411,28 +414,34 @@ void PixelTree::endRun(Run const&run, EventSetup const&iSetup) {
 
 // ----------------------------------------------------------------------
 void PixelTree::analyze(const edm::Event& iEvent, 
-			const edm::EventSetup& iSetup) 
-{
-
-  // gavril : start : sim hit info ==================================
+			const edm::EventSetup& iSetup)  {
 
   std::vector<PSimHit> vec_simhits_assoc;
-  TrackerHitAssociator associate(iEvent);
+  TrackerHitAssociator *associate(0);
+  if (fAccessSimHitInfo) {
+    associate = new TrackerHitAssociator(iEvent);
+  }
   
   edm::Handle< edm::DetSetVector<PixelDigiSimLink> > pixeldigisimlink;
-  iEvent.getByLabel("simSiPixelDigis", pixeldigisimlink);
-  
+  if (fAccessSimHitInfo) {
+    iEvent.getByLabel("simSiPixelDigis", pixeldigisimlink);
+  }
+
   edm::Handle<SimTrackContainer> simTrackCollection;
-  iEvent.getByLabel("g4SimHits", simTrackCollection);
-  const SimTrackContainer simTC = *(simTrackCollection.product());
+  SimTrackContainer simTC;
+  if (fAccessSimHitInfo) {
+    iEvent.getByLabel("g4SimHits", simTrackCollection);
+    simTC = *(simTrackCollection.product());
+  }
   
   edm::Handle<SimVertexContainer> simVertexCollection;
-  iEvent.getByLabel("g4SimHits", simVertexCollection);
-  const SimVertexContainer simVC = *(simVertexCollection.product());
-  
-  // gavril : end : sim hit info ==================================
+  SimVertexContainer simVC;
+  if (fAccessSimHitInfo) {
+    iEvent.getByLabel("g4SimHits", simVertexCollection);
+    simVC = *(simVertexCollection.product());
+  }
 
-  
+
   static int nevt(0); 
   static unsigned int oldRun(0); 
 
@@ -699,16 +708,106 @@ void PixelTree::analyze(const edm::Event& iEvent,
   // ----------------------------------------------------------------------
   // -- Fill muons
   // ----------------------------------------------------------------------
-   edm::Handle<MuonCollection> hMuonCollection;
-   bool goodMuons(false);
-   try{ 
-     iEvent.getByLabel(fMuonCollectionLabel, hMuonCollection);
-     goodMuons = true; 
-   } catch (cms::Exception &ex) {
-     cout << "No Muon collection with label " << fMuonCollectionLabel << endl;
-   }
+  edm::Handle<MuonCollection> hMuonCollection;
+  bool goodMuons(false);
+  try{ 
+    iEvent.getByLabel(fMuonCollectionLabel, hMuonCollection);
+    goodMuons = true; 
+  } catch (cms::Exception &ex) {
+    cout << "No Muon collection with label " << fMuonCollectionLabel << endl;
+  }
+
+  // -- muon trigger information (from DQM/HcalMonitorTasks/src/HcalDetDiagTimingMonitor.cc)
+  static const int MAXRPC =20;
+  static const int MAXDTBX=20;
+  static const int MAXCSC =20;    
+  static const int TRIG_DT =1;
+  static const int TRIG_RPC=2;
+  static const int TRIG_CSC=4;
+  static const int TRIG_RPCF=8;
   
-  vector<int> muTkRef;
+  edm::Handle<L1MuGMTReadoutCollection> gmtrc_handle; 
+  bool goodL1Muons(false);
+  try{ 
+    iEvent.getByLabel(fL1MuGMTLabel, gmtrc_handle);
+    goodL1Muons = gmtrc_handle.isValid();
+  } catch (cms::Exception &ex) {
+    goodL1Muons = false;
+    cout << " HELP caught exception, no L1MuGMTReadoutCollection with label " << fL1MuGMTLabel << " found " << endl;
+  }
+
+  fMuTrigger = 0; 
+  if(goodL1Muons) {
+    L1MuGMTReadoutCollection const* gmtrc = gmtrc_handle.product();
+  
+    int idt   =0;
+    int icsc  =0;
+    int irpcb =0;
+    int irpcf =0;
+    int ndt[5]   = {0,0,0,0,0};
+    int ncsc[5]  = {0,0,0,0,0};
+    int nrpcb[5] = {0,0,0,0,0};
+    int nrpcf[5] = {0,0,0,0,0};
+    int N;	
+    std::vector<L1MuGMTReadoutRecord> gmt_records = gmtrc->getRecords();
+    std::vector<L1MuGMTReadoutRecord>::const_iterator igmtrr;
+    N=0;
+    int NN=0;
+    int BXinEVENT=1,TRIGGER=0;
+    for(igmtrr=gmt_records.begin(); igmtrr!=gmt_records.end(); igmtrr++) {
+      if(igmtrr->getBxInEvent()==0) BXinEVENT=NN;
+      NN++;
+      std::vector<L1MuRegionalCand>::const_iterator iter1;
+      std::vector<L1MuRegionalCand> rmc;
+      // DTBX Trigger
+      rmc = igmtrr->getDTBXCands(); 
+      for(iter1=rmc.begin(); iter1!=rmc.end(); iter1++) {
+	if ( idt < MAXDTBX && !(*iter1).empty() ) {
+	  idt++; 
+	  if(N<5) ndt[N]++; 
+	  
+	} 	 
+      }
+      // CSC Trigger
+      rmc = igmtrr->getCSCCands(); 
+      for(iter1=rmc.begin(); iter1!=rmc.end(); iter1++) {
+	if ( icsc < MAXCSC && !(*iter1).empty() ) {
+	  icsc++; 
+	  if(N<5) ncsc[N]++; 
+	} 
+      }
+      // RPCb Trigger
+      rmc = igmtrr->getBrlRPCCands();
+      for(iter1=rmc.begin(); iter1!=rmc.end(); iter1++) {
+	if ( irpcb < MAXRPC && !(*iter1).empty() ) {
+	  irpcb++;
+	  if(N<5) nrpcb[N]++;
+	  
+	}  
+      }
+      // RPCfwd Trigger
+      rmc = igmtrr->getFwdRPCCands();
+      for(iter1=rmc.begin(); iter1!=rmc.end(); iter1++) {
+	if ( irpcf < MAXRPC && !(*iter1).empty() ) {
+	  irpcf++;
+	  if(N<5) nrpcf[N]++;
+	  
+	}  
+      }
+      
+      N++;
+    }
+    if(ncsc[BXinEVENT]>0 ) {   TRIGGER=+TRIG_CSC;  }
+    if(ndt[BXinEVENT]>0  ) {   TRIGGER=+TRIG_DT;   }
+    if(nrpcb[BXinEVENT]>0) {   TRIGGER=+TRIG_RPC;  }
+    if(nrpcf[BXinEVENT]>0) {   TRIGGER=+TRIG_RPCF; }
+
+    fMuTrigger = TRIGGER;
+  }
+  
+
+
+  vector<int> muTkRef, muMuRef;
   if (hMuonCollection.isValid()) {
     int idx(0); 
     for (MuonCollection::const_iterator it = hMuonCollection->begin(), itEnd = hMuonCollection->end(); it != itEnd; ++it){
@@ -726,6 +825,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	idx = (it->track()).index();
       }
       muTkRef.push_back(idx);
+      muMuRef.push_back(fMuN);
       
       int type = 0; 
       if (it->isGlobalMuon()) type &= 0x1; 
@@ -853,6 +953,8 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	if (fVerbose > 1) cout << "  not a pixel track" << endl;
 	continue; 
       } 
+
+      cout << "track index = " << trackref.index() << endl;
 
       fTkQuality[fTkN]= trackref->qualityMask(); // see: CMSSW/DataFormats/TrackReco/interface/TrackBase.h
       fTkCharge[fTkN] = trackref->charge();
@@ -1044,7 +1146,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	if ( fAccessSimHitInfo )
 	  {
 	    vec_simhits_assoc.clear();
-	    vec_simhits_assoc = associate.associateHit(*pixhit);
+	    vec_simhits_assoc = associate->associateHit(*pixhit);
 	    
 	    fClSimHitN[fClN] = (int)vec_simhits_assoc.size();
 	    int iSimHit = 0;
@@ -1603,7 +1705,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 		if ( fAccessSimHitInfo )
 		  {
 		    vec_simhits_assoc.clear();
-		    vec_simhits_assoc = associate.associateHit(*iRh);
+		    vec_simhits_assoc = associate->associateHit(*iRh);
 		    
 		    fClSimHitN[fClN] = (int)vec_simhits_assoc.size();
 		    int iSimHit = 0;
@@ -1939,6 +2041,7 @@ void PixelTree::init() {
     fMuType[i] = fMuTkI[i] = -1; 
   }
   fMuN = 0; 
+  fMuTrigger = 0; 
 
   for (int i = 0; i < fTkN; ++i) {
     fTkQuality[i]= -9999; 
@@ -1998,11 +2101,6 @@ void PixelTree::init() {
     fClRhIsOnEdge[i] = -9999;
     fClRhHasBadPixels[i] = -9999;
   
-
-
-
-
-
     
     // gavril : sim hit info
     
@@ -2050,10 +2148,6 @@ void PixelTree::init() {
       }
     
   }
-  
-  
-  
-  
   
   
   fClN = 0; 

@@ -43,7 +43,7 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = "GR_R_310_V2::All"
+process.GlobalTag.globaltag = "GR_P_V13::All"
 
 # -- Input files
 # POOLSOURCE
@@ -104,6 +104,7 @@ process.PixelTree = cms.EDAnalyzer(
     HLTProcessName               = cms.untracked.string('HLT'), 
     L1GTReadoutRecordLabel       = cms.untracked.InputTag('gtDigis'), 
     hltL1GtObjectMap             = cms.untracked.InputTag('hltL1GtObjectMap'), 
+    l1muGmtLabel                 = cms.untracked.InputTag('gtDigis'), 
     HLTResultsLabel              = cms.untracked.InputTag('TriggerResults::HLT')
     )
 
