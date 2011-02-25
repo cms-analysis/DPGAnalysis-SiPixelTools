@@ -140,7 +140,7 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fAccessSimHitInfo(iConfig.getUntrackedParameter<bool>( "accessSimHitInfo", false) ),
   fInit(0)
 {
-  string rcsid = string("$Id: PixelTree.cc,v 1.44 2011/02/18 22:59:28 ggiurgiu Exp $");
+  string rcsid = string("$Id: PixelTree.cc,v 1.45 2011/02/22 07:55:37 ursl Exp $");
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
   cout << "---  version:                         " << rcsid << endl;
@@ -185,7 +185,7 @@ void PixelTree::endJob() {
   GlobalTag.Write("GlobalTag");
   TObjString Type(fType.c_str());
   Type.Write("Type");
-  TObjString rcsid("$Id: PixelTree.cc,v 1.44 2011/02/18 22:59:28 ggiurgiu Exp $");
+  TObjString rcsid("$Id: PixelTree.cc,v 1.45 2011/02/22 07:55:37 ursl Exp $");
   rcsid.Write("Rcsid");
 
 
@@ -954,7 +954,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	continue; 
       } 
 
-      cout << "track index = " << trackref.index() << endl;
+      //      cout << "track index = " << trackref.index() << endl;
 
       fTkQuality[fTkN]= trackref->qualityMask(); // see: CMSSW/DataFormats/TrackReco/interface/TrackBase.h
       fTkCharge[fTkN] = trackref->charge();
