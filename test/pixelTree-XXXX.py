@@ -63,7 +63,7 @@ process.GlobalTag.globaltag = "GR_R_310_V2::All"
 
 # -- Trajectory producer
 process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
-process.TrackRefitter.src = 'splittedTracksP5'
+process.TrackRefitter.src = 'generalTracks'
 
 # -- RecHit production
 process.load("RecoLocalTracker.SiPixelRecHits.SiPixelRecHits_cfi")

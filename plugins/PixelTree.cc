@@ -140,7 +140,7 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fAccessSimHitInfo(iConfig.getUntrackedParameter<bool>( "accessSimHitInfo", false) ),
   fInit(0)
 {
-  string rcsid = string("$Id: PixelTree.cc,v 1.45 2011/02/22 07:55:37 ursl Exp $");
+  string rcsid = string("$Id: PixelTree.cc,v 1.46 2011/02/25 06:51:37 ursl Exp $");
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
   cout << "---  version:                         " << rcsid << endl;
@@ -185,7 +185,7 @@ void PixelTree::endJob() {
   GlobalTag.Write("GlobalTag");
   TObjString Type(fType.c_str());
   Type.Write("Type");
-  TObjString rcsid("$Id: PixelTree.cc,v 1.45 2011/02/22 07:55:37 ursl Exp $");
+  TObjString rcsid("$Id: PixelTree.cc,v 1.46 2011/02/25 06:51:37 ursl Exp $");
   rcsid.Write("Rcsid");
 
 
@@ -299,6 +299,9 @@ void PixelTree::beginJob() {
   fTree->Branch("TkType",       fTkType,        "TkType[TkN]/I");
   fTree->Branch("TkNHits",      fTkNHits,       "TkNHits[TkN]/I");
   fTree->Branch("TkLHits",      fTkLHits,       "TkLHits[TkN]/I");
+  fTree->Branch("TkLHitsI",     fTkLHitsI,      "TkLHitsI[TkN]/I");
+  fTree->Branch("TkLHitsO",     fTkLHitsO,      "TkLHitsO[TkN]/I");
+  fTree->Branch("TkNHitFr",     fTkNHitFr,      "TkNHitFr[TkN]/F");
   fTree->Branch("TkMuI",        fTkMuI,         "TkMuI[TkN]/I");
 
   fTree->Branch("ClN",              &fClN,            "ClN/I");
@@ -971,8 +974,14 @@ void PixelTree::analyze(const edm::Event& iEvent,
       fTkVz[fTkN]     = trackref->vz();
       fTkNHits[fTkN]  = trackref->hitPattern().numberOfValidHits();
       fTkLHits[fTkN]  = trackref->hitPattern().numberOfLostHits();
+      fTkLHitsI[fTkN] = trackref->trackerExpectedHitsInner().numberOfLostTrackerHits();
+      fTkLHitsO[fTkN] = trackref->trackerExpectedHitsOuter().numberOfLostTrackerHits();
+      fTkNHitFr[fTkN] = -1;
       fTkType[fTkN]   = 1;
       fTkMuI[fTkN]    = -1;
+      if ((fTkNHits[fTkN] + fTkLHits[fTkN] + fTkLHitsI[fTkN] + fTkLHitsO[fTkN]) > 0) {
+ 	fTkNHitFr[fTkN] = fTkNHits[fTkN]/(fTkNHits[fTkN] + fTkLHits[fTkN] + fTkLHitsI[fTkN] + fTkLHitsO[fTkN]);
+      }
 
       // ----------------------------------------------------------------------
       // -- Clusters associated with a track
@@ -2047,6 +2056,8 @@ void PixelTree::init() {
     fTkQuality[i]= -9999; 
     fTkCharge[i] = -9999; 
     fTkNHits[i]  = fTkLHits[i] = 0;
+    fTkLHitsI[i] = fTkLHitsO[i]= 0;
+    fTkNHitFr[i] = 0.;
     fTkChi2[i]   = fTkNdof[i] = -9999.;
     fTkPt[i]     = fTkTheta[i] = fTkPhi[i] = -9999.;
     fTkD0[i]     = fTkDz[i] = -9999.;
