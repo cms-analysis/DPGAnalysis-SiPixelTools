@@ -140,7 +140,7 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fAccessSimHitInfo(iConfig.getUntrackedParameter<bool>( "accessSimHitInfo", false) ),
   fInit(0)
 {
-  string rcsid = string("$Id: PixelTree.cc,v 1.46 2011/02/25 06:51:37 ursl Exp $");
+  string rcsid = string("$Id: PixelTree.cc,v 1.47 2011/03/25 07:13:56 ursl Exp $");
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
   cout << "---  version:                         " << rcsid << endl;
@@ -185,7 +185,7 @@ void PixelTree::endJob() {
   GlobalTag.Write("GlobalTag");
   TObjString Type(fType.c_str());
   Type.Write("Type");
-  TObjString rcsid("$Id: PixelTree.cc,v 1.46 2011/02/25 06:51:37 ursl Exp $");
+  TObjString rcsid("$Id: PixelTree.cc,v 1.47 2011/03/25 07:13:56 ursl Exp $");
   rcsid.Write("Rcsid");
 
 
@@ -239,7 +239,7 @@ void PixelTree::beginJob() {
 
   fTree->Branch("ttA",          fTtA,           "ttA[64]/O");
   fTree->Branch("l1A",          fL1A,           "l1A[128]/O");
-  fTree->Branch("hlA",          fHlA,           "hlA[256]/O");
+  fTree->Branch("hlA",          fHlA,           "hlA[1024]/O");
 
   fTree->Branch("hlt",          &fHLT,          "hlt/i");
 
@@ -453,7 +453,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
   if (oldRun == 0) {
     fL1Thist = new TH1D(Form("L1T_%d", fRun), Form("L1T names for run %d", fRun), 128, 0., 128.); fL1Thist->SetDirectory(fFile); 
     fL1TThist= new TH1D(Form("L1TT_%d",fRun), Form("L1TT names for run %d", fRun), 128, 0., 128.); fL1TThist->SetDirectory(fFile); 
-    fHLThist = new TH1D(Form("HLT_%d", fRun), Form("HLT names for run %d", fRun), 2*128, 0., 2*128.); fHLThist->SetDirectory(fFile); 
+    fHLThist = new TH1D(Form("HLT_%d", fRun), Form("HLT names for run %d", fRun), 10*128, 0., 10*128.); fHLThist->SetDirectory(fFile); 
     oldRun = 1; 
   }
 
@@ -504,7 +504,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
   if (fRun != oldRun) {
     fL1Thist = new TH1D(Form("L1T_%d", fRun), Form("L1T names for run %d", fRun), 2*128, 0., 2*128.); fL1Thist->SetDirectory(fFile); 
     fL1TThist= new TH1D(Form("L1TT_%d",fRun), Form("L1TT names for run %d", fRun), 2*128, 0., 2*128.); fL1TThist->SetDirectory(fFile); 
-    fHLThist = new TH1D(Form("HLT_%d", fRun), Form("HLT names for run %d", fRun), 2*128, 0., 2*128.); fHLThist->SetDirectory(fFile); 
+    fHLThist = new TH1D(Form("HLT_%d", fRun), Form("HLT names for run %d", fRun), 10*128, 0., 10*128.); fHLThist->SetDirectory(fFile); 
     oldRun = fRun; 
   }
 
@@ -2035,6 +2035,18 @@ void PixelTree::init() {
     fHlA[i+64] = false; 
     fHlA[i+128]= false; 
     fHlA[i+192]= false; 
+    fHlA[i+256]= false; 
+    fHlA[i+320]= false; 
+    fHlA[i+384]= false; 
+    fHlA[i+448]= false; 
+    fHlA[i+512]= false; 
+    fHlA[i+576]= false; 
+    fHlA[i+640]= false; 
+    fHlA[i+704]= false; 
+    fHlA[i+768]= false; 
+    fHlA[i+832]= false; 
+    fHlA[i+896]= false; 
+    fHlA[i+960]= false; 
   }
 
   for (int i = 0; i < fPvN; ++i) {

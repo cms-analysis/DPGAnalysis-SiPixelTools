@@ -113,7 +113,7 @@ class PixelTree : public edm::EDAnalyzer {
 
   unsigned int fL1T, fHLT; 
   unsigned int fL1TA[4], fL1TT[4], fHLTA[8];
-  bool         fTtA[64], fL1A[128], fHlA[256]; 
+  bool         fTtA[64], fL1A[128], fHlA[1024]; 
 
   // -- primary vertices
   static const int PVMAX = 100; 
