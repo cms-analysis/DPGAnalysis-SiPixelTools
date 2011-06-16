@@ -1,3 +1,10 @@
+# ######################################################################
+# lxb8838.cern.ch
+# /afs/cern.ch/user/u/ursl/pixel/CMSSW_4_2_3_patch2/src/DPGAnalysis/SiPixelTools/test/reco/165
+# file list contains 188389 events
+# mkPyFiles -t ../../pixelTree-XXXX.py -f 110526.165617 -s r28 -e 50000 -r
+# ./pixelTree-r28-0165617-0002.py with 50000 events, skipEvents = 100000
+# ######################################################################
 # ----------------------------------------------------------------------
 # -- RECO py template file for dumping the PixelTree only
 # ----------------------------------------------------------------------
@@ -43,18 +50,18 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = "GR_R_310_V2::All"
+process.GlobalTag.globaltag = "GR_E_V19::All"
 
 # -- Input files
 # POOLSOURCE
 
-# -- Input files
+# use for example :
 #process.source = cms.Source(
-#    "PoolSource",
-#    fileNames = cms.untracked.vstring(
-#    REPLACEFILES
-#    )
-#    )
+# "PoolSource",
+#  fileNames = cms.untracked.vstring(
+#         "/store/express/Run2011A/ExpressPhysics/FEVT/Express-v4/000/165/617/FEFC6342-8286-E011-89DD-003048D37456.root"
+# )
+#)
 
 # -- number of events
 #process.maxEvents = cms.untracked.PSet(
@@ -86,7 +93,7 @@ process.PixelFilter = cms.EDFilter(
 try:
     rootFileName = os.environ["JOB"] + ".root"
 except KeyError:
-    rootFileName = "pixelTree-XXXX.root"
+    rootFileName = "pixelTree-r28-0165617-0002.root"
 
 process.PixelTree = cms.EDAnalyzer(
     "PixelTree",
