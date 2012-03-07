@@ -81,6 +81,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
+#include "Geometry/CaloGeometry/interface/CaloSubdetectorGeometry.h"
 
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 
@@ -140,7 +141,7 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fAccessSimHitInfo(iConfig.getUntrackedParameter<bool>( "accessSimHitInfo", false) ),
   fInit(0)
 {
-  string rcsid = string("$Id: PixelTree.cc,v 1.47 2011/03/25 07:13:56 ursl Exp $");
+  string rcsid = string("$Id: PixelTree.cc,v 1.48 2011/06/16 12:44:05 ursl Exp $");
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
   cout << "---  version:                         " << rcsid << endl;
@@ -185,7 +186,7 @@ void PixelTree::endJob() {
   GlobalTag.Write("GlobalTag");
   TObjString Type(fType.c_str());
   Type.Write("Type");
-  TObjString rcsid("$Id: PixelTree.cc,v 1.47 2011/03/25 07:13:56 ursl Exp $");
+  TObjString rcsid("$Id: PixelTree.cc,v 1.48 2011/06/16 12:44:05 ursl Exp $");
   rcsid.Write("Rcsid");
 
 
@@ -586,8 +587,6 @@ void PixelTree::analyze(const edm::Event& iEvent,
   string algoname; 
   int    algobit(-1); 
   bool   result(false); 
-  int    prescale(0); 
-  int    mask(0); 
   int    iErrorCode(0);
   bool   unmaskedResult(false);
 
@@ -596,8 +595,6 @@ void PixelTree::analyze(const edm::Event& iEvent,
     algobit  = (algo->second).algoBitNumber();
     result   = l1GtUtils.decisionAfterMask(iEvent, algoname, iErrorCode);
     unmaskedResult = l1GtUtils.decisionBeforeMask(iEvent, algoname, iErrorCode);
-    mask    = l1GtUtils.triggerMask(iEvent, algoname, iErrorCode);
-    prescale = l1GtUtils.prescaleFactor(iEvent, algoname, iErrorCode);
 
     fL1Thist->GetXaxis()->SetBinLabel(algobit+1, algoname.c_str());
     fL1A[algobit]   = result;
@@ -615,8 +612,6 @@ void PixelTree::analyze(const edm::Event& iEvent,
     algobit  = (algo->second).algoBitNumber();
     result   = l1GtUtils.decisionAfterMask(iEvent, algoname, iErrorCode);
     unmaskedResult = l1GtUtils.decisionBeforeMask(iEvent, algoname, iErrorCode);
-    mask     = l1GtUtils.triggerMask(iEvent, algoname, iErrorCode);
-    prescale = l1GtUtils.prescaleFactor(iEvent, algoname, iErrorCode);
     fL1TThist->GetXaxis()->SetBinLabel(algobit+1, algoname.c_str());
     fTtA[algobit] = result; 
     if(unmaskedResult) {
@@ -650,22 +645,10 @@ void PixelTree::analyze(const edm::Event& iEvent,
     if (hltF) {
       const TriggerNames &trigName = iEvent.triggerNames(*hHLTresults);
       unsigned int index(999); 
-      bool wasrun(false), result(false), error(false);
-      int prescale(1); 
-      int psSet = -1; 
-      psSet = fHltConfig.prescaleSet(iEvent, iSetup);
+      bool result(false);
       for (unsigned int it = 0; it < validTriggerNames.size(); ++it) {
 	index    = trigName.triggerIndex(validTriggerNames[it]); 
 	result   = (index < validTriggerNames.size() && hHLTresults->accept(index));
-	wasrun   = (index < validTriggerNames.size() && hHLTresults->wasrun(index));
-	error    = (index < validTriggerNames.size() && hHLTresults->error(index));
-
-	if (psSet > -1) {
-	  prescale = fHltConfig.prescaleValue(psSet, validTriggerNames[it]);
-	} else {
-	  //	cout << "==>HFDumpTrigger> error in prescale set!?" << endl;
-	  prescale = 0;
-	}
 
 	fHLThist->GetXaxis()->SetBinLabel(index+1, validTriggerNames[it].c_str()); 
 	fHlA[index] = result; 
@@ -712,10 +695,8 @@ void PixelTree::analyze(const edm::Event& iEvent,
   // -- Fill muons
   // ----------------------------------------------------------------------
   edm::Handle<MuonCollection> hMuonCollection;
-  bool goodMuons(false);
   try{ 
     iEvent.getByLabel(fMuonCollectionLabel, hMuonCollection);
-    goodMuons = true; 
   } catch (cms::Exception &ex) {
     cout << "No Muon collection with label " << fMuonCollectionLabel << endl;
   }
@@ -1002,8 +983,8 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	  continue;
 	}
 
-	bool barrel = DetId::DetId(hit->geographicalId()).subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel);
-	bool endcap = DetId::DetId(hit->geographicalId()).subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap);
+	bool barrel = DetId(hit->geographicalId()).subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel);
+	bool endcap = DetId(hit->geographicalId()).subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap);
 	if (!barrel && !endcap) {
 	  continue;
 	}
@@ -1026,9 +1007,9 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	int DBlayer, DBladder, DBmodule, DBdisk, DBblade, DBpanel, DBdetid; 
 	DBdetid = hit->geographicalId().rawId();
 	if (barrel) {
-	  bpixNames(DetId::DetId((*hit).geographicalId()), DBlayer, DBladder, DBmodule); 
+	  bpixNames(DetId((*hit).geographicalId()), DBlayer, DBladder, DBmodule); 
 	} else {
-	  fpixNames(DetId::DetId((*hit).geographicalId()), DBdisk, DBblade, DBpanel, DBmodule); 
+	  fpixNames(DetId((*hit).geographicalId()), DBdisk, DBblade, DBpanel, DBmodule); 
 	}
 
 	const DetId &hit_detId = hit->geographicalId();
@@ -1268,15 +1249,13 @@ void PixelTree::analyze(const edm::Event& iEvent,
 			  {
 			    
 			    int simtrkid = linkiter->SimTrackId();      			      
-			    bool found_sim_trk = false;
 			    
 			    for (SimTrackContainer::const_iterator simTrack=simTC.begin(); simTrack!=simTC.end(); simTrack++)
 			      {
 				
 				if ( (int)simTrack->trackId() == simtrkid )
-				  {
-				    found_sim_trk = true;
-				    
+				  {			
+	    
 				    simTrackIdV.push_back(   linkiter->SimTrackId()    ); // add the track id to the vector
 				    simTrackFrV.push_back(   linkiter->fraction()      ); 
 				    
@@ -1816,14 +1795,12 @@ void PixelTree::analyze(const edm::Event& iEvent,
 			      {
 				
 				int simtrkid = linkiter->SimTrackId();      			      
-				bool found_sim_trk = false;
 				
 				for (SimTrackContainer::const_iterator simTrack=simTC.begin(); simTrack!=simTC.end(); simTrack++)
 				  {
 				    
 				    if ( (int)simTrack->trackId() == simtrkid )
 				      {
-					found_sim_trk = true;
 					
 					simTrackIdV.push_back(   linkiter->SimTrackId()    ); // add the track id to the vector
 					simTrackFrV.push_back(   linkiter->fraction()      ); 
@@ -1891,17 +1868,6 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
 		// gavril : end : associate and store simhit info
 	       
-
-
-
-
-
-
-		
-		
-		GlobalPoint GP  =  theGeomDet->surface().toGlobal(Local3DPoint(iRh->localPosition().x(),
-									       iRh->localPosition().y(),
-									       iRh->localPosition().x()));
 		
 		fClRhLx[fClN]           = iRh->localPosition().x();
 		fClRhLxE[fClN]          = TMath::Sqrt(iRh->localPositionError().xx());
@@ -2206,10 +2172,10 @@ void PixelTree::isPixelTrack(const edm::Ref<std::vector<Trajectory> > &refTraj, 
 
 // ----------------------------------------------------------------------
 void PixelTree::bpixNames(const DetId &pID, int &DBlayer, int &DBladder, int &DBmodule) {
-  PixelBarrelName::Shell DBshell = PixelBarrelName::PixelBarrelName(pID).shell();
-  DBlayer  = PixelBarrelName::PixelBarrelName(pID).layerName();
-  DBladder = PixelBarrelName::PixelBarrelName(pID).ladderName();
-  DBmodule = PixelBarrelName::PixelBarrelName(pID).moduleName();
+  PixelBarrelName::Shell DBshell = PixelBarrelName(pID).shell();
+  DBlayer  = PixelBarrelName(pID).layerName();
+  DBladder = PixelBarrelName(pID).ladderName();
+  DBmodule = PixelBarrelName(pID).moduleName();
   
   if (DBshell == PixelBarrelName::mO) {
     DBladder *= -1;
@@ -2229,11 +2195,11 @@ void PixelTree::bpixNames(const DetId &pID, int &DBlayer, int &DBladder, int &DB
 // ----------------------------------------------------------------------
 void PixelTree::fpixNames(const DetId &pID, int &DBdisk, int &DBblade, int &DBpanel, int &DBmodule) {
 
-  PixelEndcapName::HalfCylinder DBside = PixelEndcapName::PixelEndcapName(pID).halfCylinder();
-  DBdisk   = PixelEndcapName::PixelEndcapName(pID).diskName();
-  DBblade  = PixelEndcapName::PixelEndcapName(pID).bladeName();
-  DBpanel  = PixelEndcapName::PixelEndcapName(pID).pannelName();
-  DBmodule = PixelEndcapName::PixelEndcapName(pID).plaquetteName();
+  PixelEndcapName::HalfCylinder DBside = PixelEndcapName(pID).halfCylinder();
+  DBdisk   = PixelEndcapName(pID).diskName();
+  DBblade  = PixelEndcapName(pID).bladeName();
+  DBpanel  = PixelEndcapName(pID).pannelName();
+  DBmodule = PixelEndcapName(pID).plaquetteName();
   
   if (DBside == PixelEndcapName::mO) {
     DBdisk   *= -1; 

@@ -109,7 +109,7 @@ DetectorInformation::DetectorInformation(edm::ParameterSet const& iConfig):
   fRootFileName(iConfig.getUntrackedParameter<string>("rootFileName", string("pixelTree.root"))),
   fInit(0)
 {
-  string rcsid = string("$Id: DetectorInformation.cc,v 1.2 2010/09/21 08:26:18 ursl Exp $");
+  string rcsid = string("$Id: DetectorInformation.cc,v 1.3 2011/02/15 16:33:03 ursl Exp $");
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- DetectorInformation constructor" << endl;
   cout << "---  version:                         " << rcsid << endl;
@@ -260,11 +260,11 @@ void DetectorInformation::dumpDetIds(const edm::EventSetup& iSetup) {
       DetId detId = (*it)->geographicalId();
       if (detId.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel)) {
 
-	PixelBarrelName::Shell DBshell = PixelBarrelName::PixelBarrelName(detId).shell();
-	int DBlayer  = PixelBarrelName::PixelBarrelName(detId).layerName();
-	int DBladder = PixelBarrelName::PixelBarrelName(detId).ladderName();
-	int DBmodule = PixelBarrelName::PixelBarrelName(detId).moduleName();
-	int DBsector = PixelBarrelName::PixelBarrelName(detId).sectorName();
+	PixelBarrelName::Shell DBshell = PixelBarrelName(detId).shell();
+	int DBlayer  = PixelBarrelName(detId).layerName();
+	int DBladder = PixelBarrelName(detId).ladderName();
+	int DBmodule = PixelBarrelName(detId).moduleName();
+	int DBsector = PixelBarrelName(detId).sectorName();
 
 	string quad; 
 	if (DBshell == PixelBarrelName::mO) {
@@ -303,11 +303,11 @@ void DetectorInformation::dumpDetIds(const edm::EventSetup& iSetup) {
       }	else if(detId.subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap)) {
 	uint32_t id = detId();
        
-        PixelEndcapName::HalfCylinder side = PixelEndcapName::PixelEndcapName(DetId::DetId(id)).halfCylinder();
-        int disk   = PixelEndcapName::PixelEndcapName(DetId::DetId(id)).diskName();
-        int blade  = PixelEndcapName::PixelEndcapName(DetId::DetId(id)).bladeName();
-        int panel  = PixelEndcapName::PixelEndcapName(DetId::DetId(id)).pannelName();
-        int module = PixelEndcapName::PixelEndcapName(DetId::DetId(id)).plaquetteName();
+        PixelEndcapName::HalfCylinder side = PixelEndcapName(DetId(id)).halfCylinder();
+        int disk   = PixelEndcapName(DetId(id)).diskName();
+        int blade  = PixelEndcapName(DetId(id)).bladeName();
+        int panel  = PixelEndcapName(DetId(id)).pannelName();
+        int module = PixelEndcapName(DetId(id)).plaquetteName();
 
 
 	string quad; 
@@ -345,10 +345,10 @@ void DetectorInformation::dumpDetIds(const edm::EventSetup& iSetup) {
 
 // ----------------------------------------------------------------------
 void DetectorInformation::bpixNames(const DetId &pID, int &DBlayer, int &DBladder, int &DBmodule) {
-  PixelBarrelName::Shell DBshell = PixelBarrelName::PixelBarrelName(pID).shell();
-  DBlayer  = PixelBarrelName::PixelBarrelName(pID).layerName();
-  DBladder = PixelBarrelName::PixelBarrelName(pID).ladderName();
-  DBmodule = PixelBarrelName::PixelBarrelName(pID).moduleName();
+  PixelBarrelName::Shell DBshell = PixelBarrelName(pID).shell();
+  DBlayer  = PixelBarrelName(pID).layerName();
+  DBladder = PixelBarrelName(pID).ladderName();
+  DBmodule = PixelBarrelName(pID).moduleName();
   
   if (DBshell == PixelBarrelName::mO) {
     DBladder *= -1;
@@ -368,11 +368,11 @@ void DetectorInformation::bpixNames(const DetId &pID, int &DBlayer, int &DBladde
 // ----------------------------------------------------------------------
 void DetectorInformation::fpixNames(const DetId &pID, int &DBdisk, int &DBblade, int &DBpanel, int &DBmodule) {
 
-  PixelEndcapName::HalfCylinder DBside = PixelEndcapName::PixelEndcapName(pID).halfCylinder();
-  DBdisk   = PixelEndcapName::PixelEndcapName(pID).diskName();
-  DBblade  = PixelEndcapName::PixelEndcapName(pID).bladeName();
-  DBpanel  = PixelEndcapName::PixelEndcapName(pID).pannelName();
-  DBmodule = PixelEndcapName::PixelEndcapName(pID).plaquetteName();
+  PixelEndcapName::HalfCylinder DBside = PixelEndcapName(pID).halfCylinder();
+  DBdisk   = PixelEndcapName(pID).diskName();
+  DBblade  = PixelEndcapName(pID).bladeName();
+  DBpanel  = PixelEndcapName(pID).pannelName();
+  DBmodule = PixelEndcapName(pID).plaquetteName();
   
   if (DBside == PixelEndcapName::mO) {
     DBdisk   *= -1; 

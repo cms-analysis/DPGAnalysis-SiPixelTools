@@ -177,11 +177,8 @@ bool PixelNtuplizer_RealData::isValidMuonAssoc(const edm::Event& iEvent){
     int count = 0;
     muoninfo_.init();
    
-    int maxSize = MuonHandle->size();
-    
     if(MuonHandle->size() > 2){
       muoninfo_.HasOverFlow = 1;
-      maxSize = 2;
       muoninfo_.nMuon = 2;
     }
     else muoninfo_.nMuon = MuonHandle->size();
@@ -370,8 +367,8 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 	//double dPhi = -999;
 
 
-	bool barrel = DetId::DetId(hit->geographicalId()).subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel);
-	bool endcap = DetId::DetId(hit->geographicalId()).subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap);
+	bool barrel = DetId(hit->geographicalId()).subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel);
+	bool endcap = DetId(hit->geographicalId()).subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap);
 	if (!barrel && !endcap) {  
 	  continue;
 	}
@@ -387,15 +384,14 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 
 	float phiorientation = deltaPhi(gPhiDirection.phi(), gPModule.phi()) >= 0 ? +1. : -1.;
 	
-	LocalTrajectoryParameters ltp = tsos.localParameters();
-	LocalVector localDir = ltp.momentum()/ltp.momentum().mag();
+	//	LocalTrajectoryParameters ltp = tsos.localParameters();
+	// 	LocalVector localDir = ltp.momentum()/ltp.momentum().mag();
 
-	int DBlayer, DBladder, DBmodule, DBdisk, DBblade, DBpanel, DBdetid; 
-	DBdetid = hit->geographicalId().rawId();
+	int DBlayer, DBladder, DBmodule, DBdisk, DBblade, DBpanel; 
 	if (barrel) {
-	  bpixNames(DetId::DetId((*hit).geographicalId()), DBlayer, DBladder, DBmodule); 
+	  bpixNames(DetId((*hit).geographicalId()), DBlayer, DBladder, DBmodule); 
 	} else {
-	  fpixNames(DetId::DetId((*hit).geographicalId()), DBdisk, DBblade, DBpanel, DBmodule); 
+	  fpixNames(DetId((*hit).geographicalId()), DBdisk, DBblade, DBpanel, DBmodule); 
 	}
 
 	const DetId &hit_detId = hit->geographicalId();
@@ -408,12 +404,6 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 	}
 
 	// Flipped module?
-	float tmp1 = theGeomDet->surface().toGlobal(Local3DPoint(0.,0.,0.)).perp();
-	float tmp2 = theGeomDet->surface().toGlobal(Local3DPoint(0.,0.,1.)).perp();
-	int isFlipped(0); 
-	if (tmp2 < tmp1) isFlipped = 1;
-	else isFlipped = 0;
-
 	const RectangularPixelTopology * topol = dynamic_cast<const RectangularPixelTopology*>(&(theGeomDet->specificTopology()));
 
 	// -- Missing hits
@@ -498,7 +488,6 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 	    float rechity = lp.y();
 	    
                   if ( !matched.empty() ) {
-	            bool found_hit_from_generated_particle = false;
 
 	            //---Loop over sim hits found on DetUnit, use closest to RecHit
 	            float closest_dist = 99999.9;
@@ -514,7 +503,6 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 		      if ( dist < closest_dist ) {
 		        closest_dist = dist;
 		        closest_simhit = m;
-		        found_hit_from_generated_particle = true;
 		      } 
 		    } // end sim hit loop over candidates
 
@@ -575,7 +563,6 @@ bool PixelNtuplizer_RealData::isOffTrackHits(const edm::Event& iEvent,const SiPi
 
  //-----Iterate over detunits
  //cout << endl << "Start search for det unit..." << endl;
- bool found_det_unit = false;
  for (TrackerGeometry::DetContainer::const_iterator it = pDD->dets().begin(); it != pDD->dets().end(); it++) 
  {
    DetId detId = ( (*it)->geographicalId() );
@@ -589,7 +576,6 @@ bool PixelNtuplizer_RealData::isOffTrackHits(const edm::Event& iEvent,const SiPi
    if ( detId.rawId() != geoId ) continue;
    else if ( detId.rawId() == geoId ) {
      // cout << "Found the det unit for this RecHit = " << (int)detId.rawId() << endl;
-     found_det_unit = true;
 
      edm::Handle<SiPixelRecHitCollection> recHitColl;
      iEvent.getByLabel("siPixelRecHits", recHitColl );
@@ -732,8 +718,8 @@ void PixelNtuplizer_RealData::fillEvt(const edm::Event& iEvent,int NbrTracks)
 void PixelNtuplizer_RealData::fillDet(const DetId &tofill, uint subdetid, const PixelGeomDetUnit* PixGeom)
 {
   if (subdetid==1) {
-      det_.layer  = PXBDetId::PXBDetId(tofill).layer();
-      det_.ladder = PXBDetId::PXBDetId(tofill).ladder();
+      det_.layer  = PXBDetId(tofill).layer();
+      det_.ladder = PXBDetId(tofill).ladder();
     // convert to online ladder numbering convention 
     if (det_.layer==1) {
            if (det_.ladder<=5&&det_.ladder>=1)   det_.ladder = 6-det_.ladder;
@@ -748,20 +734,20 @@ void PixelNtuplizer_RealData::fillDet(const DetId &tofill, uint subdetid, const 
       else if (det_.ladder<=33&&det_.ladder>=12) det_.ladder = 11-det_.ladder;
       else if (det_.ladder<=44&&det_.ladder>=34) det_.ladder = 56-det_.ladder;
     }
-      det_.module = PXBDetId::PXBDetId(tofill).module();
+      det_.module = PXBDetId(tofill).module();
     // convert to online module numbering convention
     if (det_.module<=4) det_.module = det_.module-5;
     else det_.module = det_.module-4;
   } 
   else {
-      det_.disk      =  PXFDetId::PXFDetId(tofill).disk();
-      det_.blade     =  PXFDetId::PXFDetId(tofill).blade();
+      det_.disk      =  PXFDetId(tofill).disk();
+      det_.blade     =  PXFDetId(tofill).blade();
       // convert to online blade numbering convention
            if(det_.blade<=6&&det_.blade>=1)   det_.blade = 7-det_.blade;
       else if(det_.blade<=18&&det_.blade>=7)  det_.blade = 6-det_.blade;
       else if(det_.blade<=24&&det_.blade>=19) det_.blade = 31-det_.blade;
-      det_.panel     =  PXFDetId::PXFDetId(tofill).panel();
-      det_.plaquette =  PXFDetId::PXFDetId(tofill).module();
+      det_.panel     =  PXFDetId(tofill).panel();
+      det_.plaquette =  PXFDetId(tofill).module();
   }
 
 
@@ -1209,10 +1195,10 @@ float PixelNtuplizer_RealData::correctedTime(const  reco::Muon & aMuon)
 
 // ----------------------------------------------------------------------
 void PixelNtuplizer_RealData::bpixNames(const DetId &pID, int &DBlayer, int &DBladder, int &DBmodule) {
-  PixelBarrelName::Shell DBshell = PixelBarrelName::PixelBarrelName(pID).shell();
-  DBlayer  = PixelBarrelName::PixelBarrelName(pID).layerName();
-  DBladder = PixelBarrelName::PixelBarrelName(pID).ladderName();
-  DBmodule = PixelBarrelName::PixelBarrelName(pID).moduleName();
+  PixelBarrelName::Shell DBshell = PixelBarrelName(pID).shell();
+  DBlayer  = PixelBarrelName(pID).layerName();
+  DBladder = PixelBarrelName(pID).ladderName();
+  DBmodule = PixelBarrelName(pID).moduleName();
   
   if (DBshell == PixelBarrelName::mO) {
     DBladder *= -1;
@@ -1232,11 +1218,11 @@ void PixelNtuplizer_RealData::bpixNames(const DetId &pID, int &DBlayer, int &DBl
 // ----------------------------------------------------------------------
 void PixelNtuplizer_RealData::fpixNames(const DetId &pID, int &DBdisk, int &DBblade, int &DBpanel, int &DBmodule) {
 
-  PixelEndcapName::HalfCylinder DBside = PixelEndcapName::PixelEndcapName(pID).halfCylinder();
-  DBdisk   = PixelEndcapName::PixelEndcapName(pID).diskName();
-  DBblade  = PixelEndcapName::PixelEndcapName(pID).bladeName();
-  DBpanel  = PixelEndcapName::PixelEndcapName(pID).pannelName();
-  DBmodule = PixelEndcapName::PixelEndcapName(pID).plaquetteName();
+  PixelEndcapName::HalfCylinder DBside = PixelEndcapName(pID).halfCylinder();
+  DBdisk   = PixelEndcapName(pID).diskName();
+  DBblade  = PixelEndcapName(pID).bladeName();
+  DBpanel  = PixelEndcapName(pID).pannelName();
+  DBmodule = PixelEndcapName(pID).plaquetteName();
   
   if (DBside == PixelEndcapName::mO) {
     DBdisk   *= -1; 
