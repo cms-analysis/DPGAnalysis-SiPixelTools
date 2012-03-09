@@ -50,7 +50,7 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = "GR_E_V19::All"
+process.GlobalTag.globaltag = "GR_P_V28::All"
 
 # -- Input files
 # POOLSOURCE

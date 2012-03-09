@@ -29,7 +29,7 @@ process = cms.Process("Demo")
 # ----------------------------------------------------------------------
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.MessageLogger.categories.append('HLTrigReport')
 process.MessageLogger.categories.append('L1GtTrigReport')
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
@@ -43,7 +43,7 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = "GR_P_V13::All"
+process.GlobalTag.globaltag = "GR_P_V28::All"
 
 # -- Input files
 # POOLSOURCE
@@ -68,25 +68,11 @@ process.TrackRefitter.src = 'splittedTracksP5'
 # -- RecHit production
 process.load("RecoLocalTracker.SiPixelRecHits.SiPixelRecHits_cfi")
 
-# -- skimming
-process.PixelFilter = cms.EDFilter(
-    "SkimEvents",
-    verbose                        = cms.untracked.int32(0),
-    filterOnPrimaryVertex          = cms.untracked.int32(0),
-    primaryVertexCollectionLabel   = cms.untracked.InputTag('offlinePrimaryVertices'),
-    filterOnTracks                 = cms.untracked.int32(0),
-    trackCollectionLabel           = cms.untracked.InputTag('splittedTracksP5'),
-    filterOnPixelCluster           = cms.untracked.int32(1),
-    PixelClusterCollectionLabel    = cms.untracked.InputTag('siPixelClusters'),
-    filterOnL1TechnicalTriggerBits = cms.untracked.int32(0),
-    L1TechnicalTriggerBits         = cms.untracked.vint32(40, 41)
-    )
-
 # -- the tree filler
 try:
     rootFileName = os.environ["JOB"] + ".root"
 except KeyError:
-    rootFileName = "pixelTree-XXXX.root"
+    rootFileName = "pixelTree-cosmics-XXXX.root"
 
 process.PixelTree = cms.EDAnalyzer(
     "PixelTree",
@@ -110,7 +96,6 @@ process.PixelTree = cms.EDAnalyzer(
 
 # -- Path
 process.p = cms.Path(
-#    process.PixelFilter*
     process.siPixelRecHits*
     process.TrackRefitter*
     process.PixelTree
