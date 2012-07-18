@@ -1,10 +1,4 @@
 # ######################################################################
-# lxb8838.cern.ch
-# /afs/cern.ch/user/u/ursl/pixel/CMSSW_4_2_3_patch2/src/DPGAnalysis/SiPixelTools/test/reco/165
-# file list contains 188389 events
-# mkPyFiles -t ../../pixelTree-XXXX.py -f 110526.165617 -s r28 -e 50000 -r
-# ./pixelTree-r28-0165617-0002.py with 50000 events, skipEvents = 100000
-# ######################################################################
 # ----------------------------------------------------------------------
 # -- RECO py template file for dumping the PixelTree only
 # ----------------------------------------------------------------------
