@@ -108,6 +108,11 @@
 #include "DataFormats/SiPixelDigi/interface/PixelDigi.h"
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 
+//Luminosity
+#include "FWCore/Framework/interface/LuminosityBlock.h"
+#include "DataFormats/Luminosity/interface/LumiSummary.h"
+#include "DataFormats/Common/interface/ConditionsInEdm.h"
+
 
 #include <TROOT.h>
 #include <TSystem.h>
@@ -130,6 +135,7 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fPrimaryVertexCollectionLabel(iConfig.getUntrackedParameter<InputTag>("PrimaryVertexCollectionLabel", edm::InputTag("offlinePrimaryVertices"))),
   fMuonCollectionLabel(iConfig.getUntrackedParameter<InputTag>("muonCollectionLabel", edm::InputTag("muons"))),
   fTrackCollectionLabel(iConfig.getUntrackedParameter<InputTag>("trackCollectionLabel", edm::InputTag("generalTracks"))),
+  fLumiSummaryLabel(iConfig.getUntrackedParameter<InputTag>("LumiSummaryLabel", edm::InputTag("lumiProducer"))),
   fTrajectoryInputLabel(iConfig.getUntrackedParameter<InputTag>("trajectoryInputLabel", edm::InputTag("ctfRefitter"))),
   fPixelClusterLabel(iConfig.getUntrackedParameter<InputTag>("pixelClusterLabel", edm::InputTag("siPixelClusters"))), 
   fPixelRecHitLabel(iConfig.getUntrackedParameter<InputTag>("pixelRecHitLabel", edm::InputTag("siPixelRecHits"))), 
@@ -139,9 +145,10 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag>("HLTResultsLabel", edm::InputTag("TriggerResults::HLT"))),
   fL1MuGMTLabel(iConfig.getUntrackedParameter<InputTag>("l1muGmtLabel", edm::InputTag("gtDigis"))),
   fAccessSimHitInfo(iConfig.getUntrackedParameter<bool>( "accessSimHitInfo", false) ),
+
   fInit(0)
 {
-  string rcsid = string("$Id: PixelTree.cc,v 1.49 2012/03/07 16:30:06 ursl Exp $");
+  string rcsid = string("$Id: PixelTree.cc,v 1.50 2012/03/09 14:18:39 ursl Exp $");
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
   cout << "---  version:                         " << rcsid << endl;
@@ -186,7 +193,7 @@ void PixelTree::endJob() {
   GlobalTag.Write("GlobalTag");
   TObjString Type(fType.c_str());
   Type.Write("Type");
-  TObjString rcsid("$Id: PixelTree.cc,v 1.49 2012/03/07 16:30:06 ursl Exp $");
+  TObjString rcsid("$Id: PixelTree.cc,v 1.50 2012/03/09 14:18:39 ursl Exp $");
   rcsid.Write("Rcsid");
 
 
@@ -230,6 +237,9 @@ void PixelTree::beginJob() {
   fTree->Branch("tlo",          &fTimeLo,       "tlo/i");
   fTree->Branch("thi",          &fTimeHi,       "thi/i");
 
+  fTree->Branch("Lumi",         &fLumi,         "fLumi/F");
+  fTree->Branch("LumiInt",      &fLumiInt,      "fLumiInt/F");
+  
   fTree->Branch("fed1",         &fFED1,         "fed1/i");
   fTree->Branch("fed2",         &fFED2,         "fed2/i");
 
@@ -515,6 +525,30 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
   fTimeLo    = low;
   fTimeHi    = high;
+
+  // Get the luminosity information 
+  edm::LuminosityBlock const& iLumi = iEvent.getLuminosityBlock();
+  edm::Handle<LumiSummary> lumi;
+  iLumi.getByLabel("lumiProducer", lumi);
+  edm::Handle<edm::ConditionsInLumiBlock> cond;
+  float intlumi = 0, instlumi=0;
+  //int beamint1=0, beamint2=0;
+  iLumi.getByLabel("conditionsInEdm", cond);
+  // This will only work when running on RECO until (if) they fix it in the FW
+  // When running on RAW and reconstructing, the LumiSummary will not appear
+  // in the event before reaching endLuminosityBlock(). Therefore, it is not
+  // possible to get this info in the event
+  if (lumi.isValid()) {
+    intlumi =(lumi->intgRecLumi())/1000.; // integrated lumi in pb-1 per LS
+    instlumi=(lumi->avgInsDelLumi())/1000.; //inst. lumi per pb-1 averaged overLS
+    //beamint1=(cond->totalIntensityBeam1)/1000;
+    //beamint2=(cond->totalIntensityBeam2)/1000;
+  } else {
+    //std::cout << "** ERROR: Event does not get lumi info\n";
+  }
+
+  fLumi     = instlumi;
+  fLumiInt  = intlumi;
 
   fBX        = iEvent.bunchCrossing();
   fOrbit     = iEvent.orbitNumber();

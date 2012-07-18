@@ -10,6 +10,7 @@
   <use   name="DataFormats/HLTReco"/>
   <use   name="DataFormats/L1GlobalMuonTrigger"/>
   <use   name="DataFormats/L1GlobalTrigger"/>
+  <use   name="DataFormats/Luminosity"/>  
   <use   name="DataFormats/Math"/>
   <use   name="DataFormats/MuonDetId"/>
   <use   name="DataFormats/MuonReco"/>
