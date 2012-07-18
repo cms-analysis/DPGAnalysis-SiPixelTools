@@ -47,21 +47,21 @@ process.load("CondCore.DBCommon.CondDBSetup_cfi")
 
 # -- Conditions
 process.load("Configuration.StandardSequences.MagneticField_38T_cff")
-process.load("Configuration.StandardSequences.Geometry_cff")
+process.load("Configuration.Geometry.GeometryIdeal_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = "GR_P_V28::All"
+process.GlobalTag.globaltag = "GR_P_V40::All"
 
 # -- Input files
 # POOLSOURCE
 
 # use for example :
-#process.source = cms.Source(
-# "PoolSource",
-#  fileNames = cms.untracked.vstring(
-#         "/store/express/Run2011A/ExpressPhysics/FEVT/Express-v4/000/165/617/FEFC6342-8286-E011-89DD-003048D37456.root"
-# )
-#)
+process.source = cms.Source(
+ "PoolSource",
+  fileNames = cms.untracked.vstring(
+         '/store/data/Run2012C/MinimumBias/RECO/PromptReco-v1/000/198/207/B2AAFCFE-06C7-E111-89D7-001D09F253C0.root'
+ )
+)
 
 # -- number of events
 #process.maxEvents = cms.untracked.PSet(
@@ -93,7 +93,7 @@ process.PixelFilter = cms.EDFilter(
 try:
     rootFileName = os.environ["JOB"] + ".root"
 except KeyError:
-    rootFileName = "pixelTree-r28-0165617-0002.root"
+    rootFileName = "pixelTree-r31-0165617-0002.root"
 
 process.PixelTree = cms.EDAnalyzer(
     "PixelTree",
