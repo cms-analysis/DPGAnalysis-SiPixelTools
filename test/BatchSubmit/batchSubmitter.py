@@ -5,15 +5,16 @@ import fileinput,sys,os,subprocess,re,time
 ## Change only this part
 
 dataset = '/MinimumBias/Run2012C-PromptReco-v1/RECO'
-remark = ''	# adds this string at the end of root filename	
 runnum = sys.argv[1]
 globalTag = 'GR_P_V40::All'
-numEvents = '-1'
 queue = '1nw'
 destination = '/store/caf/user/jluetic/'
+
+numEvents = '-1'
+remark = ''	# adds this string at the end of root filename	
 splitLen = 1	# number of root files from the original dataset in each job
 
-submit = False	# run the script without submitting jobs (for testing)
+submit = True	# run the script without submitting jobs (for testing)
 
 ## Setting enviroment
 
