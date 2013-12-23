@@ -91,6 +91,7 @@
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 
 #include "RecoMuon/GlobalTrackingTools/interface/GlobalMuonTrackMatcher.h"
+#include <RecoTracker/MeasurementDet/interface/MeasurementTrackerEvent.h>
 
 #include "TrackingTools/TrackAssociator/interface/TrackDetectorAssociator.h"
 #include "TrackingTools/PatternTools/interface/Trajectory.h"
@@ -107,6 +108,7 @@
 #include "SimDataFormats/TrackerDigiSimLink/interface/PixelDigiSimLink.h"
 #include "DataFormats/SiPixelDigi/interface/PixelDigi.h"
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
+
 
 //Luminosity
 #include "FWCore/Framework/interface/LuminosityBlock.h"
@@ -475,6 +477,8 @@ void PixelTree::analyze(const edm::Event& iEvent,
     simVC = *(simVertexCollection.product());
   }
 
+  edm::Handle<MeasurementTrackerEvent> measurementTrackerEvent;
+  iEvent.getByLabel("MeasurementTrackerEvent", measurementTrackerEvent);
 
   static int nevt(0); 
   static unsigned int oldRun(0); 
