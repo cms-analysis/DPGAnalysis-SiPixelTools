@@ -86,7 +86,7 @@ process.PixelFilter = cms.EDFilter(
 try:
     rootFileName = os.environ["JOB"] + ".root"
 except KeyError:
-    rootFileName = "pixelTree-XXXX.root"
+    rootFileName = "pixelTree_MC.root"
 
 process.PixelTree = cms.EDAnalyzer(
     "PixelTree",

@@ -2,7 +2,15 @@ import os
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("Demo")
+
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
+process.MessageLogger.cerr.threshold = 'INFO'
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.categories.append('HLTrigReport')
+process.MessageLogger.categories.append('L1GtTrigReport')
+process.options = cms.untracked.PSet( SkipEvent = cms.untracked.vstring('ProductNotFound'), wantSummary = cms.untracked.bool(True) )
+
+
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = 'GR_R_62_V3::All'
 
@@ -56,7 +64,7 @@ process.superPointingFilter = cms.EDFilter(
 try:
     rootFileName = os.environ["JOB"] + ".root"
 except KeyError:
-    rootFileName = "collisions_900GeV_ntuplizer.root"
+    rootFileName = "pixelTree_Data.root"
 
 
 process.PixelTree = cms.EDAnalyzer(
@@ -90,16 +98,4 @@ process.p = cms.Path(
     process.PixelTree
     )
 
-process.MessageLogger.categories.extend(["GetManyWithoutRegistration","GetByLabelWithoutRegistration"])
-_messageSettings = cms.untracked.PSet(
-                reportEvery = cms.untracked.int32(1),
-                            optionalPSet = cms.untracked.bool(True),
-                            limit = cms.untracked.int32(10000000)
-                        )
-
-process.MessageLogger.cerr.GetManyWithoutRegistration = _messageSettings
-process.MessageLogger.cerr.GetByLabelWithoutRegistration = _messageSettings
-
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
-process.MessageLogger.cerr.threshold = 'DEBUG'
 #process.TrackerDigiGeometryESModule.applyAlignment = True
