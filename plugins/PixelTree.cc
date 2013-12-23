@@ -91,6 +91,7 @@
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 
 #include "RecoMuon/GlobalTrackingTools/interface/GlobalMuonTrackMatcher.h"
+#include <RecoTracker/MeasurementDet/interface/MeasurementTrackerEvent.h>
 
 #include "TrackingTools/TrackAssociator/interface/TrackDetectorAssociator.h"
 #include "TrackingTools/PatternTools/interface/Trajectory.h"
@@ -107,6 +108,7 @@
 #include "SimDataFormats/TrackerDigiSimLink/interface/PixelDigiSimLink.h"
 #include "DataFormats/SiPixelDigi/interface/PixelDigi.h"
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
+
 
 //Luminosity
 #include "FWCore/Framework/interface/LuminosityBlock.h"
@@ -135,7 +137,7 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fPrimaryVertexCollectionLabel(iConfig.getUntrackedParameter<InputTag>("PrimaryVertexCollectionLabel", edm::InputTag("offlinePrimaryVertices"))),
   fMuonCollectionLabel(iConfig.getUntrackedParameter<InputTag>("muonCollectionLabel", edm::InputTag("muons"))),
   fTrackCollectionLabel(iConfig.getUntrackedParameter<InputTag>("trackCollectionLabel", edm::InputTag("generalTracks"))),
-  fLumiSummaryLabel(iConfig.getUntrackedParameter<InputTag>("LumiSummaryLabel", edm::InputTag("lumiProducer"))),
+  //fLumiSummaryLabel(iConfig.getUntrackedParameter<InputTag>("LumiSummaryLabel", edm::InputTag("lumiProducer"))),
   fTrajectoryInputLabel(iConfig.getUntrackedParameter<InputTag>("trajectoryInputLabel", edm::InputTag("ctfRefitter"))),
   fPixelClusterLabel(iConfig.getUntrackedParameter<InputTag>("pixelClusterLabel", edm::InputTag("siPixelClusters"))), 
   fPixelRecHitLabel(iConfig.getUntrackedParameter<InputTag>("pixelRecHitLabel", edm::InputTag("siPixelRecHits"))), 
@@ -148,10 +150,9 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
 
   fInit(0)
 {
-  string rcsid = string("$Id: PixelTree.cc,v 1.50 2012/03/09 14:18:39 ursl Exp $");
   cout << "----------------------------------------------------------------------" << endl;
   cout << "--- PixelTree constructor" << endl;
-  cout << "---  version:                         " << rcsid << endl;
+//  cout << "---  version:                         " << rcsid << endl;
   cout << "---  type:                            " << fType << endl;
   cout << "---  global tag:                      " << fGlobalTag << endl;
   cout << "---  verbose:                         " << fVerbose << endl;
@@ -175,6 +176,27 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fTkN = TRACKMAX; 
   fClN = CLUSTERMAX; 
   fDgN = DIGIMAX; 
+
+  LumiToken = consumes<LumiSummary>(edm::InputTag("lumiProducer"));
+ ConditionsInLumiBlockToken = consumes <edm::ConditionsInLumiBlock> (edm::InputTag("conditionsInEdm"));
+
+PixelDigiSimLinkToken= consumes<edm::DetSetVector<PixelDigiSimLink>>(edm::InputTag("simSiPixelDigis")); 
+SimTrackContainerToken=consumes  <edm::SimTrackContainer>(edm::InputTag("g4SimHits")); 
+SimVertexContainerToken= consumes <edm::SimVertexContainer>(edm::InputTag("g4SimHits")); 
+L1TrigReadoutToken=consumes  <L1GlobalTriggerReadoutRecord> (fL1GTReadoutRecordLabel) ;
+L1TrigObjectMapToken =consumes  <L1GlobalTriggerObjectMapRecord>(edm::InputTag("hltL1GtObjectMap")) ;
+TrigResultsToken= consumes  <edm::TriggerResults>(fHLTResultsLabel) ;
+VertexCollectionToken = consumes <reco::VertexCollection>(fPrimaryVertexCollectionLabel) ;
+MuonCollectionToken =consumes  <MuonCollection>(fMuonCollectionLabel) ;
+L1MuGMTToken = consumes  <L1MuGMTReadoutCollection>(fL1MuGMTLabel) ;
+HFRecHitToken = consumes  <HFRecHitCollection>(edm::InputTag("hfreco")) ;
+SiPixelClusterToken =consumes <edmNew::DetSetVector<SiPixelCluster>>(fPixelClusterLabel) ;
+PixelRecHitToken = consumes  <SiPixelRecHitCollection>(fPixelRecHitLabel) ;
+TrackToken=consumes  <std::vector<reco::Track>>(fTrackCollectionLabel) ;
+TTAToken=consumes  <TrajTrackAssociationCollection> (fTrajectoryInputLabel);
+
+
+
   init();
 
 }
@@ -193,8 +215,8 @@ void PixelTree::endJob() {
   GlobalTag.Write("GlobalTag");
   TObjString Type(fType.c_str());
   Type.Write("Type");
-  TObjString rcsid("$Id: PixelTree.cc,v 1.50 2012/03/09 14:18:39 ursl Exp $");
-  rcsid.Write("Rcsid");
+  //TObjString rcsid("$Id: PixelTree.cc,v 1.50 2012/03/09 14:18:39 ursl Exp $");
+  //rcsid.Write("Rcsid");
 
 
 
@@ -438,23 +460,25 @@ void PixelTree::analyze(const edm::Event& iEvent,
   
   edm::Handle< edm::DetSetVector<PixelDigiSimLink> > pixeldigisimlink;
   if (fAccessSimHitInfo) {
-    iEvent.getByLabel("simSiPixelDigis", pixeldigisimlink);
+    iEvent.getByToken(PixelDigiSimLinkToken, pixeldigisimlink);
   }
 
   edm::Handle<SimTrackContainer> simTrackCollection;
   SimTrackContainer simTC;
   if (fAccessSimHitInfo) {
-    iEvent.getByLabel("g4SimHits", simTrackCollection);
+    iEvent.getByToken(SimTrackContainerToken, simTrackCollection);
     simTC = *(simTrackCollection.product());
   }
   
   edm::Handle<SimVertexContainer> simVertexCollection;
   SimVertexContainer simVC;
   if (fAccessSimHitInfo) {
-    iEvent.getByLabel("g4SimHits", simVertexCollection);
+    iEvent.getByToken(SimVertexContainerToken, simVertexCollection);
     simVC = *(simVertexCollection.product());
   }
 
+//  edm::Handle<MeasurementTrackerEvent> measurementTrackerEvent;
+//  iEvent.getByLabel("MeasurementTrackerEvent", measurementTrackerEvent);
 
   static int nevt(0); 
   static unsigned int oldRun(0); 
@@ -529,11 +553,11 @@ void PixelTree::analyze(const edm::Event& iEvent,
   // Get the luminosity information 
   edm::LuminosityBlock const& iLumi = iEvent.getLuminosityBlock();
   edm::Handle<LumiSummary> lumi;
-  iLumi.getByLabel("lumiProducer", lumi);
+  iLumi.getByToken(LumiToken, lumi);
   edm::Handle<edm::ConditionsInLumiBlock> cond;
   float intlumi = 0, instlumi=0;
   //int beamint1=0, beamint2=0;
-  iLumi.getByLabel("conditionsInEdm", cond);
+  iLumi.getByToken(ConditionsInLumiBlockToken, cond);
   // This will only work when running on RECO until (if) they fix it in the FW
   // When running on RAW and reconstructing, the LumiSummary will not appear
   // in the event before reaching endLuminosityBlock(). Therefore, it is not
@@ -605,9 +629,9 @@ void PixelTree::analyze(const edm::Event& iEvent,
   // ----------------------------------------------------------------------
 
   Handle<L1GlobalTriggerReadoutRecord> L1GTRR;
-  iEvent.getByLabel(fL1GTReadoutRecordLabel,L1GTRR);
+  iEvent.getByToken(L1TrigReadoutToken,L1GTRR);
   Handle<L1GlobalTriggerObjectMapRecord> hL1GTmap; 
-  iEvent.getByLabel("hltL1GtObjectMap", hL1GTmap);
+  iEvent.getByToken(L1TrigObjectMapToken, hL1GTmap);
 
   L1GtUtils l1GtUtils;
   l1GtUtils.retrieveL1EventSetup(iSetup);
@@ -674,7 +698,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
     Handle<TriggerResults> hHLTresults;
     bool hltF = true;
     try {
-      iEvent.getByLabel(fHLTResultsLabel, hHLTresults);
+      iEvent.getByToken(TrigResultsToken, hHLTresults);
     } catch (...) {
       if (fVerbose > 0) cout << "==>HFDumpTrigger> Triggerresults  " << fHLTResultsLabel.encode() << " not found " << endl;
       hltF = false;
@@ -704,7 +728,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
   bool goodVertices(false);
   if ("nada" != fPrimaryVertexCollectionLabel.label()) {
     try{ 
-      iEvent.getByLabel(fPrimaryVertexCollectionLabel, hVertices);
+      iEvent.getByToken(VertexCollectionToken, hVertices);
       goodVertices = true; 
     } catch (...) {
       cout << "No Vertex collection with label " << fPrimaryVertexCollectionLabel << endl;
@@ -738,7 +762,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
   // ----------------------------------------------------------------------
   edm::Handle<MuonCollection> hMuonCollection;
   try{ 
-    iEvent.getByLabel(fMuonCollectionLabel, hMuonCollection);
+    iEvent.getByToken(MuonCollectionToken, hMuonCollection);
   } catch (cms::Exception &ex) {
     cout << "No Muon collection with label " << fMuonCollectionLabel << endl;
   }
@@ -755,7 +779,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
   edm::Handle<L1MuGMTReadoutCollection> gmtrc_handle; 
   bool goodL1Muons(false);
   try{ 
-    iEvent.getByLabel(fL1MuGMTLabel, gmtrc_handle);
+    iEvent.getByToken(L1MuGMTToken, gmtrc_handle);
     goodL1Muons = gmtrc_handle.isValid();
   } catch (cms::Exception &ex) {
     goodL1Muons = false;
@@ -878,7 +902,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
   //---------------------------------------------------------------------
   if (0) {
     Handle<HFRecHitCollection> hHf;
-    if (!iEvent.getByLabel("hfreco", hHf)) {
+    if (!iEvent.getByToken(HFRecHitToken, hHf)) {
       if (fVerbose > 0) cout << "Could not get rec hits! Tried with label: hfreco" << endl;
     }
     
@@ -937,18 +961,18 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
   // -- Pixel cluster
   edm::Handle< edmNew::DetSetVector<SiPixelCluster> > hClusterColl;
-  iEvent.getByLabel(fPixelClusterLabel, hClusterColl);
+  iEvent.getByToken(SiPixelClusterToken, hClusterColl);
   const edmNew::DetSetVector<SiPixelCluster> clustColl = *(hClusterColl.product());
 
   // -- Pixel RecHit
   edm::Handle<SiPixelRecHitCollection> hRecHitColl;
-  iEvent.getByLabel(fPixelRecHitLabel, hRecHitColl); 
+  iEvent.getByToken(PixelRecHitToken, hRecHitColl); 
   //  cout << "pixel cluster collection size: " << clustColl.size() << endl;
 
   // -- Tracks
   edm::Handle<std::vector<reco::Track> > hTrackCollection;
   try {
-    iEvent.getByLabel(fTrackCollectionLabel, hTrackCollection);
+    iEvent.getByToken(TrackToken, hTrackCollection);
   } catch (cms::Exception &ex) {
     if (fVerbose > 1) cout << "No Track collection with label " << fTrackCollectionLabel << endl;
   }
@@ -965,7 +989,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
     // -- Track trajectory association map
     edm::Handle<TrajTrackAssociationCollection> hTTAC;
-    iEvent.getByLabel(fTrajectoryInputLabel, hTTAC);
+    iEvent.getByToken(TTAToken, hTTAC);
     if (fVerbose > 1) cout << "===========> trajectory collection size: " << hTTAC->size() << endl;
     
     TrajectoryStateCombiner tsoscomb;
@@ -2299,7 +2323,7 @@ void PixelTree::onlineRocColRow(const DetId &pID, int offlineRow, int offlineCol
   loc.pxid = cabling.pxid;
 
   sipixelobjects::LocalPixel locpixel(loc);
-  sipixelobjects::CablingPathToDetUnit path = {realfedID, cabling.link, cabling.roc};  
+  sipixelobjects::CablingPathToDetUnit path = {(unsigned int) realfedID, (unsigned int)cabling.link, (unsigned int)cabling.roc};  
   const sipixelobjects::PixelROC *theRoc = fCablingMap->findItem(path);
 
   roc = theRoc->idInDetUnit();
