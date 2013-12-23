@@ -477,8 +477,8 @@ void PixelTree::analyze(const edm::Event& iEvent,
     simVC = *(simVertexCollection.product());
   }
 
-  edm::Handle<MeasurementTrackerEvent> measurementTrackerEvent;
-  iEvent.getByLabel("MeasurementTrackerEvent", measurementTrackerEvent);
+//  edm::Handle<MeasurementTrackerEvent> measurementTrackerEvent;
+//  iEvent.getByLabel("MeasurementTrackerEvent", measurementTrackerEvent);
 
   static int nevt(0); 
   static unsigned int oldRun(0); 
