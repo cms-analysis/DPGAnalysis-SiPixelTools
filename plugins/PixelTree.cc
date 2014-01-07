@@ -551,26 +551,28 @@ void PixelTree::analyze(const edm::Event& iEvent,
   fTimeHi    = high;
 
   // Get the luminosity information 
-  edm::LuminosityBlock const& iLumi = iEvent.getLuminosityBlock();
-  edm::Handle<LumiSummary> lumi;
-  iLumi.getByToken(LumiToken, lumi);
-  edm::Handle<edm::ConditionsInLumiBlock> cond;
+//  edm::LuminosityBlock const& iLumi = iEvent.getLuminosityBlock();
+//  edm::Handle<LumiSummary> lumi;
+//  iLumi.getByToken(LumiToken, lumi);
+ // edm::Handle<edm::ConditionsInLumiBlock> cond;
   float intlumi = 0, instlumi=0;
   //int beamint1=0, beamint2=0;
-  iLumi.getByToken(ConditionsInLumiBlockToken, cond);
+//  iLumi.getByToken(ConditionsInLumiBlockToken, cond);
   // This will only work when running on RECO until (if) they fix it in the FW
   // When running on RAW and reconstructing, the LumiSummary will not appear
   // in the event before reaching endLuminosityBlock(). Therefore, it is not
   // possible to get this info in the event
-  if (lumi.isValid()) {
+/*  if (lumi.isValid()) {
     intlumi =(lumi->intgRecLumi())/1000.; // integrated lumi in pb-1 per LS
     instlumi=(lumi->avgInsDelLumi())/1000.; //inst. lumi per pb-1 averaged overLS
     //beamint1=(cond->totalIntensityBeam1)/1000;
     //beamint2=(cond->totalIntensityBeam2)/1000;
   } else {
-    //std::cout << "** ERROR: Event does not get lumi info\n";
+    intlumi =1.; // integrated lumi in pb-1 per LS
+    instlumi=1.;  
+  //std::cout << "** ERROR: Event does not get lumi info\n";
   }
-
+*/
   fLumi     = instlumi;
   fLumiInt  = intlumi;
 
