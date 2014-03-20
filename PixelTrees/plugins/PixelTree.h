@@ -21,6 +21,93 @@
 
 #include <map>
 
+#include "CondFormats/Alignment/interface/Definitions.h"
+#include "CondFormats/RunInfo/interface/RunSummary.h"
+#include "CondFormats/RunInfo/interface/RunInfo.h"
+#include "CondFormats/DataRecord/interface/RunSummaryRcd.h"
+
+#include "CondFormats/DataRecord/interface/L1GtTriggerMenuRcd.h"
+#include "CondFormats/L1TObjects/interface/L1GtTriggerMenu.h"
+#include "CondFormats/L1TObjects/interface/L1GtTriggerMenuFwd.h"
+
+#include "DataFormats/L1GlobalMuonTrigger/interface/L1MuRegionalCand.h"
+#include "DataFormats/L1GlobalMuonTrigger/interface/L1MuGMTReadoutCollection.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GtPsbWord.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GtFdlWord.h"
+
+#include "DataFormats/L1Trigger/interface/L1MuonParticle.h"
+#include "DataFormats/L1Trigger/interface/L1MuonParticleFwd.h"
+#include "DataFormats/L1Trigger/interface/L1ParticleMap.h"
+#include "DataFormats/L1Trigger/interface/L1ParticleMapFwd.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerObjectMapRecord.h"
+#include "DataFormats/HLTReco/interface/TriggerEventWithRefs.h"
+#include "DataFormats/HLTReco/interface/TriggerObject.h"
+#include "DataFormats/HLTReco/interface/TriggerFilterObjectWithRefs.h"
+#include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
+#include "DataFormats/HLTReco/interface/TriggerEvent.h"
+
+#include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
+
+#include "CondFormats/SiPixelObjects/interface/DetectorIndex.h"
+
+#include "DataFormats/Common/interface/DetSetVector.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
+#include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
+#include "DataFormats/Math/interface/deltaPhi.h"
+#include "DataFormats/Math/interface/deltaR.h"
+#include "DataFormats/MuonReco/interface/Muon.h"
+#include "DataFormats/MuonReco/interface/MuonTime.h"
+#include "DataFormats/MuonDetId/interface/DTChamberId.h"
+#include "DataFormats/MuonDetId/interface/MuonSubdetId.h"
+#include "DataFormats/Provenance/interface/Timestamp.h"
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PixelBarrelName.h"
+#include "DataFormats/SiPixelDetId/interface/PixelEndcapName.h"
+#include "DataFormats/SiPixelDigi/interface/PixelDigi.h"
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHitCollection.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+
+#include "DQM/SiStripCommon/interface/SiStripFolderOrganizer.h"
+
+#include "FWCore/Framework/interface/EventSetup.h"
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/Common/interface/TriggerNames.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/Framework/interface/ESHandle.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+
+#include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
+#include "Geometry/CaloGeometry/interface/CaloSubdetectorGeometry.h"
+
+#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
+
+#include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
+
+#include "MagneticField/Engine/interface/MagneticField.h"
+#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
+
+#include "RecoMuon/GlobalTrackingTools/interface/GlobalMuonTrackMatcher.h"
+
+#include "TrackingTools/TrackAssociator/interface/TrackDetectorAssociator.h"
+#include "TrackingTools/PatternTools/interface/Trajectory.h"
+#include "TrackingTools/TrajectoryState/interface/TrajectoryStateTransform.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
+#include "TrackingTools/PatternTools/interface/TrajTrackAssociation.h"
+
+#include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
+#include <DataFormats/VertexReco/interface/VertexFwd.h>
+
+#include "SimDataFormats/TrackingHit/interface/PSimHit.h"  
+#include "SimTracker/TrackerHitAssociation/interface/TrackerHitAssociator.h" 
+
+#include "SimDataFormats/TrackerDigiSimLink/interface/PixelDigiSimLink.h"
+#include "DataFormats/SiPixelDigi/interface/PixelDigi.h"
+#include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
+
 #include "CondFormats/SiPixelObjects/interface/SiPixelFrameConverter.h"
 #include "CondFormats/SiPixelObjects/interface/SiPixelFedCablingMap.h"
 #include "CondFormats/DataRecord/interface/SiPixelFedCablingMapRcd.h"
@@ -41,6 +128,11 @@
 #include "Alignment/OfflineValidation/interface/TrackerValidationVariables.h"
 #include "TrackingTools/TrackAssociator/interface/TrackAssociatorParameters.h"
 #include "TrackingTools/TrackAssociator/interface/TrackDetectorAssociator.h"
+
+//Luminosity
+#include "FWCore/Framework/interface/LuminosityBlock.h"
+#include "DataFormats/Luminosity/interface/LumiSummary.h"
+#include "DataFormats/Common/interface/ConditionsInEdm.h"
 
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 
@@ -93,6 +185,24 @@ class PixelTree : public edm::EDAnalyzer {
   std::string     fHLTProcessName; 
   edm::InputTag   fL1GTReadoutRecordLabel, fL1GTmapLabel, fHLTResultsLabel, fL1MuGMTLabel; 
   edm::ESHandle<SiPixelFedCablingMap> fCablingMap;
+
+  edm::EDGetTokenT<LumiSummary> LumiToken;
+  edm::EDGetTokenT<edm::ConditionsInLumiBlock> ConditionsInLumiBlockToken;
+
+  edm::EDGetTokenT<edm::DetSetVector<PixelDigiSimLink>> PixelDigiSimLinkToken;
+  edm::EDGetTokenT<edm::SimTrackContainer> SimTrackContainerToken;
+  edm::EDGetTokenT<edm::SimVertexContainer> SimVertexContainerToken;
+  edm::EDGetTokenT<L1GlobalTriggerReadoutRecord> L1TrigReadoutToken;
+  edm::EDGetTokenT<L1GlobalTriggerObjectMapRecord> L1TrigObjectMapToken;
+  edm::EDGetTokenT<edm::TriggerResults> TrigResultsToken;
+  edm::EDGetTokenT<reco::VertexCollection> VertexCollectionToken;
+  edm::EDGetTokenT<MuonCollection> MuonCollectionToken;
+  edm::EDGetTokenT<L1MuGMTReadoutCollection> L1MuGMTToken;
+  edm::EDGetTokenT<HFRecHitCollection> HFRecHitToken;
+  edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster>> SiPixelClusterToken;
+  edm::EDGetTokenT<SiPixelRecHitCollection> PixelRecHitToken;
+  edm::EDGetTokenT<std::vector<reco::Track>> TrackToken;
+  edm::EDGetTokenT<TrajTrackAssociationCollection> TTAToken;
 
   bool fAccessSimHitInfo;
 
