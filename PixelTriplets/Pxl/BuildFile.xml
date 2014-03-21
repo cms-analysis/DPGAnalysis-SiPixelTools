@@ -1,0 +1,15 @@
+<use name="FWCore/Framework"/>
+<use name="FWCore/PluginManager"/>
+<use name="FWCore/ParameterSet"/>
+<use name="CondFormats/SiPixelObjects"/>
+<use name="CommonTools/UtilAlgos"/>
+<use name="DataFormats/VertexReco"/>
+<use name="DataFormats/METReco"/>
+<use name="TrackingTools/Records"/>
+<use name="Geometry/TrackerGeometryBuilder"/>
+<use name="TrackingTools/TransientTrack"/>
+<use name="TrackingTools/MaterialEffects"/>
+<use name="TrackingTools/TrackFitters"/>
+<use name="TrackingTools/TransientTrackingRecHit"/>
+<use name="HLTrigger/HLTcore"/>
+<flags EDM_PLUGIN="1"/>

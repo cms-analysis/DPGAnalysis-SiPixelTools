@@ -218,7 +218,7 @@ void DetectorInformation::ROClist(const DetId &pID) {
       
       if (1 == OK) continue;
       
-      sipixelobjects::CablingPathToDetUnit path = {realfedID, cabling.link, cabling.roc};  
+      sipixelobjects::CablingPathToDetUnit path = {(unsigned int) realfedID, (unsigned int)cabling.link, (unsigned int)cabling.roc};  
       const sipixelobjects::PixelROC *theRoc = fCablingMap->findItem(path);
       
       int roc = theRoc->idInDetUnit();
@@ -413,7 +413,7 @@ void DetectorInformation::onlineRocColRow(const DetId &pID, int offlineRow, int 
   loc.pxid = cabling.pxid;
 
   sipixelobjects::LocalPixel locpixel(loc);
-  sipixelobjects::CablingPathToDetUnit path = {realfedID, cabling.link, cabling.roc};  
+  sipixelobjects::CablingPathToDetUnit path = {(unsigned int) realfedID, (unsigned int)cabling.link, (unsigned int)cabling.roc};  
   const sipixelobjects::PixelROC *theRoc = fCablingMap->findItem(path);
 
   roc = theRoc->idInDetUnit();
