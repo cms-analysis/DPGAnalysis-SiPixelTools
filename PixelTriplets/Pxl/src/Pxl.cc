@@ -102,31 +102,6 @@
 #include "CondFormats/SiPixelObjects/interface/SiPixelLorentzAngle.h"
 #include "CondFormats/DataRecord/interface/SiPixelLorentzAngleRcd.h"
 
-struct {
-	const char* name;
-	unsigned int prescale;
-}  SIM_TRIGGERS[] = {
-	{ "HLT_PFJet40_v", 30000 },
-	{ "HLT_PFJet80_v", 1000 },
-	{ "HLT_PFJet140_v", 120 },
-	{ "HLT_PFJet200_v", 25 },
-	{ "HLT_PFJet260_v", 5 },
-	{ "HLT_PFJet320_v", 1 },
-	{ "HLT_PFJet400_v", 1 },
-
-	{ "HLT_Jet370_NoJetID_v", 1 },
-
-	{ "HLT_DiPFJetAve40_v", 15000 },
-	{ "HLT_DiPFJetAve80_v", 1000 },
-	{ "HLT_DiPFJetAve140_v", 60 },
-	{ "HLT_DiPFJetAve200_v", 10 },
-	{ "HLT_DiPFJetAve260_v", 2 },
-	{ "HLT_DiPFJetAve320_v", 1 },
-	{ "HLT_DiPFJetAve400_v", 1 }
-};
-
-static const unsigned int N_SIM_TRIGGERS = sizeof(SIM_TRIGGERS)/sizeof(SIM_TRIGGERS[0]);
-
 //
 // class declaration:
 //
@@ -2147,45 +2122,6 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
       std::pair<int, int> prescale = HLTConfig.prescaleValues(iEvent, iSetup, triggerName);
       std::cout << i << ": " << triggerName << "; " << prescale.first << ", " << prescale.second << std::endl;
     }
-  }
-
-  const bool simulateTrigger = false;
-  if(simulateTrigger)
-  {
-    edm::Handle<edm::TriggerResults> triggerResults;
-    iEvent.getByLabel(_triggerSrc, triggerResults);
-
-    bool triggerAccepted = false;
-    const edm::TriggerNames& triggerNames = iEvent.triggerNames(*triggerResults);
-    for(unsigned int i = 0; i < triggerResults->size(); ++i)
-    {
-      if(triggerResults->accept(i))
-      {
-        std::string triggerName = triggerNames.triggerName(i);
-        for(unsigned int j = 0; j < N_SIM_TRIGGERS; ++j)
-        {
-          if(triggerName.find(SIM_TRIGGERS[j].name) == 0)
-          {
-            if(SIM_TRIGGERS[j].prescale == 1)
-            {
-              triggerAccepted = true;
-            }
-            else
-            {
-              edm::Service<edm::RandomNumberGenerator> rng;
-              CLHEP::RandFlat distribution(rng->getEngine(), 0.0, 1.0);
-              const double r = distribution.fire();
-
-              if(r < 1.0 / SIM_TRIGGERS[j].prescale)
-                triggerAccepted = true;
-            }
-          }
-        }
-      }
-    }
-
-    if(!triggerAccepted)
-      return;
   }
 
   myCounters::neve++;
