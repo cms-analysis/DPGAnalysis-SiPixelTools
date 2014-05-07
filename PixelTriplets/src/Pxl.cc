@@ -46,6 +46,8 @@
 
 #include <DataFormats/TrackReco/interface/HitPattern.h>
 
+#include <MagneticField/Engine/interface/MagneticField.h>
+
 // To convert detId to subdet/layer number:
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
@@ -70,24 +72,27 @@
 #include "Geometry/CommonTopologies/interface/PixelTopology.h"
 #include "Geometry/CommonTopologies/interface/StripTopology.h"
 
-#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
-#include "TrackingTools/Records/interface/TransientTrackRecord.h"
-//#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
-#include <TrackingTools/TrajectoryState/interface/FreeTrajectoryState.h>
-#include <MagneticField/Engine/interface/MagneticField.h>
 
-#include "TrackingTools/TransientTrackingRecHit/interface/TransientTrackingRecHitBuilder.h"
-#include "TrackingTools/TransientTrackingRecHit/interface/TransientTrackingRecHit.h"
+
+#include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/Records/interface/TransientRecHitRecord.h"
+//#include "TrackingTools/Records/interface/TransientRecHitRecord.h"
+//#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "TrackingTools/TransientTrackingRecHit/interface/TransientTrackingRecHit.h"
+#include "TrackingTools/TransientTrackingRecHit/interface/TransientTrackingRecHitBuilder.h"
+#include "RecoTracker/TransientTrackingRecHit/interface/TkTransientTrackingRecHitBuilder.h"
+
 
 #include "TrackingTools/PatternTools/interface/Trajectory.h"
 #include "TrackingTools/PatternTools/interface/TrajectoryBuilder.h"
-
 #include "TrackingTools/TrackFitters/interface/TrajectoryFitter.h"
-#include "TrackingTools/Records/interface/TransientRecHitRecord.h"
-#include "TrackingTools/Records/interface/TrackingComponentsRecord.h"
 #include "TrackingTools/TrackFitters/interface/TrajectoryStateCombiner.h"
+#include <TrackingTools/TrajectoryState/interface/FreeTrajectoryState.h>
+#include "TrackingTools/Records/interface/TrackingComponentsRecord.h"
 #include "TrackingTools/TrajectoryState/interface/TrajectoryStateTransform.h"
+
+#include "DataFormats/TrackerRecHit2D/interface/TkCloner.h"
 
 #include "TrackingTools/DetLayers/interface/DetLayer.h"
 
@@ -101,6 +106,9 @@
 
 #include "CondFormats/SiPixelObjects/interface/SiPixelLorentzAngle.h"
 #include "CondFormats/DataRecord/interface/SiPixelLorentzAngleRcd.h"
+
+// Flag for new tracking rechis, has to be ON for pre7 and later
+#define NEW_TRACKINGRECHITS  // For V71X_pre7 and later
 
 //
 // class declaration:
@@ -128,10 +136,10 @@ struct Histos{
   TH1D     *h050, *h051, *h052, *h053, *h054, *h055, *h056, *h057, *h058, *h059;
   TH1D     *h060, *h061, *h062, *h063, *h064, *h065;
   TH2D                                               *h066;
-  TH1D                                                      *h067, *h068;
+  TH1D                                                      *h067, *h068, *h069;
   TH1D     *h070, *h071, *h072, *h073;
   TProfile                             *h074, *h075;
-  TH1D                                               *h076;
+  TH1D                                               *h076, *h077, *h078, *h079;
   TH1D     *h080, *h081, *h082;
   TProfile                      *h083, *h084, *h085;
   TH1D                                               *h086, *h087;
@@ -542,6 +550,7 @@ private:
   edm::InputTag _triggerSrc;
   std::string _ttrhBuilder;
   HLTConfigProvider HLTConfig;
+  bool singleParticleMC;
 
   // ----------member data:
   std::map<int, Histos> runmap;
@@ -563,6 +572,9 @@ Pxl::Pxl(const edm::ParameterSet& iConfig)
   std::cout << "Pxl constructed\n";
   _triggerSrc = iConfig.getParameter<edm::InputTag>("triggerSource");
   _ttrhBuilder = iConfig.getParameter<std::string>("ttrhBuilder");
+  singleParticleMC  = iConfig.getUntrackedParameter<bool>("singleParticleMC",false);
+  std::cout<<_triggerSrc<<" "<<_triggerSrc.label()<<" "<<_triggerSrc.process()<<" "
+	   <<_triggerSrc.instance()<<" "<<std::endl;
 }
 //
 // destructor:
@@ -653,6 +665,7 @@ void Histos::init(TFileDirectory* fs)
 
   h067 = fs->make<TH1D>( "h067", "PXB row;PXB row;hits", 160, -0.5, 159.5 );
   h068 = fs->make<TH1D>( "h068", "PXB row;PXB row;ADC [ke]", 160, -0.5, 159.5 );
+  h069 = fs->make<TH1D>( "h069", "PXB y pull ", 100, -10., 10. );
 
   h070 = fs->make<TH1D>( "h070", "PXB cluster charge;PXB cluster charge [ke];hits", 100, 0, 200 );
   h071 = fs->make<TH1D>( "h071", "PXB cluster charge*cos(dip);PXB cluster charge*cos(dip) [ke];hits", 100, 0, 100 );
@@ -661,6 +674,9 @@ void Histos::init(TFileDirectory* fs)
   h074 = fs->make<TProfile>( "h074", "PXB cluster cols vs dip;dip angle [deg];<PXB cluster cols>", 80, -80, 80, 0, 30 );
   h075 = fs->make<TProfile>( "h075", "PXB cluster rows vs dip;dip angle [deg];<PXB cluster rows>", 80, -80, 80, 0, 10 );
   h076 = fs->make<TH1D>( "h076", "PXB cluster etaX;PXB cluster etaX;hits", 100, -1, 1 );
+  h077 = fs->make<TH1D>( "h077", "PXB x error ", 100, 0., 100. );
+  h078 = fs->make<TH1D>( "h078", "PXB y error ", 100, 0., 100. );
+  h079 = fs->make<TH1D>( "h079", "PXB x pull ", 100, -10., 10. );
 
   h080 = fs->make<TH1D>( "h080", "PXB x in pixel;x in pixel [#mum];hits", 100, 00, 100 );
   h081 = fs->make<TH1D>( "h081", "PXB x in pixel, =2 rows;x in pixel [#mum];hits", 100, 0, 100 );
@@ -2076,23 +2092,30 @@ void Pxl::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 	std::map<int, Histos>::iterator iter = runmap.find(run);
 	if(iter != runmap.end())
 	{
-		static_cast<Histos&>(*this) = iter->second;
+	  static_cast<Histos&>(*this) = iter->second;
 	}
 	else
 	{
-		edm::Service<TFileService> fs;
-
-		std::stringstream runstr;
-		runstr << "Run" << run;
-		TFileDirectory subdir = fs->mkdir(runstr.str().c_str());
-
-		runmap[run].init(&subdir);
-		static_cast<Histos&>(*this) = runmap[run];
+	  edm::Service<TFileService> fs;
+	  
+	  std::stringstream runstr;
+	  runstr << "Run" << run;
+	  TFileDirectory subdir = fs->mkdir(runstr.str().c_str());
+	  
+	  runmap[run].init(&subdir);
+	  static_cast<Histos&>(*this) = runmap[run];
 	}	
 
 	bool hltSetupChanged = false;
-	if(!HLTConfig.init(iRun, iSetup, _triggerSrc.process(), hltSetupChanged))
+	std::cout<<_triggerSrc<<" "<<_triggerSrc.label()<<" "<<_triggerSrc.process()<<" "
+		 <<_triggerSrc.instance()<<" "<<std::endl;
+
+	//const bool showTrigger = false;
+
+	if(_triggerSrc.label()!="") { 
+	  if(!HLTConfig.init(iRun, iSetup, _triggerSrc.process(), hltSetupChanged))
 		throw cms::Exception("Failed to init HLT config");
+	}
 }
 
 void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
@@ -2108,9 +2131,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   const double pihalf = 2*atan(1);
   const double sqrtpihalf = sqrt(pihalf);
 
-  const bool showTrigger = false;
-  if(showTrigger)
-  { 
+  // Trigger information, do only if the container is defined
+  if(_triggerSrc.label()!="") { 
     edm::Handle<edm::TriggerResults> triggerResults;
     iEvent.getByLabel(_triggerSrc, triggerResults);
     assert(triggerResults->size() == HLTConfig.size());
@@ -2263,7 +2285,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   h022->Fill( maxSumPt );
 
-  if( maxSumPt < 1 ) return;
+  //if( maxSumPt < 1 ) return;
+  if(!singleParticleMC && maxSumPt < 1 ) return;
 
   if( maxSumPt < 1 ) vtxP = vtxN;
 
@@ -2284,16 +2307,17 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   //--------------------------------------------------------------------
   // MET:
+  if(0) {
+    edm::Handle< edm::View<reco::PFMET> > pfMEThandle;
+    iEvent.getByLabel( "pfMet", pfMEThandle );
+    
+    if( !pfMEThandle.failedToGet() && pfMEThandle.isValid()){
+      
+      h026->Fill( pfMEThandle->front().sumEt() );
+      h027->Fill( pfMEThandle->front().et() );
+    }
+  } // if MET
 
-  edm::Handle< edm::View<reco::PFMET> > pfMEThandle;
-  iEvent.getByLabel( "pfMet", pfMEThandle );
-
-  if( !pfMEThandle.failedToGet() && pfMEThandle.isValid()){
-
-    h026->Fill( pfMEThandle->front().sumEt() );
-    h027->Fill( pfMEThandle->front().et() );
-
-  }
 
   //--------------------------------------------------------------------
   // get a fitter to refit TrackCandidates, the same fitter as used in standard reconstruction:
@@ -2301,19 +2325,57 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   // KalmanFilter
   // RungeKutta
 
+
+#ifdef NEW_TRACKINGRECHITS
+
+  // Fitter
+  edm::ESHandle<TrajectoryFitter> aFitter;
+  iSetup.get<TrajectoryFitter::Record>().get("KFFittingSmootherWithOutliersRejectionAndRK",aFitter);
+  std::unique_ptr<TrajectoryFitter> theFitter = aFitter->clone();
+  
+  //----------------------------------------------------------------------------
+  // Transient Rechit Builders
+  edm::ESHandle<TransientTrackBuilder> theB;
+  iSetup.get<TransientTrackRecord>().get( "TransientTrackBuilder", theB );
+
+  // Transient rec hits:
+  ESHandle<TransientTrackingRecHitBuilder> hitBuilder;
+  iSetup.get<TransientRecHitRecord>().get( _ttrhBuilder, hitBuilder );
+
+  // Cloner, New from 71Xpre7
+  const TkTransientTrackingRecHitBuilder * builder = 
+    static_cast<TkTransientTrackingRecHitBuilder const *>(hitBuilder.product());
+  //dynamic_cast<TkTransientTrackingRecHitBuilder const *>(hitBuilder.product());
+  auto hitCloner = builder->cloner();
+  //static_cast<TkTransientTrackingRecHitBuilder const *>(hitBuilder.product())->cloner();
+  
+  theFitter->setHitCloner(&hitCloner);
+
+#else 
+
+  // old
   ESHandle<TrajectoryFitter> TF;
   iSetup.get<TrajectoryFitter::Record>().get( "KFFittingSmootherWithOutliersRejectionAndRK", TF );
   const TrajectoryFitter* theFitter = TF.product();
 
-  // TrackPropagator:
+  edm::ESHandle<TransientTrackBuilder> theB;
+  iSetup.get<TransientTrackRecord>().get( "TransientTrackBuilder", theB );
 
+  // transient rec hits:
+  ESHandle<TransientTrackingRecHitBuilder> hitBuilder;
+  iSetup.get<TransientRecHitRecord>().get( _ttrhBuilder, hitBuilder );
+
+#endif
+
+  //--------------------------------------------------------------------
+  // TrackPropagator:
   edm::ESHandle<Propagator> prop;
   iSetup.get<TrackingComponentsRecord>().get( "PropagatorWithMaterial", prop );
   const Propagator* thePropagator = prop.product();
 
+
   //--------------------------------------------------------------------
   // tracks:
-
   Handle<TrackCollection> tracks;
 
   iEvent.getByLabel( "generalTracks", tracks );
@@ -2429,17 +2491,6 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   }//idet
 
-  //----------------------------------------------------------------------------
-  // transient track builder, needs B-field from data base (global tag in .py)
-
-  edm::ESHandle<TransientTrackBuilder> theB;
-
-  iSetup.get<TransientTrackRecord>().get( "TransientTrackBuilder", theB );
-
-  // transient rec hits:
-
-  ESHandle<TransientTrackingRecHitBuilder> hitBuilder;
-  iSetup.get<TransientRecHitRecord>().get( _ttrhBuilder, hitBuilder );
 
 #if 0
   edm::ESHandle<SiPixelLorentzAngle> SiPixelLorentzAngle_; 
@@ -2556,7 +2607,6 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     }//long tracks
 
     // transient track:
-
     TransientTrack tTrack = theB->build(*iTrack);
 
     TrajectoryStateOnSurface initialTSOS = tTrack.innermostMeasurementState();
@@ -2787,7 +2837,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     double uPXB2 = 0;
     double vPXB2 = 0;
     double ePXB2 = 0;
-    //double fPXB2 = 0;
+    double fPXB2 = 0;
 
     double xPXB3 = 0;
     double yPXB3 = 0;
@@ -2911,11 +2961,9 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	 irecHit != iTrack->recHitsEnd(); ++irecHit ) {
 
       DetId detId = (*irecHit)->geographicalId();
-
       uint32_t subDet = detId.subdetId();
 
       // enum Detector { Tracker=1, Muon=2, Ecal=3, Hcal=4, Calo=5 };
-
       if( detId.det() != 1 ){
 	cout << "rec hit ID = " << detId.det() << " not in tracker!?!?\n";
 	continue;
@@ -2959,36 +3007,31 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	// cast to SiPixelRecHit:
 	// TrackingRecHit -> RecHit2DLocalPos -> BaseSiTrackerRecHit2DLocalPos -> SiPixelRecHit
 
+	// Examine the detector
 	if( subDet == 1 ){ // PXB
 
 	  int ilay = PXBDetId(detId).layer();
 	  int ilad = PXBDetId(detId).ladder();
 
 	  if( ilay == 1 ){
-
 	    if(      ilad ==  5 ) halfmod = 1;
 	    else if( ilad ==  6 ) halfmod = 1;
 	    else if( ilad == 15 ) halfmod = 1;
 	    else if( ilad == 16 ) halfmod = 1;
-
 	  }
 
 	  if( ilay == 2 ){
-
 	    if(      ilad ==  8 ) halfmod = 1;
 	    else if( ilad ==  9 ) halfmod = 1;
 	    else if( ilad == 24 ) halfmod = 1;
 	    else if( ilad == 25 ) halfmod = 1;
-
 	  }
 
 	  if( ilay == 3 ){
-
 	    if( ilad == 11 ) halfmod = 1;
 	    if( ilad == 12 ) halfmod = 1;
 	    if( ilad == 33 ) halfmod = 1;
 	    if( ilad == 34 ) halfmod = 1;
-
 	  }
 
 	  if( idbg ) {
@@ -3002,13 +3045,11 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 	  if( pixhit->hasFilledProb() ){
 	    float clusProb = pixhit->clusterProbability(0);
-
 	    if( idbg ) cout << "  cluster prob " << clusProb << endl;
 	  }
 
 	  // pixel cluster:
 	  // TrackingRecHit -> RecHit2DLocalPos -> BaseSiTrackerRecHit2DLocalPos -> SiPixelRecHit -> SiPixelCluster
-
 	  edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster> const & clust = pixhit->cluster();
 
 	  if( clust.isNonnull() ) {
@@ -3045,9 +3086,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	    double qsum = 0;
 
 	    // loop over the pixels:
-
 	    int isize = pixelsVec.size();
-
 	    for( int i = 0;  i < isize; ++i ) {
 
 	      int ix = pixelsVec[i].x - xmin;
@@ -3156,9 +3195,18 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
       }//valid
 
-      // build transient hit: (from what?)
+      // build transient hit:
+#ifdef NEW_TRACKINGRECHITS
+      // for pre7
+      auto tmprh = 
+	(*irecHit)->cloneForFit(*builder->geometry()->idToDet((**irecHit).geographicalId()));
+      auto transRecHit = 
+	hitCloner.makeShared(tmprh, initialTSOS);
+#else 
 
       TransientTrackingRecHit::RecHitPointer transRecHit = hitBuilder->build( &*(*irecHit), initialTSOS);
+
+#endif
 
       myTTRHvec.push_back( transRecHit );
       coTTRHvec.push_back( transRecHit );
@@ -3167,10 +3215,10 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
       double xloc = transRecHit->localPosition().x();// 1st meas coord
       double yloc = transRecHit->localPosition().y();// 2nd meas coord or zero
-      //double zloc = transRecHit->localPosition().z();// up, always zero
+      //double zloc = transRecHit->localPosition().z();// up, always zero, unused
 
       double vxloc = transRecHit->localPositionError().xx();//covariance
-      //double vyloc = transRecHit->localPositionError().yy();//covariance
+      double vyloc = transRecHit->localPositionError().yy();//covariance
 
       double gX = transRecHit->globalPosition().x();
       double gY = transRecHit->globalPosition().y();
@@ -3180,14 +3228,22 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 	//if( idbg ) cout << "  try to improve\n";
 
-	TrajectoryStateOnSurface propTSOS = thePropagator->propagate( initialTSOS, transRecHit->det()->surface() );
+	TrajectoryStateOnSurface propTSOS = 
+	  thePropagator->propagate( initialTSOS, transRecHit->det()->surface() );
 
 	if( propTSOS.isValid() ){
 
 	  //if( idbg ) cout << "  have propTSOS\n";
 
+#ifdef NEW_TRACKINGRECHITS
+
+	  auto preciseHit = hitCloner.makeShared(tmprh,propTSOS); //pre7
+
+#else
+
 	  TransientTrackingRecHit::RecHitPointer preciseHit = transRecHit->clone(propTSOS);
 
+#endif
 	  //if( idbg ) cout << "  have preciseHit\n";
 
 	  xloc = preciseHit->localPosition().x();// 1st meas coord
@@ -3197,13 +3253,18 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  vxloc = preciseHit->localPositionError().xx();//covariance
 	  //vyloc = preciseHit->localPositionError().yy();//covariance
 
-	  if( idbg ) {
-	    cout << "  improved hit in " << subDet;
+	  if( idbg && subDet==1 ) {
+	    cout << "  improved hit in lay " << PXBDetId(detId).layer();
 	    cout << setprecision(4);
 	    cout << ", xloc from " << transRecHit->localPosition().x();
 	    cout << " to " << preciseHit->localPosition().x();
 	    cout << ", yloc from " << transRecHit->localPosition().y();
 	    cout << " to " << preciseHit->localPosition().y();
+	    cout << endl;
+	    cout<<sqrt(transRecHit->localPositionError().xx())*1E4<<" ";
+	    cout<<sqrt(transRecHit->localPositionError().yy())*1E4<<" ";
+	    cout<<sqrt(preciseHit->localPositionError().xx())*1E4<<" ";
+	    cout<<sqrt(preciseHit->localPositionError().yy())*1E4<<" ";
 	    cout << endl;
 	  }
 
@@ -3407,7 +3468,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  vPXB2 = yloc;
 	  phiN2 = phiN;
 	  ePXB2 = sqrt( vxloc );
-	  //fPXB2 = sqrt( vyloc );
+	  fPXB2 = sqrt( vyloc );
 	  clch2 = clch; // cluster charge [e]
 	  //ncol2 = ncol;
 	  nrow2 = nrow;
@@ -4817,10 +4878,22 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  h420->Fill( dca2*1E4 ); // 12.7 um
 	  h421->Fill( dz2*1E4 );
 
+	  // Add errors and pulls
+          h077->Fill( ePXB2*1E4 );
+          h078->Fill( fPXB2*1E4 );
+          if(idbg) cout<<" residuals "<<dca2*1E4<<" "<<ePXB2*1E4<<" "<<dz2*1E4
+		       <<" "<<fPXB2*1E4<<endl;
+          double pulx=0., puly=0.;
+          if(ePXB2!=0.0) pulx = dca2/ePXB2;
+          if(fPXB2!=0.0) puly = dz2/fPXB2;
+          h079->Fill( pulx );
+          h069->Fill( puly );
+
           if(bb/aa < 0.015) h420_1->Fill(dca2*1E4);
           else if(bb/aa >= 0.015 && bb/aa < 0.065) h420_2->Fill(dca2*1E4);
           else h420_3->Fill(dca2*1E4);
 
+	  //Flipped/non-flipped
 	  if( abs( phi2 - phiN2 ) < pihalf ) // outward facing module
             if(zPXB2 > 0)
 	      h420_out_zplus->Fill( dca2*1E4 );
@@ -4832,16 +4905,17 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
             else
 	      h420_in_zminus->Fill( dca2*1E4 );
 
+	  // versus number o ftracker hits
 	  if( hp.trackerLayersWithMeasurement() > 8 ) {
 	    h430->Fill( dca2*1E4 );
 	    h431->Fill( dz2*1E4 );
 	  }
-
+	  //
 	  if( phiinc*wt > -1 && phiinc*wt < 7 ){
 	    h440->Fill( dca2*1E4 ); // 11.4 um
 	    h441->Fill( dz2*1E4 );
 	  }
-
+	  // Versus cluster size in x
 	  if(      nrow2 == 1 ) h442->Fill( dca2*1E4 ); // 13.6
 	  else if( nrow2 == 2 ) h443->Fill( dca2*1E4 ); // 12.7
 	  else if( nrow2 == 3 ) h444->Fill( dca2*1E4 ); // 19.7 um
@@ -5027,7 +5101,6 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 	    if(      lpix*1E4 > 30 && lpix*1E4 < 70 ) h438->Fill( dca2*1E4 ); // 9.1 um
 	    else if( lpix*1E4 < 20 || lpix*1E4 > 80 ) h439->Fill( dca2*1E4 ); // 17.0, two peaks
-
 	    if( nrow2 == 1 ) h290->Fill( dca2*1E4 ); // single 13.1
 
 	    h379->Fill( dca2 *1E4 ); // dca from templates

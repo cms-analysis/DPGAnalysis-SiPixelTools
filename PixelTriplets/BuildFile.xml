@@ -11,5 +11,6 @@
 <use name="TrackingTools/MaterialEffects"/>
 <use name="TrackingTools/TrackFitters"/>
 <use name="TrackingTools/TransientTrackingRecHit"/>
+<use name="RecoTracker/TransientTrackingRecHit"/>
 <use name="HLTrigger/HLTcore"/>
 <flags EDM_PLUGIN="1"/>
