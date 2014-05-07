@@ -26,7 +26,7 @@
 #include "TrackingTools/TrackFitters/interface/TrajectoryStateCombiner.h"
 #include "TrackingTools/PatternTools/interface/TrajTrackAssociation.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
-#include "CalibTracker/SiPixelLorentzAngle/interface/SiPixelLorentzAngle.h"
+#include "../interface/SiPixelLorentzAngle.h"
 int lower_bin_;
 
 using namespace std;
