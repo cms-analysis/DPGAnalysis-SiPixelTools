@@ -1,0 +1,23 @@
+<use   name="boost"/>
+<use   name="root"/>
+<use   name="FWCore/Framework"/>
+<use   name="FWCore/ParameterSet"/>
+<use   name="DataFormats/SiPixelDigi"/>
+<use   name="DataFormats/SiPixelDetId"/>
+<use   name="DataFormats/DetId"/>
+<use   name="Geometry/Records"/>
+<use   name="Geometry/CommonDetUnit"/>
+<use   name="Geometry/TrackerGeometryBuilder"/>
+<use   name="CommonTools/UtilAlgos"/>
+<use   name="SimDataFormats/TrackingHit"/>
+<use   name="SimDataFormats/TrackerDigiSimLink"/>
+<use   name="SimDataFormats/CrossingFrame"/>
+# for Valid
+<library   file="SiPixelRecHitsValid_pix.cc" name="SiPixelRecHitsValid_pix">
+  <flags   EDM_PLUGIN="1"/>
+  <use   name="DQMServices/Core"/>
+  <use   name="DataFormats/TrackerRecHit2D"/>
+  <use   name="TrackingTools/TransientTrackingRecHit"/>
+  <use   name="DPGAnalysis-SiPixelTools/PixelHitAssociator"/>
+  <use   name="SimTracker/TrackerHitAssociation"/>
+</library>
