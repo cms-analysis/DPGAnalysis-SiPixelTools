@@ -142,7 +142,8 @@ struct Histos{
   TH1D                                               *h076, *h077, *h078, *h079;
   TH1D     *h080, *h081, *h082;
   TProfile                      *h083, *h084, *h085;
-  TH1D                                               *h086, *h087;
+  TH1D                                               *h086, *h087, *h088, *h089;
+  TH1D     *h090, *h091, *h092, *h093, *h094, *h095, *h096, *h097, *h098, *h099;
 
   TH1D     *h100, *h101, *h102, *h103, *h104, *h105,               *h108;
   TH2D                                               *h106, *h107,        *h109;
@@ -687,6 +688,11 @@ void Histos::init(TFileDirectory* fs)
 
   h086 = fs->make<TH1D>( "h086", "PXB x_{loc}, row = 1;x_{loc} [cm];hits", 164, -0.82, 0.82 );
   h087 = fs->make<TH1D>( "h087", "PXB x_{loc}, row = 2;x_{loc} [cm];hits", 164, -0.82, 0.82 );
+  h088 = fs->make<TH1D>( "h088", "Align x error ", 100, 0., 100. );
+  h089 = fs->make<TH1D>( "h089", "Align y error ", 100, 0., 100. );
+
+  h090 = fs->make<TH1D>( "h090", "dxy ", 100, -1000., 1000.);
+  h091 = fs->make<TH1D>( "h091", "dxy error", 100, 0., 100.);
 
   h100 = fs->make<TH1D>( "h100", "hits on tracks PXB layer;PXB layer;hits", 6, -0.5, 5.5 );
 
@@ -2402,12 +2408,45 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   }
 
   // loop over tracker detectors:
-
+  // This is just to test some parameters 
+#if 0
   for( TrackerGeometry::DetContainer::const_iterator idet = pTG->dets().begin();
        idet != pTG->dets().end(); ++idet ) {
 
     DetId mydetId = (*idet)->geographicalId();
     uint32_t mysubDet = mydetId.subdetId();
+
+    if( mysubDet == PixelSubdetector::PixelBarrel || 
+	mysubDet == PixelSubdetector::PixelEndcap ) {
+
+    //TEST
+    const GeomDet * myGeomDet = pTG->idToDet( mydetId );
+    //Surface::GlobalPoint gp = myGeomDet->toGlobal( lp );
+    cout<<myGeomDet<<" ? ";
+    if(myGeomDet != NULL) {
+      LocalError lape = myGeomDet->localAlignmentError();
+      cout<< lape.valid() <<" ";
+      if (lape.valid()) {
+	float tmp11= 0.;
+	if(lape.xx()>0.) tmp11= sqrt(lape.xx())*1E4;
+	float tmp13= 0.;
+	if(lape.yy()>0.) tmp13= sqrt(lape.yy())*1E4;
+
+	if( mysubDet == PixelSubdetector::PixelBarrel ) {
+	  cout << ": PXB layer " << PXBDetId(mydetId).layer();
+	  cout << ", ladder " << PXBDetId(mydetId).ladder();
+	  cout << ", module " << PXBDetId(mydetId).module()<<" ";
+	} else if( mysubDet == PixelSubdetector::PixelEndcap ) {
+	  cout << ": PXD side " << PXFDetId(mydetId).side();
+	  cout << ", disk " << PXFDetId(mydetId).disk();
+	  cout << ", blade " << PXFDetId(mydetId).blade()<<" ";
+	}
+	cout<<tmp11<<" "<<tmp13;
+	//h088->Fill( tmp11 );
+	//h089->Fill( tmp13 );
+      }
+    }
+    cout<<endl;
 
     //    if( myCounters::neve == 1 ){
     if( myCounters::neve == 0 ){
@@ -2489,8 +2528,9 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     }//idbg
 
+    } // if pixels
   }//idet
-
+#endif
 
 #if 0
   edm::ESHandle<SiPixelLorentzAngle> SiPixelLorentzAngle_; 
@@ -2511,7 +2551,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   double sumpt = 0;
   double sumq = 0;
   Surface::GlobalPoint origin = Surface::GlobalPoint(0,0,0);
-
+  const GeomDet * geomDet2 = NULL;
   for( TrackCollection::const_iterator iTrack = tracks->begin();
       iTrack != tracks->end(); ++iTrack ) {
 
@@ -2525,7 +2565,15 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     //if( pt < 0.75 ) continue;// curls up
     //if( pt < 1.75 ) continue;// want sharper image
 
-    if( abs( iTrack->dxy(vtxP) ) > 5*iTrack->dxyError() ) continue; // not prompt
+    //float tmp = abs(iTrack->dxy(vtxP))/iTrack->dxyError();
+    //cout<<pt<<" "<<abs(iTrack->dxy(vtxP))<<" "<<iTrack->dxyError()<<" "<<tmp<<endl;
+
+    h090->Fill( (iTrack->dxy(vtxP))*1E4 );
+    h091->Fill( (iTrack->dxyError())*1E4 );
+
+    if(!singleParticleMC && 
+       (abs( iTrack->dxy(vtxP) ) > 5*iTrack->dxyError()) ) continue; // not prompt
+
 
     sumpt += pt;
     sumq += iTrack->charge();
@@ -4411,6 +4459,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	    xPXB2 = gX;
 	    yPXB2 = gY;
 	    zPXB2 = gZ;
+	    geomDet2 = myGeomDet;
 	  }
 
 	  else if( ilay == 3 ) {
@@ -4888,6 +4937,23 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
           if(fPXB2!=0.0) puly = dz2/fPXB2;
           h079->Fill( pulx );
           h069->Fill( puly );
+
+	  // Alignment errors 
+	  //LocalError lape = det2->localAlignmentError();
+	  //cout<<geomDet2<<endl;
+	  if(geomDet2 != NULL) {
+	    LocalError lape = geomDet2->localAlignmentError();
+	    //cout<< lape.valid() <<endl;
+	    if (lape.valid()) {
+	      float tmp11= 0.;
+	      if(lape.xx()>0.) tmp11= sqrt(lape.xx())*1E4;
+	      float tmp13= 0.;
+	      if(lape.yy()>0.) tmp13= sqrt(lape.yy())*1E4;
+	      //cout<<" layer 2 "<<tmp11<<" "<<tmp13<<endl;
+	      h088->Fill( tmp11 );
+	      h089->Fill( tmp13 );
+	    } else {   if( myCounters::neve < 100 ) cout<<" lape invalid?"<<endl;}
+	  }
 
           if(bb/aa < 0.015) h420_1->Fill(dca2*1E4);
           else if(bb/aa >= 0.015 && bb/aa < 0.065) h420_2->Fill(dca2*1E4);

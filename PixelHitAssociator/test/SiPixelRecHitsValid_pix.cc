@@ -152,17 +152,17 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
 
       // alignment errors
       recHitXAlignError1 = 
-	dbe_->book1D("RecHitXAlignError1","RecHit X  Alignment errors bpix 1", 100, 0., 20.);
+	dbe_->book1D("RecHitXAlignError1","RecHit X  Alignment errors bpix 1", 100, 0., 100.);
       recHitXAlignError2 = 
-	dbe_->book1D("RecHitXAlignError2","RecHit X  Alignment errors bpix 2", 100, 0., 20.);
+	dbe_->book1D("RecHitXAlignError2","RecHit X  Alignment errors bpix 2", 100, 0., 100.);
       recHitXAlignError3 = 
-	dbe_->book1D("RecHitXAlignError3","RecHit X  Alignment errors bpix 3", 100, 0., 20.);
+	dbe_->book1D("RecHitXAlignError3","RecHit X  Alignment errors bpix 3", 100, 0., 100.);
       recHitYAlignError1 = 
-	dbe_->book1D("RecHitYAlignError1","RecHit Y  Alignment errors bpix 1", 100, 0., 20.);
+	dbe_->book1D("RecHitYAlignError1","RecHit Y  Alignment errors bpix 1", 100, 0., 100.);
       recHitYAlignError2 = 
-	dbe_->book1D("RecHitYAlignError2","RecHit Y  Alignment errors bpix 2", 100, 0., 20.);
+	dbe_->book1D("RecHitYAlignError2","RecHit Y  Alignment errors bpix 2", 100, 0., 100.);
       recHitYAlignError3 = 
-	dbe_->book1D("RecHitYAlignError3","RecHit Y  Alignment errors bpix 3", 100, 0., 20.);
+	dbe_->book1D("RecHitYAlignError3","RecHit Y  Alignment errors bpix 3", 100, 0., 100.);
 
 
 
@@ -263,13 +263,24 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
   if(!quick) {
 
     recHitXAlignError4 = 
-      dbe_->book1D("RecHitXAlignError4","RecHit X  Alignment errors fpix 1", 100, 0., 20.);
+      dbe_->book1D("RecHitXAlignError4","RecHit X  Alignment errors fpix 1", 100, 0., 100.);
     recHitXAlignError5 = 
-      dbe_->book1D("RecHitXAlignError5","RecHit X  Alignment errors fpix 2", 100, 0., 20.);
+      dbe_->book1D("RecHitXAlignError5","RecHit X  Alignment errors fpix 2", 100, 0., 100.);
     recHitYAlignError4 = 
-      dbe_->book1D("RecHitYAlignError4","RecHit Y  Alignment errors fpix 1", 100, 0., 20.);
+      dbe_->book1D("RecHitYAlignError4","RecHit Y  Alignment errors fpix 1", 100, 0., 100.);
     recHitYAlignError5 = 
-      dbe_->book1D("RecHitYAlignError5","RecHit Y  Alignment errors fpix 2", 100, 0., 20.);
+      dbe_->book1D("RecHitYAlignError5","RecHit Y  Alignment errors fpix 2", 100, 0., 100.);
+    recHitXAlignError6 = 
+      dbe_->book1D("RecHitXAlignError6","RecHit X  Alignment errors fpix 1", 100, 0., 100.);
+    recHitXAlignError7 = 
+      dbe_->book1D("RecHitXAlignError7","RecHit X  Alignment errors fpix 2", 100, 0., 100.);
+    recHitYAlignError6 = 
+      dbe_->book1D("RecHitYAlignError6","RecHit Y  Alignment errors fpix 1", 100, 0., 100.);
+    recHitYAlignError7 = 
+      dbe_->book1D("RecHitYAlignError7","RecHit Y  Alignment errors fpix 2", 100, 0., 100.);
+
+    test = 
+      dbe_->book2D("test","Alignment errors fpix", 100, 0., 100.,20,12.,32.);
     
   //RecHit X distribution for plaquette with x-size 1 in forward
   recHitXPlaquetteSize1 = dbe_->book1D("RecHit_x_Plaquette_xsize1", "RecHit X Distribution for plaquette x-size1", 100, -2., 2.);
@@ -316,10 +327,22 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
 				 "RecHit X Pull All Modules in Barrel"        , 100, -10.0, 10.0);
   recHitYPullAllB = dbe_->book1D("RecHit_ypull_b_All"       , 
 				 "RecHit Y Pull All Modules in Barrel"        , 100, -10.0, 10.0);
-  recHitXErrorAllB = dbe_->book1D("RecHit_xerr_b_All"       , 
-				 "RecHit X Error All Modules in Barrel"        , 100, 0, 0.1);
-  recHitYErrorAllB = dbe_->book1D("RecHit_yerr_b_All"       , 
-				 "RecHit Y Error All Modules in Barrel"        , 100, 0, 0.1);
+  //recHitXErrorAllB = dbe_->book1D("RecHit_xerr_b_All"       , 
+  //				 "RecHit X Error All Modules in Barrel"        , 100, 0, 0.1);
+  //recHitYErrorAllB = dbe_->book1D("RecHit_yerr_b_All"       , 
+  //				 "RecHit Y Error All Modules in Barrel"        , 100, 0, 0.1);
+  recHitXError1B = dbe_->book1D("recHitXError1B"       , 
+				 "RecHit X Error in Barrel Layer 1"        , 100, 0, 0.1);
+  recHitYError1B = dbe_->book1D("recHitYError1B"       , 
+				 "RecHit Y Error in Barrel Layer 1"        , 100, 0, 0.1);
+  recHitXError2B = dbe_->book1D("recHitXError2B"       , 
+				 "RecHit X Error in Barrel Layer 2"        , 100, 0, 0.1);
+  recHitYError2B = dbe_->book1D("recHitYError2B"       , 
+				 "RecHit Y Error in Barrel Layer 2"        , 100, 0, 0.1);
+  recHitXError3B = dbe_->book1D("recHitXError3B"       , 
+				 "RecHit X Error in Barrel Layer 3"        , 100, 0, 0.1);
+  recHitYError3B = dbe_->book1D("recHitYError3B"       , 
+				 "RecHit Y Error in Barrel Layer 3"        , 100, 0, 0.1);
 
   for (int i=0; i<3; i++) 
     {
@@ -345,6 +368,8 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
   dbe_->setCurrentFolder("TrackerRecHitsV/TrackerRecHits/Pixel/recHitPullsFPIX");
   recHitXPullAllF = dbe_->book1D("RecHit_XPull_f_All", "RecHit X Pull All in Forward", 100, -10.0, 10.0);  
   recHitYPullAllF = dbe_->book1D("RecHit_YPull_f_All", "RecHit Y Pull All in Forward", 100, -10.0, 10.0);
+  recHitXErrorAllF = dbe_->book1D("RecHit_XError_f_All", "RecHit X Error All in Forward", 100, 0.0, 0.1);  
+  recHitYErrorAllF = dbe_->book1D("RecHit_YError_f_All", "RecHit Y Error All in Forward", 100, 0.0, 0.1);
   
   for (int i=0; i<7; i++) 
     {
@@ -560,9 +585,12 @@ void SiPixelRecHitsValid_pix::fillBarrel(const SiPixelRecHit& recHit, const PSim
     recHitXPullAllB->Fill(pull_x);  
     recHitYPullAllB->Fill(pull_y);
     
-    recHitXErrorAllB->Fill(lerr_x);  
-    recHitYErrorAllB->Fill(lerr_y);
-
+    if( (tTopo->pxbLayer(detId)) == 1) 
+      {recHitXError1B->Fill(lerr_x); recHitYError1B->Fill(lerr_y);}
+    else if( (tTopo->pxbLayer(detId)) == 2) 
+      {recHitXError2B->Fill(lerr_x); recHitYError2B->Fill(lerr_y);}
+    else if( (tTopo->pxbLayer(detId)) == 3) 
+      {recHitXError3B->Fill(lerr_x); recHitYError3B->Fill(lerr_y);}
     
     int rows = theGeomDet->specificTopology().nrows(); 
     if (rows == 160) recHitXFullModules->Fill(lp_x);
@@ -731,6 +759,8 @@ void SiPixelRecHitsValid_pix::fillForward(const SiPixelRecHit & recHit, const PS
 
   if(quick) return; // skip the rest
 
+  recHitXErrorAllF->Fill(lerr_x);
+  recHitYErrorAllF->Fill(lerr_y);
   recHitXPullAllF->Fill(pull_x);
   recHitYPullAllF->Fill(pull_y);
 
@@ -755,22 +785,36 @@ void SiPixelRecHitsValid_pix::fillForward(const SiPixelRecHit & recHit, const PS
       recHitYPlaquetteSize5->Fill(lp_y);
     }
   
-    LocalError lape = theGeomDet->localAlignmentError();
-    if (lape.valid()) {
-      float tmp11= 0.;
-      if(lape.xx()>0.) tmp11= sqrt(lape.xx())*1E4;
-      //float tmp12= sqrt(lape.xy())*1E4;
-      float tmp13= 0.;
-      if(lape.yy()>0.) tmp13= sqrt(lape.yy())*1E4;
-      //bool tmp14=tmp2<tmp1;
-      if( (tTopo->pxfDisk(detId)) == 1) 
+  LocalError lape = theGeomDet->localAlignmentError();
+  if (lape.valid()) {
+    float tmp11= 0.;
+    if(lape.xx()>0.) tmp11= sqrt(lape.xx())*1E4;
+    //float tmp12= sqrt(lape.xy())*1E4;
+    float tmp13= 0.;
+    if(lape.yy()>0.) tmp13= sqrt(lape.yy())*1E4;
+    if( (tTopo->pxfDisk(detId)) == 1)  { // disk 1
+      if( (tTopo->pxfSide(detId)) == 1)  // -z
 	{recHitXAlignError4->Fill(tmp11); recHitYAlignError4->Fill(tmp13);}
-      else if( (tTopo->pxfDisk(detId)) == 2) 
+      else if( (tTopo->pxfSide(detId)) == 2)  // +z
 	{recHitXAlignError5->Fill(tmp11); recHitYAlignError5->Fill(tmp13);}
-      else {cout<<" unkown disk "<<tTopo->pxfDisk(detId)<<endl;}
-      //cout<<tTopo->pxbLayer(detId)<<" "<<tTopo->pxbModule(detId)<<" "<<rows<<" "<<tmp14<<" "
-      //  <<tmp11<<" "<<tmp13<<endl;
-    } // if lape 
+    } else if( (tTopo->pxfDisk(detId)) == 2) {  // disk 2
+      if( (tTopo->pxfSide(detId)) == 1)  
+	{recHitXAlignError6->Fill(tmp11); recHitYAlignError6->Fill(tmp13);}
+      else if( (tTopo->pxfSide(detId)) == 2)  
+	{recHitXAlignError7->Fill(tmp11); recHitYAlignError7->Fill(tmp13);}
+    }
+    else {cout<<" unkown disk "<<tTopo->pxfDisk(detId)<<endl;}
+    //if(tmp11>0.) cout<<tTopo->pxfDisk(detId)<<" "
+    //		     <<tTopo->pxfSide(detId)<<" "<<tTopo->pxfBlade(detId)<<" "
+    //		     <<tTopo->pxfPanel(detId)<<" "<<tTopo->pxfModule(detId)<<" "
+    //		     <<rows<<" "<<cols<<" "
+    //		     <<tmp11<<" "<<tmp13<<endl;
+    float tmp14=float(tTopo->pxfBlade(detId));
+    if( (tTopo->pxfDisk(detId)) == 2) tmp14 += 50.;
+    if( (tTopo->pxfSide(detId)) == 2) tmp14 += 25.; 
+    test->Fill(tmp14,tmp13);
+
+  } // if lape 
     
   // get cluster
   SiPixelRecHit::ClusterRef const& clust = recHit.cluster();

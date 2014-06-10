@@ -145,7 +145,7 @@ process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService
 )
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(-1)
 )
 
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
@@ -177,10 +177,10 @@ process.MessageLogger = cms.Service("MessageLogger",
 #process.GlobalTag.globaltag = "PRE_MC_71_V2::All"
 
 #process.GlobalTag.globaltag = "START70_V1::All"
-#process.GlobalTag.globaltag = "START71_V1::All"
-process.GlobalTag.globaltag = "PRE_STA71_V2::All"
+process.GlobalTag.globaltag = "START71_V1::All"
+#process.GlobalTag.globaltag = "PRE_STA71_V3::All"
 
-#process.GlobalTag.globaltag = "POSTLS170_V5::All"
+#process.GlobalTag.globaltag = "POSTLS170_V4::All"
 #process.GlobalTag.globaltag = "POSTLS171_V1::All"
 #process.GlobalTag.globaltag = "PRE_LS171_V3::All"
 
@@ -191,6 +191,33 @@ process.o1 = cms.OutputModule("PoolOutputModule",
 #      outputCommands = cms.untracked.vstring('keep *_*_*_*'),
       fileName = cms.untracked.string('file:dummy.root')
 )
+
+
+# DB stuff 
+# GenError
+useLocalDB = True
+if useLocalDB :
+    process.DBReaderFrontier = cms.ESSource("PoolDBESSource",
+     DBParameters = cms.PSet(
+         messageLevel = cms.untracked.int32(0),
+         authenticationPath = cms.untracked.string('')
+     ),
+     toGet = cms.VPSet(
+ 	 cms.PSet(
+          record = cms.string('SiPixelGenErrorDBObjectRcd'),
+#          tag = cms.string('SiPixelGenErrorDBObject38Tv1')
+#          tag = cms.string('SiPixelGenErrorDBObject38TV10')
+          tag = cms.string('SiPixelGenErrorDBObject_38T_v1_mc')
+ 	 ),
+ 	),
+#     connect = cms.string('sqlite_file:siPixelGenErrors38T.db')
+#     connect = cms.string('frontier://FrontierProd/CMS_COND_PIXEL_000')
+     connect = cms.string('frontier://FrontierPrep/CMS_COND_PIXEL')
+    ) # end process
+# endif
+
+process.myprefer = cms.ESPrefer("PoolDBESSource","DBReaderFrontier")
+
 
 process.g4SimHits.Generator.HepMCProductLabel = 'source'
 

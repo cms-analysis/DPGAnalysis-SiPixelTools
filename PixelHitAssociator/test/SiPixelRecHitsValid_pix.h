@@ -139,8 +139,8 @@ class SiPixelRecHitsValid_pix : public edm::EDAnalyzer {
 	//RecHits BPIX
 	MonitorElement* recHitXPullAllB;
 	MonitorElement* recHitYPullAllB;
-	MonitorElement* recHitXErrorAllB;
-	MonitorElement* recHitYErrorAllB;
+	MonitorElement *recHitXError1B,*recHitXError2B,*recHitXError3B;
+	MonitorElement *recHitYError1B,*recHitYError2B,*recHitYError3B;
 
 	MonitorElement* recHitXPullFlippedLadderLayers[3];
 	MonitorElement* recHitXPullNonFlippedLadderLayers[3];
@@ -151,6 +151,8 @@ class SiPixelRecHitsValid_pix : public edm::EDAnalyzer {
 	//RecHits FPIX
 	MonitorElement* recHitXPullAllF;
 	MonitorElement* recHitYPullAllF;
+	MonitorElement* recHitXErrorAllF;
+	MonitorElement* recHitYErrorAllF;
 
 	MonitorElement* recHitXPullDisk1Plaquettes[7];
 	MonitorElement* recHitXPullDisk2Plaquettes[7];
@@ -158,10 +160,12 @@ class SiPixelRecHitsValid_pix : public edm::EDAnalyzer {
 	MonitorElement* recHitYPullDisk2Plaquettes[7];
 
 	// Alignment errors 
-	MonitorElement *recHitXAlignError1, *recHitXAlignError2,*recHitXAlignError3,
-	  *recHitXAlignError4,*recHitXAlignError5;
-	MonitorElement *recHitYAlignError1, *recHitYAlignError2,*recHitYAlignError3,
-	  *recHitYAlignError4,*recHitYAlignError5;
+	MonitorElement *recHitXAlignError1, *recHitXAlignError2, *recHitXAlignError3;
+	MonitorElement *recHitXAlignError4, *recHitXAlignError5, *recHitXAlignError6, *recHitXAlignError7;
+	MonitorElement *recHitYAlignError1, *recHitYAlignError2, *recHitYAlignError3;
+	MonitorElement *recHitYAlignError4, *recHitYAlignError5, *recHitYAlignError6, *recHitYAlignError7;
+
+	MonitorElement* test;
 
         edm::InputTag src_;
 };
