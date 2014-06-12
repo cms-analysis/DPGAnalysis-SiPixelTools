@@ -191,7 +191,9 @@ struct Histos{
   TProfile                                                                *h409;
   TH1D     *h410, *h411;
   TProfile               *h412, *h412_out_zplus, *h412_out_zminus, *h412_in_zplus, *h412_in_zminus, *h413, *h414, *h415, *h416, *h417, *h418, *h419;
-  TH1D     *h420, *h420_out_zplus, *h420_out_zminus, *h420_in_zplus, *h420_in_zminus, *h421;
+  TH1D     *h420, *h420_out_zplus, *h420_out_zminus, *h420_in_zplus, *h420_in_zminus, *h421; 
+  TH1D     *h420_mod1, *h420_mod2, *h420_mod3, *h420_mod4, *h420_mod5, *h420_mod6, *h420_mod7, *h420_mod8; 
+  TH1D     *h421_mod1, *h421_mod2, *h421_mod3, *h421_mod4, *h421_mod5, *h421_mod6, *h421_mod7, *h421_mod8;
   TH1D     *h420_1, *h420_2, *h420_3;
   TProfile               *h422, *h423, *h424, *h425, *h426, *h427, *h428, *h429, *h429_eta;
   TH1D     *h430, *h431, *h432,                      *h436,        *h438, *h439;
@@ -966,6 +968,23 @@ void Histos::init(TFileDirectory* fs)
   h420_2 = fs->make<TH1D>( "h420_2", "PXB2 residuals #Deltax, p_{t} > 12, lever 2;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h420_3 = fs->make<TH1D>( "h420_3", "PXB2 residuals #Deltax, p_{t} > 12, lever 3;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
 
+  h420_mod1 = fs->make<TH1D>( "h420_mod1", "PXB2 Module 1 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
+  h420_mod2 = fs->make<TH1D>( "h420_mod2", "PXB2 Module 2 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
+  h420_mod3 = fs->make<TH1D>( "h420_mod3", "PXB2 Module 3 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
+  h420_mod4 = fs->make<TH1D>( "h420_mod4", "PXB2 Module 4 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
+  h420_mod5 = fs->make<TH1D>( "h420_mod5", "PXB2 Module 5 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
+  h420_mod6 = fs->make<TH1D>( "h420_mod6", "PXB2 Module 6 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
+  h420_mod7 = fs->make<TH1D>( "h420_mod7", "PXB2 Module 7 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
+  h420_mod8 = fs->make<TH1D>( "h420_mod8", "PXB2 Module 8 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
+  
+  h421_mod1 = fs->make<TH1D>( "h421_mod1", "PXB2 Module 1  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  h421_mod2 = fs->make<TH1D>( "h421_mod2", "PXB2 Module 2  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  h421_mod3 = fs->make<TH1D>( "h421_mod3", "PXB2 Module 3  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  h421_mod4 = fs->make<TH1D>( "h421_mod4", "PXB2 Module 4  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  h421_mod5 = fs->make<TH1D>( "h421_mod5", "PXB2 Module 5  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  h421_mod6 = fs->make<TH1D>( "h421_mod6", "PXB2 Module 6  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  h421_mod7 = fs->make<TH1D>( "h421_mod7", "PXB2 Module 7  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  h421_mod8 = fs->make<TH1D>( "h421_mod8", "PXB2 Module 8  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
   // width profiles:
 
   h422 = fs->make<TProfile>( "h422", "PXB2 #sigma_{x} vs #phi;#phi_{2} [deg];PXB2 rms(#Deltax) [#mum]", 360, -180, 180, 0, 99 );
@@ -2891,6 +2910,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     double yPXB3 = 0;
     double zPXB3 = 0;
     double uPXB3 = 0;
+
+
     //double vPXB3 = 0;
     //double ePXB3 = 0;
     //double fPXB3 = 0;
@@ -2985,6 +3006,9 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     //double zTOB6 = 0;
     //double phiNTOB6 = 0;
 
+    int imod = 0;
+    // std::cout << " imod 0 "<< imod<< std::endl;
+
     int nTEC[3][10];// initialized to 0 by default
     for( int is = 0; is < 3; ++is ){
       for( int iw = 0; iw < 10; ++iw ){
@@ -3060,6 +3084,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 	  int ilay = PXBDetId(detId).layer();
 	  int ilad = PXBDetId(detId).ladder();
+	  imod = PXBDetId(detId).module();
+	 // std::cout << " imod 1 "<< imod<< std::endl;
 
 	  if( ilay == 1 ){
 	    if(      ilad ==  5 ) halfmod = 1;
@@ -3388,6 +3414,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	int ilay = PXBDetId(detId).layer();
 	int ilad = PXBDetId(detId).ladder();
 	int imod = PXBDetId(detId).module();
+	// std::cout << " imod 2 "<< imod<< std::endl;
 
 	if( idbg ) {
 	  cout << "  xloc " << xloc;
@@ -4448,7 +4475,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	if( subDet == PixelSubdetector::PixelBarrel ) {
 
 	  int ilay = PXBDetId(detId).layer();
-
+  
 	  if( ilay == 1 ) {
 	    xPXB1 = gX;
 	    yPXB1 = gY;
@@ -4970,7 +4997,43 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	      h420_in_zplus->Fill( dca2*1E4 );
             else
 	      h420_in_zminus->Fill( dca2*1E4 );
-
+	  
+	  // //////// Modules:1-8
+	
+	  if( imod==1  ){// innermost  module
+	    h420_mod1->Fill( dca2*1E4 );
+	    h421_mod1->Fill( dz2*1E4 );
+	  }
+	  if( imod==2  ){
+	    h420_mod2->Fill( dca2*1E4 );
+	    h421_mod2->Fill( dz2*1E4 );
+	  }
+	  if( imod==3  ){
+	    h420_mod3->Fill( dca2*1E4 );
+	    h421_mod3->Fill( dz2*1E4 );
+	  }
+	  if( imod==4  ){
+	    h420_mod4->Fill( dca2*1E4 );
+	     h421_mod4->Fill( dz2*1E4 );
+	  }
+	  if( imod==5  ){
+	    h420_mod5->Fill( dca2*1E4 );
+	     h421_mod5->Fill( dz2*1E4 );
+	  }
+	  if( imod==6 ){
+	    h420_mod6->Fill( dca2*1E4 );
+	    h421_mod6->Fill( dz2*1E4 );
+	  }	  
+	  if( imod==7  ){
+	    h420_mod7->Fill( dca2*1E4 );
+	    h421_mod7->Fill( dz2*1E4 );
+	  }
+	  if( imod==8  ){// outermost  module
+	    h420_mod8->Fill( dca2*1E4 );     
+	     h421_mod8->Fill( dz2*1E4 );
+	  }
+	  
+	  
 	  // versus number o ftracker hits
 	  if( hp.trackerLayersWithMeasurement() > 8 ) {
 	    h430->Fill( dca2*1E4 );
