@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<!DOCTYPE connectionlist [
+<!ENTITY readOnlyOMDS SYSTEM "/afs/cern.ch/cms/DB/conddb/readOnlyOMDS.xml">
+<!ENTITY readOnlyProd SYSTEM "/afs/cern.ch/cms/DB/conddb/readOnlyProd.xml">
+<!ENTITY readOnlyInt SYSTEM "/afs/cern.ch/cms/DB/conddb/readOnlyInt.xml">
+<!ENTITY readOnlyArch SYSTEM "/afs/cern.ch/cms/DB/conddb/readOnlyArch.xml">
+<!ENTITY readWritePrep SYSTEM "/afs/cern.ch/cms/DB/conddb/readWritePrep.xml">
+]>
+<connectionlist>
+&readOnlyOMDS;
+&readOnlyProd;
+&readOnlyInt;
+&readOnlyArch;
+&readWritePrep;
+</connectionlist>
