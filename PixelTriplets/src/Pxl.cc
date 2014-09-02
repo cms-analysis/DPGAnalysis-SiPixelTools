@@ -2570,7 +2570,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   double sumpt = 0;
   double sumq = 0;
   Surface::GlobalPoint origin = Surface::GlobalPoint(0,0,0);
-  const GeomDet * geomDet2 = NULL;
+  const TrackerGeomDet * geomDet2 = NULL;
   for( TrackCollection::const_iterator iTrack = tracks->begin();
       iTrack != tracks->end(); ++iTrack ) {
 
@@ -2620,7 +2620,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
       cout << ", dxyv " << iTrack->dxy(vtxP)*1E4 << " um";
       cout << ", dzv " << iTrack->dz(vtxP)*1E1 << " mm";
       cout << setprecision(4);
-      cout << ", hits " << hp.numberOfHits();
+      cout << ", hits " << hp.numberOfHits(HitPattern::TRACK_HITS);/// assuming HitCategory =TRACK_HITS = 0
       cout << ", valid " << hp.numberOfValidTrackerHits();
       cout << endl;
     }
@@ -4486,7 +4486,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	    xPXB2 = gX;
 	    yPXB2 = gY;
 	    zPXB2 = gZ;
-	    geomDet2 = myGeomDet;
+	    geomDet2 = (TrackerGeomDet*) myGeomDet;
 	  }
 
 	  else if( ilay == 3 ) {
