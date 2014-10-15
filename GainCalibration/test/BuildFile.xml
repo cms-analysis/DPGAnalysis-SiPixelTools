@@ -6,6 +6,7 @@
 <use   name="Geometry/Records"/>
 <use   name="Geometry/CommonTopologies"/>
 <use   name="root"/>
-<library   file="*.cc" name="testCalibTrackerSiPixelGainCalibration">
-  <flags   EDM_PLUGIN="1"/>
-</library>
+# comment out because of conflicts 
+#<library   file="*.cc" name="PixelDBToolsGainCalibration">
+#  <flags   EDM_PLUGIN="1"/>
+#</library>

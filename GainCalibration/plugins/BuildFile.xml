@@ -19,7 +19,8 @@
   <use   name="Geometry/TrackerGeometryBuilder"/>
   <use   name="CalibFormats/SiPixelObjects"/>
   <use   name="CalibTracker/SiPixelTools"/>
-  <library   file="*.cc" name="CalibTrackerSiPixelGainCalibrationPlugin">
-    <flags   EDM_PLUGIN="1"/>
-  </library>
+# comment out to eliminate conflits with 
+#  <library   file="*.cc" name="PixelDBToolsGainCalibrationPlugin">
+#    <flags   EDM_PLUGIN="1"/>
+#  </library>
 </environment>
