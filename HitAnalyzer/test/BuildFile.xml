@@ -1,16 +1,26 @@
+<use   name="FWCore/Framework"/>
 <use   name="SimDataFormats/TrackingHit"/>
 <use   name="SimDataFormats/Track"/>
 <use   name="SimDataFormats/Vertex"/>
 <use   name="SimDataFormats/GeneratorProducts"/>
 <use   name="Geometry/TrackerNumberingBuilder"/>
-<use   name="FWCore/Framework"/>
+<use   name="Geometry/Records"/>
+<use   name="Geometry/TrackerGeometryBuilder"/>
 # for HEPMC
 <use name="GeneratorInterface/Core"/>
 <use name="CommonTools/UtilAlgos"/>
 <use name="root"/>
 #
-<flags   EDM_PLUGIN="1"/>
-<library   file="SimHitAnalyzer.cc" name="testPixel">
+<library   file="SimHitAnalyzer.cc" name="testPixel1">
   <use name="heppdt"/>
   <use name="SimGeneral/HepPDTRecord"/>
+ <flags   EDM_PLUGIN="1"/>
+</library>
+
+#<library   file="SiPixelDets.cc" name="testPixel2">
+# <flags   EDM_PLUGIN="1"/>
+#</library>
+
+<library   file="PixClusterTest.cc" name="testPixel3">
+ <flags   EDM_PLUGIN="1"/>
 </library>
