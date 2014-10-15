@@ -6,6 +6,17 @@
 <use   name="CondCore/DBOutputService"/>
 <use   name="CondTools/SiPixel"/>
 <use   name="CalibTracker/SiPixelESProducers"/>
+<use   name="RecoLocalTracker/SiPixelRecHits"/>
+<use   name="CalibTracker/SiPixelConnectivity"/>
+
+#<library   file="SiPixelFedCablingMapDBReader.cc" name="PixelDBTool1">
+#  <flags   EDM_PLUGIN="1"/>
+#</library>
+#
+#<library   file="SiPixelGenErrorDBReader.cc" name="PixelDBTools2">
+#  <flags   EDM_PLUGIN="1"/>
+#</library>
+
 <library   file="*.cc" name="PixelDBTools_test">
   <flags   EDM_PLUGIN="1"/>
 </library>
