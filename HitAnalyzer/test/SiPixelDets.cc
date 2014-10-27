@@ -27,6 +27,8 @@
 
 #include "SiPixelDets.h"
 
+//#define NEW_NAMES
+
 using namespace std;
 using namespace edm;
 
@@ -36,8 +38,7 @@ SiPixelDets::SiPixelDets(edm::ParameterSet const& conf) :
   conf_(conf) {
 
   //useFile_ = conf_.getParameter<bool>("useFile");		
-  //fileName_ = conf_.getParameter<string>("fileName");
-  
+  //fileName_ = conf_.getParameter<string>("fileName");  
   //BPixParameters_ = conf_.getUntrackedParameter<Parameters>("BPixParameters");
   //FPixParameters_ = conf_.getUntrackedParameter<Parameters>("FPixParameters");
 }
@@ -66,8 +67,10 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
   //Retrieve tracker topology from geometry
   edm::ESHandle<TrackerTopology> tTopo;
   es.get<IdealGeometryRecord>().get(tTopo);
+#ifdef NEW_NAMES
   const TrackerTopology* tt = tTopo.product();
-	
+#endif
+
   for(TrackerGeometry::DetUnitContainer::const_iterator it = tkgeom->detUnits().begin(); 
       it != tkgeom->detUnits().end(); it++) {
 
@@ -100,7 +103,7 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       PXBDetId pxdetid = PXBDetId(detId);
 
       if(PRINT) cout << "barrel:" << "  layer=" << pxdetid.layer() << "  ladder=" << pxdetid.ladder() 
-		     << "  module=" << pxdetid.module() << endl;
+		     << "  module=" << pxdetid.module() << " "<<rawId<<endl;
 	
       // OLD indices 
       // Barell layer = 1,2,3
@@ -154,8 +157,8 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
 		    <<module1<<" "<<half1<<" "<<name1<<" "<<moduleType1<<" "<<pxbdet1.rawId()<<endl;
 
 
+#ifdef NEW_NAMES
       //printDet(detId, tt);
-
 
       // Convert to online 
       PixelBarrelName pbn(detId, tt); // use det-id
@@ -192,7 +195,7 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       if(pxbdet.rawId() != pxbdet1.rawId()) cout<<" wrong rawid "<<endl;
       if(pxbdet.rawId() != det.rawId()) cout<<" wrong rawid "<<endl;
       if(rawId != det.rawId()) cout<<" wrong rawid "<<endl;
-
+#endif //NEW_NAMES
 
 	
     } else if(detId.subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap)) {
@@ -207,7 +210,7 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
 
       cout << "endcap:" << " side=" << pxdetid.side() << "  disk=" << pxdetid.disk() 
 	   << "  blade=" << pxdetid.blade() << "  panel=" << pxdetid.panel() 
-	   << "  plaq=" << pxdetid.module() << endl;
+	   << "  plaq=" << pxdetid.module() << " "<<rawId<<endl;
 
       // new ids 
       int disk=tTopo->pxfDisk(detId); //1,2,3
@@ -233,9 +236,11 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       PixelEndcapName::HalfCylinder part1 = pen1.halfCylinder();
       PixelModuleName::ModuleType moduleType1 = pen1.moduleType();
       cout<<nameF1<<" "<<diskName1<<" "<<bladeName1<<" "<<pannelName1<<" "
-	  <<plaquetteName1<<" "<<part1<<" "<<moduleType1<<" "<<pxfdet1.rawId()<<endl;
+	  <<plaquetteName1<<" "<<part1<<" "<<moduleType1<<" "
+	  <<pxfdet1.rawId()<<" "<<sh1<<endl;
 
 
+#ifdef NEW_NAMES
       // Convert to online 
       PixelEndcapName pen(detId,tt); // use det-id phase0
       //PixelEndcapName pen(detId,tt,false); // use det-id phase0
@@ -262,6 +267,7 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       if(pxfdet.rawId() != pxfdet1.rawId()) cout<<" wrong rawid "<<endl;
       if(pxfdet.rawId() != det.rawId()) cout<<" wrong rawid "<<endl;
       if(rawId != det.rawId()) cout<<" wrong rawid "<<endl;
+#endif
 
 
     } else { // b/fpix

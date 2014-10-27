@@ -25,7 +25,7 @@ from SimGeneral.MixingModule.pixelDigitizer_cfi import *
 from SimGeneral.MixingModule.stripDigitizer_cfi import *
 from SimGeneral.MixingModule.trackingTruthProducer_cfi import *
 
-process.mix = cms.EDProducer("MixingModule",
+process.simSiPixelDigis = cms.EDProducer("MixingModule",
 #    digitizers = cms.PSet(theDigitizers),
 #    digitizers = cms.PSet(
 #      mergedtruth = cms.PSet(
@@ -128,7 +128,7 @@ process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService
 #        initialSeed = cms.untracked.uint32(1234567),
 #        engineName = cms.untracked.string('TRandom3')
 #    ),
-     mix = cms.PSet(
+     simSiPixelDigis = cms.PSet(
         initialSeed = cms.untracked.uint32(1234567),
         engineName = cms.untracked.string('TRandom3')
    )
@@ -140,28 +140,29 @@ process.maxEvents = cms.untracked.PSet(
 )
 
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
-       'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100/simhits/simHits1.root'
+#       'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100/simhits/simHits1.root'
+       'file:/afs/cern.ch/work/d/dkotlins/public//MC/mb/13tev/simhits/simHits1.root'
   )
 )
 
 # Choose the global tag here:
 # for v7.0
-process.GlobalTag.globaltag = 'MC_70_V1::All'
+process.GlobalTag.globaltag = 'MC_72_V3::All'
 
 process.o1 = cms.OutputModule("PoolOutputModule",
             outputCommands = cms.untracked.vstring('drop *','keep *_*_*_Test'),
-      fileName = cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100/digis/digis1.root')
+#      fileName = cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100/digis/digis1.root')
+      fileName = cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/MC/mb/13tev/digis/digis1.root')
 #      fileName = cms.untracked.string('file:dummy.root')
 )
 
 process.g4SimHits.Generator.HepMCProductLabel = 'source'
 
 # modify digitizer parameters
-#process.simSiPixelDigis.ThresholdInElectrons_BPix = 3500.0 
-process.mix.digitizers.pixel.ThresholdInElectrons_BPix = 3500.0 
+#process.simSiPixelDigis.pixel.ThresholdInElectrons_BPix = 3500.0 
 
 #This process is to run the digitizer, pixel gitizer is now clled by the mix module
-process.p1 = cms.Path(process.mix)
+process.p1 = cms.Path(process.simSiPixelDigis)
 
 process.outpath = cms.EndPath(process.o1)
 

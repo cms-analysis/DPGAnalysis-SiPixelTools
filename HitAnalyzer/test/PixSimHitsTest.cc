@@ -280,7 +280,6 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
   //string mode = "bpix";
 
   using namespace edm;
-  if(PRINT) cout<<" Analyze PixSimHitsTest "<<endl;
   
   // Get event setup (to get global transformation)
   edm::ESHandle<TrackerGeometry> geom;
@@ -322,7 +321,8 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
    //iEvent.getByLabel( src_ ,"TrackerHitsPixelEndcapHighTof",PixelHitsHighTof);
    //}
 
-   if(DEBUG) cout<<"Loop over SimHits LowTof"<<endl;
+   if(PRINT) cout<<"-----------> New event, simhits =  "<<PixelHits->size()<<endl;
+
    //for(vector<PSimHit>::const_iterator isim = PixelHitsLowTof->begin();
    // isim != PixelHitsLowTof->end(); ++isim) {
    for(vector<PSimHit>::const_iterator isim = PixelHits->begin();
@@ -336,7 +336,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
      unsigned int detid=detId.rawId(); // raw det id
      
      if(dettype!=1 && subid!=1) cout<<" error in det id "<<dettype<<" "<<subid<<endl;
-     if(PRINT) cout<<totalNumOfSimHits<<" det id "<<detid<<" "<<dettype<<" "<<subid<<endl;
+     if(PRINT) cout<<totalNumOfSimHits<<" Det id "<<detid<<" "<<dettype<<" "<<subid<<endl;
      if(DEBUG) cout<<" det unit "<<(*isim).detUnitId()<<detId.null()<<endl;
 
      // Global variables 
@@ -384,7 +384,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
        panel=tTopo->pxfPanel(detid); //panel=1
        
        if(PRINT) {
-	 cout<<"Forward det "<<subid<<", disk "<<disk<<", blade "
+	 cout<<" Forward det "<<subid<<", disk "<<disk<<", blade "
 	     <<blade<<", module "<<zindex<<", side "<<side<<", panel "
 	     <<panel<<endl;
 	 //cout<<" col/row, pitch "<<cols<<" "<<rows<<" "
@@ -536,6 +536,23 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 hglobz2->Fill(gloZ);
 	 hdetphi2->Fill(detPhi);
 	 
+       } else if(disk==3) {
+	 //cout<<" disk "<<disk<<endl;
+	 totalNumOfSimHits3++;
+	 heloss3->Fill(eloss);
+	 if(pid==11) heloss3e->Fill(eloss);
+	 else heloss3mu->Fill(eloss);	 
+	 hladder3id->Fill(float(blade));
+	 hz3id->Fill(float(zindex));
+	 hthick3->Fill(dz);
+	 hlength3->Fill(y);
+	 hwidth3->Fill(x);
+	 
+	 //SimHitMap2[detId.rawId()].push_back((*isim));
+	 hglobr3->Fill(gloR);
+	 hglobz3->Fill(gloZ);
+	 hdetphi3->Fill(detPhi);
+	 
        } // end disks
 
      } else if(mode_=="bpix") {
@@ -685,6 +702,8 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
        hsimHitsPerDet3->Fill( float((simhit_map_iterator->second).size()) );
      }
    } // of bpix 
+
+   if(PRINT) cout<<endl;
 
 }
 // ------------ method called to at the end of the job  ------------

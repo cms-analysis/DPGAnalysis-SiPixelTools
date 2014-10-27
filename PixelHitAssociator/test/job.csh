@@ -2,7 +2,7 @@
 echo $home
 
 #source /afs/cern.ch/cms/LCG/LCG-2/UI/cms_ui_env.csh
-cd /afs/cern.ch/user/d/dkotlins/public/CMSSW/CMSSW_7_1_0_pre8/src
+cd /afs/cern.ch/user/d/dkotlins/public/CMSSW/CMSSW_7_2_0/src
 
 # for V7
 setenv SCRAM_ARCH slc6_amd64_gcc481

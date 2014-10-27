@@ -149,7 +149,12 @@ process.maxEvents = cms.untracked.PSet(
 )
 
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
-  'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_71_pre5/simhits/simHits2.root'
+  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre5/simhits/simHits2.root',
+  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre5/simhits/simHits1.root',
+  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre5/simhits/simHits3.root',
+  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre5/simhits/simHits4.root',
+  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre5/simhits/simHits5.root',
+  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre5/simhits/simHits6.root',
 # gen-sim
 # '/store/relval/CMSSW_7_0_0_pre8/RelValSingleMuPt100/GEN-SIM/START70_V2_RR-v7/00000/B464EA42-2B59-E311-A2C1-0025905964C2.root',
 # '/store/relval/CMSSW_7_0_0_pre10/RelValSingleMuPt100/GEN-SIM-RECO/START70_V3-v1/00000/908DD48F-1466-E311-BEBE-0025905A48F0.root',
@@ -174,11 +179,14 @@ process.MessageLogger = cms.Service("MessageLogger",
 # for v7.0
 #process.GlobalTag.globaltag = "MC_70_V1::All"
 #process.GlobalTag.globaltag = "MC_71_V1::All"
+
 #process.GlobalTag.globaltag = "PRE_MC_71_V2::All"
+#process.GlobalTag.globaltag = "PRE_STA71_V3::All"
 
 #process.GlobalTag.globaltag = "START70_V1::All"
-process.GlobalTag.globaltag = "START71_V1::All"
-#process.GlobalTag.globaltag = "PRE_STA71_V3::All"
+#process.GlobalTag.globaltag = "START71_V1::All"
+process.GlobalTag.globaltag = "START72_V3::All"
+
 
 #process.GlobalTag.globaltag = "POSTLS170_V4::All"
 #process.GlobalTag.globaltag = "POSTLS171_V1::All"
@@ -195,7 +203,7 @@ process.o1 = cms.OutputModule("PoolOutputModule",
 
 # DB stuff 
 # GenError
-useLocalDB = True
+useLocalDB = False
 if useLocalDB :
     process.DBReaderFrontier = cms.ESSource("PoolDBESSource",
      DBParameters = cms.PSet(
@@ -214,20 +222,24 @@ if useLocalDB :
 #     connect = cms.string('frontier://FrontierProd/CMS_COND_PIXEL_000')
      connect = cms.string('frontier://FrontierPrep/CMS_COND_PIXEL')
     ) # end process
+    process.myprefer = cms.ESPrefer("PoolDBESSource","DBReaderFrontier")
 # endif
-
-process.myprefer = cms.ESPrefer("PoolDBESSource","DBReaderFrontier")
 
 
 process.g4SimHits.Generator.HepMCProductLabel = 'source'
 
-# modify digitizer parameters
-#process.mix.digitizers.pixel.ThresholdInElectrons_BPix = 3500.0 
-
 # for direct digis
 process.siPixelClusters.src = 'simSiPixelDigis' # for V5, direct
 # process.siPixelClusters.src = 'mix'
+# modify digitizer parameters
+#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix = 3500.0 
 process.simSiPixelDigis.digitizers.pixel.AddPixelInefficiencyFromPython = cms.bool(False)
+# use inefficiency from DB Gain calibration payload?
+process.simSiPixelDigis.digitizers.pixel.useDB = cms.bool(False) 
+# use LA from file 
+#process.simSiPixelDigis.digitizers.pixel.LorentzAngle_DB = cms.bool(False)
+#process.simSiPixelDigis.digitizers.pixel.TanLorentzAnglePerTesla_BPix = 0.106 
+#process.simSiPixelDigis.digitizers.pixel.TanLorentzAnglePerTesla=FPix = 0.106 
 
 # to run rechit validation
 #process.load("Validation.TrackerRecHits.trackerRecHitsValidation_cff")

@@ -218,7 +218,7 @@ SimHitAnalyzer::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup
        SimHitMap[(*isim).detUnitId()].push_back((*isim));
 
        int detid = isim->detUnitId();
-       if(detid>=302000000 && detid<303000000) {
+       if(detid>=302000000 && detid<303000000) {  // only bpix
 	 // SimHit information 
 	 float eloss = (*isim).energyLoss() * 1000000/3.7;//convert GeV to ke 
 	 //float tof = (*isim).timeOfFlight();
@@ -234,7 +234,7 @@ SimHitAnalyzer::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup
 	 int tid = (*isim).trackId();
 	 int procType = (*isim).processType();
 	 if(pid==13) 
-	   cout<<"Simhit id "<<pid<<" track "<<tid<<" proc "<<procType<<" de "
+	   cout<<"BPix mu Simhit id "<<pid<<" track "<<tid<<" proc "<<procType<<" de "
 	       <<eloss<<" p "<<p<<" theta "<<theta<<" beta "<<beta<<" eta "<<eta
 	       <<" position  x = "<<isim->localPosition().x() 
 	       <<" y = "<<isim->localPosition().y() <<" z = "<< isim->localPosition().z()<<endl;

@@ -11,9 +11,9 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.source = cms.Source( "PoolSource",
                              fileNames = cms.untracked.vstring(
-#			     'file:../../../SimTracker/SiPixelDigitizer/test/simHits.root'
+			     'file:simHits.root'
 #			     'file:$home/work/MC/mu/pt100_pre10/simhits/simHits1.root'
-			     'file:$home/work/MC/mu/pt100_71_pre5/simhits/simHits1.root'
+#			     'file:$home/work/MC/mu/pt100_71_pre5/simhits/simHits1.root'
 #			     'file:$home/work/MC/mu/pt100_71_pre5/simhits/simHits1_eta0p1.root'
 			     )
                            )

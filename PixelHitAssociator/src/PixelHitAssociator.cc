@@ -223,9 +223,12 @@ std::vector<PSimHit> PixelHitAssociator::associateHit(const TrackingRecHit & thi
   std::map<unsigned int, std::vector<PSimHit> >::const_iterator it = SimHitMap.find(detID);
   simHit.clear();
   if (it!= SimHitMap.end()){
-    simHit = it->second;
-    vector<PSimHit>::const_iterator simHitIter = simHit.begin();
-    vector<PSimHit>::const_iterator simHitIterEnd = simHit.end();
+    //simHit = it->second;
+    //vector<PSimHit>::const_iterator simHitIter = simHit.begin();
+    //vector<PSimHit>::const_iterator simHitIterEnd = simHit.end();
+    vector<PSimHit>::const_iterator simHitIter = (it->second).begin();
+    vector<PSimHit>::const_iterator simHitIterEnd = (it->second).end();
+
     for (;simHitIter != simHitIterEnd; ++simHitIter) {
       const PSimHit ihit = *simHitIter;
       unsigned int simHitid = ihit.trackId();
