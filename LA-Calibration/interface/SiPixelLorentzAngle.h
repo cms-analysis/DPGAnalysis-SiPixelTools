@@ -196,7 +196,14 @@ class SiPixelLorentzAngle : public edm::EDAnalyzer
   const MagneticField * magfield;
   TrajectoryStateTransform tsTransform;
   edm::EDGetTokenT<TrajTrackAssociationCollection> t_trajTrack;
-  
+  edm::EDGetTokenT<edm::SimTrackContainer>  tok_simTk_;  
+
+
+  edm::EDGetTokenT<edm::SimVertexContainer> tok_simVtx_;
+  edm::EDGetTokenT<edm::PCaloHitContainer>  tok_caloEB_;
+  edm::EDGetTokenT<edm::PCaloHitContainer>  tok_caloEE_;
+  edm::EDGetTokenT<edm::PCaloHitContainer>  tok_caloHH_;
+
 };
 
 

@@ -27,6 +27,10 @@
 #include "TrackingTools/PatternTools/interface/TrajTrackAssociation.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "../interface/SiPixelLorentzAngle.h"
+
+
+
+
 int lower_bin_;
 
 using namespace std;
@@ -50,6 +54,11 @@ SiPixelLorentzAngle::SiPixelLorentzAngle(edm::ParameterSet const& conf) :
   max_drift_ = 1000.; //400.;
 
   t_trajTrack = consumes<TrajTrackAssociationCollection> (conf.getParameter<edm::InputTag>("src"));
+  tok_simTk_    = consumes<edm::SimTrackContainer>(edm::InputTag("g4SimHits"));
+  tok_simVtx_   = consumes<edm::SimVertexContainer>(edm::InputTag("g4SimHits"));
+  tok_caloEB_   = consumes<edm::PCaloHitContainer>(edm::InputTag("g4SimHits", "EcalHitsEB"));
+  tok_caloEE_   = consumes<edm::PCaloHitContainer>(edm::InputTag("g4SimHits", "EcalHitsEE"));
+  tok_caloHH_   = consumes<edm::PCaloHitContainer>(edm::InputTag("g4SimHits", "HcalHits"));
 
 }
 
@@ -59,7 +68,7 @@ SiPixelLorentzAngle::~SiPixelLorentzAngle() {  }
 void SiPixelLorentzAngle::beginJob()
 {
 
-  // 	cout << "started SiPixelLorentzAngle" << endl;
+  //cout << "started SiPixelLorentzAngle" << endl;
   hFile_ = new TFile (filename_.c_str(), "RECREATE" );
   int bufsize = 64000;
   // create tree structure
@@ -158,15 +167,33 @@ void SiPixelLorentzAngle::analyze(const edm::Event& e, const edm::EventSetup& es
   
   event_counter_++;
   // 	if(event_counter_ % 500 == 0) cout << "event number " << event_counter_ << endl;
-  cout << "event number " << event_counter_ << endl;
+  //cout << "event number " << event_counter_ << endl;
 
   edm::ESHandle<TrackerGeometry> estracker;
   es.get<TrackerDigiGeometryRecord>().get(estracker);
   tracker=&(* estracker);
 
-  TrackerHitAssociator* associate;
-  if(simData_) associate = new TrackerHitAssociator(e); else associate = 0; 
-  // restet values
+  //get Handles to SimTracks and SimHits
+  edm::Handle<edm::SimTrackContainer> SimTk;
+  //edm::SimTrackContainer::const_iterator simTrkItr;
+  edm::Handle<edm::SimVertexContainer> SimVtx;
+
+  //get Handles to PCaloHitContainers of eb/ee/hbhe
+  edm::Handle<edm::PCaloHitContainer> pcaloeb;
+  edm::Handle<edm::PCaloHitContainer> pcaloee;
+  edm::Handle<edm::PCaloHitContainer> pcalohh;
+
+  TrackerHitAssociator* associate = 0;
+  if(simData_){ 
+    	e.getByToken(tok_simTk_,SimTk);
+    	e.getByToken(tok_simVtx_,SimVtx);
+    	e.getByToken(tok_caloEB_, pcaloeb);
+   	e.getByToken(tok_caloEE_, pcaloee);
+	e.getByToken(tok_caloHH_, pcalohh);
+	associate = new TrackerHitAssociator(e);
+}
+ // eout << associate << endl;
+  // reset values
   module_=-1;
   layer_=-1;
   ladder_ = -1;
@@ -388,7 +415,7 @@ void SiPixelLorentzAngle::analyze(const edm::Event& e, const edm::EventSetup& es
 					
 	
 	  // fill entries in simhit_:	
-	  if(simData_){
+/*	  if(simData_){
 	    matched.clear();        
 	    matched = associate->associateHit((*recHitPix));	
 	    float dr_start=9999.;
@@ -417,8 +444,8 @@ void SiPixelLorentzAngle::analyze(const edm::Event& e, const edm::EventSetup& es
 		}
 	      }
 	    } // end of filling simhit_
-	  }
-	  SiPixelLorentzAngleTreeForward_->Fill();
+	  } // if simData_
+*/	  SiPixelLorentzAngleTreeForward_->Fill();
 	}
       }	//end iteration over trajectory measurements
     } //end iteration over trajectories

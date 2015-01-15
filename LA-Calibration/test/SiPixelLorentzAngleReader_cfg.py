@@ -4,7 +4,7 @@ process = cms.Process("Test")
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(1)
 )
-process.source = cms.Source("EmptySource",
+process.source = cms.Source("EmptyIOVSource",
     lastRun = cms.untracked.uint32(1),
     timetype = cms.string('runnumber'),
     firstRun = cms.untracked.uint32(1),
@@ -28,6 +28,8 @@ process.Timing = cms.Service("Timing")
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("Configuration.StandardSequences.GeometryIdeal_cff")
+process.GlobalTag.globaltag = "GR_R_73_V0A::All"
+
 
 process.QualityReader = cms.ESSource("PoolDBESSource",
 #    BlobStreamerName = cms.untracked.string('TBufferBlobStreamingService'),
@@ -38,17 +40,17 @@ process.QualityReader = cms.ESSource("PoolDBESSource",
     toGet = cms.VPSet(
 		cms.PSet(
 			record = cms.string("SiPixelLorentzAngleRcd"),
-			tag = cms.string("trivial_LorentzAngle")
+			tag = cms.string("SiPixelLorentzAngle_v4_offline")
 		),
 		cms.PSet(
 			record = cms.string("SiPixelLorentzAngleSimRcd"),
-			tag = cms.string("trivial_LorentzAngle_Sim")
+			tag = cms.string("SiPixelLorentzAngleSim_v02_mc")
 		)
 	),
     connect = cms.string('sqlite_file:SiPixelLorentzAngle.db')
 )
 
-process.es_prefer_QualityReader = cms.ESPrefer("PoolDBESSource","QualityReader")
+#process.es_prefer_QualityReader = cms.ESPrefer("PoolDBESSource","QualityReader")
 
 process.LorentzAngleReader = cms.EDAnalyzer("SiPixelLorentzAngleReader",
     printDebug = cms.untracked.bool(False),
