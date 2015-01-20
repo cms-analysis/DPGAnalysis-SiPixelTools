@@ -4979,7 +4979,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	      //cout<<" layer 2 "<<tmp11<<" "<<tmp13<<endl;
 	      h088->Fill( tmp11 );
 	      h089->Fill( tmp13 );
-	    } else {   if( myCounters::neve < 100 ) cout<<" lape invalid?"<<endl;}
+	    } else {   if( myCounters::neve < 10 ) cout<<" lape invalid?"<<endl;}
 	  }
 
           if(bb/aa < 0.015) h420_1->Fill(dca2*1E4);
