@@ -14,11 +14,12 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #process.GlobalTag.globaltag = "MC_70_V1::All"
 #process.GlobalTag.globaltag = "START70_V1::All"
 #process.GlobalTag.globaltag = "PRE_MC_71_V2::All"
-process.GlobalTag.globaltag = "MC_71_V1::All"
+#process.GlobalTag.globaltag = "MC_71_V1::All"
 #process.GlobalTag.globaltag = "START71_V1::All"
 #process.GlobalTag.globaltag = "POSTLS170_V5::All"
 #process.GlobalTag.globaltag = "POSTLS171_V1::All"
 #process.GlobalTag.globaltag = "PRE_LS171_V3::All"
+process.GlobalTag.globaltag = "MCRUN2_73_V7::All"
 
 process.load("Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff")
 # process.load("Configuration.StandardSequences.MagneticField_38T_cff")
@@ -110,6 +111,7 @@ if useLocalDB :
 #     connect = cms.string('frontier://FrontierProd/CMS_COND_31X_PIXEL')
      connect = cms.string('frontier://FrontierPrep/CMS_COND_PIXEL')
     ) # end process
+    process.myprefer = cms.ESPrefer("PoolDBESSource","DBReaderFrontier")
 # endif
 
 # SQ_LITE Templates 
@@ -132,10 +134,9 @@ if useLocalDBTemplate :
      connect = cms.string('sqlite_file:siPixelTemplates38T.db')
 #     connect = cms.string('sqlite_file:siPixelTemplates38T_2012_IOV7_v21.db')
    ) # end process
+#  process.myprefer = cms.ESPrefer("PoolDBESSource","DBReaderFrontier3")
 # endif
  
-process.myprefer = cms.ESPrefer("PoolDBESSource","DBReaderFrontier")
-#process.myprefer = cms.ESPrefer("PoolDBESSource","DBReaderFrontier3")
 
 process.Histos = cms.EDAnalyzer('Pxl',
 # for official RECO
