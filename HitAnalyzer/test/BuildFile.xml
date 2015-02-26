@@ -7,6 +7,9 @@
 <use   name="Geometry/Records"/>
 <use   name="Geometry/TrackerGeometryBuilder"/>
 
+# for ?
+<use   name="CondFormats/SiPixelObjects"/>
+
 # for tracks
 #<use   name="TrackingTools/TrajectoryState"/>
 #<use   name="TrackingTools/TrackFitters"/>
@@ -20,6 +23,9 @@
 <use name="heppdt"/>
 <use name="SimGeneral/HepPDTRecord"/>
 
+# for raw data
+<use   name="DataFormats/FEDRawData"/>
+<use   name="EventFilter/SiPixelRawToDigi"/>
 #
 <library   file="*.cc" name="testPixels">
  <flags   EDM_PLUGIN="1"/>
