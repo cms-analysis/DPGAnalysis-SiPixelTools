@@ -24,6 +24,21 @@
 #include <string>
 #include <iomanip>
 
+// To use root histos
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+
+// For ROOT
+#include <TROOT.h>
+//#include <TChain.h>
+#include <TFile.h>
+#include <TF1.h>
+#include <TH2F.h>
+#include <TH1D.h>
+#include <TProfile.h>
+#include <TProfile2D.h>
+
+
 namespace {
   const bool DEBUG=false;
   const bool printErrors  = false;
@@ -305,16 +320,27 @@ string MyConvert::moduleNameFromFedChan(int fed0,int fedChan0, string & tbm0) {
 const int NumPixels = 100000;
 class HotPixels {
 public:
-  HotPixels() {count=0; for(int i=0;i<NumPixels;++i) {array[i]=0; data[i]=0;}}
+  HotPixels() {
+    count=0; 
+    for(int i=0;i<NumPixels;++i) {array[i]=0; data[i]=0;}
+    for(int n=0;n<4000;++n) {rocs[n]=0;} }
+
   ~HotPixels() {}
   void update(int channel, int roc, int dcol, int pix); 
   int code(int channel, int roc, int dcol, int pix); 
   void decode(int index, int &channel, int &roc, int &dcol, int &pix); 
   void print(int, int, double);
+  void printROCs(int, int);
+  int get_counts(int i) {if(i<count) return data[i]; else return -1;}
+  int get_countsROC(int i) {if(i<4000) return rocs[i]; else return -1;}
+  int codeROC(int channel, int roc); 
+  void decodeROC(int index, int &channel, int &roc); 
+
 private:
   int count;
   int array[NumPixels];
   int data[NumPixels];
+  int rocs[4000];
 };
 
 int HotPixels::code(int channel, int roc, int dcol, int pix) {
@@ -328,6 +354,16 @@ void HotPixels::decode(int index, int &channel, int &roc, int &dcol, int &pix) {
   roc     = (index%10000000)/100000;
   dcol    = (index%100000)/1000;
   pix     = (index%1000);
+}
+int HotPixels::codeROC(int channel, int roc) {
+  // pix 0 - 182, dcol 0 - 26 , roc 0 -15, chan 1-36
+  int index = roc + 100 * channel;
+  return index;
+}
+void HotPixels::decodeROC(int index, int &channel, int &roc) {
+  //int index = pix + 1000 * dcol + 100000 * roc + 10000000 * channel;
+  channel = index/100;
+  roc     = (index%100);
 }
 void HotPixels::update(int channel, int roc, int dcol, int pix) {
   int index = code(channel, roc, dcol, pix);
@@ -359,7 +395,6 @@ void HotPixels::print(int events, int fed_id, double fraction) {
   int cut3 = events/10000;
 
   int cut = int(events * fraction);
-  //int cut = 2;
   if(cut<2) cut=2;
 
   if(fed_id==0) {
@@ -367,18 +402,19 @@ void HotPixels::print(int events, int fed_id, double fraction) {
     cout<<"fed chan     module                  tbm roc dcol  pix  colR ";   
     cout<<"rowR count  num roc-local"<<endl;   
   }
+
+
   for(int i=0;i<count;++i) {
 
-    if(data[i]>cut1) count1++;
-    if(data[i]>cut2) count2++;
-    if(data[i]>cut3) count3++;
+    if(data[i]<=0) {cout<<" not counts "<<data[i]<<endl; continue;}
+
+    int index = array[i];
+    if(index<=0) {cout<<" index wrong "<<index<<endl; continue;}
+
+    decode(index, channel, roc, dcol, pix);
 
     if(data[i]>cut) {
       num++;
-      int index = array[i];
-      decode(index, channel, roc, dcol, pix);
-
-
       // First find if we are in the first or 2nd col of a dcol.
       int colEvenOdd = pix%2;  // module(2), 0-1st sol, 1-2nd col.
       // Transform
@@ -396,9 +432,59 @@ void HotPixels::print(int events, int fed_id, double fraction) {
           <<realRocNum<<"  "<<setw(3)<<dcol<<"  "<<setw(3)<<pix<<"   "
           <<setw(3)<<colROC<<"  "<<setw(3)<<rowROC<<"  "<<setw(4)<<data[i]<<"  "
           <<setw(3)<<num<<"  "<<setw(3)<<roc<<endl;
+
+    } // if
+
+    if(data[i]>cut1) count1++;
+    if(data[i]>cut2) count2++;
+    if(data[i]>cut3) {
+      count3++;
+      // ROC
+      int indexROC = codeROC(channel,roc);
+      if(indexROC<4000) rocs[indexROC]++;
     }
-  }
+  } // for
+
   //cout<<num<<" total 'noisy' pixels above the cut = "<<cut<<endl;
+
+  // // noisy ROCs
+  // for(int n=0;n<4000;++n) {
+  //   if(rocs[n]>0) {
+  //     int chanR=0, rocR=0;
+  //     decodeROC(n,chanR, rocR);
+  //     cout<<" channel "<<chanR<<" roc "<<rocR<<" "<<rocs[n]<<endl;
+  //     rocs[n]=0;
+  //   } // if
+  // } // for
+
+
+}
+
+void HotPixels::printROCs(int fed_id, int cut) {
+  int channel=0, roc=0;
+
+  if(fed_id==0) {
+    cout<<" Noisy ROCs, Threshold = "<<cut<<endl;
+    cout<<"fed chan     module                  tbm roc count "<<endl;   
+  }
+
+  // noisy ROCs
+  for(int n=0;n<4000;++n) {
+    if(rocs[n]>0) {
+      if(rocs[n]>cut) {
+	decodeROC(n,channel, roc);
+	// Get the module name and tbm type 
+	string modName = " ",tbm=" ";
+	modName = MyConvert::moduleNameFromFedChan(fed_id,channel,tbm);
+	int realRocNum = roc;
+	if(tbm=="B") realRocNum = roc + 8; // shift for TBM-N
+	cout<<setw(3)<<fed_id<<" "<<setw(3)<<channel<<" "<<setw(30)<<modName<<" "<<tbm<<" "
+	    <<realRocNum<<"  "<<rocs[n]<<endl;
+      }
+      rocs[n]=0;
+    } // if
+  } // for
+
 
 }
 
@@ -436,6 +522,8 @@ private:
   float sumPixels, sumFedPixels[40];
   HotPixels hotPixels[40];
   double fraction_;
+
+  TH1D *hsize0, *hsize1, *hsize2, *hsize3;
 };
 
 void FindHotPixelFromRaw::endJob() {
@@ -446,14 +534,29 @@ void FindHotPixelFromRaw::endJob() {
   
   cout<<" Total/non-empty events " <<countAllEvents<<" / "<<countEvents<<" average number of pixels "<<sumPixels<<endl;
 
-  //for(int i=0;i<40;++i) cout<<sumFedPixels[i]<<" ";
-  //cout<<endl;
-
   for(int i=0;i<40;++i) {
     hotPixels[i].print(countAllEvents,i,fraction_);
+    for(int n=0; n<1000000;++n) {
+      float counts= float(hotPixels[i].get_counts(n));
+      float tmp = counts/float(countAllEvents);
+      if(counts>-1) hsize0->Fill(tmp);
+      else break;
+      // if(counts>10) cout<<i<<" "<<n<<" "<<counts<<" "<<tmp<<endl;
+    }
   }
+
   cout<<" Number of noisy pixels: 1% "<<count1<<" 0.1% "<<count2<<" 0.01% "<<count3<<endl;
 
+  // print noisy ROCs
+  const int cut=10;
+  for(int i=0;i<32;++i) {  // bpix only
+    for(int n=0; n<4000;++n) {
+      float counts= float(hotPixels[i].get_countsROC(n));
+      if(counts>0) hsize1->Fill(counts);
+      //if(counts>0) cout<<i<<" "<<n<<" "<<counts<<endl;
+    }
+    hotPixels[i].printROCs(i,cut);
+  }
 
 }
 
@@ -465,6 +568,14 @@ void FindHotPixelFromRaw::beginJob() {
   // Define the fraction for noisy pixels
   fraction_ = theConfig.getUntrackedParameter<double>("Fraction",0.001); 
   cout<<" The noise fraction is "<<fraction_<<endl;
+
+  edm::Service<TFileService> fs;
+  hsize0 = fs->make<TH1D>( "hsize0", "Noisy pixels", 10000, 0.0, 0.1);
+  hsize1 = fs->make<TH1D>( "hsize1", "Noisy pixels per roc", 1000, -0.5, 999.5);
+  //hsize2 = fs->make<TH1D>( "hsize2", "Noisy pixels", 10000, -0.5, 99999.5);
+  //hsize3 = fs->make<TH1D>( "hsize3", "Noisy pixels", 10000, -0.5, 99999.5);
+  //hsize4 = fs->make<TH1D>( "hsize4", "Noisy pixels", 10000, -0.5, 99999.5);
+
 }
 
 void FindHotPixelFromRaw::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
@@ -526,6 +637,7 @@ void FindHotPixelFromRaw::analyze(const  edm::Event& ev, const edm::EventSetup& 
       static const Word64 WORD32_mask  = 0xffffffff;
       Word32 w1 =  *word       & WORD32_mask;
       status = MyDecode::data(w1, channel, roc, dcol, pix, printData);
+      if(fedId==0 && channel==18) cout<<roc<<" "<<dcol<<" "<<pix<<endl;
       if(status>0) {
 	countPixels++;
 	countPixelsInFed++;
@@ -533,6 +645,7 @@ void FindHotPixelFromRaw::analyze(const  edm::Event& ev, const edm::EventSetup& 
       } else if(status<0) countErrorsInFed++;
       Word32 w2 =  *word >> 32 & WORD32_mask;
       status = MyDecode::data(w2, channel, roc, dcol, pix, printData);
+      if(fedId==0 && channel==18) cout<<roc<<" "<<dcol<<" "<<pix<<endl;
       if(status>0) {
 	countPixels++;
 	countPixelsInFed++;
