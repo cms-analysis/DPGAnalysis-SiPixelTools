@@ -681,12 +681,12 @@ void SiPixelRawDump::beginJob() {
 
 
   hsize = fs->make<TH1D>( "hsize", "FED event size in words-4", 6000, -0.5, pixMax);
-  hsize0 = fs->make<TH1D>( "hsize0", "FED event size in words-4", 2000, -0.5, 19999.5);
+  hsize0 = fs->make<TH1D>( "hsize0", "FED event size in words-4 (zoomed)", 2000, -0.5, 1999.5);
   hsize1 = fs->make<TH1D>( "hsize1", "bpix FED event size in words-4", 6000, -0.5, pixMax);
   hsize2 = fs->make<TH1D>( "hsize2", "fpix FED event size in words-4", 6000, -0.5, pixMax);
   hsize3 = fs->make<TH1D>( "hsize3", "ave bpix FED event size in words-4", 6000, -0.5, pixMax);
 
-  hpixels = fs->make<TH1D>( "hpixels", "pixels per FED", 2000, -0.5, 19999.5);
+  hpixels = fs->make<TH1D>( "hpixels", "pixels per FED (zoomed)", 2000, -0.5, 1999.5);
   hpixels0 = fs->make<TH1D>( "hpixels0", "pixels per FED", 6000, -0.5, pixMax);
   hpixels1 = fs->make<TH1D>( "hpixels1", "pixels >0 per FED", 6000, -0.5, pixMax);
   hpixels2 = fs->make<TH1D>( "hpixels2", "pixels >0 per BPix FED", 6000, -0.5, pixMax);

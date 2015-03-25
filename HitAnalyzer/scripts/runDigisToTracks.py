@@ -64,9 +64,11 @@ process.source = cms.Source("PoolSource",
 )
 
 # Choose the global tag here:
-process.GlobalTag.globaltag = 'MC_71_V7::All'
+# process.GlobalTag.globaltag = 'MC_71_V7::All'
 # process.GlobalTag.globaltag = 'POSTLS171_V1::All'
 # process.GlobalTag.globaltag = 'PRE_MC_71_V2::All'
+# for 73
+process.GlobalTag.globaltag = "MCRUN1_73_V5::All" # OK for condDB
 
 #process.PoolDBESSource = cms.ESSource("PoolDBESSource",
 #    BlobStreamerName = cms.untracked.string('TBufferBlobStreamingService'),

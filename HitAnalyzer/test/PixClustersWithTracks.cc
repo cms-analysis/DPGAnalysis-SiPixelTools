@@ -165,7 +165,8 @@ class PixClustersWithTracks : public edm::EDAnalyzer {
   TH1D *hPtP, *hEtaP, *hDzP, *hD0P,*hPhiP;
   TH1D *hPhi,*hPhi1,*hPhi2,*hPhi3,*hPhi4,*hPhi5,*hPhi0;
 
-  TH2F *hbpixXY, *hfpixXY1,*hfpixXY2,*hfpixXY3,*hfpixXY4, *hzphi1,*hzphi2,*hzphi3, *htest;
+  TH2F *hbpixXY, *hfpixXY1,*hfpixXY2,*hfpixXY3,*hfpixXY4, *hzphi1,*hzphi2,*hzphi3;
+  TH2F *htest,*htest2,*htest3;
 
 #ifdef L1
   TH1D *hl1a, *hl1t, *hlt1;
@@ -464,7 +465,9 @@ void PixClustersWithTracks::beginJob() {
    hzphi1 = fs->make<TH2F>("hzphi1","bpix z phi 1",208,-26.,26.,140,-3.5,3.5);
    hzphi2 = fs->make<TH2F>("hzphi2","bpix z phi 2",208,-26.,26.,140,-3.5,3.5);
    hzphi3 = fs->make<TH2F>("hzphi3","bpix z phi 3",208,-26.,26.,140,-3.5,3.5);
-   htest = fs->make<TH2F>("htest","bpix phi-hit size",140,-3.5,3.5,10,0.,10.);
+   htest = fs->make<TH2F>("htest","bpix phi-hit size",70,-3.5,3.5,10,0.,10.);
+   htest2 = fs->make<TH2F>("htest2","bpix phi-hit size-x",70,-3.5,3.5,10,0.,10.);
+   htest3 = fs->make<TH2F>("htest3","bpix phi-hit size-y",70,-3.5,3.5,10,0.,10.);
 
 
    // RecHit errors
@@ -1127,6 +1130,8 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    hbpixXY->Fill(gX,gY);
 	    hzphi1->Fill(gZ,gPhi);
 	    htest->Fill(gPhi,float(size));
+	    htest2->Fill(gPhi,float(sizeX));
+	    htest3->Fill(gPhi,float(sizeY));
 
 	    hclusMap1->Fill(gZ,phi);
 	    hstatus->Fill(12.);
@@ -1180,6 +1185,8 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    hbpixXY->Fill(gX,gY);
 	    hzphi2->Fill(gZ,gPhi);
 	    htest->Fill(gPhi,float(size));
+	    htest2->Fill(gPhi,float(sizeX));
+	    htest3->Fill(gPhi,float(sizeY));
 
 	    hclusMap2->Fill(gZ,phi);
 	    hstatus->Fill(13.);
@@ -1231,6 +1238,8 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    hbpixXY->Fill(gX,gY);
 	    hzphi3->Fill(gZ,gPhi);
 	    htest->Fill(gPhi,float(size));
+	    htest2->Fill(gPhi,float(sizeX));
+	    htest3->Fill(gPhi,float(sizeY));
 
 	    hclusMap3->Fill(gZ,phi);
 	    hstatus->Fill(14.);
