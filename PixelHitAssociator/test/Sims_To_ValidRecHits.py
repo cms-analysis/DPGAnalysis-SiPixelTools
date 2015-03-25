@@ -149,12 +149,10 @@ process.maxEvents = cms.untracked.PSet(
 )
 
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
-  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre5/simhits/simHits2.root',
-  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre5/simhits/simHits1.root',
-  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre5/simhits/simHits3.root',
-  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre5/simhits/simHits4.root',
-  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre5/simhits/simHits5.root',
-  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre5/simhits/simHits6.root',
+  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_72/simhits/simHits2.root',
+  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_72/simhits/simHits1.root',
+  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_72/simhits/simHits3.root',
+  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_72/simhits/simHits4.root',
 # gen-sim
 # '/store/relval/CMSSW_7_0_0_pre8/RelValSingleMuPt100/GEN-SIM/START70_V2_RR-v7/00000/B464EA42-2B59-E311-A2C1-0025905964C2.root',
 # '/store/relval/CMSSW_7_0_0_pre10/RelValSingleMuPt100/GEN-SIM-RECO/START70_V3-v1/00000/908DD48F-1466-E311-BEBE-0025905A48F0.root',
@@ -185,8 +183,8 @@ process.MessageLogger = cms.Service("MessageLogger",
 
 #process.GlobalTag.globaltag = "START70_V1::All"
 #process.GlobalTag.globaltag = "START71_V1::All"
-process.GlobalTag.globaltag = "START72_V3::All"
-
+#process.GlobalTag.globaltag = "START72_V3::All"
+process.GlobalTag.globaltag = "MCRUN2_73_V7::All"
 
 #process.GlobalTag.globaltag = "POSTLS170_V4::All"
 #process.GlobalTag.globaltag = "POSTLS171_V1::All"
