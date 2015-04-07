@@ -391,8 +391,9 @@ void PixClusterTest::analyze(const edm::Event& e,
 
 #ifdef NEW_ID
   //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopo;
-  es.get<IdealGeometryRecord>().get(tTopo);
+  edm::ESHandle<TrackerTopology> tTopoH;
+  es.get<IdealGeometryRecord>().get(tTopoH);
+  const TrackerTopology *tTopo=tTopoH.product();
 #endif
 
 

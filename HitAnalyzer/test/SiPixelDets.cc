@@ -27,7 +27,7 @@
 
 #include "SiPixelDets.h"
 
-//#define NEW_NAMES
+#define NEW_NAMES
 
 using namespace std;
 using namespace edm;
@@ -58,11 +58,12 @@ SiPixelDets::~SiPixelDets() {
 // Analyzer: Functions that gets called by framework every event
 
 void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
-  const bool PRINT = true;
+  const bool PRINT = false;
+  const bool PRINT_TABLE = true;
 
   edm::ESHandle<TrackerGeometry> tkgeom;
   es.get<TrackerDigiGeometryRecord>().get( tkgeom );
-  cout<<" There are "<<tkgeom->detUnits().size() <<" detectors"<<std::endl;
+  if(PRINT) cout<<" There are "<<tkgeom->detUnits().size() <<" detectors"<<std::endl;
 
   //Retrieve tracker topology from geometry
   edm::ESHandle<TrackerTopology> tTopo;
@@ -153,6 +154,7 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       // change ladeer sign for Outer )x<0)
       if(shell1==1 || shell1==3) ladder1 = -ladder1;
 
+
       if(PRINT) cout<<" shell1 "<<sh1<<"("<<shell1<<") "<<sector1<<" "<<layer1<<" "<<ladder1<<" "
 		    <<module1<<" "<<half1<<" "<<name1<<" "<<moduleType1<<" "<<pxbdet1.rawId()<<endl;
 
@@ -187,6 +189,11 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
 		    <<module<<" "<<half<<" "<<name<<" "<<moduleType<<" "<<det.rawId()<<" "
 		    <<pxbdet.rawId()<<endl;
 
+      if(PRINT_TABLE) 
+	cout<<detId.rawId()<<" "<<name<<endl;
+
+
+      if(name !=name1)  cout<<" wrong  name "<<endl;
       if(shell !=shell1)  cout<<" wrong shell "<<endl;
       if(sector !=sector1)  cout<<" wrong sector "<<endl;
       if(layer !=layer1)  cout<<" wrong layer "<<endl;
@@ -208,7 +215,8 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       unsigned int rawId = detId.rawId();
       PXFDetId pxdetid = PXFDetId(detId);
 
-      cout << "endcap:" << " side=" << pxdetid.side() << "  disk=" << pxdetid.disk() 
+      if(PRINT) 
+	cout << "endcap:" << " side=" << pxdetid.side() << "  disk=" << pxdetid.disk() 
 	   << "  blade=" << pxdetid.blade() << "  panel=" << pxdetid.panel() 
 	   << "  plaq=" << pxdetid.module() << " "<<rawId<<endl;
 
@@ -235,9 +243,10 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       PXFDetId pxfdet1=pen1.getDetId();
       PixelEndcapName::HalfCylinder part1 = pen1.halfCylinder();
       PixelModuleName::ModuleType moduleType1 = pen1.moduleType();
-      cout<<nameF1<<" "<<diskName1<<" "<<bladeName1<<" "<<pannelName1<<" "
-	  <<plaquetteName1<<" "<<part1<<" "<<moduleType1<<" "
-	  <<pxfdet1.rawId()<<" "<<sh1<<endl;
+      if(PRINT) 
+	cout<<nameF1<<" "<<diskName1<<" "<<bladeName1<<" "<<pannelName1<<" "
+	    <<plaquetteName1<<" "<<part1<<" "<<moduleType1<<" "
+	    <<pxfdet1.rawId()<<" "<<sh1<<endl;
 
 
 #ifdef NEW_NAMES
@@ -255,11 +264,14 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       PXFDetId pxfdet=pen.getDetId();
       PixelEndcapName::HalfCylinder part = pen.halfCylinder();
       PixelModuleName::ModuleType moduleType = pen.moduleType();
-      cout<<nameF<<" "<<diskName<<" "<<bladeName<<" "<<pannelName<<" "
+      if(PRINT) cout<<nameF<<" "<<diskName<<" "<<bladeName<<" "<<pannelName<<" "
 	  <<plaquetteName<<" "<<part<<" "<<moduleType<<" "
 	  <<det.rawId()<<" "<<pxfdet.rawId()<<endl;
 
+      if(PRINT_TABLE) 
+	cout<<detId.rawId()<<" "<<nameF<<endl;
 
+      if(nameF != nameF1)  cout<<" wrong name "<<endl;
       if(sh !=sh1)  cout<<" wrong shell "<<endl;
       if(diskName  != diskName1)  cout<<" wrong disk "<<endl;
       if(bladeName != bladeName1) cout<<" wrong blade "<<endl;

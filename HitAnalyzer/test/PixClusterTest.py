@@ -6,7 +6,12 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("cluTest")
 
-process.load("Configuration.StandardSequences.Geometry_cff")
+#process.load("Configuration.StandardSequences.Geometry_cff")
+#process.load("Configuration.Geometry.GeometryIdeal_cff")
+# needed for det-id
+process.load("Configuration.Geometry.GeometryRecoDB_cff")
+
+
 process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 
 import HLTrigger.HLTfilters.hltHighLevel_cfi as hlt
@@ -59,16 +64,18 @@ process.source = cms.Source("PoolSource",
 #  fileNames =  myfilelist
  fileNames = cms.untracked.vstring(    
 #  "/store/data/Run2012C/MinimumBias/RECO/22Jan2013-v1/20020/2C3E2BB3-4173-E211-8417-003048F0117C.root",
-
 #  "/store/express/Commissioning2015/ExpressCosmics/FEVT/Express-v1/000/234/029/00000/FEFCE925-8EB2-E411-A251-02163E011D70.root",
 
 # for MC 
-  'file:../scripts/tracks.root'
+#  'file:../scripts/tracks.root'
 #  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100/clus/clus1.root'
 #  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100/rechits/rechits1.root'
 #  'file:../../../../../CMSSW_7_0_0_pre8/src/EventFilter/SiPixelRawToDigi/test/digis.root'
 #   'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre7/rechits/rechits2_postls171.root'
+   'file:/afs/cern.ch/work/d/dkotlins/public/data/740_p9/clus/rechits_2012d_208307.root'
 #   'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre7/rechits/rechits2_mc71.root'
+#  "/store/relval/CMSSW_7_4_0_pre9/RelValBsToMuMu_13/GEN-SIM-RECO/MCRUN2_74_V7-v1/00000/4C1C6AAA-31D4-E411-AD53-0025905A48EC.root",
+#  "/store/relval/CMSSW_7_4_0_pre9/RelValBsToMuMu_13/GEN-SIM-RECO/MCRUN2_74_V7-v1/00000/DC26A1A1-31D4-E411-987E-003048FFCBFC.root",
 
   )
 
@@ -81,7 +88,13 @@ process.TFileService = cms.Service("TFileService",
     fileName = cms.string('clus.root')
 )
 
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+#process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
+
+from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
+#from Configuration.AlCa.GlobalTag import GlobalTag
+# to use no All 
+
 # Choose the global tag here:
 # 2012
 #process.GlobalTag.globaltag = 'GR_P_V40::All'
@@ -92,14 +105,24 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 # MC 2014
 #process.GlobalTag.globaltag = 'PRE_STA71_V4::All'
 # for MC-2015 73X
-process.GlobalTag.globaltag = "MCRUN1_73_V5::All" # OK for condDB
+#process.GlobalTag.globaltag = "MCRUN1_73_V5::All" # OK for condDB
+# for MC-2015 74X
+#process.GlobalTag.globaltag = "MCRUN2_74_V7" 
 
+# 2012
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
+#process.GlobalTag.globaltag = autoCond['run1_data']
+#process.GlobalTag.globaltag = 'GR_R_73_V0A'
+# 2015
+#process.GlobalTag.globaltag = autoCpnd['run2_data']
 # 2015
 #process.GlobalTag.globaltag = 'GR_P_V49::All'
 
+
 process.analysis = cms.EDAnalyzer("PixClusterTest",
-    Verbosity = cms.untracked.bool(True),
-    src = cms.InputTag("siPixelClusters"),
+    Verbosity = cms.untracked.bool(False),
+#    src = cms.InputTag("siPixelClusters"),
+    src = cms.InputTag("siPixelClustersPreSplitting"),
 )
 
 # for data

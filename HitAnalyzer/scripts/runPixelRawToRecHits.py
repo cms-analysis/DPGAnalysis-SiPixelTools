@@ -9,12 +9,31 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process("ClusTest")
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
-process.load("Configuration.Geometry.GeometryIdeal_cff")
+process.load("Configuration.Geometry.GeometryRecoDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_38T_cff")
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("Configuration.StandardSequences.Services_cff")
 
+#process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
+# to use aut0:
+from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
+#from Configuration.AlCa.GlobalTag import GlobalTag
+# to use autoCond[*]
+#from Configuration.AlCa.autoCond_condDBv2 import autoCond
+
+# 2012
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
+#process.GlobalTag.globaltag = autoCond['run1_data']
+#process.GlobalTag.globaltag = 'GR_R_73_V0A'
+# 2015
+#process.GlobalTag.globaltag = autoCpnd['run2_data']
+
+
 # clusterizer 
+#  already include in LocalTracker
+#process.load("RecoLocalTracker.SiPixelClusterizer/SiPixelClusterizer_cfi")
+# from 74X
+#process.load("RecoLocalTracker.SiPixelClusterizer/SiPixelClusterizerPreSplitting_cfi")
 process.load("RecoLocalTracker.Configuration.RecoLocalTracker_cff")
 
 # for raw
@@ -31,7 +50,7 @@ process.load('Configuration.EventContent.EventContent_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10)
+    input = cms.untracked.int32(-1)
 )
 
 process.MessageLogger = cms.Service("MessageLogger",
@@ -53,7 +72,16 @@ process.source = cms.Source("PoolSource",
 #    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100/digis/digis1.root'
 #    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre7/digis/digis2_postls171.root'
 #    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre7/digis/digis2_mc71.root'
-  '/store/relval/CMSSW_7_1_0_pre8/RelValTTbar/GEN-SIM-DIGI-RAW-HLTDEBUG/PU_PRE_STA71_V4-v1/00000/06397C95-91E2-E311-963D-02163E00B776.root',
+
+  '/store/data/Run2012D/MinimumBias/RAW/v1/000/208/307/020716B4-CC3A-E211-B309-5404A63886B6.root',
+  '/store/data/Run2012D/MinimumBias/RAW/v1/000/208/307/0492EC15-9E3A-E211-AF09-BCAEC5364C4C.root',
+  '/store/data/Run2012D/MinimumBias/RAW/v1/000/208/307/04FD5338-BD3A-E211-B11A-003048F118C4.root',
+  '/store/data/Run2012D/MinimumBias/RAW/v1/000/208/307/0642B1C0-C73A-E211-9F27-0030486780A8.root',
+  '/store/data/Run2012D/MinimumBias/RAW/v1/000/208/307/0E4C8627-AC3A-E211-BB71-003048D2BCA2.root',
+
+#  '/store/relval/CMSSW_7_1_0_pre8/RelValTTbar/GEN-SIM-DIGI-RAW-HLTDEBUG/PU_PRE_STA71_V4-v1/00000/06397C95-91E2-E311-963D-02163E00B776.root',
+
+
 
 # 25ns flat pu=20-50
 #   /store/mc/Spring14dr/TT_Tune4C_13TeV-pythia8-tauola/GEN-SIM-RAW/Flat20to50_POSTLS170_V5-v1/00000/006EBBE4-98DC-E311-B64F-0025905A611E.root
@@ -70,15 +98,6 @@ process.source = cms.Source("PoolSource",
 
   )
 )
-
-# Choose the global tag here:
-process.GlobalTag.globaltag = "POSTLS162_V2::All"
-#process.GlobalTag.globaltag = "MC_70_V1::All"
-#process.GlobalTag.globaltag = "START70_V1::All"
-#process.GlobalTag.globaltag = "START71_V1::All"
-#process.GlobalTag.globaltag = "MC_71_V1::All"
-#process.GlobalTag.globaltag = "POSTLS171_V1::All"
-#process.GlobalTag.globaltag = "PRE_MC_71_V2::All"
 
 
 # DB stuff 
@@ -159,27 +178,11 @@ if useLocalDB :
 
 process.o1 = cms.OutputModule("PoolOutputModule",
             outputCommands = cms.untracked.vstring('drop *','keep *_*_*_ClusTest'),
-            fileName = cms.untracked.string('file:clus.root')
+#            fileName = cms.untracked.string('file:clus.root')
 #            fileName = cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre7/rechits/rechits2_mc71.root')
-
+            fileName = cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/data/740_p9/clus/rechits_2012d_208307.root')
 )
 
-#process.Timing = cms.Service("Timing")
-#process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck")
-
-# My 
-# modify clusterie parameters
-#process.siPixelClusters.ClusterThreshold = 4000.0
-
-# DIRECT
-# direct clusterization (no raw step)
-# label of digis 
-#process.siPixelClusters.src = 'simSiPixelDigis'
-
-# plus pixel clusters  (OK)
-#process.p1 = cms.Path(process.siPixelClusters)
-# plus pixel rechits (OK)
-#process.p1 = cms.Path(process.pixeltrackerlocalreco)
 
 # RAW
 # clusterize through raw (OK)
@@ -189,13 +192,20 @@ process.o1 = cms.OutputModule("PoolOutputModule",
 process.siPixelDigis.InputLabel = 'rawDataCollector'
 #process.siPixelDigis.InputLabel = 'source'
 
-# process.siStripDigis.ProductLabel = 'SiStripDigiToRaw'
+# DIRECT
+# direct clusterization (no raw step)
+# label of digis 
+#process.siPixelClusters.src = 'simSiPixelDigis'
+# digis from raw (this is the default)
+#process.siPixelClustersPreSplitting.src = 'siPixelDigis'
+# modify clusterie parameters
+#process.siPixelClustersPreSplitting.ClusterThreshold = 4000.0
 
-
-process.siPixelClusters.src = 'siPixelDigis'
-
-#process.p1 = cms.Path(process.siPixelRawData)
-#process.p1 = cms.Path(process.siPixelRawData*process.siPixelDigis)
+# make digis only 
+#process.p1 = cms.Path(process.siPixelDigis)
+# plus pixel clusters  
+#process.p1 = cms.Path(process.siPixelDigis*process.siPixelClustersPreSplitting)
+# plus rechits
 process.p1 = cms.Path(process.siPixelDigis*process.pixeltrackerlocalreco)
 
 process.outpath = cms.EndPath(process.o1)
