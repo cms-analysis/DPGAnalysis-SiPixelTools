@@ -535,7 +535,7 @@ void SiPixelRecHitsValid_pix::fillBarrel(const SiPixelRecHit& recHit, const PSim
   const bool quick = false; // fill only essential histos
 #endif
 
-  float phi = simHit.phiAtEntry();
+  //float phi = simHit.phiAtEntry();
   float theta = simHit.thetaAtEntry(); // theta with respect to module coordinates 
   float beta = 0;  // beta is roughly like real theta
   if(theta<PI/2.) beta=(PI/2.) - theta; //  
@@ -558,7 +558,7 @@ void SiPixelRecHitsValid_pix::fillBarrel(const SiPixelRecHit& recHit, const PSim
 
   if(!quick) {
     heta->Fill(eta);
-    hphi->Fill(phi);
+    //hphi->Fill(phi);
   }
   LocalPoint lp = recHit.localPosition();
   float lp_y = lp.y();  

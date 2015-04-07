@@ -1,14 +1,13 @@
 ##############################################################################
-
+# start from simhits, do trackerlocal, compare sim and rec-hits
 import FWCore.ParameterSet.Config as cms
-
 process = cms.Process("TestValid")
 
-process.load("FWCore.MessageLogger.MessageLogger_cfi")
 # process.load("Configuration.StandardSequences.Geometry_cff")
-process.load("Configuration.Geometry.GeometryIdeal_cff")
+process.load("Configuration.Geometry.GeometryDB_cff")
+
+process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.load("Configuration.StandardSequences.MagneticField_38T_cff")
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("Configuration.StandardSequences.Services_cff")
 process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
 
@@ -22,6 +21,35 @@ process.load("CalibTracker.SiStripESProducers.SiStripGainSimESProducer_cfi")
 process.load("RecoLocalTracker.Configuration.RecoLocalTracker_cff")
 # needed for pixel RecHits (templates?)
 process.load("Configuration.StandardSequences.Reconstruction_cff")
+
+#process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
+
+from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
+#from Configuration.AlCa.GlobalTag import GlobalTag
+# to use no All 
+
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
+
+# Choose the global tag here:
+# for v7.0
+#process.GlobalTag.globaltag = "MC_70_V1::All"
+#process.GlobalTag.globaltag = "MC_71_V1::All"
+
+#process.GlobalTag.globaltag = "PRE_MC_71_V2::All"
+#process.GlobalTag.globaltag = "PRE_STA71_V3::All"
+
+#process.GlobalTag.globaltag = "START70_V1::All"
+#process.GlobalTag.globaltag = "START71_V1::All"
+#process.GlobalTag.globaltag = "START72_V3::All"
+#process.GlobalTag.globaltag = "MCRUN2_73_V7::All"
+
+#process.GlobalTag.globaltag = "POSTLS170_V4::All"
+#process.GlobalTag.globaltag = "POSTLS171_V1::All"
+#process.GlobalTag.globaltag = "PRE_LS171_V3::All"
 
 
 # process.load("SimGeneral.MixingModule.mixNoPU_cfi")
@@ -145,7 +173,7 @@ process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService
 )
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(10)
 )
 
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
@@ -172,23 +200,6 @@ process.MessageLogger = cms.Service("MessageLogger",
 #        threshold = cms.untracked.string('DEBUG')
 #    )
 )
-
-# Choose the global tag here:
-# for v7.0
-#process.GlobalTag.globaltag = "MC_70_V1::All"
-#process.GlobalTag.globaltag = "MC_71_V1::All"
-
-#process.GlobalTag.globaltag = "PRE_MC_71_V2::All"
-#process.GlobalTag.globaltag = "PRE_STA71_V3::All"
-
-#process.GlobalTag.globaltag = "START70_V1::All"
-#process.GlobalTag.globaltag = "START71_V1::All"
-#process.GlobalTag.globaltag = "START72_V3::All"
-process.GlobalTag.globaltag = "MCRUN2_73_V7::All"
-
-#process.GlobalTag.globaltag = "POSTLS170_V4::All"
-#process.GlobalTag.globaltag = "POSTLS171_V1::All"
-#process.GlobalTag.globaltag = "PRE_LS171_V3::All"
 
 
 
@@ -227,7 +238,7 @@ if useLocalDB :
 process.g4SimHits.Generator.HepMCProductLabel = 'source'
 
 # for direct digis
-process.siPixelClusters.src = 'simSiPixelDigis' # for V5, direct
+process.siPixelClustersPreSplitting.src = 'simSiPixelDigis' # for V5, direct
 # process.siPixelClusters.src = 'mix'
 # modify digitizer parameters
 #process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix = 3500.0 
@@ -239,7 +250,7 @@ process.simSiPixelDigis.digitizers.pixel.useDB = cms.bool(False)
 #process.simSiPixelDigis.digitizers.pixel.TanLorentzAnglePerTesla_BPix = 0.106 
 #process.simSiPixelDigis.digitizers.pixel.TanLorentzAnglePerTesla=FPix = 0.106 
 
-# to run rechit validation
+# to run rechit "official" validation
 #process.load("Validation.TrackerRecHits.trackerRecHitsValidation_cff")
 #process.load("Validation.TrackerRecHits.SiPixelRecHitsValid_cfi")
 
@@ -248,14 +259,13 @@ process.load("DPGAnalysis-SiPixelTools.PixelHitAssociator.SiPixelRecHitsValid_cf
 
 #process.pixRecHitsValid.outputFile="pixelrechitshisto.root"
 #process.pixRecHitsValid.verbose=True
-#process.pixRecHitsValid.src="siPixelRecHits"
+process.pixRecHitsValid.src="siPixelRecHitsPreSplitting"
 #process.pixRecHitsValid.associatePixel = True
 #process.pixRecHitsValid.associateStrip = False
 #process.pixRecHitsValid.associateRecoTracks = False
 
 #This process is to run the digitizer:
-#process.p1 = cms.Path(process.mix)
-#process.p1 = cms.Path(process.mix*process.pixeltrackerlocalreco)
+#process.p1 = cms.Path(process.simSiPixelDigis*process.pixeltrackerlocalreco)
 process.p1 = cms.Path(process.simSiPixelDigis*process.pixeltrackerlocalreco*process.pixRecHitsValid)
 
 # for RelVal GEN-SIM-DIGI-RAW-HLTDEBUG
