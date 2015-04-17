@@ -8,7 +8,7 @@ process.source = cms.Source("EmptySource",
 #    lastRun = cms.untracked.uint32(1),
 #    timetype = cms.string('runnumber'),
 #    interval = cms.uint32(1),
-    firstRun = cms.untracked.uint32(1)
+#    firstRun = cms.untracked.uint32(1)
 #    firstRun = cms.untracked.uint32(180000),
 # iov 1
 #    firstRun = cms.untracked.uint32(190000),
@@ -25,6 +25,8 @@ process.source = cms.Source("EmptySource",
 #    firstRun = cms.untracked.uint32(206000),
 # iov 7
 #    firstRun = cms.untracked.uint32(208686),
+#  2015, iov 1
+    firstRun = cms.untracked.uint32(240000),
 )
 
 
@@ -78,14 +80,19 @@ if useLocalDB :
 # 			label = cms.untracked.string("fromAlignment"),
 # 			label = cms.untracked.string("forWidth"),
 
-			tag = cms.string("SiPixelLorentzAngle_2015_1")
+#			tag = cms.string("SiPixelLorentzAngle_2015_1")
 
 #			tag = cms.string("SiPixelLorentzAngle_v02_mc")
+
 #			tag = cms.string("SiPixelLorentzAngle_forWidth_v0_mc")
 #			tag = cms.string("SiPixelLorentzAngle_forWidth_v01")
-#			tag = cms.string("SiPixelLorentzAngle_fromAlignment_v0_mc")
-#			tag = cms.string("SiPixelLorentzAngle_fromAlignment_v01_mc")
-#			tag = cms.string("SiPixelLorentzAngle_fromAlignment_v01")
+
+#			tag = cms.string("SiPixelLorentzAngle_fromAlignment_v1_mc")
+#			tag = cms.string("SiPixelLorentzAngle_fromAlignment_v1")
+#			tag = cms.string("SiPixelLorentzAngle_fromAlignment_v1_offline") 
+#			tag = cms.string("SiPixelLorentzAngle_fromAlignment_v1_express") 
+			tag = cms.string("SiPixelLorentzAngle_fromAlignment_v1_hlt") 
+
                         # express/prompt, hlt
                         #tag = cms.string("SiPixelLorentzAngle_2009_v1_express")
                         #tag = cms.string("SiPixelLorentzAngle_2009_v1_hlt")
@@ -127,13 +134,13 @@ if useLocalDB :
 #		)
 	),
 
-    connect = cms.string('sqlite_file:la.db')
+#    connect = cms.string('sqlite_file:la.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_forWidth_v01_mc.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_forWidth_v01.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_fromAlignment_v01_mc.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_fromAlignment_v01.db')
-
-#    connect = cms.string('frontier://FrontierProd/CMS_COND_31X_PIXEL')
+    connect = cms.string('frontier://FrontierProd/CMS_COND_31X_PIXEL')
+#    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
 
   ) # end process
   process.es_prefer_QualityReader = cms.ESPrefer("PoolDBESSource","QualityReader")
@@ -142,7 +149,8 @@ if useLocalDB :
 
 process.LorentzAngleReader = cms.EDAnalyzer("SiPixelLorentzAngleDBReader",
     printDebug = cms.untracked.bool(True),
-    useSimRcd = cms.bool(False)
+    label = cms.untracked.string("fromAlignment"),
+    useSimRcd = cms.bool(False)                                    
 )
 
 process.LorentzAngleSimReader = cms.EDAnalyzer("SiPixelLorentzAngleDBReader",

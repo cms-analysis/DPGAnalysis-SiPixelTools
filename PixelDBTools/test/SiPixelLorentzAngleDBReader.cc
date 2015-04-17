@@ -25,7 +25,8 @@ using namespace cms;
 
 SiPixelLorentzAngleDBReader::SiPixelLorentzAngleDBReader( const edm::ParameterSet& iConfig ):
   printdebug_(iConfig.getUntrackedParameter<bool>("printDebug",false)),
-  useSimRcd_( iConfig.getParameter<bool>("useSimRcd") )
+  useSimRcd_( iConfig.getParameter<bool>("useSimRcd") ),
+  tagLabel_( iConfig.getUntrackedParameter<std::string>("label"," "))
 {
 }
 
@@ -42,11 +43,15 @@ void SiPixelLorentzAngleDBReader::analyze( const edm::Event& e, const edm::Event
    
  } else {
    //edm::LogInfo("SiPixelLorentzAngleReader") <<" Show LA for reconstruction "<<std::endl;
-   std::cout<<" Show LA for reconstruction "<<std::endl;
-   iSetup.get<SiPixelLorentzAngleRcd>().get(SiPixelLorentzAngle_);
+   std::cout<<" Show LA for reconstruction, use label = "<<tagLabel_<<std::endl;
    // get the payloads with labels
-   //iSetup.get<SiPixelLorentzAngleRcd>().get("fromAlignment",SiPixelLorentzAngle_);
-   //iSetup.get<SiPixelLorentzAngleRcd>().get("forWidth",SiPixelLorentzAngle_);
+   if(tagLabel_=="fromAlignment") {
+     iSetup.get<SiPixelLorentzAngleRcd>().get("fromAlignment",SiPixelLorentzAngle_);
+   } else if(tagLabel_=="forWidth") {
+     iSetup.get<SiPixelLorentzAngleRcd>().get("forWidth",SiPixelLorentzAngle_);
+   } else {  // the nomral no label one 
+     iSetup.get<SiPixelLorentzAngleRcd>().get(SiPixelLorentzAngle_);
+   }
  }
 
  //edm::LogInfo("SiPixelLorentzAngleDBReader") << "[SiPixelLorentzAngleDBReader::analyze] End Reading SiPixelLorentzAngle" << std::endl;
