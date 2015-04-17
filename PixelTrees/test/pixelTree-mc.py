@@ -68,6 +68,7 @@ try:
     rootFileName = os.environ["JOB"] + ".root"
 except KeyError:
     rootFileName = "pixelTree_MC.root"
+
 process.PixelTree = cms.EDAnalyzer(
     "PixelTree",
     verbose                      = cms.untracked.int32(0),
@@ -85,7 +86,6 @@ process.PixelTree = cms.EDAnalyzer(
     L1GTReadoutRecordLabel       = cms.untracked.InputTag('gtDigis'), 
     hltL1GtObjectMap             = cms.untracked.InputTag('hltL1GtObjectMap'), 
     HLTResultsLabel              = cms.untracked.InputTag('TriggerResults::HLT'),
-    accessSimHitInfo             = cms.untracked.bool(True)
     )
 
 # -- Path
