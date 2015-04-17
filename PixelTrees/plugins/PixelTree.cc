@@ -505,7 +505,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
     iSetup.get<TrackerDigiGeometryRecord>().get(pDD);
 
     for (TrackerGeometry::DetContainer::const_iterator it = pDD->dets().begin(); it != pDD->dets().end(); it++){
-      if(dynamic_cast<PixelGeomDetUnit*>((*it))!=0){
+      if(dynamic_cast<const PixelGeomDetUnit*>((*it))!=0){
 	DetId detId = (*it)->geographicalId();
 	uint32_t newDetId = detId;
 	
@@ -1029,9 +1029,9 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	fTkVy[fTkN]     = trackref->vy();
 	fTkVz[fTkN]     = trackref->vz();
 	fTkNHits[fTkN]  = trackref->hitPattern().numberOfValidHits();
-	fTkLHits[fTkN]  = trackref->hitPattern().numberOfLostHits();
-	fTkLHitsI[fTkN] = trackref->trackerExpectedHitsInner().numberOfLostTrackerHits();
-	fTkLHitsO[fTkN] = trackref->trackerExpectedHitsOuter().numberOfLostTrackerHits();
+	fTkLHits[fTkN]  = trackref->hitPattern().numberOfLostHits(reco::HitPattern::TRACK_HITS);
+	fTkLHitsI[fTkN] = trackref->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS);  
+	fTkLHitsO[fTkN] = trackref->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_OUTER_HITS); 
 	fTkNHitFr[fTkN] = -1;
 	fTkType[fTkN]   = 1;
 	fTkMuI[fTkN]    = -1;
@@ -1644,7 +1644,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
   // ----------------------------------------------------------------------
   // -- Clusters without tracks
   for (TrackerGeometry::DetContainer::const_iterator it = TG->dets().begin(); it != TG->dets().end(); it++){
-    if (dynamic_cast<PixelGeomDetUnit*>((*it)) != 0){ 
+    if (dynamic_cast<const PixelGeomDetUnit*>((*it)) != 0){ 
       DetId detId = (*it)->geographicalId();
 
       // -- clusters on this det
@@ -1652,12 +1652,14 @@ void PixelTree::analyze(const edm::Event& iEvent,
       // -- rechits on this det
       SiPixelRecHitCollection::const_iterator dsmatch = hRecHitColl->find(detId);
       SiPixelRecHitCollection::DetSet rhRange;
+      SiPixelRecHitCollection::DetSet::const_iterator rhIteratorBegin(0);
+      SiPixelRecHitCollection::DetSet::const_iterator rhIteratorEnd=rhIteratorBegin;
+      SiPixelRecHitCollection::DetSet::const_iterator iRh;
       if (dsmatch != hRecHitColl->end()) { 
 	rhRange = *dsmatch;
-      }
-      SiPixelRecHitCollection::DetSet::const_iterator rhIteratorBegin = rhRange.begin();
-      SiPixelRecHitCollection::DetSet::const_iterator rhIteratorEnd = rhRange.end();
-      SiPixelRecHitCollection::DetSet::const_iterator iRh;
+        rhIteratorBegin = rhRange.begin();
+        rhIteratorEnd = rhRange.end();
+}
 
       if (isearch != clustColl.end()) {  // Not an empty iterator
 	edmNew::DetSet<SiPixelCluster>::const_iterator  di;

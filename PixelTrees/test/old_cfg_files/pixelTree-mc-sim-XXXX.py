@@ -132,12 +132,9 @@ process.PixelTree = cms.EDAnalyzer(
     accessSimHitInfo               = cms.untracked.bool( True )
     )
 
-process.load("SimGeneral.MixingModule.mixNoPU_cfi")
-#process.p0 = cms.Path(process.mix)
 
 # -- Path
 process.p = cms.Path(
-    process.mix*
     process.siPixelRecHits*
     process.TrackRefitter*
     process.PixelTree

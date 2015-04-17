@@ -172,7 +172,7 @@ void DetectorInformation::analyze(const edm::Event& iEvent,
     iSetup.get<TrackerDigiGeometryRecord>().get(pDD);
 
     for (TrackerGeometry::DetContainer::const_iterator it = pDD->dets().begin(); it != pDD->dets().end(); it++){
-      if(dynamic_cast<PixelGeomDetUnit*>((*it))!=0){
+      if(dynamic_cast<const PixelGeomDetUnit*>((*it))!=0){
 	DetId detId = (*it)->geographicalId();
 	uint32_t newDetId = detId;
 	
@@ -256,7 +256,7 @@ void DetectorInformation::dumpDetIds(const edm::EventSetup& iSetup) {
   
   for (TrackerGeometry::DetContainer::const_iterator it = pDD->dets().begin(); it != pDD->dets().end(); it++){
     
-    if(dynamic_cast<PixelGeomDetUnit*>((*it))!=0){
+    if(dynamic_cast<const PixelGeomDetUnit*>((*it))!=0){
       DetId detId = (*it)->geographicalId();
       if (detId.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel)) {
 
