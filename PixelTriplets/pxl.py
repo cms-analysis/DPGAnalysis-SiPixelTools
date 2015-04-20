@@ -3,9 +3,20 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("DQ")
 
-process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
-process.load("Configuration.Geometry.GeometryIdeal_cff")
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+#process.load("Configuration.Geometry.GeometryIdeal_cff")
+process.load("Configuration.Geometry.GeometryDB_cff")
+
+#process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
+#from Configuration.AlCa.GlobalTag import GlobalTag
+from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
+# tags for 74X
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
+
+#process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #process.GlobalTag.globaltag = 'START53_V27::All'
 #process.GlobalTag.globaltag = 'FT_R_53_V21::All'
 # for data in V7
@@ -13,13 +24,9 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 # for simulations 
 #process.GlobalTag.globaltag = "MC_70_V1::All"
 #process.GlobalTag.globaltag = "START70_V1::All"
-#process.GlobalTag.globaltag = "PRE_MC_71_V2::All"
 #process.GlobalTag.globaltag = "MC_71_V1::All"
-#process.GlobalTag.globaltag = "START71_V1::All"
-#process.GlobalTag.globaltag = "POSTLS170_V5::All"
-#process.GlobalTag.globaltag = "POSTLS171_V1::All"
-#process.GlobalTag.globaltag = "PRE_LS171_V3::All"
-process.GlobalTag.globaltag = "MCRUN2_73_V7::All"
+#process.GlobalTag.globaltag = "MCRUN2_73_V7::All"
+
 
 process.load("Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff")
 # process.load("Configuration.StandardSequences.MagneticField_38T_cff")
@@ -41,7 +48,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 )
 
 
-
+process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
 # WithTrackAngle - PixelCPEGeneric
 process.load('RecoTracker.TransientTrackingRecHit.TransientTrackingRecHitBuilder_cfi')
 # WithAngleAndTemplate - PixelCPETemplateReco
@@ -53,14 +60,11 @@ process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
 # Get beamspot from DB
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
-
-#from CalibTracker.Configuration.Common.PoolDBESSource_cfi import poolDBESSource
-#import CalibTracker.Configuration.Common.PoolDBESSource_cfi
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.source = cms.Source("PoolSource",
 	fileNames = cms.untracked.vstring(
-# "/store/data/Run2012D/MinimumBias/RECO/PromptReco-v1/000/208/686/F60495B3-1E41-E211-BB7C-003048D3756A.root",
+#"/store/data/Run2012D/MinimumBias/RECO/PromptReco-v1/000/208/686/F60495B3-1E41-E211-BB7C-003048D3756A.root",
 # my re-reco 
 #    'file:/afs/cern.ch/work/d/dkotlins/public/data/tracks/r208686_1_0.root',
 #    'file:/afs/cern.ch/work/d/dkotlins/public/data/tracks/r208686_1_1.root',
@@ -68,16 +72,14 @@ process.source = cms.Source("PoolSource",
 #    'file:/afs/cern.ch/work/d/dkotlins/public/data/tracks/r208686_1_3.root',
 
 # mc
-#    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100/tracks/tracks1.root'
-    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre7/tracks/tracks2_mc71.root'
-#    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre7/tracks/tracks2_postls171.root'
+    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_73/tracks/tracks1_mc73_13.root'
 	)
 )
 
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('208686:73-208686:463')
 
 # DB stuff 
-useLocalDB = True
+useLocalDB = False
 if useLocalDB :
 # Frontier LA 
     process.DBReaderFrontier = cms.ESSource("PoolDBESSource",
@@ -161,7 +163,6 @@ process.Histos = cms.EDAnalyzer('Pxl',
 
 #process.PixelCPEGenericESProducer.useLAAlignmentOffsets = cms.bool(True)
 #process.PixelCPEGenericESProducer.useLAWidthFromDB = cms.bool(True)
-
 
 # use the LA correction from alignment in templates 
 #process.templates.DoLorentz = cms.bool(True)
