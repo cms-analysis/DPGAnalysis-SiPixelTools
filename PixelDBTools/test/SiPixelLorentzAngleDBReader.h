@@ -2,6 +2,7 @@
 #define SiPixelLorentzAngleDBReader_H
 
 #include <string>
+#include <vector>
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -37,6 +38,7 @@
 
     bool useSimRcd_;
     std::string tagLabel_;
+    std::vector<unsigned int> l1New, l2New, l3New;
   };
 
 #endif

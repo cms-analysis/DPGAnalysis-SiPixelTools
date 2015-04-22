@@ -41,36 +41,27 @@ process.MessageLogger = cms.Service("MessageLogger",
     destinations = cms.untracked.vstring('cout')
 )
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
-#process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-#process.GlobalTag.globaltag = "GR_R_70_V1::All"
-#process.GlobalTag.globaltag = 'FT_R_53_V21::All'
-#process.GlobalTag.globaltag = 'MC_70_V1::All'
-#process.GlobalTag.globaltag = 'POSTLS171_V3::All'
-#process.GlobalTag.globaltag = 'PRE_MC_71_V5::All'
-
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 #from Configuration.AlCa.GlobalTag import GlobalTag
 # works with condDB and condDBv2
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgradePLS1', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'MCRUN2_73_V7', '')
 
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 
 # empty for the moment
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
 
-
-
 #process.load("Configuration.StandardSequences.GeometryIdeal_cff")
 process.load("Configuration.Geometry.GeometryDB_cff")
 
 # DB stuff 
-useLocalDB = False
+useLocalDB = True
 if useLocalDB :
-  process.QualityReader = cms.ESSource("PoolDBESSource",
+  process.DBReader = cms.ESSource("PoolDBESSource",
     DBParameters = cms.PSet(
         messageLevel = cms.untracked.int32(0),
         authenticationPath = cms.untracked.string('')
@@ -81,9 +72,11 @@ if useLocalDB :
 # 			label = cms.untracked.string("fromAlignment"),
 # 			label = cms.untracked.string("forWidth"),
 
-#			tag = cms.string("SiPixelLorentzAngle_2015_1")
+#			tag = cms.string("SiPixelLorentzAngle_2015_v1")
+			tag = cms.string("SiPixelLorentzAngle_2015_v2")
+#			tag = cms.string("SiPixelLorentzAngle_v1") # wrong tag name?
 
-			tag = cms.string("SiPixelLorentzAngle_v02_mc")
+#			tag = cms.string("SiPixelLorentzAngle_v02_mc")
 
 #			tag = cms.string("SiPixelLorentzAngle_forWidth_v0_mc")
 #			tag = cms.string("SiPixelLorentzAngle_forWidth_v01")
@@ -127,12 +120,12 @@ if useLocalDB :
                         #tag = cms.string("SiPixelLorentzAngle_0_106_612_slhc1_mc")
                         #tag = cms.string("SiPixelLorentzAngle_0_106_612_slhc1_offline")
 		),
-		cms.PSet(
-			record = cms.string("SiPixelLorentzAngleSimRcd"),
+#		cms.PSet(
+#			record = cms.string("SiPixelLorentzAngleSimRcd"),
 #                        tag = cms.string("SiPixelLorentzAngleSim_0_106_612_slhc1_mc")
 #			tag = cms.string("trivial_LorentzAngle_Sim")
-			tag = cms.string("SiPixelLorentzAngleSim_v02_mc")
-		),
+#			tag = cms.string("SiPixelLorentzAngleSim_v02_mc")
+#		),
 	),
 
 #    connect = cms.string('sqlite_file:la.db')
@@ -140,16 +133,18 @@ if useLocalDB :
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_forWidth_v01.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_fromAlignment_v01_mc.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_fromAlignment_v01.db')
+#    connect = cms.string('sqlite_file:../../../../../DB/SiPixelLorentzAngle_2015_v1.db')
+    connect = cms.string('sqlite_file:../../../../../DB/SiPixelLorentzAngle_2015_v2.db')
 #    connect = cms.string('frontier://FrontierProd/CMS_COND_31X_PIXEL')
-    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
+#    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
 
   ) # end process
-  process.es_prefer_QualityReader = cms.ESPrefer("PoolDBESSource","QualityReader")
+  process.es_prefer_DBReader = cms.ESPrefer("PoolDBESSource","DBReader")
 
 #  end if
 
 process.LorentzAngleReader = cms.EDAnalyzer("SiPixelLorentzAngleDBReader",
-    printDebug = cms.untracked.bool(True),
+    printDebug = cms.untracked.bool(False),
 #    label = cms.untracked.string("fromAlignment"),
     useSimRcd = cms.bool(False)                                    
 )
