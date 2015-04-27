@@ -141,7 +141,7 @@ private:
 
   double xpx2_g,xpy2_g,xpz2_g;
   double xpx2_l,xpy2_l,xpz2_l; 
-
+  double xl_ideal, yl_ideal, zl_ideal;
   double xblade;
   double xpanel;
   double xmodule;
@@ -229,6 +229,10 @@ void PxlFPix::beginJob()
   outtree->Branch("xpx1_l",&xpx1_l,"xpx1_l/D");
   outtree->Branch("xpy1_l",&xpy1_l,"xpy1_l/D");
   outtree->Branch("xpz1_l",&xpz1_l,"xpz1_l/D");
+
+  outtree->Branch("xl_ideal",&xl_ideal,"xl_ideal/D");
+  outtree->Branch("yl_ideal",&yl_ideal,"yl_ideal/D");
+  outtree->Branch("zl_ideal",&zl_ideal,"zl_ideal/D");
   outtree->Branch("xpx2_g",&xpx2_g,"xpx2_g/D");
   outtree->Branch("xpy2_g",&xpy2_g,"xpy2_g/D");
   outtree->Branch("xpz2_g",&xpz2_g,"xpz2_g/D");
@@ -1841,9 +1845,9 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	Surface::GlobalPoint gp_ideal( x_ideal, y_ideal, uz2 );
 	Surface::LocalPoint lp_ideal = det2->toLocal( gp_ideal );
 	
-	double xl_ideal= lp_ideal.x();
-	double yl_ideal= lp_ideal.y();
-	double zl_ideal= lp_ideal.z();
+	xl_ideal= lp_ideal.x();
+	yl_ideal= lp_ideal.y();
+	zl_ideal= lp_ideal.z();
 
 	x_local_error=ePXB2*1E4;
 	y_local_error=fPXB2*1E4;
@@ -1851,6 +1855,7 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	// if( kap2>=0)  unit=1;
 	// if(kap2<=0)  continue;
 	
+
 	residual_x= (xpx1_l - xl_ideal)*1E4;
 	residual_y= (xpy1_l - yl_ideal)*1E4;
 	residual_z= (xpz1_l - zl_ideal)*1E4;
@@ -2035,7 +2040,7 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	    double s = ks*rho2;// signed
 	    double uz2 = uz0 + s*tandip; //track z at R2
 	    double dz2 = zPXB2 - uz2;
-	    
+
 	    residual_refit = dca2 * 1E4;
 	    
 
