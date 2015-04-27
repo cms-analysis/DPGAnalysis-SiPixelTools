@@ -27,7 +27,8 @@
 
 #include "SiPixelDets.h"
 
-//#define NEW_NAMES
+#define NEW_NAMES
+//#define OLD_NAMES
 
 using namespace std;
 using namespace edm;
@@ -58,11 +59,12 @@ SiPixelDets::~SiPixelDets() {
 // Analyzer: Functions that gets called by framework every event
 
 void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
-  const bool PRINT = true;
+  const bool PRINT = false;
+  const bool PRINT_TABLE = true;
 
   edm::ESHandle<TrackerGeometry> tkgeom;
   es.get<TrackerDigiGeometryRecord>().get( tkgeom );
-  cout<<" There are "<<tkgeom->detUnits().size() <<" detectors"<<std::endl;
+  if(PRINT) cout<<" There are "<<tkgeom->detUnits().size() <<" detectors"<<std::endl;
 
   //Retrieve tracker topology from geometry
   edm::ESHandle<TrackerTopology> tTopo;
@@ -104,60 +106,20 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
 
       if(PRINT) cout << "barrel:" << "  layer=" << pxdetid.layer() << "  ladder=" << pxdetid.ladder() 
 		     << "  module=" << pxdetid.module() << " "<<rawId<<endl;
-	
-      // OLD indices 
+
+
+#ifdef NEW_NAMES 
+      // Use new indecies 
       // Barell layer = 1,2,3
-      unsigned int layerC = pxdetid.layer();
+      unsigned int layerC = tTopo->pxbLayer(detId);
       // Barrel ladder id 1-20,32,44.
-      unsigned int ladderC = pxdetid.ladder();
+      unsigned int ladderC = tTopo->pxbLadder(detId);
       // Barrel Z-index=1,8
-      unsigned int zindex = pxdetid.module();
+      unsigned int zindex = tTopo->pxbModule(detId);
 
       if(PRINT) cout<<" Barrel layer, ladder, module "
-		    <<layerC<<" "<<ladderC<<" "<<zindex<<endl;
+	  <<layerC<<" "<<ladderC<<" "<<zindex<<endl;
 
-      // new indecies 
-      // Barell layer = 1,2,3
-      unsigned int layerC1 = tTopo->pxbLayer(detId);
-      // Barrel ladder id 1-20,32,44.
-      unsigned int ladderC1 = tTopo->pxbLadder(detId);
-      // Barrel Z-index=1,8
-      unsigned int zindex1 = tTopo->pxbModule(detId);
-
-
-      if(PRINT) cout<<" Barrel layer, ladder, module "
-	  <<layerC1<<" "<<ladderC1<<" "<<zindex1<<endl;
-
-      if(layerC!=layerC1) cout<<" wrong layer "<<endl;
-      if(ladderC!=ladderC1) cout<<" wrong ladder "<<endl;
-      if(zindex!=zindex1) cout<<" wrong module "<<endl;
-
-      // Convert to online 
-      PixelBarrelName pbn1(detId); // use det-id
-      //PixelBarrelName pbn(pxdetid); // or pixel det id 
-      PixelBarrelName::Shell sh1 = pbn1.shell(); //enum
-      int sector1 = pbn1.sectorName();
-      int ladder1 = pbn1.ladderName();
-      int layer1  = pbn1.layerName();
-      int module1 = pbn1.moduleName();
-      bool half1  = pbn1.isHalfModule();
-      string name1= pbn1.name();
-      PXBDetId pxbdet1=pbn1.getDetId();
-
-      PixelModuleName::ModuleType moduleType1 = pbn1.moduleType();
-
-      // Shell { mO = 1, mI = 2 , pO =3 , pI =4 };
-      int shell1 = int(sh1);
-      // change the module sign for z<0
-      if(shell1==1 || shell1==2) module1 = -module1;
-      // change ladeer sign for Outer )x<0)
-      if(shell1==1 || shell1==3) ladder1 = -ladder1;
-
-      if(PRINT) cout<<" shell1 "<<sh1<<"("<<shell1<<") "<<sector1<<" "<<layer1<<" "<<ladder1<<" "
-		    <<module1<<" "<<half1<<" "<<name1<<" "<<moduleType1<<" "<<pxbdet1.rawId()<<endl;
-
-
-#ifdef NEW_NAMES
       //printDet(detId, tt);
 
       // Convert to online 
@@ -187,6 +149,58 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
 		    <<module<<" "<<half<<" "<<name<<" "<<moduleType<<" "<<det.rawId()<<" "
 		    <<pxbdet.rawId()<<endl;
 
+      if(PRINT_TABLE) 
+	cout<<detId.rawId()<<" "<<name<<endl;
+
+#endif // NEW_ANMES
+	
+#ifdef OLD_NAMES
+      // OLD indices 
+      // Barell layer = 1,2,3
+      unsigned int layerC1 = pxdetid.layer();
+      // Barrel ladder id 1-20,32,44.
+      unsigned int ladderC1 = pxdetid.ladder();
+      // Barrel Z-index=1,8
+      unsigned int zindex1 = pxdetid.module();
+
+      if(PRINT) cout<<" Barrel layer, ladder, module "
+		    <<layerC1<<" "<<ladderC1<<" "<<zindex1<<endl;
+
+
+      // Convert to online 
+      PixelBarrelName pbn1(detId); // use det-id
+      //PixelBarrelName pbn(pxdetid); // or pixel det id 
+      PixelBarrelName::Shell sh1 = pbn1.shell(); //enum
+      int sector1 = pbn1.sectorName();
+      int ladder1 = pbn1.ladderName();
+      int layer1  = pbn1.layerName();
+      int module1 = pbn1.moduleName();
+      bool half1  = pbn1.isHalfModule();
+      string name1= pbn1.name();
+      PXBDetId pxbdet1=pbn1.getDetId();
+
+      PixelModuleName::ModuleType moduleType1 = pbn1.moduleType();
+
+      // Shell { mO = 1, mI = 2 , pO =3 , pI =4 };
+      int shell1 = int(sh1);
+      // change the module sign for z<0
+      if(shell1==1 || shell1==2) module1 = -module1;
+      // change ladeer sign for Outer )x<0)
+      if(shell1==1 || shell1==3) ladder1 = -ladder1;
+
+      if(PRINT) cout<<" shell1 "<<sh1<<"("<<shell1<<") "<<sector1<<" "<<layer1<<" "<<ladder1<<" "
+		    <<module1<<" "<<half1<<" "<<name1<<" "<<moduleType1<<" "<<pxbdet1.rawId()<<endl;
+
+#endif // OLD_NAMES
+
+
+      // Compare OLD with NEW if needed 
+#if defined(OLD_NAMES) && defined(NEW_NAMES) 
+      if(layerC!=layerC1) cout<<" wrong layer "<<endl;
+      if(ladderC!=ladderC1) cout<<" wrong ladder "<<endl;
+      if(zindex!=zindex1) cout<<" wrong module "<<endl;
+
+      if(name !=name1)  cout<<" wrong  name "<<endl;
       if(shell !=shell1)  cout<<" wrong shell "<<endl;
       if(sector !=sector1)  cout<<" wrong sector "<<endl;
       if(layer !=layer1)  cout<<" wrong layer "<<endl;
@@ -195,11 +209,10 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       if(pxbdet.rawId() != pxbdet1.rawId()) cout<<" wrong rawid "<<endl;
       if(pxbdet.rawId() != det.rawId()) cout<<" wrong rawid "<<endl;
       if(rawId != det.rawId()) cout<<" wrong rawid "<<endl;
-#endif //NEW_NAMES
-
+#endif //NEW & OLD_NAMES
 	
     } else if(detId.subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap)) {
-      // fpix values  
+      // Now the fpix values  
       //continue;
 
       if(PRINT) 
@@ -208,7 +221,8 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       unsigned int rawId = detId.rawId();
       PXFDetId pxdetid = PXFDetId(detId);
 
-      cout << "endcap:" << " side=" << pxdetid.side() << "  disk=" << pxdetid.disk() 
+      if(PRINT) 
+	cout << "endcap:" << " side=" << pxdetid.side() << "  disk=" << pxdetid.disk() 
 	   << "  blade=" << pxdetid.blade() << "  panel=" << pxdetid.panel() 
 	   << "  plaq=" << pxdetid.module() << " "<<rawId<<endl;
 
@@ -223,22 +237,6 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
 		    <<blade<<", panel "
 		    <<panel<<", plaq "<<plaq<<endl;
  
-
-      // Convert to online 
-      PixelEndcapName pen1(detId); // use det-id
-      PixelEndcapName::HalfCylinder sh1 = pen1.halfCylinder(); //enum
-      string nameF1 = pen1.name();
-      int diskName1 = pen1.diskName();
-      int bladeName1 = pen1.bladeName();
-      int pannelName1 = pen1.pannelName();
-      int plaquetteName1 = pen1.plaquetteName();
-      PXFDetId pxfdet1=pen1.getDetId();
-      PixelEndcapName::HalfCylinder part1 = pen1.halfCylinder();
-      PixelModuleName::ModuleType moduleType1 = pen1.moduleType();
-      cout<<nameF1<<" "<<diskName1<<" "<<bladeName1<<" "<<pannelName1<<" "
-	  <<plaquetteName1<<" "<<part1<<" "<<moduleType1<<" "
-	  <<pxfdet1.rawId()<<" "<<sh1<<endl;
-
 
 #ifdef NEW_NAMES
       // Convert to online 
@@ -255,11 +253,35 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       PXFDetId pxfdet=pen.getDetId();
       PixelEndcapName::HalfCylinder part = pen.halfCylinder();
       PixelModuleName::ModuleType moduleType = pen.moduleType();
-      cout<<nameF<<" "<<diskName<<" "<<bladeName<<" "<<pannelName<<" "
+      if(PRINT) cout<<sh<<" "<<nameF<<" "<<diskName<<" "<<bladeName<<" "<<pannelName<<" "
 	  <<plaquetteName<<" "<<part<<" "<<moduleType<<" "
 	  <<det.rawId()<<" "<<pxfdet.rawId()<<endl;
 
+      if(PRINT_TABLE) 
+	cout<<detId.rawId()<<" "<<nameF<<endl;
+#endif // NEW_NAMES 
 
+#ifdef OLD_NAMES
+      // Convert to online 
+      PixelEndcapName pen1(detId); // use det-id
+      PixelEndcapName::HalfCylinder sh1 = pen1.halfCylinder(); //enum
+      string nameF1 = pen1.name();
+      int diskName1 = pen1.diskName();
+      int bladeName1 = pen1.bladeName();
+      int pannelName1 = pen1.pannelName();
+      int plaquetteName1 = pen1.plaquetteName();
+      PXFDetId pxfdet1=pen1.getDetId();
+      PixelEndcapName::HalfCylinder part1 = pen1.halfCylinder();
+      PixelModuleName::ModuleType moduleType1 = pen1.moduleType();
+      if(PRINT) 
+	cout<<nameF1<<" "<<diskName1<<" "<<bladeName1<<" "<<pannelName1<<" "
+	    <<plaquetteName1<<" "<<part1<<" "<<moduleType1<<" "
+	    <<pxfdet1.rawId()<<" "<<sh1<<endl;
+#endif // OLD_NAMES
+
+      // Compare OLD with NEW if needed 
+#if defined(OLD_NAMES) && defined(NEW_NAMES) 
+      if(nameF != nameF1)  cout<<" wrong name "<<endl;
       if(sh !=sh1)  cout<<" wrong shell "<<endl;
       if(diskName  != diskName1)  cout<<" wrong disk "<<endl;
       if(bladeName != bladeName1) cout<<" wrong blade "<<endl;

@@ -1,8 +1,8 @@
 #ifndef SiPixelLorentzAngleDBReader_H
 #define SiPixelLorentzAngleDBReader_H
 
-// system include files
-//#include <memory>
+#include <string>
+#include <vector>
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -37,6 +37,8 @@
     TH1F *LABPixL1_[8], *LABPixL2_[8], *LABPixL3_[8];
 
     bool useSimRcd_;
+    std::string tagLabel_;
+    std::vector<unsigned int> l1New, l2New, l3New;
   };
 
 #endif

@@ -79,6 +79,10 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
   heta2 = dbe_->book1D("heta2","eta",50,-2.5,2.5);
   heta3 = dbe_->book1D("heta3","eta",50,-2.5,2.5);
 
+  htest1 = dbe_->book1D("htest1","test1",20,-0.5,19.5);
+  htest2 = dbe_->book1D("htest2","test2",200,0.,0.2);
+  htest3 = dbe_->book1D("htest3","test3",200,0.,0.2);
+
   //Cluster y-size by module number for barrel
   for (int i=0; i<8; i++) {
     sprintf(histo, "Clust_y_size_Module%d", i+1);
@@ -455,15 +459,17 @@ void SiPixelRecHitsValid_pix::analyze(const edm::Event& e, const edm::EventSetup
       for ( ; pixeliter != pixelrechitRangeIteratorEnd; pixeliter++) 
 	{
 	  matched.clear();
-	  matched = associate.associateHit(*pixeliter);
+	  matched = associate.associateHit(*pixeliter); // get the matched simhits
 	  //cout<<" rechit "<<pixeliter->localPosition().x()<<" "<<matched.size()<<endl;
-	  if ( !matched.empty() ) 
-	    {
+	  htest1->Fill(float(matched.size()));
+
+	  if ( !matched.empty() ) {
 	      float closest = 9999.9;
 	      std::vector<PSimHit>::const_iterator closestit = matched.begin();
 	      LocalPoint lp = pixeliter->localPosition();
 	      float rechit_x = lp.x();
 	      float rechit_y = lp.y();
+	      
 
 	      //loop over sim hits and fill closet
 	      for (std::vector<PSimHit>::const_iterator m = matched.begin(); m<matched.end(); m++) 
@@ -479,25 +485,29 @@ void SiPixelRecHitsValid_pix::analyze(const edm::Event& e, const edm::EventSetup
 		  float x_res = fabs(sim_xpos - rechit_x);
 		  float y_res = fabs(sim_ypos - rechit_y);
 		  
-		  float dist = sqrt(x_res*x_res + y_res*y_res);
+		  float dist = sqrt(x_res*x_res + y_res*y_res); // in cm
+		  htest2->Fill(dist);
 
-		  if ( dist < closest ) 
-		    {
-		      closest = x_res;
-		      closestit = m;
-
-		      // std::cout<<" simhit "
-		      //       <<(*m).pabs()<<" "
-		      //       <<(*m).thetaAtEntry()<<" "
-		      //       <<(*m).phiAtEntry()<<" "
-		      //       <<(*m).particleType()<<" "
-		      //       <<(*m).trackId()<<" "
-		      //       <<(*m).momentumAtEntry()
-		      //       <<std::endl;
-
-		    }
+		  if ( dist < closest ) {
+		    //closest = x_res;
+		    closest = dist;
+		    closestit = m;
+		    
+		    // std::cout<<" simhit "
+		    //       <<(*m).pabs()<<" "
+		    //       <<(*m).thetaAtEntry()<<" "
+		    //       <<(*m).phiAtEntry()<<" "
+		    //       <<(*m).particleType()<<" "
+		    //       <<(*m).trackId()<<" "
+		    //       <<(*m).momentumAtEntry()
+		    //       <<std::endl;
+		    
+		  }
 		} // end sim hit loop
 	      
+	      htest3->Fill(closest);
+	      //cout<<" closest "<<closest<<endl;
+
 	      if (subid==1) 
 		{ //<----------barrel
 		  fillBarrel(*pixeliter, *closestit, detId, theGeomDet,tTopo);	
@@ -546,8 +556,10 @@ void SiPixelRecHitsValid_pix::fillBarrel(const SiPixelRecHit& recHit, const PSim
   //   //	   <<simHit.trackId()<<" "
   // 	   <<std::endl;
 
-  if(!quick) heta->Fill(eta);
-
+  if(!quick) {
+    heta->Fill(eta);
+    //hphi->Fill(phi);
+  }
   LocalPoint lp = recHit.localPosition();
   float lp_y = lp.y();  
   float lp_x = lp.x();

@@ -391,8 +391,9 @@ void PixClusterTest::analyze(const edm::Event& e,
 
 #ifdef NEW_ID
   //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopo;
-  es.get<IdealGeometryRecord>().get(tTopo);
+  edm::ESHandle<TrackerTopology> tTopoH;
+  es.get<IdealGeometryRecord>().get(tTopoH);
+  const TrackerTopology *tTopo=tTopoH.product();
 #endif
 
 
@@ -601,6 +602,10 @@ void PixClusterTest::analyze(const edm::Event& e,
       module = pbn.moduleName();
       half  = pbn.isHalfModule();
       shell = int(sh);
+
+      // try skipping most feds
+      if( shell!= 3 || sector !=1 ) continue;  // skip all but BpO1
+
       // change the module sign for z<0
       if(shell==1 || shell==2) module = -module;
       // change ladeer sign for Outer )x<0)

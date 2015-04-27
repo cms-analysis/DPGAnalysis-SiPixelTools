@@ -99,7 +99,7 @@ using namespace std;
 
 #define HISTOS
 //#define L1
-//#define HLT
+#define HLT
 //#define HI
 //#define ROC_EFF
 //#define Lumi

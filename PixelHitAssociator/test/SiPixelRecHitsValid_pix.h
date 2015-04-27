@@ -119,6 +119,9 @@ class SiPixelRecHitsValid_pix : public edm::EDAnalyzer {
 	MonitorElement* heta1;
 	MonitorElement* heta2;
 	MonitorElement* heta3;
+	MonitorElement* htest1;
+	MonitorElement* htest2;
+	MonitorElement* htest3;
 
 
 	//RecHits FPIX

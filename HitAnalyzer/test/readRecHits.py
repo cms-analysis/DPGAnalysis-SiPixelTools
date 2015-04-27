@@ -46,7 +46,10 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = 'MC_70_V1::All'
 
 # read rechits
-process.analysis = cms.EDAnalyzer("ReadPixelRecHit",
+# from RecoLocalTracker
+#process.analysis = cms.EDAnalyzer("ReadPixelRecHit",
+# from DPGAnalysis-SiPixelTools
+process.analysis = cms.EDAnalyzer("PixRecHitTest",
     Verbosity = cms.untracked.bool(True),
     src = cms.InputTag("siPixelRecHits"),
 )

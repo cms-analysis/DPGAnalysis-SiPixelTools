@@ -8,7 +8,6 @@ process.load("FWCore.MessageLogger.MessageLogger_cfi")
 # process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.Geometry.GeometryIdeal_cff")
 process.load("Configuration.StandardSequences.MagneticField_38T_cff")
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("Configuration.StandardSequences.Services_cff")
 process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
 
@@ -17,6 +16,36 @@ process.load("SimG4Core.Configuration.SimG4Core_cff")
 
 # for strips 
 process.load("CalibTracker.SiStripESProducers.SiStripGainSimESProducer_cfi")
+
+# Choose the global tag here:
+#process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
+# for v7.0
+#process.GlobalTag.globaltag = 'MC_70_V1::All'
+#process.GlobalTag.globaltag = 'START70_V1::All'
+#process.GlobalTag.globaltag = 'DESIGN70_V1::All'
+
+#process.GlobalTag.globaltag = 'POSTLS171_V1::All'
+#process.GlobalTag.globaltag = "PRE_MC_71_V2::All"
+#process.GlobalTag.globaltag = "PRE_STA71_V4::All"
+
+#process.GlobalTag.globaltag = "START71_V7::All"
+#process.GlobalTag.globaltag = 'MC_71_V7::All'
+
+#from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
+#from Configuration.AlCa.GlobalTag import GlobalTag
+# to use no All 
+
+# tags for 72X
+#process.GlobalTag.globaltag = "MC_72_V1::All"
+#process.GlobalTag.globaltag = "MC_72_V1"
+
+# tags for 73X
+#process.GlobalTag.globaltag = "MCRUN2_73_V11"
+#process.GlobalTag.globaltag = "DESRUN1_73_V5"
+#process.GlobalTag.globaltag = "MCRUN1_73_V5::All" # OK for condDB
+process.GlobalTag.globaltag = "MCRUN1_73_V5" # needs condDBv2
+
 
 # process.load("SimGeneral.MixingModule.mixNoPU_cfi")
 
@@ -140,29 +169,18 @@ process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService
 
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(10)
 )
 
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
+       'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_72/simhits/simHits1.root'
 #       'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_71_pre5/simhits/simHits2.root'
-       'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_71_pre5/simhits/simHits1.root'
+#       'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_71_pre5/simhits/simHits1.root'
 #       'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_71_pre5/simhits/simHits3.root'
 #       'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_71_pre5/simhits/simHits4.root'
   )
 )
 
-# Choose the global tag here:
-# for v7.0
-#process.GlobalTag.globaltag = 'MC_70_V1::All'
-#process.GlobalTag.globaltag = 'START70_V1::All'
-#process.GlobalTag.globaltag = 'DESIGN70_V1::All'
-
-#process.GlobalTag.globaltag = 'POSTLS171_V1::All'
-#process.GlobalTag.globaltag = "PRE_MC_71_V2::All"
-#process.GlobalTag.globaltag = "PRE_STA71_V4::All"
-
-#process.GlobalTag.globaltag = "START71_V7::All"
-process.GlobalTag.globaltag = 'MC_71_V7::All'
 
 process.o1 = cms.OutputModule("PoolOutputModule",
       outputCommands = cms.untracked.vstring('drop *','keep *_*_*_Test'),
