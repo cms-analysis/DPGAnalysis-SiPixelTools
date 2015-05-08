@@ -195,7 +195,8 @@ struct Histos{
   TH1D     *h420_mod1, *h420_mod2, *h420_mod3, *h420_mod4, *h420_mod5, *h420_mod6, *h420_mod7, *h420_mod8; 
   TH1D     *h421_mod1, *h421_mod2, *h421_mod3, *h421_mod4, *h421_mod5, *h421_mod6, *h421_mod7, *h421_mod8;
   TH1D     *h420_1, *h420_2, *h420_3;
-  TProfile               *h422, *h423, *h424, *h425, *h426, *h427, *h428, *h429, *h429_eta;
+  TH1D     *h422, *h423, *h424, *h425;  
+  //TProfile               *h422, *h423, *h424, *h425, *h426, *h427, *h428, *h429, *h429_eta;
   TH1D     *h430, *h431, *h432,                      *h436,        *h438, *h439;
   TProfile                      *h433, *h434, *h435,        *h437;
   TH1D     *h440, *h441, *h442, *h443, *h444, *h445, *h446, *h447, *h448, *h449;
@@ -995,20 +996,23 @@ void Histos::init(TFileDirectory* fs) {
   h421_mod6 = fs->make<TH1D>( "h421_mod6", "PXB2 Module 6  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
   h421_mod7 = fs->make<TH1D>( "h421_mod7", "PXB2 Module 7  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
   h421_mod8 = fs->make<TH1D>( "h421_mod8", "PXB2 Module 8  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  h422 = fs->make<TH1D>( "h422", "Probability XY", 110, 0, 1.1 );
+  h423 = fs->make<TH1D>( "h423", "Probability Q", 110, 0, 1.1 );
+  h424 = fs->make<TH1D>( "h424", "Probability XY", 110, 0, 1.1 );
+  h425 = fs->make<TH1D>( "h425", "Probability @", 110, 0, 1.1 );
   // width profiles:
+  //h422 = fs->make<TProfile>( "h422", "PXB2 #sigma_{x} vs #phi;#phi_{2} [deg];PXB2 rms(#Deltax) [#mum]", 360, -180, 180, 0, 99 );
+  //h423 = fs->make<TProfile>( "h423", "PXB2 #sigma_{z} vs #phi;#phi_{2} [deg];PXB2 rms(#Deltaz) [#mum]", 360, -180, 180, 0, 199 );
+  //h424 = fs->make<TProfile>( "h424", "PXB2 #sigma_{x} vs z;z2 [cm];PXB2 rms(#Deltax) [#mum]", 80, -20, 20, 0, 99 );
+  //h425 = fs->make<TProfile>( "h425", "PXB2 #sigma_{z} vs z;z2 [cm];PXB2 rms(#Deltaz) [#mum]", 80, -20, 20, 0, 199 );
 
-  h422 = fs->make<TProfile>( "h422", "PXB2 #sigma_{x} vs #phi;#phi_{2} [deg];PXB2 rms(#Deltax) [#mum]", 360, -180, 180, 0, 99 );
-  h423 = fs->make<TProfile>( "h423", "PXB2 #sigma_{z} vs #phi;#phi_{2} [deg];PXB2 rms(#Deltaz) [#mum]", 360, -180, 180, 0, 199 );
+  //h426 = fs->make<TProfile>( "h426", "PXB2 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB2 rms(#Deltax) [#mum]", 20, 0, 2, 0, 99 );
+  //h427 = fs->make<TProfile>( "h427", "PXB2 #sigma_{z} vs p_{t};log(p_{t} [GeV]);PXB2 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
 
-  h424 = fs->make<TProfile>( "h424", "PXB2 #sigma_{x} vs z;z2 [cm];PXB2 rms(#Deltax) [#mum]", 80, -20, 20, 0, 99 );
-  h425 = fs->make<TProfile>( "h425", "PXB2 #sigma_{z} vs z;z2 [cm];PXB2 rms(#Deltaz) [#mum]", 80, -20, 20, 0, 199 );
-
-  h426 = fs->make<TProfile>( "h426", "PXB2 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB2 rms(#Deltax) [#mum]", 20, 0, 2, 0, 99 );
-  h427 = fs->make<TProfile>( "h427", "PXB2 #sigma_{z} vs p_{t};log(p_{t} [GeV]);PXB2 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
-
-  h428 = fs->make<TProfile>( "h428", "PXB2 #sigma_{x} vs dip;dip [deg];PXB2 rms(#Deltax) [#mum]", 70, -70, 70, 0, 99 );
-  h429 = fs->make<TProfile>( "h429", "PXB2 #sigma_{z} vs dip;dip [deg];PXB2 rms(#Deltaz) [#mum]", 70, -70, 70, 0, 199 );
-  h429_eta = fs->make<TProfile>( "h429_eta", "PXB2 #sigma_{z} vs #eta;Track #eta;PXB2 rms(#Deltaz) [#mum]", 70, -1.5, 1.5, 0, 199 );
+  //h428 = fs->make<TProfile>( "h428", "PXB2 #sigma_{x} vs dip;dip [deg];PXB2 rms(#Deltax) [#mum]", 70, -70, 70, 0, 99 );
+  //h429 = fs->make<TProfile>( "h429", "PXB2 #sigma_{z} vs dip;dip [deg];PXB2 rms(#Deltaz) [#mum]", 70, -70, 70, 0, 199 );
+  //h429_eta = fs->make<TProfile>( "h429_eta", "PXB2 #sigma_{z} vs #eta;Track #eta;PXB2 rms(#Deltaz) [#mum]", 70, -1.5, 1.5, 0, 199 );
 
   h430 = fs->make<TH1D>( "h430", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h431 = fs->make<TH1D>( "h431", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
@@ -2611,9 +2615,9 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     //double fPXB3 = 0;
 #endif
 
-    int n1 = 0, n11=0;
-    int n2 = 0, n12=0;
-    int n3 = 0, n13=0;
+    int n1 = 0; // n11=0;
+    int n2 = 0; // n12=0;
+    int n3 = 0; // n13=0;
     double phiN1 = 0;
     double phiN2 = 0;
     double phiN3 = 0;
@@ -2624,6 +2628,8 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     const GeomDet * det2 = NULL;
     //#endif
 
+    double  probabilityXY2=-1., probabilityQ2=-1.;
+ 
     // Now look at rechits
     edm::OwnVector<TrackingRecHit> recHitVector; // for seed
     std::vector<TransientTrackingRecHit::RecHitPointer> myTTRHvec;
@@ -2637,181 +2643,17 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
       uint32_t subDet = detId.subdetId();
 
       // enum Detector { Tracker=1, Muon=2, Ecal=3, Hcal=4, Calo=5 };
-      if( detId.det() != 1 ){
+      if( detId.det() != 1 ) {
 	cout << "rec hit ID = " << detId.det() << " not in tracker!?!?\n";
 	continue;
       }
+
       recHitVector.push_back( (*irecHit)->clone() ); // save the simple rechit collection
 
-#ifdef DO_TESTS 
-      // This code is to examine the detailes of pixel clusters, like charge distributions.
-      //if( (*irecHit)->isValid() ) {
-      // int xmin = 0;
-      // int xmax = 0;
-      // int ymin = 0;
-      // int ymax = 0;
-      // double cogp = 0;
-      // //int icol = 0;
-      // //int irow = 0;
-      // int ncol = 0;
-      // int nrow = 0;
-      // double clch = 0;
-      // bool halfmod = 0;
-      // double Q_f_X = 0.0;//first
-      // double Q_l_X = 0.0;//last
-      // double Q_m_X = 0.0;//middle
-      // double etaX = 0;
-      // double Q_f_Y = 0.0;//first
-      // double Q_l_Y = 0.0;//last
-      // double Q_m_Y = 0.0;//middle
-      // 	// enum SubDetector{ PixelBarrel=1, PixelEndcap=2 };
-      // 	// enum SubDetector{ TIB=3, TID=4, TOB=5, TEC=6 };
-      // 	//if( idbg ) cout << "  hit in " << subDet << endl;
-      // 	h060->Fill( subDet );
-      // 	// cast to SiPixelRecHit:
-      // 	// TrackingRecHit -> RecHit2DLocalPos -> BaseSiTrackerRecHit2DLocalPos -> SiPixelRecHit
-      // 	// Examine the detector
-      // 	if( subDet == 1 ){ // PXB
-      // 	  int ilay = PXBDetId(detId).layer();
-      // 	  int ilad = PXBDetId(detId).ladder();
-      // 	  imod = PXBDetId(detId).module();
-      // 	 // std::cout << " imod 1 "<< imod<< std::endl;
-      // 	  if( ilay == 1 ){
-      // 	    if(      ilad ==  5 ) halfmod = 1;
-      // 	    else if( ilad ==  6 ) halfmod = 1;
-      // 	    else if( ilad == 15 ) halfmod = 1;
-      // 	    else if( ilad == 16 ) halfmod = 1;
-      // 	  }
-      // 	  if( ilay == 2 ){
-      // 	    if(      ilad ==  8 ) halfmod = 1;
-      // 	    else if( ilad ==  9 ) halfmod = 1;
-      // 	    else if( ilad == 24 ) halfmod = 1;
-      // 	    else if( ilad == 25 ) halfmod = 1;
-      // 	  }
-      // 	  if( ilay == 3 ){
-      // 	    if( ilad == 11 ) halfmod = 1;
-      // 	    if( ilad == 12 ) halfmod = 1;
-      // 	    if( ilad == 33 ) halfmod = 1;
-      // 	    if( ilad == 34 ) halfmod = 1;
-      // 	  }
-      // 	  if( idbg ) {
-      // 	    cout << "  layer  " << PXBDetId(detId).layer();
-      // 	    cout << ", ladder " << PXBDetId(detId).ladder();
-      // 	    cout << ", module " << PXBDetId(detId).module();
-      // 	    cout << endl;
-      // 	  }
-      // 	  const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( &*(*irecHit) );
-      // 	  if( pixhit->hasFilledProb() ){
-      // 	    float clusProb = pixhit->clusterProbability(0);
-      // 	    if( idbg ) cout << "  cluster prob " << clusProb << endl;
-      // 	  }
-      // 	  // pixel cluster:
-      // 	  // TrackingRecHit -> RecHit2DLocalPos -> BaseSiTrackerRecHit2DLocalPos -> SiPixelRecHit -> SiPixelCluster
-      // 	  edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster> const & clust = pixhit->cluster();
-      // 	  if( clust.isNonnull() ) {
-      // 	    if( idbg ) {
-      // 	      cout << setprecision(0);
-      // 	      cout << "  charge " << clust->charge();
-      // 	      cout << setprecision(4);
-      // 	      cout << ", cols " << clust->minPixelCol() << " - " << clust->maxPixelCol(); //0..416 = 8*52
-      // 	      cout << " = " << clust->sizeY();
-      // 	      cout << ", rows " << clust->minPixelRow() << " - " << clust->maxPixelRow();//0..159 left and right
-      // 	      cout << " = " << clust->sizeX();
-      // 	      cout << endl;
-      // 	    }
-      // 	    // Fetch the pixels vector from the cluster:
-      // 	    const vector<SiPixelCluster::Pixel> & pixelsVec = clust->pixels();
-      // 	    // Obtain boundaries in index units:
-      // 	    xmin = clust->minPixelRow();
-      // 	    xmax = clust->maxPixelRow();
-      // 	    ymin = clust->minPixelCol();
-      // 	    ymax = clust->maxPixelCol();
-      // 	    // cluster matrix:
-      // 	    int QQ[9][99];
-      // 	    for( int ix = 0; ix < 9; ++ix ){
-      // 	      for( int jz = 0; jz < 99; ++jz ){
-      // 		QQ[ix][jz] = 0;
-      // 	      }
-      // 	    }
-      // 	    double xsum = 0;
-      // 	    double qsum = 0;
-      // 	    // loop over the pixels:
-      // 	    int isize = pixelsVec.size();
-      // 	    for( int i = 0;  i < isize; ++i ) {
-      // 	      int ix = pixelsVec[i].x - xmin;
-      // 	      int jz = pixelsVec[i].y - ymin;
-      // 	      if( ix > 8 ) ix = 8;
-      // 	      if( jz > 98 ) jz = 98;
-      // 	      QQ[ix][jz] = pixelsVec[i].adc;
-      // 	      double pix_adc = pixelsVec[i].adc;
-      // 	      qsum += pix_adc;
-      // 	      xsum += pix_adc * pixelsVec[i].x;
-      // 	      // X projection:
-      // 	      if( pixelsVec[i].x == xmin )
-      // 		Q_f_X += pix_adc;
-      // 	      else{
-      // 		if( pixelsVec[i].x == xmax ) 
-      // 		  Q_l_X += pix_adc;
-      // 		else
-      // 		  Q_m_X += pix_adc;
-      // 	      }
-      // 	      if( ! halfmod ) {
-      // 		h049->Fill( pixelsVec[i].y, pixelsVec[i].x );
-      // 		h067->Fill( pixelsVec[i].x );//0..159
-      // 		h068->Fill( pixelsVec[i].x, pix_adc*1E-3 );//weighted
-      // 	      }
-      // 	      // Y projection:
-      // 	      if( pixelsVec[i].y == ymin ) 
-      // 		Q_f_Y += pix_adc;
-      // 	      else{
-      // 		if( pixelsVec[i].y == ymax ) 
-      // 		  Q_l_Y += pix_adc;
-      // 		else 
-      // 		  Q_m_Y += pix_adc;
-      // 	      }
-      // 	    }//loop over pixels
-      // 	    etaX = ( Q_f_X - Q_l_X ) / ( Q_f_X + Q_l_X + Q_m_X );
-      // 	    cogp = xsum / qsum;
-      // 	    clch = clust->charge();//electrons
-      // 	    /*icol = clust->minPixelCol();
-      // 	    irow = clust->minPixelRow();*/
-      // 	    ncol = clust->sizeY();
-      // 	    nrow = clust->sizeX();
-      // 	    if( ncol > 5 && idbg ){
-      // 	      cout << setprecision(1);
-      // 	      cout.setf(ios::showpoint);
-      // 	      cout.setf(ios::uppercase);
-      // 	      //cout.setf(ios::scientific);
-      // 	      cout.setf(ios::fixed);
-      // 	      cout << "  dip " << setw(5) << dip*wt;
-      // 	      cout << setprecision(4);
-      // 	      cout << ", layer  " << PXBDetId(detId).layer();
-      // 	      cout << ", ladder " << PXBDetId(detId).ladder();
-      // 	      cout << ", module " << PXBDetId(detId).module();
-      // 	      cout << ", x " << xmin << " - " << xmax;
-      // 	      cout << ", z " << ymin << " - " << ymax;
-      // 	      cout << endl;
-      // 	      for( int ix = 0; ix < min( 9, nrow ); ++ix ){
-      // 		cout << "    row " << setw(3) << ix + xmin;
-      // 		for( int jz = 0; jz < min( 99, ncol ); ++jz ){
-      // 		  cout << setw(6) << QQ[ix][jz] / 100;
-      // 		}
-      // 		cout << endl;
-      // 	      }
-      // 	    }//long ncol
-      // 	    //
-      // 	    h070->Fill( clch/1E3 );
-      // 	    h071->Fill( clch/1E3*cos(dip) );
-      // 	    h072->Fill( ncol );
-      // 	    h073->Fill( nrow );
-      // 	    h074->Fill( dip*wt, ncol );
-      // 	    h075->Fill( dip*wt, nrow );
-      // 	    if( nrow == 2 ) h076->Fill( etaX );
-      // 	  }//clust nonNull
-      // 	}//PXB
-      //}//valid
-#endif // NOT)USED
-
+      if( !(*irecHit)->isValid() ) {
+	//cout<<" invalid rechits "<<endl;;
+	continue;
+      }
 
       // build transient hit:
 #ifdef NEW_TRACKINGRECHITS
@@ -2830,14 +2672,36 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
       // Save rechits for refits
       myTTRHvec.push_back( transRecHit );
       coTTRHvec.push_back( transRecHit );
-
-      if( ! (*irecHit)->isValid() ) {
-	//cout<<" invalid rechits "<<endl;;
-	continue;
-      }
-
-      // So it looks like rechits can be accessed without doing a refit.
+      
+      // 
       if( subDet == PixelSubdetector::PixelBarrel ) {  // bpix only 
+
+	const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( (*irecHit)->hit() );
+	//const SiPixelRecHit *pixhit1 = dynamic_cast<const SiPixelRecHit*>( (transRecHit)->hit() );
+	//pixhit->isValid()<<" "<<pixhit;
+	//cout<<pixhit->localPosition().x()<<" ";
+	//cout<<pixhit->localPosition().y()<<" ";
+	// cout<<hit->localPositionError().xx()<<" ";
+	// cout<<hit->localPositionError().yy()<<" ";
+	//if( pixhit->hasFilledProb() ){
+	//cout<<pixhit->clusterProbability(0)<<" ";   // XY
+	//cout<<pixhit->clusterProbability(1)<<" "; // XY*Q 
+	//cout<<pixhit->clusterProbability(2)<<" ";   // Q
+	//cout<<pixhit1->clusterProbability(0)<<" ";  // XY
+	//cout<<pixhit1->clusterProbability(2)<<" ";  // Q
+	//cout<<pixhit2->clusterProbability(0)<<" ";  // XY alwyas 1
+	//cout<<pixhit2->clusterProbability(2)<<" ";  // Q always 1
+	//}
+	//cout<<endl;
+	double probabilityXY = pixhit->clusterProbability(0);
+	double probabilityQ  = pixhit->clusterProbability(2);
+	
+	// 	  if( pixhit->hasFilledProb() ){
+	// 	  // pixel cluster:
+	// 	  // TrackingRecHit -> RecHit2DLocalPos -> BaseSiTrackerRecHit2DLocalPos -> SiPixelRecHit -> SiPixelCluster
+	// 	  edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster> const & clust = pixhit->cluster();
+     	    
+
 	int ilay = PXBDetId(detId).layer();
 
 	// First look at recHits directly
@@ -2878,7 +2742,14 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	    
 	    vxloc = preciseHit->localPositionError().xx();//covariance
 	    vyloc = preciseHit->localPositionError().yy();//covariance
-	    
+
+	    const SiPixelRecHit *pixhit2 = dynamic_cast<const SiPixelRecHit*>( (preciseHit)->hit() );
+	    //cout<<pixhit2->clusterProbability(0)<<" ";   // XY
+	    //cout<<pixhit2->clusterProbability(2)<<" ";   // Q
+	    //cout<<endl;
+	    probabilityXY = pixhit2->clusterProbability(0);
+	    probabilityQ  = pixhit2->clusterProbability(2);
+
 	    if( idbg && subDet==1 ) {
 	      cout << "  improved hit in lay " << PXBDetId(detId).layer();
 	      cout << setprecision(4);
@@ -2930,8 +2801,9 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	double phiN = transRecHit->det()->surface().normalVector().barePhi();//normal vector
 	double xmid = transRecHit->det()->position().x();
 	double ymid = transRecHit->det()->position().y();
+
 	if(fdbg) cout<<xmid<<" "<<ymid<<" "<<phiN<<endl;
-	
+
 	// PXB:
 	//if( subDet == PixelSubdetector::PixelBarrel ) {
 	
@@ -2975,7 +2847,11 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  det2 = transRecHit->det();
 	  geomDet2 = (TrackerGeomDet*) det2;
 
-	  if(jdbg) cout<<" lay 2 "<<n2<<" "<<xPXB2<<" "<<yPXB2<<" "<<zPXB2<<endl;
+	  probabilityXY2 = probabilityXY; 
+	  probabilityQ2 = probabilityQ; 
+
+	  if(jdbg) cout<<" lay 2 "<<n2<<" "<<xPXB2<<" "<<yPXB2<<" "<<zPXB2<<" "
+		       <<probabilityXY2<<" "<<probabilityQ2<<endl;
 
 	  //clch2 = clch; // cluster charge [e]
 	  //ncol2 = ncol;
@@ -3018,9 +2894,11 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     const TrajectorySeed seed( PTraj, recHitVector, alongMomentum );
   
     //------------------------------------------------------------------------
-    // 1-2-3 pixel triplet:
-    //if( !(n1*n2*n3 > 0) ) continue; // skip if not hits in layers 1,2,3
-    
+    // 1-2-3 pixel triplets
+    // the triplet method from Daniel. 
+    // Uses an analytical formula. Does not need a track refit and propagation.
+
+    // Do the 1+3->2 triplet    
     if( useTriplet13_2 && (n1*n2*n3 > 0) ) {
       
       if( jdbg ) cout << "  triplet 1+3 -> 2\n";
@@ -3213,6 +3091,9 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	if(fPXB2!=0.0) puly = dz2/fPXB2;
 	h079->Fill( pulx );
 	h069->Fill( puly );
+
+	h422->Fill(probabilityXY2); 
+	h423->Fill(probabilityQ2); 
 	
 	// Alignment errors 
 	//LocalError lape = det2->localAlignmentError();
@@ -3977,8 +3858,8 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   //------------------------------------------------------------------------
   // Triplet 1+3 -> 2 with refitted track:
-//------------------------------------------------------------------------
-// refit once more, leaving out hit in 2nd PXB:
+  //------------------------------------------------------------------------
+  // refit track, leaving out hit in 2nd PXB:
 
   if(doRefit && (n1*n2*n3 > 0) ){
 
@@ -4209,7 +4090,9 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   // This is the main track refit using all rechits
   // The refit is needed to propaget hits to the surface 
   // refit the track:
-  
+  // Use this part to compare recHits with the propagated hit 
+
+  // Refit  
   std::vector<Trajectory> refitTrajectoryCollection = theFitter->fit( seed, coTTRHvec, initialTSOS );
 
   if( refitTrajectoryCollection.size() <= 0) {
@@ -4242,7 +4125,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
       }//dbg
 
 
-      // Loop over trajectory hits. This is the main loop to get hits.
+      // Loop over trajectory hits. 
       for( Trajectory::DataContainer::iterator iTM = refitTMs.begin();
 	   iTM != refitTMs.end(); iTM++ ) {
 
@@ -4261,7 +4144,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	int ilay = PXBDetId( detId ).layer();
 
 	// Here we start with comparisons 
-	// Comparison I
+	// Comparison I, rehit versus predicatedState
 	Surface::LocalPoint lpHit = iTM->recHit()->localPosition();
 	double xHit = lpHit.x(); // primary measurement direction
 	double yHit = lpHit.y(); // always 0 in strips
@@ -4272,6 +4155,12 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  h420_mod1->Fill( dx*1E4 );
 	  h421_mod1->Fill( dy*1E4 );
 	}
+
+	// HERE
+	const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( iTM->recHit()->hit() ); 
+	h424->Fill(pixhit->clusterProbability(0));
+	h425->Fill(pixhit->clusterProbability(2));
+
 #ifdef DO_TESTS
 	double vxh = iTM->recHit()->localPositionError().xx();//covariance
 	double vxt = iTM->predictedState().localError().positionError().xx();//
@@ -4280,21 +4169,21 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	}
 #endif
 
-	// Try a better prediction 
+	// Try a better prediction. For bpix it gives the same or even worse predictions.
 	TrajectoryStateOnSurface combinedPredictedState =
 	  TrajectoryStateCombiner().combine( iTM->forwardPredictedState(), iTM->backwardPredictedState() );
 	
 	if( !combinedPredictedState.isValid() ) {
 	  cout<<" combinedpredicted state not valid"<<endl;
-	  continue; //skip hit
-	}
+	  continue;
+	} 
 
 	// Use better hit predictions 
 	// use Topology. no effect in PXB, essential in TID, TEC
 	const Topology* theTopology = &(iTM->recHit()->detUnit()->topology() );
 	MeasurementPoint combinedPredictedMeasurement = 
 	  theTopology->measurementPosition( combinedPredictedState.localPosition() );
-
+	
 	// Comaprision II
 	dx = xHit - combinedPredictedState.localPosition().x(); //x = primary measurement
 	dy = yHit - combinedPredictedState.localPosition().y(); //
@@ -4305,9 +4194,9 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  h420_mod2->Fill( dx*1E4 );
 	  h421_mod2->Fill( dy*1E4 );
 	}
-
 	//double alf_inc = atan2( combinedPredictedState.localDirection().x(), combinedPredictedState.localDirection().z() );
 	//double bet_inc = atan2( combinedPredictedState.localDirection().y(), combinedPredictedState.localDirection().z() );
+
 
 	// Try to go through measurement
 	// MeasurementPoint [pitch] (like channel number)
@@ -4367,7 +4256,10 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  cout << endl;
 	}
 
+
+#ifdef DO_TESTS
 	// Translate the hit to global, use the hit from comparison I
+	// Just for testing
 	Surface::GlobalPoint gp = myGeomDet->toGlobal( lpHit );
 	double gX = gp.x();
 	double gY = gp.y();
@@ -4388,21 +4280,13 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	h420_mod6->Fill( tmp1*1E4 );
 	h421_mod6->Fill( tmp2*1E4 );
 
-	if( tmp1>0.0001 || fabs(tmp2)>0.0001) {
-	  cout<<" pos not consistent  "<<gp.x()<<" "<<gp.y()<<" "<<gp.z()<<endl;
-	  cout<<" != "<<gp1.x()<<" "<<gp1.y()<<" "<<gp1.z()<<endl;
-	}
-	//double gF = atan2( gY, gX );
-	//double gR = sqrt( gX*gX + gY*gY );
 
-	//#define REFIT
-#ifdef REFIT
  	double phiN = iTM->recHit()->det()->surface().normalVector().barePhi();//normal vector	
 	//2012: overwrite PXB global coordinates once more, using topology:
 	// This is the main place where the hit measurements are defined
 
 	if( ilay == 1 ) {
-	  n11++;
+	  //n11++;
 	  xPXB1 = gX;
 	  yPXB1 = gY;
 	  zPXB1 = gZ;
@@ -4410,7 +4294,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	    cout<<" lay 1 after refit "<<n11<<" "<<xPXB1<<" "<<yPXB1<<" "<<zPXB1<<" "<<phiN<<endl;
 	  
 	} else if( ilay == 2 ) {
-	  n12++;
+	  //n12++;
 	  if(jdbg) 
 	    cout<<" lay 2 before refit "<<n2<<" "<<xPXB2<<" "<<yPXB2<<" "<<zPXB2<<" "<<phiN<<endl;
 	  if(n2==1) {  // do only if one hit in layer 2
@@ -4428,21 +4312,20 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  if(jdbg) 
 	    cout<<" lay 2 after refit "<<n12<<" "<<xPXB2<<" "<<yPXB2<<" "<<zPXB2<<" "<<phiN<<endl;
 	} else if( ilay == 3 ) {
-	  n13++;
+	  //n13++;
 	  xPXB3 = gX;
 	  yPXB3 = gY;
 	  zPXB3 = gZ;
 	  if(jdbg) 
 	    cout<<" lay 3 after refit "<<n13<<" "<<xPXB3<<" "<<yPXB3<<" "<<zPXB3<<" "<<phiN<<endl;
 	} // layer 
-#endif // REFIT
+#endif // DO_TESTS
 
       } //loop iTM, end the tracjectory hit conatiner 
 
   } // if refitted trajectory
     
-  if(jdbg) cout<<" number of hits "<<n1<<"-"<<n11<<" "<<n2<<"-"<<n12<<" "
-	       <<n3<<"-"<<n13<<endl;
+  // Keep the code below for special tests 
 
 #ifdef NOT_USED
   //------------------------------------------------------------------------
