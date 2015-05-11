@@ -195,8 +195,7 @@ struct Histos{
   TH1D     *h420_mod1, *h420_mod2, *h420_mod3, *h420_mod4, *h420_mod5, *h420_mod6, *h420_mod7, *h420_mod8; 
   TH1D     *h421_mod1, *h421_mod2, *h421_mod3, *h421_mod4, *h421_mod5, *h421_mod6, *h421_mod7, *h421_mod8;
   TH1D     *h420_1, *h420_2, *h420_3;
-  TH1D     *h422, *h423, *h424, *h425;  
-  //TProfile               *h422, *h423, *h424, *h425, *h426, *h427, *h428, *h429, *h429_eta;
+  TH1D     *h422, *h423, *h424, *h425, *h426, *h427; // *h428, *h429, *h429_eta;
   TH1D     *h430, *h431, *h432,                      *h436,        *h438, *h439;
   TProfile                      *h433, *h434, *h435,        *h437;
   TH1D     *h440, *h441, *h442, *h443, *h444, *h445, *h446, *h447, *h448, *h449;
@@ -1000,7 +999,9 @@ void Histos::init(TFileDirectory* fs) {
   h422 = fs->make<TH1D>( "h422", "Probability XY", 110, 0, 1.1 );
   h423 = fs->make<TH1D>( "h423", "Probability Q", 110, 0, 1.1 );
   h424 = fs->make<TH1D>( "h424", "Probability XY", 110, 0, 1.1 );
-  h425 = fs->make<TH1D>( "h425", "Probability @", 110, 0, 1.1 );
+  h425 = fs->make<TH1D>( "h425", "Probability Q", 110, 0, 1.1 );
+  h426 = fs->make<TH1D>( "h426", "Probability XY", 110, 0, 1.1 );
+  h427 = fs->make<TH1D>( "h427", "Probability Q", 110, 0, 1.1 );
   // width profiles:
   //h422 = fs->make<TProfile>( "h422", "PXB2 #sigma_{x} vs #phi;#phi_{2} [deg];PXB2 rms(#Deltax) [#mum]", 360, -180, 180, 0, 99 );
   //h423 = fs->make<TProfile>( "h423", "PXB2 #sigma_{z} vs #phi;#phi_{2} [deg];PXB2 rms(#Deltaz) [#mum]", 360, -180, 180, 0, 199 );
@@ -2628,8 +2629,10 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     const GeomDet * det2 = NULL;
     //#endif
 
-    double  probabilityXY2=-1., probabilityQ2=-1.;
- 
+    double  probabilityXY2=-1., probabilityQ2=-1.,
+      probabilityXY1=-1., probabilityQ1=-1.,
+      probabilityXY3=-3., probabilityQ3=-1.;
+
     // Now look at rechits
     edm::OwnVector<TrackingRecHit> recHitVector; // for seed
     std::vector<TransientTrackingRecHit::RecHitPointer> myTTRHvec;
@@ -2823,6 +2826,8 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  yPXB1 = gY;
 	  zPXB1 = gZ;
 	  if(jdbg) cout<<" lay 1 "<<n1<<" "<<xPXB1<<" "<<yPXB1<<" "<<zPXB1<<endl;
+	  probabilityXY1 = probabilityXY; 
+	  probabilityQ1  = probabilityQ; 
 	  //uPXB1 = xloc;
 	  //vPXB1 = yloc;
 	  //ePXB1 = sqrt( vxloc );
@@ -2848,7 +2853,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  geomDet2 = (TrackerGeomDet*) det2;
 
 	  probabilityXY2 = probabilityXY; 
-	  probabilityQ2 = probabilityQ; 
+	  probabilityQ2 = probabilityQ;
 
 	  if(jdbg) cout<<" lay 2 "<<n2<<" "<<xPXB2<<" "<<yPXB2<<" "<<zPXB2<<" "
 		       <<probabilityXY2<<" "<<probabilityQ2<<endl;
@@ -2871,6 +2876,8 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  xPXB3 = gX;
 	  yPXB3 = gY;
 	  zPXB3 = gZ;
+	  probabilityXY3 = probabilityXY; 
+	  probabilityQ3 = probabilityQ;
 	  if(jdbg) cout<<" lay 3 "<<n3<<" "<<xPXB3<<" "<<yPXB3<<" "<<zPXB3<<endl;
 	  //uPXB3 = xloc;
 	  //vPXB3 = yloc;
@@ -3094,6 +3101,9 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 	h422->Fill(probabilityXY2); 
 	h423->Fill(probabilityQ2); 
+	h426->Fill(probabilityXY1*probabilityXY2*probabilityXY3); 
+	h427->Fill(probabilityQ1*probabilityQ2*probabilityQ3); 
+
 	
 	// Alignment errors 
 	//LocalError lape = det2->localAlignmentError();
