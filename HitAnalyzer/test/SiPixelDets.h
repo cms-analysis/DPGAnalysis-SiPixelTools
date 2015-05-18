@@ -37,6 +37,7 @@ class SiPixelDets : public edm::EDAnalyzer
  private:
 
   edm::ParameterSet conf_;
+  bool phase1_;
   //typedef std::vector< edm::ParameterSet > Parameters;
   //Parameters BPixParameters_;
   //Parameters FPixParameters_;

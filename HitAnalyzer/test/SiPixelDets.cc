@@ -36,10 +36,9 @@ using namespace edm;
 //Constructor
 
 SiPixelDets::SiPixelDets(edm::ParameterSet const& conf) : 
-  conf_(conf) {
+  conf_(conf), phase1_(false) {
 
-  //useFile_ = conf_.getParameter<bool>("useFile");		
-  //fileName_ = conf_.getParameter<string>("fileName");  
+  phase1_ = conf_.getUntrackedParameter<bool>("phase1",false);		
   //BPixParameters_ = conf_.getUntrackedParameter<Parameters>("BPixParameters");
   //FPixParameters_ = conf_.getUntrackedParameter<Parameters>("FPixParameters");
 }
@@ -61,7 +60,10 @@ SiPixelDets::~SiPixelDets() {
 void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
   const bool PRINT = false;
   const bool PRINT_TABLE = true;
+  const bool doReversedTest = true;
 
+  if(phase1_) cout<<"This is for phase1 geometry "<<endl;
+ 
   edm::ESHandle<TrackerGeometry> tkgeom;
   es.get<TrackerDigiGeometryRecord>().get( tkgeom );
   if(PRINT) cout<<" There are "<<tkgeom->detUnits().size() <<" detectors"<<std::endl;
@@ -91,8 +93,12 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
     double detThick = pixDet->specificSurface().bounds().thickness();
     double detZ = pixDet->surface().position().z();
     double detR = pixDet->surface().position().perp();
+    double detPhi = pixDet->surface().position().phi();
+    GlobalVector  normVect = pixDet->surface().normalVector();
+    // add the module direction, so we know the E field 
 
-    if(PRINT) cout<<"Position "<<detR<<" "<<detZ<<" "<<detThick<<" "<<nrows<<" "<<ncols<<endl;
+    if(PRINT) cout<<"Position "<<detR<<" "<<detZ<<" "<<detPhi<<" "
+		  <<detThick<<" "<<nrows<<" "<<ncols<<endl;
 
     // bpix  
     if(detId.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel)) {	
@@ -123,7 +129,7 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       //printDet(detId, tt);
 
       // Convert to online 
-      PixelBarrelName pbn(detId, tt); // use det-id
+      PixelBarrelName pbn(detId, tt, phase1_); // use det-id
       //PixelBarrelName pbn(detId, tt, false); // use det-id, select phase0
       //PixelBarrelName pbn(detId, tt, true); // use det-id, select phase1
       //PixelBarrelName pbn(pxdetid); // or pixel det id 
@@ -136,21 +142,58 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       string name= pbn.name();
       PixelModuleName::ModuleType moduleType = pbn.moduleType();
       DetId det=pbn.getDetId(tt);
-      PXBDetId pxbdet=pbn.getDetId();
 
+      // Sometimes we also use the additional sign convention 
+      int ladderSigned=ladder;
+      int moduleSigned=module;
       // Shell { mO = 1, mI = 2 , pO =3 , pI =4 };
       int shell = int(sh);
       // change the module sign for z<0
-      if(shell==1 || shell==2) module = -module;
+      if(shell==1 || shell==2) moduleSigned = -module;
       // change ladeer sign for Outer )x<0)
-      if(shell==1 || shell==3) ladder = -ladder;
+      if(shell==1 || shell==3) ladderSigned = -ladder;
 
-      if(PRINT) cout<<" shell "<<sh<<"("<<shell<<") "<<sector<<" "<<layer<<" "<<ladder<<" "
-		    <<module<<" "<<half<<" "<<name<<" "<<moduleType<<" "<<det.rawId()<<" "
-		    <<pxbdet.rawId()<<endl;
+      if(PRINT) cout<<" shell "<<sh<<"("<<shell<<") "<<sector<<" "<<layer<<" "<<ladderSigned<<" "
+		    <<moduleSigned<<" "<<half<<" "<<name<<" "<<moduleType<<" "<<det.rawId()<<" "
+		    <<endl;
 
       if(PRINT_TABLE) 
-	cout<<detId.rawId()<<" "<<name<<endl;
+	cout<<detId.rawId()<<" "<<name<<" r/phi/z = "<<detR<<"/"<<detPhi<<"/"<<detZ
+	    <<" cmssw layer/ladder/module "<<layerC<<"/"<<ladderC<<"/"<<zindex
+	    <<" "<<normVect.phi()    // <<" "<<normVect.barePhi() same
+	    <<endl;
+
+      // Now check if teh id is the same
+      if(rawId != det.rawId() )
+	 cout<<" Wrong bpix ID, old = "<<rawId<<" new = "<<det.rawId() <<endl;
+
+      if(!phase1_) {
+	PXBDetId pxbdet=pbn.getDetId();
+	if(rawId != pxbdet.rawId() ) 
+	  cout<<" Wrong bpix (old) ID, old = "<<rawId<<" new = "<<pxbdet.rawId() <<endl;
+      }
+
+
+      // Check the revers transformation (special test)
+      if(doReversedTest) {
+	PixelBarrelName pbn2(name, phase1_); // use name to get detId
+	PixelBarrelName::Shell sh2 = pbn2.shell(); //enum
+	int sector2 = pbn2.sectorName();
+	int ladder2 = pbn2.ladderName();
+	int layer2  = pbn2.layerName();
+	int module2 = pbn2.moduleName();
+	string name2= pbn2.name();
+	PixelModuleName::ModuleType moduleType2 = pbn2.moduleType();
+	DetId det2=pbn2.getDetId(tt);
+	if(name !=name2)  cout<<" wrong  name "<<endl;
+	if(shell !=sh2)  cout<<" wrong shell "<<endl;
+	if(sector !=sector2)  cout<<" wrong sector "<<endl;
+	if(layer !=layer2)  cout<<" wrong layer "<<endl;
+	if(ladder!=ladder2) cout<<" wrong ladder "<<endl;
+	if(module!=module2) cout<<" wrong module "<<endl;
+	if(moduleType!=moduleType2) cout<<" wrong module type "<<endl;
+	if(det2.rawId() != det.rawId()) cout<<" wrong rawid "<<endl;
+      }
 
 #endif // NEW_ANMES
 	
@@ -181,15 +224,19 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
 
       PixelModuleName::ModuleType moduleType1 = pbn1.moduleType();
 
+      // Sometimes we also use the additional sign convention 
+      int ladderSigned1=ladder1;
+      int moduleSigned1=module1;
       // Shell { mO = 1, mI = 2 , pO =3 , pI =4 };
       int shell1 = int(sh1);
       // change the module sign for z<0
-      if(shell1==1 || shell1==2) module1 = -module1;
+      if(shell1==1 || shell1==2) moduleSigned1 = -module1;
       // change ladeer sign for Outer )x<0)
-      if(shell1==1 || shell1==3) ladder1 = -ladder1;
+      if(shell1==1 || shell1==3) ladderSigned1 = -ladder1;
 
-      if(PRINT) cout<<" shell1 "<<sh1<<"("<<shell1<<") "<<sector1<<" "<<layer1<<" "<<ladder1<<" "
-		    <<module1<<" "<<half1<<" "<<name1<<" "<<moduleType1<<" "<<pxbdet1.rawId()<<endl;
+      if(PRINT) cout<<" shell1 "<<sh1<<"("<<shell1<<") "<<sector1<<" "<<layer1<<" "
+		    <<ladderSigned1<<" "<<moduleSigned1
+		    <<" "<<half1<<" "<<name1<<" "<<moduleType1<<" "<<pxbdet1.rawId()<<endl;
 
 #endif // OLD_NAMES
 
@@ -211,36 +258,32 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       if(rawId != det.rawId()) cout<<" wrong rawid "<<endl;
 #endif //NEW & OLD_NAMES
 	
+      // FPIX 
     } else if(detId.subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap)) {
+
       // Now the fpix values  
       //continue;
 
-      if(PRINT) 
-	cout<<"Det: "<<detId.rawId()<<" "<<detId.null()<<" "<<detId.det()<<" "<<detId.subdetId()<<endl;
-
       unsigned int rawId = detId.rawId();
-      PXFDetId pxdetid = PXFDetId(detId);
 
       if(PRINT) 
-	cout << "endcap:" << " side=" << pxdetid.side() << "  disk=" << pxdetid.disk() 
-	   << "  blade=" << pxdetid.blade() << "  panel=" << pxdetid.panel() 
-	   << "  plaq=" << pxdetid.module() << " "<<rawId<<endl;
+	cout<<"Det: "<<rawId<<" "<<detId.null()<<" "<<detId.det()<<" "<<detId.subdetId()<<endl;
 
-      // new ids 
-      int disk=tTopo->pxfDisk(detId); //1,2,3
-      int blade=tTopo->pxfBlade(detId); //1-24
-      int plaq=tTopo->pxfModule(detId); //
-      int side=tTopo->pxfSide(detId); //size=1 for -z, 2 for +z
-      int panel=tTopo->pxfPanel(detId); //panel=1
-
-      if(PRINT) cout<<"endcap, size "<<side<<" disk "<<disk<<", blade "
-		    <<blade<<", panel "
-		    <<panel<<", plaq "<<plaq<<endl;
- 
 
 #ifdef NEW_NAMES
+      // new ids 
+      int disk=tTopo->pxfDisk(detId);   //1,2,3
+      int blade=tTopo->pxfBlade(detId); //1-24
+      int plaq=tTopo->pxfModule(detId); //
+      int side=tTopo->pxfSide(detId);   //sizd=1 for -z, 2 for +z
+      int panel=tTopo->pxfPanel(detId); //panel=1
+
+      if(PRINT) cout<<"endcap, side="<<side<<" disk="<<disk<<", blade="<<blade
+		    <<", panel="<<panel<<", plaq="<<plaq<<endl;
+ 
+
       // Convert to online 
-      PixelEndcapName pen(detId,tt); // use det-id phase0
+      PixelEndcapName pen(detId,tt,phase1_); // use det-id phase0
       //PixelEndcapName pen(detId,tt,false); // use det-id phase0
       //PixelEndcapName pen(detId,tt,true); // use det-id phase1
       PixelEndcapName::HalfCylinder sh = pen.halfCylinder(); //enum
@@ -250,18 +293,63 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       int pannelName = pen.pannelName();
       int plaquetteName = pen.plaquetteName();
       DetId det=pen.getDetId(tt);
-      PXFDetId pxfdet=pen.getDetId();
-      PixelEndcapName::HalfCylinder part = pen.halfCylinder();
+      //PixelEndcapName::HalfCylinder part = pen.halfCylinder();
       PixelModuleName::ModuleType moduleType = pen.moduleType();
       if(PRINT) cout<<sh<<" "<<nameF<<" "<<diskName<<" "<<bladeName<<" "<<pannelName<<" "
-	  <<plaquetteName<<" "<<part<<" "<<moduleType<<" "
-	  <<det.rawId()<<" "<<pxfdet.rawId()<<endl;
+		    <<plaquetteName<<" "<<moduleType<<" "<<det.rawId()
+		    <<endl;
 
       if(PRINT_TABLE) 
-	cout<<detId.rawId()<<" "<<nameF<<endl;
+	cout<<rawId<<" "<<nameF<<" r/phi/z = "<<detR<<"/"<<detPhi<<"/"<<detZ
+	    <<" cmssw side/disk/blade/pannel/plaq="
+	    <<side<<"/"<<disk<<"/"<<blade<<"/"<<panel<<"/"<<plaq
+	    <<" "<<normVect.z()
+	    <<endl;
+
+      // Now check if teh id is the same
+      if(rawId != det.rawId() )
+	 cout<<" Wrong fpix ID, old = "<<rawId<<" new = "<<det.rawId() <<endl;
+
+      if(!phase1_) {
+	PXFDetId pxfdet=pen.getDetId();   
+	if(rawId != pxfdet.rawId() ) 
+	  cout<<" Wrong fpix (old) ID, old = "<<rawId<<" new = "<<pxfdet.rawId() <<endl;
+      }
+
+      // Reverse the transformation to check the name translation 
+      if(doReversedTest) { 
+	PixelEndcapName pen2(nameF,phase1_); // get id from name 
+
+	PixelEndcapName::HalfCylinder sh2 = pen2.halfCylinder(); //enum
+	string nameF2 = pen2.name();
+	int diskName2 = pen2.diskName();
+	int bladeName2 = pen2.bladeName();
+	int pannelName2 = pen2.pannelName();
+	int plaquetteName2 = pen2.plaquetteName();
+	DetId det2=pen2.getDetId(tt);
+	PixelModuleName::ModuleType moduleType2 = pen2.moduleType();
+	if(nameF != nameF2)  cout<<" wrong name "<<endl;
+	if(sh !=sh2)  cout<<" wrong shell "<<endl;
+	if(diskName  != diskName2)  cout<<" wrong disk "<<endl;
+	if(bladeName != bladeName2) cout<<" wrong blade "<<endl;
+	if(pannelName != pannelName2) cout<<" wrong panel "<<endl;
+	if(plaquetteName != plaquetteName2) cout<<" wrong plaquette "<<endl;
+	if(moduleType != moduleType2) cout<<" wrong module type "<<endl;
+	if(det.rawId() != det2.rawId()) cout<<" wrong rawid "<<endl;
+      }
+
 #endif // NEW_NAMES 
 
 #ifdef OLD_NAMES
+      // old ids, does not work for phase1
+      if(!phase1_) {
+	PXFDetId pxdetid = PXFDetId(detId);
+	if(PRINT) 
+	  cout << "endcap:" << " side=" << pxdetid.side() << "  disk=" << pxdetid.disk() 
+	       << "  blade=" << pxdetid.blade() << "  panel=" << pxdetid.panel() 
+	       << "  plaq=" << pxdetid.module() << " "<<rawId<<endl;
+      }
+
       // Convert to online 
       PixelEndcapName pen1(detId); // use det-id
       PixelEndcapName::HalfCylinder sh1 = pen1.halfCylinder(); //enum
@@ -271,11 +359,11 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       int pannelName1 = pen1.pannelName();
       int plaquetteName1 = pen1.plaquetteName();
       PXFDetId pxfdet1=pen1.getDetId();
-      PixelEndcapName::HalfCylinder part1 = pen1.halfCylinder();
+      //PixelEndcapName::HalfCylinder part1 = pen1.halfCylinder();
       PixelModuleName::ModuleType moduleType1 = pen1.moduleType();
       if(PRINT) 
 	cout<<nameF1<<" "<<diskName1<<" "<<bladeName1<<" "<<pannelName1<<" "
-	    <<plaquetteName1<<" "<<part1<<" "<<moduleType1<<" "
+	    <<plaquetteName1<<" "<<moduleType1<<" "
 	    <<pxfdet1.rawId()<<" "<<sh1<<endl;
 #endif // OLD_NAMES
 

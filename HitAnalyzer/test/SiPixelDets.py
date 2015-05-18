@@ -33,6 +33,7 @@ process.TFileService = cms.Service("TFileService",
 
 # the analyzer itself - empty parameter set 
 process.test = cms.EDAnalyzer( "SiPixelDets",
+         phase1=cms.untracked.bool(False),   
 #        NPartForHisto = cms.untracked.int32(100),
 #        PtMaxForHisto = cms.untracked.double(200.0)
 )
