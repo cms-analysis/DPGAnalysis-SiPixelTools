@@ -351,6 +351,8 @@ void PixDigisTest::beginJob() {
 // ------------ method called to produce the data  ------------
 void PixDigisTest::analyze(const edm::Event& iEvent, 
 			   const edm::EventSetup& iSetup) {
+
+  const bool MY_DEBUG = false;
   //Retrieve tracker topology from geometry
   edm::ESHandle<TrackerTopology> tTopo;
   iSetup.get<IdealGeometryRecord>().get(tTopo);
@@ -358,7 +360,6 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 
   using namespace edm;
   if(PRINT) cout<<" Analyze PixDigisTest for phase "<<phase1_<<endl;
-
 
   //  int run       = iEvent.id().run();
   int event     = iEvent.id().event();
@@ -441,7 +442,7 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
     unsigned int detType=detId.det(); // det type, tracker=1
     unsigned int subid=detId.subdetId(); //subdetector type, barrel=1
     
-    if(PRINT) 
+    if(MY_DEBUG) 
       cout<<"Det: "<<detId.rawId()<<" "<<detId.null()<<" "<<detType<<" "<<subid<<endl;
     
 #ifdef HISTOS
@@ -506,11 +507,11 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
       panel=tTopo->pxfPanel(detid); //panel=1
       
       if(PRINT) {
-	cout<<"Forward det "<<subid<<", disk "<<disk<<", blade "
+	cout<<"FPix (cmssw) "<<", disk "<<disk<<", blade "
 		    <<blade<<", module "<<zindex<<", side "<<side<<", panel "
 		    <<panel<<endl;
-	cout<<" col/row, pitch "<<cols<<" "<<rows<<" "
-		    <<pitchX<<" "<<pitchY<<endl;
+	if(MY_DEBUG) cout<<" col/row, pitch "<<cols<<" "<<rows<<" "
+			 <<pitchX<<" "<<pitchY<<endl;
       }
 
     } else if(subid == 1) { // Barrel 
@@ -538,8 +539,8 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
       
 
       if(PRINT) { 
-	cout<<" Barrel layer/ladder/module (cmssw) "
-	    <<layerC<<" "<<ladderC<<" "<<zindex<<" online "
+	cout<<" BPix layer/ladder/module (cmssw) "
+	    <<layerC<<" "<<ladderC<<" "<<zindex<<" (online) "
 	    <<pbn.name()<<" "<<sh<<"("<<shell<<") "<<sector<<" "
 	    <<layer<<" "<<ladder<<" "<<module<<" "<<half<< endl;
 	//cout<<" Barrel det, thick "<<detThick<<" "
