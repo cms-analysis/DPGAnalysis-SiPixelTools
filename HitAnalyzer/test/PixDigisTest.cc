@@ -159,6 +159,7 @@ private:
 #endif
 
   edm::InputTag src_;  
+  bool phase1_;
 
 };
 
@@ -174,16 +175,14 @@ private:
 // constructors and destructor
 //
 PixDigisTest::PixDigisTest(const edm::ParameterSet& iConfig) {
-  //We put this here for the moment since there is no better place 
-  //edm::Service<MonitorDaemon> daemon;
-  //daemon.operator->();
 
   PRINT = iConfig.getUntrackedParameter<bool>("Verbosity",false);
   src_ =  iConfig.getParameter<edm::InputTag>( "src" );
   tPixelDigi = consumes <edm::DetSetVector<PixelDigi>> (src_);
 #ifdef USE_SIM_LINKS
   tPixelDigiSimLink = consumes < edm::DetSetVector<PixelDigiSimLink> > ( src_);
-#endif
+#endif 
+  phase1_ =  iConfig.getUntrackedParameter<bool>( "phase1",false);
 
   cout<<" Construct PixDigisTest "<<endl;
 }
@@ -355,9 +354,10 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
   //Retrieve tracker topology from geometry
   edm::ESHandle<TrackerTopology> tTopo;
   iSetup.get<IdealGeometryRecord>().get(tTopo);
+  const TrackerTopology* tt = tTopo.product();
 
   using namespace edm;
-  if(PRINT) cout<<" Analyze PixDigisTest "<<endl;
+  if(PRINT) cout<<" Analyze PixDigisTest for phase "<<phase1_<<endl;
 
 
   //  int run       = iEvent.id().run();
@@ -522,7 +522,7 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
       // Barrel Z-index=1,8
       zindex=tTopo->pxbModule(detid);
       // Convert to online 
-      PixelBarrelName pbn(detid);
+      PixelBarrelName pbn(detid,tt,phase1_);
       // Shell { mO = 1, mI = 2 , pO =3 , pI =4 };
       PixelBarrelName::Shell sh = pbn.shell(); //enum
       sector = pbn.sectorName();
@@ -538,10 +538,10 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
       
 
       if(PRINT) { 
-	cout<<" Barrel layer, ladder, module "
-	    <<layerC<<" "<<ladderC<<" "<<zindex<<" "
-	    <<sh<<"("<<shell<<") "<<sector<<" "<<layer<<" "<<ladder<<" "
-	    <<module<<" "<<half<< endl;
+	cout<<" Barrel layer/ladder/module (cmssw) "
+	    <<layerC<<" "<<ladderC<<" "<<zindex<<" online "
+	    <<pbn.name()<<" "<<sh<<"("<<shell<<") "<<sector<<" "
+	    <<layer<<" "<<ladder<<" "<<module<<" "<<half<< endl;
 	//cout<<" Barrel det, thick "<<detThick<<" "
 	//  <<" layer, ladder, module "
 	//  <<layer<<" "<<ladder<<" "<<zindex<<endl;

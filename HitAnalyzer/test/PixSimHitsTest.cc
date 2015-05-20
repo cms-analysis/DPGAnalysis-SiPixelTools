@@ -133,7 +133,7 @@ PixSimHitsTest::PixSimHitsTest(const edm::ParameterSet& iConfig) :
 
   mode_ = iConfig.getUntrackedParameter<std::string>( "mode","bpix"); // select bpix or fpix
   PRINT = iConfig.getUntrackedParameter<bool>( "Verbosity",false); // printout
-  phase1_ =  iConfig.getUntrackedParameter<bool>( "phase1" );
+  phase1_ =  iConfig.getUntrackedParameter<bool>( "phase1",false);
   cout<<" Construct PixSimHitsTest, phase =  "<<phase1_<<endl;
 }
 
