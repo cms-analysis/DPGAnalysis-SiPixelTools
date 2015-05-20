@@ -92,31 +92,35 @@ private:
   double numSimHits, numSimHitsGood; 
   bool phase1_;
 
-  TH1F  *heloss1,*heloss2, *heloss3,*hdetunit,*hpabs,*hpid,*htof,*htid;
-  TH1F* hpixid,*hpixsubid,*hlayerid,*hladder1id,*hladder2id,*hladder3id,
-    *hz1id,*hz2id,*hz3id;
+  TH1F  *heloss1,*heloss2, *heloss3,*heloss4,
+    *hdetunit,*hpabs,*hpid,*htof,*htid;
+  TH1F* hpixid,*hpixsubid,*hlayerid,
+    *hladder1id,*hladder2id,*hladder3id,*hladder4id,
+    *hz1id,*hz2id,*hz3id,*hz4id;
   //TH1F *hladder1idUp, *hladder2idUp, *hladder3idUp;
-  TH1F* hthick1,*hthick2,*hthick3,*hlength1,*hlength2,*hlength3;
-  TH1F *hwidth1,*hwidth2,*hwidth3;
-  TH1F *hsimHitsPerDet1,*hsimHitsPerDet2,*hsimHitsPerDet3;
-  TH1F *hsimHitsPerLay1,*hsimHitsPerLay2,*hsimHitsPerLay3;
+  TH1F* hthick1,*hthick2,*hthick3,*hthick4,
+    *hlength1,*hlength2,*hlength3,*hlength4;
+  TH1F *hwidth1,*hwidth2,*hwidth3,*hwidth4;
+  TH1F *hsimHitsPerDet1,*hsimHitsPerDet2,*hsimHitsPerDet3,*hsimHitsPerDet4;
+  TH1F *hsimHitsPerLay1,*hsimHitsPerLay2,*hsimHitsPerLay3,*hsimHitsPerLay4;
   TH1F *hsimHits, *hsimHitsGood;
-  TH1F *hdetsPerLay1,*hdetsPerLay2,*hdetsPerLay3;
-  TH1F *heloss1e, *heloss2e, *heloss3e;
-  TH1F *heloss1mu, *heloss2mu, *heloss3mu;
-  TH1F *htheta1, *htheta2, *htheta3;
-  TH1F *hphi1, *hphi2, *hphi3;
-  TH1F *hdetr, *hdetz, *hdetphi1, *hdetphi2, *hdetphi3;
-  TH1F *hglobr1,*hglobr2,*hglobr3,*hglobz1, *hglobz2, *hglobz3;
+  TH1F *hdetsPerLay1,*hdetsPerLay2,*hdetsPerLay3,*hdetsPerLay4;
+  TH1F *heloss1e, *heloss2e, *heloss3e, *heloss4e;
+  TH1F *heloss1mu, *heloss2mu, *heloss3mu, *heloss4mu;
+  TH1F *htheta1, *htheta2, *htheta3, *htheta4;
+  TH1F *hphi1, *hphi2, *hphi3, *hphi4;
+  TH1F *hdetr, *hdetz, *hdetphi1, *hdetphi2, *hdetphi3, *hdetphi4;
+  TH1F *hglobr1,*hglobr2,*hglobr3,*hglobr4,
+    *hglobz1, *hglobz2, *hglobz3, *hglobz4;
   TH1F *hcolsB,  *hrowsB,  *hcolsF,  *hrowsF;
 
   TH2F *htest, *htest2, *htest3, *htest4, *htest5;
   //TProfile *hp1, *hp2, *hp3, *hp4, *hp5;
 
 #ifdef CHECK_GEOM
-  float modulePositionZ[3][44][8];
-  float modulePositionR[3][44][8];
-  float modulePositionPhi[3][44][8];
+  float modulePositionZ[4][64][8];
+  float modulePositionR[4][64][8];
+  float modulePositionPhi[4][64][8];
 #endif
 
 };
@@ -161,6 +165,7 @@ void PixSimHitsTest::beginJob() {
    heloss1 = fs->make<TH1F>( "heloss1", "Eloss l1", 100, 0., max_charge);
    heloss2 = fs->make<TH1F>( "heloss2", "Eloss l2", 100, 0., max_charge);
    heloss3 = fs->make<TH1F>( "heloss3", "Eloss l3", 100, 0., max_charge);
+   heloss4 = fs->make<TH1F>( "heloss4", "Eloss l4", 100, 0., max_charge);
 
    hdetunit = fs->make<TH1F>( "hdetunit", "Det unit", 1000,
                               302000000.,302300000.);
@@ -172,24 +177,30 @@ void PixSimHitsTest::beginJob() {
     hpixid = fs->make<TH1F>( "hpixid", "Pix det id", 10, 0., 10.);
     hpixsubid = fs->make<TH1F>( "hpixsubid", "Pix Barrel id", 10, 0., 10.);
     hlayerid = fs->make<TH1F>( "hlayerid", "Pix layer id", 10, 0., 10.);
+
     hladder1id = fs->make<TH1F>( "hladder1id", "Ladder L1 id", 102, -25.5, 25.5);
     hladder2id = fs->make<TH1F>( "hladder2id", "Ladder L2 id", 102, -25.5, 25.5);
     hladder3id = fs->make<TH1F>( "hladder3id", "Ladder L3 id", 102, -25.5, 25.5);
+    hladder4id = fs->make<TH1F>( "hladder4id", "Ladder 43 id", 72, -35.5, 35.5);
     hz1id = fs->make<TH1F>( "hz1id", "Z-index id L1", 10, -5., 5.);
     hz2id = fs->make<TH1F>( "hz2id", "Z-index id L2", 10, -5., 5.);
     hz3id = fs->make<TH1F>( "hz3id", "Z-index id L3", 10, -5., 5.);
+    hz4id = fs->make<TH1F>( "hz4id", "Z-index id L4", 10, -5., 5.);
     
     hthick1 = fs->make<TH1F>( "hthick1", "Det 1 Thinckess", 400, 0.,0.04);
     hthick2 = fs->make<TH1F>( "hthick2", "Det 2 Thinckess", 400, 0.,0.04);
     hthick3 = fs->make<TH1F>( "hthick3", "Det 3 Thinckess", 400, 0.,0.04);
+    hthick4 = fs->make<TH1F>( "hthick4", "Det 4 Thinckess", 400, 0.,0.04);
                                                                                 
     hlength1 = fs->make<TH1F>( "hlength1", "Det 1 Length", 700,-3.5,3.5);
     hlength2 = fs->make<TH1F>( "hlength2", "Det 2 Length", 700,-3.5,3.5);
     hlength3 = fs->make<TH1F>( "hlength3", "Det 3 Length", 700,-3.5,3.5);
+    hlength4 = fs->make<TH1F>( "hlength4", "Det 4 Length", 700,-3.5,3.5);
  
     hwidth1 = fs->make<TH1F>( "hwidth1", "Det 1 Width", 200,-1.,1.);
     hwidth2 = fs->make<TH1F>( "hwidth2", "Det 2 Width", 200,-1.,1.);
     hwidth3 = fs->make<TH1F>( "hwidth3", "Det 3 Width", 200,-1.,1.);
+    hwidth4 = fs->make<TH1F>( "hwidth4", "Det 4 Width", 200,-1.,1.);
 
     hsimHitsPerDet1 = fs->make<TH1F>( "hsimHitsPerDet1", "SimHits per det l1", 
 			      200, -0.5, 199.5);
@@ -197,11 +208,15 @@ void PixSimHitsTest::beginJob() {
 			      200, -0.5, 199.5);
     hsimHitsPerDet3 = fs->make<TH1F>( "hsimHitsPerDet3", "SimHits per det l3", 
 			      200, -0.5, 199.5);
+    hsimHitsPerDet4 = fs->make<TH1F>( "hsimHitsPerDet4", "SimHits per det l4", 
+			      200, -0.5, 199.5);
     hsimHitsPerLay1 = fs->make<TH1F>( "hsimHitsPerLay1", "SimHits per layer l1", 
 			      2000, -0.5, 1999.5);
     hsimHitsPerLay2 = fs->make<TH1F>( "hsimHitsPerLay2", "SimHits per layer l2", 
 			      2000, -0.5, 1999.5);
     hsimHitsPerLay3 = fs->make<TH1F>( "hsimHitsPerLay3", "SimHits per layer l3", 
+			      2000, -0.5, 1999.5);
+    hsimHitsPerLay4 = fs->make<TH1F>( "hsimHitsPerLay4", "SimHits per layer l4", 
 			      2000, -0.5, 1999.5);
     hdetsPerLay1 = fs->make<TH1F>( "hdetsPerLay1", "Full dets per layer l1", 
 			      161, -0.5, 160.5);
@@ -209,6 +224,8 @@ void PixSimHitsTest::beginJob() {
 			      353, -0.5, 352.5);
     hdetsPerLay2 = fs->make<TH1F>( "hdetsPerLay2", "Full dets per layer l2", 
 			      257, -0.5, 256.5);
+    hdetsPerLay4 = fs->make<TH1F>( "hdetsPerLay4", "Full dets per layer l4", 
+			      513, -0.5, 512.5);
     hsimHits = fs->make<TH1F>( "hsimHits", "SimHits for bpix",2000, -0.5, 1999.5);
     hsimHitsGood = fs->make<TH1F>( "hsimHitsGood", "SimHits for bpix",2000, -0.5, 1999.5); // no deltas
 
@@ -216,24 +233,30 @@ void PixSimHitsTest::beginJob() {
     heloss1e = fs->make<TH1F>( "heloss1e", "Eloss e l1", 100, 0., max_charge);
     heloss2e = fs->make<TH1F>( "heloss2e", "Eloss e l2", 100, 0., max_charge);
     heloss3e = fs->make<TH1F>( "heloss3e", "Eloss e l3", 100, 0., max_charge);
+    heloss4e = fs->make<TH1F>( "heloss4e", "Eloss e l4", 100, 0., max_charge);
 
     heloss1mu = fs->make<TH1F>( "heloss1mu", "Eloss mu l1", 100, 0., max_charge);
     heloss2mu = fs->make<TH1F>( "heloss2mu", "Eloss mu l2", 100, 0., max_charge);
     heloss3mu = fs->make<TH1F>( "heloss3mu", "Eloss mu l3", 100, 0., max_charge);
+    heloss4mu = fs->make<TH1F>( "heloss4mu", "Eloss mu l4", 100, 0., max_charge);
 
     htheta1 = fs->make<TH1F>( "htheta1", "Theta l1",350,0.0,3.5);
     htheta2 = fs->make<TH1F>( "htheta2", "Theta l2",350,0.0,3.5);
     htheta3 = fs->make<TH1F>( "htheta3", "Theta l3",350,0.0,3.5);
+    htheta4 = fs->make<TH1F>( "htheta4", "Theta l4",350,0.0,3.5);
+
     hphi1 = fs->make<TH1F>("hphi1","phi l1",1400,-3.5,3.5);
     hphi2 = fs->make<TH1F>("hphi2","phi l2",1400,-3.5,3.5);
     hphi3 = fs->make<TH1F>("hphi3","phi l3",1400,-3.5,3.5);
+    hphi4 = fs->make<TH1F>("hphi4","phi l4",1400,-3.5,3.5);
  
-    hdetr = fs->make<TH1F>("hdetr","det r",1500,0.,15.);
+    hdetr = fs->make<TH1F>("hdetr","det r",1800,0.,18.);
     hdetz = fs->make<TH1F>("hdetz","det z",5200,-26.,26.);
 
     hdetphi1 = fs->make<TH1F>("hdetphi1","det phi l1",700,-3.5,3.5);
     hdetphi2 = fs->make<TH1F>("hdetphi2","det phi l2",700,-3.5,3.5);
     hdetphi3 = fs->make<TH1F>("hdetphi3","det phi l3",700,-3.5,3.5);
+    hdetphi4 = fs->make<TH1F>("hdetphi4","det phi l4",700,-3.5,3.5);
 
     hcolsB = fs->make<TH1F>("hcolsB","cols per bar det",450,0.,450.);
     hrowsB = fs->make<TH1F>("hrowsB","rows per bar det",200,0.,200.);
@@ -250,6 +273,8 @@ void PixSimHitsTest::beginJob() {
     hglobz2 = fs->make<TH1F>("hglobz2","global z2",540,-27.,27.);
     hglobr3 = fs->make<TH1F>("hglobr3","global r3",150,0.,15.);
     hglobz3 = fs->make<TH1F>("hglobz3","global z3",540,-27.,27.);
+    hglobr4 = fs->make<TH1F>("hglobr4","global r4",180,0.,18.);
+    hglobz4 = fs->make<TH1F>("hglobz4","global z4",540,-27.,27.);
 
     // layer 1 only 
     htest  = fs->make<TH2F>("htest"," ",108,-27.,27.,35,-3.5,3.5);  // global z versus local y
@@ -263,8 +288,8 @@ void PixSimHitsTest::beginJob() {
 
 #ifdef CHECK_GEOM
     // To get the module position
-    for(int i=0;i<3;i++) {
-      for(int n=0;n<44;n++) {
+    for(int i=0;i<4;i++) {
+      for(int n=0;n<64;n++) {
 	for(int m=0;m<8;m++) {
  	  modulePositionR[i][n][m]=-1;
  	  modulePositionZ[i][n][m]=-1;
@@ -298,6 +323,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
   int totalNumOfSimHits1 = 0;
   int totalNumOfSimHits2 = 0;
   int totalNumOfSimHits3 = 0;
+  int totalNumOfSimHits4 = 0;
   int goodHits = 0; // above pt=0.1GeV
 
    // To count simhits per det module 
@@ -308,6 +334,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
    map<unsigned int, vector<PSimHit>, less<unsigned int> > SimHitMap1;
    map<unsigned int, vector<PSimHit>, less<unsigned int> > SimHitMap2;
    map<unsigned int, vector<PSimHit>, less<unsigned int> > SimHitMap3;
+   map<unsigned int, vector<PSimHit>, less<unsigned int> > SimHitMap4;
 
    // Access hits containers
    if(DEBUG) cout<<"Define simhit container"<<endl;
@@ -655,6 +682,34 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 hdetphi3->Fill(detPhi);
 	 // check up/down modules 
 	 //if(pid!=11 && moduleDirectionUp) hladder3idUp->Fill(float(ladder));
+
+       } else if(layer==4) {
+	 
+	 //cout<<" layer "<<layer<<endl;
+	 totalNumOfSimHits4++;
+	 heloss4->Fill(eloss);
+	 if(abs(pid)==11) heloss4e->Fill(eloss);
+	 else heloss4mu->Fill(eloss);	 
+	 
+	 hladder4id->Fill(float(ladder));
+	 hz4id->Fill(float(module));
+	 hthick4->Fill(dz);
+	 hlength4->Fill(y);
+	 hwidth4->Fill(x); 
+	 if(abs(pid)==13 && p>1.) hphi4->Fill(phi);
+	 
+	 // check half modules 
+	 //       if(ladder==11 || ladder==12 || ladder==33 || ladder==34 ) {
+	 // 	 hwidth3h->Fill(x);
+	 //        } else {
+	 //        }
+	 
+	 SimHitMap4[detId.rawId()].push_back((*isim));
+	 hglobr4->Fill(gloR);
+	 hglobz4->Fill(gloZ);
+	 hdetphi4->Fill(detPhi);
+	 // check up/down modules 
+	 //if(pid!=11 && moduleDirectionUp) hladder3idUp->Fill(float(ladder));
 	 
        } // layers
      } // end fpix/bpix 
@@ -664,14 +719,16 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
    hsimHitsPerLay1 ->Fill(float(totalNumOfSimHits1));
    hsimHitsPerLay2 ->Fill(float(totalNumOfSimHits2));
    hsimHitsPerLay3 ->Fill(float(totalNumOfSimHits3));
+   hsimHitsPerLay4 ->Fill(float(totalNumOfSimHits4));
    hsimHits->Fill(float(totalNumOfSimHits));
    hsimHitsGood->Fill(float(goodHits));
 
    int numberOfDetUnits1 = SimHitMap1.size();
    int numberOfDetUnits2 = SimHitMap2.size();
    int numberOfDetUnits3 = SimHitMap3.size();
-   int numberOfDetUnits = numberOfDetUnits1+numberOfDetUnits2+
-     numberOfDetUnits3;
+   int numberOfDetUnits4 = SimHitMap4.size();
+   int numberOfDetUnits = numberOfDetUnits1+numberOfDetUnits2
+     +numberOfDetUnits3+numberOfDetUnits4;
 
    if(PRINT) 
      cout << " Number of full det-units = " <<numberOfDetUnits
@@ -680,6 +737,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
    hdetsPerLay1 ->Fill(float(numberOfDetUnits1));
    hdetsPerLay2 ->Fill(float(numberOfDetUnits2));
    hdetsPerLay3 ->Fill(float(numberOfDetUnits3));
+   hdetsPerLay4 ->Fill(float(numberOfDetUnits4));
 
    numEvents++;
    numSimHits += totalNumOfSimHits;
@@ -706,6 +764,12 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
        //	      << (simhit_map_iterator->second).size() << endl;
        hsimHitsPerDet3->Fill( float((simhit_map_iterator->second).size()) );
      }
+     for(simhit_map_iterator = SimHitMap4.begin(); 
+	 simhit_map_iterator != SimHitMap4.end(); simhit_map_iterator++) {
+       //if(PRINT) cout << " Lay4 det = "<<simhit_map_iterator->first <<" simHits = "
+       //	      << (simhit_map_iterator->second).size() << endl;
+       hsimHitsPerDet4->Fill( float((simhit_map_iterator->second).size()) );
+     }
    } // of bpix 
 
    if(PRINT) cout<<endl;
@@ -725,11 +789,12 @@ void PixSimHitsTest::endJob(){
   // To get module positions
   cout<< " Module position"<<endl;
   cout<<" Layer Ladder Zindex    R      Z      Phi "<<endl; 
-  for(int i=0;i<3;i++) {
+  for(int i=0;i<4;i++) {
     int max_lad=0;
     if(i==0) max_lad=20;
     else if(i==1) max_lad=32;
     else if(i==2) max_lad=44;
+    else if(i==3) max_lad=64;
     for(int n=0;n<max_lad;n++) {
       for(int m=0;m<8;m++) {
 	cout<<"   "<<i+1<<"      "<<n+1<<"      "<<m+1<<"    "
