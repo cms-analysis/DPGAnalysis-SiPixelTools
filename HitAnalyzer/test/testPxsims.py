@@ -42,13 +42,27 @@ process.TFileService = cms.Service("TFileService",
     fileName = cms.string('sim_histos.root')
 )
 
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
+
+from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
+#from Configuration.AlCa.GlobalTag import GlobalTag
+# to use no All 
+
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
+
+
+#process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 # Choose the global tag here:
 #process.GlobalTag.globaltag = 'MC_53_V15::All'
 #process.GlobalTag.globaltag = 'DESIGN53_V15::All'
 #process.GlobalTag.globaltag = 'START53_V15::All'
 # ideal
-process.GlobalTag.globaltag = 'MC_72_V1::All'
+#process.GlobalTag.globaltag = 'MC_72_V1::All'
 # realistiv alignment and calibrations 
 #process.GlobalTag.globaltag = 'START70_V1::All'
 
@@ -62,6 +76,7 @@ process.analysis =  cms.EDAnalyzer("PixSimHitsTest",
 #	list = cms.string("TrackerHitsPixelEndcapLowTof"),
 #	list = cms.string("TrackerHitsPixelEndcapHighTof"),
         Verbosity = cms.untracked.bool(True),
+        phase1 = cms.untracked.bool(False),
         mode = cms.untracked.string("bpix"),
 #        mode = cms.untracked.string("fpix"),
 )

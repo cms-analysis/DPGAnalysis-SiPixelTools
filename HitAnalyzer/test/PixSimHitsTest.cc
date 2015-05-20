@@ -90,6 +90,7 @@ private:
   edm::EDGetTokenT<PSimHitContainer> tPixelSimHits;
   int numEvents;
   double numSimHits, numSimHitsGood; 
+  bool phase1_;
 
   TH1F  *heloss1,*heloss2, *heloss3,*hdetunit,*hpabs,*hpid,*htof,*htid;
   TH1F* hpixid,*hpixsubid,*hlayerid,*hladder1id,*hladder2id,*hladder3id,
@@ -132,7 +133,8 @@ PixSimHitsTest::PixSimHitsTest(const edm::ParameterSet& iConfig) :
 
   mode_ = iConfig.getUntrackedParameter<std::string>( "mode","bpix"); // select bpix or fpix
   PRINT = iConfig.getUntrackedParameter<bool>( "Verbosity",false); // printout
-  cout<<" Construct PixSimHitsTest "<<endl;
+  phase1_ =  iConfig.getUntrackedParameter<bool>( "phase1" );
+  cout<<" Construct PixSimHitsTest, phase =  "<<phase1_<<endl;
 }
 
 PixSimHitsTest::~PixSimHitsTest() {
@@ -289,6 +291,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
   //Retrieve tracker topology from geometry (for det id)
   edm::ESHandle<TrackerTopology> tTopo;
   iSetup.get<IdealGeometryRecord>().get(tTopo);
+  const TrackerTopology* tt = tTopo.product();
 
   // Get input data
   int totalNumOfSimHits = 0;
@@ -402,8 +405,9 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
        ladderC=tTopo->pxbLadder(detid);
        // Barrel Z-index=1,8
        zindex=tTopo->pxbModule(detid);
+
        // Convert to online 
-       PixelBarrelName pbn(detid);
+       PixelBarrelName pbn(detid,tt,phase1_);
        // Shell { mO = 1, mI = 2 , pO =3 , pI =4 };
        PixelBarrelName::Shell sh = pbn.shell(); //enum
        sector = pbn.sectorName();
@@ -412,13 +416,14 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
        module = pbn.moduleName();
        half  = pbn.isHalfModule();
        shell = int(sh);
+
        // change the module sign for z<0
        if(shell==1 || shell==2) module = -module;
        // change ladeer sign for Outer )x<0)
        if(shell==1 || shell==3) ladder = -ladder;
 
        if(PRINT) { 
-	 cout<<" Barrel layer, ladder, module "
+	 cout<<" Barrel layer, ladder, module "<<pbn.name()<<" "
 	     <<layerC<<" "<<ladderC<<" "<<zindex<<" "
 	     <<sh<<"("<<shell<<") "<<sector<<" "<<layer<<" "<<ladder<<" "
 	     <<module<<" "<<half<< endl;
