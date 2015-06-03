@@ -1,7 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 process = cms.Process("Test")
 
-process.load("Configuration.Geometry.GeometryRecoDB_cff")
+process.load('Configuration.Geometry.GeometryExtended2017Reco_cff')
+#process.load('Configuration.Geometry.GeometryExtended2017_cff')
+
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
@@ -9,7 +11,9 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
+# for phase1 
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
 
 
 process.maxEvents = cms.untracked.PSet(

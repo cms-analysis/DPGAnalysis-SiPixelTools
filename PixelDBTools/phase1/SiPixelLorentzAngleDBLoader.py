@@ -2,7 +2,10 @@
 import FWCore.ParameterSet.Config as cms
 process = cms.Process("SiPixelLorentzAngleLoader")
 
-process.load("Configuration.Geometry.GeometryRecoDB_cff")
+#process.load("Configuration.Geometry.GeometryRecoDB_cff")
+process.load('Configuration.Geometry.GeometryExtended2017Reco_cff')
+#process.load('Configuration.Geometry.GeometryExtended2017_cff')
+
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
 
@@ -10,8 +13,9 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 #from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.destinations = cms.untracked.vstring("cout")
@@ -52,7 +56,8 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
     toPut = cms.VPSet(
         cms.PSet(
             record = cms.string('SiPixelLorentzAngleRcd'),
-            tag = cms.string('SiPixelLorentzAngle_test')
+#            tag = cms.string('dupa')
+            tag = cms.string('SiPixelLorentzAngle_phase1_mc_v1')
 #	     tag = cms.string("SiPixelLorentzAngle_fromAlignment_v01_mc")	
 #	     tag = cms.string("SiPixelLorentzAngle_fromAlignment_v01")	
 #	     tag = cms.string("SiPixelLorentzAngle_forWidth_v01_mc")
@@ -60,7 +65,7 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
         ),
         cms.PSet(
             record = cms.string('SiPixelLorentzAngleSimRcd'),
-            tag = cms.string('SiPixelLorentzAngleSim_test')
+            tag = cms.string('SiPixelLorentzAngleSim_phase1_mc_v1')
         ),
        )
 )

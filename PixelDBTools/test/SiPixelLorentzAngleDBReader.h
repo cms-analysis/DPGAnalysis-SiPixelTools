@@ -34,7 +34,7 @@
     bool printdebug_;
     TH1F* LorentzAngleBarrel_;
     TH1F* LorentzAngleForward_;
-    TH1F *LABPixL1_[8], *LABPixL2_[8], *LABPixL3_[8];
+    TH1F *LABPixL1_[8], *LABPixL2_[8], *LABPixL3_[8], *LABPixL4_[8];
 
     bool useSimRcd_;
     std::string tagLabel_;

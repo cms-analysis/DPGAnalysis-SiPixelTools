@@ -1,0 +1,222 @@
+# produce pixel cluster & rechits from digia
+# works directly or through raw
+# 
+# Fro phase1
+##############################################################################
+
+import FWCore.ParameterSet.Config as cms
+
+process = cms.Process("RecHitTest")
+ 
+#process.load("Configuration.Geometry.GeometryIdeal_cff")
+process.load('Configuration.Geometry.GeometryExtended2017Reco_cff')
+
+#process.load("Configuration.StandardSequences.MagneticField_38T_cff")
+process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
+
+process.load("FWCore.MessageLogger.MessageLogger_cfi")
+process.load("Configuration.StandardSequences.Services_cff")
+process.load('Configuration.EventContent.EventContent_cff')
+process.load('Configuration.StandardSequences.EndOfProcess_cff')
+
+# clusterizer 
+process.load("RecoLocalTracker.Configuration.RecoLocalTracker_cff")
+
+# for raw
+#process.load("EventFilter.SiPixelRawToDigi.SiPixelDigiToRaw_cfi")
+#process.load("EventFilter.SiPixelRawToDigi.SiPixelRawToDigi_cfi")
+process.load('Configuration.StandardSequences.DigiToRaw_cff')
+process.load('Configuration.StandardSequences.RawToDigi_cff')
+
+
+# needed for pixel RecHits (templates?)
+process.load("Configuration.StandardSequences.Reconstruction_cff")
+
+
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+from Configuration.AlCa.GlobalTag import GlobalTag
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
+
+
+process.maxEvents = cms.untracked.PSet(
+    input = cms.untracked.int32(-1)
+)
+
+process.MessageLogger = cms.Service("MessageLogger",
+    debugModules = cms.untracked.vstring('SiPixelClusterizer'),
+    destinations = cms.untracked.vstring('cout'),
+#    destinations = cms.untracked.vstring("log","cout"),
+    cout = cms.untracked.PSet(
+#       threshold = cms.untracked.string('INFO')
+#       threshold = cms.untracked.string('ERROR')
+        threshold = cms.untracked.string('WARNING')
+    )
+#    log = cms.untracked.PSet(
+#        threshold = cms.untracked.string('DEBUG')
+#    )
+)
+# get the files from DBS:
+process.source = cms.Source("PoolSource",
+  fileNames = cms.untracked.vstring(
+#    'file:digis_nodb.root'
+#    'file:digis.root'
+    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_75/digis/digis1.root'
+  )
+)
+
+# a service to use root histos (keep if the analyser is run at the end)
+process.TFileService = cms.Service("TFileService",
+    fileName = cms.string('histo.root')
+)
+
+# Local DB stuff 
+# LA 
+useLocalLA = True
+if useLocalLA :
+    process.LAReader = cms.ESSource("PoolDBESSource",
+     DBParameters = cms.PSet(
+         messageLevel = cms.untracked.int32(0),
+         authenticationPath = cms.untracked.string('')
+     ),
+     toGet = cms.VPSet(
+ 	 cms.PSet(
+# LA
+	record = cms.string("SiPixelLorentzAngleRcd"),
+        tag = cms.string("SiPixelLorentzAngle_phase1_mc_v1")
+# cabling
+#           record = cms.string('SiPixelFedCablingMapRcd'),
+#           tag = cms.string('SiPixelFedCablingMap_v17')
+# GenError
+#          record = cms.string('SiPixelGenErrorDBObjectRcd'),
+#          tag = cms.string('SiPixelGenErrorDBObject38Tv1')
+#          tag = cms.string('SiPixelGenErrorDBObject38TV10')
+#          tag = cms.string('SiPixelGenErrorDBObject38T_v0_mc1')
+#          tag = cms.string('SiPixelGenErrorDBObject_38T_v1_mc')
+ 		),
+ 	),
+      connect= cms.string('sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_phase1_mc_v1.db')
+    ) # end process
+
+    process.LAprefer = cms.ESPrefer("PoolDBESSource","LAReader")
+
+    process.LAWidthReader = cms.ESSource("PoolDBESSource",
+     DBParameters = cms.PSet(
+         messageLevel = cms.untracked.int32(0),
+         authenticationPath = cms.untracked.string('')
+     ),
+     toGet = cms.VPSet(
+       cms.PSet(
+	record = cms.string("SiPixelLorentzAngleRcd"),
+        label = cms.untracked.string("forWidth"),
+        tag = cms.string("SiPixelLorentzAngle_phase1_mc_v1")
+       ),
+     ),
+     connect= cms.string('sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_phase1_mc_v1.db')
+    ) # end process
+
+    process.LAWidthprefer = cms.ESPrefer("PoolDBESSource","LAWidthReader")
+
+# endif
+
+# Gain 
+useLocalGain = True
+if useLocalGain :
+  process.GainsReader = cms.ESSource("PoolDBESSource",
+    DBParameters = cms.PSet(
+       messageLevel = cms.untracked.int32(0),
+       authenticationPath = cms.untracked.string('')
+    ),
+    toGet = cms.VPSet(
+      cms.PSet(
+        record = cms.string('SiPixelGainCalibrationOfflineRcd'),
+        tag = cms.string('SiPixelGainCalibration_phase1_ideal')
+        #tag = cms.string('SiPixelGainCalibration_phase1_mc_v1')
+    )),
+    #connect = cms.string('sqlite_file:SiPixelGainCalibration_phase1_mc_v1.db')
+    connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_phase1_ideal.db')
+  ) # end process
+  process.Gainprefer = cms.ESPrefer("PoolDBESSource","GainsReader")
+# end if
+
+
+# SQ_LITE GenError
+#    process.DBReaderFrontier2 = cms.ESSource("PoolDBESSource",
+#     DBParameters = cms.PSet(
+#         messageLevel = cms.untracked.int32(0),
+#         authenticationPath = cms.untracked.string('')
+#     ),
+#     toGet = cms.VPSet(
+# 		cms.PSet(
+# 			record = cms.string("SiPixelGenErrorDBObjectRcd"),
+# 			tag = cms.string("SiPixelGenErrorDBObject38Tv1")
+# 			tag = cms.string("SiPixelGenErrorDBObject38TV10")
+# 		),
+# 	),
+#     connect = cms.string('sqlite_file:siPixelGenErrors38T.db')
+#   ) # end process
+
+ 
+
+process.o1 = cms.OutputModule("PoolOutputModule",
+          outputCommands = cms.untracked.vstring('drop *','keep *_*_*_RecHitTest'),
+          fileName = cms.untracked.string('file:rechits.root')
+#         fileName = cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_75/clus/clus1.root')
+)
+
+# My 
+# modify clusterie parameters
+#process.siPixelClusters.ClusterThreshold = 4000.0
+
+# DIRECT
+# direct clusterization (no raw step)
+# label of digis 
+process.siPixelClustersPreSplitting.src = 'simSiPixelDigis'
+#process.siPixelClustersPreSplitting.ClusterThreshold = 4000.
+# set to false to ignore the gain calibration
+#process.siPixelClustersPreSplitting.MissCalibrate = cms.untracked.bool(False)
+# force generic CPE to skip GenErrors. For parameters used by the producer us the producer process
+process.PixelCPEGenericESProducer.UseErrorsFromTemplates = cms.bool(False)
+process.PixelCPEGenericESProducer.LoadTemplatesFromDB = cms.bool(False)
+process.PixelCPEGenericESProducer.TruncatePixelCharge = cms.bool(False)
+#process.PixelCPEGenericESProducer.useLAAlignmentOffsets = cms.bool(True)
+#process.PixelCPEGenericESProducer.useLAWidthFromDB = cms.bool(True)
+#process.PixelCPEGenericESProducer.lAOffset = cms.double(0.098)
+#process.PixelCPEGenericESProducer.lAOffset = cms.double(0.09)
+#process.PixelCPEGenericESProducer.lAOffset = cms.double(0.0)
+#process.PixelCPEGenericESProducer.lAWidthBPix = cms.double(0.098)
+#process.PixelCPEGenericESProducer.lAWidthBPix = cms.double(0.0)
+#process.PixelCPEGenericESProducer.lAWidthFPix = cms.double(0.058)
+#process.PixelCPEGenericESProducer.lAWidthFPix = cms.double(0.0)
+
+# read rechits
+process.analysis = cms.EDAnalyzer("PixRecHitTest",
+    Verbosity = cms.untracked.bool(False),
+    src = cms.InputTag("siPixelRecHitsPreSplitting"),
+)
+
+#process.analysis = cms.EDAnalyzer("PixClusterTest",
+#    Verbosity = cms.untracked.bool(False),
+#    src = cms.InputTag("siPixelClusters"),
+#)
+
+# plus pixel clusters  (OK)
+#process.p1 = cms.Path(process.siPixelClustersPreSplitting)
+#process.p1 = cms.Path(process.pixeltrackerlocalreco)
+# plus pixel rechits (OK)
+process.p1 = cms.Path(process.pixeltrackerlocalreco*process.analysis)
+
+# RAW
+# clusterize through raw (OK)
+# for Raw2digi for simulations 
+#process.siPixelRawData.InputLabel = 'mix'
+#process.siPixelRawData.InputLabel = 'simSiPixelDigis'
+#process.siPixelDigis.InputLabel = 'siPixelRawData'
+#process.siStripDigis.ProductLabel = 'SiStripDigiToRaw'
+#process.siPixelClusters.src = 'siPixelDigis'
+
+#process.p1 = cms.Path(process.siPixelRawData)
+#process.p1 = cms.Path(process.siPixelRawData*process.siPixelDigis)
+#process.p1 = cms.Path(process.siPixelRawData*process.siPixelDigis*process.siPixelClusters*process.analysis)
+
+# for no output comment it out
+#process.outpath = cms.EndPath(process.o1)

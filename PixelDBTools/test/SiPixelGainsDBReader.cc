@@ -121,7 +121,7 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     }     
    
       
-     _deadfrac_m[detid]=0.;
+    _deadfrac_m[detid]=0.;
     _noisyfrac_m[detid]=0.;
 
     nmodules++;
@@ -141,33 +141,34 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
       // Barrel Z-index=1,8
       unsigned int zindex1 = tTopo->pxbModule(detIdObject);
 
+      if(layerC1==1 && ladderC1==1 && zindex1==1) select=true;
+      if(layerC1==2 && ladderC1==1 && zindex1==1) select=true;
+      if(layerC1==3 && ladderC1==1 && zindex1==1) select=true;
+      if(layerC1==4 && ladderC1==1 && zindex1==1) select=true;
       if(PRINT&&select) cout<<" Barrel layer, ladder, module "
 		    <<layerC1<<" "<<ladderC1<<" "<<zindex1<<endl;
 
       // Online 
-      PixelBarrelName pbn(detIdObject); // use det-id
-      //PixelBarrelName pbn(pxdetid); // or pixel det id 
-      PixelBarrelName::Shell sh = pbn.shell(); //enum
-      int sector = pbn.sectorName();
-      int ladder = pbn.ladderName();
-      int layer  = pbn.layerName();
-      int module = pbn.moduleName();
-      bool half  = pbn.isHalfModule();
-      string name= pbn.name();
-      PixelModuleName::ModuleType moduleType = pbn.moduleType();
+      //PixelBarrelName pbn(detIdObject); // use det-id
+      //PixelBarrelName::Shell sh = pbn.shell(); //enum
+      //int sector = pbn.sectorName();
+      //int ladder = pbn.ladderName();
+      //int layer  = pbn.layerName();
+      //int module = pbn.moduleName();
+      //bool half  = pbn.isHalfModule();
+      //string name= pbn.name();
+      //PixelModuleName::ModuleType moduleType = pbn.moduleType();
 
       // Shell { mO = 1, mI = 2 , pO =3 , pI =4 };
-      int shell = int(sh);
+      //int shell = int(sh);
       // change the module sign for z<0
-      if(shell==1 || shell==2) module = -module;
+      //if(shell==1 || shell==2) module = -module;
       // change ladeer sign for Outer )x<0)
-      if(shell==1 || shell==3) ladder = -ladder;
+      //if(shell==1 || shell==3) ladder = -ladder;
 
-
-      if(layer==1 && ladder==1 && module==1) select=true;
-
-      if(PRINT&&select) cout<<" shell "<<sh<<"("<<shell<<") "<<sector<<" "<<layer<<" "<<ladder<<" "
-                    <<module<<" "<<half<<" "<<name<<" "<<moduleType<<endl;
+      //if(layer==1 && ladder==1 && module==1) select=true;
+      //if(PRINT&&select) cout<<" shell "<<sh<<"("<<shell<<") "<<sector<<" "<<layer<<" "<<ladder<<" "
+      //            <<module<<" "<<half<<" "<<name<<" "<<moduleType<<endl;
 
     } else {  // endcaps
 
@@ -178,22 +179,25 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
       int side=tTopo->pxfSide(detIdObject); //size=1 for -z, 2 for +z
       int panel=tTopo->pxfPanel(detIdObject); //panel=1
 
+      if(disk==1 && blade==1 && side==1 && panel==1 && plaq==1 ) select=true;
+      if(disk==2 && blade==1 && side==1 && panel==1 && plaq==1 ) select=true;
+      if(disk==3 && blade==1 && side==1 && panel==1 && plaq==1 ) select=true;
       if(PRINT&&select) cout<<"endcap, size "<<side<<" disk "<<disk<<", blade "
 		    <<blade<<", panel "
 		    <<panel<<", plaq "<<plaq<<endl;
  
 
       // Convert to online 
-      PixelEndcapName pen(detIdObject); // use det-id
-      string nameF = pen.name();
-      int diskName = pen.diskName();
-      int bladeName = pen.bladeName();
-      int pannelName = pen.pannelName();
-      int plaquetteName = pen.plaquetteName();
-      PixelEndcapName::HalfCylinder part = pen.halfCylinder();
-      PixelModuleName::ModuleType moduleType = pen.moduleType();
-      if(PRINT&&select) cout<<nameF<<" "<<diskName<<" "<<bladeName<<" "<<pannelName<<" "
-		    <<plaquetteName<<" "<<part<<" "<<moduleType<<endl;
+      //PixelEndcapName pen(detIdObject); // use det-id
+      //string nameF = pen.name();
+      //int diskName = pen.diskName();
+      //int bladeName = pen.bladeName();
+      //int pannelName = pen.pannelName();
+      //int plaquetteName = pen.plaquetteName();
+      //PixelEndcapName::HalfCylinder part = pen.halfCylinder();
+      //PixelModuleName::ModuleType moduleType = pen.moduleType();
+      //if(PRINT&&select) cout<<nameF<<" "<<diskName<<" "<<bladeName<<" "<<pannelName<<" "
+      //	    <<plaquetteName<<" "<<part<<" "<<moduleType<<endl;
 
     }
 
@@ -238,7 +242,9 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 	 if (detIdObject.subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap))
 	   _TH1F_Pedestals_fpix->Fill(ped);
 
-	 if(PRINT && select) std::cout <<" DetId "<<detid<<" Col "<<col_iter<<" Row "<<row_iter<<" Ped "<<ped<<" Gain "<<gain<<std::endl;	 
+	 if(PRINT && select && (col_iter%10==0) && (row_iter%20==0) ) 
+	    std::cout <<" DetId "<<detid<<" Col "<<col_iter<<" Row "<<row_iter
+	    <<" Ped "<<ped<<" Gain "<<gain<<std::endl;	 
        }
     }
 
