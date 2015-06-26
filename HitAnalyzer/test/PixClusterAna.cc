@@ -5,6 +5,7 @@
 // Modify to work with CMSSW354, 11/03/10 d.k.
 // Modify to work with CMSSW620, SLC6, CMSSW700, 10/10/13 d.k.
 // Change to ByToken (clusters only)
+// not yet for 4 layers.
 //--------------------------------------------
 #include <memory>
 #include <string>
@@ -101,7 +102,7 @@ using namespace std;
 //#define L1
 #define HLT
 //#define HI
-//#define ROC_EFF
+#define ROC_EFF
 //#define Lumi
 //#define USE_RESYNCS  // get theinfo about recyncs 
 
@@ -109,8 +110,8 @@ using namespace std;
 //#define INSTLUMI_STUDIES
 //#define VDM_STUDIES
 
-//#define BX
-#define BX_NEW
+#define BX
+//#define BX_NEW
 
 
 //=======================================================================
@@ -251,6 +252,7 @@ int getBX::find(int bx) {
 #endif  // BX_NEW
 
 //=======================================================================
+
 #ifdef BX
 class getBX {
 
@@ -263,215 +265,234 @@ private:
   int limit;
   int trains;
   int train_start[40];
-  int train_stop[40];
-  int beam1_start[40];
-  int beam1_stop[40];
-  int beam2_start[40];
-  int beam2_stop[40];
+  //int train_stop[40];
+  //int beam1_start[40];
+  //int beam1_stop[40];
+  //int beam2_start[40];
+  //int beam2_stop[40];
 };
 
 getBX::getBX(void) {
-  limit=1841;
-  trains = 22;
   int count = 0;
-
-  // train 1
-  train_start[count] = 7;
-  train_stop[count] = 24;
-  beam1_start[count] = 1;
-  beam1_stop[count] = 5;
-  beam2_start[count] = 25;
-  beam2_stop[count] = 29;
-
-  // train 2
-  count++;
-  train_start[count] = 66;
-  train_stop[count] = 137;
-  beam1_start[count] = -1;
-  beam1_stop[count] = -1;
-  beam2_start[count] = -1;
-  beam2_stop[count] = -1;
-
-  // train 3
-  count++;
-  train_start[count] = 146;
-  train_stop[count] = 217;
-  beam1_start[count] = -1;
-  beam1_stop[count] = -1;
-  beam2_start[count] = -1;
-  beam2_stop[count] = -1;
-
-  // train 4
-  count++;
-  train_start[count] = 226;
-  train_stop[count] = 297;
-  beam1_start[count] = -1;
-  beam1_stop[count] = -1;
-  beam2_start[count] = -1;
-  beam2_stop[count] = -1;
-
-  // train 5
-  count++;
-  train_start[count] = 306;
-  train_stop[count] = 377;
-  beam1_start[count] = -1;
-  beam1_stop[count] = -1;
-  beam2_start[count] = -1;
-  beam2_stop[count] = -1;
-
-  // train 6
-  count++;
-  train_start[count] = 413;
-  train_stop[count] = 484;
-  beam1_start[count] = -1;
-  beam1_stop[count] = -1;
-  beam2_start[count] = -1;
-  beam2_stop[count] = -1;
-
-  // train 7
-  count++;
-  train_start[count] = 493;
-  train_stop[count] = 564;
-  beam1_start[count] = -1;
-  beam1_stop[count] = -1;
-  beam2_start[count] = -1;
-  beam2_stop[count] = -1;
-
-  // train 8
-  count++;
-  train_start[count] = 573;
-  train_stop[count] = 644;
-  beam1_start[count] = -1;
-  beam1_stop[count] = -1;
-  beam2_start[count] = -1;
-  beam2_stop[count] = -1;
-
-  // train 9
-  count++;
-  train_start[count] = 653;
-  train_stop[count] = 724;
-  beam1_start[count] = -1;
-  beam1_stop[count] = -1;
-  beam2_start[count] = -1;
-  beam2_stop[count] = -1;
-
-  // train 10
-  count++;
-  train_start[count] = 773;
-  train_stop[count] = 844;
-  beam1_start[count] = -1;
-  beam1_stop[count] = -1;
-  beam2_start[count] = -1;
-  beam2_stop[count] = -1;
+  limit=4000;
+  trains = 8;
+  train_start[count]=208;
+  ++count;
+  train_start[count]=308;
+  ++count;
+  train_start[count]=408;
+  ++count;
+  train_start[count]=508;
+  ++count;
+  train_start[count]=1993;
+  ++count;
+  train_start[count]=2093;
+  ++count;
+  train_start[count]=2193;
+  ++count;
+  train_start[count]=2293;
+  ++count;
 
 
-  // train 11
-  count++;
-  train_start[count] = 853;
-  train_stop[count] = 924;
-  beam1_start[count] = -1;
-  beam1_stop[count] = -1;
-  beam2_start[count] = -1;
-  beam2_stop[count] = -1;
+  // limit=1841;
+  // trains = 22;
+  // // train 1
+  // train_start[count] = 7;
+  // train_stop[count] = 24;
+  // beam1_start[count] = 1;
+  // beam1_stop[count] = 5;
+  // beam2_start[count] = 25;
+  // beam2_stop[count] = 29;
 
-  // train 12
-  count++;
-  train_start[count] = 960;
-  train_stop[count] = 1031;
-  beam1_start[count] = -1;
-  beam1_stop[count] = -1;
-  beam2_start[count] = -1;
-  beam2_stop[count] = -1;
+  // // train 2
+  // count++;
+  // train_start[count] = 66;
+  // train_stop[count] = 137;
+  // beam1_start[count] = -1;
+  // beam1_stop[count] = -1;
+  // beam2_start[count] = -1;
+  // beam2_stop[count] = -1;
 
-  // train 13
-  count++;
-  train_start[count] = 1040;
-  train_stop[count] = 1111;
-  beam1_start[count] = -1;
-  beam1_stop[count] = -1;
-  beam2_start[count] = -1;
-  beam2_stop[count] = -1;
+  // // train 3
+  // count++;
+  // train_start[count] = 146;
+  // train_stop[count] = 217;
+  // beam1_start[count] = -1;
+  // beam1_stop[count] = -1;
+  // beam2_start[count] = -1;
+  // beam2_stop[count] = -1;
 
-  // train 14
-  count++;
-  train_start[count] = 1120;
-  train_stop[count] = 1191;
-  beam1_start[count] = -1;
-  beam1_stop[count] = -1;
-  beam2_start[count] = -1;
-  beam2_stop[count] = -1;
+  // // train 4
+  // count++;
+  // train_start[count] = 226;
+  // train_stop[count] = 297;
+  // beam1_start[count] = -1;
+  // beam1_stop[count] = -1;
+  // beam2_start[count] = -1;
+  // beam2_stop[count] = -1;
 
-  // train 15
-  count++;
-  train_start[count] = 1200;
-  train_stop[count] = 1271;
-  beam1_start[count] = -1;
-  beam1_stop[count] = -1;
-  beam2_start[count] = -1;
-  beam2_stop[count] = -1;
+  // // train 5
+  // count++;
+  // train_start[count] = 306;
+  // train_stop[count] = 377;
+  // beam1_start[count] = -1;
+  // beam1_stop[count] = -1;
+  // beam2_start[count] = -1;
+  // beam2_stop[count] = -1;
 
-  // train 16
-  count++;
-  train_start[count] = 1307;
-  train_stop[count] = 1378;
-  beam1_start[count] = -1;
-  beam1_stop[count] = -1;
-  beam2_start[count] = -1;
-  beam2_stop[count] = -1;
+  // // train 6
+  // count++;
+  // train_start[count] = 413;
+  // train_stop[count] = 484;
+  // beam1_start[count] = -1;
+  // beam1_stop[count] = -1;
+  // beam2_start[count] = -1;
+  // beam2_stop[count] = -1;
 
-  // train 17
-  count++;
-  train_start[count] = 1387;
-  train_stop[count] = 1458;
-  beam1_start[count] = -1;
-  beam1_stop[count] = -1;
-  beam2_start[count] = -1;
-  beam2_stop[count] = -1;
+  // // train 7
+  // count++;
+  // train_start[count] = 493;
+  // train_stop[count] = 564;
+  // beam1_start[count] = -1;
+  // beam1_stop[count] = -1;
+  // beam2_start[count] = -1;
+  // beam2_stop[count] = -1;
 
-  // train 18
-  count++;
-  train_start[count] = 1467;
-  train_stop[count] = 1538;
-  beam1_start[count] = -1;
-  beam1_stop[count] = -1;
-  beam2_start[count] = -1;
-  beam2_stop[count] = -1;
+  // // train 8
+  // count++;
+  // train_start[count] = 573;
+  // train_stop[count] = 644;
+  // beam1_start[count] = -1;
+  // beam1_stop[count] = -1;
+  // beam2_start[count] = -1;
+  // beam2_stop[count] = -1;
 
-  // train 19
-  count++;
-  train_start[count] = 1547;
-  train_stop[count] = 1618;
-  beam1_start[count] = -1;
-  beam1_stop[count] = -1;
-  beam2_start[count] = -1;
-  beam2_stop[count] = -1;
+  // // train 9
+  // count++;
+  // train_start[count] = 653;
+  // train_stop[count] = 724;
+  // beam1_start[count] = -1;
+  // beam1_stop[count] = -1;
+  // beam2_start[count] = -1;
+  // beam2_stop[count] = -1;
 
-  // train 20
-  count++;
-  train_start[count] = 1667;
-  train_stop[count] = 1726;
-  beam1_start[count] = 1727;
-  beam1_stop[count] = 1734;
-  beam2_start[count] = 1655;
-  beam2_stop[count] = 1666;
+  // // train 10
+  // count++;
+  // train_start[count] = 773;
+  // train_stop[count] = 844;
+  // beam1_start[count] = -1;
+  // beam1_stop[count] = -1;
+  // beam2_start[count] = -1;
+  // beam2_stop[count] = -1;
 
-  // train 21
-  count++;
-  train_start[count] = 1735;
-  train_stop[count] = 1738;
-  beam1_start[count] = -1;
-  beam1_stop[count] = -1;
-  beam2_start[count] = -1;
-  beam2_stop[count] = -1;
 
-  // train 22
-  count++;
-  train_start[count] = 1747;
-  train_stop[count]  = 1806;
-  beam1_start[count] = 1807;
-  beam1_stop[count]  = 1818;
-  beam2_start[count] = 1739;
-  beam2_stop[count]  = 1745;
+  // // train 11
+  // count++;
+  // train_start[count] = 853;
+  // train_stop[count] = 924;
+  // beam1_start[count] = -1;
+  // beam1_stop[count] = -1;
+  // beam2_start[count] = -1;
+  // beam2_stop[count] = -1;
+
+  // // train 12
+  // count++;
+  // train_start[count] = 960;
+  // train_stop[count] = 1031;
+  // beam1_start[count] = -1;
+  // beam1_stop[count] = -1;
+  // beam2_start[count] = -1;
+  // beam2_stop[count] = -1;
+
+  // // train 13
+  // count++;
+  // train_start[count] = 1040;
+  // train_stop[count] = 1111;
+  // beam1_start[count] = -1;
+  // beam1_stop[count] = -1;
+  // beam2_start[count] = -1;
+  // beam2_stop[count] = -1;
+
+  // // train 14
+  // count++;
+  // train_start[count] = 1120;
+  // train_stop[count] = 1191;
+  // beam1_start[count] = -1;
+  // beam1_stop[count] = -1;
+  // beam2_start[count] = -1;
+  // beam2_stop[count] = -1;
+
+  // // train 15
+  // count++;
+  // train_start[count] = 1200;
+  // train_stop[count] = 1271;
+  // beam1_start[count] = -1;
+  // beam1_stop[count] = -1;
+  // beam2_start[count] = -1;
+  // beam2_stop[count] = -1;
+
+  // // train 16
+  // count++;
+  // train_start[count] = 1307;
+  // train_stop[count] = 1378;
+  // beam1_start[count] = -1;
+  // beam1_stop[count] = -1;
+  // beam2_start[count] = -1;
+  // beam2_stop[count] = -1;
+
+  // // train 17
+  // count++;
+  // train_start[count] = 1387;
+  // train_stop[count] = 1458;
+  // beam1_start[count] = -1;
+  // beam1_stop[count] = -1;
+  // beam2_start[count] = -1;
+  // beam2_stop[count] = -1;
+
+  // // train 18
+  // count++;
+  // train_start[count] = 1467;
+  // train_stop[count] = 1538;
+  // beam1_start[count] = -1;
+  // beam1_stop[count] = -1;
+  // beam2_start[count] = -1;
+  // beam2_stop[count] = -1;
+
+  // // train 19
+  // count++;
+  // train_start[count] = 1547;
+  // train_stop[count] = 1618;
+  // beam1_start[count] = -1;
+  // beam1_stop[count] = -1;
+  // beam2_start[count] = -1;
+  // beam2_stop[count] = -1;
+
+  // // train 20
+  // count++;
+  // train_start[count] = 1667;
+  // train_stop[count] = 1726;
+  // beam1_start[count] = 1727;
+  // beam1_stop[count] = 1734;
+  // beam2_start[count] = 1655;
+  // beam2_stop[count] = 1666;
+
+  // // train 21
+  // count++;
+  // train_start[count] = 1735;
+  // train_stop[count] = 1738;
+  // beam1_start[count] = -1;
+  // beam1_stop[count] = -1;
+  // beam2_start[count] = -1;
+  // beam2_stop[count] = -1;
+
+  // // train 22
+  // count++;
+  // train_start[count] = 1747;
+  // train_stop[count]  = 1806;
+  // beam1_start[count] = 1807;
+  // beam1_stop[count]  = 1818;
+  // beam2_start[count] = 1739;
+  // beam2_stop[count]  = 1745;
 
   cout<<" number of trains "<<trains<<" "<<limit<<endl;
 }
@@ -485,35 +506,45 @@ int getBX::find(int bx) {
   if(bx>limit) return (-1);
   //cout<<bx<<endl;
 
+  // simple lookup
   // Check collisions
   for(int train=0;train<trains;++train) {
     //cout<<bx<<" "<<train<<endl;
+    int b=train_start[train];
+    //cout<<bx<<" "<<train<<" "<<b<<endl;
+    if(bx == b) return (3);  // collision
+    else if(bx == (b+1)) return (4); // collision+1
+  }
+  
+  // // Check collisions
+  // for(int train=0;train<trains;++train) {
+  //   //cout<<bx<<" "<<train<<endl;
 
-    for(int b=train_start[train];b<=train_stop[train];b+=2) {
-      //cout<<bx<<" "<<train<<" "<<b<<endl;
-      if(bx == b) return (3);  // collision
-      else if(bx == (b+1)) return (4); // collision+1
-    }
+  //   for(int b=train_start[train];b<=train_stop[train];b+=2) {
+  //     //cout<<bx<<" "<<train<<" "<<b<<endl;
+  //     if(bx == b) return (3);  // collision
+  //     else if(bx == (b+1)) return (4); // collision+1
+  //   }
     
-    if(beam1_start[train]!= -1) {
-      for(int b=beam1_start[train];b<=beam1_stop[train];b+=2) {
-	//cout<<bx<<" "<<train<<" "<<b<<endl;
-	if(bx == b) return (1);  // beam1
-	else if(bx == (b+1)) return (5); // beam1+1
-      }
-    }
+  //   if(beam1_start[train]!= -1) {
+  //     for(int b=beam1_start[train];b<=beam1_stop[train];b+=2) {
+  // 	//cout<<bx<<" "<<train<<" "<<b<<endl;
+  // 	if(bx == b) return (1);  // beam1
+  // 	else if(bx == (b+1)) return (5); // beam1+1
+  //     }
+  //   }
  
-    if(beam2_start[train]!= -1) {
-      for(int b=beam2_start[train];b<=beam2_stop[train];b+=2) {
-	//cout<<bx<<" "<<train<<" "<<b<<endl;
-	if(bx == b) return (2);  // beam1
-	else if(bx == (b+1)) return (6); // beam1+1
-      }
-    }
+  //   if(beam2_start[train]!= -1) {
+  //     for(int b=beam2_start[train];b<=beam2_stop[train];b+=2) {
+  // 	//cout<<bx<<" "<<train<<" "<<b<<endl;
+  // 	if(bx == b) return (2);  // beam1
+  // 	else if(bx == (b+1)) return (6); // beam1+1
+  //     }
+  //   }
 
-  }  // loop trains
+  // }  // loop trains
  
-  //cout<<bx<<endl;
+  // //cout<<bx<<endl;
 
   return 0; // return no collision 
 }
@@ -868,6 +899,7 @@ class PixClusterAna : public edm::EDAnalyzer {
   TH2F *hDetMap1,  *hDetMap2,  *hDetMap3;    // all modules
   TH2F *hpDetMap1, *hpDetMap2, *hpDetMap3; // all modules
   TH2F *hsizeDetMap1, *hsizeDetMap2, *hsizeDetMap3;
+  TH2F *hpDetMapE1, *hpDetMapE2, *hpDetMapE3; // all modules
   //TH2F *hsizeXDetMap1, *hsizeXDetMap2, *hsizeXDetMap3;
   //TH2F *hsizeYDetMap1, *hsizeYDetMap2, *hsizeYDetMap3;
 
@@ -990,7 +1022,7 @@ void PixClusterAna::beginRun(const edm::EventSetup& iSetup) {
 
 // ------------ method called at the begining   ------------
 void PixClusterAna::beginJob() {
-  cout << "Initialize PixelClusterTest " <<endl;
+  cout << "Initialize PixClusterAna " <<endl;
 
   edm::Service<TFileService> fs;
 
@@ -1048,19 +1080,6 @@ void PixClusterAna::beginJob() {
   hpixPerDet34 = fs->make<TH1D>( "hpixPerDet34", "Pix per det l3 - ring 4",
 			    sizeH, lowH, highH);
 
-//   hpixPerDet100 = fs->make<TH1D>( "hpixPerDet100", "Pix per det",
-// 			    sizeH, lowH, highH);
-//   hpixPerDet101 = fs->make<TH1D>( "hpixPerDet101", "Pix per det",
-// 			    sizeH, lowH, highH);
-//   hpixPerDet102 = fs->make<TH1D>( "hpixPerDet102", "Pix per det",
-// 			    sizeH, lowH, highH);
-//   hpixPerDet103 = fs->make<TH1D>( "hpixPerDet103", "Pix per det",
-// 			    sizeH, lowH, highH);
-//   hpixPerDet104 = fs->make<TH1D>( "hpixPerDet104", "Pix per det",
-// 			    sizeH, lowH, highH);
-//   hpixPerDet105 = fs->make<TH1D>( "hpixPerDet105", "Pix per det",
-// 			    sizeH, lowH, highH);
-
   sizeH=1000;
   highH = 999.5;
   hpixPerLink1 = fs->make<TH1D>( "hpixPerLink1", "Pix per link l1",
@@ -1084,12 +1103,46 @@ void PixClusterAna::beginJob() {
   hclusPerLay3 = fs->make<TH1D>( "hclusPerLay3", "Clus per layer l3",
 			    sizeH, lowH, highH);
 
-  hclus = fs->make<TH1D>( "hclus", "Clus per event",
+  hclus = fs->make<TH1D>( "hclus", "Clus per event, after cut",
 			    sizeH, lowH, 5.*highH);
+  hclus2 = fs->make<TH1D>( "hclus2", "Clus per event - zoomed",
+			   1000, -0.5, 999.5);
   hclusBPix = fs->make<TH1D>( "hclusBPix", "Bpix Clus per event",
 			    sizeH, lowH, 4.*highH);
   hclusFPix = fs->make<TH1D>( "hclusFPix", "Fpix Clus per event",
 			    sizeH, lowH, 2.*highH);
+
+  sizeH=1000;
+#ifdef HI
+  highH = 19999.5;
+#else
+  highH = 4999.5;
+#endif
+
+  hclus5 = fs->make<TH1D>( "hclus5", "Clus per event, none edge",
+			   sizeH, lowH, highH);
+  //hclus3 = fs->make<TH1D>( "hclus3", "Clus per event",sizeH, lowH, highH);
+  //hclus4 = fs->make<TH1D>( "hclus4", "Clus per event",sizeH, lowH, highH);
+  //hclus6 = fs->make<TH1D>( "hclus6", "Clus per event",sizeH, lowH, highH);
+  //hclus7 = fs->make<TH1D>( "hclus7", "Clus per event",sizeH, lowH, highH);
+  //hclus8 = fs->make<TH1D>( "hclus8", "Clus per event",sizeH, lowH, highH);
+  //hclus9 = fs->make<TH1D>( "hclus9", "Clus per event",sizeH, lowH, highH);
+  //hclus10 = fs->make<TH1D>( "hclus10", "Clus per event",
+  //		    sizeH, lowH, highH);
+
+// #ifdef BX
+//   hclus30=fs->make<TH1D>("hclus30","Clus per event",sizeH, lowH, highH);
+//   hclus31=fs->make<TH1D>("hclus31","Clus per event",sizeH, lowH, highH);
+//   hclus32=fs->make<TH1D>("hclus32","Clus per event",sizeH, lowH, highH);
+//   hclus33=fs->make<TH1D>("hclus33","Clus per event",sizeH, lowH, highH);
+//   hclus34=fs->make<TH1D>("hclus34","Clus per event",sizeH, lowH, highH);
+//   hclus35=fs->make<TH1D>("hclus35","Clus per event",sizeH, lowH, highH);
+//   hclus36=fs->make<TH1D>("hclus36","Clus per event",sizeH, lowH, highH);
+//   hclus37=fs->make<TH1D>("hclus37","Clus per event",sizeH, lowH, highH);
+//   hclus38=fs->make<TH1D>("hclus38","Clus per event",sizeH, lowH, highH);
+//   hclus39=fs->make<TH1D>("hclus39","Clus per event",sizeH, lowH, highH);
+// #endif
+
 
 #ifdef HI
   highH = 3999.5;
@@ -1136,7 +1189,7 @@ void PixClusterAna::beginJob() {
   hpixPerLay3 = fs->make<TH1D>( "hpixPerLay3", "Pix per layer l3",
 				 sizeH, lowH, highH);
 
-  hdigis = fs->make<TH1D>( "hdigis", "All Digis in clus per event",
+  hdigis = fs->make<TH1D>( "hdigis", "All Digis in clus per event, after cut",
 				 sizeH, lowH, 5.*highH);
   hdigisB = fs->make<TH1D>( "hdigisB", "BPix Digis in clus per event",
 				 sizeH, lowH, 4.*highH);
@@ -1161,38 +1214,6 @@ void PixClusterAna::beginJob() {
 //   hdigis26 = fs->make<TH1D>("hdigis26","Digis",sizeH,lowH,4.*highH);
 //#endif
 
-  sizeH=1000;
-#ifdef HI
-  highH = 19999.5;
-#else
-  highH = 4999.5;
-#endif
-
-
-  hclus2 = fs->make<TH1D>( "hclus2", "Clus per event - zoomed",1000, -0.5, 999.5);
-  //hclus3 = fs->make<TH1D>( "hclus3", "Clus per event",sizeH, lowH, highH);
-  //hclus4 = fs->make<TH1D>( "hclus4", "Clus per event",sizeH, lowH, highH);
-  hclus5 = fs->make<TH1D>( "hclus5", "Clus per event",sizeH, lowH, highH);
-  //hclus6 = fs->make<TH1D>( "hclus6", "Clus per event",sizeH, lowH, highH);
-  //hclus7 = fs->make<TH1D>( "hclus7", "Clus per event",sizeH, lowH, highH);
-  //hclus8 = fs->make<TH1D>( "hclus8", "Clus per event",sizeH, lowH, highH);
-  //hclus9 = fs->make<TH1D>( "hclus9", "Clus per event",sizeH, lowH, highH);
-  //hclus10 = fs->make<TH1D>( "hclus10", "Clus per event",
-  //		    sizeH, lowH, highH);
-
-// #ifdef BX
-//   hclus30=fs->make<TH1D>("hclus30","Clus per event",sizeH, lowH, highH);
-//   hclus31=fs->make<TH1D>("hclus31","Clus per event",sizeH, lowH, highH);
-//   hclus32=fs->make<TH1D>("hclus32","Clus per event",sizeH, lowH, highH);
-//   hclus33=fs->make<TH1D>("hclus33","Clus per event",sizeH, lowH, highH);
-//   hclus34=fs->make<TH1D>("hclus34","Clus per event",sizeH, lowH, highH);
-//   hclus35=fs->make<TH1D>("hclus35","Clus per event",sizeH, lowH, highH);
-//   hclus36=fs->make<TH1D>("hclus36","Clus per event",sizeH, lowH, highH);
-//   hclus37=fs->make<TH1D>("hclus37","Clus per event",sizeH, lowH, highH);
-//   hclus38=fs->make<TH1D>("hclus38","Clus per event",sizeH, lowH, highH);
-//   hclus39=fs->make<TH1D>("hclus39","Clus per event",sizeH, lowH, highH);
-// #endif
-
   hdetsPerLay1 = fs->make<TH1D>( "hdetsPerLay1", "Full dets per layer l1",
 				 161, -0.5, 160.5);
   hdetsPerLay3 = fs->make<TH1D>( "hdetsPerLay3", "Full dets per layer l3",
@@ -1200,8 +1221,9 @@ void PixClusterAna::beginJob() {
   hdetsPerLay2 = fs->make<TH1D>( "hdetsPerLay2", "Full dets per layer l2",
 				 257, -0.5, 256.5);
 
-  hdets2 = fs->make<TH1D>("hdets2","Dets per event",2000, 0.5, 1999.5);
-  hdets = fs->make<TH1D>( "hdets","Dets per event",2000, -0.5, 1999.5);
+  hdets2 = fs->make<TH1D>("hdets2","Dets per event after cut",2000, -0.5, 1999.5);
+  hdets = fs->make<TH1D>( "hdets","Dets per event before cut",
+			  2000, -0.5, 1999.5);
   hmaxPixPerDet = fs->make<TH1D>( "hmaxPixPerDet","Max pixels per det",1000, -0.5, 999.5);
 
   sizeH= 400;
@@ -1212,24 +1234,6 @@ void PixClusterAna::beginJob() {
   hcharge3 = fs->make<TH1D>( "hcharge3", "Clu charge l3", sizeH, 0.,highH);
   hcharge4 = fs->make<TH1D>( "hcharge4", "Clu charge d1", sizeH, 0.,highH);
   hcharge5 = fs->make<TH1D>( "hcharge5", "Clu charge d2", sizeH, 0.,highH);
-  //hchargen = fs->make<TH1D>( "hchargen", "Clu charge", sizeH, 0.,highH);
-  //hchargen1 = fs->make<TH1D>( "hchargen1", "Clu charge", sizeH, 0.,highH);
-  //hchargen2 = fs->make<TH1D>( "hchargen2", "Clu charge", sizeH, 0.,highH);
-  //hchargen3 = fs->make<TH1D>( "hchargen3", "Clu charge", sizeH, 0.,highH);
-  //hchargen4 = fs->make<TH1D>( "hchargen4", "Clu charge", sizeH, 0.,highH);
-  //hchargen5 = fs->make<TH2D>( "hchargen5", "Clu charge-size", sizeH, 0.,highH,10,0.,10.);
-
-  //havCharge1 = fs->make<TH1D>( "havCharge1", "Clu charge l1", sizeH, 0.,2.*highH); //in ke
-  //havCharge2 = fs->make<TH1D>( "havCharge2", "Clu charge l2", sizeH, 0.,2.*highH);
-  //havCharge3 = fs->make<TH1D>( "havCharge3", "Clu charge l3", 110, 0.,1.1);
-  //havCharge4 = fs->make<TH1D>( "havCharge4", "Clu charge d1", sizeH, 0.,2.*highH);
-  //havCharge5 = fs->make<TH1D>( "havCharge5", "Clu charge d2", sizeH, 0.,2.*highH);
-  //havCharge6 = fs->make<TH1D>( "havCharge6", "Clu charge d2", sizeH, 0.,2.*highH);
-
-  //hcharge11 = fs->make<TH1D>( "hcharge11", "Clu charge l1", sizeH, 0.,highH);
-  //hcharge12 = fs->make<TH1D>( "hcharge12", "Clu charge l1", sizeH, 0.,highH);
-  //hcharge13 = fs->make<TH1D>( "hcharge13", "Clu charge l1", sizeH, 0.,highH);
-  //hcharge14 = fs->make<TH1D>( "hcharge14", "Clu charge l1", sizeH, 0.,highH);
 
 #if defined(BX) || defined(BX_NEW)
   hchargebx1 = fs->make<TH1D>( "hchargebx1", "Clu charge", 100, 0.,highH); //in ke
@@ -1262,20 +1266,6 @@ void PixClusterAna::beginJob() {
   hpixcharge3 = fs->make<TH1D>( "hpixcharge3", "Pix charge l3",sizeH, 0.,highH);
   hpixcharge4 = fs->make<TH1D>( "hpixcharge4", "Pix charge d1",sizeH, 0.,highH);
   hpixcharge5 = fs->make<TH1D>( "hpixcharge5", "Pix charge d2",sizeH, 0.,highH);
-  //hpixchargen = fs->make<TH1D>( "hpixchargen", "Pix charge",sizeH, 0.,highH);
-  //hpixchargen1 = fs->make<TH1D>( "hpixchargen1", "Pix charge",sizeH, 0.,highH);
-  //hpixchargen2 = fs->make<TH1D>( "hpixchargen2", "Pix charge",sizeH, 0.,highH);
- 
-  //hnpixcharge1 = fs->make<TH1D>( "hnpixcharge1", "Noise pix charge l1",sizeH, 0.,highH); 
-  //hnpixcharge2 = fs->make<TH1D>( "hnpixcharge2", "Noise pix charge l2",sizeH, 0.,highH);
-  //hnpixcharge3 = fs->make<TH1D>( "hnpixcharge3", "Noise pix charge l3",sizeH, 0.,highH);
- 
-  //hcols1 = fs->make<TH1D>( "hcols1", "Layer 1 cols", 500,-0.5,499.5);
-  //hcols2 = fs->make<TH1D>( "hcols2", "Layer 2 cols", 500,-0.5,499.5);
-  //hcols3 = fs->make<TH1D>( "hcols3", "Layer 3 cols", 500,-0.5,499.5);
-  //hrows1 = fs->make<TH1D>( "hrows1", "Layer 1 rows", 200,-0.5,199.5);
-  //hrows2 = fs->make<TH1D>( "hrows2", "Layer 2 rows", 200,-0.5,199.5);
-  //hrows3 = fs->make<TH1D>( "hrows3", "layer 3 rows", 200,-0.5,199.5);
 
   hpcols1 = fs->make<TH1D>( "hpcols1", "Layer 1 pix cols", 500,-0.5,499.5);
   hpcols2 = fs->make<TH1D>( "hpcols2", "Layer 2 pix cols", 500,-0.5,499.5);
@@ -1285,16 +1275,11 @@ void PixClusterAna::beginJob() {
   hprows2 = fs->make<TH1D>( "hprows2", "Layer 2 pix rows", 200,-0.5,199.5);
   hprows3 = fs->make<TH1D>( "hprows3", "layer 3 pix rows", 200,-0.5,199.5);
 
-
-
   sizeH=1000;
   highH = 999.5; // charge limit in kelec
   hsize1 = fs->make<TH1D>( "hsize1", "layer 1 clu size",sizeH,-0.5,highH);
   hsize2 = fs->make<TH1D>( "hsize2", "layer 2 clu size",sizeH,-0.5,highH);
   hsize3 = fs->make<TH1D>( "hsize3", "layer 3 clu size",sizeH,-0.5,highH);
-  //hsizen = fs->make<TH1D>( "hsizen", "clu size",sizeH,-0.5,highH);
-  //hsizen1 = fs->make<TH1D>( "hsizen1", "clu size",sizeH,-0.5,highH);
-  //hsizen2 = fs->make<TH1D>( "hsizen2", "clu size",sizeH,-0.5,highH);
 
   hsizex1 = fs->make<TH1D>( "hsizex1", "lay1 clu size in x",
 		      100,-0.5,99.5);
@@ -1382,32 +1367,55 @@ void PixClusterAna::beginJob() {
 #endif
 
   // dets hit per event
-  hDetsMap1 = fs->make<TH2F>("hDetsMap1"," ",9,-4.5,4.5,21,-10.5,10.5);
+  hDetsMap1 = fs->make<TH2F>("hDetsMap1"," hit modules per event",
+			     9,-4.5,4.5,21,-10.5,10.5);
   hDetsMap1->SetOption("colz");
-  hDetsMap2 = fs->make<TH2F>("hDetsMap2"," ",9,-4.5,4.5,33,-16.5,16.5);
+  hDetsMap2 = fs->make<TH2F>("hDetsMap2"," hit modules per event",
+			     9,-4.5,4.5,33,-16.5,16.5);
   hDetsMap2->SetOption("colz");
-  hDetsMap3 = fs->make<TH2F>("hDetsMap3"," ",9,-4.5,4.5,45,-22.5,22.5);
+  hDetsMap3 = fs->make<TH2F>("hDetsMap3"," hit modules per event",
+			     9,-4.5,4.5,45,-22.5,22.5);
   hDetsMap3->SetOption("colz");
   // clus per det
-  hDetMap1 = fs->make<TH2F>("hDetMap1"," ",9,-4.5,4.5,21,-10.5,10.5);
+  hDetMap1 = fs->make<TH2F>("hDetMap1"," clusters per event",
+			    9,-4.5,4.5,21,-10.5,10.5);
   hDetMap1->SetOption("colz");
-  hDetMap2 = fs->make<TH2F>("hDetMap2"," ",9,-4.5,4.5,33,-16.5,16.5);
+  hDetMap2 = fs->make<TH2F>("hDetMap2"," clusters per event",
+			    9,-4.5,4.5,33,-16.5,16.5);
   hDetMap2->SetOption("colz");
-  hDetMap3 = fs->make<TH2F>("hDetMap3"," ",9,-4.5,4.5,45,-22.5,22.5);
+  hDetMap3 = fs->make<TH2F>("hDetMap3"," clusters per event",
+			    9,-4.5,4.5,45,-22.5,22.5);
   hDetMap3->SetOption("colz");
   // pix per det
-  hpDetMap1 = fs->make<TH2F>("hpDetMap1"," ",9,-4.5,4.5,21,-10.5,10.5);
+  hpDetMap1 = fs->make<TH2F>("hpDetMap1"," pixels per event",
+			     9,-4.5,4.5,21,-10.5,10.5);
   hpDetMap1->SetOption("colz");
-  hpDetMap2 = fs->make<TH2F>("hpDetMap2"," ",9,-4.5,4.5,33,-16.5,16.5);
+  hpDetMap2 = fs->make<TH2F>("hpDetMap2"," pixels per event",
+			     9,-4.5,4.5,33,-16.5,16.5);
   hpDetMap2->SetOption("colz");
-  hpDetMap3 = fs->make<TH2F>("hpDetMap3"," ",9,-4.5,4.5,45,-22.5,22.5);
+  hpDetMap3 = fs->make<TH2F>("hpDetMap3"," pixels per event",
+			     9,-4.5,4.5,45,-22.5,22.5);
   hpDetMap3->SetOption("colz");
+  // for edge pixels 
+  hpDetMapE1 = fs->make<TH2F>("hpDetMapE1"," edge pixels per event",
+			     9,-4.5,4.5,21,-10.5,10.5);
+  hpDetMapE1->SetOption("colz");
+  hpDetMapE2 = fs->make<TH2F>("hpDetMapE2"," edge pixels per event",
+			     9,-4.5,4.5,33,-16.5,16.5);
+  hpDetMapE2->SetOption("colz");
+  hpDetMapE3 = fs->make<TH2F>("hpDetMapE3"," edge pixels per event",
+			     9,-4.5,4.5,45,-22.5,22.5);
+  hpDetMapE3->SetOption("colz");
 
-  hsizeDetMap1 = fs->make<TH2F>("hsizeDetMap1"," ",9,-4.5,4.5,21,-10.5,10.5);
+  // clu size per det
+  hsizeDetMap1 = fs->make<TH2F>("hsizeDetMap1"," cluster size",
+				9,-4.5,4.5,21,-10.5,10.5);
   hsizeDetMap1->SetOption("colz");
-  hsizeDetMap2 = fs->make<TH2F>("hsizeDetMap2"," ",9,-4.5,4.5,33,-16.5,16.5);
+  hsizeDetMap2 = fs->make<TH2F>("hsizeDetMap2"," cluster size",
+				9,-4.5,4.5,33,-16.5,16.5);
   hsizeDetMap2->SetOption("colz");
-  hsizeDetMap3 = fs->make<TH2F>("hsizeDetMap3"," ",9,-4.5,4.5,45,-22.5,22.5);
+  hsizeDetMap3 = fs->make<TH2F>("hsizeDetMap3"," cluster size",
+				9,-4.5,4.5,45,-22.5,22.5);
   hsizeDetMap3->SetOption("colz");
 
   //hsizeXDetMap1 = fs->make<TH2F>("hsizeXDetMap1"," ",9,-4.5,4.5,21,-10.5,10.5);
@@ -1424,28 +1432,30 @@ void PixClusterAna::beginJob() {
   //hsizeYDetMap3 = fs->make<TH2F>("hsizeYDetMap3"," ",9,-4.5,4.5,45,-22.5,22.5);
   //hsizeYDetMap3->SetOption("colz");
 
-  
-  hpixDetMap1 = fs->make<TH2F>( "hpixDetMap1", "pix det layer 1",
+  // pix in all dets (superimposed)
+  hpixDetMap1 = fs->make<TH2F>( "hpixDetMap1", "pix in det layer 1",
 		      416,0.,416.,160,0.,160.);
-  hpixDetMap2 = fs->make<TH2F>( "hpixDetMap2", "pix det layer 2",
+  hpixDetMap1->SetOption("colz");
+  hpixDetMap2 = fs->make<TH2F>( "hpixDetMap2", "pix in det layer 2",
 		      416,0.,416.,160,0.,160.);
-  hpixDetMap3 = fs->make<TH2F>( "hpixDetMap3", "pix det layer 3",
+  hpixDetMap2->SetOption("colz");
+  hpixDetMap3 = fs->make<TH2F>( "hpixDetMap3", "pix in det layer 3",
 		      416,0.,416.,160,0.,160.);
-
-  hcluDetMap1 = fs->make<TH2F>( "hcluDetMap1", "clu det layer 1",
+  hpixDetMap3->SetOption("colz");
+  // clus in all dets (superimposed)
+  hcluDetMap1 = fs->make<TH2F>( "hcluDetMap1", "clu in det layer 1",
 				416,0.,416.,160,0.,160.);
-  hcluDetMap2 = fs->make<TH2F>( "hcluDetMap2", "clu det layer 1",
+  hcluDetMap1->SetOption("colz");
+  hcluDetMap2 = fs->make<TH2F>( "hcluDetMap2", "clu in det layer 2",
 				416,0.,416.,160,0.,160.);
-  hcluDetMap3 = fs->make<TH2F>( "hcluDetMap3", "clu det layer 1",
+  hcluDetMap2->SetOption("colz");
+  hcluDetMap3 = fs->make<TH2F>( "hcluDetMap3", "clu in det layer 3",
 				416,0.,416.,160,0.,160.);
+  hcluDetMap3->SetOption("colz");
 
 
   // Special test hitos for inefficiency effects
   hpixDetMap10 = fs->make<TH2F>( "hpixDetMap10", "pix det layer 1",
-				 416,0.,416.,160,0.,160.);
-  hpixDetMap20 = fs->make<TH2F>( "hpixDetMap20", "pix det layer 2",
-				 416,0.,416.,160,0.,160.);
-  hpixDetMap30 = fs->make<TH2F>( "hpixDetMap30", "pix det layer 3",
 				 416,0.,416.,160,0.,160.);
   hpixDetMap11 = fs->make<TH2F>( "hpixDetMap11", "pix det layer 1",
 				 416,0.,416.,160,0.,160.);
@@ -1466,6 +1476,8 @@ void PixClusterAna::beginJob() {
   hpixDetMap19 = fs->make<TH2F>( "hpixDetMap19", "pix det layer 1",
 				  416,0.,416.,160,0.,160.);
 
+  hpixDetMap20 = fs->make<TH2F>( "hpixDetMap20", "pix det layer 2",
+				 416,0.,416.,160,0.,160.);
   hpixDetMap21 = fs->make<TH2F>( "hpixDetMap21", "pix det layer 2",
 				 416,0.,416.,160,0.,160.);
   hpixDetMap22 = fs->make<TH2F>( "hpixDetMap22", "pix det layer 2",
@@ -1485,6 +1497,8 @@ void PixClusterAna::beginJob() {
   hpixDetMap29 = fs->make<TH2F>( "hpixDetMap29", "pix det layer 2",
 				  416,0.,416.,160,0.,160.);
 
+  hpixDetMap30 = fs->make<TH2F>( "hpixDetMap30", "pix det layer 3",
+				 416,0.,416.,160,0.,160.);
   hpixDetMap31 = fs->make<TH2F>( "hpixDetMap31", "pix det layer 3",
 				 416,0.,416.,160,0.,160.);
   hpixDetMap32 = fs->make<TH2F>( "hpixDetMap32", "pix det layer 3",
@@ -1748,15 +1762,18 @@ void PixClusterAna::endJob(){
     norm = 1./float(countEvents);
   }
 
-  countLumi /= 1000.;
-  double c1=0, c2=0;
-  double c3 = hinst->GetMean();
-  if(c3>0.) {c1=sumClusters/c3; c2=sumPixels/c3;}
 
-  cout << " End PixelClusTest, events all/with hits=  " << countAllEvents<<"/"<<countEvents
+  cout << " End PixClusterAna, events all/with hits=  " << countAllEvents<<"/"<<countEvents
        <<" clus/pix per full event "<<sumClusters<<"/"<<sumPixels<<endl;
-  cout<<" Lumi = "<<countLumi<<" still the /10 bug? "<<"clu and pix per lumi unit"<<c1<<" "<<c2<<endl;
+  cout<<" 2D plots are rescaled by the number of full events "<<countEvents<<endl;
 
+  //countLumi /= 1000.;
+  //double c1=0, c2=0;
+  //double c3 = hinst->GetMean();
+  //if(c3>0.) {c1=sumClusters/c3; c2=sumPixels/c3;}
+  //cout<<" Lumi = "<<countLumi<<" still the /10 bug? "<<"clu and pix per lumi unit"<<c1<<" "<<c2<<endl;
+  
+  if(countEvents==0) return;
 
   //Divide the size histos
   hsizeDetMap1->Divide(hsizeDetMap1,hDetMap1,1.,1.);
@@ -1783,18 +1800,23 @@ void PixClusterAna::endJob(){
 #ifdef ROC_EFF
   // Do this only if there is enough statistics
   double clusPerROC = totClusters/15000.;
+  bool doFullAna = true;
   if( clusPerROC < 1000.) {
-    cout<<" The average number of clusters per ROC is too low to do teh ROF efficiency analysis "<<clusPerROC<<endl;
-    
-  } else { // do it
+    cout<<" The average number of clusters per ROC is too low to do the full ROC efficiency analysis "<<clusPerROC<<endl;
+    doFullAna=false;
+    //return;
+  } 
 
-    int deadRocs1 = 0, ineffRocs1=0,deadRocs2 = 0, ineffRocs2=0,deadRocs3 = 0, ineffRocs3=0 ;
+  int deadRocs1 = 0, ineffRocs1=0,deadRocs2 = 0, 
+    ineffRocs2=0,deadRocs3 = 0, ineffRocs3=0,
+    noisyRocs1=0,noisyRocs2 = 0, noisyRocs3=0;
+  
     const int ladders1[20] = {-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7,8,9,10};  
     const int ladders2[32] = {-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
     const int ladders3[44] = {-22,-21,-20,-19,-18,-17,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,
 			      1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22};
     const int modules[8] = {-4,-3,-2,-1,1,2,3,4};
-    const float effCut = 0.25;
+    const float effCut = 0.25, noiseCut=5.;
     float half1=1, half2=0;
     
     
@@ -1820,15 +1842,20 @@ void PixClusterAna::endJob(){
 	  }
 	} else if(tmp==0.) {
 	  deadRocs1++;
-	  cout<<" layer1, dead  roc "<<lad<<" "<<mod<<" "<<roc<<" - "<<count<<" "<<half1<<" "<<half2<<endl;
+	  if(doFullAna) 
+	    cout<<" layer1, dead  roc "<<lad<<" "<<mod<<" "<<roc<<" - "<<count<<" "<<half1<<" "<<half2<<endl;
 	} else {
 	  hcountInRoc1->Fill(tmp);
           float tmp1 = tmp/count;
           //cout<<" roc "<<roc<<" "<<tmp<<" "<<tmp1<<endl;
           hcountInRoc12->Fill(tmp1);
-	  if( abs(1.-tmp1)>effCut ) {
+	  if( (tmp1-1.)>noiseCut ) { // to many hits
+	    noisyRocs1++;
+	    cout<<"NOISY ROC, Layer 1: "<<tmp1<<"/"<<tmp<<" ladder "<<lad<<" module "<<mod<<" roc(false #) "<<roc<<endl;
+	    hbadMap1->Fill(float(mod),float(lad));
+ 	  } else if( doFullAna && ((1.-tmp1)>effCut )) {
 	    ineffRocs1++;
-	    cout<<"LOW-EFF/NOISY ROC, Layer 1: "<<tmp1<<"/"<<tmp<<" ladder "<<lad<<" module "<<mod<<" roc(false #) "<<roc<<endl;
+	    cout<<"LOW-EFF ROC, Layer 1: "<<tmp1<<"/"<<tmp<<" ladder "<<lad<<" module "<<mod<<" roc(false #) "<<roc<<endl;
 	    hbadMap1->Fill(float(mod),float(lad));
  	  }
         } //if
@@ -1856,15 +1883,20 @@ void PixClusterAna::endJob(){
 	  }
 	} else if(tmp==0.) {
 	  deadRocs2++;
-	  cout<<" layer2, dead  roc "<<lad<<" "<<mod<<" "<<roc<<" - "<<count<<" "<<half1<<" "<<half2<<endl;
+	  if(doFullAna) 
+	    cout<<" layer2, dead  roc "<<lad<<" "<<mod<<" "<<roc<<" - "<<count<<" "<<half1<<" "<<half2<<endl;
 	} else {
 	  hcountInRoc2->Fill(tmp);
           float tmp1 = tmp/count;
           //cout<<" roc "<<roc<<" "<<tmp<<" "<<tmp1<<endl;
           hcountInRoc22->Fill(tmp1);
-	  if( abs(1.-tmp1)>effCut ) {
+	  if( (tmp1-1.)>noiseCut ) {
+	    noisyRocs2++;
+	    cout<<"NOISY ROC, Layer 2: "<<tmp1<<"/"<<tmp<<" ladder "<<lad<<" module "<<mod<<" roc(false) "<<roc<<endl; 
+	    hbadMap2->Fill(float(mod),float(lad));
+	  } else if( doFullAna && ((1.-tmp1)>effCut) ) {
 	    ineffRocs2++;
-	    cout<<"LOW-EFF/NOISY ROC, Layer 2: "<<tmp1<<"/"<<tmp<<" ladder "<<lad<<" module "<<mod<<" roc(false) "<<roc<<endl; 
+	    cout<<"LOW-EFF ROC, Layer 2: "<<tmp1<<"/"<<tmp<<" ladder "<<lad<<" module "<<mod<<" roc(false) "<<roc<<endl; 
 	    hbadMap2->Fill(float(mod),float(lad));
 	  } 
         } //if
@@ -1890,15 +1922,21 @@ void PixClusterAna::endJob(){
 	  }
 	} else if(tmp==0.) {
 	  deadRocs3++;
-	  cout<<" layer3, dead  roc "<<lad<<" "<<mod<<" "<<roc<<" - "<<count<<" "<<half1<<" "<<half2<<endl;
+	  if(doFullAna) 
+	    cout<<" layer3, dead  roc "<<lad<<" "<<mod<<" "<<roc<<" - "<<count<<" "<<half1<<" "<<half2<<endl;
 	} else {
 	  hcountInRoc3->Fill(tmp);
           float tmp1 = tmp/count;
           //cout<<" roc "<<roc<<" "<<tmp<<" "<<tmp1<<endl;
           hcountInRoc32->Fill(tmp1);
-	  if( abs(1.-tmp1)>effCut ) {
+	  if( (tmp1-1.)>noiseCut ) {  // noisy
+	    noisyRocs3++;
+	    cout<<"NOISY ROC, Layer 3: "<<tmp1<<"/"<<tmp<<" ladder "<<lad<<" module "<<mod<<" roc(false) "<<roc<<endl; 
+	    hbadMap3->Fill(float(mod),float(lad));
+	  }
+	  if( doFullAna && ((1.-tmp1)>effCut )) {
 	    ineffRocs3++;
-	    cout<<"LOW-EFF/NOISY ROC, Layer 3: "<<tmp1<<"/"<<tmp<<" ladder "<<lad<<" module "<<mod<<" roc(false) "<<roc<<endl; 
+	    cout<<"LOW-EFF ROC, Layer 3: "<<tmp1<<"/"<<tmp<<" ladder "<<lad<<" module "<<mod<<" roc(false) "<<roc<<endl; 
 	    hbadMap3->Fill(float(mod),float(lad));
 	  }
         } //if
@@ -1906,8 +1944,9 @@ void PixClusterAna::endJob(){
     } // mod
   } // lad    
 
-  cout<<" Bad Rocs "<<deadRocs1<<" "<<deadRocs2<<" "<<deadRocs3<<", Inefficient Rocs "<<ineffRocs1<<" "<<ineffRocs2<<" "<<ineffRocs3<<endl;
-  } // if DO IT
+  cout<<" Bad Rocs "<<deadRocs1<<" "<<deadRocs2<<" "<<deadRocs3
+      <<", Inefficient Rocs "<<ineffRocs1<<" "<<ineffRocs2<<" "<<ineffRocs3<<" "
+      <<", Noisy Rocs "<<noisyRocs1<<" "<<noisyRocs2<<" "<<noisyRocs3<<endl;
 
 #endif // ROC_EFF
 
@@ -2186,18 +2225,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 	hlt1->Fill(float(i));
 
 // 	if (      TrigNames.triggerName(i) == "HLT_L1Tech_BSC_minBias") passHLT1=true;
-// 	else if  (TrigNames.triggerName(i) == "HLT_L1Tech_BSC_minBias_OR") passHLT2=true;
-// 	else if  (TrigNames.triggerName(i) == "HLT_L1_BptxXOR_BscMinBiasOR")
-// 	  passHLT3=true;
-// 	else if  (TrigNames.triggerName(i) == "HLT_L1Tech_BSC_halo_forPhysicsBackground") passHLT4=true;
-// 	//
-// 	//else if  (TrigNames.triggerName(i) == "HLT_L1_BPTX") passHLT5=true;
 // 	else if  (TrigNames.triggerName(i) == "HLT_L1_ZeroBias") passHLT5=true;
-// 	//else if  (TrigNames.triggerName(i) == "HLT_L1_BPTX_MinusOnly") passHLT5=true;
-// 	//else if  (TrigNames.triggerName(i) == "HLT_L1_BPTX_PlusOnly") passHLT5=true;
-// 	else if ((TrigNames.triggerName(i) == "HLT_MinBiasPixel_SingleTrac") ||
-// 		 (TrigNames.triggerName(i) == "HLT_MinBiasPixel_DoubleTrack") ||
-// 		 (TrigNames.triggerName(i) == "HLT_MinBiasPixel_DoubleIsoTrack5") )
 //	  passHLT5=true;
 
       } // if hlt
@@ -2537,6 +2565,8 @@ void PixClusterAna::analyze(const edm::Event& e,
       if(pixelsVec.size()>maxPixPerClu) maxPixPerClu = pixelsVec.size();
  
       for (unsigned int i = 0;  i < pixelsVec.size(); ++i) { // loop over pixels
+	//cout<<i;
+	bool isBig=false;
 	sumPixels++;
 	numberOfPixels++;
 	float pixx = pixelsVec[i].x; // index as float=iteger, row index
@@ -2544,46 +2574,45 @@ void PixClusterAna::analyze(const edm::Event& e,
 	float adc = (float(pixelsVec[i].adc)/1000.);
 #ifdef ROC_EFF
 	int roc = rocId(int(pixy),int(pixx));  // column, row
-#endif
+#endif	
 	//int chan = PixelChannelIdentifier::pixelToChannel(int(pixx),int(pixy));
 
 	bool bigInX = topol->isItBigPixelInX(int(pixx));
 	bool bigInY = topol->isItBigPixelInY(int(pixy));
-	if( !(bigInX || bigInY) ) numberOfNoneEdgePixels++;
-	
+	if( !(bigInX || bigInY) ) {numberOfNoneEdgePixels++;}
+	else {isBig=true;}
+
 #ifdef HISTOS
 	// Pixel histos
 	if (subid==1 && (selectEvent==-1 || countEvents==selectEvent)) {  // barrel
 	  if(layer==1) {
+
+	    //cout<<" module "<<layer<<" "<<ladder<<" "<<module<<" "
+	    //	<<pixx<<" "<<pixy<<endl;
+
 	    numOfPixPerDet1++;
 	    numOfPixPerLay1++;     
 	    //valid = valid || true;
 	    hpixcharge1->Fill(adc);
 	    hpixDetMap1->Fill(pixy,pixx);
 	    hpDetMap1->Fill(float(module),float(ladder));
+	    if(isBig) hpDetMapE1->Fill(float(module),float(ladder));
 	    //module1[int(pixx)][int(pixy)]++;
 	    
 	    hpcols1->Fill(pixy);
 	    hprows1->Fill(pixx);
 
-	    if     (ladder==-1 && module==-1) hpixDetMap10->Fill(pixy,pixx); // ineff
-	    //else if(ladder==-4 && module==-1) hpixDetMap11->Fill(pixy,pixx); // ineff
-	    //else if(ladder== 2 && module== 2) hpixDetMap12->Fill(pixy,pixx); // ineff
-	    else if(ladder== 2 && module== 8) hpixDetMap11->Fill(pixy,pixx); // roc ineff (1run)
-	    else if(ladder== 2 && module==-2) hpixDetMap12->Fill(pixy,pixx); // roc ineff (1 run)
-
-	    else if(ladder==-9 && module== 4) hpixDetMap13->Fill(pixy,pixx); // ineff
+	    if     (ladder== 7 && module==-2) hpixDetMap10->Fill(pixy,pixx); // NOISY Run2
+	    else if(ladder== 3 && module== 1) hpixDetMap11->Fill(pixy,pixx); // " 
+	    else if(ladder== 9 && module== 2) hpixDetMap12->Fill(pixy,pixx); // "
+	    else if(ladder==-9 && module== 4) hpixDetMap13->Fill(pixy,pixx); // ineff, SPOT
 	    else if(ladder==-8 && module==-4) hpixDetMap14->Fill(pixy,pixx); // bad al, ENE
-	    else if(ladder== 6 && module== 4) hpixDetMap15->Fill(pixy,pixx); // pix 0,0
+	    else if(ladder== 6 && module== 4) hpixDetMap15->Fill(pixy,pixx); // pix 0,0, dead col, 15
 	    else if(ladder== 9 && module== 4) hpixDetMap16->Fill(pixy,pixx); // gain low off
-	    else if(ladder==-3 && module==-3) hpixDetMap17->Fill(pixy,pixx); // bad col
+	    else if(ladder==-3 && module==-3) hpixDetMap17->Fill(pixy,pixx); // bad col, NOISY in 2015
 	    else if(ladder==-7 && module==-4) hpixDetMap18->Fill(pixy,pixx); // bad col
-	    else if(ladder==-5 && module==-4) hpixDetMap19->Fill(pixy,pixx); // low ROC eff (1 run)
+	    else if(ladder==-5 && module==-4) hpixDetMap19->Fill(pixy,pixx); // 
 	    
-	    //if(module1[int(pixx)][int(pixy)]>MAX_CUT) 
-	    //cout<<" module "<<layer<<" "<<ladder<<" "<<module<<" "
-	    //  <<pixx<<" "<<pixy<<" "<<module1[int(pixx)][int(pixy)]<<endl;
-
 	    if(pixx<80.) numOfPixPerLink11++;
 	    else numOfPixPerLink12++;
 
@@ -2609,8 +2638,6 @@ void PixClusterAna::analyze(const edm::Event& e,
 #endif
 
 
-
-
 #ifdef ROC_EFF
 	   pixEff->addPixel(1,ladder,module,roc);  // count pixels
 	   
@@ -2634,8 +2661,8 @@ void PixClusterAna::analyze(const edm::Event& e,
 	   //else if(ladder== 7 && module==-1 && roc== 8)  hrocHits1ls->Fill(float(lumiBlock),4);
 	   //else if(ladder== 2 && module== 1 && roc== 0)  hrocHits1ls->Fill(float(lumiBlock),5);
 	   // run 180250
-	   if     (ladder==-9 && module== 4 && roc== 12)  hrocHits1ls->Fill(float(lumiBlock),0);
-	   else if(ladder==-7 && module==-4 && roc==3)  hrocHits1ls->Fill(float(lumiBlock),1);
+	   if     (ladder==-9 && module== 4 && roc== 12) hrocHits1ls->Fill(float(lumiBlock),0);
+	   else if(ladder==-7 && module==-4 && roc==3)   hrocHits1ls->Fill(float(lumiBlock),1);
 	   else if(ladder==-5 && module==-4 && roc==11)  hrocHits1ls->Fill(float(lumiBlock),2);
 	   else if(ladder== 2 && module==-2 && roc== 1)  hrocHits1ls->Fill(float(lumiBlock),3);
 	   else if(ladder== 8 && module== 2 && roc== 1)  hrocHits1ls->Fill(float(lumiBlock),4);
@@ -2646,29 +2673,33 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 	    numOfPixPerDet2++;
 	    numOfPixPerLay2++;   
-
 	    
 	    hpcols2->Fill(pixy);
 	    hprows2->Fill(pixx);
+	    hpixcharge2->Fill(adc);
+	    hpixDetMap2->Fill(pixy,pixx);
+	    hpDetMap2->Fill(float(module),float(ladder));
+	    if(isBig) hpDetMapE2->Fill(float(module),float(ladder));
+	    //module2[int(pixx)][int(pixy)]++;
 
-	    if(ladder==-11 && module==-2) hpixDetMap20->Fill(pixy,pixx);      // ineff
-	    else if(ladder==-7 && module==-3)  hpixDetMap21->Fill(pixy,pixx); // ineff
-	    else if(ladder==-2  && module== 1) hpixDetMap22->Fill(pixy,pixx); // ineff
+ 	    hpixchar2->Fill(zPos,adc);
+	    hcharPixbx->Fill(bx,adc);
+	    hcharPixls->Fill(lumiBlock,adc);
+	    hcharPixLumi->Fill(instlumi,adc);
+
+	    if     (ladder== -4 && module==-4) hpixDetMap20->Fill(pixy,pixx); // noise 15 
+	    else if(ladder==  4 && module== 1) hpixDetMap21->Fill(pixy,pixx); // "
+	    else if(ladder== 12 && module== 1) hpixDetMap22->Fill(pixy,pixx); // "
 	    else if(ladder==-14 && module== 4) hpixDetMap23->Fill(pixy,pixx); // ineff
 	    else if(ladder==-14 && module== 1) hpixDetMap24->Fill(pixy,pixx); // bad al
 	    else if(ladder==-14 && module==-1) hpixDetMap25->Fill(pixy,pixx); // evn errors
-	    //else if(ladder== 14 && module== 2) hpixDetMap26->Fill(pixy,pixx); // gain cal poor eff
 	    else if(ladder== -4 && module== 4) hpixDetMap26->Fill(pixy,pixx); // bad dcol 
 	    else if(ladder== 6  && module==-2) hpixDetMap27->Fill(pixy,pixx); // bad dcol
-	    //else if(ladder==-4  && module== 2) hpixDetMap28->Fill(pixy,pixx); // pix0
-
 	    else if(ladder==-10 && module==-3) hpixDetMap28->Fill(pixy,pixx); // roc eff 1 run 
-	    else if(ladder== 14 && module== 3) hpixDetMap29->Fill(pixy,pixx); // "
-
+	    else if(ladder== 14 && module== 3) hpixDetMap29->Fill(pixy,pixx); // 
 
 	    if(pixx<80.) numOfPixPerLink21++;
 	    else numOfPixPerLink22++;
-
 
 #if defined(BX) || defined(BX_NEW)
 	   if(bxId>-1) {
@@ -2681,7 +2712,6 @@ void PixClusterAna::analyze(const edm::Event& e,
 	     else cout<<" wrong bx id "<<bxId<<endl;
 	   }
 #endif
-
 
 #ifdef ROC_EFF
 	    pixEff->addPixel(2,ladder,module,roc);
@@ -2713,15 +2743,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 	   //else if(ladder== 2 && module==1  && roc== 0)  hrocHits2ls->Fill(float(lumiBlock),3);
 #endif
 
-	    hpixcharge2->Fill(adc);
-	    hpixDetMap2->Fill(pixy,pixx);
-	    hpDetMap2->Fill(float(module),float(ladder));
-	    //module2[int(pixx)][int(pixy)]++;
 
-	    hpixchar2->Fill(zPos,adc);
-	    hcharPixbx->Fill(bx,adc);
-	    hcharPixls->Fill(lumiBlock,adc);
-	    hcharPixLumi->Fill(instlumi,adc);
 
 #ifdef VDM_STUDIES
 	    hcharPixls2->Fill(lumiBlock,adc);
@@ -2745,25 +2767,22 @@ void PixClusterAna::analyze(const edm::Event& e,
 	    hpixDetMap3->Fill(pixy,pixx);
 	    //if(ladder==l3ldr&&module==l3mod) hpixDetMap30->Fill(pixy,pixx,adc);
 	    hpDetMap3->Fill(float(module),float(ladder));
+	    if(isBig) hpDetMapE3->Fill(float(module),float(ladder));
 	    //module3[int(pixx)][int(pixy)]++;
 	    
 	    hpcols3->Fill(pixy);
 	    hprows3->Fill(pixx);
 
-	    if     (ladder== -5  && module==-4) hpixDetMap30->Fill(pixy,pixx); // ineff
-	    else if(ladder==  9  && module== 4) hpixDetMap31->Fill(pixy,pixx); // adr errors, NOR
-	    else if(ladder== 15  && module==-3) hpixDetMap32->Fill(pixy,pixx); // ineff
-	    else if(ladder== 17  && module==-4) hpixDetMap33->Fill(pixy,pixx); // ineff, NOR
-	    //else if(ladder== 6   && module== 4) hpixDetMap34->Fill(pixy,pixx); // gain ineff 
-	    //else if(ladder==-14  && module==-3) hpixDetMap35->Fill(pixy,pixx); // gain low slope 
-	    else if(ladder==-6   && module==-1) hpixDetMap34->Fill(pixy,pixx); // roc eff 1 run  
-	    else if(ladder==-13  && module== 4) hpixDetMap35->Fill(pixy,pixx); // " 
-	    else if(ladder== 14  && module==-4) hpixDetMap36->Fill(pixy,pixx); // ineff pixel alive
-	    else if(ladder==-6   && module== 2) hpixDetMap37->Fill(pixy,pixx); // E pattern 
-	    else if(ladder== 19  && module==-4) hpixDetMap38->Fill(pixy,pixx); // large thr.
-	    //else if(ladder==-8   && module==-1) hpixDetMap39->Fill(pixy,pixx); // large thr rms
-	    //else if(ladder== 11 && module== 1) hpixDetMap39->Fill(pixy,pixx); // old ROCs
-	    else if(ladder==-7 && module==-4) hpixDetMap39->Fill(pixy,pixx); // roc eff (1 run)
+	    if     (ladder==  4 && module==-3) hpixDetMap30->Fill(pixy,pixx); // nois 15
+	    else if(ladder== 11 && module==-1) hpixDetMap31->Fill(pixy,pixx); // "
+	    else if(ladder== 20 && module== 2) hpixDetMap32->Fill(pixy,pixx); // "
+	    else if(ladder== 15 && module== 2) hpixDetMap33->Fill(pixy,pixx); // "
+	    else if(ladder==-6  && module==-1) hpixDetMap34->Fill(pixy,pixx); // roc eff 1 run  
+	    else if(ladder==-13 && module== 4) hpixDetMap35->Fill(pixy,pixx); // " 
+	    else if(ladder== 14 && module==-4) hpixDetMap36->Fill(pixy,pixx); // ineff pixel alive
+	    else if(ladder==-6  && module== 2) hpixDetMap37->Fill(pixy,pixx); // E pattern 
+	    else if(ladder== 19 && module==-4) hpixDetMap38->Fill(pixy,pixx); // large thr.
+	    else if(ladder==-7  && module==-4) hpixDetMap39->Fill(pixy,pixx); //  
 
 	    hpixchar3->Fill(zPos,adc);
 	    hcharPixbx->Fill(bx,adc);

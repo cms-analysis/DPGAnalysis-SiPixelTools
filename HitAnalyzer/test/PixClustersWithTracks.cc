@@ -168,6 +168,8 @@ class PixClustersWithTracks : public edm::EDAnalyzer {
   TH2F *hbpixXY, *hfpixXY1,*hfpixXY2,*hfpixXY3,*hfpixXY4, *hzphi1,*hzphi2,*hzphi3;
   TH2F *htest,*htest2,*htest3;
 
+  TH1D *hProbabilityXY, *hProbabilityQ;
+
 #ifdef L1
   TH1D *hl1a, *hl1t, *hlt1;
 #endif
@@ -381,6 +383,9 @@ void PixClustersWithTracks::beginJob() {
   hPhi4 = fs->make<TH1D>( "hPhi4", "track phi 4",70,-3.5,3.5);
   hPhi5 = fs->make<TH1D>( "hPhi5", "track phi 5",70,-3.5,3.5);
   hPhi0 = fs->make<TH1D>( "hPhi0", "track phi 0",70,-3.5,3.5);
+
+  hProbabilityXY = fs->make<TH1D>( "hProbabilityXY", "hit probability XY",110,0.,1.1);
+  hProbabilityQ = fs->make<TH1D>( "hProbabilityQ", "hit probabaility Q",110,0.,1.1);
 
 #ifdef L1
   hl1a    = fs->make<TH1D>("hl1a",   "l1a",   128,-0.5,127.5);
@@ -946,10 +951,26 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
       //std::vector<SiPixelRecHit*> TrkComparison::getRecHitComponents(const TrackingRecHit* rechit){
 
       const SiPixelRecHit* hit = dynamic_cast<const SiPixelRecHit*>((*recHit)->hit());
-      //edm::Ref<edmNew::DetSetVector<SiStripCluster> ,SiStripCluster> cluster = hit->cluster();
-      // get the edm::Ref to the cluster
 
       if(hit) {
+
+	//if(hit->clusterProbability(0)>1.) {
+	  // cout<<hit->localPosition().x()<<" ";
+	  //cout<<hit->localPosition().y()<<" ";
+	// cout<<hit->localPositionError().xx()<<" ";
+	// cout<<hit->localPositionError().yy()<<" ";
+	//cout<<hit->clusterProbability(0)<<" ";  // XY
+	//cout<<hit->clusterProbability(1)<<" ";  // XY*Q 
+	//cout<<hit->clusterProbability(2)<<" ";  // Q
+	// cout<<hit->probabilityX()<<" ";
+	// cout<<hit->probabilityY()<<" ";
+	// cout<<hit->probabilityXY()<<" ";
+	// cout<<hit->probabilityQ()<<" ";
+	//cout<<endl;
+	//}
+	hProbabilityXY->Fill(hit->clusterProbability(0));
+	hProbabilityQ->Fill(hit->clusterProbability(2));
+
 
 #ifdef ALIGN_STUDIES
 	if(pt>1.) { // eliminate low pt tracks

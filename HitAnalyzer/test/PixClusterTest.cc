@@ -420,7 +420,7 @@ void PixClusterTest::beginJob() {
 // ------------ method called to at the end of the job  ------------
 void PixClusterTest::endJob(){
   sumClusters = sumClusters/float(countEvents);
-  cout << " End PixelClusTest, events all/with hits=  " << countAllEvents<<"/"<<countEvents<<" "
+  cout << " End PixClusterTest, events all/with hits=  " << countAllEvents<<"/"<<countEvents<<" "
        <<sumClusters<<" "<<printLocal<<endl;
 
 }

@@ -12,7 +12,7 @@
  Works with CMSSW_7
  New detector ID.
  Modified to use "byToken"
-
+ Modify for 4 layers.
 */
 //
 // Original Author:  d.k.
@@ -156,7 +156,7 @@ private:
     * hpixMapNoise; 
 
   TH1F *hevent, *hlumi, *horbit, *hbx0, *hlumi0, *hlumi1,*hbx1,*hbx2,*hbx3,*hbx4,*hbx5,*hbx6;
-  TH1F *hdets, *hdigis, *hdigis1, *hdigis2,*hdigis3,*hdigis4,*hdigis5; 
+  TH1F *hdets, *hdigis, *hdigis0, *hdigis1, *hdigis2,*hdigis3,*hdigis4,*hdigis5; 
 
 #endif
 
@@ -366,12 +366,16 @@ void PixDigisTest::beginJob() {
   hbx0    = fs->make<TH1F>("hbx0",   "bx",   4000,0,4000.);  
 
   hdets  = fs->make<TH1F>( "hdets",  "Dets with hits", 2000, -0.5, 1999.5);
-  hdigis = fs->make<TH1F>( "hdigis", "All Digis", 2000, -0.5, 1999.5);
-  hdigis1 = fs->make<TH1F>( "hdigis1", "All Digis for full events", 2000, -0.5, 1999.5);
-  hdigis2 = fs->make<TH1F>( "hdigis2", "BPix Digis", 2000, -0.5, 1999.5);
-  hdigis3 = fs->make<TH1F>( "hdigis3", "Fpix Digis", 2000, -0.5, 1999.5);
-  hdigis4 = fs->make<TH1F>( "hdigis4", "All Digis - on bunch", 2000, -0.5, 1999.5);
-  hdigis5 = fs->make<TH1F>( "hdigis5", "All Digis - off bunch ", 2000, -0.5, 1999.5);
+  const int sizeH=20000;
+  const float lowH = -0.5;
+  const float highH = 99999.5;
+  hdigis  = fs->make<TH1F>( "hdigis", "All Digis", sizeH, lowH, highH);
+  hdigis0 = fs->make<TH1F>( "hdigis0", "All Digis zoomed", 2000, lowH, 1999.5);
+  hdigis1 = fs->make<TH1F>( "hdigis1", "All Digis for full events", sizeH, lowH, highH);
+  hdigis2 = fs->make<TH1F>( "hdigis2", "BPix Digis", sizeH, lowH, highH);
+  hdigis3 = fs->make<TH1F>( "hdigis3", "Fpix Digis", sizeH, lowH, highH);
+  hdigis4 = fs->make<TH1F>( "hdigis4", "All Digis - on bunch", sizeH, lowH, highH);
+  hdigis5 = fs->make<TH1F>( "hdigis5", "All Digis - off bunch ", sizeH, lowH, highH);
 #endif
 
 }
@@ -828,6 +832,7 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	 <<" total digis = "<<totalNumOfDigis<<endl;
   hdets->Fill(float(numberOfDetUnits));
   hdigis->Fill(float(totalNumOfDigis));
+  hdigis0->Fill(float(totalNumOfDigis));
 
   if(numberOfDetUnits>0) {
     hevent->Fill(float(event));

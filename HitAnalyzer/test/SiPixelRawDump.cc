@@ -549,8 +549,8 @@ private:
     *hfed2DErrors6ls,*hfed2DErrors7ls,*hfed2DErrors8ls,*hfed2DErrors9ls,*hfed2DErrors10ls,*hfed2DErrors11ls,*hfed2DErrors12ls,
     *hfed2DErrors13ls,*hfed2DErrors14ls,*hfed2DErrors15ls,*hfed2DErrors16ls;
 
-  TH1D *hevent, *hlumi, *horbit, *hbx, *hlumi0, *hbx0;
-  //TH1D *hbx1,*hbx2,*hbx3,*hbx4,*hbx5,*hbx6,*hbx7,*hbx8,*hbx9,*hbx10,*hbx11,*hbx12; 
+  TH1D *hevent, *hlumi, *horbit, *hbx, *hlumi0, *hbx0, *hbx1;
+  //TH1D *hbx2,*hbx3,*hbx4,*hbx5,*hbx6,*hbx7,*hbx8,*hbx9,*hbx10,*hbx11,*hbx12; 
   TProfile *htotPixelsls, *hsizels, *herrorType1ls, *herrorType2ls, *havsizels, *htotPixelsbx, 
     *herrorType1bx,*herrorType2bx,*havsizebx,*hsizep;
   TProfile *herror1ls,*herror2ls,*herror3ls,*herror4ls,*herror5ls,*herror6ls,*herror7ls,*herror8ls,
@@ -768,10 +768,10 @@ void SiPixelRawDump::beginJob() {
   hlumi  = fs->make<TH1D>("hlumi", "lumi", 3000,0,3000.);
   hlumi0  = fs->make<TH1D>("hlumi0", "lumi", 3000,0,3000.);
  
-  hbx    = fs->make<TH1D>("hbx",   "bx",   4000,0,4000.);  
-  hbx0    = fs->make<TH1D>("hbx0",   "bx",   4000,0,4000.);  
+  hbx    = fs->make<TH1D>("hbx",   "bx all",   4000,0,4000.);  
+  hbx0    = fs->make<TH1D>("hbx0",   "bx with hits",   4000,0,4000.);  
+  hbx1    = fs->make<TH1D>("hbx1",   "bx pixels",   4000,0,4000.);  
 
-//   hbx1    = fs->make<TH1D>("hbx1",   "bx",   4000,0,4000.);  
 //   hbx2    = fs->make<TH1D>("hbx2",   "bx",   4000,0,4000.);  
 //   hbx3    = fs->make<TH1D>("hbx3",   "bx",   4000,0,4000.);  
 //   hbx4    = fs->make<TH1D>("hbx4",   "bx",   4000,0,4000.);  
@@ -1065,7 +1065,8 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
     unsigned int bxid = 0;
     eventId = MyDecode::header(*header, fedId, printHeaders, bxid);
     //if(fedId = fedIds.first) 
-    //if(bx != int(bxid) ) cout<<" Inconsistent BX: from event "<<bx<<" from FED "<<bxid<<endl;
+    if(bx != int(bxid) ) cout<<" Inconsistent BX: from event "<<bx<<" from FED "<<bxid<<endl;
+    hbx1->Fill(float(bxid));
 
 
     const Word64* trailer = reinterpret_cast<const Word64* >(rawData.data())+(nWords-1);
