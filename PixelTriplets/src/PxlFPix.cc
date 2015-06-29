@@ -105,6 +105,8 @@
 #include "CondFormats/SiPixelObjects/interface/SiPixelLorentzAngle.h"
 #include "CondFormats/DataRecord/interface/SiPixelLorentzAngleRcd.h"
 
+#include "SimpleHelix.h"
+
 // Flag for new tracking rechis, has to be ON for pre7 and later   
 #define NEW_TRACKINGRECHITS  // For V71X_pre7 and later 
 
@@ -147,24 +149,33 @@ private:
   double xmodule;
 
   double residual;
-  double residual_x;
-  double residual_y;
-  double residual_z;
-  double x_local_error;
-  double y_local_error;
-  double residual_c;
+  double residual_x = -999;
+  double residual_y = -999;
+  double residual_z = -999;
+  double x_local_error = -999;
+  double y_local_error = -999;;
 
-  double resid_disk1;
-  double resid_disk2;
+  double resid_disk1 = -999;
+  double resid_disk2 = -999;
+  double residual_refit = -999;
 
-  double residual_refit;
+  double final_pt = -999;
+  double final_p = -999;
+  double final_phi = -999;
+  double final_eta = -999;
+  int run_num = -999;
+  int lumi_block = -999;
 
-  double final_pt;
-  double final_p;
-  double final_phi;
-  double final_eta;
-  int run_num;
-  int lumi_block;
+  int Pass = -99;
+  int nloops = -99;
+  int insideN = -99;
+  double radius = -99;
+  double xcenter = -99;
+  double ycenter = -99;
+  double dzdphi = -99;
+  double z0 = -99;
+  double rho = -99;
+
 };
 
 class myCountersF{
@@ -242,6 +253,17 @@ void PxlFPix::beginJob()
   outtree->Branch("xblade",&xblade,"xblade/D");
   outtree->Branch("xpanel",&xpanel,"xpanel/D");
   outtree->Branch("xmodule",&xmodule,"xmodule/D");
+
+  outtree->Branch("Pass",&Pass,"Pass/I");
+  outtree->Branch("nloops",&nloops,"nloops/I");
+  outtree->Branch("insideN",&insideN,"insideN/I");
+
+  outtree->Branch("radius",&radius,"radius/D");
+  outtree->Branch("xcenter",&xcenter,"xcenter/D");
+  outtree->Branch("ycenter",&ycenter,"ycenter/D");
+  outtree->Branch("dzdphi",&dzdphi,"dzdphi/D");
+  outtree->Branch("z0",&z0,"z0/D");
+  outtree->Branch("rho",&rho,"rho/D");
 }
 
 //----------------------------------------------------------------------
@@ -623,7 +645,8 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     //double tt = tan(tet);
     
     double rinv = -kap; // Karimaki                                           
-    double rho = 1/kap;
+    //double rho = 1/kap;
+    rho = 1/kap;  
     double erd = 1.0 - kap*dca;
     double drd = dca * ( 0.5*kap*dca - 1.0 ); // 0.5 * kap * dca**2 - dca;
     double hkk = 0.5*kap*kap;
@@ -804,6 +827,11 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     double vPXB3 = 0;
     double ePXB3 = 0;
     double fPXB3 = 0;
+
+    double P3x = 0;
+    double P3y = 0;
+    double P3z = 0;
+    
 
     int n1 = 0;
     int n2 = 0;
@@ -1188,29 +1216,6 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
           else if( ilad == 15 ) halfmod = 1;
           else if( ilad == 16 ) halfmod = 1;
         }// BPIX1
-	else if( ilay == 2 ) {
-	  
-	  n1++;
-	  xPXB1 = gX;
-	  yPXB1 = gY;
-	  zPXB1 = gZ;
-	  uPXB1 = xloc;
-	  vPXB1 = yloc;
-	  ePXB1 = sqrt( vxloc );
-	  fPXB1 = sqrt( vyloc );
-	  phiN1 = phiN;
-	  clch1 = clch;
-	  ncol1 = ncol;
-	  nrow1 = nrow;
-	  etaX1 = etaX;
-	  cogp1 = cogp;
-	
-	  if(      ilad ==  8 ) halfmod = 1; // was ilad == 5, 6, 15, 16 like ilay == 1 but changed to match bpix - not sure if relevant for layer or hit
-	  else if( ilad ==  9 ) halfmod = 1;
-	  else if( ilad == 24 ) halfmod = 1;
-	  else if( ilad == 25 ) halfmod = 1;
-	}// BPIX2
-	
 
 	// track impact parameter to beam:
 	// my crossings:	
@@ -1296,7 +1301,7 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	}//PXF2
 	
       }//PXF
-      
+
     }//loop rechits
   
     //if( pt < 0.75 ) continue;// curls up
@@ -1518,6 +1523,7 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	    xpz2_l=lZ;
 	  }// disk 2
 	  
+
 	}// endcaps
 	
 	
@@ -1830,24 +1836,56 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 	x_ideal=rho*cos(theta_ideal)+x0;
 	y_ideal=rho*sin(theta_ideal)+y0;
-	
+
+	// ==================================================
+	//      Helix Method
+	// =================================================
+
+	// create helix
+	std::vector<double> p1 = {xPXB1, yPXB1, zPXB1};
+	std::vector<double> p3 = {xPXB3, yPXB3, zPXB3};
+
+	// Fit the helix first with two points and the track curvature
+	SimpleHelix Hel = SimpleHelix(p1, p3, fabs(rho), &Pass);
+
+	// Information for detector plane
+	double x_0 = det2->position().x();
+	double y_0 = det2->position().y();
+	double z_0 = det2->position().z();
+
+	double nX = det2->surface().normalVector().x();
+	double nY = det2->surface().normalVector().y();
+	double nZ = det2->surface().normalVector().z();
+
+	//std::cout<<" normal vector : "<< nX << "  ,  " << nY << " , " << nZ <<std::endl;
+	//std::cout<<" position      : "<< x_0<< "  ,  " <<y_0 << " , " << z_0<<std::endl;
+
+	std::vector<double> plane = {x_0, y_0, z_0, nX, nY, nZ};
+	std::vector<double> intersection = {};
+
+	// Find the intersection of the detector plane and helix
+	nloops = Hel.SimpleHelix::pposdir(plane, intersection);
+
+	std::vector<double> p2 = {intersection[0],intersection[1],intersection[2]};
+	Surface::GlobalPoint EstimatedPoint(intersection[0],intersection[1],intersection[2]);
+	Surface::LocalPoint LocalEstimate = det2->toLocal(EstimatedPoint);
+
+	insideN = det2->surface().bounds().inside(LocalEstimate);
 	
 
-	//if (!(((x_ideal-x0)/(xPXB2-x0)>0)&&((y_ideal-y0)/(yPXB2-y0)>0))) continue; 
-	//	       
-	//	                    x_ideal=-rho*cos(theta_ideal)+x0;
-	//	                    y_ideal=-rho*sin(theta_ideal)+y0;
-	//                 }
-	//              cout<<"theta_ideal0="<<theta_ideal0<<"   theta_ideal="<<theta_ideal<<endl;                   
-	
-	//               cout<<"x_ideal="<<x_ideal<<"   y_ideal="<<y_ideal<<endl;
-	
+	// Use the intersection to create a new helix without the curvature
+	Hel.SimpleHelix::parameters(radius, xcenter, ycenter, dzdphi, z0);
+
+	xl_ideal = LocalEstimate.x();
+	yl_ideal = LocalEstimate.y();
+	zl_ideal = LocalEstimate.z();
+
 	Surface::GlobalPoint gp_ideal( x_ideal, y_ideal, uz2 );
 	Surface::LocalPoint lp_ideal = det2->toLocal( gp_ideal );
 	
-	xl_ideal= lp_ideal.x();
-	yl_ideal= lp_ideal.y();
-	zl_ideal= lp_ideal.z();
+	//xl_ideal= lp_ideal.x();
+	//yl_ideal= lp_ideal.y();
+	//zl_ideal= lp_ideal.z();
 
 	x_local_error=ePXB2*1E4;
 	y_local_error=fPXB2*1E4;
