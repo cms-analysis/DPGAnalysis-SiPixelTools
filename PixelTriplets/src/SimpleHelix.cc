@@ -18,12 +18,8 @@
 #include <math.h>
 #include <vector>
 #include <assert.h>
-//#ifndef SI_PIXEL_TEMPLATE_STANDALONE
-// put CMSSW location of SimpleHelix.h here
-//#include "CondFormats/SiPixelObjects/interface/SimpleHelix.h"
-//#else
+#include <iostream>
 #include "SimpleHelix.h"
-//#endif
 
 // ******************************************************************
 //! Simple Constructor
@@ -111,7 +107,9 @@ SimpleHelix::SimpleHelix(std::vector<double> p1, std::vector<double> p2, std::ve
 	 
 // Check sizes of input vectors
 
-   int n3p = 0; int n2p = 0; std::vector<double> *p3p1, *p3p2; double *phip1, *phip2;
+   int n3p = 0; int n2p = 0; 
+   std::vector<double> *p3p1 = 0, *p3p2 = 0; 
+   double *phip1=0, *phip2=0;
    
    if(p1.size() == 3) {
       ++n3p; p3p1 = &p1; phip1 = &phi1_;
@@ -187,8 +185,9 @@ SimpleHelix::SimpleHelix(std::vector<double> p1, std::vector<double> p2, std::ve
    } else {
    
 // If only 2 3-d points, connect the z-dots
-      
-      double z1 = (*p3p1)[2]; double z2 = (*p3p2)[2];
+     if( p3p1->size()<3) std::cout<<" Error: p3p1 too small "<<std::endl; 
+     if( p3p2->size()<3) std::cout<<" Error: p3p2 too small "<<std::endl; 
+     double z1 = (*p3p1)[2]; double z2 = (*p3p2)[2];
    
       if(fabs((*phip2) - (*phip1)) > 1.e-15) {
      

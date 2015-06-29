@@ -309,7 +309,7 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   const double wt = 180/pi;
   const double twopi = 2*pi;
   const double pihalf = 2*atan(1);
-  const double sqrtpihalf = sqrt(pihalf);
+  //const double sqrtpihalf = sqrt(pihalf);
   
   myCountersF::neve++;
   
@@ -345,14 +345,14 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   iEvent.getByLabel( "offlineBeamSpot", rbs );
   
   XYZPoint bsP = XYZPoint(0,0,0);        // beam spot point
-  int ibs = 0;                           // boolean for valid beam spot point
+  //int ibs = 0;                           // boolean for valid beam spot point
   
   if( rbs.failedToGet() ) return;
   if( ! rbs.isValid() ) return;
-  ibs = 1;
+  //ibs = 1;
   bsP = XYZPoint( rbs->x0(), rbs->y0(), rbs->z0() );
-  double bx = rbs->BeamWidthX();
-  double by = rbs->BeamWidthY();
+  //double bx = rbs->BeamWidthX();
+  //double by = rbs->BeamWidthY();
   if( idbg ){
     cout << "beam spot x " << rbs->x0();
     cout << ", y " << rbs->y0();
@@ -365,7 +365,7 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   iEvent.getByLabel( "offlinePrimaryVertices", vertices );
   if( vertices.failedToGet() ) return;
   if( !vertices.isValid() ) return;
-  int nvertex = vertices->size();
+  //int nvertex = vertices->size();
 
   // need vertex global point for tracks
   // from #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
@@ -376,22 +376,22 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   //XYZPoint vtxN = XYZPoint(0,0,0);    // Not sure of the purpose for vtxN
   XYZPoint vtxP = XYZPoint(0,0,0);    //
   
-  double bestNdof = 0;
-  double maxSumPt = 0;
+  //double bestNdof = 0;
+  //double maxSumPt = 0;
   Vertex bestPvx;
   
-  double xBS = 0;                     
-  double yBS = 0;
+  //double xBS = 0;                     
+  //double yBS = 0;
   // If valid beam spot set beam spot to point
-  if( ibs ) {                        
-    xBS = bsP.x();
-    yBS = bsP.y();
-  }
-  // otherwise set the beam spot to (0,0)
-  else {
-    xBS = vtxP.x();
-    yBS = vtxP.y();
-  }
+  // if( ibs ) {                        
+  //   xBS = bsP.x();
+  //   yBS = bsP.y();
+  // }
+  // // otherwise set the beam spot to (0,0)
+  // else {
+  //   xBS = vtxP.x();
+  //   yBS = vtxP.y();
+  // }
   
   //--------------------------------------------------------------------
   // MET:
@@ -588,7 +588,7 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     sumpt += pt;
     sumq += iTrack->charge();
     
-    double logpt = log(pt) / log(10);
+    //double logpt = log(pt) / log(10);
     
     const reco::HitPattern& hp = iTrack->hitPattern();
     
@@ -613,29 +613,29 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     //double dca = -iTrack->dxy(); // dxy = -d0                               
     double dip = iTrack->lambda();
     double z0  = iTrack->dz();
-    double tet = pihalf - dip;
+    //double tet = pihalf - dip;
 
     // beam line at z of track, taking beam tilt into account
-    double zBeam = iTrack->dz(bsP);                       // z0p of track along beam line w.r.t. beam z center
-    double xBeam = rbs->x0() + rbs->dxdz() * zBeam;       // beam at z of track
-    double yBeam = rbs->y0() + rbs->dydz() * zBeam;
-    double z0p =  zBeam + bsP.z();                        // z0p of track along beam line w.r.t. CMS z = 0
-    XYZPoint blP = XYZPoint( xBeam, yBeam, z0p );         // point on beam line at z of track
+    //double zBeam = iTrack->dz(bsP);                       // z0p of track along beam line w.r.t. beam z center
+    //double xBeam = rbs->x0() + rbs->dxdz() * zBeam;       // beam at z of track
+    //double yBeam = rbs->y0() + rbs->dydz() * zBeam;
+    //double z0p =  zBeam + bsP.z();                        // z0p of track along beam line w.r.t. CMS z = 0
+    //XYZPoint blP = XYZPoint( xBeam, yBeam, z0p );         // point on beam line at z of track
     
     // beam spot position from track
-    xBS = xBeam;  // improve
-    yBS = yBeam;  //beam tilt taken into account
+    //xBS = xBeam;  // improve
+    //yBS = yBeam;  //beam tilt taken into account
     
-    double bcap = iTrack->dxy(blP);          //impact parameter to beam
-    double edca = iTrack->dxyError();
-    double ebca = sqrt( edca*edca + bx*by ); //round beam
-    double sbca = bcap / ebca;               //impact parameter significance
+    //double bcap = iTrack->dxy(blP);          //impact parameter to beam
+    //double edca = iTrack->dxyError();
+    //double ebca = sqrt( edca*edca + bx*by ); //round beam
+    //double sbca = bcap / ebca;               //impact parameter significance
     
     // transient track:    
     TransientTrack tTrack = theB->build(*iTrack);
     TrajectoryStateOnSurface initialTSOS = tTrack.innermostMeasurementState();
     double kap = tTrack.initialFreeState().transverseCurvature();                          // curvature of track
-    TrajectoryStateClosestToPoint tscp = tTrack.trajectoryStateClosestToPoint( origin );
+    //TrajectoryStateClosestToPoint tscp = tTrack.trajectoryStateClosestToPoint( origin );
     
     double cf = cos(phi);
     double sf = sin(phi);
@@ -653,12 +653,12 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     
     // track w.r.t. beam (cirmov):
     
-    double dp = -xBS*sf + yBS*cf + dca;
-    double dl = -xBS*cf - yBS*sf;
-    double sa = 2*dp + rinv * ( dp*dp + dl*dl );
-    double dcap = sa / ( 1 + sqrt(1 + rinv*sa) );// distance to beam
-    double ud = 1 + rinv*dca;
-    double phip = atan2( -rinv*xBS + ud*sf, rinv*yBS + ud*cf );//direction
+    //double dp = -xBS*sf + yBS*cf + dca;
+    //double dl = -xBS*cf - yBS*sf;
+    //double sa = 2*dp + rinv * ( dp*dp + dl*dl );
+    //double dcap = sa / ( 1 + sqrt(1 + rinv*sa) );// distance to beam
+    //double ud = 1 + rinv*dca;
+    //double phip = atan2( -rinv*xBS + ud*sf, rinv*yBS + ud*cf );//direction
     
     // track at R(PXB1), from FUNPHI, FUNLEN:
     double R1 = 4.4; // PXB1
@@ -695,7 +695,7 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     // loop over tracker detectors:
     double xcrss[99];
     double ycrss[99];
-    double zcrss[99];
+    //double zcrss[99];
     int ncrss = 0;
     for( TrackerGeometry::DetContainer::const_iterator idet = pTG->dets().begin(); idet != pTG->dets().end(); ++idet ) {
       DetId mydetId = (*idet)->geographicalId();
@@ -788,7 +788,7 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  if( hkk * ( r*r - dca*dca ) > erd ) s = pi/abs(kap) - s;
 	}
 	
-	zcrss[ncrss] = z0 + s*tan(dip); // z at r
+	//zcrss[ncrss] = z0 + s*tan(dip); // z at r
 	
 	ncrss++;
 	
@@ -807,61 +807,61 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     double xPXB1 = 0;      // global x hit 1
     double yPXB1 = 0;      // global y hit 1
     double zPXB1 = 0;      // global z hit 1
-    double uPXB1 = 0;      // local position x rechit
-    double vPXB1 = 0;      // local position y rechit
-    double ePXB1 = 0;      // sqrt(covariance of x)
-    double fPXB1 = 0;      // sqrt(covariance of y)
+    //double uPXB1 = 0;      // local position x rechit
+    //double vPXB1 = 0;      // local position y rechit
+    //double ePXB1 = 0;      // sqrt(covariance of x)
+    //double fPXB1 = 0;      // sqrt(covariance of y)
     
     double xPXB2 = 0;
     double yPXB2 = 0;
     double zPXB2 = 0;
     double uPXB2 = 0;
-    double vPXB2 = 0;
+    //double vPXB2 = 0;
     double ePXB2 = 0;
     double fPXB2 = 0;
     
     double xPXB3 = 0;
     double yPXB3 = 0;
     double zPXB3 = 0;
-    double uPXB3 = 0;
-    double vPXB3 = 0;
-    double ePXB3 = 0;
-    double fPXB3 = 0;
+    //double uPXB3 = 0;
+    //double vPXB3 = 0;
+    //double ePXB3 = 0;
+    //double fPXB3 = 0;
 
-    double P3x = 0;
-    double P3y = 0;
-    double P3z = 0;
+    //double P3x = 0;
+    //double P3y = 0;
+    //double P3z = 0;
     
 
     int n1 = 0;
     int n2 = 0;
     int n3 = 0;
-    double phiN1 = 0;
+    //double phiN1 = 0;
     double phiN2 = 0;
-    double phiN3 = 0;
-    double clch1 = 0;
-    double clch2 = 0;
-    double clch3 = 0;
-    int ncol1 = 0;
-    int ncol2 = 0;
-    int ncol3 = 0;
-    int nrow1 = 0;
-    int nrow2 = 0;
-    int nrow3 = 0;
-    double etaX1 = 0;
-    double etaX2 = 0;
-    double etaX3 = 0;
-    double cogp1 = 0;
-    double cogp2 = 0;
-    double cogp3 = 0;
+    //double phiN3 = 0;
+    //double clch1 = 0;
+    //double clch2 = 0;
+    //double clch3 = 0;
+    //int ncol1 = 0;
+    //int ncol2 = 0;
+    //int ncol3 = 0;
+    //int nrow1 = 0;
+    //int nrow2 = 0;
+    //int nrow3 = 0;
+    //double etaX1 = 0;
+    //double etaX2 = 0;
+    //double etaX3 = 0;
+    //double cogp1 = 0;
+    //double cogp2 = 0;
+    //double cogp3 = 0;
     double xmid2 = 0;
     double ymid2 = 0;
     const GeomDet * det2 = NULL;
-    int ilad2 = 0;
-    int xmin2 = 0;
-    int xmax2 = 0;
-    int zmin2 = 0;
-    int zmax2 = 0;
+    //int ilad2 = 0;
+    //int xmin2 = 0;
+    //int xmax2 = 0;
+    //int zmin2 = 0;
+    //int zmax2 = 0;
     
     
     edm::OwnVector<TrackingRecHit> recHitVector;                     // for seed
@@ -887,20 +887,20 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
       int ymin = 0;
       int ymax = 0;
       
-      double cogp = 0;
+      //double cogp = 0;
       
-      int icol = 0;
-      int irow = 0;
+      //int icol = 0;
+      //int irow = 0;
       int ncol = 0;
       int nrow = 0;
-      double clch = 0;
+      //double clch = 0;
       
-      bool halfmod = 0;
+      //bool halfmod = 0;
       
       double Q_f_X = 0.0;//first
       double Q_l_X = 0.0;//last
       double Q_m_X = 0.0;//middle
-      double etaX = 0;
+      //double etaX = 0;
       
       double Q_f_Y = 0.0;//first
       double Q_l_Y = 0.0;//last
@@ -918,35 +918,35 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	
 	if( subDet == 1 ){ // PXB  Barrel
 	  
-	  int ilay = PXBDetId(detId).layer();
-	  int ilad = PXBDetId(detId).ladder();
+	  //int ilay = PXBDetId(detId).layer();
+	  //int ilad = PXBDetId(detId).ladder();
 	  
-	  if( ilay == 1 ){
+	  // if( ilay == 1 ){
 	    
-	    if(      ilad ==  5 ) halfmod = 1;
-	    else if( ilad ==  6 ) halfmod = 1;
-	    else if( ilad == 15 ) halfmod = 1;
-	    else if( ilad == 16 ) halfmod = 1;
+	  //   if(      ilad ==  5 ) halfmod = 1;
+	  //   else if( ilad ==  6 ) halfmod = 1;
+	  //   else if( ilad == 15 ) halfmod = 1;
+	  //   else if( ilad == 16 ) halfmod = 1;
 	    
-	  }
+	  // }
 	  
-	  if( ilay == 2 ){
+	  // if( ilay == 2 ){
 	    
-	    if(      ilad ==  8 ) halfmod = 1;
-	    else if( ilad ==  9 ) halfmod = 1;
-	    else if( ilad == 24 ) halfmod = 1;
-	    else if( ilad == 25 ) halfmod = 1;
+	  //   if(      ilad ==  8 ) halfmod = 1;
+	  //   else if( ilad ==  9 ) halfmod = 1;
+	  //   else if( ilad == 24 ) halfmod = 1;
+	  //   else if( ilad == 25 ) halfmod = 1;
 	    
-	  }
+	  // }
 	  
-	  if( ilay == 3 ){
+	  // if( ilay == 3 ){
 	    
-	    if( ilad == 11 ) halfmod = 1;
-	    if( ilad == 12 ) halfmod = 1;
-	    if( ilad == 33 ) halfmod = 1;
-	    if( ilad == 34 ) halfmod = 1;
+	  //   if( ilad == 11 ) halfmod = 1;
+	  //   if( ilad == 12 ) halfmod = 1;
+	  //   if( ilad == 33 ) halfmod = 1;
+	  //   if( ilad == 34 ) halfmod = 1;
 	    
-	  }
+	  // }
 	  
 	  if( idbg ) {
 	    cout << "  layer  " << PXBDetId(detId).layer();
@@ -1035,13 +1035,11 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	      
 	    }//loop over pixels
 	    
-	    etaX = ( Q_f_X - Q_l_X ) / ( Q_f_X + Q_l_X + Q_m_X );
-	    
-	    cogp = xsum / qsum;
-	    
-	    clch = clust->charge();//electrons
-	    icol = clust->minPixelCol();
-	    irow = clust->minPixelRow();
+	    //etaX = ( Q_f_X - Q_l_X ) / ( Q_f_X + Q_l_X + Q_m_X );
+	    //cogp = xsum / qsum;
+	    //clch = clust->charge();//electrons
+	    //icol = clust->minPixelCol();
+	    //irow = clust->minPixelRow();
 	    ncol = clust->sizeY();
 	    nrow = clust->sizeX();
 	    
@@ -1112,9 +1110,9 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
       if( ! (*irecHit)->isValid() ) continue;
       
       double xloc = transRecHit->localPosition().x();       // 1st meas coord
-      double yloc = transRecHit->localPosition().y();       // 2nd meas coord or zero
+      //double yloc = transRecHit->localPosition().y();       // 2nd meas coord or zero
       double vxloc = transRecHit->localPositionError().xx();//covariance
-      double vyloc = transRecHit->localPositionError().yy();//covariance
+      //double vyloc = transRecHit->localPositionError().yy();//covariance
       double gX = transRecHit->globalPosition().x();
       double gY = transRecHit->globalPosition().y();
       double gZ = transRecHit->globalPosition().z();
@@ -1131,10 +1129,10 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 #endif
 	  //if( idbg ) cout << "  have preciseHit\n";
 	  xloc = preciseHit->localPosition().x();// 1st meas coord
-	  yloc = preciseHit->localPosition().y();// 2nd meas coord or zero
+	  //yloc = preciseHit->localPosition().y();// 2nd meas coord or zero
 
 	  vxloc = preciseHit->localPositionError().xx();//covariance
-	  vyloc = preciseHit->localPositionError().yy();//covariance
+	  //vyloc = preciseHit->localPositionError().yy();//covariance
 	  if( idbg ) {
 	    //cout << "  improved hit in "   << subDet;
 	    //cout << setprecision(4);
@@ -1171,7 +1169,7 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
       // PXB:      
       if( subDet == PixelSubdetector::PixelBarrel ) {
 	
-	double xpix = fmod( xloc+0.82, 0.01 );// xpix = 0..0.01
+	//double xpix = fmod( xloc+0.82, 0.01 );// xpix = 0..0.01
 
 	double df = phiN - gF;//normal vector vs position vector: inwards or outwards
 	// take care of cut at +180/-180:
@@ -1179,13 +1177,13 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	else if( df < -pi ) df += twopi;
 	
 	int ilay = PXBDetId(detId).layer();
-	int ilad = PXBDetId(detId).ladder();
-	int imod = PXBDetId(detId).module();
+	//int ilad = PXBDetId(detId).ladder();
+	//int imod = PXBDetId(detId).module();
 	
 	if( idbg ) {
 	  //cout << "  xloc " << xloc;
 	  //cout << ", cogp " << cogp;
-	  double cogx = (cogp + 0.5 - 80) * 0.01 - 0.0054;
+	  //double cogx = (cogp + 0.5 - 80) * 0.01 - 0.0054;
 	  //if( cogp < 79 ) cogx -= 0.01; // big pix
 	  //if( cogp > 80 ) cogx += 0.01; // big pix
 	  //cout << ", cogx " << cogx;
@@ -1198,23 +1196,21 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
           xPXB1 = gX;
           yPXB1 = gY;
           zPXB1 = gZ;
-          uPXB1 = xloc;
-          vPXB1 = yloc;
-	  
+          //uPXB1 = xloc;
+          //vPXB1 = yloc;
+          //ePXB1 = sqrt( vxloc );
+          //fPXB1 = sqrt( vyloc );
+          //phiN1 = phiN;
+          //clch1 = clch;
+          //ncol1 = ncol;
+          //nrow1 = nrow;
+          //etaX1 = etaX;
+          //cogp1 = cogp;
 
-          ePXB1 = sqrt( vxloc );
-          fPXB1 = sqrt( vyloc );
-          phiN1 = phiN;
-          clch1 = clch;
-          ncol1 = ncol;
-          nrow1 = nrow;
-          etaX1 = etaX;
-          cogp1 = cogp;
-
-          if(      ilad ==  5 ) halfmod = 1;
-          else if( ilad ==  6 ) halfmod = 1;
-          else if( ilad == 15 ) halfmod = 1;
-          else if( ilad == 16 ) halfmod = 1;
+          //if(      ilad ==  5 ) halfmod = 1;
+          //else if( ilad ==  6 ) halfmod = 1;
+          //else if( ilad == 15 ) halfmod = 1;
+          //else if( ilad == 16 ) halfmod = 1;
         }// BPIX1
 
 	// track impact parameter to beam:
@@ -1224,8 +1220,8 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  double df = gF - fcrss;
 	  if( df > pi ) df -= twopi;
 	  else if( df < -pi ) df += twopi;
-	  double du = gR*df;
-	  double dz = gZ - zcrss[icrss];
+	  //double du = gR*df;
+	  //double dz = gZ - zcrss[icrss];
 	  //std::cout<<"dz  "<<dz<<std::endl;
 	  
 	  
@@ -1247,22 +1243,22 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  yPXB2 = gY;
 	  zPXB2 = gZ;
 	  uPXB2 = xloc; // precise hit in local coordinates (w.r.t. sensor center)
-	  vPXB2 = yloc;
+	  //vPXB2 = yloc;
 	  phiN2 = phiN;
 	  ePXB2 = sqrt( vxloc );
-	  fPXB2 = sqrt( vyloc );
+	  //fPXB2 = sqrt( vyloc );
 
-	  clch2 = clch; // cluster charge [e]
-	  ncol2 = ncol;
-	  nrow2 = nrow;
-	  etaX2 = etaX;
-	  cogp2 = cogp;
+	  //clch2 = clch; // cluster charge [e]
+	  //ncol2 = ncol;
+	  //nrow2 = nrow;
+	  //etaX2 = etaX;
+	  //cogp2 = cogp;
 	  xmid2 = xmid; // middle of sensor in global CMS coordinates
 	  ymid2 = ymid;
-	  xmin2 = xmin;
-	  xmax2 = xmax;
-	  zmin2 = ymin;
-	  zmax2 = ymax;
+	  //xmin2 = xmin;
+	  //xmax2 = xmax;
+	  //zmin2 = ymin;
+	  //zmax2 = ymax;
 	  
 	  xpx1_g=xPXB2;
 	  xpy1_g=yPXB2;
@@ -1282,16 +1278,16 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  xPXB3 = gX;
 	  yPXB3 = gY;
 	  zPXB3 = gZ;
-	  uPXB3 = xloc;
-	  vPXB3 = yloc;
-	  ePXB3 = sqrt( vxloc );
-	  fPXB3 = sqrt( vyloc );
-	  phiN3 = phiN;
-	  clch3 = clch;
-	  ncol3 = ncol;
-	  nrow3 = nrow;
-	  etaX3 = etaX;
-	  cogp3 = cogp;
+	  //uPXB3 = xloc;
+	  //vPXB3 = yloc;
+	  //ePXB3 = sqrt( vxloc );
+	  //fPXB3 = sqrt( vyloc );
+	  //phiN3 = phiN;
+	  //clch3 = clch;
+	  //ncol3 = ncol;
+	  //nrow3 = nrow;
+	  //etaX3 = etaX;
+	  //cogp3 = cogp;
 	  
 	  xpx2_g=xPXB3;
 	  xpy2_g=yPXB3;
@@ -1361,10 +1357,10 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	double xHit = iTM->recHit()->localPosition().x(); // primary measurement direction
 	double yHit = iTM->recHit()->localPosition().y(); // always 0 in strips
 	
-	int ilay = 0;
-	if( detId.subdetId() == 1 ){
-	  ilay = PXBDetId( detId ).layer();
-	}
+	//int ilay = 0;
+	//if( detId.subdetId() == 1 ){
+	//ilay = PXBDetId( detId ).layer();
+	//}
 	/*
 	  if( subDet == 1 && idbg ){//1=PXB
 	  cout << "  PXB layer " << ilay << endl;
@@ -1373,8 +1369,8 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	
 	double dx = xHit - iTM->predictedState().localPosition().x();
 	double dy = yHit - iTM->predictedState().localPosition().y();
-	double vxh = iTM->recHit()->localPositionError().xx();//covariance
-	double vxt = iTM->predictedState().localError().positionError().xx();//
+	//double vxh = iTM->recHit()->localPositionError().xx();//covariance
+	//double vxt = iTM->predictedState().localError().positionError().xx();//
 	
 	//if( subDet == 1 && idbg ){//1=PXB
 	//if( subDet == 4 && idbg ){4=TID
@@ -1391,9 +1387,9 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	
 	if( jdbg ) cout << "  have combinedPredictedState\n";
 	
-	double R = combinedPredictedState.globalPosition().perp();
-	double F = combinedPredictedState.globalPosition().barePhi();
-	double Z = combinedPredictedState.globalPosition().z();
+	//double R = combinedPredictedState.globalPosition().perp();
+	//double F = combinedPredictedState.globalPosition().barePhi();
+	//double Z = combinedPredictedState.globalPosition().z();
 	
 	double xptch;
 	double yptch;	
@@ -1411,8 +1407,8 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
       
 	dx = xHit - combinedPredictedState.localPosition().x(); //x = primary measurement
 	dy = yHit - combinedPredictedState.localPosition().y(); //
-	vxh = iTM->recHit()->localPositionError().xx();//covariance
-	vxt = combinedPredictedState.localError().positionError().xx();//
+	//vxh = iTM->recHit()->localPositionError().xx();//covariance
+	//vxt = combinedPredictedState.localError().positionError().xx();//
 	
 	// angles of incidence:
 	// local z = upwards = normal vector
@@ -1480,10 +1476,8 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	double lY = lp.y();
 	double lZ = lp.z();
 
-	//double phiN = myGeomDet->surface().normalVector().barePhi();//normal vector
-	double phiN = iTM->recHit()->det()->surface().normalVector().barePhi();//normal vector
+	//double phiN = iTM->recHit()->det()->surface().normalVector().barePhi();//normal vector
 	
-
 	//2012: overwrite PXB global coordinates once more, using topology:
 
 	if( subDet == PixelSubdetector::PixelBarrel ) {
@@ -1629,17 +1623,17 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	
 	if( jdbg ); //cout << "  triplet 1+3 -> 2\n";
 	  
-	double f2 = atan2( yPXB2, xPXB2 );//position angle in disk 1
+	//double f2 = atan2( yPXB2, xPXB2 );//position angle in disk 1
 	
-	double ax = xPXB3 - xPXB1;
-	double ay = yPXB3 - yPXB1;
-	double aa = sqrt( ax*ax + ay*ay ); // distance from 1 to 3
+	//double ax = xPXB3 - xPXB1;
+	//double ay = yPXB3 - yPXB1;
+	//double aa = sqrt( ax*ax + ay*ay ); // distance from 1 to 3
 	
-	double xmid = 0.5 * ( xPXB1 + xPXB3 );
-	double ymid = 0.5 * ( yPXB1 + yPXB3 );
-	double bx = xPXB2 - xmid;
-	double by = yPXB2 - ymid;
-	double bb = sqrt( bx*bx + by*by ); // from mid point to point 2
+	//double xmid = 0.5 * ( xPXB1 + xPXB3 );
+	//double ymid = 0.5 * ( yPXB1 + yPXB3 );
+	//double bx = xPXB2 - xmid;
+	//double by = yPXB2 - ymid;
+	//double bb = sqrt( bx*bx + by*by ); // from mid point to point 2
 	
 	// Make track from 2 space points and kappa (cmz98/ftn/csmktr.f)
 	// Definition of the Helix :
@@ -1655,7 +1649,7 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	
 	// Point 1 must be in the pixel, 3 in the outer disk
 	double r1 = sqrt( xPXB1*xPXB1 + yPXB1*yPXB1 );
-	double r2=  sqrt( xPXB2*xPXB2+  yPXB2*yPXB2 );
+	//double r2=  sqrt( xPXB2*xPXB2+  yPXB2*yPXB2 );
 	double r3 = sqrt( xPXB3*xPXB3 + yPXB3*yPXB3 );
 	
 	if( r3-r1 < 2.0 ) cout << "warn r1 = " << r1 << ", r3 = " << r3 << endl;
@@ -1687,7 +1681,7 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	double num = ( yPXB3 - y0 ) * ( xPXB1 - x0 ) - ( xPXB3 - x0 ) * ( yPXB1 - y0 );
 	double den = ( xPXB1 - x0 ) * ( xPXB3 - x0 ) + ( yPXB1 - y0 ) * ( yPXB3 - y0 );
 	double tandip = kap * ( zPXB3 - zPXB1 ) / atan( num / den );
-	double udip = atan(tandip);
+	//double udip = atan(tandip);
 	//double utet = pihalf - udip;
 	
 	// To get phi0 in the right interval one must distinguish
@@ -1759,7 +1753,7 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	
 	double s = ks*rho; // signed
 	double uz2 = uz0 + s*tandip; // track z at R2
-	double dz2 = zPXB2 - uz2;
+	//double dz2 = zPXB2 - uz2;
 	
 	Surface::GlobalPoint gp2( xx, yy, uz2 );
 	Surface::LocalPoint lp2 = det2->toLocal( gp2 );
@@ -1768,10 +1762,10 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	// local y = z in barrel
 	// local z = radial in barrel (thickness)
 	
-	double xpix = fmod( uPXB2 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed
-	double xpx2 = fmod( uPXB2 + 0.82, 0.02 ); // xpix = 0..0.02 reconstructed
-	double xpx1 = fmod( uPXB1 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed 
-	double xpx3 = fmod( uPXB3 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed
+	//double xpix = fmod( uPXB2 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed
+	//double xpx2 = fmod( uPXB2 + 0.82, 0.02 ); // xpix = 0..0.02 reconstructed
+	//double xpx1 = fmod( uPXB1 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed 
+	//double xpx3 = fmod( uPXB3 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed
 
 	
 	//double dpix = fmod( uPXB2 + dca2 + 0.82, 0.01 ); // dpix = 0..0.01 predicted
@@ -1779,35 +1773,35 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	double vpix = fmod( vv, 0.01 ); // vpix = 0..0.01 predicted
 	if( uPXB2 < 0 ) vpix = -vpix; // vv is unsigned distance from module center
 	
-	double lpix = fmod( lp2.x() + 0.82, 0.01 ); // lpix = 0..0.01 predicted
-	double tpix = fmod( lp2.x() + 0.82, 0.02 ); // tpix = 0..0.02 predicted
+	//double lpix = fmod( lp2.x() + 0.82, 0.01 ); // lpix = 0..0.01 predicted
+	//double tpix = fmod( lp2.x() + 0.82, 0.02 ); // tpix = 0..0.02 predicted
 	
-	double zpix = fmod( lp2.y() + 3.24, 0.015 ); // zpix = 0..0.015 predicted
-	double spix = fmod( lp2.y() + 3.24, 0.03  ); // spix = 0..0.03  predicted
+	//double zpix = fmod( lp2.y() + 3.24, 0.015 ); // zpix = 0..0.015 predicted
+	//double spix = fmod( lp2.y() + 3.24, 0.03  ); // spix = 0..0.03  predicted
 	
-	int smin = zmin2%52; // 0..51 column along z
-	int smax = zmax2%52; // 0..51 column along z
+	//int smin = zmin2%52; // 0..51 column along z
+	//int smax = zmax2%52; // 0..51 column along z
 	
-	double cogx = (cogp2 + 0.5 - 80) * 0.01 - 0.0054; // Lorentz shift
-	if( cogp2 < 79 ) cogx -= 0.01; // big pix
-	if( cogp2 > 80 ) cogx += 0.01; // big pix
+	//double cogx = (cogp2 + 0.5 - 80) * 0.01 - 0.0054; // Lorentz shift
+	//if( cogp2 < 79 ) cogx -= 0.01; // big pix
+	//if( cogp2 > 80 ) cogx += 0.01; // big pix
 	
-	double mpix = fmod( cogx + 0.82, 0.01 ); // mpix = 0..0.01 from cluster COG
-	double cogdx = cogx - lp2.x(); // residual
+	//double mpix = fmod( cogx + 0.82, 0.01 ); // mpix = 0..0.01 from cluster COG
+	//double cogdx = cogx - lp2.x(); // residual
 	
 	// hybrid method:
 	
-	double hybx = uPXB2; // template
-	if( mpix*1E4 < 20 ) hybx = cogx; // COG
-	if( mpix*1E4 > 75 ) hybx = cogx;
+	//double hybx = uPXB2; // template
+	//if( mpix*1E4 < 20 ) hybx = cogx; // COG
+	//if( mpix*1E4 > 75 ) hybx = cogx;
 	//double hpix = fmod( hybx + 0.82, 0.01 ); // hpix = 0..0.01 from cluster hybrid method
-	double hybdx = hybx - lp2.x(); // residual
+	//double hybdx = hybx - lp2.x(); // residual
 	
-	bool halfmod = 0;
-	if(      ilad2 ==  8 ) halfmod = 1;
-	else if( ilad2 ==  9 ) halfmod = 1;
-	else if( ilad2 == 24 ) halfmod = 1;
-	else if( ilad2 == 25 ) halfmod = 1;
+	//bool halfmod = 0;
+	//if(      ilad2 ==  8 ) halfmod = 1;
+	//else if( ilad2 ==  9 ) halfmod = 1;
+	//else if( ilad2 == 24 ) halfmod = 1;
+	//else if( ilad2 == 25 ) halfmod = 1;
 	
 	//	       double theta_ideal0= (-rho*rho+x0*x0+y0*y0+r2*r2)/(2*r2*sqrt(x0*x0+y0*y0));
 	//	       double phi_circle = atan2(y0,x0);
@@ -1824,7 +1818,7 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	double phi2_ideal = asin((x0*kk+kb-y0)/(rho*sqrt(1+kk*kk)));
 	double theta_ideal = phi_ideal+phi2_ideal; 
 
-	int c_unit=1;
+	//int c_unit=1;
 	//cout<<"y0="<<y0<<"  "<<"x0="<<x0<<endl;
 	//cout<<"yPXB2="<<yPXB2<<"  "<<"xPXB2="<<xPXB2<<endl;
 	//              double theta_ideal = acos((rho*rho+x0*x0+y0*y0-r1*r1)/(2*sqrt(2)*rho));
@@ -1889,7 +1883,7 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 	x_local_error=ePXB2*1E4;
 	y_local_error=fPXB2*1E4;
-	double unit=1;
+	//double unit=1;
 	// if( kap2>=0)  unit=1;
 	// if(kap2<=0)  continue;
 	
@@ -1996,7 +1990,7 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  if( refit2valid ){
 	    
 	    //if( jdbg ) cout << "  triplet 1+3 -> 2 refitted\n";
-	    double f2 = atan2( yPXB2, xPXB2 );//position angle in layer 2
+	    //double f2 = atan2( yPXB2, xPXB2 );//position angle in layer 2
 	    double rho2 = 1/kap2;
 	    double lam = sqrt( -0.25 + 
 			       rho2*rho2 / ( ( xPXB1 - xPXB3 )*( xPXB1 - xPXB3 ) + ( yPXB1 - yPXB3 )*( yPXB1 - yPXB3 ) ) );
@@ -2012,10 +2006,10 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	    double y0 =  0.5*( yPXB1 + yPXB3 ) + lam * (  xPXB1 - xPXB3 );
 	    
 	    // Calculate theta:
-	    double num = ( yPXB3 - y0 ) * ( xPXB1 - x0 ) - ( xPXB3 - x0 ) * ( yPXB1 - y0 );
-	    double den = ( xPXB1 - x0 ) * ( xPXB3 - x0 ) + ( yPXB1 - y0 ) * ( yPXB3 - y0 );
-	    double tandip = kap2 * ( zPXB3 - zPXB1 ) / atan( num / den );
-	    double udip = atan(tandip);
+	    //double num = ( yPXB3 - y0 ) * ( xPXB1 - x0 ) - ( xPXB3 - x0 ) * ( yPXB1 - y0 );
+	    //double den = ( xPXB1 - x0 ) * ( xPXB3 - x0 ) + ( yPXB1 - y0 ) * ( yPXB3 - y0 );
+	    //double tandip = kap2 * ( zPXB3 - zPXB1 ) / atan( num / den );
+	    //double udip = atan(tandip);
 	    //double utet = pihalf - udip;
 	    
 	    // To get phi0 in the right interval one must distinguish
@@ -2031,10 +2025,10 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	    else          udca = rho2 + sqrt( x0*x0 + y0*y0 );
 	    
 	    // angle from first hit to dca point:
-	    double dphi = atan( ( ( xPXB1 - x0 ) * y0 - ( yPXB1 - y0 ) * x0 )
-				/ ( ( xPXB1 - x0 ) * x0 + ( yPXB1 - y0 ) * y0 ) );
+	    //double dphi = atan( ( ( xPXB1 - x0 ) * y0 - ( yPXB1 - y0 ) * x0 )
+	    //			/ ( ( xPXB1 - x0 ) * x0 + ( yPXB1 - y0 ) * y0 ) );
 	    
-	    double uz0 = zPXB1 + tandip * dphi * rho2;
+	    //double uz0 = zPXB1 + tandip * dphi * rho2;
 	    
 	    
 	    // interpolate to middle hit:
@@ -2075,9 +2069,9 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	    if(      ks >  pi ) ks = ks - twopi;
 	    else if( ks < -pi ) ks = ks + twopi;
 	    
-	    double s = ks*rho2;// signed
-	    double uz2 = uz0 + s*tandip; //track z at R2
-	    double dz2 = zPXB2 - uz2;
+	    //double s = ks*rho2;// signed
+	    //double uz2 = uz0 + s*tandip; //track z at R2
+	    //double dz2 = zPXB2 - uz2;
 
 	    residual_refit = dca2 * 1E4;
 	    

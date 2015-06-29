@@ -391,8 +391,8 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
   using namespace reco;
   using namespace math;
   
-  const double pi = 4*atan(1);
-  const double wt = 180/pi;
+  //const double wt = 180/pi;  // Unused
+  //const double pi = 4*atan(1); // Ditto 
   
   myCountersPixel::neve++;
   
@@ -566,8 +566,8 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
     sumq += iTrack->charge();
     
     const reco::HitPattern& hp = iTrack->hitPattern();
-    double phi = iTrack->phi();
-    double eta = iTrack->eta();
+    //double phi = iTrack->phi(); // Not used
+    //double eta = iTrack->eta(); // ditto 
     //if( idbg ) {
     //  cout << endl;
     //  cout << "Track "  << distance( tracks->begin(), iTrack );
@@ -879,8 +879,8 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
 	
 	double dx = xHit - iTM->predictedState().localPosition().x();
 	double dy = yHit - iTM->predictedState().localPosition().y();
-	double vxh = iTM->recHit()->localPositionError().xx();//covariance
-	double vxt = iTM->predictedState().localError().positionError().xx();//
+	//double vxh = iTM->recHit()->localPositionError().xx();//covariance Not used
+	//double vxt = iTM->predictedState().localError().positionError().xx();// ditto
 	
 	//if( subDet == 1 && idbg ){//1=PXB
 	//if( subDet == 4 && idbg ){4=TID
@@ -913,8 +913,8 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
       
 	dx = xHit - combinedPredictedState.localPosition().x(); //x = primary measurement
 	dy = yHit - combinedPredictedState.localPosition().y(); //
-	vxh = iTM->recHit()->localPositionError().xx();//covariance
-	vxt = combinedPredictedState.localError().positionError().xx();//
+	//vxh = iTM->recHit()->localPositionError().xx();//covariance Unused
+	//vxt = combinedPredictedState.localError().positionError().xx();// ditto
 	
 	// angles of incidence:
 	// local z = upwards = normal vector
