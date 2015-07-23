@@ -25,11 +25,13 @@ pwd
 #cmsRun testPxdigi.py
 #cmsRun PixClusterAna.py
 #cmsRun PixClusterTest.py
-#cmsRun PixClusterAna_ZB_247324.py
+
+cmsRun PixClusterAna_ZB_251643.py
 #cmsRun PixClusterAna_ZB_247607.py
 #cmsRun PixClusterAna_ZB_248025.py
+
 #cmsRun PixClusterAna_Comm_248025.py
-cmsRun PixClusterAna_Lumi.py
+#cmsRun PixClusterAna_Lumi.py
 
 #cmsRun testTracks.py
 

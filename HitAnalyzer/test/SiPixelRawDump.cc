@@ -1024,7 +1024,9 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 
   countAllEvents++;
 
-  if(printHeaders || printLocal>0) cout<<"Event = "<<countEvents<<" Event number "<<event<<" Run "<<run<<" LS "<<lumiBlock<<endl;
+  if(printHeaders) 
+    cout<<"Event = "<<countEvents<<" Event number "<<event<<" Run "<<run
+	<<" LS "<<lumiBlock<<endl;
 
   // Loop over FEDs
   for (int fedId = fedIds.first; fedId <= fedIds.second; fedId++) {
@@ -1065,7 +1067,7 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
     unsigned int bxid = 0;
     eventId = MyDecode::header(*header, fedId, printHeaders, bxid);
     //if(fedId = fedIds.first) 
-    if(bx != int(bxid) ) cout<<" Inconsistent BX: from event "<<bx<<" from FED "<<bxid<<endl;
+    if(bx != int(bxid+207) ) cout<<" Inconsistent BX: from event "<<bx<<" from FED "<<bxid<<" forevent "<<eventId<<endl;
     hbx1->Fill(float(bxid));
 
 

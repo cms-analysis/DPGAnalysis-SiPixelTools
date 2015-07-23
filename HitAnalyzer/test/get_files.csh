@@ -18,30 +18,37 @@
 #das_client.py --limit=0 --query='file dataset=/MinimumBias/Commissioning2015-PromptReco-v1/RECO run=237956'
 
 # Cosmics 
-das_client.py --limit=0 --query='file dataset=/MinimumBias/Run2015A-v1/RAW run=248566' # NO
+#das_client.py --limit=0 --query='file dataset=/MinimumBias/Run2015A-v1/RAW run=250381' # Y
 #das_client.py --limit=0 --query='file dataset=/MinimumBias/Run2015A-PromptReco-v1/RECO run=248566' # NO
 #das_client.py --limit=0 --query='file dataset=/Cosmics/Run2015A-PromptReco-v1/RECO run=248566' # NO
 
 # Collisions 
 # RAW
 #das_client.py --limit=0 --query='file dataset=/ZeroBias1/Run2015A-v1/RAW run=247324' # YES
+
 #RECO 
 #das_client.py --limit=0 --query='file dataset=/ExpressPhysics/Run2015A-Express-v1/FEVT run=246963' # YES
 #das_client.py --limit=0 --query='file dataset=/MinimumBias/Run2015A-PromptReco-v1/RECO run=247607' # NO
 #das_client.py --limit=0 --query='file dataset=/Commissioning/Run2015A-PromptReco-v1/RECO run=248025' # YES
 #das_client.py --limit=0 --query='file dataset=/ZeroBias1/Run2015A-PromptReco-v1/RECO run=248025' # YES
 #das_client.py --limit=0 --query='file dataset=/ZeroBias1/Run2015A-PromptReco-v1/RECO run=247607' # YES
-#das_client.py --limit=0 --query='file dataset=/ZeroBias1/Run2015A-PromptReco-v1/RECO run=247324' # YES
+
+#das_client.py --limit=0 --query='file dataset=/ZeroBias/Run2015B-PromptReco-v1/RECO run=251643' # YES
+das_client.py --limit=0 --query='file dataset=/Commissioning/Run2015B-PromptReco-v1/RECO run=251643' # YES
 # Lumi
-#das_client.py --limit=0 --query='file dataset=/AlCaLumiPixels/Run2015A-LumiPixels-PromptReco-v1/ALCARECO run=248025' # YES
+#das_client.py --limit=0 --query='file dataset=/AlCaLumiPixels/Run2015B-LumiPixels-PromptReco-v1/ALCARECO run=251643' # YES
 
 
 # 2015-A
 # /eos/cms/store/data/Run2015A/MinimumBias/RECO/PromptReco-v1/000/246
 #/eos/cms/store/data/Run2015A/ZeroBias1/RECO/PromptReco-v1/000/246/908/00000
 #/eos/cms/store/data/Run2015A/Commissioning/RECO/PromptReco-v1/000/246/908/00000
-
 #/eos/cms/store/express/Run2015A/ExpressPhysics/FEVT/Express-v1/000/246/963
+
+
+# 2015-B
+#/eos/cms/store/data/Run2015B/ZeroBias/RECO/PromptReco-v1/000/251/643/00000
+#/eos/cms/store/data/Run2015B/Commissioning/RECO/PromptReco-v1/000/251/643/00000
 
 #/eos/cms/store/data/Run2015A/MinimumBias/RAW/v1/000/246
 #/eos/cms/store/data/Run2015A/AlCaLumiPixels/RAW/v1/000/246

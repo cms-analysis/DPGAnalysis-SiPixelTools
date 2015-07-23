@@ -47,31 +47,30 @@ SiPixelGenErrorDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup
   cout<<" DBObject version "<<dbobject.version()<<" index "<<dbobject.index()<<" max "<<dbobject.maxIndex()
       <<" fail "<<dbobject.fail()<<" numOfTeml "<<dbobject.numOfTempl()<<endl;
 
-  if(theFullGenErrorDBOutput) {
-    std::cout << "Map info" << std::endl;
-    std::vector<short> tempMapId;
-    std::map<unsigned int,short> templMap=dbobject.getGenErrorIDs();
-    for(std::map<unsigned int,short>::const_iterator it=templMap.begin(); it!=templMap.end();++it) {
-      if(tempMapId.size()==0) tempMapId.push_back(it->second);
-      for(unsigned int i=0; i<tempMapId.size();++i) {
-	if(tempMapId[i]==it->second) continue;
-	else if(i==tempMapId.size()-1) {
-	  tempMapId.push_back(it->second);
-	  break;
-	}
-      }
+  std::cout << "Map info" << std::endl;
+  std::vector<short> tempMapId;
+  std::map<unsigned int,short> templMap=dbobject.getGenErrorIDs();
+  for(std::map<unsigned int,short>::const_iterator it=templMap.begin(); it!=templMap.end();++it) {
 
-      std::cout<< "DetId: "<< it->first<<" GenErrorID: "<< it->second<<"\n";
-      
+    if(tempMapId.size()==0) tempMapId.push_back(it->second);
+
+    for(unsigned int i=0; i<tempMapId.size();++i) {
+      if( tempMapId[i] == it->second ) break;
+      else if(i==tempMapId.size()-1) {
+	tempMapId.push_back(it->second);
+	break;
+      }
     }
     
-    std::cout << "\nMap stores GenError Id(s): ";
-    for(unsigned int vindex=0; vindex < tempMapId.size(); ++ vindex)
-      std::cout << tempMapId[vindex] << " ";
-    std::cout << std::endl;
+    if(theFullGenErrorDBOutput) 
+      std::cout<< "DetId: "<< it->first<<" GenErrorID: "<< it->second<<"\n";  
   }
-
-
+    
+  std::cout << "\nMap stored GenError Id(s), size =  "<<tempMapId.size()<<endl;
+  for(unsigned int vindex=0; vindex < tempMapId.size(); ++ vindex)
+    std::cout << tempMapId[vindex] << " ";
+  std::cout << std::endl;
+ 
   // if the dircetory is an empty string ignore file comparison 
   if(theGenErrorCalibrationLocation == "") {
 

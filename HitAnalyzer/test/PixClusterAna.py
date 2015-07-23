@@ -33,9 +33,10 @@ import HLTrigger.HLTfilters.hltHighLevel_cfi as hlt
 process.hltfilter = hlt.hltHighLevel.clone(
 # Min-Bias	
 #    HLTPaths = ['HLT_Physics_v*'],
+    HLTPaths = ['HLT_Physics_part*'],
 #    HLTPaths = ['HLT_Random_v*'],
 #    HLTPaths = ['HLT_L1SingleMuOpen_v*'],
-    HLTPaths = ['HLT_ZeroBias_*'],
+#    HLTPaths = ['HLT_ZeroBias_*'],
 #    HLTPaths = ['HLT_PAZeroBias*'],
 #    HLTPaths = ['HLT_PARandom*'],
 #    HLTPaths = ['HLT_PAMinBias*'],
@@ -51,8 +52,8 @@ process.hltfilter = hlt.hltHighLevel.clone(
     )
 
 # to select PhysicsBit
-process.load('HLTrigger.special.hltPhysicsDeclared_cfi')
-process.hltPhysicsDeclared.L1GtReadoutRecordTag = 'gtDigis'
+#process.load('HLTrigger.special.hltPhysicsDeclared_cfi')
+#process.hltPhysicsDeclared.L1GtReadoutRecordTag = 'gtDigis'
 
 # i do not know what is this doing?
 #triggerSelection = cms.EDFilter( "TriggerResultsFilter",
@@ -68,7 +69,7 @@ process.hltPhysicsDeclared.L1GtReadoutRecordTag = 'gtDigis'
 
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(1000)
 )
 
 process.MessageLogger = cms.Service("MessageLogger",
@@ -444,14 +445,23 @@ myfilelist.extend([
 process.source = cms.Source("PoolSource",
 # fileNames =  myfilelist
   fileNames = cms.untracked.vstring(    
-
+# muonia 
+#"/store/data/Run2015A/MuOnia/RECO/PromptReco-v1/000/248/038/00000/22A90F7F-5A14-E511-AD96-02163E012BE3.root",
+#single muon 
+#"/store/data/Run2015A/SingleMuon/RECO/PromptReco-v1/000/248/038/00000/0C5FA27E-5A14-E511-8D85-02163E012385.root",
+# charmonium
+#"/store/data/Run2015A/Charmonium/RECO/PromptReco-v1/000/248/038/00000/FC099721-5A14-E511-A3D1-02163E012B9A.root",
+#
+#"/store/data/Run2015A/Commissioning/RECO/PromptReco-v1/000/248/025/00000/50B4C032-0314-E511-A718-02163E013569.root",
+#"/store/data/Run2015A/ZeroBias1/RECO/PromptReco-v1/000/248/025/00000/08590F92-0115-E511-9483-02163E011C17.root",
+#"/store/data/Run2015A/ZeroBias/RECO/PromptReco-v1/000/248/025/00000/30A880F2-0414-E511-9E31-02163E0139A3.root",
+"/store/data/Run2015A/ZeroBias1/AOD/PromptReco-v1/000/248/025/00000/341760D5-5114-E511-A92E-02163E0129E4.root",
 
 #"/store/data/Run2015A/Commissioning/RECO/PromptReco-v1/000/247/607/00000/681AB913-9110-E511-98DA-02163E014374.root",
-#"/store/data/Run2015A/ZeroBias1/RECO/PromptReco-v1/000/248/025/00000/50B4C032-0314-E511-A718-02163E013569.root",
 #"/store/data/Run2015A/ZeroBias1/RECO/PromptReco-v1/000/246/963/00000/00F51FE4-090C-E511-8F33-02163E014299.root",
-#  "/store/express/Run2015A/ExpressPhysics/FEVT/Express-v1/000/246/963/00000/0006E9B1-4A0A-E511-AD47-02163E0138BC.root",
+#"/store/express/Run2015A/ExpressPhysics/FEVT/Express-v1/000/246/963/00000/0006E9B1-4A0A-E511-AD47-02163E0138BC.root",
 
-  "file:/afs/cern.ch/work/d/dkotlins/public/data/clus/clus_zb_248025.root"
+#  "file:/afs/cern.ch/work/d/dkotlins/public/data/clus/clus_zb_248025.root"
 #  "file:../scripts/clus.root"
 # MC
 #"/store/relval/CMSSW_7_1_0_pre7/RelValTTbar/GEN-SIM-RECO/PRE_STA71_V3-v1/00000/887DEA5B-5CD1-E311-BB97-002618943923.root",
@@ -477,14 +487,12 @@ process.TFileService = cms.Service("TFileService",
 
 process.d = cms.EDAnalyzer("PixClusterAna",
     Verbosity = cms.untracked.bool(False),
-    #src = cms.InputTag("siPixelClusters"),
-    src = cms.InputTag("siPixelClustersPreSplitting"),
+    src = cms.InputTag("siPixelClusters"),
+    #src = cms.InputTag("siPixelClustersPreSplitting"),
     Select1 = cms.untracked.int32(1),  # cut on the num of dets <4 skip, 0 means 4 default 
     Select2 = cms.untracked.int32(0),  # 6 no bptx, 0 no selection                               
 )
 
-#process.p = cms.Path(process.hltPhysicsDeclared*process.hltfilter*process.d)
-#process.p = cms.Path(process.hltPhysicsDeclared*process.d)
 #process.p = cms.Path(process.hltfilter*process.d)
 process.p = cms.Path(process.d)
 
