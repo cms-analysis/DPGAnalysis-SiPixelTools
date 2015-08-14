@@ -535,7 +535,7 @@ private:
   TH1D *hsizeFeds[40];
 #endif
   TH1D *hpixels, *hpixels0, *hpixels1, *hpixels2, *hpixels3, *hpixels4;
-  TH1D *htotPixels,*htotPixels0, *htotPixels1;
+  TH1D *htotPixels,*htotPixels0, *htotPixels1, *htotPixels2;
   TH1D *herrors, *htotErrors;
   TH1D *herrorType1, *herrorType1Fed, *herrorType1Chan,*herrorType2, *herrorType2Fed, *herrorType2Chan;
   TH1D *hcountDouble, *hcount000, *hrocDouble, *hroc000;
@@ -549,7 +549,7 @@ private:
     *hfed2DErrors6ls,*hfed2DErrors7ls,*hfed2DErrors8ls,*hfed2DErrors9ls,*hfed2DErrors10ls,*hfed2DErrors11ls,*hfed2DErrors12ls,
     *hfed2DErrors13ls,*hfed2DErrors14ls,*hfed2DErrors15ls,*hfed2DErrors16ls;
 
-  TH1D *hevent, *hlumi, *horbit, *hbx, *hlumi0, *hbx0, *hbx1;
+  TH1D *hevent, *hlumi, *horbit, *hbx, *hlumi0, *hbx0, *hbx1, *hbx2;
   //TH1D *hbx2,*hbx3,*hbx4,*hbx5,*hbx6,*hbx7,*hbx8,*hbx9,*hbx10,*hbx11,*hbx12; 
   TProfile *htotPixelsls, *hsizels, *herrorType1ls, *herrorType2ls, *havsizels, *htotPixelsbx, 
     *herrorType1bx,*herrorType2bx,*havsizebx,*hsizep;
@@ -696,6 +696,7 @@ void SiPixelRawDump::beginJob() {
   htotPixels = fs->make<TH1D>( "htotPixels", "pixels per event", 10000, -0.5, totMax);
   htotPixels0 = fs->make<TH1D>( "htotPixels0", "pixels per event, zoom low region", 20000, -0.5, 19999.5);
   htotPixels1 = fs->make<TH1D>( "htotPixels1", "pixels >0 per event", 10000, -0.5, totMax);
+  htotPixels2 = fs->make<TH1D>( "htotPixels2", "pixels per event for wrong BX", 10000, -0.5, totMax);
 
   herrors = fs->make<TH1D>( "herrors", "errors per FED", 100, -0.5, 99.5);
   htotErrors = fs->make<TH1D>( "htotErrors", "errors per event", 1000, -0.5, 999.5);
@@ -768,9 +769,10 @@ void SiPixelRawDump::beginJob() {
   hlumi  = fs->make<TH1D>("hlumi", "lumi", 3000,0,3000.);
   hlumi0  = fs->make<TH1D>("hlumi0", "lumi", 3000,0,3000.);
  
-  hbx    = fs->make<TH1D>("hbx",   "bx all",   4000,0,4000.);  
-  hbx0    = fs->make<TH1D>("hbx0",   "bx with hits",   4000,0,4000.);  
+  hbx    = fs->make<TH1D>("hbx",   "bx with hits",   4000,0,4000.);  
+  hbx0    = fs->make<TH1D>("hbx0",   "bx all",   4000,0,4000.);  
   hbx1    = fs->make<TH1D>("hbx1",   "bx pixels",   4000,0,4000.);  
+  hbx2    = fs->make<TH1D>("hbx2",   "bad bx",   4000,0,4000.);  
 
 //   hbx2    = fs->make<TH1D>("hbx2",   "bx",   4000,0,4000.);  
 //   hbx3    = fs->make<TH1D>("hbx3",   "bx",   4000,0,4000.);  
@@ -1019,7 +1021,7 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
   double aveFedSize = 0.;
   int stat1=-1, stat2=-1;
   int fedchannelsize[36];
-
+  bool wrongBX=false;
   int countErrors[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
   countAllEvents++;
@@ -1067,7 +1069,11 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
     unsigned int bxid = 0;
     eventId = MyDecode::header(*header, fedId, printHeaders, bxid);
     //if(fedId = fedIds.first) 
-    if(bx != int(bxid+207) ) cout<<" Inconsistent BX: from event "<<bx<<" from FED "<<bxid<<" forevent "<<eventId<<endl;
+    if(bx != int(bxid) ) { 
+      wrongBX=true;
+      if(printErrors) 
+	cout<<" Inconsistent BX: event "<<bx<<" FED "<<bxid<<" for FED "<<fedId<<" for event "<<eventId<<endl;
+    }
     hbx1->Fill(float(bxid));
 
 
@@ -1342,6 +1348,10 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 
   htotPixels->Fill(float(countPixels));
   htotPixels0->Fill(float(countPixels));
+  if(wrongBX) {
+    htotPixels2->Fill(float(countPixels));
+    hbx2->Fill(float(bx));
+  }
   htotErrors->Fill(float(countErrorsPerEvent));
 
   htotPixelsls->Fill(float(lumiBlock),float(countPixels));

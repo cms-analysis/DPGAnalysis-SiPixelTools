@@ -26,14 +26,14 @@ pwd
 #cmsRun PixClusterAna.py
 #cmsRun PixClusterTest.py
 
-cmsRun PixClusterAna_ZB_251643.py
+#cmsRun PixClusterAna_ZB_251643.py
 #cmsRun PixClusterAna_ZB_247607.py
 #cmsRun PixClusterAna_ZB_248025.py
 
 #cmsRun PixClusterAna_Comm_248025.py
 #cmsRun PixClusterAna_Lumi.py
 
-#cmsRun testTracks.py
+cmsRun testTracks_251643.py
 
 # ls /tmp/dkotlins
 
