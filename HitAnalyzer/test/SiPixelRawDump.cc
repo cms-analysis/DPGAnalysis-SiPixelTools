@@ -1349,6 +1349,8 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
   htotPixels->Fill(float(countPixels));
   htotPixels0->Fill(float(countPixels));
   if(wrongBX) {
+    cout<<" Inconsistent BX: for event "<<eventId<<" for LS "<<lumiBlock
+	<<" for run "<<run<<" for bx "<<bx<<" pix= "<<countPixels<<endl;
     htotPixels2->Fill(float(countPixels));
     hbx2->Fill(float(bx));
   }
