@@ -3,7 +3,8 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("simTest")
 
-process.load("Configuration.Geometry.GeometryIdeal_cff")
+#process.load("Configuration.Geometry.GeometryIdeal_cff")
+process.load("Configuration.Geometry.GeometryRecoDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 
 
@@ -25,8 +26,8 @@ process.MessageLogger = cms.Service("MessageLogger",
 
 process.source = cms.Source("PoolSource",
     fileNames =  cms.untracked.vstring(
-#    '/store/user/kotlinski/mu100/simhits/simHits.root',
-    'file:simHits.root'
+    '/store/user/kotlinski/mu100_v74/simhits/simHits1.root',
+#    'file:simHits.root'
 #    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_72/simhits/simHits1.root'
 #    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_71_pre5/simhits/simHits2.root'
 #    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_71_pre5/simhits/simHits3.root'
@@ -71,14 +72,14 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 # or from DPGAnalysis 
 process.analysis =  cms.EDAnalyzer("PixSimHitsTest",
 	src = cms.string("g4SimHits"),
-	list = cms.string("TrackerHitsPixelBarrelLowTof"),
+#        mode = cms.untracked.string("bpix"),
+#	list = cms.string("TrackerHitsPixelBarrelLowTof"),
 #	list = cms.string("TrackerHitsPixelBarrelHighTof"),
-#	list = cms.string("TrackerHitsPixelEndcapLowTof"),
+        mode = cms.untracked.string("fpix"),
+	list = cms.string("TrackerHitsPixelEndcapLowTof"),
 #	list = cms.string("TrackerHitsPixelEndcapHighTof"),
-        Verbosity = cms.untracked.bool(True),
+        Verbosity = cms.untracked.bool(False),
         phase1 = cms.untracked.bool(False),
-        mode = cms.untracked.string("bpix"),
-#        mode = cms.untracked.string("fpix"),
 )
 
 process.p = cms.Path(process.analysis)
