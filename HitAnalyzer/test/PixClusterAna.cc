@@ -102,7 +102,7 @@ using namespace std;
 //#define L1
 #define HLT
 //#define HI
-#define ROC_EFF
+//#define ROC_EFF
 //#define Lumi
 //#define USE_RESYNCS  // get theinfo about recyncs 
 
@@ -110,7 +110,7 @@ using namespace std;
 //#define INSTLUMI_STUDIES
 //#define VDM_STUDIES
 
-#define BX
+//#define BX
 //#define BX_NEW
 
 
@@ -1350,10 +1350,9 @@ void PixClusterAna::beginJob() {
   //hmbits2 = fs->make<TH1D>("hmbits2","hmbits2",50,-0.5,49.5);
   //hmbits3 = fs->make<TH1D>("hmbits3","hmbits3",50,-0.5,49.5);
 
-  hlt1 = fs->make<TH1D>("hlt1","hlt1",256,-0.5,255.5);
-  hlt2 = fs->make<TH1D>("hlt2","hlt2",256,-0.5,255.5);
-  hlt3 = fs->make<TH1D>("hlt3","hlt3",256,-0.5,255.5);
-
+  hlt1 = fs->make<TH1D>("hlt1","hlt1",512,-0.5,511.5);
+  hlt2 = fs->make<TH1D>("hlt2","hlt2",512,-0.5,511.5);
+  hlt3 = fs->make<TH1D>("hlt3","hlt3",512,-0.5,511.5);
 
   hgz1 = fs->make<TH1D>("hgz1","layer1, clu global z",600,-30.,30.);
   hgz2 = fs->make<TH1D>("hgz2","layer2, clu global z",600,-30.,30.);
@@ -1964,7 +1963,6 @@ void PixClusterAna::analyze(const edm::Event& e,
   //static double pixsum = 0., clussum=0.;
   //static int nsum = 0, lsold=-999, lumiold=0.;
 
-
   // Get event setup 
   edm::ESHandle<TrackerGeometry> geom;
   es.get<TrackerDigiGeometryRecord>().get( geom );
@@ -2078,16 +2076,15 @@ void PixClusterAna::analyze(const edm::Event& e,
     //}
   } // if run
     
-  int bxId = -1;
 #ifdef BX
   //cout<<" for bx "<<bx<<endl;
-  bxId = getbx->find(bx);  // get the bunch type 
+  int bxId = getbx->find(bx);  // get the bunch type 
   //cout<<" id is "<<bxId<<endl;
 #endif // BX
 
 #ifdef BX_NEW
   //cout<<" for bx "<<bx<<endl;
-  bxId = getBX::find(bx);  // get the bunch type 
+  int bxId = getBX::find(bx);  // get the bunch type 
   //cout<<" id is "<<bxId<<endl;
 #endif // BX_NEW
 
@@ -2196,8 +2193,9 @@ void PixClusterAna::analyze(const edm::Event& e,
   //---------------------------------------
   // Analyse HLT
   //bool passHLT1=false,passHLT2=false,passHLT3=false,passHLT4=false,passHLT5=false;
-  bool hlt[256];
-  for(int i=0;i<256;++i) hlt[i]=false;
+  const int hltSize = 512;
+  bool hlt[hltSize];
+  for(int i=0;i<hltSize;++i) hlt[i]=false;
 
 #ifdef HLT
 
@@ -2211,7 +2209,7 @@ void PixClusterAna::analyze(const edm::Event& e,
     //TrigNames.init(*HLTResults);
     const edm::TriggerNames & TrigNames = e.triggerNames(*HLTResults);
 
-    //cout<<TrigNames.triggerNames().size()<<endl;
+    if(TrigNames.triggerNames().size() > hltSize) cout<<" extend the hlt array above "<<hltSize<<endl;
 
     for (unsigned int i = 0; i < TrigNames.triggerNames().size(); i++) {  // loop over trigger
       if(countAllEvents==1) cout<<i<<" "<<TrigNames.triggerName(i)<<endl;
@@ -3417,7 +3415,6 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 //     // Check mod and roc time dependence
 //     if( (lumiBlock%5) == 0 ) { // do every 5 lumi blocks
-
 //       int id=0, lad=0, mod=0, roc=0, layer=0, index=0;
 //       float tmp=0;
 //       // ROCs
@@ -3430,7 +3427,6 @@ void PixClusterAna::analyze(const edm::Event& e,
 //       rocHits[layer-1][id] = tmp;
 //       index = lumiBlock/5;
 //       hrocHits1ls->Fill(float(index),id,tmp);
-
 //       // Layer 2, 
 //       layer=2;
 //       id = 0;
@@ -3460,48 +3456,8 @@ void PixClusterAna::analyze(const edm::Event& e,
 //       moduleHits[layer-1][id] = tmp;
 //       index = lumiBlock/5;
 //       hmoduleHits1ls->Fill(float(index),id,tmp);
-
 //     }
 
-#ifdef SEB
-//     float tmp0=0., tmp3=0., tmp4=0., tmp5=0.;
-//     //if(numOfClustersPerLay1>0) { tmp0 = avCharge1/float(numOfClustersPerLay1); havCharge1->Fill(tmp0);}
-//     //if(numOfClustersPerLay2>0) { tmp0 = avCharge2/float(numOfClustersPerLay2); havCharge1->Fill(tmp0);}
-//     //if(numOfClustersPerLay3>0) { tmp0 = avCharge3/float(numOfClustersPerLay3); havCharge1->Fill(tmp0);}   
-//     if( (numOfClustersPerDisk1 + numOfClustersPerDisk2) > 0 ) 
-//       tmp4 = avCharge4/float(numOfClustersPerDisk2 + numOfClustersPerDisk1);
-//     if( (numOfClustersPerDisk3 + numOfClustersPerDisk4) > 0 ) 
-//       tmp5 = avCharge5/float(numOfClustersPerDisk3 + numOfClustersPerDisk4);
-//     //tmp4 = float(numOfClustersPerDisk2 + numOfClustersPerDisk1);
-//     //tmp5 = float(numOfClustersPerDisk3 + numOfClustersPerDisk4);
-//     havCharge6->Fill(float(tmp4));
-//     havCharge6->Fill(float(tmp5));
-//     float tmp8=1.03;
-//     if( (tmp4+tmp5) > 0. ) tmp8 = tmp5/(tmp4+tmp5);
-//     else tmp8 = 1.05;    
-//     havCharge3->Fill(tmp8);
-//     if(tmp1>0) {
-//       tmp3 = (avCharge1 + avCharge2 + avCharge3)/float(tmp1);  // average over bpix
-//       havCharge2->Fill(tmp3);
-//       //h2d1->Fill(tmp1,tmp3);  // bpix num of clusters vs av cluster charge 
-//       //float tmp6 = float(numberOfDetUnits1 + numberOfDetUnits2 + numberOfDetUnits3); //num of dets
-//       //float tmp7 = float(tmp1)/float(tmp6);  // ave clusters per module
-//       //h2d2->Fill(tmp8,tmp3); // 
-//       //h2d3->Fill(tmp8,tmp1); // 
-//       if(tmp8>1.02) { // no signal in fpix
-// 	havCharge1->Fill(tmp3);
-// 	hclus20->Fill(float(numberOfClusters));
-//       } else if (tmp8>0.05 && tmp8<0.95) { // some signal in both disks
-// 	havCharge4->Fill(tmp3);
-// 	hclus21->Fill(float(numberOfClusters));
-//       } else { // tmp=0., 1., signal in only one disk
-// 	havCharge5->Fill(tmp3);
-// 	hclus22->Fill(float(numberOfClusters));
-//       }
-//     } else {  // no bpix hits
-//       hclus23->Fill(float(numberOfClusters));
-//     }
-#endif // SEB 
 
 #ifdef L1
     //int numberOfClusters0 = numberOfClusters;  // select all clusters
@@ -3528,6 +3484,24 @@ void PixClusterAna::analyze(const edm::Event& e,
     //if(halo)       hclus3->Fill(float(numberOfClusters0));  // bits 36-39
     //if(bit85) hclus18->Fill(float(numberOfClusters0));      // bit85
     //if(minBias) hclus19->Fill(float(numberOfClusters0));    // bits 40,41
+
+    // Check L1 bits with pixel selection
+    if (L1GTRR.isValid()) {
+      //bool l1a = L1GTRR->decision();
+      //cout<<" L1 status :"<<l1a<<" "<<hex;
+      for (unsigned int i = 0; i < L1GTRR->decisionWord().size(); ++i) {
+	int l1flag = L1GTRR->decisionWord()[i]; 
+	int t1flag = L1GTRR->technicalTriggerWord()[i]; 	
+	if( l1flag>0 )        hl1a1->Fill(float(i));
+	if( t1flag>0 && i<64) hl1t1->Fill(float(i));
+      } // for loop
+    } // if l1a
+
+#endif // L1
+
+    // HLT bits
+    for (unsigned int i=0;i<256;i++) if(hlt[i]) hlt3->Fill(float(i));
+    
 // #ifdef BX 
 //     if     (bxId==1)  {hclus30->Fill(float(numberOfClusters0));hdigis30->Fill(float(numberOfPixels));}
 //     else if(bxId==2)  {hclus31->Fill(float(numberOfClusters0));hdigis31->Fill(float(numberOfPixels));}
@@ -3566,28 +3540,10 @@ void PixClusterAna::analyze(const edm::Event& e,
 //     }
 // #endif
 
-    // Check L1 bits with pixel selection
-    if (L1GTRR.isValid()) {
-      //bool l1a = L1GTRR->decision();
-      //cout<<" L1 status :"<<l1a<<" "<<hex;
-      for (unsigned int i = 0; i < L1GTRR->decisionWord().size(); ++i) {
-	int l1flag = L1GTRR->decisionWord()[i]; 
-	int t1flag = L1GTRR->technicalTriggerWord()[i]; 	
-	if( l1flag>0 )        hl1a1->Fill(float(i));
-	if( t1flag>0 && i<64) hl1t1->Fill(float(i));
-      } // for loop
-    } // if l1a
-
-    // HLT bits
-    for (unsigned int i=0;i<256;i++) if(hlt[i]) hlt3->Fill(float(i));
-    
-#endif  // L1
-    
   } // if select event
 
 #endif // HISTOS
-    
-  
+      
 } // end 
 
 //define this as a plug-in

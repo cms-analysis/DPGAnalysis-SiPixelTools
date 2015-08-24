@@ -7,8 +7,9 @@ import HLTrigger.HLTfilters.hltHighLevel_cfi as hlt
 # accept if 'path_1' succeeds
 process.hltfilter = hlt.hltHighLevel.clone(
 # Min-Bias
-#    HLTPaths = ['HLT_Physics_v*'],
-#    HLTPaths = ['HLT_Random_v*'],
+#    HLTPaths = ['HLT_Physics_v*'],  # not in ZB stream
+#    HLTPaths = ['DST_Physics_v*'], useless 
+    HLTPaths = ['HLT_Random_v*'],
 #    HLTPaths = ['HLT_ZeroBias*'],
 #    HLTPaths = ['HLT_L1Tech54_ZeroBias*'],
 # Commissioning:
@@ -45,7 +46,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 #process.MessageLogger.cerr.threshold = 'Debug'
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(-1)
 )
 
 process.TFileService = cms.Service("TFileService",
@@ -57,8 +58,28 @@ process.source = cms.Source("PoolSource",
 #    "file:../../../../../CMSSW_7_1_3/src/DPGAnalysis-SiPixelTools/HitAnalyzer/test/raw.root"
 #    "file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre7/raw/raw2.root"
 #
+
+"root://eoscms//eos/cms/tier0/store/data/Run2015C/ZeroBias/RAW/v1/000/254/227/00000/FA244051-8141-E511-B22B-02163E014153.root",
+"root://eoscms//eos/cms/tier0/store/data/Run2015C/ZeroBias/RAW/v1/000/254/227/00000/F4E6E4DE-8841-E511-922B-02163E014125.root",
+"root://eoscms//eos/cms/tier0/store/data/Run2015C/ZeroBias/RAW/v1/000/254/227/00000/F41B36B8-8841-E511-B34E-02163E01437D.root",
+"root://eoscms//eos/cms/tier0/store/data/Run2015C/ZeroBias/RAW/v1/000/254/227/00000/F0C1F208-9341-E511-B9B1-02163E0145C7.root",
+"root://eoscms//eos/cms/tier0/store/data/Run2015C/ZeroBias/RAW/v1/000/254/227/00000/EEF00C97-8141-E511-9148-02163E0142D9.root",
+
+#"root://eoscms//eos/cms/tier0/store/data/Run2015C/HLTPhysics/RAW/v1/000/254/227/00000/FE743A63-9941-E511-80CC-02163E01437A.root",
+#"root://eoscms//eos/cms/tier0/store/data/Run2015C/Charmonium/RAW/v1/000/254/227/00000/B6FC5492-8841-E511-9CF7-02163E01444F.root",
+#"root://eoscms//eos/cms/tier0/store/data/Run2015C/Charmonium/RAW/v1/000/254/227/00000/88DDB326-8841-E511-A4C2-02163E014595.root",
+
+
+#"/store/data/Run2015B/Cosmics/RAW/v1/000/253/106/00000/98FDF449-DA37-E511-A847-02163E0124BA.root",
+
+#"/store/data/Run2015B/MinimumBias/RAW/v1/000/253/215/00000/04B30F2F-A839-E511-B855-02163E013717.root",
+#"/store/data/Run2015A/MinimumBias/RAW/v1/000/250/411/00000/2227CD91-A61F-E511-8ABC-02163E011D1C.root",
+#"/store/data/Run2015A/MinimumBias/RAW/v1/000/250/411/00000/D2A60B28-A71F-E511-9950-02163E012AEE.root",
+
+#"/store/data/Run2015A/MinimumBias/RAW/v1/000/250/381/00000/0EE60482-6A1F-E511-BF44-02163E013515.root",
+
 #"/store/data/Run2015A/ZeroBias1/RAW/v1/000/248/025/00000/24014201-5C13-E511-AEFB-02163E0139DC.root",
-"/store/data/Run2015A/ZeroBias/RAW/v1/000/248/025/00000/3C78C42B-5C13-E511-9ED3-02163E012385.root",
+#"/store/data/Run2015A/ZeroBias/RAW/v1/000/248/025/00000/3C78C42B-5C13-E511-9ED3-02163E012385.root",
 
 #"/store/data/Run2015A/ZeroBias1/RAW/v1/000/247/324/00000/00C00730-A00D-E511-8273-02163E014565.root",
 #"/store/data/Run2015A/ZeroBias1/RAW/v1/000/247/324/00000/125871B2-6E0D-E511-9212-02163E01365F.root",
@@ -101,18 +122,15 @@ process.source = cms.Source("PoolSource",
 #"/store/data/Run2015A/ZeroBias1/RAW/v1/000/247/324/00000/F686589F-A00D-E511-A3E2-02163E0145E7.root",
 #"/store/data/Run2015A/ZeroBias1/RAW/v1/000/247/324/00000/FABFBF61-530D-E511-B20B-02163E013653.root",
 #
-#"/store/data/Commissioning2015/Cosmics/RAW/v1/000/238/512/00000/027EE06B-D8CE-E411-8E83-02163E012A80.root",
-#"/store/data/Commissioning2015/Cosmics/RAW/v1/000/238/512/00000/02D738CA-D7CE-E411-8500-02163E012576.root",
-#"/store/data/Commissioning2015/Cosmics/RAW/v1/000/238/512/00000/06013B3A-D8CE-E411-9F80-02163E0125E2.root",
-#"/store/data/Commissioning2015/Cosmics/RAW/v1/000/238/512/00000/2E60760C-E9CE-E411-86DA-02163E0134B2.root",
-#"/store/data/Commissioning2015/Cosmics/RAW/v1/000/238/512/00000/3A79D614-D9CE-E411-A8A9-02163E01216F.root",
-#"/store/data/Commissioning2015/Cosmics/RAW/v1/000/238/512/00000/46931501-D8CE-E411-A9C7-02163E0126C4.root",
 
 #  "/store/data/Commissioning2015/Cosmics/RAW/v1/000/234/026/00000/029FB859-68B2-E411-8145-02163E0122AB.root",
 
+
+#"/store/data/Commissioning2015/Cosmics/RAW/v1/000/238/512/00000/027EE06B-D8CE-E411-8E83-02163E012A80.root",
 # fill 2576
 ##    "rfio:/castor/cern.ch/cms/store/data/Run2012A/LP_ZeroBias/RAW/v1/000/193/092/16131715-E893-E111-8CDB-001D09F27003.root",
 #  "rfio:/castor/cern.ch/cms/store/data/Run2012D/MinimumBias/RAW/v1/000/205/718/02285033-FD1B-E211-8F74-001D09F295FB. 
+
     )
 
 )
@@ -129,6 +147,7 @@ process.source = cms.Source("PoolSource",
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('201657:77-201657:9999')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('205217:0-205217:323')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('205718:49-205718:734')
+process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('254227:20-254227:9999')
 
 process.d = cms.EDAnalyzer("SiPixelRawDump", 
     Timing = cms.untracked.bool(False),
@@ -144,13 +163,13 @@ process.d = cms.EDAnalyzer("SiPixelRawDump",
 #    InputLabel = cms.untracked.string('source'),
     CheckPixelOrder = cms.untracked.bool(False),
 # 0 - nothing, 1 - error , 2- data, 3-headers, 4-hex
-    Verbosity = cms.untracked.int32(3),
+    Verbosity = cms.untracked.int32(0),
 # threshold, print fed/channel num of errors if tot_errors > events * PrintThreshold, default 0,001 
     PrintThreshold = cms.untracked.double(0.001)
 )
 
-# process.p = cms.Path(process.hltfilter*process.d)
-process.p = cms.Path(process.d)
+process.p = cms.Path(process.hltfilter*process.d)
+#process.p = cms.Path(process.d)
 
 # process.ep = cms.EndPath(process.out)
 

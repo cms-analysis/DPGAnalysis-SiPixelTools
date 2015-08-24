@@ -158,7 +158,7 @@ class PixClustersWithTracks : public edm::EDAnalyzer {
 
   TH2F *hpvxy, *hclusMap1, *hclusMap2, *hclusMap3; // Z vs PHI
 
-  TH1F *hladder1id,*hladder2id,*hladder3id,*hz1id,*hz2id,*hz3id;
+  TH1D *hladder1id,*hladder2id,*hladder3id,*hz1id,*hz2id,*hz3id;
 
   TH1D *hpvz, *hpvr, *hNumPv, *hNumPvClean;
   TH1D *hPt, *hEta, *hDz, *hD0,*hzdiff;
@@ -346,12 +346,12 @@ void PixClustersWithTracks::beginJob() {
   hcluDetMap3 = fs->make<TH2F>( "hcluDetMap3", "clu det layer 3",
 				416,0.,416.,160,0.,160.);
 
-  hladder1id = fs->make<TH1F>( "hladder1id", "Ladder L1 id", 23, -11.5, 11.5);
-  hladder2id = fs->make<TH1F>( "hladder2id", "Ladder L2 id", 35, -17.5, 17.5);
-  hladder3id = fs->make<TH1F>( "hladder3id", "Ladder L3 id", 47, -23.5, 23.5);
-  hz1id = fs->make<TH1F>( "hz1id", "Z-index id L1", 11, -5.5, 5.5);
-  hz2id = fs->make<TH1F>( "hz2id", "Z-index id L2", 11, -5.5, 5.5);
-  hz3id = fs->make<TH1F>( "hz3id", "Z-index id L3", 11, -5.5, 5.5);
+  hladder1id = fs->make<TH1D>( "hladder1id", "Ladder L1 id", 23, -11.5, 11.5);
+  hladder2id = fs->make<TH1D>( "hladder2id", "Ladder L2 id", 35, -17.5, 17.5);
+  hladder3id = fs->make<TH1D>( "hladder3id", "Ladder L3 id", 47, -23.5, 23.5);
+  hz1id = fs->make<TH1D>( "hz1id", "Z-index id L1", 11, -5.5, 5.5);
+  hz2id = fs->make<TH1D>( "hz2id", "Z-index id L2", 11, -5.5, 5.5);
+  hz3id = fs->make<TH1D>( "hz3id", "Z-index id L3", 11, -5.5, 5.5);
 
   htracksGoodInPix = fs->make<TH1D>( "htracksGoodInPix", "count good tracks in pix",2000,-0.5,1999.5);
   htracksGood = fs->make<TH1D>( "htracksGood", "count good tracks",2000,-0.5,1999.5);

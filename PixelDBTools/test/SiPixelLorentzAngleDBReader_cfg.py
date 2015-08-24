@@ -26,9 +26,10 @@ process.source = cms.Source("EmptySource",
 # iov 6
 #    firstRun = cms.untracked.uint32(206000),
 # iov 7
-#    firstRun = cms.untracked.uint32(208686),
+    firstRun = cms.untracked.uint32(208686),
 #  2015, iov 1
-    firstRun = cms.untracked.uint32(240000),
+#    firstRun = cms.untracked.uint32(240000), # for offline
+#    firstRun = cms.untracked.uint32(250000), # for prompt 
 )
 
 
@@ -49,7 +50,10 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgradePLS1', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'MCRUN2_73_V7', '')
 
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, '74X_dataRun2_Prompt_v0', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'FT_R_74_V15B', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'GR_R_75_V1A', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
@@ -66,14 +70,15 @@ if useLocalDB :
     ),
     toGet = cms.VPSet(
 		cms.PSet(
-#			record = cms.string("SiPixelLorentzAngleRcd"),
-			record = cms.string("SiPixelLorentzAngleSimRcd"),
+			record = cms.string("SiPixelLorentzAngleRcd"),
+#			record = cms.string("SiPixelLorentzAngleSimRcd"),
 
 # 			label = cms.untracked.string("fromAlignment"),
 # 			label = cms.untracked.string("forWidth"),
 
 #			tag = cms.string("SiPixelLorentzAngle_2015_v1")
 #			tag = cms.string("SiPixelLorentzAngle_2015_v2")
+#			tag = cms.string("SiPixelLorentzAngle_2015_v2_hltvalidation")
 #			tag = cms.string("SiPixelLorentzAngle_test") 
 
 #			tag = cms.string("SiPixelLorentzAngle_v02_mc")
@@ -88,7 +93,7 @@ if useLocalDB :
 #			tag = cms.string("SiPixelLorentzAngle_fromAlignment_v1_hlt") 
 
                         # express/prompt, hlt
-                        #tag = cms.string("SiPixelLorentzAngle_2009_v1_express")
+                        tag = cms.string("SiPixelLorentzAngle_2009_v1_express")
                         #tag = cms.string("SiPixelLorentzAngle_2009_v1_hlt")
                         # offline
                         #tag = cms.string("SiPixelLorentzAngle_v00")
@@ -120,7 +125,7 @@ if useLocalDB :
                         #tag = cms.string("SiPixelLorentzAngle_0_106_612_slhc1_mc")
                         #tag = cms.string("SiPixelLorentzAngle_0_106_612_slhc1_offline")
 
-			tag = cms.string("SiPixelLorentzAngleSim_test")
+#			tag = cms.string("SiPixelLorentzAngleSim_test")
 #                       tag = cms.string("SiPixelLorentzAngleSim_0_106_612_slhc1_mc")
 #			tag = cms.string("SiPixelLorentzAngleSim_v02_mc")
 
@@ -135,9 +140,12 @@ if useLocalDB :
 #    connect = cms.string('sqlite_file:../../../../../DB/SiPixelLorentzAngle_2015_v1.db')
 #    connect = cms.string('sqlite_file:../../../../../DB/SiPixelLorentzAngle_2015_v2.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_test.db')
-    connect = cms.string('sqlite_file:SiPixelLorentzAngleSim_test.db')
+#    connect = cms.string('sqlite_file:SiPixelLorentzAngleSim_test.db')
+
 #    connect = cms.string('frontier://FrontierProd/CMS_COND_31X_PIXEL')
-#    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
+    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
+#    connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
+#    connect = cms.string('frontier://FrontierPrep/CMS_COND_PIXEL')
 
   ) # end process
   process.es_prefer_DBReader = cms.ESPrefer("PoolDBESSource","DBReader")
@@ -157,7 +165,7 @@ process.LorentzAngleSimReader = cms.EDAnalyzer("SiPixelLorentzAngleDBReader",
 )
 
 #process.p = cms.Path(process.LorentzAngleReader*process.LorentzAngleSimReader)
-process.p = cms.Path(process.LorentzAngleSimReader)
-#process.p = cms.Path(process.LorentzAngleReader)
+#process.p = cms.Path(process.LorentzAngleSimReader)
+process.p = cms.Path(process.LorentzAngleReader)
 
 

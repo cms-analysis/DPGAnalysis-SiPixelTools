@@ -1,0 +1,24 @@
+#!/usr/bin/perl
+
+#  open(EP,">$filename");
+#  while (<EP>) {
+
+print "start\n";
+
+# open all files with a given extension 
+#while ($filename = <*.dat>) {
+$filename = "out";
+
+  print  "$filename\n";
+  $^I = ".bak";
+  @ARGV = $filename;
+
+  while (<>) {
+# substitute text 
+    s#/store/#"/store/#g;
+    s#.root#.root",#g;
+    print;
+  }
+close($filename);
+
+print "end\n";
