@@ -1072,7 +1072,8 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
     if(bx != int(bxid) ) { 
       wrongBX=true;
       if(printErrors) 
-	cout<<" Inconsistent BX: event "<<bx<<" FED "<<bxid<<" for FED "<<fedId<<" for event "<<eventId<<endl;
+	cout<<" Inconsistent BX: for event "<<event<<" (fed-header event "<<eventId<<") for LS "<<lumiBlock
+	    <<" for run "<<run<<" for bx "<<bx<<" fed bx "<<bxid<<endl;
     }
     hbx1->Fill(float(bxid));
 
@@ -1349,7 +1350,7 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
   htotPixels->Fill(float(countPixels));
   htotPixels0->Fill(float(countPixels));
   if(wrongBX) {
-    cout<<" Inconsistent BX: for event "<<eventId<<" for LS "<<lumiBlock
+    cout<<" Inconsistent BX: for event "<<event<<" (fed-header event "<<eventId<<") for LS "<<lumiBlock
 	<<" for run "<<run<<" for bx "<<bx<<" pix= "<<countPixels<<endl;
     htotPixels2->Fill(float(countPixels));
     hbx2->Fill(float(bx));

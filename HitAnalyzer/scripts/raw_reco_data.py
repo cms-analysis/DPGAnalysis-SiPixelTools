@@ -59,7 +59,7 @@ process.hltfilter = hlt.hltHighLevel.clone(
     throw = False
     )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10))
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1))
 
 process.source = cms.Source("PoolSource",
 # fileNames =  cms.untracked.vstring('file:rawdata.root')
@@ -125,13 +125,13 @@ if useLocalDBError :
 # end 
 
 process.out = cms.OutputModule("PoolOutputModule",
-    fileName =  cms.untracked.string('file:reco.root'),
+    fileName =  cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/data/reco/reco.root'),
+#    fileName =  cms.untracked.string('file:reco.root'),
 #    fileName =  cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/data/tracks/tracks_1_0.root'),
     #outputCommands = cms.untracked.vstring("drop *","keep *_*_*_MyRawToClus") # 13.1MB per 10 events
     splitLevel = cms.untracked.int32(0),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
     outputCommands = process.RECOEventContent.outputCommands,  # 4.9MB per 10 events 
-    outputCommands = process.RECOEventContent.outputCommands,
     dataset = cms.untracked.PSet(
         filterName = cms.untracked.string(''),
         dataTier = cms.untracked.string('RECO')
@@ -179,7 +179,7 @@ process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
 process.reconstruction_step = cms.Path(process.reconstruction)
 process.endjob_step = cms.EndPath(process.endOfProcess)
-process.RECOoutput_step = cms.EndPath(process.output)
+process.RECOoutput_step = cms.EndPath(process.out)
 
 # Schedule definition
 process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.endjob_step,process.RECOoutput_step)

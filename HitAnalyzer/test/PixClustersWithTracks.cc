@@ -631,7 +631,43 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
   int bx        = e.bunchCrossing();
   //int orbit     = e.orbitNumber(); // unused 
 
-  if(PRINT) cout<<"Run "<<run<<" Event "<<event<<" LS "<<lumiBlock<<endl;
+  if(PRINT) cout<<"Run "<<run<<" Event "<<event<<" LS "<<lumiBlock<<" bx "<<endl;
+
+ // Inconsistent BX: for event 20659585 (fed-header event 3882369) for LS 21 for run 254227 for bx 895 pix= 8729
+ // Inconsistent BX: for event 20752843 (fed-header event 3975627) for LS 21 for run 254227 for bx 895 pix= 9257
+ // Inconsistent BX: for event 19980588 (fed-header event 3203372) for LS 21 for run 254227 for bx 895 pix= 14505
+ // Inconsistent BX: for event 20506849 (fed-header event 3729633) for LS 21 for run 254227 for bx 895 pix= 5019
+ // Inconsistent BX: for event 19798240 (fed-header event 3021024) for LS 21 for run 254227 for bx 895 pix= 2283
+ // Inconsistent BX: for event 19962263 (fed-header event 3185047) for LS 21 for run 254227 for bx 895 pix= 1735
+ // Inconsistent BX: for event 20493708 (fed-header event 3716492) for LS 21 for run 254227 for bx 895 pix= 6444
+ // Inconsistent BX: for event 19791851 (fed-header event 3014635) for LS 21 for run 254227 for bx 895 pix= 5652
+ // Inconsistent BX: for event 20150825 (fed-header event 3373609) for LS 21 for run 254227 for bx 895 pix= 9477
+ // Inconsistent BX: for event 19747917 (fed-header event 2970701) for LS 21 for run 254227 for bx 895 pix= 13265
+ // Inconsistent BX: for event 20311581 (fed-header event 3534365) for LS 21 for run 254227 for bx 895 pix= 9403
+ // Inconsistent BX: for event 20444653 (fed-header event 3667437) for LS 21 for run 254227 for bx 895 pix= 9887
+ // Inconsistent BX: for event 20446682 (fed-header event 3669466) for LS 21 for run 254227 for bx 895 pix= 16018
+ // Inconsistent BX: for event 20454700 (fed-header event 3677484) for LS 21 for run 254227 for bx 895 pix= 27807
+ // Inconsistent BX: for event 20011376 (fed-header event 3234160) for LS 21 for run 254227 for bx 895 pix= 8000
+ // Inconsistent BX: for event 20013421 (fed-header event 3236205) for LS 21 for run 254227 for bx 895 pix= 7999
+ // Inconsistent BX: for event 20761275 (fed-header event 3984059) for LS 21 for run 254227 for bx 895 pix= 12280
+ // Inconsistent BX: for event 19948624 (fed-header event 3171408) for LS 21 for run 254227 for bx 895 pix= 9316
+ // Inconsistent BX: for event 20588638 (fed-header event 3811422) for LS 21 for run 254227 for bx 895 pix= 5426
+
+  //int badBx[19] = {
+  //20659585, 20752843, 19980588, 20506849, 19798240, 19962263, 20493708, 19791851, 20150825, 19747917, 
+  //20311581, 20444653, 20446682, 20454700, 20011376, 20013421, 20761275, 19948624, 20588638}; 
+
+
+  //bool select = false;
+  //if(lumiBlock==21) {
+  ////if(event==20659585) cout<<" Event "<<event<<" LS "<<lumiBlock<<endl;
+  //for(int i=0;i<19;++i) {
+  //  if(event==badBx[i]) {select=true; break;}
+  //}      
+  //} else {return;}
+  //if(!select) return;
+
+  //cout<<"Run "<<run<<" Event "<<event<<" LS "<<lumiBlock<<" bx "<<bx<<endl;
 
   hbx0->Fill(float(bx));
   hlumi0->Fill(float(lumiBlock));
@@ -1471,6 +1507,7 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 
 
   if(PRINT) cout<<" event with tracks = "<<trackNumber<<" "<<countNiceTracks<<endl;
+  //cout<<" event with tracks = "<<trackNumber<<" "<<countGoodTracks<<endl;
 
   return;
 
@@ -1606,7 +1643,6 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 #endif // USE_TRAJ
 
 
-  cout<<" event with tracks = "<<trackNumber<<" "<<countGoodTracks<<endl;
 
 } // end 
 
