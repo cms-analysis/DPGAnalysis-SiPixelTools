@@ -6,7 +6,9 @@ process = cms.Process("Test")
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 # process.load("Configuration.StandardSequences.Geometry_cff")
-process.load("Configuration.Geometry.GeometryIdeal_cff")
+#process.load("Configuration.Geometry.GeometryIdeal_cff")
+process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
+process.load('Configuration.StandardSequences.GeometrySimDB_cff')
 process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.Services_cff")
 process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
@@ -44,7 +46,11 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condD
 #process.GlobalTag.globaltag = "MCRUN2_73_V11"
 #process.GlobalTag.globaltag = "DESRUN1_73_V5"
 #process.GlobalTag.globaltag = "MCRUN1_73_V5::All" # OK for condDB
-process.GlobalTag.globaltag = "MCRUN1_73_V5" # needs condDBv2
+#process.GlobalTag.globaltag = "MCRUN1_73_V5" # needs condDBv2
+
+from Configuration.AlCa.autoCond_condDBv2 import autoCond
+#process.GlobalTag.globaltag = autoCond['run2_design']
+process.GlobalTag.globaltag = autoCond['run2_mc']
 
 
 # process.load("SimGeneral.MixingModule.mixNoPU_cfi")
@@ -173,7 +179,8 @@ process.maxEvents = cms.untracked.PSet(
 )
 
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
-       'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_72/simhits/simHits1.root'
+       'file:simHits1.root'
+#       'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_72/simhits/simHits1.root'
 #       'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_71_pre5/simhits/simHits2.root'
 #       'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_71_pre5/simhits/simHits1.root'
 #       'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_71_pre5/simhits/simHits3.root'

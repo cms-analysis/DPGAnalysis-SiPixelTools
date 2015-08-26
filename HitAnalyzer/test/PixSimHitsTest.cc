@@ -564,6 +564,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 hwidth2->Fill(x);
 	 
 	 //SimHitMap2[detId.rawId()].push_back((*isim));
+	 htheta2->Fill(theta);
 	 hglobr2->Fill(gloR);
 	 hglobz2->Fill(gloZ);
 	 hdetphi2->Fill(detPhi);
@@ -581,6 +582,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 hwidth3->Fill(x);
 	 
 	 //SimHitMap2[detId.rawId()].push_back((*isim));
+	 htheta3->Fill(theta);
 	 hglobr3->Fill(gloR);
 	 hglobz3->Fill(gloZ);
 	 hdetphi3->Fill(detPhi);
@@ -648,6 +650,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 //        }
 	 
 	 SimHitMap2[detId.rawId()].push_back((*isim));
+	 htheta2->Fill(theta);
 	 hglobr2->Fill(gloR);
 	 hglobz2->Fill(gloZ);
 	 hdetphi2->Fill(detPhi);
@@ -677,6 +680,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 //        }
 	 
 	 SimHitMap3[detId.rawId()].push_back((*isim));
+	 htheta3->Fill(theta);
 	 hglobr3->Fill(gloR);
 	 hglobz3->Fill(gloZ);
 	 hdetphi3->Fill(detPhi);
@@ -705,6 +709,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 //        }
 	 
 	 SimHitMap4[detId.rawId()].push_back((*isim));
+	 htheta4->Fill(theta);
 	 hglobr4->Fill(gloR);
 	 hglobz4->Fill(gloZ);
 	 hdetphi4->Fill(detPhi);

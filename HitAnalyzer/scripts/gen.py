@@ -52,17 +52,17 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condD
 #process.GlobalTag.globaltag = 'DESIGN72_V5::All'
 
 from Configuration.AlCa.autoCond_condDBv2 import autoCond
-process.GlobalTag.globaltag = autoCond['run2_design']
-#process.GlobalTag.globaltag = autoCond['run2_mc']
+#process.GlobalTag.globaltag = autoCond['run2_design']
+process.GlobalTag.globaltag = autoCond['run2_mc']
 
 ##############################
 # magnetic field in solenoid #
 ##############################
 #
-process.load('Configuration.StandardSequences.MagneticField_38T_cff')
-
+#process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 # Parametrized magnetic field (new mapping, 4.0 and 3.8T)
-process.VolumeBasedMagneticFieldESProducer.useParametrizedTrackerField = True
+#process.VolumeBasedMagneticFieldESProducer.useParametrizedTrackerField = True
+process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
 
 #########################
 # event vertex smearing #
@@ -73,7 +73,7 @@ process.VolumeBasedMagneticFieldESProducer.useParametrizedTrackerField = True
 process.load('IOMC.EventVertexGenerators.VtxSmearedRealistic8TeVCollision_cfi')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10000)
+    input = cms.untracked.int32(10)
 )
 
 # Input source
@@ -102,9 +102,9 @@ process.generator = cms.EDProducer("FlatRandomPtGunProducer",
         MaxPt = cms.double(100.1),
         MinPt = cms.double(99.9),
         PartID = cms.vint32(13,13,13,13),
-        MaxEta = cms.double(2.5),
+        MaxEta = cms.double(3.0),
         MaxPhi = cms.double(3.14159265359),
-        MinEta = cms.double(-2.5),
+        MinEta = cms.double(-3.0),
         MinPhi = cms.double(-3.14159265359) ## in radians
     ),
     Verbosity = cms.untracked.int32(1), ## set to 1 (or greater)  for printouts
@@ -167,8 +167,7 @@ process.o1 = cms.OutputModule(
     ),
 # definition of output file (full path)
     fileName = cms.untracked.string(
-      'simHits.root')
-#      '/afs/cern.ch/user/d/dkotlins/work/MC/mu/pt100_72/simhits/simHits1.root')
+      'simHits1.root')
 )
 #
 process.outpath = cms.EndPath(process.o1)

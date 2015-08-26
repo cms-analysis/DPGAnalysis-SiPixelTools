@@ -9,12 +9,28 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process("TrackTest")
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
-process.load("Configuration.Geometry.GeometryIdeal_cff")
+#process.load("Configuration.Geometry.GeometryIdeal_cff")
+process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
+process.load('Configuration.StandardSequences.GeometrySimDB_cff')
 process.load("Configuration.StandardSequences.MagneticField_38T_cff")
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("Configuration.StandardSequences.Services_cff")
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
+
+#process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
+
+# Choose the global tag here:
+# process.GlobalTag.globaltag = 'MC_71_V7::All'
+# process.GlobalTag.globaltag = 'POSTLS171_V1::All'
+# process.GlobalTag.globaltag = 'PRE_MC_71_V2::All'
+# for 73
+process.GlobalTag.globaltag = "MCRUN1_73_V5::All" # OK for condDB
+from Configuration.AlCa.autoCond_condDBv2 import autoCond
+#process.GlobalTag.globaltag = autoCond['run2_design']
+process.GlobalTag.globaltag = autoCond['run2_mc']
+
+
 
 # for data?
 #process.load('Configuration.StandardSequences.Reconstruction_Data_cff')
@@ -63,12 +79,6 @@ process.source = cms.Source("PoolSource",
     )
 )
 
-# Choose the global tag here:
-# process.GlobalTag.globaltag = 'MC_71_V7::All'
-# process.GlobalTag.globaltag = 'POSTLS171_V1::All'
-# process.GlobalTag.globaltag = 'PRE_MC_71_V2::All'
-# for 73
-process.GlobalTag.globaltag = "MCRUN1_73_V5::All" # OK for condDB
 
 #process.PoolDBESSource = cms.ESSource("PoolDBESSource",
 #    BlobStreamerName = cms.untracked.string('TBufferBlobStreamingService'),
@@ -132,7 +142,8 @@ process.SiStripDigiToRaw.InputModuleLabel = 'simSiPixelDigis'
 process.siPixelDigis.InputLabel = 'siPixelRawData'
 process.siStripDigis.ProductLabel = 'SiStripDigiToRaw'
 # for digi to clu
-process.siPixelClusters.src = 'siPixelDigis'
+#process.siPixelClusters.src = 'siPixelDigis'
+process.siPixelClustersPreSplitting.src = 'siPixelDigis'
 
 # pixel only 
 #process.p1 = cms.Path(process.siPixelRawData)
@@ -150,7 +161,7 @@ process.siPixelClusters.src = 'siPixelDigis'
 #process.p1 = cms.Path(process.siPixelRawData*process.SiStripDigiToRaw*process.siPixelDigis*process.siStripDigis*process.trackerlocalreco*process.offlineBeamSpot)
 
 # runs ok
-#process.p1 = cms.Path(process.siPixelRawData*process.SiStripDigiToRaw*process.siPixelDigis*process.siStripDigis*process.trackerlocalreco*process.offlineBeamSpot*process.MeasurementTrackerEvent)
+process.p1 = cms.Path(process.siPixelRawData*process.SiStripDigiToRaw*process.siPixelDigis*process.siStripDigis*process.trackerlocalreco*process.offlineBeamSpot*process.MeasurementTrackerEvent)
 
 # runs ok
 #process.p1 = cms.Path(process.siPixelRawData*process.SiStripDigiToRaw*process.siPixelDigis*process.siStripDigis*process.trackerlocalreco*process.offlineBeamSpot*process.MeasurementTrackerEvent*process.siPixelClusterShapeCache*process.recopixelvertexing)
@@ -177,7 +188,7 @@ process.myTracking = cms.Sequence(process.InitialStep*
 # run full tracking
 # trackingGlobalReco does not work, needs EarlyMuons for muon seeding.
 # ckftracks & iterTracking does not work as well  (same problem).
-process.p1 = cms.Path(process.siPixelRawData*process.SiStripDigiToRaw*process.siPixelDigis*process.siStripDigis*process.trackerlocalreco*process.offlineBeamSpot*process.siPixelClusterShapeCache*process.recopixelvertexing*process.MeasurementTrackerEvent*process.myTracking*process.vertexreco)
+#process.p1 = cms.Path(process.siPixelRawData*process.SiStripDigiToRaw*process.siPixelDigis*process.siStripDigis*process.trackerlocalreco*process.offlineBeamSpot*process.siPixelClusterShapeCache*process.recopixelvertexing*process.MeasurementTrackerEvent*process.myTracking*process.vertexreco)
 
 #process.p1 = cms.Path(process.siPixelRawData*process.SiStripDigiToRaw*process.siPixelDigis*process.siStripDigis*process.trackerlocalreco*process.offlineBeamSpot*process.siPixelClusterShapeCache*process.recopixelvertexing*process.MeasurementTrackerEvent*process.iterTracking*process.vertexreco)
 
