@@ -40,6 +40,9 @@ das_client.py --limit=0 --query='file dataset=/ZeroBias/Run2015D-v1/RAW run=2560
 #das_client.py --limit=0 --query='file dataset=/Commissioning/Run2015C-PromptReco-v1/RECO run=254227' # YES
 #das_client.py --limit=0 --query='file dataset=/ZeroBias/Run2015C-PromptReco-v1/RECO run=254227' # YES
 #das_client.py --limit=0 --query='file dataset=/ZeroBias/Run2015C-PromptReco-v1/RECO run=254790' # YES
+das_client.py --limit=0 --query='file dataset=/ZeroBias/Run2015C-PromptReco-v1/RECO run=254608' # YES
+#das_client.py --limit=0 --query='file dataset=/ZeroBias/Run2015C-PromptReco-v1/RECO run=254833' # YES
+#das_client.py --limit=0 --query='file dataset=/ZeroBias/Run2015C-PromptReco-v1/RECO run=254905' # YES
 #das_client.py --limit=0 --query='file dataset=/HLTPhysics/Run2015C-PromptReco-v1/RECO run=254227' # YES
 # most data sets are only on /tier0/store/data but DAS still lists them
 

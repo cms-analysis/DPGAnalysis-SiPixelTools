@@ -27,12 +27,16 @@ pwd
 #cmsRun PixClusterAna.py
 #cmsRun PixClusterTest.py
 
+#cmsRun PixClusterAna_ZB_254905.py
+#cmsRun PixClusterAna_ZB_254833.py
+#cmsRun PixClusterAna_ZB_254790.py
+cmsRun PixClusterAna_ZB_254608.py
 #cmsRun PixClusterAna_ZB_254227.py
 #cmsRun PixClusterAna_ZB_251643.py
 #cmsRun PixClusterAna_ZB_247607.py
 #cmsRun PixClusterAna_ZB_248025.py
 
-cmsRun PixClusterAna_Phys_254227.py
+#cmsRun PixClusterAna_Phys_254227.py
 #cmsRun PixClusterAna_Comm_248025.py
 
 #cmsRun PixClusterAna_Lumi.py
