@@ -3,6 +3,17 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process("SiPixelLorentzAngleLoader")
 
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
+
+process.load("Configuration.StandardSequences.MagneticField_cff")
+#process.load("Geometry.CMSCommonData.cmsIdealGeometryXML_cfi")
+process.load("CalibTracker.Configuration.TrackerAlignment.TrackerAlignment_Fake_cff")
+#process.load("Geometry.TrackerGeometryBuilder.trackerGeometry_cfi")
+#process.load("Geometry.TrackerNumberingBuilder.trackerNumberingGeometry_cfi")
+process.load("CondTools.SiPixel.SiPixelGainCalibrationService_cfi")
+process.load("CondCore.DBCommon.CondDBCommon_cfi")
+
+
+
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
 
@@ -285,7 +296,7 @@ process.SiPixelLorentzAngleSim = cms.EDAnalyzer("SiPixelLorentzAngleDBLoader",
 
 
 process.p = cms.Path(
-    process.SiPixelLorentzAngleSim
-#    process.SiPixelLorentzAngle
+#    process.SiPixelLorentzAngleSim
+    process.SiPixelLorentzAngle
     )
 

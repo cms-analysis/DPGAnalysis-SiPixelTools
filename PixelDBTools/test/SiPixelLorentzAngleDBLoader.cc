@@ -10,6 +10,8 @@
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
+//#include "Geometry/Records/interface/TrackerTopologyRcd.h"
+
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -61,11 +63,12 @@ void SiPixelLorentzAngleDBLoader::analyze(const edm::Event& e, const edm::EventS
   edm::ESHandle<TrackerGeometry> pDD;
   es.get<TrackerDigiGeometryRecord>().get( pDD );
 
+
   //Retrieve tracker topology from geometry
   edm::ESHandle<TrackerTopology> tTopo;
   es.get<IdealGeometryRecord>().get(tTopo);
-  //const TrackerTopology* tt = tTopo.product();
-
+  //es.get<TrackerTopologyRcd>().get(tTopo);
+  //const TrackerTopology* const tTopo = tTopoHandle.product();
 
   std::cout<<"SiPixelLorentzAngle"<<" There are "<<pDD->detUnits().size() <<" detectors"<<std::endl;
 	
