@@ -5,7 +5,9 @@
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 #include "DataFormats/DetId/interface/DetId.h"
-#include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
+
+#include "Geometry/Records/interface/TrackerDigiGeometryRecord.h" //???
+
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -13,7 +15,8 @@
 //#include "DataFormats/SiPixelDetId/interface/PixelEndcapName.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h" //???
+#include "Geometry/Records/interface/TrackerTopologyRcd.h"
 
 #include "SiPixelLorentzAngleDBReader.h"
 
@@ -117,12 +120,11 @@ void SiPixelLorentzAngleDBReader::analyze( const edm::Event& e, const edm::Event
 
   //Retrieve tracker topology from geometry
   edm::ESHandle<TrackerTopology> tTopo;
-  iSetup.get<IdealGeometryRecord>().get(tTopo);
+  //iSetup.get<IdealGeometryRecord>().get(tTopo);
+  iSetup.get<TrackerTopologyRcd>().get(tTopo);
   //const TrackerTopology* tt = tTopo.product()
 
  edm::ESHandle<SiPixelLorentzAngle> SiPixelLorentzAngle_; 
-
-
 
  if(useSimRcd_ == true) {
    iSetup.get<SiPixelLorentzAngleSimRcd>().get(SiPixelLorentzAngle_);
