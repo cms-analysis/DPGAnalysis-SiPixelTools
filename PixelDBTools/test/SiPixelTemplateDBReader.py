@@ -9,14 +9,19 @@ process.load("CondCore.DBCommon.CondDBSetup_cfi")
 process.load("CalibTracker.SiPixelESProducers.SiPixelTemplateDBObjectESProducer_cfi")
 
 #Load the correct Magnetic Field
-#magfieldCffStr = "38T"
-magfieldCffStr = "0T"
-process.load("Configuration.StandardSequences.MagneticField_"+magfieldCffStr+"_cff")
+# Control the template selection either through the run number or by explicitly 
+# using the specific mag field map
+#process.load("Configuration.StandardSequences.MagneticField_0T_cff")
+#process.load("Configuration.StandardSequences.MagneticField_38T_cff")
+process.load("Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff")
+#process.load("Configuration.StandardSequences.MagneticField_cff") # same
 
 
 process.source = cms.Source("EmptySource",
 #   firstRun = cms.untracked.uint32(1), # 
    firstRun = cms.untracked.uint32(258000), # for prompt 2015D 
+#   firstRun = cms.untracked.uint32(256004), # 2015D @ 0T
+#   firstRun = cms.untracked.uint32(257058), # 2015D @ 0T
 )
 
 process.maxEvents = cms.untracked.PSet(
@@ -25,7 +30,7 @@ process.maxEvents = cms.untracked.PSet(
 
 
 ## Change to False if you do not want to test the global tag
-testGlobalTag = False
+testGlobalTag = True
 if testGlobalTag :
     #process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
     process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
@@ -39,12 +44,12 @@ else:
       process.CondDBSetup,
         toGet = cms.VPSet(cms.PSet(
           record = cms.string('SiPixelTemplateDBObjectRcd'),
-          tag = cms.string('SiPixelTemplateDBObject0Tv10')
-#          tag = cms.string('SiPixelTemplateDBObject38Tv10')
+#          tag = cms.string('SiPixelTemplateDBObject0Tv10')
+          tag = cms.string('SiPixelTemplateDBObject38Tv10')
         )),
         timetype = cms.string('runnumber'),
-#        connect = cms.string('sqlite_file:../../../../../DB/310815/SiPixelTemplateDBObject_38T_2015_v3.db')
-        connect = cms.string('sqlite_file:../../../../../DB/310815/SiPixelTemplateDBObject_0T_2015_v3.db')
+        connect = cms.string('sqlite_file:../../../../../DB/310815/SiPixelTemplateDBObject_38T_2015_v3.db')
+#        connect = cms.string('sqlite_file:../../../../../DB/310815/SiPixelTemplateDBObject_0T_2015_v3.db')
     )
     process.PoolDBESSource.DBParameters.authenticationPath='.'
     process.PoolDBESSource.DBParameters.messageLevel=0

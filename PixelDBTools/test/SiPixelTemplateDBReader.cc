@@ -26,13 +26,20 @@ void SiPixelTemplateDBReader::beginJob() {
 }
 
 void SiPixelTemplateDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& setup) {
-  //To test with the ESProducer
+  std::string label = "";
   if(testGlobalTag) {
     edm::ESHandle<MagneticField> magfield;
     setup.get<IdealMagneticFieldRecord>().get(magfield);
     GlobalPoint center(0.0, 0.0, 0.0);
     float theMagField = magfield.product()->inTesla(center).mag();    
     std::cout << " Testing global tag at magfield = " << theMagField << std::endl;
+    
+    if(     theMagField>=-0.1 && theMagField<1.0 ) label = "0T";
+    else if(theMagField>=1.0  && theMagField<2.5 ) label = "2T";
+    else if(theMagField>=2.5  && theMagField<3.25) label = "3T";
+    else if(theMagField>=3.25 && theMagField<3.65) label = "35T";
+    else if(theMagField>=3.9  && theMagField<4.1 ) label = "4T";
+    if(label != " ") cout << " use label "<<label<<" to get templates "<<endl;
 
     // if(SiPixTemplDBObjWatcher_.check(setup)) {
     //   edm::ESHandle<SiPixelTemplateDBObject> templateH;
@@ -51,7 +58,7 @@ void SiPixelTemplateDBReader::analyze(const edm::Event& iEvent, const edm::Event
   }
 
   edm::ESHandle<SiPixelTemplateDBObject> templateH;
-  setup.get<SiPixelTemplateDBObjectRcd>().get(templateH);
+  setup.get<SiPixelTemplateDBObjectRcd>().get(label,templateH);
   dbobject = *templateH.product();
 
   //if(hasTriggeredWatcher) {
@@ -190,23 +197,20 @@ void SiPixelTemplateDBReader::printObject() {
       templateVersion = (int) dbobject.sVector()[index+21];
       //templateVersion = (int) dbobject.sVector_[index+21];
       cout<< m<<" template version "<<templateVersion <<endl;
-      cout<<" after the first loop this printout will be nonsense because the skiping is wrong"<<endl;
 
       if(templateVersion<=10) {
-	cout<<"*****WARNING***** This code will not format this template version properly ****WARNING****"
-	    <<templateVersion<<endl;
+	cout<<"*****WARNING***** Use size 21 & 7 for template "<<templateVersion<<endl;
 	sizeSetter=0;
-      } else if(templateVersion<=16) {sizeSetter=1;}
-      else {
-	cout<<"*****WARNING***** This code will not format this template version properly ****WARNING****"
-	    <<templateVersion<<endl;}
+      } else {
+	sizeSetter=1;
+	cout<<"*****WARNING***** Use size 21 & 13 for template "<<templateVersion<<endl;
+      }
       
-      std::cout << "**********************************************************************" << endl;
-      std::cout << "***************      Reading Template ID " << dbobject.sVector()[index+20]
-		<< "\t(" << m+1 << "/" << dbobject.numOfTempl() <<")                 ***************"<<endl;
-      std::cout << "***********************************************************************" <<endl;
+      std::cout << "************************************************************" << endl;
+      std::cout << "***************  Reading Template ID " << dbobject.sVector()[index+20]
+		<< "\t(" << m+1 << "/" << dbobject.numOfTempl() <<")  *******"<<endl;
+      std::cout << "*************************************************************" <<endl;
       
-
       //Header Title
       SiPixelTemplateDBObject::char2float temp;
       for (n=0; n < 20; ++n) {
@@ -219,172 +223,196 @@ void SiPixelTemplateDBReader::printObject() {
       
       entries[0] = (int) dbobject.sVector()[index+3];               // Y
       entries[1] = (int)(dbobject.sVector()[index+4]*dbobject.sVector()[index+5]);   // X
-      
+    
       //Header
-      if(FullPrint) cout << dbobject.sVector()[index]   <<"\t"<< dbobject.sVector()[index+1]  <<"\t"<< dbobject.sVector()[index+2]
-	       <<"\t"<< dbobject.sVector()[index+3]  <<"\t"<< dbobject.sVector()[index+4]  <<"\t"<< dbobject.sVector()[index+5]
-	       <<"\t"<< dbobject.sVector()[index+6]  <<"\t"<< dbobject.sVector()[index+7]  <<"\t"<< dbobject.sVector()[index+8]
-	       <<"\t"<< dbobject.sVector()[index+9]  <<"\t"<< dbobject.sVector()[index+10] <<"\t"<< dbobject.sVector()[index+11]
-	       <<"\t"<< dbobject.sVector()[index+12] <<"\t"<< dbobject.sVector()[index+13] <<"\t"<< dbobject.sVector()[index+14]
-	       <<"\t"<< dbobject.sVector()[index+15] <<"\t"<< dbobject.sVector()[index+16] << std::endl;
+      int templ_version = dbobject.sVector()[index+1];  
+      cout <<" id "     << dbobject.sVector()[index]   
+	   <<" version "<< dbobject.sVector()[index+1]  
+	   <<" B "      << dbobject.sVector()[index+2]
+	   << endl
+	   <<" NTy "    << dbobject.sVector()[index+3]  
+	   <<" NTyx "   << dbobject.sVector()[index+4]  
+	   <<" NTxx "   << dbobject.sVector()[index+5]
+	   <<" Type "   << dbobject.sVector()[index+6]
+	   << endl  
+	   <<" Bias "   << dbobject.sVector()[index+7]  
+	   <<" Temparature "<< dbobject.sVector()[index+8]
+	   <<" Fluence "<< dbobject.sVector()[index+9]  
+	   <<" Qscale " << dbobject.sVector()[index+10] 
+	   <<" s50 "    << dbobject.sVector()[index+11]
+	   << endl
+	   <<" LoYWid " << dbobject.sVector()[index+12] 
+	   <<" LoXWid " << dbobject.sVector()[index+13] 
+	   <<" Ysize "  << dbobject.sVector()[index+14]
+	   <<" Xsize "  << dbobject.sVector()[index+15] 
+	   <<" Zsize "  << dbobject.sVector()[index+16] 
+	   << endl;
       index += 17;
       
+      if(templ_version>17) { // read additional things 
+	cout <<" ss50 "     << dbobject.sVector()[index]   
+	     <<" LoYBias " << dbobject.sVector()[index+1]  
+	     <<" LoXBias " << dbobject.sVector()[index+2]
+	     <<" FBin " << dbobject.sVector()[index+3]
+	     <<" "      << dbobject.sVector()[index+4]
+	     <<" "      << dbobject.sVector()[index+5]
+	     <<endl;
+	index += 6;
+      }
+
       //Loop over By,Bx,Fy,Fx
       for(entry_it=0;entry_it<4;++entry_it) {
 	//Run,costrk,qavg,...,clslenx
-	for(i=0;i < entries[entry_it];++i)
-	  {
-	    if(FullPrint) cout         << dbobject.sVector()[index]    << "\t" << dbobject.sVector()[index+1]  << "\t" << dbobject.sVector()[index+2]
-		      << "\t" << dbobject.sVector()[index+3]  << "\n" << dbobject.sVector()[index+4]  << "\t" << dbobject.sVector()[index+5]
-		      << "\t" << dbobject.sVector()[index+6]  << "\t" << dbobject.sVector()[index+7]  << "\t" << dbobject.sVector()[index+8]
-		      << "\t" << dbobject.sVector()[index+9]  << "\t" << dbobject.sVector()[index+10] << "\t" << dbobject.sVector()[index+11]
-		      << "\n" << dbobject.sVector()[index+12] << "\t" << dbobject.sVector()[index+13] << "\t" << dbobject.sVector()[index+14]
-		      << "\t" << dbobject.sVector()[index+15] << "\t" << dbobject.sVector()[index+16] << "\t" << dbobject.sVector()[index+17]
-		      << "\t" << dbobject.sVector()[index+18] << std::endl;
-	    index+=19;
-	    //YPar
-	    for(j=0;j<2;++j)
-	      {
-		for(k=0;k<5;++k)
-		  {
+	for(i=0;i < entries[entry_it];++i) {
+	  if(FullPrint) 
+	    cout << dbobject.sVector()[index]  //run    
+		 << "\t" << dbobject.sVector()[index+1] // costrk 
+		 << "\t" << dbobject.sVector()[index+2] // costrk
+		 << "\t" << dbobject.sVector()[index+3] // costrk
+
+		 << "\n" << dbobject.sVector()[index+4] // Qav
+		 << "\t" << dbobject.sVector()[index+5] // pixmax
+		 << "\t" << dbobject.sVector()[index+6] //symax
+		 << "\t" << dbobject.sVector()[index+7] // dyone  
+		 << "\t" << dbobject.sVector()[index+8] // syone
+		 << "\t" << dbobject.sVector()[index+9]    //sxmax
+		 << "\t" << dbobject.sVector()[index+10] // dzone
+		 << "\t" << dbobject.sVector()[index+11] //sxone
+
+		 << "\n" << dbobject.sVector()[index+12] //dytwo
+		 << "\t" << dbobject.sVector()[index+13] //sytwo
+		 << "\t" << dbobject.sVector()[index+14] //dxtwo
+		 << "\t" << dbobject.sVector()[index+15] //sxtwo
+		 << "\t" << dbobject.sVector()[index+16] //qmin
+		 << "\t" << dbobject.sVector()[index+17] // clsleny
+		 << "\t" << dbobject.sVector()[index+18] // clslenx
+		 << std::endl;
+	  index+=19;
+	  //YPar
+	  for(j=0;j<2;++j) {
+	    for(k=0;k<5;++k) {
+	      if(FullPrint) cout << dbobject.sVector()[index] << "\t";
+	      ++index;
+	    }
+	    if(FullPrint) cout << std::endl;
+	  }
+	  //YTemp
+	  for(j=0;j<9;++j) {
+	    for(k=0;k<tysize[sizeSetter];++k) {
+	      if(FullPrint) cout << dbobject.sVector()[index] << "\t";
+	      ++index;
+	    }
+	    if(FullPrint) cout << std::endl;
+	  }
+	  //XPar
+	  for(j=0;j<2;++j) {
+	    for(k=0;k<5;++k) {
+	      if(FullPrint) cout << dbobject.sVector()[index] << "\t";
+	      ++index;
+	    }
+	    if(FullPrint) cout << std::endl;
+	  }
+	  //XTemp
+	  for(j=0;j<9;++j)
+	    {
+	      for(k=0;k<txsize[sizeSetter];++k)
+		{
+		  if(FullPrint) cout << dbobject.sVector()[index] << "\t";
+		  ++index;
+		}
+	      if(FullPrint) cout << std::endl;
+	    }
+	  //Y average reco params  4*4 yavg, yrms,...
+	  for(j=0;j<4;++j)
+	    {
+	      for(k=0;k<4;++k)
+		{
+		  if(FullPrint) cout << dbobject.sVector()[index] << "\t";
+		  ++index;
+		}
+	      if(FullPrint) cout << std::endl;
+	    }
+	  //Yflpar  4*6 yflpar 
+	  for(j=0;j<4;++j)
+	    {
+	      for(k=0;k<6;++k)
+		{
+		  if(FullPrint) cout << dbobject.sVector()[index] << "\t";
+		  ++index;
+		}
+	      if(FullPrint) cout << std::endl;
+	    }
+	  //X average reco params
+	  for(j=0;j<4;++j)  // 4*4 xavg
+	    {
+	      for(k=0;k<4;++k)
+		{
+		  if(FullPrint) cout << dbobject.sVector()[index] << "\t";
+		  ++index;
+		}
+	      if(FullPrint) cout << std::endl;
+	    }
+	  //Xflpar  4*6 xflpar
+	  for(j=0;j<4;++j)
+	    {
+	      for(k=0;k<6;++k)
+		{
+		  if(FullPrint) cout << dbobject.sVector()[index] << "\t";
+		  ++index;
+		}
+	      if(FullPrint) cout << std::endl;
+	    }
+	  //Chi2X,Y  4*4
+	  for(j=0;j<4;++j) {
+	      for(k=0;k<2;++k) {
+		  for(l=0;l<2;++l) {
 		    if(FullPrint) cout << dbobject.sVector()[index] << "\t";
 		    ++index;
 		  }
-		if(FullPrint) cout << std::endl;
 	      }
-	    //YTemp
-	    for(j=0;j<9;++j)
-	      {
-		for(k=0;k<tysize[sizeSetter];++k)
-		  {
-		    if(FullPrint) cout << dbobject.sVector()[index] << "\t";
-		    ++index;
-		  }
-		if(FullPrint) cout << std::endl;
-	      }
-	    //XPar
-	    for(j=0;j<2;++j)
-	      {
-		for(k=0;k<5;++k)
-		  {
-		    if(FullPrint) cout << dbobject.sVector()[index] << "\t";
-		    ++index;
-		  }
-		if(FullPrint) cout << std::endl;
-	      }
-	    //XTemp
-	    for(j=0;j<9;++j)
-	      {
-		for(k=0;k<txsize[sizeSetter];++k)
-		  {
-		    if(FullPrint) cout << dbobject.sVector()[index] << "\t";
-		    ++index;
-		  }
-		if(FullPrint) cout << std::endl;
-	      }
-	    //Y average reco params
-	    for(j=0;j<4;++j)
-	      {
-		for(k=0;k<4;++k)
-		  {
-		    if(FullPrint) cout << dbobject.sVector()[index] << "\t";
-		    ++index;
-		  }
-		if(FullPrint) cout << std::endl;
-	      }
-	    //Yflpar
-	    for(j=0;j<4;++j)
-	      {
-		for(k=0;k<6;++k)
-		  {
-		    if(FullPrint) cout << dbobject.sVector()[index] << "\t";
-		    ++index;
-		  }
-		if(FullPrint) cout << std::endl;
-	      }
-	    //X average reco params
-	    for(j=0;j<4;++j)
-	      {
-		for(k=0;k<4;++k)
-		  {
-		    if(FullPrint) cout << dbobject.sVector()[index] << "\t";
-		    ++index;
-		  }
-		if(FullPrint) cout << std::endl;
-	      }
-	    //Xflpar
-	    for(j=0;j<4;++j)
-	      {
-		for(k=0;k<6;++k)
-		  {
-		    if(FullPrint) cout << dbobject.sVector()[index] << "\t";
-		    ++index;
-		  }
-		if(FullPrint) cout << std::endl;
-	      }
-	    //Chi2X,Y
-	    for(j=0;j<4;++j)
-	      {
-		for(k=0;k<2;++k)
-		  {
-		    for(l=0;l<2;++l)
-		      {
-			if(FullPrint) cout << dbobject.sVector()[index] << "\t";
-			++index;
-		      }
-		  }
-		if(FullPrint) cout << std::endl;
-	      }
-	    //Y average Chi2 params
-	    for(j=0;j<4;++j)
-	      {
-		for(k=0;k<4;++k)
-		  {
-		    if(FullPrint) cout << dbobject.sVector()[index] << "\t";
-		    ++index;
-		  }
-		if(FullPrint) cout << std::endl;
-	      }
-	    //X average Chi2 params
-	    for(j=0;j<4;++j)
-	      {
-		for(k=0;k<4;++k)
-		  {
-		    if(FullPrint) cout << dbobject.sVector()[index] << "\t";
-		    ++index;
-		  }
-		if(FullPrint) cout << std::endl;
-	      }
-	    //Y average reco paramif(FullPrint) cout for CPE Generic
-	    for(j=0;j<4;++j)
-	      {
-		for(k=0;k<4;++k)
-		  {
-		    if(FullPrint) cout << dbobject.sVector()[index] << "\t";
-		    ++index;
-		  }
-		if(FullPrint) cout << std::endl;
-	      }
-	    //X average reco paramif(FullPrint) cout for CPE Generic
-	    for(j=0;j<4;++j)
-	      {
-		for(k=0;k<4;++k)
-		  {
-		    if(FullPrint) cout << dbobject.sVector()[index] << "\t";
-		    ++index;
-		  }
-		if(FullPrint) cout << std::endl;
-	      }
-	    //SpareX,Y
-	    for(j=0;j<20;++j)
-	      {
+	      if(FullPrint) cout << std::endl;
+	  }
+	  //Y average Chi2 params 4*4
+	  for(j=0;j<4;++j) {
+	      for(k=0;k<4;++k) {
 		if(FullPrint) cout << dbobject.sVector()[index] << "\t";
 		++index;
-		if(j==9 ||j==19) if(FullPrint) cout << std::endl;
 	      }
+	      if(FullPrint) cout << std::endl;
 	  }
+	  //X average Chi2 params 4*4
+	  for(j=0;j<4;++j) {
+	      for(k=0;k<4;++k) {
+		if(FullPrint) cout << dbobject.sVector()[index] << "\t";
+		++index;
+	      }
+	      if(FullPrint) cout << std::endl;
+	  }
+	  //Y average reco paramif(FullPrint) cout for CPE Generic 4*4
+	  for(j=0;j<4;++j) {
+	    for(k=0;k<4;++k) {
+	      if(FullPrint) cout << dbobject.sVector()[index] << "\t";
+	      ++index;
+	    }
+	    if(FullPrint) cout << std::endl;
+	  }
+	  //X average reco paramif(FullPrint) cout for CPE Generic 4*4
+	  for(j=0;j<4;++j) {
+	    for(k=0;k<4;++k) {
+	      if(FullPrint) cout << dbobject.sVector()[index] << "\t";
+	      ++index;
+	    }
+	    if(FullPrint) cout << std::endl;
+	  }
+	  //SpareX,Y  2 * 10
+	  for(j=0;j<20;++j) {
+	    if(FullPrint)  cout << dbobject.sVector()[index] << "\t";
+	    ++index; 
+	    if(j==9 || j==19) if(FullPrint) cout << std::endl;
+	  } 
+	} 
       }
-    }
+  }
 }
 
 //--------------------------------------------------
