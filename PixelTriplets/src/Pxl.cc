@@ -2156,27 +2156,10 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   const double pihalf = 2*atan(1);
   const double sqrtpihalf = sqrt(pihalf);
 
-  // Trigger information, do only if the container is defined
-  if(_triggerSrc.label()!="") { 
-    edm::Handle<edm::TriggerResults> triggerResults;
-    iEvent.getByLabel(_triggerSrc, triggerResults);
-    assert(triggerResults->size() == HLTConfig.size());
-
-    const edm::TriggerNames& triggerNames = iEvent.triggerNames(*triggerResults);
-    for(unsigned int i = 0; i < triggerResults->size(); ++i)
-    {
-      std::string triggerName = triggerNames.triggerName(i);
-      std::pair<int, int> prescale = HLTConfig.prescaleValues(iEvent, iSetup, triggerName);
-      std::cout << i << ": " << triggerName << "; " << prescale.first << ", " << prescale.second << std::endl;
-    }
-  }
-
   myCounters::neve++;
-
   if( myCounters::prevrun != iEvent.run() ){
 
     time_t unixZeit = iEvent.time().unixTime();
-
     cout << "new run " << iEvent.run();
     cout << ", LumiBlock " << iEvent.luminosityBlock();
     cout << " taken " << ctime(&unixZeit); // ctime has endline
@@ -2185,10 +2168,10 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   }// new run
 
-  int idbg = 0;
+  int idbg = 0;  // printout for the first few events
   if( myCounters::neve < 2 ) idbg = 1;
 
-  int jdbg = 0;
+  int jdbg = 0; // special printout
 
   if( idbg ) {
     cout << endl;
@@ -2197,6 +2180,28 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     cout << ", event " << iEvent.eventAuxiliary().event();
     time_t unixZeit = iEvent.time().unixTime();
     cout << ", taken " << ctime(&unixZeit); // ctime has endline
+  }
+
+
+  //----------------- HLT -------------------------------------------
+
+  // Trigger information, do only if the container is defined
+  if(_triggerSrc.label()!="" && idbg==1 ) { 
+    edm::Handle<edm::TriggerResults> triggerResults;
+    iEvent.getByLabel(_triggerSrc, triggerResults);
+    assert(triggerResults->size() == HLTConfig.size());
+
+    const edm::TriggerNames& triggerNames = iEvent.triggerNames(*triggerResults);
+    for(unsigned int i = 0; i < triggerResults->size(); ++i)
+    {
+      std::string triggerName = triggerNames.triggerName(i);
+      // this does not work in 74X
+      //std::pair<int, int> prescale = HLTConfig.prescaleValues(iEvent, iSetup, triggerName);
+      // this compiles&runs but I am not sure how to use it?
+      std::pair<std::vector<std::pair<std::basic_string<char>, int> >, int> 
+	prescale = HLTConfig.prescaleValuesInDetail(iEvent, iSetup, triggerName);
+      std::cout << i << ": " << triggerName << ", " << prescale.second << std::endl;
+    }
   }
 
   //--------------------------------------------------------------------

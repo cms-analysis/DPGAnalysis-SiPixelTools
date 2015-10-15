@@ -112,4 +112,5 @@ int fittp0( char* hs ) {
 
     h->Draw("histepsame");  // data again on top
   }
+  return 0;
 }

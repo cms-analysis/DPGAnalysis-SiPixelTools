@@ -56,7 +56,7 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'GR_R_75_V1A', '')
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
 
@@ -79,7 +79,8 @@ if useLocalDB :
 
 #			tag = cms.string("SiPixelLorentzAngle_2015_v1")
 #			tag = cms.string("SiPixelLorentzAngle_2015_v2")
-			tag = cms.string("SiPixelLorentzAngle_2015_v3")
+#			tag = cms.string("SiPixelLorentzAngle_2015_v3")
+			tag = cms.string("SiPixelLorentzAngle_2015_v4")
 #			tag = cms.string("SiPixelLorentzAngle_2015_v2_hltvalidation")
 #			tag = cms.string("SiPixelLorentzAngle_test") 
 
@@ -134,14 +135,15 @@ if useLocalDB :
 		),
 	),
 
-#    connect = cms.string('sqlite_file:la.db')
+#    connect = cms.string('sqlite_file:SiPixelLorentzAngle_2015_v4.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_forWidth_v01_mc.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_forWidth_v01.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_fromAlignment_v01_mc.db')
 #    connect = cms.string('sqlite_file:../../../CondTools/SiPixel/test/siPixelLorentzAngle.db')
 #    connect = cms.string('sqlite_file:../../../../../DB/SiPixelLorentzAngle_2015_v1.db')
 #    connect = cms.string('sqlite_file:../../../../../DB/SiPixelLorentzAngle_2015_v2.db')
-    connect = cms.string('sqlite_file:../../../../../DB/310815/SiPixelLorentzAngle_2015_v3.db')
+#    connect = cms.string('sqlite_file:../../../../../DB/310815/SiPixelLorentzAngle_2015_v3.db')
+#    connect = cms.string('sqlite_file:../../../../../DB/210915/SiPixelLorentzAngle_2015_v4.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_test.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngleSim_test.db')
 
@@ -149,6 +151,8 @@ if useLocalDB :
 #    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
 #    connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
 #    connect = cms.string('frontier://FrontierPrep/CMS_COND_PIXEL')
+#    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
+    connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
 
   ) # end process
   process.es_prefer_DBReader = cms.ESPrefer("PoolDBESSource","DBReader")

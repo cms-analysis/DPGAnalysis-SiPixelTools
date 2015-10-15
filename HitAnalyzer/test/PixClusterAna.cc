@@ -898,8 +898,10 @@ class PixClusterAna : public edm::EDAnalyzer {
   TH2F *hDetsMap1, *hDetsMap2, *hDetsMap3;    // all modules
   TH2F *hDetMap1,  *hDetMap2,  *hDetMap3;    // all modules
   TH2F *hpDetMap1, *hpDetMap2, *hpDetMap3; // all modules
+  TH2F *hl1DetMap1, *hl1DetMap2, *hl1DetMap3; // link 1
+  TH2F *hl2DetMap1, *hl2DetMap2, *hl2DetMap3; // link 2
   TH2F *hsizeDetMap1, *hsizeDetMap2, *hsizeDetMap3;
-  TH2F *hpDetMapE1, *hpDetMapE2, *hpDetMapE3; // all modules
+  //TH2F *hpDetMapE1, *hpDetMapE2, *hpDetMapE3; // all modules
   //TH2F *hsizeXDetMap1, *hsizeXDetMap2, *hsizeXDetMap3;
   //TH2F *hsizeYDetMap1, *hsizeYDetMap2, *hsizeYDetMap3;
 
@@ -1395,16 +1397,36 @@ void PixClusterAna::beginJob() {
   hpDetMap3 = fs->make<TH2F>("hpDetMap3"," pixels per event",
 			     9,-4.5,4.5,45,-22.5,22.5);
   hpDetMap3->SetOption("colz");
-  // for edge pixels 
-  hpDetMapE1 = fs->make<TH2F>("hpDetMapE1"," edge pixels per event",
+  // split per link 
+  hl1DetMap1 = fs->make<TH2F>("hl1DetMap1"," pixels per event",
 			     9,-4.5,4.5,21,-10.5,10.5);
-  hpDetMapE1->SetOption("colz");
-  hpDetMapE2 = fs->make<TH2F>("hpDetMapE2"," edge pixels per event",
+  hl1DetMap1->SetOption("colz");
+  hl1DetMap2 = fs->make<TH2F>("hl1DetMap2"," pixels per event",
 			     9,-4.5,4.5,33,-16.5,16.5);
-  hpDetMapE2->SetOption("colz");
-  hpDetMapE3 = fs->make<TH2F>("hpDetMapE3"," edge pixels per event",
+  hl1DetMap2->SetOption("colz");
+  hl1DetMap3 = fs->make<TH2F>("hl1DetMap3"," pixels per event",
 			     9,-4.5,4.5,45,-22.5,22.5);
-  hpDetMapE3->SetOption("colz");
+  hl1DetMap3->SetOption("colz");
+
+  hl2DetMap1 = fs->make<TH2F>("hl2DetMap1"," pixels per event",
+			     9,-4.5,4.5,21,-10.5,10.5);
+  hl2DetMap1->SetOption("colz");
+  hl2DetMap2 = fs->make<TH2F>("hl2DetMap2"," pixels per event",
+			     9,-4.5,4.5,33,-16.5,16.5);
+  hl2DetMap2->SetOption("colz");
+  hl2DetMap3 = fs->make<TH2F>("hl2DetMap3"," pixels per event",
+			     9,-4.5,4.5,45,-22.5,22.5);
+  hl2DetMap3->SetOption("colz");
+  // for edge pixels 
+  //hpDetMapE1 = fs->make<TH2F>("hpDetMapE1"," edge pixels per event",
+  //			     9,-4.5,4.5,21,-10.5,10.5);
+  //hpDetMapE1->SetOption("colz");
+  //hpDetMapE2 = fs->make<TH2F>("hpDetMapE2"," edge pixels per event",
+  //			     9,-4.5,4.5,33,-16.5,16.5);
+  //hpDetMapE2->SetOption("colz");
+  //hpDetMapE3 = fs->make<TH2F>("hpDetMapE3"," edge pixels per event",
+  //		     9,-4.5,4.5,45,-22.5,22.5);
+  //hpDetMapE3->SetOption("colz");
 
   // clu size per det
   hsizeDetMap1 = fs->make<TH2F>("hsizeDetMap1"," cluster size",
@@ -2563,16 +2585,16 @@ void PixClusterAna::analyze(const edm::Event& e,
       if(pixelsVec.size()>maxPixPerClu) maxPixPerClu = pixelsVec.size();
  
       for (unsigned int i = 0;  i < pixelsVec.size(); ++i) { // loop over pixels
-	//cout<<i;
 	bool isBig=false;
 	sumPixels++;
 	numberOfPixels++;
 	float pixx = pixelsVec[i].x; // index as float=iteger, row index
 	float pixy = pixelsVec[i].y; // same, col index
 	float adc = (float(pixelsVec[i].adc)/1000.);
-#ifdef ROC_EFF
+
 	int roc = rocId(int(pixy),int(pixx));  // column, row
-#endif	
+	int link = int(roc/8); // link 0 & 1
+
 	//int chan = PixelChannelIdentifier::pixelToChannel(int(pixx),int(pixy));
 
 	bool bigInX = topol->isItBigPixelInX(int(pixx));
@@ -2594,7 +2616,9 @@ void PixClusterAna::analyze(const edm::Event& e,
 	    hpixcharge1->Fill(adc);
 	    hpixDetMap1->Fill(pixy,pixx);
 	    hpDetMap1->Fill(float(module),float(ladder));
-	    if(isBig) hpDetMapE1->Fill(float(module),float(ladder));
+	    if(link==0)      hl1DetMap1->Fill(float(module),float(ladder));
+	    else if(link==1) hl2DetMap1->Fill(float(module),float(ladder));
+	    //if(isBig) hpDetMapE1->Fill(float(module),float(ladder));
 	    //module1[int(pixx)][int(pixy)]++;
 	    
 	    hpcols1->Fill(pixy);
@@ -2677,7 +2701,9 @@ void PixClusterAna::analyze(const edm::Event& e,
 	    hpixcharge2->Fill(adc);
 	    hpixDetMap2->Fill(pixy,pixx);
 	    hpDetMap2->Fill(float(module),float(ladder));
-	    if(isBig) hpDetMapE2->Fill(float(module),float(ladder));
+	    if(link==0)      hl1DetMap2->Fill(float(module),float(ladder));
+	    else if(link==1) hl2DetMap2->Fill(float(module),float(ladder));
+	    //if(isBig) hpDetMapE2->Fill(float(module),float(ladder));
 	    //module2[int(pixx)][int(pixy)]++;
 
  	    hpixchar2->Fill(zPos,adc);
@@ -2765,7 +2791,9 @@ void PixClusterAna::analyze(const edm::Event& e,
 	    hpixDetMap3->Fill(pixy,pixx);
 	    //if(ladder==l3ldr&&module==l3mod) hpixDetMap30->Fill(pixy,pixx,adc);
 	    hpDetMap3->Fill(float(module),float(ladder));
-	    if(isBig) hpDetMapE3->Fill(float(module),float(ladder));
+	    if(link==0)      hl1DetMap3->Fill(float(module),float(ladder));
+	    else if(link==1) hl2DetMap3->Fill(float(module),float(ladder));
+	    //if(isBig) hpDetMapE3->Fill(float(module),float(ladder));
 	    //module3[int(pixx)][int(pixy)]++;
 	    
 	    hpcols3->Fill(pixy);
@@ -2881,7 +2909,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 	edgeInY = topol->isItEdgePixelInY(int(pixy));
 	
 	if(PRINT) cout<<i<<" "<<pixx<<" "<<pixy<<" "<<adc<<" "<<bigInX<<" "<<bigInY
-		      <<" "<<edgeInX<<" "<<edgeInY<<endl;
+		      <<" "<<edgeInX<<" "<<edgeInY<<" "<<isBig<<endl;
 	
 	if(edgeInX) edgeHitX2=true;
 	if(edgeInY) edgeHitY2=true; 

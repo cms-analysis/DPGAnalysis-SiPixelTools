@@ -6,7 +6,7 @@ source /afs/cern.ch/cms/LCG/LCG-2/UI/cms_ui_env.csh
 #rfdir /castor/cern.ch/cms/store/data
 
 setenv SCRAM_ARCH slc6_amd64_gcc491
-cd /afs/cern.ch/user/d/dkotlins/public/CMSSW/CMSSW_7_4_5/src
+cd /afs/cern.ch/user/d/dkotlins/public/CMSSW/CMSSW_7_4_11/src
 
 #source /afs/cern.ch/cms/sw/cmsset_default.csh
 source /afs/cern.ch/project/gd/apps/cms/cmsset_default.csh   # this works with gcc462
@@ -19,7 +19,7 @@ pwd
 
 #  RAW
 # cmsRun runHotPixels_cfg.py 
-#cmsRun runRawDumper.py 
+cmsRun runRawDumper.py 
 #cmsRun runRawDumper_lumi.py 
 # cmsRun runRawToDigi_cfg.py 
 # cmsRun runFedErrorDumper.py
@@ -27,12 +27,16 @@ pwd
 #cmsRun PixClusterAna.py
 #cmsRun PixClusterTest.py
 
+#cmsRun PixClusterAna_ZB_254905.py
+#cmsRun PixClusterAna_ZB_254833.py
+#cmsRun PixClusterAna_ZB_254790.py
+#cmsRun PixClusterAna_ZB_254608.py
 #cmsRun PixClusterAna_ZB_254227.py
 #cmsRun PixClusterAna_ZB_251643.py
 #cmsRun PixClusterAna_ZB_247607.py
 #cmsRun PixClusterAna_ZB_248025.py
 
-cmsRun PixClusterAna_Phys_254227.py
+#cmsRun PixClusterAna_Phys_254227.py
 #cmsRun PixClusterAna_Comm_248025.py
 
 #cmsRun PixClusterAna_Lumi.py

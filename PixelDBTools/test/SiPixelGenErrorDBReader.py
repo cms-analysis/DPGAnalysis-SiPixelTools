@@ -47,20 +47,26 @@ if testTag :
        toGet = cms.VPSet(
          cms.PSet(
            record = cms.string('SiPixelGenErrorDBObjectRcd'),
-           tag = cms.string('SiPixelGenErrorDBObject_38T_v1_offline')
+#           tag = cms.string('SiPixelGenErrorDBObject_38T_v1_offline')
 #           tag = cms.string('SiPixelGenErrorDBObject_38T_v2_express')
 #           tag = cms.string('SiPixelGenErrorDBObject_38T_2015_v1_hltvalidation')
 #           tag = cms.string('SiPixelGenErrorDBObject_0T_2015_v1_hltvalidation')
+#           tag = cms.string('SiPixelGenErrorsDBObject_38T_2015_v4')
 #           tag = cms.string('SiPixelGenErrorDBObject38Tv1')
 #           tag = cms.string('SiPixelGenErrorDBObject38Tv3')
+#           tag = cms.string('SiPixelGenErrorDBObject0Tv10')
+           tag = cms.string('SiPixelGenErrorDBObject0Tv3')
          )),
         #timetype = cms.string('runnumber'),
         #connect = cms.string('sqlite_file:../../../../../DB/siPixelGenErrors38T_v1_mc.db')
         #connect = cms.string('sqlite_file:../../../../../DB/siPixelGenErrors38T_2012_IOV7_v1.db')
         #connect = cms.string('sqlite_file:../../../../../DB/siPixelGenErrors38T_IOV8a.db')
+#        connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/public/CMSSW/DB/310815/siPixelGenErrorsNM0Tv10.db')
+        connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/public/CMSSW/DB/210915/SiPixelGenErrorDBObject_38T_2015_v4.db')
+#        connect = cms.string('sqlite_file:SiPixelGenErrorsDBObject_38T_2015_v4.db')
         #connect = cms.string('frontier://FrontierProd/CMS_COND_31X_PIXEL')
         #connect = cms.string('frontier://FrontierProd/CMS_COND_PIXEL_000')
-        connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
+        #connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
         #connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
         #connect = cms.string('frontier://FrontierPrep/CMS_COND_PIXEL')
 
