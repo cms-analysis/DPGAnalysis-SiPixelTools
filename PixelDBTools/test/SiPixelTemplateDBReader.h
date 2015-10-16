@@ -28,15 +28,11 @@ class SiPixelTemplateDBReader : public edm::EDAnalyzer {
       virtual void endJob() ;
       void printObject() ;
 		
-      //edm::ESWatcher<SiPixelTemplateDBObjectESProducerRcd>  SiPixTemplDBObjectWatcher_;
-      //edm::ESWatcher<SiPixelTemplateDBObjectRcd>  SiPixTemplDBObjWatcher_;
-			
       std::string theTemplateCalibrationLocation;
       bool theDetailedTemplateDBErrorOutput;
       bool theFullTemplateDBOutput;
-      bool testGlobalTag;
+      bool useBFieldFromGlobalTag;
       SiPixelTemplateDBObject dbobject;
-      //bool hasTriggeredWatcher;			
 
 };
 

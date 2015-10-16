@@ -16,7 +16,7 @@ SiPixelTemplateDBReader::SiPixelTemplateDBReader(const edm::ParameterSet& iConfi
 	theTemplateCalibrationLocation( iConfig.getParameter<std::string>("siPixelTemplateCalibrationLocation") ),
 	theDetailedTemplateDBErrorOutput( iConfig.getParameter<bool>("wantDetailedTemplateDBErrorOutput") ),
 	theFullTemplateDBOutput( iConfig.getParameter<bool>("wantFullTemplateDBOutput") ),
-	testGlobalTag( iConfig.getParameter<bool>("TestGlobalTag") ) {
+	useBFieldFromGlobalTag( iConfig.getParameter<bool>("useBFieldFromGlobalTag") ) {
 }
 
 SiPixelTemplateDBReader::~SiPixelTemplateDBReader() {
@@ -27,7 +27,8 @@ void SiPixelTemplateDBReader::beginJob() {
 
 void SiPixelTemplateDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& setup) {
   std::string label = "";
-  if(testGlobalTag) {
+
+  if(useBFieldFromGlobalTag) {
     edm::ESHandle<MagneticField> magfield;
     setup.get<IdealMagneticFieldRecord>().get(magfield);
     GlobalPoint center(0.0, 0.0, 0.0);
@@ -41,20 +42,8 @@ void SiPixelTemplateDBReader::analyze(const edm::Event& iEvent, const edm::Event
     else if(theMagField>=3.9  && theMagField<4.1 ) label = "4T";
     if(label != " ") cout << " use label "<<label<<" to get templates "<<endl;
 
-    // if(SiPixTemplDBObjWatcher_.check(setup)) {
-    //   edm::ESHandle<SiPixelTemplateDBObject> templateH;
-    //   setup.get<SiPixelTemplateDBObjectESProducerRcd>().get(templateH);
-    //   dbobject = *templateH.product();
-    //   hasTriggeredWatcher=true;
-    // }
   } else {
     std::cout << " Loading from file " << std::endl;
-    // if(SiPixTemplDBObjWatcher_.check(setup)) {
-    //   edm::ESHandle<SiPixelTemplateDBObject> templateH;
-    //   setup.get<SiPixelTemplateDBObjectRcd>().get(templateH);
-    //   dbobject = *templateH.product();
-    //   hasTriggeredWatcher=true;
-    // }
   }
 
   edm::ESHandle<SiPixelTemplateDBObject> templateH;
