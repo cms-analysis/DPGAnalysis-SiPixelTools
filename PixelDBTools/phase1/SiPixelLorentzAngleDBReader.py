@@ -54,9 +54,9 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
-
+process.GlobalTag = GlobalTag(process.GlobalTag, '75X_upgrade2017_design_v4', '')
 
 # DB stuff 
 useLocalDB = True
@@ -119,26 +119,27 @@ if useLocalDB :
                         #tag = cms.string("SiPixelLorentzAngle_2012_IOV7")
 			#tag = cms.string("SiPixelLorentzAngle_test")
 			#tag = cms.string("dupa")
-                        # phase 1
+                        # phase 1 MC
                         tag = cms.string("SiPixelLorentzAngle_phase1_mc_v1")
                         #tag = cms.string("SiPixelLorentzAngle_0_106_612_slhc1_mc")
                         #tag = cms.string("SiPixelLorentzAngle_0_106_612_slhc1_offline")
 
-#			tag = cms.string("SiPixelLorentzAngleSim_test")
 #                       tag = cms.string("SiPixelLorentzAngleSim_phase1_mc_v1")
 #			tag = cms.string("SiPixelLorentzAngleSim_v02_mc")
 
 		),
 	),
 
-#    connect = cms.string('sqlite_file:la.db')
-#    connect = cms.string('sqlite_file:SiPixelLorentzAngle_forWidth_v01_mc.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_forWidth_v01.db')
-#    connect = cms.string('sqlite_file:SiPixelLorentzAngle_fromAlignment_v01_mc.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_fromAlignment_v01.db')
 #    connect = cms.string('sqlite_file:../../../../../DB/SiPixelLorentzAngle_2015_v1.db')
 #    connect = cms.string('sqlite_file:../../../../../DB/SiPixelLorentzAngle_2015_v2.db')
 #    connect = cms.string('sqlite_file:../test/SiPixelLorentzAngle_test.db')
+#   MC 
+#    connect = cms.string('sqlite_file:SiPixelLorentzAngle_forWidth_v01_mc.db')
+#    connect = cms.string('sqlite_file:SiPixelLorentzAngle_fromAlignment_v01_mc.db')
+#   MC phase1
+#    connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_phase1_mc_v1.db')
     connect = cms.string('sqlite_file:SiPixelLorentzAngle_phase1_mc_v1.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngleSim_phase1_mc_v1.db')
 #    connect = cms.string('frontier://FrontierProd/CMS_COND_31X_PIXEL')
@@ -150,7 +151,7 @@ if useLocalDB :
 #  end if
 
 process.LorentzAngleReader = cms.EDAnalyzer("SiPixelLorentzAngleDBReader",
-    printDebug = cms.untracked.bool(False),
+    printDebug = cms.untracked.bool(True),
 #    label = cms.untracked.string("fromAlignment"),
     useSimRcd = cms.bool(False)                                    
 )

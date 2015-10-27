@@ -12,6 +12,10 @@
 #include "RecoLocalTracker/SiPixelRecHits/interface/SiPixelGenError.h"
 //#include "MagneticField/Engine/interface/MagneticField.h"
 //#include "FWCore/ParameterSet/interface/FileInPath.h"
+#include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
+#include "Geometry/Records/interface/TrackerTopologyRcd.h"
+
 
 #include "SiPixelGenErrorDBReader.h"
 
@@ -20,8 +24,9 @@ using namespace std;
 SiPixelGenErrorDBReader::SiPixelGenErrorDBReader(const edm::ParameterSet& iConfig):
 	theGenErrorCalibrationLocation( iConfig.getParameter<std::string>("siPixelGenErrorCalibrationLocation") ),
 	theDetailedGenErrorDBErrorOutput( iConfig.getParameter<bool>("wantDetailedGenErrorDBErrorOutput") ),
-	theFullGenErrorDBOutput( iConfig.getParameter<bool>("wantFullGenErrorDBOutput") )
-{
+	theFullGenErrorDBOutput( iConfig.getParameter<bool>("wantFullGenErrorDBOutput") ) {
+  //phase1_ = iConfig.getUntrackedParameter<bool>("phase1","false");
+  //if(phase1_) cout<<" Use phase-1 geometry"<<endl;
 }
 
 SiPixelGenErrorDBReader::~SiPixelGenErrorDBReader()
@@ -36,12 +41,14 @@ SiPixelGenErrorDBReader::beginJob()
 void
 SiPixelGenErrorDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& setup) {
 
-  std::cout << "\nLoading ... " << std::endl;
-  
   edm::ESHandle<SiPixelGenErrorDBObject> generrorH;
   setup.get<SiPixelGenErrorDBObjectRcd>().get(generrorH);
   dbobject = *generrorH.product();
   const SiPixelGenErrorDBObject * db = generrorH.product();
+
+  //Retrieve tracker topology from geometry
+  edm::ESHandle<TrackerTopology> tTopo;
+  setup.get<TrackerTopologyRcd>().get(tTopo);
 
   // these seem to be the only variables I can get directly from the object class
   cout<<" DBObject version "<<dbobject.version()<<" index "<<dbobject.index()<<" max "<<dbobject.maxIndex()
@@ -62,14 +69,59 @@ SiPixelGenErrorDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup
       }
     }
     
-    if(theFullGenErrorDBOutput) 
-      std::cout<< "DetId: "<< it->first<<" GenErrorID: "<< it->second<<"\n";  
-  }
+    if(theFullGenErrorDBOutput) { 
+      // Find first where we are 
+      auto detid = it->first;  // raw det id 
+      auto subdet   = DetId(detid).subdetId(); // bpix/fpix 
+      
+      std::cout<< "DetId: "<<detid<<" GenErrorID: "<< it->second;  
+
+      if(subdet == static_cast<int>(PixelSubdetector::PixelBarrel)) {  // BPix
+      
+	unsigned int layerC = tTopo->pxbLayer(detid);
+	// Barrel ladder id 1-20,32,44.
+	unsigned int ladderC = tTopo->pxbLadder(detid);
+	// Barrel Z-index=1,8
+	unsigned int moduleC = tTopo->pxbModule(detid);
+
+	cout<<" bpix "<<layerC<<" "<<ladderC<<" "<<moduleC<<endl;
+
+      } else if(subdet == static_cast<int>(PixelSubdetector::PixelEndcap)){
+
+	unsigned int disk=tTopo->pxfDisk(detid);   //1,2,3
+	unsigned int blade=tTopo->pxfBlade(detid); //1-24
+	unsigned int side=tTopo->pxfSide(detid);   //sizd=1 for -z, 2 for +z
+	unsigned int panel=tTopo->pxfPanel(detid);   //sizd=1 for -z, 2 for +z
+	unsigned int moduleF=tTopo->pxfModule(detid); //
+	
+	cout<<" fpix "<<disk<<" "<<blade<<" "<<side<<" "<<panel<<" "<<moduleF<<endl;
+      
+      } // subdet 
+
+    } // if FullOut  
+
+  } // map
     
   std::cout << "\nMap stored GenError Id(s), size =  "<<tempMapId.size()<<endl;
   for(unsigned int vindex=0; vindex < tempMapId.size(); ++ vindex)
     std::cout << tempMapId[vindex] << " ";
   std::cout << std::endl;
+
+  // Try to interpret the object 
+  vector<SiPixelGenErrorStore> thePixelGenError;
+  //const SiPixelGenErrorDBObject * ge = &dbobject;
+  bool status = SiPixelGenError::pushfile(*db, thePixelGenError);
+  cout<<" status = "<<status<<" size = "<<thePixelGenError.size()<<endl;
+  
+  SiPixelGenError genError(thePixelGenError);
+  // these are all 0 because qbin() was not run.
+  cout<<" some values "
+      <<genError.lorxwidth()<<" "<<genError.lorywidth()<<" "
+      <<endl;
+
+  // Print the full object, I think it does not work, the print is for templates.
+  printObject();
+
  
   // if the dircetory is an empty string ignore file comparison 
   if(theGenErrorCalibrationLocation == "") {
@@ -162,257 +214,155 @@ SiPixelGenErrorDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup
 
   } // if compare 
   
-  // Try to interpret the object 
-  vector<SiPixelGenErrorStore> thePixelGenError;
-  //const SiPixelGenErrorDBObject * ge = &dbobject;
-  bool status = SiPixelGenError::pushfile(*db, thePixelGenError);
-  cout<<" status = "<<status<<" size = "<<thePixelGenError.size()<<endl;
-  
-  SiPixelGenError genError(thePixelGenError);
-  // these are all 0 because qbin() was not run.
-  cout<<" some values "
-      <<genError.lorxwidth()<<" "<<genError.lorywidth()<<" "
-      <<endl;
-
-  // Print the full object, I think it does not work, the print is for templates.
-  //if(theFullGenErrorDBOutput) std::cout << dbobject << std::endl;
 
 }
 
 
-void SiPixelGenErrorDBReader::endJob()
-{ }
+void SiPixelGenErrorDBReader::endJob() { 
+
+}
+
 
 // I think this was written for templates and not for genErrors
 // so it does not work correctly.
-std::ostream& operator<<(std::ostream& s, const SiPixelGenErrorDBObject& dbobject){
+//std::ostream& operator<<(std::ostream& s, const SiPixelGenErrorDBObject& dbobject){
+void SiPixelGenErrorDBReader::printObject() {
+  const bool FullPrint = false;
   //!-index to keep track of where we are in the object
   int index = 0;
   //!-these are modifiable parameters for the extended GenErrors
-  int txsize[4] = { 7,13,0,0};
-  int tysize[4] = {21,21,0,0};
+  //int txsize[4] = { 7,13,0,0};
+  //int tysize[4] = {21,21,0,0};
   //!-entries takes the number of entries in By,Bx,Fy,Fx from the object
-  int entries[4] = {0};
+  //int entries[4] = {0};
   //!-local indicies for loops
-  int i,j,k,l,m,n,entry_it;
+  //int i,j,k,l,m,n,entry_it;
   //!-changes the size of the GenErrors based on the version
-  int sizeSetter=1,generrorVersion=0;
+  int generrorVersion=0;
   
   std::cout << "\n\nDBobject version: " << dbobject.version() << std::endl;
   
-  for(m=0; m < dbobject.numOfTempl(); ++m)  {
+  for(int m=0; m < dbobject.numOfTempl(); ++m)  {
     //To change the size of the output based on which GenError version we are using"
-    generrorVersion = (int) dbobject.sVector_[index+21];
-
+    generrorVersion = (int) dbobject.sVector()[index+21];
     cout<<" GenError version "<<generrorVersion<<" "<<m<<endl;
 
-    if(generrorVersion<=10) {
-      std::cout << "*****WARNING***** This code will not format this GenError version properly *****WARNING*****\n";
-      sizeSetter=0;
-    } else if (generrorVersion<=16) 
-      sizeSetter=1;
-    else std::cout << "*****WARNING***** This code has not been tested at formatting this version *****WARNING*****\n";
-    
-
-    std::cout << "\n\n*********************************************************************************************" << std::endl;
-    std::cout << "***************                  Reading GenError ID " << dbobject.sVector_[index+20]
-	      << "\t(" << m+1 << "/" << dbobject.numOfTempl_ <<")                 ***************" << std::endl;
-    std::cout << "*********************************************************************************************\n\n" << std::endl;
+    std::cout << "************************************************************************************" << std::endl;
+    std::cout << "***********           Reading GenError ID " << dbobject.sVector()[index+20]
+	      <<" "<< m+1 << "/" << dbobject.numOfTempl() <<")                 ************* " << std::endl;
+    std::cout << "************************************************************************************" << std::endl;
     
     //Header Title
     cout<<" Header Title"<<endl;
     SiPixelGenErrorDBObject::char2float temp;
-    for (n=0; n < 20; ++n) {
-      temp.f = dbobject.sVector_[index];
-      s << temp.c[0] << temp.c[1] << temp.c[2] << temp.c[3];
+    for (int n=0; n < 20; ++n) {
+      temp.f = dbobject.sVector()[index];
+      cout << temp.c[0] << temp.c[1] << temp.c[2] << temp.c[3];
       ++index;
     }
     
-    entries[0] = (int) dbobject.sVector_[index+3];                               // Y
-    entries[1] = (int)(dbobject.sVector_[index+4]*dbobject.sVector_[index+5]);   // X
+    //entries[0] = (int) dbobject.sVector()[index+3];                               // Y
+    //entries[1] = (int)(dbobject.sVector()[index+4]*dbobject.sVector()[index+5]);   // X
     
     //Header
     cout<<" Header "<<endl;
-    s        << dbobject.sVector_[index]   <<"\t"<< dbobject.sVector_[index+1]  <<"\t"<< dbobject.sVector_[index+2]
-	     <<"\t"<< dbobject.sVector_[index+3]  <<"\t"<< dbobject.sVector_[index+4]  <<"\t"<< dbobject.sVector_[index+5]
-	     <<"\t"<< dbobject.sVector_[index+6]  <<"\t"<< dbobject.sVector_[index+7]  <<"\t"<< dbobject.sVector_[index+8]
-	     <<"\t"<< dbobject.sVector_[index+9]  <<"\t"<< dbobject.sVector_[index+10] <<"\t"<< dbobject.sVector_[index+11]
-	     <<"\t"<< dbobject.sVector_[index+12] <<"\t"<< dbobject.sVector_[index+13] <<"\t"<< dbobject.sVector_[index+14]
-	     <<"\t"<< dbobject.sVector_[index+15] <<"\t"<< dbobject.sVector_[index+16] << std::endl;
-    index += 17;
+    cout <<" ID "<< dbobject.sVector()[index]
+	 <<" version "<< dbobject.sVector()[index+1]  
+	 <<" Bfiled"<< dbobject.sVector()[index+2]
+	 <<" NTy "<< dbobject.sVector()[index+3]  
+	 <<" NTyx "<< dbobject.sVector()[index+4]  
+	 <<" NTxx "<< dbobject.sVector()[index+5]
+	 <<endl  
+	 <<" Dtype "<< dbobject.sVector()[index+6]
+	 <<" Vbias "<< dbobject.sVector()[index+7]  
+	 <<" Temperature "<< dbobject.sVector()[index+8]  
+	 <<" Fluence "<< dbobject.sVector()[index+9]
+	 <<" Qscale "<< dbobject.sVector()[index+10]  
+      //<<" s50 "<< dbobject.sVector()[index+11]  
+	 <<endl
+	 <<" LAYWidth "<< dbobject.sVector()[index+12]
+	 <<" LAXWidth "<< dbobject.sVector()[index+13]  
+	 <<" YSize "<< dbobject.sVector()[index+14] 
+	 <<" XSize "<< dbobject.sVector()[index+15]
+	 <<" ZSize "<< dbobject.sVector()[index+16]
+      //<<" ss50 "<< dbobject.sVector()[index+17]
+	 <<" LAYBias "<< dbobject.sVector()[index+18]
+	 <<" LAXBias "<< dbobject.sVector()[index+19]
+      //<<" FBin "<< dbobject.sVector()[index+20] <<" "<< dbobject.sVector()[index+21] <<" "
+      //<< dbobject.sVector()[index+22]
+	 <<endl;
     
-    //Loop over By,Bx,Fy,Fx
-    cout<<" ByBxFyFx"<<endl;
-    for(entry_it=0;entry_it<4;++entry_it) {
-      //Run,costrk,qavg,...,clslenx
-      for(i=0;i < entries[entry_it];++i)
-	{
-	  s         << dbobject.sVector_[index]    << "\t" << dbobject.sVector_[index+1]  << "\t" << dbobject.sVector_[index+2]
-		    << "\t" << dbobject.sVector_[index+3]  << "\n" << dbobject.sVector_[index+4]  << "\t" << dbobject.sVector_[index+5]
-		    << "\t" << dbobject.sVector_[index+6]  << "\t" << dbobject.sVector_[index+7]  << "\t" << dbobject.sVector_[index+8]
-		    << "\t" << dbobject.sVector_[index+9]  << "\t" << dbobject.sVector_[index+10] << "\t" << dbobject.sVector_[index+11]
-		    << "\n" << dbobject.sVector_[index+12] << "\t" << dbobject.sVector_[index+13] << "\t" << dbobject.sVector_[index+14]
-		    << "\t" << dbobject.sVector_[index+15] << "\t" << dbobject.sVector_[index+16] << "\t" << dbobject.sVector_[index+17]
-		    << "\t" << dbobject.sVector_[index+18] << std::endl;
-	  index+=19;
-	  //YPar
-	  cout<<" YPar"<<endl;
-	  for(j=0;j<2;++j)
-	    {
-	      for(k=0;k<5;++k)
-		{
-		  s << dbobject.sVector_[index] << "\t";
-		  ++index;
-		}
-	      s << std::endl;
-	    }
-	  //YTemp
-	  cout<<" YTemp"<<endl;
-	  for(j=0;j<9;++j)
-	    {
-	      for(k=0;k<tysize[sizeSetter];++k)
-		{
-		  s << dbobject.sVector_[index] << "\t";
-		  ++index;
-		}
-	      s << std::endl;
-	    }
-	  //XPar
-	  cout<<" XPar"<<endl;
-	  for(j=0;j<2;++j)
-	    {
-	      for(k=0;k<5;++k)
-		{
-		  s << dbobject.sVector_[index] << "\t";
-		  ++index;
-		}
-	      s << std::endl;
-	    }
-	  //XTemp
-	  cout<<" Xtemp"<<endl;
-	  for(j=0;j<9;++j)
-	    {
-	      for(k=0;k<txsize[sizeSetter];++k)
-		{
-		  s << dbobject.sVector_[index] << "\t";
-		  ++index;
-		}
-	      s << std::endl;
-	    }
-	  //Y average reco params
-	  cout<<" Y average reco params "<<endl;
-	  for(j=0;j<4;++j)
-	    {
-	      for(k=0;k<4;++k)
-		{
-		  s << dbobject.sVector_[index] << "\t";
-		  ++index;
-		}
-	      s << std::endl;
-	    }
-	  //Yflpar
-	  cout<<" Yflar "<<endl;
-	  for(j=0;j<4;++j)
-	    {
-	      for(k=0;k<6;++k)
-		{
-		  s << dbobject.sVector_[index] << "\t";
-		  ++index;
-		}
-	      s << std::endl;
-	    }
-	  //X average reco params
-	  cout<<" X average reco params"<<endl;
-	  for(j=0;j<4;++j)
-	    {
-	      for(k=0;k<4;++k)
-		{
-		  s << dbobject.sVector_[index] << "\t";
-		  ++index;
-		}
-	      s << std::endl;
-	    }
-	  //Xflpar
-	  cout<<" Xflar"<<endl;
-	  for(j=0;j<4;++j)
-	    {
-	      for(k=0;k<6;++k)
-		{
-		  s << dbobject.sVector_[index] << "\t";
-		  ++index;
-		}
-	      s << std::endl;
-	    }
-	  //Chi2X,Y
-	  cout<<" XY chi2"<<endl;
-	  for(j=0;j<4;++j)
-	    {
-	      for(k=0;k<2;++k)
-		{
-		  for(l=0;l<2;++l)
-		    {
-		      s << dbobject.sVector_[index] << "\t";
-		      ++index;
-		    }
-		}
-	      s << std::endl;
-	    }
-	  //Y average Chi2 params
-	  cout<<" Y chi2"<<endl;
-	  for(j=0;j<4;++j)
-	    {
-	      for(k=0;k<4;++k)
-		{
-		  s << dbobject.sVector_[index] << "\t";
-		  ++index;
-		}
-	      s << std::endl;
-	    }
-	  //X average Chi2 params
-	  cout<<" X chi2"<<endl;
-	  for(j=0;j<4;++j)
-	    {
-	      for(k=0;k<4;++k)
-		{
-		  s << dbobject.sVector_[index] << "\t";
-		  ++index;
-		}
-	      s << std::endl;
-	    }
-	  //Y average reco params for CPE Generic
-	  cout<<" Y reco params for generic"<<endl;
-	  for(j=0;j<4;++j)
-	    {
-	      for(k=0;k<4;++k)
-		{
-		  s << dbobject.sVector_[index] << "\t";
-		  ++index;
-		}
-	      s << std::endl;
-	    }
-	  //X average reco params for CPE Generic
-	  cout<<" X reco params for generic"<<endl;
-	  for(j=0;j<4;++j)
-	    {
-	      for(k=0;k<4;++k)
-		{
-		  s << dbobject.sVector_[index] << "\t";
-		  ++index;
-		}
-	      s << std::endl;
-	    }
-	  //SpareX,Y
-	  cout<<" Spare "<<endl;
-	  for(j=0;j<20;++j)
-	    {
-	      s << dbobject.sVector_[index] << "\t";
-	      ++index;
-	      if(j==9 ||j==19) s << std::endl;
-	    }
+    int NTy = dbobject.sVector()[index+3];  
+    int NTyx = dbobject.sVector()[index+4];  
+    int NTxx = dbobject.sVector()[index+5];  
+    index += 23;
+    
+    if(FullPrint) cout<<"  "<<endl;
+    for(int entry_it=0;entry_it<NTy;++entry_it) {
+      if(FullPrint) 
+	cout <<" run "<<dbobject.sVector()[index]    
+	     <<" costrk "<<dbobject.sVector()[index+1]<<" "<< dbobject.sVector()[index+2]<<" "<< dbobject.sVector()[index+3]  
+	     << " qavg " << dbobject.sVector()[index+4]  
+	     << " pixmax " << dbobject.sVector()[index+5]
+	     << " dyone " << dbobject.sVector()[index+6]  
+	     << " syone " << dbobject.sVector()[index+7]  
+	     << " dxone " << dbobject.sVector()[index+8]
+	     << " sxone " << dbobject.sVector()[index+9]  
+	     << " dytwo " << dbobject.sVector()[index+10] 
+	     << " sytwo " << dbobject.sVector()[index+11]
+	     << " dxtwo " << dbobject.sVector()[index+12] 
+	     << " sxtwo " << dbobject.sVector()[index+13] 
+	     << " qmin " << dbobject.sVector()[index+14]
+	     << " qmin2 " << dbobject.sVector()[index+15] 
+	     << endl;
+      index+=16;
+
+      for(int i=0;i<4;++i) {
+	for(int j=0;j<4;++j) {
+	  if(FullPrint) cout << dbobject.sVector()[index] <<" ";
+	  ++index;
 	}
-    }
-  }
-  return s;
+      }
+      if(FullPrint) cout << std::endl;
+      
+    } // NTy
+
+
+    for(int entry_it=0;entry_it<NTyx;++entry_it) {
+      for(int it=0;it<NTxx;++it) {
+
+	if(FullPrint) 
+	  cout <<" run "<<dbobject.sVector()[index]    
+	       <<" costrk "<<dbobject.sVector()[index+1]<<" "<< dbobject.sVector()[index+2]<<" "<< dbobject.sVector()[index+3]  
+	       << " qavg " << dbobject.sVector()[index+4]  
+	       << " pixmax " << dbobject.sVector()[index+5]
+	       << " dyone " << dbobject.sVector()[index+6]  
+	       << " syone " << dbobject.sVector()[index+7]  
+	       << " dxone " << dbobject.sVector()[index+8]
+	       << " sxone " << dbobject.sVector()[index+9]  
+	       << " dytwo " << dbobject.sVector()[index+10] 
+	       << " sytwo " << dbobject.sVector()[index+11]
+	       << " dxtwo " << dbobject.sVector()[index+12] 
+	       << " sxtwo " << dbobject.sVector()[index+13] 
+	       << " qmin " << dbobject.sVector()[index+14]
+	       << " qmin2 " << dbobject.sVector()[index+15] 
+	       << endl;
+	index+=16;
+	
+	for(int i=0;i<4;++i) {
+	  for(int j=0;j<4;++j) {
+	    if(FullPrint) cout << dbobject.sVector()[index] <<" ";
+	    ++index;
+	  }
+	}
+	if(FullPrint) cout << std::endl;
+
+      } // NTxx
+    } // NTyx 
+
+  }  // num objects 
+
+  return;
 }
 //define this as a plug-in
 DEFINE_FWK_MODULE(SiPixelGenErrorDBReader);

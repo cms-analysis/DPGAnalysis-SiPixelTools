@@ -249,14 +249,16 @@ void SiPixelLorentzAngleDBReader::analyze( const edm::Event& e, const edm::Event
       else if(layerC==3) LABPixL3_[moduleC-1]->Fill(la);
       else if(layerC==4) LABPixL4_[moduleC-1]->Fill(la);
 
+      if(newModule) {
+	if     (layerC==1) la1New = la;
+	else if(layerC==2) la2New = la;
+	else if(layerC==3) la3New = la;	    
+      }
+
       if(printdebug_) {
 
-	std::cout<<"BPix - layer "<<layerC<<" ladder "<<ladderC<<" ring "<<moduleC<< " Lorentz angle  " <<la << std::endl;
-	if(newModule) {
-	  if     (layerC==1) la1New = la;
-	  else if(layerC==2) la2New = la;
-	  else if(layerC==3) la3New = la;	    
-	}
+	std::cout<<detid<<" BPix - layer "<<layerC<<" ladder "<<ladderC<<" ring "<<moduleC
+		 << " Lorentz angle  " <<la << std::endl;
 
       } else {
 
@@ -286,10 +288,6 @@ void SiPixelLorentzAngleDBReader::analyze( const edm::Event& e, const edm::Event
 	    l4z[moduleC-1]=true;
 	  }
 
-	} else { // new module 
-	  if     (layerC==1) la1New = la;
-	  else if(layerC==2) la2New = la;
-	  else if(layerC==3) la3New = la;	    
 	} // new module 
 
       } // end print if
@@ -303,6 +301,10 @@ void SiPixelLorentzAngleDBReader::analyze( const edm::Event& e, const edm::Event
       unsigned int panel=tTopo->pxfPanel(detid);   //sizd=1 for -z, 2 for +z
       unsigned int moduleF=tTopo->pxfModule(detid); //
       
+      if(printdebug_) {
+	std::cout<<detid<<" FPix - disk "<<disk<<" blade "<<blade<<" side "<<side
+		 <<" pand; "<<panel<<" module "<<moduleF<< " Lorentz angle  " <<la << std::endl;
+      }
       //PXFDetId pdetId = PXFDetId(detid);       
       //int disk=pdetId.disk(); //1,2,3
       //int blade=pdetId.blade(); //1-24

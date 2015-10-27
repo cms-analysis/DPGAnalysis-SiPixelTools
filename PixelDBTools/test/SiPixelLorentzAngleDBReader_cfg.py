@@ -56,13 +56,13 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'GR_R_75_V1A', '')
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
 
 
 # DB stuff 
-useLocalDB = True
+useLocalDB = False
 if useLocalDB :
   process.DBReader = cms.ESSource("PoolDBESSource",
     DBParameters = cms.PSet(
@@ -172,7 +172,7 @@ process.LorentzAngleSimReader = cms.EDAnalyzer("SiPixelLorentzAngleDBReader",
 )
 
 #process.p = cms.Path(process.LorentzAngleReader*process.LorentzAngleSimReader)
-#process.p = cms.Path(process.LorentzAngleSimReader)
-process.p = cms.Path(process.LorentzAngleReader)
+process.p = cms.Path(process.LorentzAngleSimReader)
+#process.p = cms.Path(process.LorentzAngleReader)
 
 

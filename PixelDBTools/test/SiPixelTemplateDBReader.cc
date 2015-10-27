@@ -9,6 +9,10 @@
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "MagneticField/Engine/interface/MagneticField.h"
+#include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
+#include "Geometry/Records/interface/TrackerTopologyRcd.h"
+
 
 using namespace std;
 
@@ -50,44 +54,82 @@ void SiPixelTemplateDBReader::analyze(const edm::Event& iEvent, const edm::Event
   setup.get<SiPixelTemplateDBObjectRcd>().get(label,templateH);
   dbobject = *templateH.product();
 
-  //if(hasTriggeredWatcher) {
-    std::vector<short> tempMapId;
-    
-    if(theFullTemplateDBOutput) std::cout << "Map info" << std::endl;
-    std::map<unsigned int,short> templMap=dbobject.getTemplateIDs();
-    for(std::map<unsigned int,short>::const_iterator it=templMap.begin(); it!=templMap.end();++it) {
-      if(tempMapId.size()==0) tempMapId.push_back(it->second);
-      for(unsigned int i=0; i<tempMapId.size();++i) {
-	if(tempMapId[i]==it->second) continue;
-	else if(i==tempMapId.size()-1) {
-	  tempMapId.push_back(it->second);
-	  break;
-	}
+  //Retrieve tracker topology from geometry
+  edm::ESHandle<TrackerTopology> tTopo;
+  setup.get<TrackerTopologyRcd>().get(tTopo);
+
+  std::vector<short> tempMapId;
+  
+  if(theFullTemplateDBOutput) std::cout << "Map info" << std::endl;
+  std::map<unsigned int,short> templMap=dbobject.getTemplateIDs();
+  for(std::map<unsigned int,short>::const_iterator it=templMap.begin(); it!=templMap.end();++it) {
+
+    if(tempMapId.size()==0) tempMapId.push_back(it->second);
+
+    for(unsigned int i=0; i<tempMapId.size();++i) {
+      if(tempMapId[i]==it->second) continue;
+      else if(i==tempMapId.size()-1) {
+	tempMapId.push_back(it->second);
+	break;
       }
-      if(0 && theFullTemplateDBOutput) // disable for the moment
-	std::cout<< "DetId: "<< it->first<<" TemplateID: "<< it->second<<"\n";
-    }
-    
-    std::cout << "\nMap stores template Id(s): ";
-    for(unsigned int vindex=0; vindex < tempMapId.size(); ++ vindex)
-      std::cout << tempMapId[vindex] << " ";
-    std::cout << std::endl;
-    
-    // print it
-    if(theFullTemplateDBOutput) {
-      //std::cout << dbobject << std::endl;
-      printObject();
     }
 
-    int numOfTempl = dbobject.numOfTempl();
-    std::cout << "\nChecking Template DB object version " << dbobject.version() << " containing " 
-	      << numOfTempl << " calibration(s) at " << dbobject.sVector()[22] <<endl;
+    if(theFullTemplateDBOutput) { // disable for the moment
 
-    return;
+      std::cout<< "DetId: "<< it->first<<" TemplateID: "<< it->second;
+      
+      auto detid = it->first;  // raw det id 
+      auto subdet   = DetId(detid).subdetId(); // bpix/fpix 
+      
+      if(subdet == static_cast<int>(PixelSubdetector::PixelBarrel)) {  // BPix
+      
+	unsigned int layerC = tTopo->pxbLayer(detid);
+	// Barrel ladder id 1-20,32,44.
+	unsigned int ladderC = tTopo->pxbLadder(detid);
+	// Barrel Z-index=1,8
+	unsigned int moduleC = tTopo->pxbModule(detid);
 
-    // compare with the ascii file (not available most of the time)
+	cout<<" bpix "<<layerC<<" "<<ladderC<<" "<<moduleC<<endl;
 
-    //local variables
+      } else if(subdet == static_cast<int>(PixelSubdetector::PixelEndcap)){
+
+	unsigned int disk=tTopo->pxfDisk(detid);   //1,2,3
+	unsigned int blade=tTopo->pxfBlade(detid); //1-24
+	unsigned int side=tTopo->pxfSide(detid);   //sizd=1 for -z, 2 for +z
+	unsigned int panel=tTopo->pxfPanel(detid);   //sizd=1 for -z, 2 for +z
+	unsigned int moduleF=tTopo->pxfModule(detid); //
+	
+	cout<<" fpix "<<disk<<" "<<blade<<" "<<side<<" "<<panel<<" "<<moduleF<<endl;
+      
+      } // subdet 
+
+
+    } // if print 
+
+  } // map loop 
+  
+  std::cout << "\nMap stores template Id(s): ";
+  for(unsigned int vindex=0; vindex < tempMapId.size(); ++ vindex)
+    std::cout << tempMapId[vindex] << " ";
+  std::cout << std::endl;
+  
+  // print it
+  if(theFullTemplateDBOutput) {
+    //std::cout << dbobject << std::endl;
+    printObject();
+  }
+  
+  int numOfTempl = dbobject.numOfTempl();
+  std::cout << "\nChecking Template DB object version " << dbobject.version() << " containing " 
+	    << numOfTempl << " calibration(s) at " << dbobject.sVector()[22] <<endl;
+  
+  //return;  // skip the comparison with files 
+  
+
+  // compare with the ascii file (not available most of the time)  
+  if(theTemplateCalibrationLocation == "") return; // skip if location empty
+
+  //local variables
     const char * tempfile;
     char c;
     int index = 0;
@@ -102,7 +144,9 @@ void SiPixelTemplateDBReader::analyze(const edm::Event& iEvent, const edm::Event
       //Tell the person viewing the output what the template ID and version are -- note that version is only valid for >=13
       std::cout << "Calibration " << i+1 << " of " << numOfTempl << ", with Template ID " 
 		<< dbobject.sVector()[index]<< "\tand Version " << dbobject.sVector()[index+1] <<endl;
-      
+ 
+      // skip the file open if location is ""
+
       //Opening the text-based template calibration
       std::ostringstream tout;
       tout << theTemplateCalibrationLocation.c_str() << "/data/template_summary_zp"
@@ -121,8 +165,7 @@ void SiPixelTemplateDBReader::analyze(const edm::Event& iEvent, const edm::Event
 	in_file >> tempnum;
 	
 	//Read until the end of the current text file
-	while(!in_file.eof())
-	  {
+	while(!in_file.eof()) {
 	    //Calculate the difference between the text file and the db object
 	    diff = std::abs(tempnum - dbobject.sVector()[index]);
 	    
@@ -158,7 +201,6 @@ void SiPixelTemplateDBReader::analyze(const edm::Event& iEvent, const edm::Event
 		<< "wantFullOutput = True. Make sure that you pipe the output to a\n"
 		<< "log file. This could take a few minutes.\n\n";
     
-    //}
 }
 
 

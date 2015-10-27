@@ -15,7 +15,8 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '75X_upgrade2017_design_v4', '')
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.destinations = cms.untracked.vstring("cout")
@@ -33,9 +34,8 @@ process.maxEvents = cms.untracked.PSet(
 )
 
 # has to be deleted if it exist  
-file = "la.db"
-sqlfile = "sqlite_file:" + file
-print '\n-> Uploading into file %s, i.e. %s\n' % (file, sqlfile)
+#file = "la.db"
+#sqlfile = "sqlite_file:" + file
 
 ##### DATABASE CONNNECTION AND INPUT TAGS ######
 process.PoolDBOutputService = cms.Service("PoolDBOutputService",
@@ -52,11 +52,11 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
         enableReadOnlySessionOnUpdateConnection = cms.untracked.bool(False)
     ),
     timetype = cms.untracked.string('runnumber'),
-    connect = cms.string(sqlfile),
+    connect = cms.string("sqlite_file:SiPixelLorentzAngle_phase1_mc_v1.db"),
+#    connect = cms.string("sqlite_file:SiPixelLorentzAngleSim_phase1_mc_v1.db"),
     toPut = cms.VPSet(
         cms.PSet(
             record = cms.string('SiPixelLorentzAngleRcd'),
-#            tag = cms.string('dupa')
             tag = cms.string('SiPixelLorentzAngle_phase1_mc_v1')
 #	     tag = cms.string("SiPixelLorentzAngle_fromAlignment_v01_mc")	
 #	     tag = cms.string("SiPixelLorentzAngle_fromAlignment_v01")	
@@ -74,13 +74,11 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
 ###### LORENTZ ANGLE OBJECT ######
 process.SiPixelLorentzAngle = cms.EDAnalyzer("SiPixelLorentzAngleDBLoader",
 # common input for all rings 
-    bPixLorentzAnglePerTesla = cms.double(0.10),
-    fPixLorentzAnglePerTesla = cms.double(0.06),
-#    bPixLorentzAnglePerTesla = cms.double(0.05),
-#    fPixLorentzAnglePerTesla = cms.double(0.03),
+    bPixLorentzAnglePerTesla = cms.untracked.double(0.098),
+    fPixLorentzAnglePerTesla = cms.untracked.double(0.058),
 # enter -9999 if individual input for rings 
-#    bPixLorentzAnglePerTesla = cms.double(-9999.),
-#    fPixLorentzAnglePerTesla = cms.double(-9999.),
+#    bPixLorentzAnglePerTesla = cms.untracked.double(-9999.),
+#    fPixLorentzAnglePerTesla = cms.untracked.double(-9999.),
 
     #in case of PSet
     BPixParameters = cms.untracked.VPSet(
@@ -255,6 +253,12 @@ process.SiPixelLorentzAngle = cms.EDAnalyzer("SiPixelLorentzAngleDBLoader",
             angle = cms.double(0.081)
         ),
     ),
+   ModuleParameters = cms.untracked.VPSet(
+        cms.PSet(
+            #rawid = cms.uint32(0),
+            #angle = cms.double(0.0)
+        ),
+   ),
     #in case lorentz angle values for bpix should be read from file -> not implemented yet
     useFile = cms.bool(False),
     record = cms.untracked.string('SiPixelLorentzAngleRcd'),  
@@ -262,9 +266,8 @@ process.SiPixelLorentzAngle = cms.EDAnalyzer("SiPixelLorentzAngleDBLoader",
 )
 
 process.SiPixelLorentzAngleSim = cms.EDAnalyzer("SiPixelLorentzAngleDBLoader",
-   # magneticField = cms.double(3.8),
-    bPixLorentzAnglePerTesla = cms.double(0.10),
-    fPixLorentzAnglePerTesla = cms.double(0.06),
+    bPixLorentzAnglePerTesla = cms.untracked.double(0.098),
+    fPixLorentzAnglePerTesla = cms.untracked.double(0.058),
     #in case lorentz angle values for bpix should be read from file -> not implemented yet
     useFile = cms.bool(False),
     record = cms.untracked.string('SiPixelLorentzAngleSimRcd'),
@@ -285,12 +288,18 @@ process.SiPixelLorentzAngleSim = cms.EDAnalyzer("SiPixelLorentzAngleDBLoader",
             angle = cms.double(0.0)
         ),
     ),
+   ModuleParameters = cms.untracked.VPSet(
+        cms.PSet(
+            #rawid = cms.uint32(0),
+            #angle = cms.double(0.0)
+        ),
+   ),
 
 )
 
 
 process.p = cms.Path(
-    process.SiPixelLorentzAngleSim
-#    process.SiPixelLorentzAngle
+#    process.SiPixelLorentzAngleSim
+    process.SiPixelLorentzAngle
     )
 
