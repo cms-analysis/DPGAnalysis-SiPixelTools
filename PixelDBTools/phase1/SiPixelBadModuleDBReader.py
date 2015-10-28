@@ -13,8 +13,8 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
 # for phase1 
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
-
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '75X_upgrade2017_design_v4', '')
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(1)
@@ -38,8 +38,6 @@ process.MessageLogger = cms.Service("MessageLogger",
     ),
     destinations = cms.untracked.vstring('cout')
 )
-
-
 
 # DB stuff 
 useLocalDB = True
