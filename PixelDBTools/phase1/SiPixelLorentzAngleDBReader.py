@@ -120,10 +120,9 @@ if useLocalDB :
 			#tag = cms.string("SiPixelLorentzAngle_test")
 			#tag = cms.string("dupa")
                         # phase 1 MC
-                        tag = cms.string("SiPixelLorentzAngle_phase1_mc_v1")
-                        #tag = cms.string("SiPixelLorentzAngle_0_106_612_slhc1_mc")
-                        #tag = cms.string("SiPixelLorentzAngle_0_106_612_slhc1_offline")
-
+#                        tag = cms.string("SiPixelLorentzAngle_forWidth_phase1_mc_v1")
+                        tag = cms.string("SiPixelLorentzAngle_fromAlignment_phase1_mc_v1")
+#                        tag = cms.string("SiPixelLorentzAngle_phase1_mc_v1")
 #                       tag = cms.string("SiPixelLorentzAngleSim_phase1_mc_v1")
 #			tag = cms.string("SiPixelLorentzAngleSim_v02_mc")
 
@@ -140,7 +139,9 @@ if useLocalDB :
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_fromAlignment_v01_mc.db')
 #   MC phase1
 #    connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_phase1_mc_v1.db')
-    connect = cms.string('sqlite_file:SiPixelLorentzAngle_phase1_mc_v1.db')
+#    connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_forWidth_phase1_mc_v1.db')
+    connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_fromAlignment_phase1_mc_v1.db')
+#    connect = cms.string('sqlite_file:SiPixelLorentzAngle_phase1_mc_v1.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngleSim_phase1_mc_v1.db')
 #    connect = cms.string('frontier://FrontierProd/CMS_COND_31X_PIXEL')
 #    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')

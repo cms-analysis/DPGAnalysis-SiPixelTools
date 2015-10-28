@@ -62,7 +62,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 
 
 # DB stuff 
-useLocalDB = False
+useLocalDB = True
 if useLocalDB :
   process.DBReader = cms.ESSource("PoolDBESSource",
     DBParameters = cms.PSet(
@@ -80,13 +80,13 @@ if useLocalDB :
 #			tag = cms.string("SiPixelLorentzAngle_2015_v1")
 #			tag = cms.string("SiPixelLorentzAngle_2015_v2")
 #			tag = cms.string("SiPixelLorentzAngle_2015_v3")
-			tag = cms.string("SiPixelLorentzAngle_2015_v4")
+#			tag = cms.string("SiPixelLorentzAngle_2015_v4")
 #			tag = cms.string("SiPixelLorentzAngle_2015_v2_hltvalidation")
 #			tag = cms.string("SiPixelLorentzAngle_test") 
 
 #			tag = cms.string("SiPixelLorentzAngle_v02_mc")
 
-#			tag = cms.string("SiPixelLorentzAngle_forWidth_v0_mc")
+			tag = cms.string("SiPixelLorentzAngle_forWidth_v01_mc")
 #			tag = cms.string("SiPixelLorentzAngle_forWidth_v01")
 
 #			tag = cms.string("SiPixelLorentzAngle_fromAlignment_v1_mc")
@@ -136,10 +136,10 @@ if useLocalDB :
 	),
 
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_2015_v4.db')
-#    connect = cms.string('sqlite_file:SiPixelLorentzAngle_forWidth_v01_mc.db')
+    connect = cms.string('sqlite_file:../../../../../DB/MC/SiPixelLorentzAngle_forWidth_v01_mc.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_forWidth_v01.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_fromAlignment_v01_mc.db')
-#    connect = cms.string('sqlite_file:../../../CondTools/SiPixel/test/siPixelLorentzAngle.db')
+
 #    connect = cms.string('sqlite_file:../../../../../DB/SiPixelLorentzAngle_2015_v1.db')
 #    connect = cms.string('sqlite_file:../../../../../DB/SiPixelLorentzAngle_2015_v2.db')
 #    connect = cms.string('sqlite_file:../../../../../DB/310815/SiPixelLorentzAngle_2015_v3.db')
@@ -152,7 +152,7 @@ if useLocalDB :
 #    connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
 #    connect = cms.string('frontier://FrontierPrep/CMS_COND_PIXEL')
 #    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
-    connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
+#    connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
 
   ) # end process
   process.es_prefer_DBReader = cms.ESPrefer("PoolDBESSource","DBReader")
@@ -162,6 +162,7 @@ if useLocalDB :
 process.LorentzAngleReader = cms.EDAnalyzer("SiPixelLorentzAngleDBReader",
     printDebug = cms.untracked.bool(False),
 #    label = cms.untracked.string("fromAlignment"),
+#    label = cms.untracked.string("forWidth"),
     useSimRcd = cms.bool(False)                                    
 )
 
@@ -172,7 +173,7 @@ process.LorentzAngleSimReader = cms.EDAnalyzer("SiPixelLorentzAngleDBReader",
 )
 
 #process.p = cms.Path(process.LorentzAngleReader*process.LorentzAngleSimReader)
-process.p = cms.Path(process.LorentzAngleSimReader)
-#process.p = cms.Path(process.LorentzAngleReader)
+#process.p = cms.Path(process.LorentzAngleSimReader)
+process.p = cms.Path(process.LorentzAngleReader)
 
 
