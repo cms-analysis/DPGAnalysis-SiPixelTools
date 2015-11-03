@@ -128,7 +128,7 @@ process.output = cms.OutputModule("PoolOutputModule",
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
     fileName = cms.untracked.string(
      #'simHits.root'
-     '/afs/cern.ch/user/d/dkotlins/work/MC/mu_phase1/pt100_75/simhits/simHits11.root'
+     '/afs/cern.ch/user/d/dkotlins/work/MC/mu_phase1/pt100_76/simhits/simHits1.root'
     ),
     outputCommands = process.FEVTDEBUGEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
@@ -182,7 +182,6 @@ from SLHCUpgradeSimulations.Configuration.combinedCustoms import cust_2017
 process = cust_2017(process)
 
 # End of customisation functions
-
 
 #process.outpath = cms.EndPath(process.o1)
 #process.p = cms.Path(process.generator*process.VtxSmeared*process.genParticles*process.psim)

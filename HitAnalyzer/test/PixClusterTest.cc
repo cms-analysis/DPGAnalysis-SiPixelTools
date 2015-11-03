@@ -133,7 +133,10 @@ class PixClusterTest : public edm::EDAnalyzer {
   TH2F *hpDetMap1,   *hpDetMap2,   *hpDetMap3,   *hpDetMap4;
   TH2F *hpixDetMap1, *hpixDetMap2, *hpixDetMap3, *hpixDetMap4;
   TH2F *hcluDetMap1, *hcluDetMap2, *hcluDetMap3, *hcluDetMap4;
-  
+
+  TH2F *hxy, *hphiz1, *hphiz2, *hphiz3, *hphiz4; // bpix 
+  TH2F *hzr, *hxy11, *hxy12, *hxy21, *hxy22, *hxy31, *hxy32;  // fpix 
+
   TH1F *hevent, *horbit, *hlumi, *hlumi0, *hlumi1; 
   TH1F *hbx, *hbx0, *hbx1;
   TH1F *hdets, *hmbits1,*hmbits2,*hmbits3, *hmaxPixPerDet;
@@ -408,6 +411,20 @@ void PixClusterTest::beginJob() {
   hcluDetMap4 = fs->make<TH2F>( "hcluDetMap4", "clu det layer 4",
 				416,0.,416.,160,0.,160.);
 
+  hzr = fs->make<TH2F>("hzr"," ",240,-60.,60.,68,0.,17.);  // x-y plane
+  hxy11 = fs->make<TH2F>("hxy11"," ",320,-16.,16.,320,-16.,16.); // x-y pla 
+  hxy12 = fs->make<TH2F>("hxy12"," ",320,-16.,16.,320,-16.,16.); // x-y pla
+  hxy21 = fs->make<TH2F>("hxy21"," ",320,-16.,16.,320,-16.,16.); // x-y pl
+  hxy22 = fs->make<TH2F>("hxy22"," ",320,-16.,16.,320,-16.,16.); // x-y pla
+  hxy31 = fs->make<TH2F>("hxy31"," ",320,-16.,16.,320,-16.,16.); // x-y pla
+  hxy32 = fs->make<TH2F>("hxy32"," ",320,-16.,16.,320,-16.,16.); // x-y plae
+
+  hxy = fs->make<TH2F>("hxy"," ",340,-17.,17.,340,-17.,17.);  // x-y plane
+  hphiz1 = fs->make<TH2F>("hphiz1"," ",108,-27.,27.,140,-3.5,3.5);
+  hphiz2 = fs->make<TH2F>("hphiz2"," ",108,-27.,27.,140,-3.5,3.5);
+  hphiz3 = fs->make<TH2F>("hphiz3"," ",108,-27.,27.,140,-3.5,3.5);
+  hphiz4 = fs->make<TH2F>("hphiz4"," ",108,-27.,27.,140,-3.5,3.5);
+
   htest = fs->make<TH1F>( "htest", "FPix R", 400, -20., 20.);
 
 #endif
@@ -439,10 +456,9 @@ void PixClusterTest::analyze(const edm::Event& e,
 #ifdef NEW_ID
   //Retrieve tracker topology from geometry
   edm::ESHandle<TrackerTopology> tTopoH;
-  es.get<IdealGeometryRecord>().get(tTopoH);
+  es.get<TrackerTopologyRcd>().get(tTopoH);
   const TrackerTopology *tTopo=tTopoH.product();
 #endif
-
 
   countAllEvents++;
   int run       = e.id().run();
@@ -565,8 +581,12 @@ void PixClusterTest::analyze(const edm::Event& e,
     // Get the geom-detector
     const PixelGeomDetUnit * theGeomDet =
       dynamic_cast<const PixelGeomDetUnit*> (theTracker.idToDet(detId) );
-    //double detZ = theGeomDet->surface().position().z();
+
+    double detX = theGeomDet->surface().position().x();
+    double detY = theGeomDet->surface().position().y();
+    double detZ = theGeomDet->surface().position().z();
     double detR = theGeomDet->surface().position().perp();
+    double detPhi = theGeomDet->surface().position().phi();
 
     //const BoundPlane& plane = theGeomDet->surface(); //for transf.
     
@@ -1005,6 +1025,8 @@ void PixClusterTest::analyze(const edm::Event& e,
 #ifdef HISTOS
     if (subid==1 ) {  // barrel
 
+      hxy->Fill(detX,detY);
+
       // Det histos
       if(layer==1) {
 	
@@ -1021,6 +1043,7 @@ void PixClusterTest::analyze(const edm::Event& e,
 	hpixPerLink1->Fill(float(numOfPixPerLink12));
 	numOfPixPerLink11=0;        
 	numOfPixPerLink12=0;        
+	hphiz1->Fill(detZ,detPhi);
 
       } else if(layer==2) {
 
@@ -1036,6 +1059,7 @@ void PixClusterTest::analyze(const edm::Event& e,
 	hpixPerLink2->Fill(float(numOfPixPerLink22));
 	numOfPixPerLink21=0;        
 	numOfPixPerLink22=0;        
+	hphiz2->Fill(detZ,detPhi);
 
       } else if(layer==3) {
 
@@ -1046,7 +1070,9 @@ void PixClusterTest::analyze(const edm::Event& e,
 	hpixPerDet3->Fill(float(numOfPixPerDet3));
 	if(numOfPixPerDet3>maxPixPerDet) maxPixPerDet = numOfPixPerDet3;  
 	numOfClustersPerDet3=0;
-	numOfPixPerDet3=0;        
+	numOfPixPerDet3=0;
+	hphiz3->Fill(detZ,detPhi);
+        
 	//SK:unused	numOfPixPerLink3=0;        
 
       } else if(layer==4) {
@@ -1059,9 +1085,25 @@ void PixClusterTest::analyze(const edm::Event& e,
 	if(numOfPixPerDet4>maxPixPerDet) maxPixPerDet = numOfPixPerDet4;  
 	numOfClustersPerDet4=0;
 	numOfPixPerDet4=0;        
+	hphiz4->Fill(detZ,detPhi);
 
       } // layer
-      
+
+    } else { // fpix
+
+      hzr->Fill(detZ,detR);
+
+      if(disk==1) { // disk1 -+z	
+	if(side==1)      hxy11->Fill(detX,detY);      // d1,-z
+	else if(side==2) hxy12->Fill(detX,detY); // d1, +z
+      } else if(disk==2) { // disk2 -+z	
+	if(side==1)      hxy21->Fill(detX,detY);      // d1,-z
+	else if(side==2) hxy22->Fill(detX,detY); // d1, +z
+      } else if(disk==3) { // disk3 -+z	
+	if(side==1)      hxy31->Fill(detX,detY);      // d1,-z
+	else if(side==2) hxy32->Fill(detX,detY); // d1, +z
+      }      
+
     } // end barrel/forward
 
 #endif // HISTOS

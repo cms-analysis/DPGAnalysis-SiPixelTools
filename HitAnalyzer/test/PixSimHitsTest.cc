@@ -114,7 +114,9 @@ private:
     *hglobz1, *hglobz2, *hglobz3, *hglobz4;
   TH1F *hcolsB,  *hrowsB,  *hcolsF,  *hrowsF;
 
-  TH2F *htest, *htest2, *htest3, *htest4, *htest5;
+  TH2F *hxy, *hphiz1, *hphiz2, *hphiz3, *hphiz4; // bpix 
+  TH2F *hzr, *hxy11, *hxy12, *hxy21, *hxy22, *hxy31, *hxy32;  // fpix 
+  //TH2F *htest, *htest2, *htest3, *htest4, *htest5;
   //TProfile *hp1, *hp2, *hp3, *hp4, *hp5;
 
 #ifdef CHECK_GEOM
@@ -276,16 +278,22 @@ void PixSimHitsTest::beginJob() {
     hglobr4 = fs->make<TH1F>("hglobr4","global r4",180,0.,18.);
     hglobz4 = fs->make<TH1F>("hglobz4","global z4",540,-27.,27.);
 
-    // layer 1 only 
-    htest  = fs->make<TH2F>("htest"," ",108,-27.,27.,35,-3.5,3.5);  // global z versus local y
-    htest2 = fs->make<TH2F>("htest2"," ",108,-27.,27.,60,0.,600.);  // global z versus eloss
-    htest3 = fs->make<TH2F>("htest3"," ",240,-12.,12.,240,-12.,12.);  // x-y plane
-    //htest4 = fs->make<TH2F>("htest4"," ",80,-4.,4.,100,-5.,5.);
-
-    //hp1 = fs->make<TProfile>("hp1"," ",50,0.,50.);    // default option
-    //hp2 = fs->make<TProfile>("hp2"," ",50,0.,50.," "); // option set to " "
-    //hp3 = fs->make<TProfile>("hp3"," ",50,0.,50.,-100.,100.); //
-
+    // 2D
+    if(mode_ == "fpix") {
+      hzr = fs->make<TH2F>("hzr"," ",240,-60.,60.,68,0.,17.);  // x-y plane
+      hxy11 = fs->make<TH2F>("hxy11"," ",320,-16.,16.,320,-16.,16.); // x-y pla 
+      hxy12 = fs->make<TH2F>("hxy12"," ",320,-16.,16.,320,-16.,16.); // x-y pla
+      hxy21 = fs->make<TH2F>("hxy21"," ",320,-16.,16.,320,-16.,16.); // x-y pl
+      hxy22 = fs->make<TH2F>("hxy22"," ",320,-16.,16.,320,-16.,16.); // x-y pla
+      hxy31 = fs->make<TH2F>("hxy31"," ",320,-16.,16.,320,-16.,16.); // x-y pla
+      hxy32 = fs->make<TH2F>("hxy32"," ",320,-16.,16.,320,-16.,16.); // x-y plae
+    } else {
+      hxy = fs->make<TH2F>("hxy"," ",340,-17.,17.,340,-17.,17.);  // x-y plane
+      hphiz1 = fs->make<TH2F>("hphiz1"," ",108,-27.,27.,140,-3.5,3.5);
+      hphiz2 = fs->make<TH2F>("hphiz2"," ",108,-27.,27.,140,-3.5,3.5);
+      hphiz3 = fs->make<TH2F>("hphiz3"," ",108,-27.,27.,140,-3.5,3.5);
+      hphiz4 = fs->make<TH2F>("hphiz4"," ",108,-27.,27.,140,-3.5,3.5);
+    }
 #ifdef CHECK_GEOM
     // To get the module position
     for(int i=0;i<4;i++) {
@@ -315,7 +323,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
  
   //Retrieve tracker topology from geometry (for det id)
   edm::ESHandle<TrackerTopology> tTopo;
-  iSetup.get<IdealGeometryRecord>().get(tTopo);
+  iSetup.get<TrackerTopologyRcd>().get(tTopo);
   const TrackerTopology* tt = tTopo.product();
 
   // Get input data
@@ -516,9 +524,9 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
      double gloY = theGeomDet->surface().toGlobal(loc).y(); // 
      double gloR = theGeomDet->surface().toGlobal(loc).perp(); // 
      double gloZ = theGeomDet->surface().toGlobal(loc).z(); // 
+     double gloPhi = theGeomDet->surface().toGlobal(loc).phi(); // 
      if(DEBUG) cout<<", global pos "<<gloX<<" "<<gloY<<" "<<gloR<<" "<<gloZ<<endl;
 
-     htest3->Fill(gloX,gloY);
      hdetunit->Fill(float(detId.rawId()));
      hpabs->Fill(p);
      htof->Fill(tof);
@@ -533,6 +541,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
      //else theta = (PI/2. + PI) - theta;
 
      if(mode_=="fpix") {
+       hzr->Fill(gloZ,gloR);
        if(disk==1) {
 	 //cout<<" disk "<<disk<<endl;
 	 totalNumOfSimHits1++;
@@ -544,7 +553,8 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 hthick1->Fill(dz);
 	 hlength1->Fill(y);
 	 hwidth1->Fill(x);
-	 
+	 if(gloZ<0.) hxy11->Fill(gloX,gloY);
+	 else        hxy12->Fill(gloX,gloY);
 	 //SimHitMap1[detId.rawId()].push_back((*isim));
 	 htheta1->Fill(theta);
 	 hglobr1->Fill(gloR);
@@ -562,6 +572,8 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 hthick2->Fill(dz);
 	 hlength2->Fill(y);
 	 hwidth2->Fill(x);
+	 if(gloZ<0.) hxy21->Fill(gloX,gloY);
+	 else        hxy22->Fill(gloX,gloY);
 	 
 	 //SimHitMap2[detId.rawId()].push_back((*isim));
 	 htheta2->Fill(theta);
@@ -580,6 +592,8 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 hthick3->Fill(dz);
 	 hlength3->Fill(y);
 	 hwidth3->Fill(x);
+	 if(gloZ<0.) hxy31->Fill(gloX,gloY);
+	 else        hxy32->Fill(gloX,gloY);
 	 
 	 //SimHitMap2[detId.rawId()].push_back((*isim));
 	 htheta3->Fill(theta);
@@ -590,6 +604,8 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
        } // end disks
 
      } else if(mode_=="bpix") {
+
+       hxy->Fill(gloX,gloY);
 
        if(layer==1) {
 	 //cout<<" layer "<<layer<<endl;
@@ -602,6 +618,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 hthick1->Fill(dz);
 	 hlength1->Fill(y);
 	 hwidth1->Fill(x);
+	 hphiz1->Fill(gloZ,gloPhi);
 	 if(abs(pid)==13 && p>1.) hphi1->Fill(phi);
 	 
 	 // Test half modules 
@@ -620,8 +637,8 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 hglobz1->Fill(gloZ);
 	 
 	 // Check the coordinate system and counting
-	 htest->Fill(gloZ,ypos);
-	 if(abs(pid) != 11) htest2->Fill(gloZ,eloss);
+	 //htest->Fill(gloZ,ypos);
+	 //if(abs(pid) != 11) htest2->Fill(gloZ,eloss);
 	 
 	 //if(pid!=11 && moduleDirectionUp)  hladder1idUp->Fill(float(ladder));
 	 
@@ -641,6 +658,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 hthick2->Fill(dz);
 	 hlength2->Fill(y);
 	 hwidth2->Fill(x);
+	 hphiz2->Fill(gloZ,gloPhi);
 	 if(abs(pid)==13 && p>1.) hphi2->Fill(phi);
 	 
 	 // check half modules 
@@ -671,6 +689,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 hthick3->Fill(dz);
 	 hlength3->Fill(y);
 	 hwidth3->Fill(x); 
+	 hphiz3->Fill(gloZ,gloPhi);
 	 if(abs(pid)==13 && p>1.) hphi3->Fill(phi);
 	 
 	 // check half modules 
@@ -700,6 +719,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 hthick4->Fill(dz);
 	 hlength4->Fill(y);
 	 hwidth4->Fill(x); 
+	 hphiz4->Fill(gloZ,gloPhi);
 	 if(abs(pid)==13 && p>1.) hphi4->Fill(phi);
 	 
 	 // check half modules 

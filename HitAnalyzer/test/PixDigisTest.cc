@@ -154,6 +154,8 @@ private:
   TH2F *hdetMap4,*hdetMap3,*hdetMap2,*hdetMap1, 
     *hpixMap1, *hpixMap2, *hpixMap3,*hpixMap4,
     * hpixMapNoise; 
+  TH2F *hxy, *hphiz1, *hphiz2, *hphiz3, *hphiz4; // bpix 
+  TH2F *hzr, *hxy11, *hxy12, *hxy21, *hxy22, *hxy31, *hxy32;  // fpix 
 
   TH1F *hevent, *hlumi, *horbit, *hbx0, *hlumi0, *hlumi1,*hbx1,*hbx2,*hbx3,*hbx4,*hbx5,*hbx6;
   TH1F *hdets, *hdigis, *hdigis0, *hdigis1, *hdigis2,*hdigis3,*hdigis4,*hdigis5; 
@@ -376,6 +378,22 @@ void PixDigisTest::beginJob() {
   hdigis3 = fs->make<TH1F>( "hdigis3", "Fpix Digis", sizeH, lowH, highH);
   hdigis4 = fs->make<TH1F>( "hdigis4", "All Digis - on bunch", sizeH, lowH, highH);
   hdigis5 = fs->make<TH1F>( "hdigis5", "All Digis - off bunch ", sizeH, lowH, highH);
+
+  // 2D
+  hzr = fs->make<TH2F>("hzr"," ",240,-60.,60.,68,0.,17.);  // x-y plane
+  hxy11 = fs->make<TH2F>("hxy11"," ",320,-16.,16.,320,-16.,16.); // x-y pla 
+  hxy12 = fs->make<TH2F>("hxy12"," ",320,-16.,16.,320,-16.,16.); // x-y pla
+  hxy21 = fs->make<TH2F>("hxy21"," ",320,-16.,16.,320,-16.,16.); // x-y pl
+  hxy22 = fs->make<TH2F>("hxy22"," ",320,-16.,16.,320,-16.,16.); // x-y pla
+  hxy31 = fs->make<TH2F>("hxy31"," ",320,-16.,16.,320,-16.,16.); // x-y pla
+  hxy32 = fs->make<TH2F>("hxy32"," ",320,-16.,16.,320,-16.,16.); // x-y plae
+
+  hxy = fs->make<TH2F>("hxy"," ",340,-17.,17.,340,-17.,17.);  // x-y plane
+  hphiz1 = fs->make<TH2F>("hphiz1"," ",108,-27.,27.,140,-3.5,3.5);
+  hphiz2 = fs->make<TH2F>("hphiz2"," ",108,-27.,27.,140,-3.5,3.5);
+  hphiz3 = fs->make<TH2F>("hphiz3"," ",108,-27.,27.,140,-3.5,3.5);
+  hphiz4 = fs->make<TH2F>("hphiz4"," ",108,-27.,27.,140,-3.5,3.5);
+
 #endif
 
 }
@@ -387,7 +405,7 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
   const bool MY_DEBUG = false;
   //Retrieve tracker topology from geometry
   edm::ESHandle<TrackerTopology> tTopo;
-  iSetup.get<IdealGeometryRecord>().get(tTopo);
+  iSetup.get<TrackerTopologyRcd>().get(tTopo);
   const TrackerTopology* tt = tTopo.product();
 
   using namespace edm;
@@ -402,31 +420,31 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
   hbx0->Fill(float(bx));
   hlumi0->Fill(float(lumiBlock));
 
-  // eliminate bunches with beam
+  // // eliminate bunches with beam
   bool bunch = false;
-  if( bx==410 || bx==460 || bx==510) bunch = true;
-  else if( bx==560 || bx==610 || bx==660 ) bunch = true;
-  else if( bx==1292 || bx==1342 || bx==1392 ) bunch = true;
-  else if( bx==1454 || bx==1504 || bx==1554 ) bunch = true;
-  else if( bx==2501 || bx==2601 ) bunch = true;
-  else if( bx==3080 || bx==3030 || bx == 3180 ) bunch = true;
+  // if( bx==410 || bx==460 || bx==510) bunch = true;
+  // else if( bx==560 || bx==610 || bx==660 ) bunch = true;
+  // else if( bx==1292 || bx==1342 || bx==1392 ) bunch = true;
+  // else if( bx==1454 || bx==1504 || bx==1554 ) bunch = true;
+  // else if( bx==2501 || bx==2601 ) bunch = true;
+  // else if( bx==3080 || bx==3030 || bx == 3180 ) bunch = true;
 
-  if(bx>=1 && bx<=351) { if( (bx%50) == 1 ) bunch = true; }
-  else if(bx>=892 && bx<=1245) {
-    if( ((bx-892)%50) == 0 ) bunch = true;
-    else if( ((bx-895)%50) == 0 ) bunch = true;
-  } else if(bx>=1786 && bx<=2286) { if( ((bx-1786)%50) == 0 ) bunch = true; }
-  else if(bx>=2671 && bx<=3021) { if( ((bx-2671)%50) == 0 ) bunch = true; }
+  // if(bx>=1 && bx<=351) { if( (bx%50) == 1 ) bunch = true; }
+  // else if(bx>=892 && bx<=1245) {
+  //   if( ((bx-892)%50) == 0 ) bunch = true;
+  //   else if( ((bx-895)%50) == 0 ) bunch = true;
+  // } else if(bx>=1786 && bx<=2286) { if( ((bx-1786)%50) == 0 ) bunch = true; }
+  // else if(bx>=2671 && bx<=3021) { if( ((bx-2671)%50) == 0 ) bunch = true; }
 
-  if(bunch) {
-    //cout<<" reject "<<bx<<endl;
-    hbx2->Fill(float(bx));
-  } else {
-    if(bx==892) cout<<" something wrong"<<endl;
-    if(bx==1245) cout<<" something wrong"<<endl;
-    if(bx==3021) cout<<" something wrong"<<endl;
-    if(bx==2286) cout<<" something wrong"<<endl;
-  } 
+  // if(bunch) {
+  //   //cout<<" reject "<<bx<<endl;
+  //   hbx2->Fill(float(bx));
+  // } else {
+  //   if(bx==892) cout<<" something wrong"<<endl;
+  //   if(bx==1245) cout<<" something wrong"<<endl;
+  //   if(bx==3021) cout<<" something wrong"<<endl;
+  //   if(bx==2286) cout<<" something wrong"<<endl;
+  // } 
 
     // Get digis
   edm::Handle< edm::DetSetVector<PixelDigi> > pixelDigis;
@@ -495,8 +513,11 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
     // Get the geom-detector 
     const PixelGeomDetUnit * theGeomDet = 
       dynamic_cast<const PixelGeomDetUnit*> ( theTracker.idToDet(detId) );
+    double detX = theGeomDet->surface().position().x();
+    double detY = theGeomDet->surface().position().y();
     double detZ = theGeomDet->surface().position().z();
     double detR = theGeomDet->surface().position().perp();
+    double detPhi = theGeomDet->surface().position().phi();
     //const BoundPlane plane = theGeomDet->surface(); // does not work
     
 //     int cols = theGeomDet->specificTopology().ncolumns();
@@ -755,25 +776,30 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	  hdetzF->Fill(detZ);
 	  hcolsF->Fill(float(cols));
 	  hrowsF->Fill(float(rows));
-	  
+	  hzr->Fill(detZ,detR);
 	  
 	  if(disk==1) {
 	    hblade1->Fill(float(blade));
 	    ++numberOfDetUnitsF1;
 	    hdigisPerDetF1->Fill(float(numOfDigisPerDetF1));
 	    numOfDigisPerDetF1=0;	
-	    
+	    if(detZ<0.) hxy11->Fill(detX,detY);
+	    else        hxy12->Fill(detX,detY);
 	  } else if(disk==2) {
 	    hblade2->Fill(float(blade));
 	    ++numberOfDetUnitsF2;
 	    hdigisPerDetF2->Fill(float(numOfDigisPerDetF2));
 	    numOfDigisPerDetF2=0;
+	    if(detZ<0.) hxy21->Fill(detX,detY);
+	    else        hxy22->Fill(detX,detY);
 
 	  } else if(disk==3) {
 	    hblade3->Fill(float(blade));
 	    ++numberOfDetUnitsF3;
 	    hdigisPerDetF3->Fill(float(numOfDigisPerDetF3));
 	    numOfDigisPerDetF3=0;
+	    if(detZ<0.) hxy31->Fill(detX,detY);
+	    else        hxy32->Fill(detX,detY);
 	  } // if disk
 
 	} else if (subid==1) { // barrel
@@ -782,7 +808,8 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	  hdetz->Fill(detZ);
 	  hcolsB->Fill(float(cols));
 	  hrowsB->Fill(float(rows));
-	  
+	  hxy->Fill(detX,detY);
+
 	  hlayerid->Fill(float(layer));
 	  hshellid->Fill(float(shell));
 	  hsectorid->Fill(float(sector));
@@ -795,6 +822,7 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	    ++numberOfDetUnits1;
 	    hdigisPerDet1->Fill(float(numOfDigisPerDet1));
 	    numOfDigisPerDet1=0;
+	    hphiz1->Fill(detZ,detPhi);
 	    
 	  } else if(layer==2) {
 	    hladder2id->Fill(float(ladder));
@@ -803,6 +831,7 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	    ++numberOfDetUnits2;
 	    hdigisPerDet2->Fill(float(numOfDigisPerDet2));
 	    numOfDigisPerDet2=0;
+	    hphiz2->Fill(detZ,detPhi);
 	    
 	  } else if(layer==3) {
 	    hladder3id->Fill(float(ladder));
@@ -811,6 +840,7 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	    ++numberOfDetUnits3;
 	    hdigisPerDet3->Fill(float(numOfDigisPerDet3));
 	    numOfDigisPerDet3=0;
+	    hphiz3->Fill(detZ,detPhi);
 
 	  } else if(layer==4) {
 	    hladder4id->Fill(float(ladder));
@@ -819,6 +849,7 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	    ++numberOfDetUnits4;
 	    hdigisPerDet4->Fill(float(numOfDigisPerDet4));
 	    numOfDigisPerDet4=0;
+	    hphiz4->Fill(detZ,detPhi);
 	    
 	  } // layer
 	} // if bpix	

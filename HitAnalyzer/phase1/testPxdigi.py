@@ -13,7 +13,6 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
 
-
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
 )
@@ -32,9 +31,9 @@ process.MessageLogger = cms.Service("MessageLogger",
 
 process.source = cms.Source("PoolSource",
     fileNames =  cms.untracked.vstring(
-#    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100/digis/digis1.root'
+    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/digis/digis1.root'
 #    'file:digis.root'
-    'file:digis_nodb.root'
+#    'file:digis_100eve.root'
     )
 )
 
@@ -42,10 +41,9 @@ process.source = cms.Source("PoolSource",
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string('histo.root')
 )
-
   
 process.analysis = cms.EDAnalyzer("PixDigisTest",
-    Verbosity = cms.untracked.bool(True),
+    Verbosity = cms.untracked.bool(False),
     phase1 = cms.untracked.bool(True),
 # sim in V7
 #    src = cms.InputTag("mix"),

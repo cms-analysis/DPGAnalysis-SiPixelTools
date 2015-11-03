@@ -67,8 +67,8 @@ process.source = cms.Source("PoolSource",
 #  fileNames =  myfilelist
  fileNames = cms.untracked.vstring(    
 # for MC 
-  'file:clus.root'
-#  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100/clus/clus1.root'
+#  'file:clus.root'
+  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/clus/clus1.root'
   )
 )
 
@@ -81,19 +81,18 @@ process.TFileService = cms.Service("TFileService",
 
 
 process.analysis = cms.EDAnalyzer("PixClusterTest",
-    Verbosity = cms.untracked.bool(True),
+    Verbosity = cms.untracked.bool(False),
     phase1 = cms.untracked.bool(True),
 #    src = cms.InputTag("siPixelClusters"),
     src = cms.InputTag("siPixelClustersPreSplitting"),
 )
 
 # for data
-#process.p = cms.Path(process.hltPhysicsDeclared*process.hltfilter*process.analysis)
 #process.p = cms.Path(process.hltfilter*process.analysis)
-process.p = cms.Path(process.analysis)
+#process.p = cms.Path(process.analysis)
 
 # for MC
-#process.p = cms.Path(process.analysis)
+process.p = cms.Path(process.analysis)
 
 # define an EndPath to analyze all other path results
 #process.hltTrigReport = cms.EDAnalyzer( 'HLTrigReport',

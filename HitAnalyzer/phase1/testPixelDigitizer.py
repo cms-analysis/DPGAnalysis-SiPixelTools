@@ -18,116 +18,22 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
 
+process.load('Configuration.StandardSequences.Digi_cff')
+
 # from v7
 #process.load("SimGeneral.MixingModule.pixelDigitizer_cfi")
 # process.load("SimTracker.Configuration.SimTracker_cff")
 process.load("SimG4Core.Configuration.SimG4Core_cff")
 
-# process.load("SimGeneral.MixingModule.mixNoPU_cfi")
-from SimGeneral.MixingModule.aliases_cfi import * 
+process.load("SimGeneral.MixingModule.mixNoPU_cfi")
+#from SimGeneral.MixingModule.aliases_cfi import * 
 from SimGeneral.MixingModule.mixObjects_cfi import *
-# from SimGeneral.MixingModule.digitizers_cfi import *
+from SimGeneral.MixingModule.digitizers_cfi import *
 from SimGeneral.MixingModule.pixelDigitizer_cfi import *
-from SimGeneral.MixingModule.stripDigitizer_cfi import *
-from SimGeneral.MixingModule.trackingTruthProducer_cfi import *
+#from SimGeneral.MixingModule.stripDigitizer_cfi import *
+#from SimGeneral.MixingModule.trackingTruthProducer_cfi import *
 
-process.simSiPixelDigis = cms.EDProducer("MixingModule",
-#    digitizers = cms.PSet(theDigitizers),
-#    digitizers = cms.PSet(
-#      mergedtruth = cms.PSet(
-#            trackingParticles
-#      )
-#    ),
-
-  digitizers = cms.PSet(
-   pixel = cms.PSet(
-    pixelDigitizer
-   ),
-#  strip = cms.PSet(
-#    stripDigitizer
-#  ),
-  ),
-
-#theDigitizersValid = cms.PSet(
-#  pixel = cms.PSet(
-#    pixelDigitizer
-#  ),
-#  strip = cms.PSet(
-#    stripDigitizer
-#  ),
-#  ecal = cms.PSet(
-#    ecalDigitizer
-#  ),
-#  hcal = cms.PSet(
-#    hcalDigitizer
-#  ),
-#  castor = cms.PSet(
-#    castorDigitizer
-#  ),
-#  mergedtruth = cms.PSet(
-#    trackingParticles
-#  )
-#),
-
-    LabelPlayback = cms.string(' '),
-    maxBunch = cms.int32(3),
-    minBunch = cms.int32(-5), ## in terms of 25 ns
-
-    bunchspace = cms.int32(25),
-    mixProdStep1 = cms.bool(False),
-    mixProdStep2 = cms.bool(False),
-
-    playback = cms.untracked.bool(False),
-    useCurrentProcessOnly = cms.bool(False),
-    mixObjects = cms.PSet(
-        mixTracks = cms.PSet(
-            mixSimTracks
-        ),
-        mixVertices = cms.PSet(
-            mixSimVertices
-        ),
-        mixSH = cms.PSet(
-#            mixPixSimHits
-# mixPixSimHits = cms.PSet(
-    input = cms.VInputTag(cms.InputTag("g4SimHits","TrackerHitsPixelBarrelHighTof"), 
-                          cms.InputTag("g4SimHits","TrackerHitsPixelBarrelLowTof"),
-                          cms.InputTag("g4SimHits","TrackerHitsPixelEndcapHighTof"), 
-                          cms.InputTag("g4SimHits","TrackerHitsPixelEndcapLowTof"), 
-#                          cms.InputTag("g4SimHits","TrackerHitsTECHighTof"), 
-#                          cms.InputTag("g4SimHits","TrackerHitsTECLowTof"), 
-#                          cms.InputTag("g4SimHits","TrackerHitsTIBHighTof"),
-#                          cms.InputTag("g4SimHits","TrackerHitsTIBLowTof"), 
-#                          cms.InputTag("g4SimHits","TrackerHitsTIDHighTof"), 
-#                          cms.InputTag("g4SimHits","TrackerHitsTIDLowTof"), 
-#                          cms.InputTag("g4SimHits","TrackerHitsTOBHighTof"), 
-#                          cms.InputTag("g4SimHits","TrackerHitsTOBLowTof")
-    ),
-    type = cms.string('PSimHit'),
-    subdets = cms.vstring(
-        'TrackerHitsPixelBarrelHighTof',
-        'TrackerHitsPixelBarrelLowTof',
-        'TrackerHitsPixelEndcapHighTof',
-        'TrackerHitsPixelEndcapLowTof',
-#        'TrackerHitsTECHighTof',
-#        'TrackerHitsTECLowTof',
-#        'TrackerHitsTIBHighTof',
-#        'TrackerHitsTIBLowTof',
-#        'TrackerHitsTIDHighTof',
-#        'TrackerHitsTIDLowTof',
-#        'TrackerHitsTOBHighTof',
-#        'TrackerHitsTOBLowTof'
-    ),
-    crossingFrames = cms.untracked.vstring(),
-#        'MuonCSCHits',
-#        'MuonDTHits',
-#        'MuonRPCHits'),
-#)   
-        ),
-        mixHepMC = cms.PSet(
-            mixHepMCProducts
-        )
-    )
-)
+process.mix.digitizers=cms.PSet(pixel=cms.PSet(pixelDigitizer))
 
 process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
 #     simMuonCSCDigis = cms.PSet(
@@ -146,23 +52,22 @@ process.maxEvents = cms.untracked.PSet(
 )
 
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
-       'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu_phase1/pt100_75/simhits/simHits1.root'
-#       'file:simHits.root'
+#       'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu_phase1/pt100_76/simhits/simHits1.root'
+       'file:simHits_100eve.root'
   )
 )
 
 
 process.o1 = cms.OutputModule("PoolOutputModule",
             outputCommands = cms.untracked.vstring('drop *','keep *_*_*_Test'),
-      fileName = cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_75/digis/digis1.root')
-#      fileName = cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/MC/mb/13tev/digis/digis1.root')
-#      fileName = cms.untracked.string('file:digis.root')
+#      fileName = cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/digis/digis1.root')
+      fileName = cms.untracked.string('file:digis.root')
 )
 
 
 # add sqlite DBs
 #LA
-useLocalLA = True
+useLocalLA = False
 if useLocalLA :
   process.LAReader = cms.ESSource("PoolDBESSource",
     DBParameters = 
@@ -182,7 +87,7 @@ if useLocalLA :
 #  end if
 
 # Quality
-useLocalQuality = True
+useLocalQuality = False
 if useLocalQuality :
   process.QualityReader = cms.ESSource("PoolDBESSource",
     BlobStreamerName = cms.untracked.string('TBufferBlobStreamingService'),
