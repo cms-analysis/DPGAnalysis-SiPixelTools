@@ -24,7 +24,8 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '75X_upgrade2017_design_v4', '')
 
 process.source = cms.Source("EmptyIOVSource",
     firstValue = cms.uint64(1),
@@ -54,13 +55,13 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
     toPut = cms.VPSet(
         cms.PSet(
             record = cms.string('SiPixelGainCalibrationOfflineRcd'),
-            #tag = cms.string('SiPixelGainCalibration_phase1_ideal')
-            tag = cms.string('SiPixelGainCalibration_phase1_mc_v1')
+            tag = cms.string('SiPixelGainCalibration_phase1_ideal')
+            #tag = cms.string('SiPixelGainCalibration_phase1_mc_v1')
         ), 
         cms.PSet(
             record = cms.string('SiPixelGainCalibrationForHLTRcd'),
-            #tag = cms.string('SiPixelGainCalibration_hlt_phase1_ideal')
-            tag = cms.string('SiPixelGainCalibration_hlt_phase1_mc_v1')
+            tag = cms.string('SiPixelGainCalibration_hlt_phase1_ideal')
+            #tag = cms.string('SiPixelGainCalibration_hlt_phase1_mc_v1')
         ),
         cms.PSet(
             record = cms.string('SiPixelGainCalibrationOfflineSimRcd'),
@@ -72,23 +73,28 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
         ))
 )
 
+# offline reco , can be ideal or mc
 process.SiPixelGainsOfflineBuilder = cms.EDAnalyzer("SiPixelCondObjOfflineBuilder",
     process.SiPixelGainCalibrationServiceParameters,
     numberOfModules = cms.int32(2000),
     appendMode = cms.untracked.bool(False),
     meanGain = cms.double(3.48),
-    #rmsGain = cms.double(0.0),
-    rmsGain = cms.double(0.058),
     meanPed = cms.double(25.3),
-    #rmsPed = cms.double(0.0),
-    rmsPed = cms.double(8.1),
+    # realistic (mc)
+    #rmsGain = cms.double(0.058),
+    #rmsPed = cms.double(8.1),
+    # ideal payload
+    rmsGain = cms.double(0.0),
+    rmsPed = cms.double(0.0),
     # separate input for the FPIX. If not entered the default values are used.
     meanGainFPix = cms.untracked.double(2.90),
-    #rmsGainFPix = cms.untracked.double(0.0),
-    rmsGainFPix = cms.untracked.double(0.054),
     meanPedFPix = cms.untracked.double(27.7),
-    #rmsPedFPix = cms.untracked.double(0.0),
-    rmsPedFPix = cms.untracked.double(9.5),
+    # realistic (mc) 
+    #rmsGainFPix = cms.untracked.double(0.054),
+    #rmsPedFPix = cms.untracked.double(9.5),
+    # ideal 
+    rmsGainFPix = cms.untracked.double(0.0),
+    rmsPedFPix = cms.untracked.double(0.0),
     record = cms.string('SiPixelGainCalibrationOfflineRcd'),
     fromFile = cms.bool(False),
     fileName = cms.string(''),
@@ -98,13 +104,14 @@ process.SiPixelGainsOfflineBuilder = cms.EDAnalyzer("SiPixelCondObjOfflineBuilde
     noisyFraction = cms.double(0.0)
 )
 
+# offline sim
 process.SiPixelGainsOfflineSimBuilder = cms.EDAnalyzer("SiPixelCondObjOfflineBuilder",
     process.SiPixelGainCalibrationServiceParameters,
     numberOfModules = cms.int32(2000),
     appendMode = cms.untracked.bool(False),
     meanGain = cms.double(3.48),
-    rmsGain = cms.double(0.0),
     meanPed = cms.double(25.3),
+    rmsGain = cms.double(0.0),
     rmsPed = cms.double(0.0),
     # separate input for the FPIX. If not entered the default values are used.
     meanGainFPix = cms.untracked.double(2.90),
@@ -120,23 +127,28 @@ process.SiPixelGainsOfflineSimBuilder = cms.EDAnalyzer("SiPixelCondObjOfflineBui
     noisyFraction = cms.double(0.0)                                                       
 )
 
+# hlt reco, can be ideal or not (mc)
 process.SiPixelGainsForHLTBuilder = cms.EDAnalyzer("SiPixelCondObjForHLTBuilder",
     process.SiPixelGainCalibrationServiceParameters,
     numberOfModules = cms.int32(2000),
     appendMode = cms.untracked.bool(False),
     meanGain = cms.double(3.48),
-    rmsGain = cms.double(0.0),
-    #rmsGain = cms.double(0.058),
     meanPed = cms.double(25.3),
-    rmsPed = cms.double(0.0),
+    # realistic (mc)
+    #rmsGain = cms.double(0.058),
     #rmsPed = cms.double(8.1),
+    # ideal 
+    rmsGain = cms.double(0.0),
+    rmsPed = cms.double(0.0),
     # separate input for the FPIX. If not entered the default values are used.
     meanGainFPix = cms.untracked.double(2.90),
-    rmsGainFPix = cms.untracked.double(0.0),
-    #rmsGainFPix = cms.untracked.double(0.054),
     meanPedFPix = cms.untracked.double(27.7),
-    rmsPedFPix = cms.untracked.double(0.0),
+    #realistic (mc)
+    #rmsGainFPix = cms.untracked.double(0.054),
     #rmsPedFPix = cms.untracked.double(9.5),
+    # ideal 
+    rmsGainFPix = cms.untracked.double(0.0),
+    rmsPedFPix = cms.untracked.double(0.0),
     record = cms.string('SiPixelGainCalibrationForHLTRcd'),
     fromFile = cms.bool(False),
     fileName = cms.string(''),
@@ -145,6 +157,8 @@ process.SiPixelGainsForHLTBuilder = cms.EDAnalyzer("SiPixelCondObjForHLTBuilder"
     deadFraction = cms.double(0.0),
     noisyFraction = cms.double(0.0)
 )
+
+# hlt sim
 process.SiPixelGainsForHLTSimBuilder = cms.EDAnalyzer("SiPixelCondObjForHLTBuilder",
     process.SiPixelGainCalibrationServiceParameters,
     numberOfModules = cms.int32(2000),
@@ -168,9 +182,11 @@ process.SiPixelGainsForHLTSimBuilder = cms.EDAnalyzer("SiPixelCondObjForHLTBuild
 )
 
 #process.p = cms.Path(process.SiPixelGainsOfflineBuilder)
-process.p = cms.Path(process.SiPixelGainsForHLTBuilder)
+#process.p = cms.Path(process.SiPixelGainsForHLTBuilder)
+process.p = cms.Path(process.SiPixelGainsOfflineBuilder*process.SiPixelGainsForHLTBuilder)
 
 #process.p = cms.Path(process.SiPixelGainsOfflineSimBuilder)
 #process.p = cms.Path(process.SiPixelGainsForHLTSimBuilder)
+#process.p = cms.Path(process.SiPixelGainsOfflineSimBuilder*process.SiPixelGainsForHLTSimBuilder)
 
 

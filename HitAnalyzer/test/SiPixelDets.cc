@@ -14,6 +14,7 @@
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
+#include "Geometry/Records/interface/TrackerTopologyRcd.h"
 
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 #include "DataFormats/SiPixelDetId/interface/PixelBarrelName.h"
@@ -66,11 +67,13 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
  
   edm::ESHandle<TrackerGeometry> tkgeom;
   es.get<TrackerDigiGeometryRecord>().get( tkgeom );
+
   if(PRINT) cout<<" There are "<<tkgeom->detUnits().size() <<" detectors"<<std::endl;
 
   //Retrieve tracker topology from geometry
   edm::ESHandle<TrackerTopology> tTopo;
-  es.get<IdealGeometryRecord>().get(tTopo);
+  //es.get<IdealGeometryRecord>().get(tTopo);
+  es.get<TrackerTopologyRcd>().get(tTopo);
 #ifdef NEW_NAMES
   const TrackerTopology* tt = tTopo.product();
 #endif
@@ -81,7 +84,7 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
     // Is it a pixel detetector
     if( dynamic_cast<PixelGeomDetUnit const*>((*it)) == 0) continue; // no, than skip
 
-    DetId detId=(*it)->geographicalId();
+    DetId detId = (*it)->geographicalId();
     
     const GeomDetUnit      * geoUnit = tkgeom->idToDetUnit( detId );
     const PixelGeomDetUnit * pixDet  = dynamic_cast<const PixelGeomDetUnit*>(geoUnit);
@@ -104,18 +107,17 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
     if(detId.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel)) {	
       //continue;
 
-      if(PRINT) 
-	cout<<"Det: "<<detId.rawId()<<" "<<detId.null()<<" "<<detId.det()<<" "<<detId.subdetId()<<endl;
-
       unsigned int rawId = detId.rawId();
-      PXBDetId pxdetid = PXBDetId(detId);
+      if(PRINT) 
+	cout<<"Det raw: "<<rawId<<" "<<detId.null()<<" "<<detId.det()<<" "<<detId.subdetId()<<endl;
 
-      if(PRINT) cout << "barrel:" << "  layer=" << pxdetid.layer() << "  ladder=" << pxdetid.ladder() 
-		     << "  module=" << pxdetid.module() << " "<<rawId<<endl;
+
 
 
 #ifdef NEW_NAMES 
-      // Use new indecies 
+      //cout<<" print det "<< tTopo->print(detId) <<endl; // does not seem to work in 752
+
+     // Use new indecies 
       // Barell layer = 1,2,3
       unsigned int layerC = tTopo->pxbLayer(detId);
       // Barrel ladder id 1-20,32,44.
@@ -160,7 +162,7 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       if(PRINT_TABLE) 
 	cout<<detId.rawId()<<" "<<name<<" r/phi/z = "<<detR<<"/"<<detPhi<<"/"<<detZ
 	    <<" cmssw layer/ladder/module "<<layerC<<"/"<<ladderC<<"/"<<zindex
-	    <<" "<<normVect.phi()    // <<" "<<normVect.barePhi() same
+	    <<" E-phi "<<normVect.phi()    // <<" "<<normVect.barePhi() same
 	    <<endl;
 
       // Now check if teh id is the same
@@ -198,6 +200,9 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
 #endif // NEW_ANMES
 	
 #ifdef OLD_NAMES
+      PXBDetId pxdetid = PXBDetId(detId);
+      if(PRINT) cout << "barrel:" << "  layer=" << pxdetid.layer() << "  ladder=" << pxdetid.ladder() 
+		     << "  module=" << pxdetid.module() << " "<<rawId<<endl;
       // OLD indices 
       // Barell layer = 1,2,3
       unsigned int layerC1 = pxdetid.layer();
@@ -303,7 +308,7 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
 	cout<<rawId<<" "<<nameF<<" r/phi/z = "<<detR<<"/"<<detPhi<<"/"<<detZ
 	    <<" cmssw side/disk/blade/pannel/plaq="
 	    <<side<<"/"<<disk<<"/"<<blade<<"/"<<panel<<"/"<<plaq
-	    <<" "<<normVect.z()
+	    <<" E-z "<<normVect.z()
 	    <<endl;
 
       // Now check if teh id is the same

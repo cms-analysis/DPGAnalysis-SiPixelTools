@@ -52,21 +52,20 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
         enableReadOnlySessionOnUpdateConnection = cms.untracked.bool(False)
     ),
     timetype = cms.untracked.string('runnumber'),
-    connect = cms.string("sqlite_file:SiPixelLorentzAngle_phase1_mc_v1.db"),
-#    connect = cms.string("sqlite_file:SiPixelLorentzAngleSim_phase1_mc_v1.db"),
+    connect = cms.string("sqlite_file:SiPixelLorentzAngle_forWidth_phase1_mc_v1.db"),
     toPut = cms.VPSet(
         cms.PSet(
             record = cms.string('SiPixelLorentzAngleRcd'),
-            tag = cms.string('SiPixelLorentzAngle_phase1_mc_v1')
+            tag = cms.string('SiPixelLorentzAngle_forWidth_phase1_mc_v1')
 #	     tag = cms.string("SiPixelLorentzAngle_fromAlignment_v01_mc")	
 #	     tag = cms.string("SiPixelLorentzAngle_fromAlignment_v01")	
 #	     tag = cms.string("SiPixelLorentzAngle_forWidth_v01_mc")
 #	     tag = cms.string("SiPixelLorentzAngle_forWidth_v01")
         ),
-        cms.PSet(
-            record = cms.string('SiPixelLorentzAngleSimRcd'),
-            tag = cms.string('SiPixelLorentzAngleSim_phase1_mc_v1')
-        ),
+#        cms.PSet(
+#            record = cms.string('SiPixelLorentzAngleSimRcd'),
+#            tag = cms.string('SiPixelLorentzAngleSim_phase1_mc_v1')
+#        ),
        )
 )
 
@@ -74,8 +73,8 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
 ###### LORENTZ ANGLE OBJECT ######
 process.SiPixelLorentzAngle = cms.EDAnalyzer("SiPixelLorentzAngleDBLoader",
 # common input for all rings 
-    bPixLorentzAnglePerTesla = cms.untracked.double(0.098),
-    fPixLorentzAnglePerTesla = cms.untracked.double(0.058),
+    bPixLorentzAnglePerTesla = cms.untracked.double(0.1),
+    fPixLorentzAnglePerTesla = cms.untracked.double(0.06),
 # enter -9999 if individual input for rings 
 #    bPixLorentzAnglePerTesla = cms.untracked.double(-9999.),
 #    fPixLorentzAnglePerTesla = cms.untracked.double(-9999.),

@@ -28,11 +28,10 @@ process.MessageLogger = cms.Service("MessageLogger",
 
 process.source = cms.Source("PoolSource",
     fileNames =  cms.untracked.vstring(
+    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu_phase1/pt100_76/simhits/simHits1.root'
 #    '/store/user/kotlinski/mu100/simhits/simHits.root',
-    'file:simHits.root'
-#    'file:sims.root'
+#    'file:simHits_100eve.root'
 #    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_72/simhits/simHits1.root'
-#    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_71_pre5/simhits/simHits2.root'
 #    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_71_pre5/simhits/simHits3.root'
 #    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_71_pre5/simhits/simHits4.root'
 #    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_71_pre5/simhits/simHits5.root'
@@ -64,14 +63,14 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
 # or from DPGAnalysis 
 process.analysis =  cms.EDAnalyzer("PixSimHitsTest",
 	src = cms.string("g4SimHits"),
-	list = cms.string("TrackerHitsPixelBarrelLowTof"),
+#	list = cms.string("TrackerHitsPixelBarrelLowTof"),
 #	list = cms.string("TrackerHitsPixelBarrelHighTof"),
-#	list = cms.string("TrackerHitsPixelEndcapLowTof"),
+	list = cms.string("TrackerHitsPixelEndcapLowTof"),
 #	list = cms.string("TrackerHitsPixelEndcapHighTof"),
-        Verbosity = cms.untracked.bool(True),
+        Verbosity = cms.untracked.bool(False),
         phase1 = cms.untracked.bool(True),
-        mode = cms.untracked.string("bpix"),
-#        mode = cms.untracked.string("fpix"),
+#        mode = cms.untracked.string("bpix"),
+        mode = cms.untracked.string("fpix"),
 )
 
 process.p = cms.Path(process.analysis)
