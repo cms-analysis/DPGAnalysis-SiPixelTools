@@ -110,9 +110,14 @@ using namespace std;
 //#define INSTLUMI_STUDIES
 //#define VDM_STUDIES
 
-//#define BX
+#define BX
 //#define BX_NEW
 
+//#define HF
+
+#ifdef HF
+#include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
+#endif // HF
 
 //=======================================================================
 #ifdef BX_NEW
@@ -265,48 +270,49 @@ private:
   int limit;
   int trains;
   int train_start[40];
-  //int train_stop[40];
-  //int beam1_start[40];
-  //int beam1_stop[40];
-  //int beam2_start[40];
-  //int beam2_stop[40];
+  int train_stop[40];
+  int beam1_start[40];
+  int beam1_stop[40];
+  int beam2_start[40];
+  int beam2_stop[40];
 };
 
 getBX::getBX(void) {
   int count = 0;
   limit=4000;
-  trains = 8;
-  train_start[count]=208;
-  ++count;
-  train_start[count]=308;
-  ++count;
-  train_start[count]=408;
-  ++count;
-  train_start[count]=508;
-  ++count;
-  train_start[count]=1993;
-  ++count;
-  train_start[count]=2093;
-  ++count;
-  train_start[count]=2193;
-  ++count;
-  train_start[count]=2293;
-  ++count;
+
+  // trains = 8;
+  // train_start[count]=208;
+  // ++count;
+  // train_start[count]=308;
+  // ++count;
+  // train_start[count]=408;
+  // ++count;
+  // train_start[count]=508;
+  // ++count;
+  // train_start[count]=1993;
+  // ++count;
+  // train_start[count]=2093;
+  // ++count;
+  // train_start[count]=2193;
+  // ++count;
+  // train_start[count]=2293;
+  // ++count;
 
 
   // limit=1841;
   // trains = 22;
-  // // train 1
-  // train_start[count] = 7;
-  // train_stop[count] = 24;
-  // beam1_start[count] = 1;
-  // beam1_stop[count] = 5;
-  // beam2_start[count] = 25;
-  // beam2_stop[count] = 29;
+  // train 1
+  train_start[count] = 67;
+  train_stop[count]  = 102;
+  beam1_start[count] = 1;
+  beam1_stop[count]  = 12;
+  beam2_start[count] = 16;
+  beam2_stop[count]  = 27;
 
   // // train 2
-  // count++;
-  // train_start[count] = 66;
+  count++;
+  train_start[count] = 112;
   // train_stop[count] = 137;
   // beam1_start[count] = -1;
   // beam1_stop[count] = -1;
@@ -501,20 +507,34 @@ getBX::~getBX(void) {
 }
 
 int getBX::find(int bx) {
-  // invalid -1, empty 0. beam1 1, beam2 2, collision 3, collison+1 4, beam1+1 5,  beam2+1 6 
+  // invalid -1, empty (before collisions) 0. beam1 1, beam2 2, collision 3, collison+1 4, 
+  // orbit gap 5, gap in between 6
+ 
+  //if(bx>limit) return (-1);
 
-  if(bx>limit) return (-1);
+  // look only at train 1
+  if(bx>111 && bx<3290) return (-1);
   //cout<<bx<<endl;
 
   // simple lookup
+  // check beam1
+  if(    bx==train_stop[0]) return (4);  // 1+ collsion
+  else if(bx>=beam1_start[0] && bx<=beam1_stop[0]) return (1); // beam 1
+  else if(bx>=beam2_start[0] && bx<=beam2_stop[0]) return (2); // beam 2
+  else if(bx>=train_start[0] && bx<=train_stop[0]) return (3); // collisions 
+  else if(bx>=3290 && bx<=3528) return (5); // abort gap
+  else if(bx>beam1_stop[0] && bx<beam2_start[1]) return (1); // gap in between 
+  return (0); // initial empty 
+
+
   // Check collisions
-  for(int train=0;train<trains;++train) {
-    //cout<<bx<<" "<<train<<endl;
-    int b=train_start[train];
-    //cout<<bx<<" "<<train<<" "<<b<<endl;
-    if(bx == b) return (3);  // collision
-    else if(bx == (b+1)) return (4); // collision+1
-  }
+  // for(int train=0;train<trains;++train) {
+  //   //cout<<bx<<" "<<train<<endl;
+  //   int b=train_start[train];
+  //   //cout<<bx<<" "<<train<<" "<<b<<endl;
+  //   if(bx == b) return (3);  // collision
+  //   else if(bx == (b+1)) return (4); // collision+1
+  // }
   
   // // Check collisions
   // for(int train=0;train<trains;++train) {
@@ -850,6 +870,10 @@ class PixClusterAna : public edm::EDAnalyzer {
   // Needed for the ByToken method
   edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster> > myClus;
 
+#ifdef HF
+edm::EDGetTokenT<HFRecHitCollection> HFHitsToken_;
+#endif //HF
+
   //TFile* hFile;
   TH1D *hdetunit;
   TH1D *hpixid,*hpixsubid,
@@ -980,6 +1004,12 @@ class PixClusterAna : public edm::EDAnalyzer {
   TProfile *hclusls1, *hpixls1,*hclusls2, *hpixls2, *hclusls3, *hpixls3 ;
 #endif
 
+#ifdef HF
+  TH2F *hclusbhf,*hclusfhf,*hclusb1hf, *hbxhf;   
+  TH1D *hhf;
+  TProfile *hbxhfp;
+#endif //HF
+
 #ifdef ROC_EFF
   rocEfficiency * pixEff;
 
@@ -1012,6 +1042,11 @@ PixClusterAna::PixClusterAna(edm::ParameterSet const& conf)
   // For the ByToken method
   myClus = consumes<edmNew::DetSetVector<SiPixelCluster> >(conf.getParameter<edm::InputTag>( "src" ));
 
+#ifdef HF
+  //HFHits_       = iConfig.getParameter<edm::InputTag>("HFHitCollection");
+  //HFHitsToken_  = consumes<HFRecHitCollection>(edm::InputTag("hltHfreco")); // or "hfreco"
+  HFHitsToken_  = consumes<HFRecHitCollection>(edm::InputTag("hfreco")); // for pp "hfreco"
+#endif // HF
 
 }
 // Virtual destructor needed.
@@ -1748,6 +1783,21 @@ void PixClusterAna::beginJob() {
 
 #endif // ROC_EFF
 
+#ifdef HF
+  hhf = fs->make<TH1D>("hhf"," HF ",2000,0.,20000.);
+  hclushf = fs->make<TH2F>("hclushf"," HF versus clusters",100,0.,10000.,100,0.,20000.);
+  hclushf->SetOption("colz");
+  hclusbhf = fs->make<TH2F>("hclusbhf"," HF versus clusters-b",80,0.,8000.,100,0.,20000.);
+  hclusbhf->SetOption("colz");
+  hclusfhf = fs->make<TH2F>("hclusfhf"," HF versus clusters-f",30,0.,3000.,100,0.,20000.);
+  hclusfhf->SetOption("colz");
+  hclusb1hf = fs->make<TH2F>("hclusb1hf"," HF versus clusters-b1",40,0.,4000.,100,0.,20000.);
+  hclusb1hf->SetOption("colz");
+  //hbxhf = fs->make<TH2F>("hbxhf"," HF versus bx",4000,0.,4000.,50,0.,10000.);
+  //hbxhf->SetOption("colz");  // should be a profile 
+  hbxhfp = fs->make<TProfile>("hbxhfp"," HF versus bx",4000,0.,4000.,0.,20000.);
+#endif
+
   countEvents=0;
   countAllEvents=0;
   sumClusters=0., sumPixels=0.;
@@ -1773,6 +1823,9 @@ void PixClusterAna::beginJob() {
 // ------------ method called to at the end of the job  ------------
 void PixClusterAna::endJob(){
   double norm = 1;
+  cout << " End PixClusterAna, events all/with hits=  " 
+       << countAllEvents<<"/"<<countEvents<<endl;
+
 #ifdef ROC_EFF
   double totClusters = sumClusters; // save the total cluster number
 #endif
@@ -1784,8 +1837,7 @@ void PixClusterAna::endJob(){
   }
 
 
-  cout << " End PixClusterAna, events all/with hits=  " << countAllEvents<<"/"<<countEvents
-       <<" clus/pix per full event "<<sumClusters<<"/"<<sumPixels<<endl;
+  cout <<" clus/pix per full event "<<sumClusters<<"/"<<sumPixels<<endl;
   cout<<" 2D plots are rescaled by the number of full events "<<countEvents<<endl;
 
   //countLumi /= 1000.;
@@ -2064,7 +2116,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 
   // PVs
   int numPVsGood = 0;
-  if(select2<11 && run>165000) { // skip for earlier runs, crashes
+  if(run>165000) { // skip for earlier runs, crashes
     edm::Handle<reco::VertexCollection> vertices;
     e.getByLabel( "offlinePrimaryVertices", vertices );
     
@@ -2101,7 +2153,16 @@ void PixClusterAna::analyze(const edm::Event& e,
 #ifdef BX
   //cout<<" for bx "<<bx<<endl;
   int bxId = getbx->find(bx);  // get the bunch type 
-  //cout<<" id is "<<bxId<<endl;
+  // select special events only 
+  if(select2>0 && select2<11) {
+    // skip events which are not single beams, only if select2=2 
+    if( (select2==2) && (bxId!=1) && (bxId!=2) ) return;
+    // skip events which are not collisions 
+    if( (select2==1) && (bxId!=3) ) return;
+    // skip events which are not cempty
+    if( (select2==6) && (bxId!=0) ) return;
+    //cout<<" id is "<<bxId<<" "<<bx<<endl;
+  }
 #endif // BX
 
 #ifdef BX_NEW
@@ -2115,12 +2176,23 @@ void PixClusterAna::analyze(const edm::Event& e,
   else if(bxId==4) hbx2->Fill(float(bx)); // collision+1
   else if(bxId==1) hbx3->Fill(float(bx)); // beam1
   else if(bxId==2) hbx4->Fill(float(bx)); // beam2
-  else if(bxId==5 || bxId==6) hbx5->Fill(float(bx)); // beam1,2+1
+  else if(bxId==5 || bxId==6) hbx5->Fill(float(bx)); // empty gap and in-between
   else if(bxId==0) hbx6->Fill(float(bx)); // empty
 
 #endif
 
-
+#ifdef HF
+  edm::Handle<HFRecHitCollection> HFRecHitsH;
+  e.getByToken(HFHitsToken_,HFRecHitsH);
+  double sumHFE = 0.;
+  for (HFRecHitCollection::const_iterator it=HFRecHitsH->begin(); it!=HFRecHitsH->end(); it++) {
+    if (it->energy()>10.0) {   // from eCut_HF
+      sumHFE += it->energy();
+    }
+  }
+  hhf->Fill(sumHFE);
+  //cout<<" energy sum HF "<<sumHFE<<endl;
+#endif // HF
 
 
   // Get Cluster Collection from InputTag
@@ -2293,7 +2365,6 @@ void PixClusterAna::analyze(const edm::Event& e,
   //if( bptx_xor || bptx_and ) return; // select no bptx events
   //if(!bptx_and ) return; // select coll  events
   //if(!bptx_xor ) return; // select single beams
-
   // if(select2>0 && select2<11) {
   //   if(select2==1 && !bptx_and) return;  // select bptx_and only
   //   if(select2==2 && !bptx_xor) return;  // select bptx_xor
@@ -2625,7 +2696,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 	    hprows1->Fill(pixx);
 
 	    if     (ladder== 7 && module==-2) hpixDetMap10->Fill(pixy,pixx); // NOISY Run2
-	    else if(ladder== 3 && module== 1) hpixDetMap11->Fill(pixy,pixx); // " 
+	    else if(ladder== 2 && module== -3) hpixDetMap11->Fill(pixy,pixx); // " 
 	    else if(ladder== 9 && module== 2) hpixDetMap12->Fill(pixy,pixx); // "
 	    else if(ladder==-9 && module== 4) hpixDetMap13->Fill(pixy,pixx); // ineff, SPOT
 	    else if(ladder==-8 && module==-4) hpixDetMap14->Fill(pixy,pixx); // bad al, ENE
@@ -2633,7 +2704,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 	    else if(ladder== 9 && module== 4) hpixDetMap16->Fill(pixy,pixx); // gain low off
 	    else if(ladder==-3 && module==-3) hpixDetMap17->Fill(pixy,pixx); // bad col, NOISY in 2015
 	    else if(ladder==-7 && module==-4) hpixDetMap18->Fill(pixy,pixx); // bad col
-	    else if(ladder==-5 && module==-4) hpixDetMap19->Fill(pixy,pixx); // 
+	    else if(ladder==6 && module==-2) hpixDetMap19->Fill(pixy,pixx); // 
 	    
 	    if(pixx<80.) numOfPixPerLink11++;
 	    else numOfPixPerLink12++;
@@ -2654,7 +2725,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 	     else if(bxId==0) hpixChargebx6->Fill(adc); // empty
 	     else if(bxId==1) hpixChargebx3->Fill(adc); // beam1
 	     else if(bxId==2) hpixChargebx3->Fill(adc); // beam2
-	     else if(bxId==5 || bxId==6) hpixChargebx5->Fill(adc); // beam1/2+1
+	     else if(bxId==5 || bxId==6) hpixChargebx5->Fill(adc); // gap and in-between 
 	     else cout<<" wrong bx id "<<bxId<<endl;
 	   }
 #endif
@@ -2732,7 +2803,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 	     else if(bxId==0) hpixChargebx6->Fill(adc); // empty
 	     else if(bxId==1) hpixChargebx3->Fill(adc); // beam1
 	     else if(bxId==2) hpixChargebx3->Fill(adc); // beam2
-	     else if(bxId==5 || bxId==6) hpixChargebx5->Fill(adc); // beam1/2+1
+	     else if(bxId==5 || bxId==6) hpixChargebx5->Fill(adc); // gap and in bwtween 
 	     else cout<<" wrong bx id "<<bxId<<endl;
 	   }
 #endif
@@ -2838,7 +2909,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 	     else if(bxId==0) hpixChargebx6->Fill(adc); // empty
 	     else if(bxId==1) hpixChargebx3->Fill(adc); // beam1
 	     else if(bxId==2) hpixChargebx3->Fill(adc); // beam2
-	     else if(bxId==5 || bxId==6) hpixChargebx5->Fill(adc); // beam1/2+1
+	     else if(bxId==5 || bxId==6) hpixChargebx5->Fill(adc); //  gap and in-betwen
 	     else cout<<" wrong bx id "<<bxId<<endl;
 	   }
 #endif
@@ -2966,7 +3037,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 	    else if(bxId==0) {hchargebx6->Fill(ch); hsizebx6->Fill(size);} // empty
 	    else if(bxId==1) {hchargebx3->Fill(ch); hsizebx3->Fill(size);} // beam1
 	    else if(bxId==2) {hchargebx4->Fill(ch); hsizebx3->Fill(size);} // beam2
-	    else if(bxId==5 || bxId==6) {hchargebx5->Fill(ch); hsizebx5->Fill(size);} // beam1/2+1
+	    else if(bxId==5 || bxId==6) {hchargebx5->Fill(ch); hsizebx5->Fill(size);} // gap and in-between
 	    else cout<<" wrong bx id "<<bxId<<endl;
 	  }
 	  //if(bxId==0) htestbx->Fill(bx,ch);
@@ -3043,7 +3114,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 	    else if(bxId==0) {hchargebx6->Fill(ch); hsizebx6->Fill(size);} // empty
 	    else if(bxId==1) {hchargebx3->Fill(ch); hsizebx3->Fill(size);} // beam1
 	    else if(bxId==2) {hchargebx4->Fill(ch); hsizebx3->Fill(size);} // beam2
-	    else if(bxId==5 || bxId==6) {hchargebx5->Fill(ch); hsizebx5->Fill(size);} // beam1/2+1
+	    else if(bxId==5 || bxId==6) {hchargebx5->Fill(ch); hsizebx5->Fill(size);} // gap & in-between
 	    else cout<<" wrong bx id "<<bxId<<endl;
 	  }
 #endif
@@ -3100,7 +3171,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 	    else if(bxId==0) {hchargebx6->Fill(ch); hsizebx6->Fill(size);} // empty
 	    else if(bxId==1) {hchargebx3->Fill(ch); hsizebx3->Fill(size);} // beam1
 	    else if(bxId==2) {hchargebx4->Fill(ch); hsizebx3->Fill(size);} // beam2
-	    else if(bxId==5 || bxId==6) {hchargebx5->Fill(ch); hsizebx5->Fill(size);} // beam1/2+1
+	    else if(bxId==5 || bxId==6) {hchargebx5->Fill(ch); hsizebx5->Fill(size);} // gap & in-between
 	    else cout<<" wrong bx id "<<bxId<<endl;
 	  }
 #endif
@@ -3330,6 +3401,16 @@ void PixClusterAna::analyze(const edm::Event& e,
       numOfClustersPerDisk3+numOfClustersPerDisk4;
     hclusFPix->Fill(float(clusf));  // clusters in fpix
 
+#ifdef HF
+    hclushf->Fill(float(numberOfClusters),sumHFE);
+    hclusbhf->Fill(float(clusb),sumHFE);
+    hclusfhf->Fill(float(clusf),sumHFE);
+    hclusb1hf->Fill(float(numOfClustersPerLay1),sumHFE);
+    //hbxhf->Fill(float(bx),sumHFE);
+    hbxhfp->Fill(float(bx),sumHFE);
+
+#endif // HF
+
     hclus5->Fill(float(numberOfNoneEdgePixels));   // count none edge pixels
     hclusls->Fill(float(lumiBlock),float(numberOfClusters)); // clusters fpix+bpix
     hpixls->Fill(float(lumiBlock),float(numberOfPixels)); // pixels fpix+bpix
@@ -3530,44 +3611,6 @@ void PixClusterAna::analyze(const edm::Event& e,
     // HLT bits
     for (unsigned int i=0;i<256;i++) if(hlt[i]) hlt3->Fill(float(i));
     
-// #ifdef BX 
-//     if     (bxId==1)  {hclus30->Fill(float(numberOfClusters0));hdigis30->Fill(float(numberOfPixels));}
-//     else if(bxId==2)  {hclus31->Fill(float(numberOfClusters0));hdigis31->Fill(float(numberOfPixels));}
-//     else if(bxId==3)  {hclus32->Fill(float(numberOfClusters0));hdigis32->Fill(float(numberOfPixels));}
-//     else if(bxId==4)  {hclus33->Fill(float(numberOfClusters0));hdigis33->Fill(float(numberOfPixels));}
-//     else if(bxId==5)  {hclus34->Fill(float(numberOfClusters0));hdigis34->Fill(float(numberOfPixels));}
-//     else if(bxId==6)  {hclus35->Fill(float(numberOfClusters0));hdigis35->Fill(float(numberOfPixels));}
-//     else if(bxId==-1) {hclus36->Fill(float(numberOfClusters0));hdigis36->Fill(float(numberOfPixels));}
-//     else              {hclus37->Fill(float(numberOfClusters0));hdigis37->Fill(float(numberOfPixels));}
-//     if(run>=160888 && run<=160940) { // 64bx
-//       // Fill 1638
-//       if(bx==442)       {hclus7->Fill(float(numberOfClusters0));  hdigis7->Fill(float(numberOfPixels));} //B1, 1st
-//       else if(bx==3136) {hclus18->Fill(float(numberOfClusters0)); hdigis18->Fill(float(numberOfPixels));} //B1, last
-//       else if(bx==466)  {hclus25->Fill(float(numberOfClusters0)); hdigis25->Fill(float(numberOfPixels));} //B2, last
-//       else if(bx==3112) {hclus26->Fill(float(numberOfClusters0)); hdigis26->Fill(float(numberOfPixels));} //B2, 1st
-//     } else if(run>=160955 && run<=161176) { // 136bx
-//       // Fill 1640
-//       if(bx==149)       hclus7->Fill(float(numberOfClusters0));
-//       else if(bx==3184) hclus18->Fill(float(numberOfClusters0));
-//       else if(bx==173)  hclus25->Fill(float(numberOfClusters0));
-//       else if(bx==3112) hclus26->Fill(float(numberOfClusters0));
-//     } else if(run>=161216 && run<=161312) { // 200bx
-//       // Fill 1645
-//       if(bx==1 || bx==4) {
-// 	hclus7->Fill(float(numberOfClusters0));
-// 	hdigis7->Fill(float(numberOfPixels));
-//       } else if( bx==1950 || bx==1953 || bx==1956 || bx==1959 ) {
-// 	hclus18->Fill(float(numberOfClusters0));
-// 	hdigis18->Fill(float(numberOfPixels));
-//       } else if(bx==25 || bx==28) {
-// 	hclus25->Fill(float(numberOfClusters0));
-// 	hdigis25->Fill(float(numberOfPixels));
-//       } else if( bx==1878 || bx==1881 || bx==1884 || bx==1887 ) {
-// 	hclus26->Fill(float(numberOfClusters0));
-// 	hdigis26->Fill(float(numberOfPixels));      }
-//     }
-// #endif
-
   } // if select event
 
 #endif // HISTOS

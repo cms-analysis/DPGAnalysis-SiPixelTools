@@ -87,34 +87,14 @@ process.MessageLogger = cms.Service("MessageLogger",
 
 myfilelist = cms.untracked.vstring()
 myfilelist.extend([
-"/store/data/Run2015C/ZeroBias_0T/RECO/PromptReco-v2/000/256/004/00000/00CB5356-E856-E511-AA83-02163E013515.root",
-"/store/data/Run2015C/ZeroBias_0T/RECO/PromptReco-v2/000/256/004/00000/1227DA2B-E756-E511-9772-02163E0123A8.root",
-"/store/data/Run2015C/ZeroBias_0T/RECO/PromptReco-v2/000/256/004/00000/1A73C78E-E856-E511-8852-02163E0123FF.root",
-"/store/data/Run2015C/ZeroBias_0T/RECO/PromptReco-v2/000/256/004/00000/226E5AC3-EB56-E511-A2F6-02163E01449B.root",
-"/store/data/Run2015C/ZeroBias_0T/RECO/PromptReco-v2/000/256/004/00000/2C5B08C2-E856-E511-AEFF-02163E012612.root",
-"/store/data/Run2015C/ZeroBias_0T/RECO/PromptReco-v2/000/256/004/00000/2CE719E2-EE56-E511-9762-02163E0127C7.root",
-"/store/data/Run2015C/ZeroBias_0T/RECO/PromptReco-v2/000/256/004/00000/3A98AC0E-E956-E511-BDC8-02163E01411A.root",
-"/store/data/Run2015C/ZeroBias_0T/RECO/PromptReco-v2/000/256/004/00000/3C310453-E956-E511-9F65-02163E013428.root",
-"/store/data/Run2015C/ZeroBias_0T/RECO/PromptReco-v2/000/256/004/00000/42C82FE1-E756-E511-9492-02163E0133C8.root",
-"/store/data/Run2015C/ZeroBias_0T/RECO/PromptReco-v2/000/256/004/00000/507E17AC-E956-E511-AA39-02163E01419D.root",
-"/store/data/Run2015C/ZeroBias_0T/RECO/PromptReco-v2/000/256/004/00000/6A2130A4-E956-E511-A208-02163E012885.root",
-"/store/data/Run2015C/ZeroBias_0T/RECO/PromptReco-v2/000/256/004/00000/8CBCB2B4-E956-E511-833C-02163E013459.root",
-"/store/data/Run2015C/ZeroBias_0T/RECO/PromptReco-v2/000/256/004/00000/A6377BD4-E956-E511-A96C-02163E014639.root",
-"/store/data/Run2015C/ZeroBias_0T/RECO/PromptReco-v2/000/256/004/00000/AE55B1A5-E956-E511-8A6A-02163E014161.root",
-"/store/data/Run2015C/ZeroBias_0T/RECO/PromptReco-v2/000/256/004/00000/BCF8C18B-E756-E511-9A44-02163E013428.root",
-"/store/data/Run2015C/ZeroBias_0T/RECO/PromptReco-v2/000/256/004/00000/C247F5C4-EE56-E511-B035-02163E014469.root",
-"/store/data/Run2015C/ZeroBias_0T/RECO/PromptReco-v2/000/256/004/00000/C886E0E9-EE56-E511-8A1C-02163E014786.root",
-"/store/data/Run2015C/ZeroBias_0T/RECO/PromptReco-v2/000/256/004/00000/CA386B05-EF56-E511-874E-02163E013398.root",
-"/store/data/Run2015C/ZeroBias_0T/RECO/PromptReco-v2/000/256/004/00000/D0255DA0-E756-E511-8C6A-02163E0144A8.root",
-"/store/data/Run2015C/ZeroBias_0T/RECO/PromptReco-v2/000/256/004/00000/E89A4F35-E756-E511-AF81-02163E011D85.root",
 ])
 
 
 process.source = cms.Source("PoolSource",
- fileNames =  myfilelist
-#  fileNames = cms.untracked.vstring(    
+# fileNames =  myfilelist
+  fileNames = cms.untracked.vstring(    
 # muonia 
-#"/store/data/Run2015A/MuOnia/RECO/PromptReco-v1/000/248/038/00000/22A90F7F-5A14-E511-AD96-02163E012BE3.root",
+"/store/data/Run2015A/MuOnia/RECO/PromptReco-v1/000/248/038/00000/22A90F7F-5A14-E511-AD96-02163E012BE3.root",
 #single muon 
 #"/store/data/Run2015A/SingleMuon/RECO/PromptReco-v1/000/248/038/00000/0C5FA27E-5A14-E511-8D85-02163E012385.root",
 # charmonium
@@ -139,7 +119,7 @@ process.source = cms.Source("PoolSource",
 # "/store/data/Commissioning12/Commissioning/RECO/PromptReco-v1/000/186/791/6EC3470C-6F69-E111-93CA-001D09F241B9.root",
 # "/store/data/Commissioning12/Cosmics/RECO/PromptReco-v1/000/186/791/6A54D2A0-6D69-E111-ABA8-001D09F2441B.root",
 
-#  )   # end the list "by-hand"
+  )   # end the list "by-hand"
 
 )
 

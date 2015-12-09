@@ -11,6 +11,10 @@
 #dbs search --query='find file where run=175260 and dataset=/Interfill/Run2011A-v1/RAW' 
 #dbs search --query='find file where run=208686 and dataset=/MinimumBias/Run2012D-v1/RAW' 
 
+# 2012
+das_client.py --limit=0 --query='file dataset=/JetHT/Run2012D-22Jan2013-v1/RECO run=208686' # 
+#das_client.py --limit=0 --query='file dataset=/MuOnia/Run2012D-22Jan2013-v1/AOD run=208686' # 
+
 # COSMICS 
 #das_client.py --limit=0 --query='file dataset=/Cosmics/Commissioning2015-v1/RAW run=239342'
 #das_client.py --limit=0 --query='file dataset=/MinimumBias/Commissioning2015-v1/RAW run=239342'
@@ -27,8 +31,12 @@
 #das_client.py --limit=0 --query='file dataset=/ZeroBias1/Run2015A-v1/RAW run=247324' # YES
 #das_client.py --limit=0 --query='file dataset=/ZeroBias/Run2015C-v1/RAW run=254319' # YES
 #das_client.py --limit=0 --query='file dataset=/ZeroBias_0T/Run2015C-v1/RAW run=256004' # YES
-das_client.py --limit=0 --query='file dataset=/ZeroBias/Run2015D-v1/RAW run=256676' # YES
-#das_client.py --limit=0 --query='file dataset=/ZeroBias/Run2015D-v1/RAW run=256729' # YES
+#das_client.py --limit=0 --query='file dataset=/ZeroBias/Run2015D-v1/RAW run=256676' # YES
+#das_client.py --limit=0 --query='file dataset=/ZeroBias/Run2015D-v1/RAW run=258655' # YES
+#das_client.py --limit=0 --query='file dataset=/ZeroBias/Run2015D-v1/RAW run=260627' # YES
+#das_client.py --limit=0 --query='file dataset=/ZeroBias/Run2015D-v1/RAW run=260627' # YES
+
+
 #RECO 
 # A
 #das_client.py --limit=0 --query='file dataset=/ExpressPhysics/Run2015A-Express-v1/FEVT run=246963' # YES
@@ -49,10 +57,15 @@ das_client.py --limit=0 --query='file dataset=/ZeroBias/Run2015D-v1/RAW run=2566
 # most data sets are only on /tier0/store/data but DAS still lists them
 #das_client.py --limit=0 --query='file dataset=/ZeroBias_0T/Run2015C-PromptReco-v2/RECO run=256004' # YES
 
+# D
+#das_client.py --limit=0 --query='file dataset=/ZeroBias/Run2015D-PromptReco-v3/RECO run=256729' # YES
+#das_client.py --limit=0 --query='file dataset=/ZeroBias/Run2015D-PromptReco-v4/RECO run=260627' # YES
+
+
 # Lumi
 #das_client.py --limit=0 --query='file dataset=/AlCaLumiPixels/Run2015B-LumiPixels-PromptReco-v1/ALCARECO run=251643' # YES
 #das_client.py --limit=0 --query='file dataset=/AlCaLumiPixels/Run2015C-LumiPixels-v1/RAW run=254319' # YES
-
+#das_client.py --limit=0 --query='file dataset=/AlCaLumiPixels/Run2015D-LumiPixels-PromptReco-v4/ALCARECO run=260490' 
 
 # 2015-A
 # /eos/cms/store/data/Run2015A/MinimumBias/RECO/PromptReco-v1/000/246
