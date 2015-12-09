@@ -62,7 +62,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 
 
 # DB stuff 
-useLocalDB = True
+useLocalDB = False
 if useLocalDB :
   process.DBReader = cms.ESSource("PoolDBESSource",
     DBParameters = cms.PSet(
@@ -173,7 +173,7 @@ process.LorentzAngleSimReader = cms.EDAnalyzer("SiPixelLorentzAngleDBReader",
 )
 
 #process.p = cms.Path(process.LorentzAngleReader*process.LorentzAngleSimReader)
-#process.p = cms.Path(process.LorentzAngleSimReader)
-process.p = cms.Path(process.LorentzAngleReader)
+process.p = cms.Path(process.LorentzAngleSimReader)
+#process.p = cms.Path(process.LorentzAngleReader)
 
 

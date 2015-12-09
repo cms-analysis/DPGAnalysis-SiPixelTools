@@ -15,8 +15,8 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, '75X_upgrade2017_design_v4', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, '75X_upgrade2017_design_v4', '')
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.destinations = cms.untracked.vstring("cout")
@@ -33,10 +33,6 @@ process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(1)
 )
 
-# has to be deleted if it exist  
-#file = "la.db"
-#sqlfile = "sqlite_file:" + file
-
 ##### DATABASE CONNNECTION AND INPUT TAGS ######
 process.PoolDBOutputService = cms.Service("PoolDBOutputService",
     BlobStreamerName = cms.untracked.string('TBufferBlobStreamingService'),
@@ -52,17 +48,17 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
         enableReadOnlySessionOnUpdateConnection = cms.untracked.bool(False)
     ),
     timetype = cms.untracked.string('runnumber'),
-    connect = cms.string("sqlite_file:SiPixelLorentzAngle_phase1_mc_v1.db"),
-#    connect = cms.string("sqlite_file:SiPixelLorentzAngleSim_phase1_mc_v1.db"),
+#    connect = cms.string("sqlite_file:SiPixelLorentzAngle_phase1_mc_v1.db"),
+    connect = cms.string("sqlite_file:SiPixelLorentzAngleSim_phase1_mc_v1.db"),
     toPut = cms.VPSet(
-        cms.PSet(
-            record = cms.string('SiPixelLorentzAngleRcd'),
-            tag = cms.string('SiPixelLorentzAngle_phase1_mc_v1')
+#        cms.PSet(
+#            record = cms.string('SiPixelLorentzAngleRcd'),
+#            tag = cms.string('SiPixelLorentzAngle_phase1_mc_v1')
 #	     tag = cms.string("SiPixelLorentzAngle_fromAlignment_v01_mc")	
 #	     tag = cms.string("SiPixelLorentzAngle_fromAlignment_v01")	
 #	     tag = cms.string("SiPixelLorentzAngle_forWidth_v01_mc")
 #	     tag = cms.string("SiPixelLorentzAngle_forWidth_v01")
-        ),
+#        ),
         cms.PSet(
             record = cms.string('SiPixelLorentzAngleSimRcd'),
             tag = cms.string('SiPixelLorentzAngleSim_phase1_mc_v1')
@@ -299,7 +295,7 @@ process.SiPixelLorentzAngleSim = cms.EDAnalyzer("SiPixelLorentzAngleDBLoader",
 
 
 process.p = cms.Path(
-#    process.SiPixelLorentzAngleSim
-    process.SiPixelLorentzAngle
+    process.SiPixelLorentzAngleSim
+#    process.SiPixelLorentzAngle
     )
 

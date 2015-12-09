@@ -19,16 +19,17 @@ pwd
 
 # whole CMS 
 #cmsRun gen_sim.py
-cmsRun testDigitizer.py
+#cmsRun testDigitizer.py
 
 # pixel only  
 #cmsRun testPixelDigitizer.py
 #cmsRun runDigisToClus.py
 #cmsRun runDigisToRecHits.py
+cmsRun SimsToClus.py
 
 # pixels & strips 
 #cmsRun Digitze_Pixels_And_Strips.py
-# cmsRun runPixelRH.py
+#cmsRun runPixelRH.py
 #cmsRun runPixelRawToRecHitsAna.py
 #cmsRun runPixelRawToRecHits.py
 #cmsRun runClusToTracks.py

@@ -99,8 +99,8 @@ private:
     *hz1id,*hz2id,*hz3id,*hz4id;
   //TH1F *hladder1idUp, *hladder2idUp, *hladder3idUp;
   TH1F* hthick1,*hthick2,*hthick3,*hthick4,
-    *hlength1,*hlength2,*hlength3,*hlength4;
-  TH1F *hwidth1,*hwidth2,*hwidth3,*hwidth4;
+    *hypos1,*hypos2,*hypos3,*hypos4;
+  TH1F *hxpos1,*hxpos2,*hxpos3,*hxpos4;
   TH1F *hsimHitsPerDet1,*hsimHitsPerDet2,*hsimHitsPerDet3,*hsimHitsPerDet4;
   TH1F *hsimHitsPerLay1,*hsimHitsPerLay2,*hsimHitsPerLay3,*hsimHitsPerLay4;
   TH1F *hsimHits, *hsimHitsGood;
@@ -194,15 +194,15 @@ void PixSimHitsTest::beginJob() {
     hthick3 = fs->make<TH1F>( "hthick3", "Det 3 Thinckess", 400, 0.,0.04);
     hthick4 = fs->make<TH1F>( "hthick4", "Det 4 Thinckess", 400, 0.,0.04);
                                                                                 
-    hlength1 = fs->make<TH1F>( "hlength1", "Det 1 Length", 700,-3.5,3.5);
-    hlength2 = fs->make<TH1F>( "hlength2", "Det 2 Length", 700,-3.5,3.5);
-    hlength3 = fs->make<TH1F>( "hlength3", "Det 3 Length", 700,-3.5,3.5);
-    hlength4 = fs->make<TH1F>( "hlength4", "Det 4 Length", 700,-3.5,3.5);
+    hypos1 = fs->make<TH1F>( "hypos1", "Det 1 y pos", 700,-3.5,3.5);
+    hypos2 = fs->make<TH1F>( "hypos2", "Det 2 y pos", 700,-3.5,3.5);
+    hypos3 = fs->make<TH1F>( "hypos3", "Det 3 y pos", 700,-3.5,3.5);
+    hypos4 = fs->make<TH1F>( "hypos4", "Det 4 y pos", 700,-3.5,3.5);
  
-    hwidth1 = fs->make<TH1F>( "hwidth1", "Det 1 Width", 200,-1.,1.);
-    hwidth2 = fs->make<TH1F>( "hwidth2", "Det 2 Width", 200,-1.,1.);
-    hwidth3 = fs->make<TH1F>( "hwidth3", "Det 3 Width", 200,-1.,1.);
-    hwidth4 = fs->make<TH1F>( "hwidth4", "Det 4 Width", 200,-1.,1.);
+    hxpos1 = fs->make<TH1F>( "hxpos1", "Det 1 x pos", 200,-1.,1.);
+    hxpos2 = fs->make<TH1F>( "hxpos2", "Det 2 x pos", 200,-1.,1.);
+    hxpos3 = fs->make<TH1F>( "hxpos3", "Det 3 x pos", 200,-1.,1.);
+    hxpos4 = fs->make<TH1F>( "hxpos4", "Det 4 x pos", 200,-1.,1.);
 
     hsimHitsPerDet1 = fs->make<TH1F>( "hsimHitsPerDet1", "SimHits per det l1", 
 			      200, -0.5, 199.5);
@@ -551,8 +551,8 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 hladder1id->Fill(float(blade));
 	 hz1id->Fill(float(zindex));
 	 hthick1->Fill(dz);
-	 hlength1->Fill(y);
-	 hwidth1->Fill(x);
+	 hypos1->Fill(ypos);
+	 hxpos1->Fill(xpos);
 	 if(gloZ<0.) hxy11->Fill(gloX,gloY);
 	 else        hxy12->Fill(gloX,gloY);
 	 //SimHitMap1[detId.rawId()].push_back((*isim));
@@ -570,8 +570,8 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 hladder2id->Fill(float(blade));
 	 hz2id->Fill(float(zindex));
 	 hthick2->Fill(dz);
-	 hlength2->Fill(y);
-	 hwidth2->Fill(x);
+	 hypos2->Fill(ypos);
+	 hxpos2->Fill(xpos);
 	 if(gloZ<0.) hxy21->Fill(gloX,gloY);
 	 else        hxy22->Fill(gloX,gloY);
 	 
@@ -590,8 +590,8 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 hladder3id->Fill(float(blade));
 	 hz3id->Fill(float(zindex));
 	 hthick3->Fill(dz);
-	 hlength3->Fill(y);
-	 hwidth3->Fill(x);
+	 hypos3->Fill(ypos);
+	 hxpos3->Fill(xpos);
 	 if(gloZ<0.) hxy31->Fill(gloX,gloY);
 	 else        hxy32->Fill(gloX,gloY);
 	 
@@ -616,14 +616,14 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 hladder1id->Fill(float(ladder));
 	 hz1id->Fill(float(module));
 	 hthick1->Fill(dz);
-	 hlength1->Fill(y);
-	 hwidth1->Fill(x);
+	 hypos1->Fill(ypos);
+	 hxpos1->Fill(xpos);
 	 hphiz1->Fill(gloZ,gloPhi);
 	 if(abs(pid)==13 && p>1.) hphi1->Fill(phi);
 	 
 	 // Test half modules 
 	 //        if(ladder==5 || ladder==6 || ladder==15 || ladder==16 ) { // half-modules
-	 // 	 hwidth1h->Fill(x);
+	 // 	 hxpos1h->Fill(x);
 	 // 	 if(pid==13 && p>1.) {  // select primary muons with mom above 1.
 	 // 	   hphi1h->Fill(phi);
 	 // 	   hglobr1h->Fill(gloR);
@@ -656,14 +656,14 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 hladder2id->Fill(float(ladder));
 	 hz2id->Fill(float(module));
 	 hthick2->Fill(dz);
-	 hlength2->Fill(y);
-	 hwidth2->Fill(x);
+	 hypos2->Fill(ypos);
+	 hxpos2->Fill(xpos);
 	 hphiz2->Fill(gloZ,gloPhi);
 	 if(abs(pid)==13 && p>1.) hphi2->Fill(phi);
 	 
 	 // check half modules 
 	 //        if(ladder==8 || ladder==9 || ladder==24 || ladder==25 ) {
-	 // 	 hwidth2h->Fill(x);
+	 // 	 hxpos2h->Fill(x);
 	 //        } else {
 	 //        }
 	 
@@ -687,14 +687,14 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 hladder3id->Fill(float(ladder));
 	 hz3id->Fill(float(module));
 	 hthick3->Fill(dz);
-	 hlength3->Fill(y);
-	 hwidth3->Fill(x); 
+	 hypos3->Fill(ypos);
+	 hxpos3->Fill(xpos); 
 	 hphiz3->Fill(gloZ,gloPhi);
 	 if(abs(pid)==13 && p>1.) hphi3->Fill(phi);
 	 
 	 // check half modules 
 	 //       if(ladder==11 || ladder==12 || ladder==33 || ladder==34 ) {
-	 // 	 hwidth3h->Fill(x);
+	 // 	 hxpos3h->Fill(x);
 	 //        } else {
 	 //        }
 	 
@@ -717,14 +717,14 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 hladder4id->Fill(float(ladder));
 	 hz4id->Fill(float(module));
 	 hthick4->Fill(dz);
-	 hlength4->Fill(y);
-	 hwidth4->Fill(x); 
+	 hypos4->Fill(ypos);
+	 hxpos4->Fill(xpos); 
 	 hphiz4->Fill(gloZ,gloPhi);
 	 if(abs(pid)==13 && p>1.) hphi4->Fill(phi);
 	 
 	 // check half modules 
 	 //       if(ladder==11 || ladder==12 || ladder==33 || ladder==34 ) {
-	 // 	 hwidth3h->Fill(x);
+	 // 	 hxpos3h->Fill(x);
 	 //        } else {
 	 //        }
 	 

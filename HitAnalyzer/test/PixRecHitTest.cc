@@ -186,15 +186,15 @@ void PixRecHitTest::beginJob() {
   hpixCharge4 = fs->make<TH1F>( "hpixCharge4", "pix charge l4", 50, 0.,50.); //in ke
   hpixCharge1big = fs->make<TH1F>( "hpixCharge1big", "big pix charge l1", 50, 0.,50.); //in ke
   
-  hxpos1 = fs->make<TH1F>( "hxpos1", "Layer 1 cols", 700,-3.5,3.5);
-  hxpos2 = fs->make<TH1F>( "hxpos2", "Layer 2 cols", 700,-3.5,3.5);
-  hxpos3 = fs->make<TH1F>( "hxpos3", "Layer 3 cols", 700,-3.5,3.5);
-  hxpos4 = fs->make<TH1F>( "hxpos4", "Layer 4 cols", 700,-3.5,3.5);
+  hypos1 = fs->make<TH1F>( "hypos1", "Layer 1 x pos", 700,-3.5,3.5);
+  hypos2 = fs->make<TH1F>( "hypos2", "Layer 2 x pos", 700,-3.5,3.5);
+  hypos3 = fs->make<TH1F>( "hypos3", "Layer 3 x pos", 700,-3.5,3.5);
+  hypos4 = fs->make<TH1F>( "hypos4", "Layer 4 x pos", 700,-3.5,3.5);
    
-  hypos1 = fs->make<TH1F>( "hypos1", "Layer 1 rows", 200,-1.,1.);
-  hypos2 = fs->make<TH1F>( "hypos2", "Layer 2 rows", 200,-1.,1.);
-  hypos3 = fs->make<TH1F>( "hypos3", "layer 3 rows", 200,-1.,1.);
-  hypos4 = fs->make<TH1F>( "hypos4", "layer 4 rows", 200,-1.,1.);
+  hxpos1 = fs->make<TH1F>( "hxpos1", "Layer 1 y pos", 200,-1.,1.);
+  hxpos2 = fs->make<TH1F>( "hxpos2", "Layer 2 y pos", 200,-1.,1.);
+  hxpos3 = fs->make<TH1F>( "hxpos3", "layer 3 y pos", 200,-1.,1.);
+  hxpos4 = fs->make<TH1F>( "hxpos4", "layer 4 y pos", 200,-1.,1.);
  
   hsize1 = fs->make<TH1F>( "hsize1", "layer 1 clu size",100,-0.5,99.5);
   hsize2 = fs->make<TH1F>( "hsize2", "layer 2 clu size",100,-0.5,99.5);
@@ -289,12 +289,12 @@ void PixRecHitTest::beginJob() {
   hcharge1F = fs->make<TH1F>( "hcharge1F", "Clu charge d1", 200, 0.,200.); //in ke
   hcharge2F = fs->make<TH1F>( "hcharge2F", "Clu charge d2", 200, 0.,200.);
   hcharge3F = fs->make<TH1F>( "hcharge3F", "Clu charge d3", 200, 0.,200.);
-  hxpos1F = fs->make<TH1F>( "hxpos1F", "Disk 1 cols", 700,-3.5,3.5);
-  hxpos2F = fs->make<TH1F>( "hxpos2F", "Disk 2 cols", 700,-3.5,3.5);
-  hxpos3F = fs->make<TH1F>( "hxpos3F", "Disk 3 cols", 700,-3.5,3.5);
-  hypos1F = fs->make<TH1F>( "hypos1F", "Disk 1 rows", 200,-1.,1.);
-  hypos2F = fs->make<TH1F>( "hypos2F", "Disk 2 rows", 200,-1.,1.);
-  hypos3F = fs->make<TH1F>( "hypos3F", "Disk 3 rows", 200,-1.,1.);
+  hypos1F = fs->make<TH1F>( "hypos1F", "Disk 1 y pos", 700,-3.5,3.5);
+  hypos2F = fs->make<TH1F>( "hypos2F", "Disk 2 y pos", 700,-3.5,3.5);
+  hypos3F = fs->make<TH1F>( "hypos3F", "Disk 3 y pos", 700,-3.5,3.5);
+  hxpos1F = fs->make<TH1F>( "hxpos1F", "Disk 1 x pos", 200,-1.,1.);
+  hxpos2F = fs->make<TH1F>( "hxpos2F", "Disk 2 x pso", 200,-1.,1.);
+  hxpos3F = fs->make<TH1F>( "hxpos3F", "Disk 3 x pos", 200,-1.,1.);
   hsize1F = fs->make<TH1F>( "hsize1F", "Disk 1 clu size",100,-0.5,99.5);
   hsize2F = fs->make<TH1F>( "hsize2F", "Disk 2 clu size",100,-0.5,99.5);
   hsize3F = fs->make<TH1F>( "hsize3F", "Disk 3 clu size",100,-0.5,99.5);
@@ -707,8 +707,8 @@ void PixRecHitTest::analyze(const edm::Event& e,
 #ifdef DO_HISTO
       if(layer==1) {
 	hcharge1->Fill(ch);
-	hxpos1->Fill(yRecHit);
-	hypos1->Fill(xRecHit);
+	hypos1->Fill(yRecHit);
+	hxpos1->Fill(xRecHit);
 	hsize1->Fill(float(size));
 	hsizex1->Fill(float(sizeX));
 	hsizey1->Fill(float(sizeY));
@@ -724,8 +724,8 @@ void PixRecHitTest::analyze(const edm::Event& e,
       } else if(layer==2) {  // layer 2
 	
 	hcharge2->Fill(ch);
-	hxpos2->Fill(yRecHit);
-	hypos2->Fill(xRecHit);
+	hypos2->Fill(yRecHit);
+	hxpos2->Fill(xRecHit);
 	hsize2->Fill(float(size));
 	hsizex2->Fill(float(sizeX));
 	hsizey2->Fill(float(sizeY));
@@ -741,8 +741,8 @@ void PixRecHitTest::analyze(const edm::Event& e,
       } else if(layer==3) {  // Layer 3
 	
 	hcharge3->Fill(ch);
-	hxpos3->Fill(yRecHit);
-	hypos3->Fill(xRecHit);
+	hypos3->Fill(yRecHit);
+	hxpos3->Fill(xRecHit);
 	hsize3->Fill(float(size));
 	hsizex3->Fill(float(sizeX));
 	hsizey3->Fill(float(sizeY));
@@ -758,8 +758,8 @@ void PixRecHitTest::analyze(const edm::Event& e,
       } else if(layer==4) {  // Layer 4
 	
 	hcharge4->Fill(ch);
-	hxpos4->Fill(yRecHit);
-	hypos4->Fill(xRecHit);
+	hypos4->Fill(yRecHit);
+	hxpos4->Fill(xRecHit);
 	hsize4->Fill(float(size));
 	hsizex4->Fill(float(sizeX));
 	hsizey4->Fill(float(sizeY));
@@ -775,8 +775,8 @@ void PixRecHitTest::analyze(const edm::Event& e,
       } else if(disk==1) {
 	
 	hcharge1F->Fill(ch);
-	hxpos1F->Fill(yRecHit);
-	hypos1F->Fill(xRecHit);
+	hypos1F->Fill(yRecHit);
+	hxpos1F->Fill(xRecHit);
 	hsize1F->Fill(float(size));
 	hsizex1F->Fill(float(sizeX));
 	hsizey1F->Fill(float(sizeY));
@@ -800,8 +800,8 @@ void PixRecHitTest::analyze(const edm::Event& e,
       } else if(disk==2) {  // disk 2
 	
 	hcharge2F->Fill(ch);
-	hxpos2F->Fill(yRecHit);
-	hypos2F->Fill(xRecHit);
+	hypos2F->Fill(yRecHit);
+	hxpos2F->Fill(xRecHit);
 	hsize2F->Fill(float(size));
 	hsizex2F->Fill(float(sizeX));
 	hsizey2F->Fill(float(sizeY));
@@ -825,8 +825,8 @@ void PixRecHitTest::analyze(const edm::Event& e,
       } else if(disk==3) {  // disk 3
 	
 	hcharge3F->Fill(ch);
-	hxpos3F->Fill(yRecHit);
-	hypos3F->Fill(xRecHit);
+	hypos3F->Fill(yRecHit);
+	hxpos3F->Fill(xRecHit);
 	hsize3F->Fill(float(size));
 	hsizex3F->Fill(float(sizeX));
 	hsizey3F->Fill(float(sizeY));

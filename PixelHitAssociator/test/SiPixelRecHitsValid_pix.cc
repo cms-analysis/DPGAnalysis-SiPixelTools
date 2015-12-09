@@ -36,7 +36,7 @@
 #include "SimTracker/TrackerHitAssociation/interface/TrackerHitAssociator.h"
 #endif
 
-#define QUICK
+//#define QUICK
 
 using namespace std;
 using namespace edm;
@@ -45,8 +45,10 @@ using namespace edm;
 SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps): 
   dbe_(0), 
   conf_(ps),
-  src_( ps.getParameter<edm::InputTag>( "src" ) ) 
-{
+  trackerHitAssociatorConfig_(ps, consumesCollector() ),
+  src_( ps.getParameter<edm::InputTag>( "src" ) )  {
+  tPixelRecHit = consumes<edmNew::DetSetVector<SiPixelRecHit>>( src_ );
+
   outputFile_ = ps.getUntrackedParameter<string>("outputFile", "pixelrechitshisto.root");
 
 #ifdef PIXEL_ASSOCIATOR
@@ -77,14 +79,21 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
 
   if(!quick) {
 
-    heta = dbe_->book1D("heta","eta",50,-2.5,2.5);
+    //heta = dbe_->book1D("heta","eta1",50,-2.5,2.5);
+    hphi1 = dbe_->book1D("hphi1","phi1",70,-3.5,3.5);
+    htheta1 = dbe_->book1D("htheta1","theta1",70,-3.5,3.5);
+    hbeta1  = dbe_->book1D("beta1","beta1",70,-3.5,3.5);
+
+    hphi2 = dbe_->book1D("hphi2","phi2",70,-3.5,3.5);
+    htheta2 = dbe_->book1D("htheta2","theta2",70,-3.5,3.5);
+    hbeta2  = dbe_->book1D("beta2","beta2",70,-3.5,3.5);
+
     heta1 = dbe_->book1D("heta1","eta",50,-2.5,2.5);
     heta2 = dbe_->book1D("heta2","eta",50,-2.5,2.5);
     heta3 = dbe_->book1D("heta3","eta",50,-2.5,2.5);
     
-    htest1 = dbe_->book1D("htest1","test1",20,-0.5,19.5);
-    htest2 = dbe_->book1D("htest2","test2",200,0.,0.2);
-    htest3 = dbe_->book1D("htest3","test3",200,0.,0.2);
+    htest1 = dbe_->book2D("htest1","test1",50,0.,2.5,70,0.,3.5);
+    htest2 = dbe_->book2D("htest2","test2",50,0.,2.5,70,0.,3.5);
     
     //Cluster y-size by module number for barrel
     for (int i=0; i<8; i++) {
@@ -93,10 +102,10 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
     } // end for
     
     //Cluster x-size by layer for barrel
-    for (int i=0; i<NumLayers; i++) {
-      sprintf(histo, "Clust_x_size_Layer%d", i+1);
-      clustXSizeLayer[i] = dbe_->book1D(histo,"Cluster x-size by Layer", 20, 0.5, 20.5);
-    } // end for
+    //for (int i=0; i<NumLayers; i++) {
+    //sprintf(histo, "Clust_x_size_Layer%d", i+1);
+    //clustXSizeLayer[i] = dbe_->book1D(histo,"Cluster x-size by Layer", 20, 0.5, 20.5);
+    //} // end for
     
     //Cluster charge by module for 3 layers of barrel
     for (int i=0; i<8; i++) {
@@ -156,7 +165,24 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
     recHitYResLayers[i] = dbe_->book1D(histo, "RecHit YRes by Layer", 100, -200., 200.);
     
     if(!quick) {
-      
+
+      // special histos for layer 1
+      recHitL1XResNonFlippedpZ = dbe_->book1D("recHitL1XNonFlippedpZ", "XRes NonFlipped +z L1", 100, -200., 200.);      
+      recHitL1XResFlippedpZ    = dbe_->book1D("recHitL1XFlippedpZ",    "XRes Flipped +z L1", 100, -200., 200.);      
+      recHitL1XResNonFlippedmZ = dbe_->book1D("recHitL1XNonFlippedmZ", "XRes NonFlipped -z L1", 100, -200., 200.);      
+      recHitL1XResFlippedmZ    = dbe_->book1D("recHitL1XFlippedmZ",      "XRes Flipped -z L1", 100, -200., 200.);   
+      recHitL2XResNonFlippedpZ = dbe_->book1D("recHitL2XNonFlippedpZ", "XRes NonFlipped +z L2", 100, -200., 200.);      
+      recHitL2XResFlippedpZ    = dbe_->book1D("recHitL2XFlippedpZ",    "XRes Flipped +z L2", 100, -200., 200.);      
+      recHitL2XResNonFlippedmZ = dbe_->book1D("recHitL2XNonFlippedmZ", "XRes NonFlipped -z L2", 100, -200., 200.);      
+      recHitL2XResFlippedmZ    = dbe_->book1D("recHitL2XFlippedmZ",      "XRes Flipped -z L2", 100, -200., 200.);   
+
+      recHitL1XResSize1    = dbe_->book1D("recHitL1XSize1",      "XRes size 1 L1", 100, -200., 200.);   
+      recHitL1XResSize2    = dbe_->book1D("recHitL1XSize2",      "XRes size 2 L1", 100, -200., 200.);   
+      recHitL1XResSize3    = dbe_->book1D("recHitL1XSize3",      "XRes size 3 L1", 100, -200., 200.);   
+      recHitL2XResSize1    = dbe_->book1D("recHitL2XSize1",      "XRes size 1 L2", 100, -200., 200.);   
+      recHitL2XResSize2    = dbe_->book1D("recHitL2XSize2",      "XRes size 2 L2", 100, -200., 200.);   
+      recHitL2XResSize3    = dbe_->book1D("recHitL2XSize3",      "XRes size 3 L2", 100, -200., 200.);   
+
       // alignment errors
       recHitXAlignError1 = 
 	dbe_->book1D("RecHitXAlignError1","RecHit X  Alignment errors bpix 1", 100, 0., 100.);
@@ -178,10 +204,10 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
       recHitYResAllB = dbe_->book1D("RecHit_yres_b_All","RecHit Y Res All Modules in Barrel", 100, -200., 200.);
       
       //RecHit X distribution for full modules for barrel
-      recHitXFullModules = dbe_->book1D("RecHit_x_FullModules", "RecHit X distribution for full modules", 100,-2., 2.);
+      //recHitXFullModules = dbe_->book1D("RecHit_x_FullModules", "RecHit X distribution for full modules", 100,-2., 2.);
       
       //RecHit X distribution for half modules for barrel
-      recHitXHalfModules = dbe_->book1D("RecHit_x_HalfModules", "RecHit X distribution for half modules", 100, -1., 1.);
+      //recHitXHalfModules = dbe_->book1D("RecHit_x_HalfModules", "RecHit X distribution for half modules", 100, -1., 1.);
       
       //RecHit Y distribution all modules for barrel
       recHitYAllModules = dbe_->book1D("RecHit_y_AllModules", "RecHit Y distribution for all modules", 100, -4., 4.);
@@ -229,7 +255,10 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
       sprintf(histo, "RecHit_YRes_LayerP4%d", i+1);
       recHitYResLayersP4[i] = dbe_->bookProfile(histo, "RecHit YRes by Layer, size 4", 25, 0., 2.5,0.,1000.," ");
       
-      
+      recHitX11 = dbe_->bookProfile("recHitX11", "RecHit", 100, 0.5, 2.5,0.,100.," ");
+      recHitX12 = dbe_->bookProfile("recHitX12", "RecHit", 100, 0.5, 2.5,0.,100.," ");
+      recHitX21 = dbe_->bookProfile("recHitX21", "RecHit", 100, 0.5, 2.5,0.,100.," ");
+      recHitX22 = dbe_->bookProfile("recHitX22", "RecHit", 100, 0.5, 2.5,0.,100.," ");
       
       //RecHit X resolution for flipped ladders by layer
       sprintf(histo, "RecHit_XRes_FlippedLadder_Layer%d", i+1);
@@ -422,15 +451,15 @@ void SiPixelRecHitsValid_pix::endJob() {
 
 void SiPixelRecHitsValid_pix::analyze(const edm::Event& e, const edm::EventSetup& es) {
 
-#ifdef QUICK
-  const bool quick = true; // fill only essential histos
-#else
-  const bool quick = false; // fill only essential histos
-#endif
+  //#ifdef QUICK
+  //const bool quick = true; // fill only essential histos
+  //#else
+  //const bool quick = false; // fill only essential histos
+  //#endif
 
   //Retrieve tracker topology from geometry
   edm::ESHandle<TrackerTopology> tTopoHand;
-  es.get<IdealGeometryRecord>().get(tTopoHand);
+  es.get<TrackerTopologyRcd>().get(tTopoHand);
   const TrackerTopology *tTopo=tTopoHand.product();
 
   if ( (int) e.id().event() % 1000 == 0 )
@@ -438,7 +467,8 @@ void SiPixelRecHitsValid_pix::analyze(const edm::Event& e, const edm::EventSetup
   
   //Get RecHits
   edm::Handle<SiPixelRecHitCollection> recHitColl;
-  e.getByLabel( src_, recHitColl);
+  //e.getByLabel( src_, recHitColl);
+  e.getByToken(tPixelRecHit , recHitColl);
   
   //Get event setup
   edm::ESHandle<TrackerGeometry> geom;
@@ -450,8 +480,8 @@ void SiPixelRecHitsValid_pix::analyze(const edm::Event& e, const edm::EventSetup
   PixelHitAssociator associate( e); 
   //PixelHitAssociator associate( e, conf_ ); 
 #else
-  //TrackerHitAssociator associate( e); 
-  TrackerHitAssociator associate( e, conf_); 
+  //TrackerHitAssociator associate( e);
+  TrackerHitAssociator associate( e, trackerHitAssociatorConfig_); 
 #endif
 
   //iterate over detunits
@@ -474,12 +504,11 @@ void SiPixelRecHitsValid_pix::analyze(const edm::Event& e, const edm::EventSetup
       
       //cout<<" pixel det "<<pixeldet->size()<<endl;
       //----Loop over rechits for this detId
-      for ( ; pixeliter != pixelrechitRangeIteratorEnd; pixeliter++) 
-	{
+      for ( ; pixeliter != pixelrechitRangeIteratorEnd; pixeliter++)  {
 	  matched.clear();
 	  matched = associate.associateHit(*pixeliter); // get the matched simhits
+
 	  //cout<<" rechit "<<pixeliter->localPosition().x()<<" "<<matched.size()<<endl;
-	  if(!quick) htest1->Fill(float(matched.size()));
 
 	  if ( !matched.empty() ) {
 	      float closest = 9999.9;
@@ -490,8 +519,7 @@ void SiPixelRecHitsValid_pix::analyze(const edm::Event& e, const edm::EventSetup
 	      
 
 	      //loop over sim hits and fill closet
-	      for (std::vector<PSimHit>::const_iterator m = matched.begin(); m<matched.end(); m++) 
-		{
+	      for (std::vector<PSimHit>::const_iterator m = matched.begin(); m<matched.end(); m++) {
 		  float sim_x1 = (*m).entryPoint().x();
 		  float sim_x2 = (*m).exitPoint().x();
 		  float sim_xpos = 0.5*(sim_x1+sim_x2);
@@ -504,29 +532,27 @@ void SiPixelRecHitsValid_pix::analyze(const edm::Event& e, const edm::EventSetup
 		  float y_res = fabs(sim_ypos - rechit_y);
 		  
 		  float dist = sqrt(x_res*x_res + y_res*y_res); // in cm
-		  if(!quick) htest2->Fill(dist);
 
 		  if ( dist < closest ) {
 		    //closest = x_res;
 		    closest = dist;
 		    closestit = m;
 		    
-		    // std::cout<<" simhit "
+		    //std::cout<<" simhit "
 		    //       <<(*m).pabs()<<" "
 		    //       <<(*m).thetaAtEntry()<<" "
 		    //       <<(*m).phiAtEntry()<<" "
 		    //       <<(*m).particleType()<<" "
 		    //       <<(*m).trackId()<<" "
 		    //       <<(*m).momentumAtEntry()
-		    //       <<std::endl;
+		    //      <<std::endl;
 		    
 		  }
 		} // end sim hit loop
 	      
-	      if(!quick) htest3->Fill(closest);
 	      //cout<<" closest "<<closest<<endl;
 
-	      if (subid==1) { //<----------barrel
+	      if (subid==1) {         //<----------barrel
 		fillBarrel(*pixeliter, *closestit, detId, theGeomDet,tTopo);	
 	      }  else if (subid==2) { // <-------forward
 		fillForward(*pixeliter, *closestit, detId, theGeomDet,tTopo);
@@ -535,6 +561,7 @@ void SiPixelRecHitsValid_pix::analyze(const edm::Event& e, const edm::EventSetup
 	  } // end matched emtpy
 	} // <-----end rechit loop 
     } // <------ end detunit loop
+
 }
 
 void SiPixelRecHitsValid_pix::fillBarrel(const SiPixelRecHit& recHit, const PSimHit& simHit, 
@@ -550,30 +577,56 @@ void SiPixelRecHitsValid_pix::fillBarrel(const SiPixelRecHit& recHit, const PSim
   const bool quick = false; // fill only essential histos
 #endif
 
-  //float phi = simHit.phiAtEntry();
+  float phi = simHit.phiAtEntry();
   float theta = simHit.thetaAtEntry(); // theta with respect to module coordinates 
   float beta = 0;  // beta is roughly like real theta
   if(theta<PI/2.) beta=(PI/2.) - theta; //  
   else            beta=theta - (PI/2.);
   float eta = -log(tan(beta/2.));  // this is an approximation to the tracks eta, only positive
-  //float eta = std::abs((simHit.localDirection()).eta());
+
+  //float phiLocal = simHit.localDirection().phi(); // same as phi
+  //float thetaLocal = simHit.localDirection().theta(); // same as theta
+
+  //float pt  = simHit.momentumAtEntry().perp(); // crap, not real pt
   float p  = simHit.pabs();
   int pid = simHit.particleType();
 
-  // skip secendaries
-  if(pid!=13 || p<10. ) return;
+  // skip secondaries
+  if( abs(pid) != 13 || p<10. ) {if(PRINT) cout<<" skip "<<p<<" "<<pid<<endl; return;}
 
-  // std::cout<<" simhit "
-  // 	   <<p<<" "
-  // 	   <<eta<<" "
-  //   //<<phi<<" "
-  // 	   <<pid<<" "
-  //   //	   <<simHit.trackId()<<" "
-  // 	   <<std::endl;
+  unsigned int layer = tTopo->pxbLayer(detId);
+  unsigned int module = tTopo->pxbModule(detId);
+
+    if(layer==1) {
+      htest1->Fill(eta,phi);
+    } else if(layer==2) {
+      htest2->Fill(eta,phi);
+    }
+
+  // skip, for tests only
+  //if( abs(eta)<0.1 || abs(eta)>1.0) return; // limit 
+  //if( abs(phi)<1.3 || abs(phi)>1.9) return;  // limit to l2 acceptance
+
+  if(PRINT) std::cout<<" simhit "
+		     <<p<<" "
+		     <<pid<<" "
+		     <<phi<<" "
+		     <<theta<<" "
+		     <<simHit.trackId()<<" "
+		     <<layer<<" "
+		     <<module<<" "
+		     <<std::endl;
 
   if(!quick) {
-    heta->Fill(eta);
-    //hphi->Fill(phi);
+    if(layer==1) {
+      hphi1->Fill(phi);
+      htheta1->Fill(theta);
+      hbeta1->Fill(beta);
+    } else if(layer==2) {
+      hphi2->Fill(phi);
+      htheta2->Fill(theta);
+      hbeta2->Fill(beta);
+    }
   }
   LocalPoint lp = recHit.localPosition();
   float lp_y = lp.y();  
@@ -612,17 +665,19 @@ void SiPixelRecHitsValid_pix::fillBarrel(const SiPixelRecHit& recHit, const PSim
     recHitYResAllB->Fill(res_y);
     recHitXPullAllB->Fill(pull_x);  
     recHitYPullAllB->Fill(pull_y);
-    
-    if( (tTopo->pxbLayer(detId)) == 1) 
-      {recHitXError1B->Fill(lerr_x); recHitYError1B->Fill(lerr_y);}
-    else if( (tTopo->pxbLayer(detId)) == 2) 
-      {recHitXError2B->Fill(lerr_x); recHitYError2B->Fill(lerr_y);}
-    else if( (tTopo->pxbLayer(detId)) == 3) 
-      {recHitXError3B->Fill(lerr_x); recHitYError3B->Fill(lerr_y);}
-    
-    int rows = theGeomDet->specificTopology().nrows(); 
-    if (rows == 160) recHitXFullModules->Fill(lp_x);
-    else if (rows == 80) recHitXHalfModules->Fill(lp_x);
+
+    if( layer == 1) {
+      recHitXError1B->Fill(lerr_x); recHitYError1B->Fill(lerr_y);
+      if(phi<0.) recHitX11->Fill(abs(phi),res_x); else recHitX12->Fill(abs(phi),res_x);
+    } else if( layer == 2) { 
+      recHitXError2B->Fill(lerr_x); recHitYError2B->Fill(lerr_y);
+      if(phi<0.) recHitX21->Fill(abs(phi),res_x); else recHitX22->Fill(abs(phi),res_x);
+    } else if( layer == 3) {
+      recHitXError3B->Fill(lerr_x); recHitYError3B->Fill(lerr_y);
+      }
+    //int rows = theGeomDet->specificTopology().nrows(); 
+    //if (rows == 160) recHitXFullModules->Fill(lp_x);
+    //else if (rows == 80) recHitXHalfModules->Fill(lp_x);
     
     float tmp1 = theGeomDet->surface().toGlobal(Local3DPoint(0.,0.,0.)).perp();
     float tmp2 = theGeomDet->surface().toGlobal(Local3DPoint(0.,0.,1.)).perp();
@@ -635,32 +690,48 @@ void SiPixelRecHitsValid_pix::fillBarrel(const SiPixelRecHit& recHit, const PSim
       float tmp13= 0.;
       if(lape.yy()>0.) tmp13= sqrt(lape.yy())*1E4;
       //bool tmp14=tmp2<tmp1;
-      if( (tTopo->pxbLayer(detId)) == 1) 
+      if( (layer) == 1) 
 	{recHitXAlignError1->Fill(tmp11); recHitYAlignError1->Fill(tmp13);}
-      else if( (tTopo->pxbLayer(detId)) == 2) 
+      else if( (layer) == 2) 
 	{recHitXAlignError2->Fill(tmp11); recHitYAlignError2->Fill(tmp13);}
-      else if( (tTopo->pxbLayer(detId)) == 3) 
+      else if( (layer) == 3) 
 	{recHitXAlignError3->Fill(tmp11); recHitYAlignError3->Fill(tmp13);}
-      else {cout<<" unknown layer "<< tTopo->pxbLayer(detId)<<endl;}
-      //cout<<tTopo->pxbLayer(detId)<<" "<<tTopo->pxbModule(detId)<<" "<<rows<<" "<<tmp14<<" "
+      else {cout<<" unknown layer "<< layer<<endl;}
+      //cout<<layer<<" "<<tTopo->pxbModule(detId)<<" "<<rows<<" "<<tmp14<<" "
       //  <<tmp11<<" "<<tmp13<<endl;
     }  // if lape
 
+    //int module = tTopo->pxbModule(detId);
     if (tmp2<tmp1) { // flipped
       for (unsigned int i=0; i<3; i++)  {
-	if (tTopo->pxbLayer(detId) == i+1) {
+	if (layer == i+1) {
 	  recHitXResFlippedLadderLayers[i]->Fill(res_x);
 	  recHitXPullFlippedLadderLayers[i]->Fill(pull_x);
+	  if(i==0) { // layer 1
+	    if(module>4) recHitL1XResFlippedpZ->Fill(res_x); 
+	    else recHitL1XResFlippedmZ->Fill(res_x); 
+	  } else if(i==1) { // layer 2
+	    if(module>4) recHitL2XResFlippedpZ->Fill(res_x); 
+	    else recHitL2XResFlippedmZ->Fill(res_x); 
+	  }
 	}
-      }
+      } 
     } else {
       for (unsigned int i=0; i<3; i++) {
-	if (tTopo->pxbLayer(detId) == i+1) {
+	if (layer == i+1) {
 	  recHitXResNonFlippedLadderLayers[i]->Fill(res_x);
 	  recHitXPullNonFlippedLadderLayers[i]->Fill(pull_x);
+	  if(i==0) { // layer 1
+	    if(module>4) recHitL1XResNonFlippedpZ->Fill(res_x); 
+	    else recHitL1XResNonFlippedmZ->Fill(res_x); 
+	  } else if(i==1) { // layer 2
+	    if(module>4) recHitL2XResNonFlippedpZ->Fill(res_x); 
+	    else recHitL2XResNonFlippedmZ->Fill(res_x); 
+	  }
 	}
       }
-    }
+    } // end if
+
   } // end if quick 
   
   //get cluster
@@ -668,16 +739,27 @@ void SiPixelRecHitsValid_pix::fillBarrel(const SiPixelRecHit& recHit, const PSim
 
   // as a function of layer
   for (unsigned int i=0; i<NumLayers; i++) {
-    if (tTopo->pxbLayer(detId) == i+1)  { // select layer
+    if (layer == i+1)  { // select layer
       recHitXResLayers[i]->Fill(res_x);  //QUICK
       recHitYResLayers[i]->Fill(res_y);  //QUICK
       if(!quick) {
 	recHitXResLayersP[i]->Fill(eta,std::abs(res_x));
 	recHitYResLayersP[i]->Fill(eta,std::abs(res_y));
 	int sizeX = (*clust).sizeX();
-	if(sizeX==1)      recHitXResLayersP1[i]->Fill(eta,std::abs(res_x));
-	else if(sizeX==2) recHitXResLayersP2[i]->Fill(eta,std::abs(res_x));
-	else if(sizeX>=3) recHitXResLayersP3[i]->Fill(eta,std::abs(res_x));
+	if(sizeX==1) {
+	  recHitXResLayersP1[i]->Fill(eta,std::abs(res_x));
+	  if(i==0) recHitL1XResSize1->Fill(res_x);
+	  else if(i==1) recHitL2XResSize1->Fill(res_x);
+	} else if(sizeX==2) {
+	  recHitXResLayersP2[i]->Fill(eta,std::abs(res_x));
+	  if(i==0) recHitL1XResSize2->Fill(res_x);
+	  else if(i==1) recHitL2XResSize2->Fill(res_x);
+	} else if(sizeX>=3) {
+	  recHitXResLayersP3[i]->Fill(eta,std::abs(res_x));
+	  if(i==0) recHitL1XResSize3->Fill(res_x);
+	  else if(i==1) recHitL2XResSize3->Fill(res_x);
+	}
+
 	int sizeY = (*clust).sizeY();
 	if(sizeY==1)      recHitYResLayersP1[i]->Fill(eta,std::abs(res_y));
 	else if(sizeY==2) recHitYResLayersP2[i]->Fill(eta,std::abs(res_y));
@@ -695,58 +777,52 @@ void SiPixelRecHitsValid_pix::fillBarrel(const SiPixelRecHit& recHit, const PSim
     float eta2=eta1+0.1;
     if(eta>=eta1 && eta<eta2) {
  
-      if (tTopo->pxbLayer(detId) == 1) 
+      if (layer == 1) 
 	{heta1->Fill(eta);recHitXResLayer1Eta[i]->Fill(res_x);recHitYResLayer1Eta[i]->Fill(res_y);}
-      else if (tTopo->pxbLayer(detId) == 2) 
+      else if (layer == 2) 
 	{heta2->Fill(eta);recHitXResLayer2Eta[i]->Fill(res_x);recHitYResLayer2Eta[i]->Fill(res_y);}
-      else if (tTopo->pxbLayer(detId) == 3) 
+      else if (layer == 3) 
 	{heta3->Fill(eta);recHitXResLayer3Eta[i]->Fill(res_x);recHitYResLayer3Eta[i]->Fill(res_y);}
       
     } // eta 
   } // i (eta)
   
   // fill module dependent info
-  for (unsigned int i=0; i<8; i++) 
-    {
-      if (tTopo->pxbModule(detId) == i+1) 
-	{
-	  int sizeY = (*clust).sizeY();
-	  clustYSizeModule[i]->Fill(sizeY);
-	  
-	  if (tTopo->pxbLayer(detId) == 1) 
-	    {
-	      float charge = (*clust).charge();
-	      clustChargeLayer1Modules[i]->Fill(charge);
-	      recHitYResLayer1Modules[i]->Fill(res_y);
-	      recHitYPullLayer1Modules[i]->Fill(pull_y);
-	    }
-	  else if (tTopo->pxbLayer(detId) == 2) 
-	    {
-	      float charge = (*clust).charge();
-	      clustChargeLayer2Modules[i]->Fill(charge);
-	      recHitYResLayer2Modules[i]->Fill(res_y);
-	      recHitYPullLayer2Modules[i]->Fill(pull_y);
-	    }
-	  else if (tTopo->pxbLayer(detId) == 3) 
-	    {
-	      float charge = (*clust).charge();
-	      clustChargeLayer3Modules[i]->Fill(charge);
-	      recHitYResLayer3Modules[i]->Fill(res_y);
-	      recHitYPullLayer3Modules[i]->Fill(pull_y);
-	    }
-	}
-    }
-  int sizeX = (*clust).sizeX();
-  if (tTopo->pxbLayer(detId) == 1) clustXSizeLayer[0]->Fill(sizeX);
-  if (tTopo->pxbLayer(detId) == 2) clustXSizeLayer[1]->Fill(sizeX);
-  if (tTopo->pxbLayer(detId) == 3) clustXSizeLayer[2]->Fill(sizeX);
+  for (unsigned int i=0; i<8; i++) {
+    if (tTopo->pxbModule(detId) == i+1) {
+      int sizeY = (*clust).sizeY();
+      clustYSizeModule[i]->Fill(sizeY);
+      
+      if (layer == 1) {
+	float charge = (*clust).charge();
+	clustChargeLayer1Modules[i]->Fill(charge);
+	recHitYResLayer1Modules[i]->Fill(res_y);
+	recHitYPullLayer1Modules[i]->Fill(pull_y);
+      } else if (layer == 2)  {
+	float charge = (*clust).charge();
+	clustChargeLayer2Modules[i]->Fill(charge);
+	recHitYResLayer2Modules[i]->Fill(res_y);
+	recHitYPullLayer2Modules[i]->Fill(pull_y);
+      } else if (layer == 3) {
+	float charge = (*clust).charge();
+	clustChargeLayer3Modules[i]->Fill(charge);
+	recHitYResLayer3Modules[i]->Fill(res_y);
+	recHitYPullLayer3Modules[i]->Fill(pull_y);
+      } // end if
+    } // end if
+  } // end for
+
+  //int sizeX = (*clust).sizeX();
+  //if (layer == 1) clustXSizeLayer[0]->Fill(sizeX);
+  //if (layer == 2) clustXSizeLayer[1]->Fill(sizeX);
+  //if (layer == 3) clustXSizeLayer[2]->Fill(sizeX);
+
 }
 
-
+// ------------------------------------------------------------------------------
 void SiPixelRecHitsValid_pix::fillForward(const SiPixelRecHit & recHit, const PSimHit & simHit, 
 				      DetId detId,const PixelGeomDetUnit * theGeomDet,
-				      const TrackerTopology *tTopo) 
-{
+				      const TrackerTopology *tTopo) {
   const float cmtomicron = 10000.0;
 #ifdef QUICK
   const bool quick = true;
@@ -796,39 +872,33 @@ void SiPixelRecHitsValid_pix::fillForward(const SiPixelRecHit & recHit, const PS
 
     recHitXResDisk1[0]->Fill(res_x);
     recHitYResDisk1[0]->Fill(res_y);
+
     if(side==1) {  // -z 
       recHitXResDisk1[1]->Fill(res_x);
       recHitYResDisk1[1]->Fill(res_y);
+
+      if(panel==1) {  // panel 1 
+	recHitXResDisk1[3]->Fill(res_x);
+	recHitYResDisk1[3]->Fill(res_y);
+      } else { // panel 2
+	recHitXResDisk1[4]->Fill(res_x);
+	recHitYResDisk1[4]->Fill(res_y);
+      }
+
     } else { //+z
       recHitXResDisk1[2]->Fill(res_x);
       recHitYResDisk1[2]->Fill(res_y);
-    }
-    if(panel==1) {  // panel 1 
-      //recHitXResDisk1[3]->Fill(res_x);
-      //recHitYResDisk1[3]->Fill(res_y);
-      if(side==1) {  // -z 
-	recHitXResDisk1[3]->Fill(res_x);
-	recHitYResDisk1[3]->Fill(res_y);
-      } else { //+z
+
+      if(panel==1) {  // panel 1 
 	recHitXResDisk1[5]->Fill(res_x);
 	recHitYResDisk1[5]->Fill(res_y);
-      }
-    } else { // panel 2
-      //recHitXResDisk1[4]->Fill(res_x);
-      //recHitYResDisk1[4]->Fill(res_y);
-      if(side==1) {  // -z 
-	recHitXResDisk1[4]->Fill(res_x);
-	recHitYResDisk1[4]->Fill(res_y);
-      } else { //+z
+      } else { // panel 2
 	recHitXResDisk1[6]->Fill(res_x);
 	recHitYResDisk1[6]->Fill(res_y);
       }
+
     }
 
-
-
-    // 5, 6 reserved for rings 
-    
     if(!quick) {
       int sizeX = (*clust).sizeX();
       clustXSizeDisk1Plaquettes[0]->Fill(sizeX);	
@@ -891,19 +961,18 @@ void SiPixelRecHitsValid_pix::fillForward(const SiPixelRecHit & recHit, const PS
       recHitYResDisk3[4]->Fill(res_y);
     }
 
-    if(!quick) {
-      int sizeX = (*clust).sizeX();
-      clustXSizeDisk3Plaquettes[0]->Fill(sizeX);	
-      int sizeY = (*clust).sizeY();
-      clustYSizeDisk3Plaquettes[0]->Fill(sizeY);	
-      float charge = (*clust).charge();
-      clustChargeDisk3Plaquettes[0]->Fill(charge);
-      recHitXPullDisk3Plaquettes[0]->Fill(pull_x);
-      recHitYPullDisk3Plaquettes[0]->Fill(pull_y);
-    } 
+    // if(!quick) { // histios not defined yet
+    //   int sizeX = (*clust).sizeX();
+    //   clustXSizeDisk3Plaquettes[0]->Fill(sizeX);	
+    //   int sizeY = (*clust).sizeY();
+    //   clustYSizeDisk3Plaquettes[0]->Fill(sizeY);	
+    //   float charge = (*clust).charge();
+    //   clustChargeDisk3Plaquettes[0]->Fill(charge);
+    //   recHitXPullDisk3Plaquettes[0]->Fill(pull_x);
+    //   recHitYPullDisk3Plaquettes[0]->Fill(pull_y);
+    // } 
 
   } // end disk 
-
 
 
   if(quick) return; // skip the rest
@@ -956,6 +1025,7 @@ void SiPixelRecHitsValid_pix::fillForward(const SiPixelRecHit & recHit, const PS
     //		     <<tTopo->pxfPanel(detId)<<" "<<tTopo->pxfModule(detId)<<" "
     //		     <<rows<<" "<<cols<<" "
     //		     <<tmp11<<" "<<tmp13<<endl;
+
     float tmp14=float(tTopo->pxfBlade(detId));
     if( (tTopo->pxfDisk(detId)) == 2) tmp14 += 50.;
     if( (tTopo->pxfSide(detId)) == 2) tmp14 += 25.; 

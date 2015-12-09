@@ -63,8 +63,10 @@ class SiPixelRecHitsValid_pix : public edm::EDAnalyzer {
    private:
 	DQMStore* dbe_;
 	std::string outputFile_;
-
+	edm::EDGetTokenT<edmNew::DetSetVector<SiPixelRecHit>>tPixelRecHit;
 	edm::ParameterSet conf_;
+
+	TrackerHitAssociator::Config trackerHitAssociatorConfig_;
 
 	void fillBarrel(const SiPixelRecHit &,const PSimHit &, DetId, const PixelGeomDetUnit *,	
 			 const TrackerTopology *tTopo);
@@ -73,7 +75,7 @@ class SiPixelRecHitsValid_pix : public edm::EDAnalyzer {
 
 	//Clusters BPIX
 	MonitorElement* clustYSizeModule[8];
-	MonitorElement* clustXSizeLayer[4];
+	//MonitorElement* clustXSizeLayer[4];
 	MonitorElement* clustChargeLayer1Modules[8];
 	MonitorElement* clustChargeLayer2Modules[8];
 	MonitorElement* clustChargeLayer3Modules[8];
@@ -93,8 +95,8 @@ class SiPixelRecHitsValid_pix : public edm::EDAnalyzer {
 	//RecHits BPIX
 	MonitorElement* recHitXResAllB;
 	MonitorElement* recHitYResAllB;
-	MonitorElement* recHitXFullModules;
-	MonitorElement* recHitXHalfModules;
+	//MonitorElement* recHitXFullModules;
+	//MonitorElement* recHitXHalfModules;
 	MonitorElement* recHitYAllModules;
 	MonitorElement* recHitXResFlippedLadderLayers[4];
 	MonitorElement* recHitXResNonFlippedLadderLayers[4];
@@ -120,14 +122,15 @@ class SiPixelRecHitsValid_pix : public edm::EDAnalyzer {
 	MonitorElement* recHitYResLayer1Eta[25];
 	MonitorElement* recHitYResLayer2Eta[25];
 	MonitorElement* recHitYResLayer3Eta[25];
-	MonitorElement* heta;
-	MonitorElement* heta1;
-	MonitorElement* heta2;
-	MonitorElement* heta3;
-	MonitorElement* htest1;
-	MonitorElement* htest2;
-	MonitorElement* htest3;
-
+  	MonitorElement *htheta1,*hbeta1,*hphi1;
+  	MonitorElement *htheta2,*hbeta2,*hphi2;
+	MonitorElement* heta1, *heta2, *heta3;
+	MonitorElement* htest1, *htest2;
+	MonitorElement *recHitL1XResNonFlippedpZ,*recHitL1XResFlippedpZ,*recHitL1XResNonFlippedmZ,*recHitL1XResFlippedmZ,
+	  *recHitL1XResSize1,*recHitL1XResSize2,*recHitL1XResSize3;   
+	MonitorElement *recHitL2XResNonFlippedpZ,*recHitL2XResFlippedpZ,*recHitL2XResNonFlippedmZ,*recHitL2XResFlippedmZ,
+	  *recHitL2XResSize1,*recHitL2XResSize2,*recHitL2XResSize3;   
+	MonitorElement *recHitX11, *recHitX12, *recHitX21, *recHitX22;
 
 	//RecHits FPIX
 	MonitorElement* recHitXResAllF;

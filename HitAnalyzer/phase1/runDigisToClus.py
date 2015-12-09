@@ -30,7 +30,8 @@ process.load("RecoLocalTracker.Configuration.RecoLocalTracker_cff")
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '76X_upgrade2017_design_v8', '')
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
@@ -54,7 +55,7 @@ process.source = cms.Source("PoolSource",
   fileNames = cms.untracked.vstring(
 #    'file:digis_100eve.root'
 #    'file:digis.root'
-    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/digis/digis1.root'
+    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/digis/digis1_pixonly.root'
   )
 )
 
@@ -100,11 +101,12 @@ if useLocalGain :
     toGet = cms.VPSet(
       cms.PSet(
         record = cms.string('SiPixelGainCalibrationOfflineRcd'),
-        tag = cms.string('SiPixelGainCalibration_phase1_ideal')
-        #tag = cms.string('SiPixelGainCalibration_phase1_mc_v1')
+        #tag = cms.string('SiPixelGainCalibration_phase1_ideal')
+        tag = cms.string('SiPixelGainCalibration_phase1_mc_v1')
     )),
     #connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_phase1_mc_v1.db')
-    connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_phase1_ideal.db')
+    #connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_phase1_ideal.db')
+    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
   ) # end process
   process.Gainprefer = cms.ESPrefer("PoolDBESSource","GainsReader")
 # end if
@@ -113,7 +115,7 @@ if useLocalGain :
 process.o1 = cms.OutputModule("PoolOutputModule",
           outputCommands = cms.untracked.vstring('drop *','keep *_*_*_ClusTest'),
 #          fileName = cms.untracked.string('file:clus.root')
-         fileName = cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/clus/clus1.root')
+         fileName = cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/clus/clus1_pixonly.root')
 )
 
 # My 

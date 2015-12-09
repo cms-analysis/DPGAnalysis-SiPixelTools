@@ -55,8 +55,8 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, '75X_upgrade2017_design_v4', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, '75X_upgrade2017_design_v4', '')
 
 # DB stuff 
 useLocalDB = True
@@ -121,10 +121,9 @@ if useLocalDB :
 			#tag = cms.string("dupa")
                         # phase 1 MC
 #                        tag = cms.string("SiPixelLorentzAngle_forWidth_phase1_mc_v1")
-                        tag = cms.string("SiPixelLorentzAngle_fromAlignment_phase1_mc_v1")
-#                        tag = cms.string("SiPixelLorentzAngle_phase1_mc_v1")
+#                        tag = cms.string("SiPixelLorentzAngle_fromAlignment_phase1_mc_v1")
+                        tag = cms.string("SiPixelLorentzAngle_phase1_mc_v1")
 #                       tag = cms.string("SiPixelLorentzAngleSim_phase1_mc_v1")
-#			tag = cms.string("SiPixelLorentzAngleSim_v02_mc")
 
 		),
 	),
@@ -138,11 +137,10 @@ if useLocalDB :
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_forWidth_v01_mc.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_fromAlignment_v01_mc.db')
 #   MC phase1
-#    connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_phase1_mc_v1.db')
+    connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_phase1_mc_v1.db')
 #    connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_forWidth_phase1_mc_v1.db')
-    connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_fromAlignment_phase1_mc_v1.db')
-#    connect = cms.string('sqlite_file:SiPixelLorentzAngle_phase1_mc_v1.db')
-#    connect = cms.string('sqlite_file:SiPixelLorentzAngleSim_phase1_mc_v1.db')
+#    connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_fromAlignment_phase1_mc_v1.db')
+#     connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngleSim_phase1_mc_v1.db')
 #    connect = cms.string('frontier://FrontierProd/CMS_COND_31X_PIXEL')
 #    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
 

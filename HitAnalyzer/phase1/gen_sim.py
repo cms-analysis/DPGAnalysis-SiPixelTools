@@ -67,9 +67,9 @@ process.generator = cms.EDFilter("Pythia8PtGun",
         MaxPt = cms.double(100.1),
         MinPt = cms.double(99.9),
         ParticleID = cms.vint32(13,13),
-        MaxEta = cms.double(2.5),
+        MaxEta = cms.double(1.0), # 2.5
         MaxPhi = cms.double(3.14159265359),
-        MinEta = cms.double(-2.5),
+        MinEta = cms.double(-1.0), # -2.5
         MinPhi = cms.double(-3.14159265359) ## in radians
     ),
     PythiaParameters = cms.PSet(
@@ -98,6 +98,9 @@ process.source.firstRun = cms.untracked.uint32(1)
 process.source.firstEvent = cms.untracked.uint32(1)
 process.source.firstLuminosityBlock = cms.untracked.uint32(1)
 # next files 
+#process.source.firstRun = cms.untracked.uint32(2)
+#process.source.firstEvent = cms.untracked.uint32(10001)
+#process.source.firstLuminosityBlock = cms.untracked.uint32(1000)
 #process.source.firstRun = cms.untracked.uint32(N)
 #process.source.firstEvent = cms.untracked.uint32(N)
 #process.source.firstLuminosityBlock = cms.untracked.uint32(N)
@@ -128,7 +131,10 @@ process.output = cms.OutputModule("PoolOutputModule",
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
     fileName = cms.untracked.string(
      #'simHits.root'
-     '/afs/cern.ch/user/d/dkotlins/work/MC/mu_phase1/pt100_76/simhits/simHits1.root'
+     '/afs/cern.ch/user/d/dkotlins/work/MC/mu_phase1/pt100_76/simhits/simHits1_eta1_novtx.root'
+#     '/afs/cern.ch/user/d/dkotlins/work/MC/mu_phase1/pt100_76/simhits/simHits1_eta1.root'
+#     '/afs/cern.ch/user/d/dkotlins/work/MC/mu_phase1/pt100_76/simhits/simHits1.root'
+#     '/afs/cern.ch/user/d/dkotlins/work/MC/mu_phase1/pt100_76/simhits/simHits2.root'
     ),
     outputCommands = process.FEVTDEBUGEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)

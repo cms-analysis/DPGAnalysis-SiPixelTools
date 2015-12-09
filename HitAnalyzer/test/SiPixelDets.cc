@@ -39,7 +39,7 @@ using namespace edm;
 SiPixelDets::SiPixelDets(edm::ParameterSet const& conf) : 
   conf_(conf), phase1_(false) {
 
-  phase1_ = conf_.getUntrackedParameter<bool>("phase1",false);		
+  //phase1_ = conf_.getUntrackedParameter<bool>("phase1",false);		
   //BPixParameters_ = conf_.getUntrackedParameter<Parameters>("BPixParameters");
   //FPixParameters_ = conf_.getUntrackedParameter<Parameters>("FPixParameters");
 }
@@ -63,12 +63,26 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
   const bool PRINT_TABLE = true;
   const bool doReversedTest = true;
 
-  if(phase1_) cout<<"This is for phase1 geometry "<<endl;
  
   edm::ESHandle<TrackerGeometry> tkgeom;
   es.get<TrackerDigiGeometryRecord>().get( tkgeom );
 
   if(PRINT) cout<<" There are "<<tkgeom->detUnits().size() <<" detectors"<<std::endl;
+
+  // Test new TrackerGeometry features
+  cout << "Test of TrackerGeometry::isThere";
+  cout  << " is there PixelBarrel: " << tkgeom->isThere(GeomDetEnumerators::PixelBarrel);
+  cout  << " is there PixelEndcap: " << tkgeom->isThere(GeomDetEnumerators::PixelEndcap);
+  cout  << " is there P1PXB: " << tkgeom->isThere(GeomDetEnumerators::P1PXB);
+  cout  << " is there P1PXEC: " << tkgeom->isThere(GeomDetEnumerators::P1PXEC);
+  cout  << endl;
+
+  // switch on the phase1 
+  if( (tkgeom->isThere(GeomDetEnumerators::P1PXB)) && 
+      (tkgeom->isThere(GeomDetEnumerators::P1PXEC)) ) phase1_ = true;
+  else phase1_ = false;
+
+  if(phase1_) cout<<"This is for phase1 geometry "<<endl;
 
   //Retrieve tracker topology from geometry
   edm::ESHandle<TrackerTopology> tTopo;
@@ -179,6 +193,8 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       // Check the revers transformation (special test)
       if(doReversedTest) {
 	PixelBarrelName pbn2(name, phase1_); // use name to get detId
+	//PixelBarrelName pbn2(name); // use name to get detId
+	//cout<<name<<" "<<pbn2.name()<<endl;
 	PixelBarrelName::Shell sh2 = pbn2.shell(); //enum
 	int sector2 = pbn2.sectorName();
 	int ladder2 = pbn2.ladderName();

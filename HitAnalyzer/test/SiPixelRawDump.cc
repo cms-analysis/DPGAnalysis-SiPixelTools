@@ -56,6 +56,7 @@ using namespace std;
 
 // #define L1  // L1 information not in RAW
 //#define OUTFILE 
+#define PHASE1
 
 namespace {
   bool printErrors  = false;
@@ -63,10 +64,18 @@ namespace {
   bool printHeaders = false;
   const bool CHECK_PIXELS = true;
   const bool PRINT_BASELINE = false;
-  const int n_of_FEDs = 41;
   // to store the previous pixel 
   int fed0 = -1, chan0 = -1, roc0 = -1, dcol0 = -1, pix0 =-1, count0=-1;
   int countDecodeErrors1=0, countDecodeErrors2=0;
+#ifdef PHASE1
+  const int n_of_FEDs = 41;
+  const int n_of_Channels = 36;
+  const bool phase1 = true;
+#else
+  const int n_of_FEDs = 56;
+  const int n_of_Channels = 96;
+  const bool phase1 = false;
+#endif
 }
 
 // Include the helper decoding class
@@ -366,7 +375,7 @@ int MyDecode::data(int word, int & fedChannel, int fed, int & stat1, int & stat2
     //if(print) cout<<"data "<<hex<<word<<dec;
     channel_ = ((word&chnlmsk)>>26);
 
-    if(channel_>0 && channel_<37) {  // valid channels 1-36
+    if(channel_>0 && channel_ <= n_of_Channels) {  // valid channels 1-36
       //cout<<hex<<word<<dec;
       dcol_=(word&dclmsk)>>16;
       pix_=(word&pxlmsk)>>8;
@@ -518,13 +527,13 @@ private:
   int countEvents, countAllEvents;
   int countTotErrors;
   float sumPixels, sumFedSize, sumFedPixels[n_of_FEDs];
-  int fedErrors[n_of_FEDs][36];
-  int fedErrorsENE[n_of_FEDs][36];
-  int fedErrorsTime[n_of_FEDs][36];
-  int fedErrorsOver[n_of_FEDs][36];
-  int decodeErrors[n_of_FEDs][36];
-  int decodeErrors000[n_of_FEDs][36];  // pix 0 problem
-  int decodeErrorsDouble[n_of_FEDs][36];  // double pix  problem
+  int fedErrors[n_of_FEDs][n_of_Channels];
+  int fedErrorsENE[n_of_FEDs][n_of_Channels];
+  int fedErrorsTime[n_of_FEDs][n_of_Channels];
+  int fedErrorsOver[n_of_FEDs][n_of_Channels];
+  int decodeErrors[n_of_FEDs][n_of_Channels];
+  int decodeErrors000[n_of_FEDs][n_of_Channels];  // pix 0 problem
+  int decodeErrorsDouble[n_of_FEDs][n_of_Channels];  // double pix  problem
   int errorType[20];
 
 #ifdef OUTFILE
@@ -614,13 +623,13 @@ void SiPixelRawDump::endJob() {
   cout<<" FED errors "<<endl<<"Fed Channel Tot-Errors ENE-Errors Time-Errors Over-Errors"<<endl;
 
   for(int i = 0; i < n_of_FEDs; ++i) {
-    for(int j=0;j<36;++j) if( (fedErrors[i][j]) > int(countEvents*printThreshold) || (fedErrorsENE[i][j] > 0) ) {
+    for(int j=0;j<n_of_Channels;++j) if( (fedErrors[i][j]) > int(countEvents*printThreshold) || (fedErrorsENE[i][j] > 0) ) {
       cout<<" "<<i<<"  -  "<<(j+1)<<" -  "<<fedErrors[i][j]<<" - "<<fedErrorsENE[i][j]<<" -  "<<fedErrorsTime[i][j]<<" - "<<fedErrorsOver[i][j]<<endl;
     }
   }
   cout<<" Decode errors "<<endl<<"Fed Channel Errors Pix_000 Double_Pix"<<endl;
   for(int i = 0; i < n_of_FEDs; ++i) {
-    for(int j=0;j<36;++j) {
+    for(int j=0;j<n_of_Channels;++j) {
       int tmp = decodeErrors[i][j] + decodeErrors000[i][j] + decodeErrorsDouble[i][j];
       if(tmp>10) 
 	cout<<" "<<i<<" -  "<<(j+1)<<"   -  "
@@ -665,8 +674,8 @@ void SiPixelRawDump::beginJob() {
   sumFedSize=0;
   for(int i = 0; i < n_of_FEDs; ++i) {
     sumFedPixels[i]=0;
-    for(int j=0;j<36;++j) {fedErrors[i][j]=0; fedErrorsENE[i][j]=0; fedErrorsTime[i][j]=0; fedErrorsOver[i][j]=0;}
-    for(int j=0;j<36;++j) {decodeErrors[i][j]=0; decodeErrors000[i][j]=0; decodeErrorsDouble[i][j]=0;}
+    for(int j=0;j<n_of_Channels;++j) {fedErrors[i][j]=0; fedErrorsENE[i][j]=0; fedErrorsTime[i][j]=0; fedErrorsOver[i][j]=0;}
+    for(int j=0;j<n_of_Channels;++j) {decodeErrors[i][j]=0; decodeErrors000[i][j]=0; decodeErrorsDouble[i][j]=0;}
   }
   for(int i=0;i<20;++i) errorType[i]=0;
 
@@ -1004,7 +1013,14 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
   //ev.getByLabel( label, instance, buffers);
   ev.getByToken(rawData , buffers);  // the new bytoken 
 
-  std::pair<int,int> fedIds(FEDNumbering::MINSiPixelFEDID, FEDNumbering::MAXSiPixelFEDID);
+#ifdef PHASE1
+  std::pair<int,int> fedIds(1200,1255); // phase 1
+  const int fedId0=1200;
+#else // phase0
+  std::pair<int,int> fedIds(FEDNumbering::MINSiPixelFEDID, FEDNumbering::MAXSiPixelFEDID); //0
+  const int fedId0=0;
+#endif
+
 
   //PixelDataFormatter formatter(0);  // only for digis
   //bool dummyErrorBool;
@@ -1021,7 +1037,7 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
   int countErrorsPerEvent2=0;
   double aveFedSize = 0.;
   int stat1=-1, stat2=-1;
-  int fedchannelsize[36];
+  int fedchannelsize[n_of_Channels];
   bool wrongBX=false;
   int countErrors[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
@@ -1043,7 +1059,7 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
     if(printHeaders) cout<<"Get data For FED = "<<fedId<<" size in bytes "<<rawData.size()<<endl;
     if(rawData.size()==0) continue;  // skip if not data for this fed
 
-    for(int i=0;i<36;++i) fedchannelsize[i]=0;
+    for(int i=0;i<n_of_Channels;++i) fedchannelsize[i]=0;
 
     int nWords = rawData.size()/sizeof(Word64);
     //cout<<" size "<<nWords<<endl;
@@ -1147,9 +1163,9 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 	  case(10) : { // Timeout
 
 	    countErrors[10]++;
-	    fedErrorsTime[fedId][(fedChannel-1)]++;
-	    hfed2DErrors10->Fill(float(fedId),float(fedChannel));
-	    hfed2DErrors10ls->Fill(float(lumiBlock),float(fedId)); //errors
+	    fedErrorsTime[fedId-fedId0][(fedChannel-1)]++;
+	    hfed2DErrors10->Fill(float(fedId-fedId0),float(fedChannel));
+	    hfed2DErrors10ls->Fill(float(lumiBlock),float(fedId-fedId)); //errors
 
 	    herrorTimels->Fill(float(lumiBlock));
 	    if(layer==1)      herrorTimels1->Fill(float(lumiBlock));
@@ -1163,9 +1179,9 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 	  case(14) : {  // OVER
 
 	    countErrors[14]++;
-	    fedErrorsOver[fedId][(fedChannel-1)]++;
-	    hfed2DErrors14->Fill(float(fedId),float(fedChannel));
-	    hfed2DErrors14ls->Fill(float(lumiBlock),float(fedId)); //errors
+	    fedErrorsOver[fedId-fedId0][(fedChannel-1)]++;
+	    hfed2DErrors14->Fill(float(fedId-fedId0),float(fedChannel));
+	    hfed2DErrors14ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
 
 	    herrorOverls->Fill(float(lumiBlock));
 	    if(layer==1)      herrorOverls1->Fill(float(lumiBlock));
@@ -1178,83 +1194,83 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 	  case(11) : {  // ENE
 
 	    countErrors[11]++;
-	    hfed2DErrors11->Fill(float(fedId),float(fedChannel));
-	    hfed2DErrors11ls->Fill(float(lumiBlock),float(fedId)); //errors
+	    hfed2DErrors11->Fill(float(fedId-fedId0),float(fedChannel));
+	    hfed2DErrors11ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
 	    //hbx3->Fill(float(bx));
-	    fedErrorsENE[fedId][(fedChannel-1)]++;
+	    fedErrorsENE[fedId-fedId0][(fedChannel-1)]++;
 	    break; }
 
 	  case(16) : { //FIFO
 
 	    countErrors[16]++;
-	    hfed2DErrors16->Fill(float(fedId),float(fedChannel));
-	    hfed2DErrors16ls->Fill(float(lumiBlock),float(fedId)); //errors
+	    hfed2DErrors16->Fill(float(fedId-fedId0),float(fedChannel));
+	    hfed2DErrors16ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
 	    break; }
 
 	  case(12) : {  // NOR
 
 	    countErrors[12]++;
-	    hfed2DErrors12->Fill(float(fedId),float(fedChannel));
-	    hfed2DErrors12ls->Fill(float(lumiBlock),float(fedId)); //errors
+	    hfed2DErrors12->Fill(float(fedId-fedId0),float(fedChannel));
+	    hfed2DErrors12ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
 	    //hbx5->Fill(float(bx));
 	    break; }
 
 	  case(15) : {  // TBM Trailer
 
 	    countErrors[15]++;
-	    hfed2DErrors15->Fill(float(fedId),float(fedChannel));
-	    hfed2DErrors15ls->Fill(float(lumiBlock),float(fedId)); //errors
+	    hfed2DErrors15->Fill(float(fedId-fedId0),float(fedChannel));
+	    hfed2DErrors15ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
 	    break; }
 
 	  case(13) : {  // FSM
 
 	    countErrors[13]++;
-	    hfed2DErrors13->Fill(float(fedId),float(fedChannel));
-	    hfed2DErrors13ls->Fill(float(lumiBlock),float(fedId)); //errors
+	    hfed2DErrors13->Fill(float(fedId-fedId0),float(fedChannel));
+	    hfed2DErrors13ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
 	    break; }
 
 	  case(3) : {  //  inv. pix-dcol
 
 	    countErrors[3]++;
-	    hfed2DErrors3->Fill(float(fedId),float(fedChannel));
-	    hfed2DErrors3ls->Fill(float(lumiBlock),float(fedId)); //errors
+	    hfed2DErrors3->Fill(float(fedId-fedId0),float(fedChannel));
+	    hfed2DErrors3ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
 	    //hbx8->Fill(float(bx));
 	    break; }
 
 	  case(4) : {  // inv roc
 	    countErrors[4]++;
-	    hfed2DErrors4->Fill(float(fedId),float(fedChannel));
-	    hfed2DErrors4ls->Fill(float(lumiBlock),float(fedId)); //errors
+	    hfed2DErrors4->Fill(float(fedId-fedId0),float(fedChannel));
+	    hfed2DErrors4ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
 	    //hbx9->Fill(float(bx));
 	    break; }
 
 	  case(5) : {  // pix=0
 	    countErrors[5]++;
-	    hfed2DErrors5->Fill(float(fedId),float(fedChannel));
-	    hfed2DErrors5ls->Fill(float(lumiBlock),float(fedId)); //errors
+	    hfed2DErrors5->Fill(float(fedId-fedId0),float(fedChannel));
+	    hfed2DErrors5ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
 	    //hbx10->Fill(float(bx));
 
 	    hroc000->Fill(float(stat1)); // count rocs
 	    hcount000->Fill(float(stat2));
-	    hcount0002->Fill(float(fedId),float(stat2));
+	    hcount0002->Fill(float(fedId-fedId0),float(stat2));
 	    break; }
 
 	  case(6) : {  // double pix
 
 	    countErrors[6]++;
-	    hfed2DErrors6->Fill(float(fedId),float(fedChannel));
-	    hfed2DErrors6ls->Fill(float(lumiBlock),float(fedId)); //errors
+	    hfed2DErrors6->Fill(float(fedId-fedId0),float(fedChannel));
+	    hfed2DErrors6ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
 	    //hbx12->Fill(float(bx));
 
 	    hrocDouble->Fill(float(stat1)); // count rocs
 	    hcountDouble->Fill(float(stat2));
-	    hcountDouble2->Fill(float(fedId),float(stat2));
+	    hcountDouble2->Fill(float(fedId-fedId0),float(stat2));
 	    break; }
 
 	  case(1) : {  // unknown
 	    countErrors[1]++;
-	    hfed2DErrors1->Fill(float(fedId),float(fedChannel));
-	    hfed2DErrors1ls->Fill(float(lumiBlock),float(fedId)); //errors
+	    hfed2DErrors1->Fill(float(fedId-fedId0),float(fedChannel));
+	    hfed2DErrors1ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
 	    break; }
 
 	  }  // end switch
@@ -1265,35 +1281,35 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 	  //herrorFed0->Fill(float(fedId));
 	  //herrorChan0->Fill(float(fedChannel));
 
-	  hfed2d->Fill(float(fedId),float(status));
+	  hfed2d->Fill(float(fedId-fedId0),float(status));
 	  
 	  if(status>=10) {  // hard errors
 	    // Type - 1 Errors
 
 	    countErrorsInFed1++;
-	    hfedErrorType1ls->Fill(float(lumiBlock),float(fedId)); // hard errors
-	    hfed2DErrorsType1->Fill(float(fedId),float(fedChannel));
+	    hfedErrorType1ls->Fill(float(lumiBlock),float(fedId-fedId0)); // hard errors
+	    hfed2DErrorsType1->Fill(float(fedId-fedId0),float(fedChannel));
 
 	    herrorType1->Fill(float(status));
-	    herrorType1Fed->Fill(float(fedId));
+	    herrorType1Fed->Fill(float(fedId-fedId0));
 	    herrorType1Chan->Fill(float(fedChannel));
 
-	    fedErrors[fedId][(fedChannel-1)]++;
+	    fedErrors[fedId-fedId0][(fedChannel-1)]++;
 
 	  } else if(status>0) {  // decode errors
 	    // Type 2 errprs
 
 	    countErrorsInFed2++;
-	    hfedErrorType2ls->Fill(float(lumiBlock),float(fedId)); // decode errors
-	    hfed2DErrorsType2->Fill(float(fedId),float(fedChannel));
+	    hfedErrorType2ls->Fill(float(lumiBlock),float(fedId-fedId0)); // decode errors
+	    hfed2DErrorsType2->Fill(float(fedId-fedId0),float(fedChannel));
 
 	    herrorType2->Fill(float(status));
-	    herrorType2Fed->Fill(float(fedId));
+	    herrorType2Fed->Fill(float(fedId-fedId0));
 	    herrorType2Chan->Fill(float(fedChannel));
 
-	    if(status==5)      decodeErrors000[fedId][(fedChannel-1)]++;
-	    else if(status==6) decodeErrorsDouble[fedId][(fedChannel-1)]++;
-	    else               decodeErrors[fedId][(fedChannel-1)]++;
+	    if(status==5)      decodeErrors000[fedId-fedId0][(fedChannel-1)]++;
+	    else if(status==6) decodeErrorsDouble[fedId-fedId0][(fedChannel-1)]++;
+	    else               decodeErrors[fedId-fedId0][(fedChannel-1)]++;
 	  }
 
 	}
@@ -1311,7 +1327,7 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
     //cout<<dummyErrorBool<<" "<<digis.size()<<" "<<errors.size()<<endl;
 
     if(countPixelsInFed>0)  {
-      sumFedPixels[fedId] += countPixelsInFed;
+      sumFedPixels[fedId-fedId0] += countPixelsInFed;
     }
 
     hpixels->Fill(float(countPixelsInFed));
@@ -1321,8 +1337,8 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
     if(countPixelsInFed>0 && fedId>=32) hpixels3->Fill(float(countPixelsInFed));
     herrors->Fill(float(countErrorsInFed));
 
-    for(int i=0;i<36;++i) { 
-      hfedchannelsize->Fill( float(fedId), float(i+1), float(fedchannelsize[i]) );
+    for(int i=0;i<n_of_Channels;++i) { 
+      hfedchannelsize->Fill( float(fedId-fedId0), float(i+1), float(fedchannelsize[i]) );
       if(fedId<32) {
 	hfedchannelsizeb->Fill( float(fedchannelsize[i]) );
 	int layer = MyDecode::checkLayerLink(fedId, i); // get bpix layer 

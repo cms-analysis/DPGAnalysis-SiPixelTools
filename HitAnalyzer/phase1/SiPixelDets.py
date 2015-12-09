@@ -6,7 +6,6 @@ process.load('Configuration.Geometry.GeometryExtended2017Reco_cff')
 process.load('Configuration.Geometry.GeometryExtended2017_cff')
 
 
-
 #process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
 
@@ -19,16 +18,12 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, '75X_upgrade2017_design_v4', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '76X_upgrade2017_design_v8', '')
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) )
 
 
 process.source = cms.Source( "EmptySource",
-#process.source = cms.Source( "PoolSource",
-#                             fileNames = cms.untracked.vstring(
-#			     'file:$home/work/MC/mu/pt100_71_pre5/simhits/simHits1.root'
-#			     )
 )
 	      
 # FileService is mandatory, as the following analyzer module 
@@ -39,7 +34,7 @@ process.TFileService = cms.Service("TFileService",
 
 # the analyzer itself - empty parameter set 
 process.test = cms.EDAnalyzer( "SiPixelDets",
-         phase1=cms.untracked.bool(True),                      
+#         phase1=cms.untracked.bool(True),                      
 #        NPartForHisto = cms.untracked.int32(100),
 #        PtMaxForHisto = cms.untracked.double(200.0)
 )

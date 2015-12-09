@@ -68,7 +68,8 @@ process.source = cms.Source("PoolSource",
  fileNames = cms.untracked.vstring(    
 # for MC 
 #  'file:clus.root'
-  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/clus/clus1.root'
+  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/clus/clus1_gain_ideal.root'
+#  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/clus/clus1_gain_mc.root'
   )
 )
 

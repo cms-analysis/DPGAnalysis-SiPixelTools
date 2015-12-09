@@ -20,9 +20,22 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
 
+process.MessageLogger = cms.Service("MessageLogger",
+    #debugModules = cms.untracked.vstring('Digitize'),
+    debugModules = cms.untracked.vstring('PixelDigitizer'),
+    destinations = cms.untracked.vstring('cout'),
+    #destinations = cms.untracked.vstring("log","cout"),
+    cout = cms.untracked.PSet(
+        threshold = cms.untracked.string('ERROR')
+    )
+    #log = cms.untracked.PSet(
+    #    threshold = cms.untracked.string('DEBUG')
+    #)
+)
+
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(-1)
 )
 
 process.source = cms.Source("PoolSource", 
@@ -55,7 +68,7 @@ process.source = cms.Source("PoolSource",
 
 # add sqlite DBs
 #LA
-useLocalLA = False
+useLocalLA = True
 if useLocalLA :
   process.LAReader = cms.ESSource("PoolDBESSource",
     DBParameters = 
@@ -70,12 +83,13 @@ if useLocalLA :
       ),
     ),
     connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngleSim_phase1_mc_v1.db')
+    #connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS') #NEW
   ) # end process
   process.es_prefer_DBReader = cms.ESPrefer("PoolDBESSource","LAReader")
 #  end if
 
 # Quality
-useLocalQuality = False
+useLocalQuality = True
 if useLocalQuality :
   process.QualityReader = cms.ESSource("PoolDBESSource",
     BlobStreamerName = cms.untracked.string('TBufferBlobStreamingService'),
@@ -87,15 +101,16 @@ if useLocalQuality :
         record = cms.string('SiPixelQualityFromDbRcd'),
         tag = cms.string('SiPixelQuality_phase1_ideal')
     )),
-    connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelQuality_phase1_ideal.db')
+    #connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelQuality_phase1_ideal.db')
+    connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
   )
   process.es_prefer_QualityReader = cms.ESPrefer("PoolDBESSource","QualityReader")
 #  end if
 
 #very strange effect, if I use 
-#process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
+process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
 # the output is 50% bigger than with this
-process.output = cms.OutputModule("PoolOutputModule",
+#process.output = cms.OutputModule("PoolOutputModule",
      dataset = cms.untracked.PSet(
         dataTier = cms.untracked.string('GEN-SIM-DIGI-RAW'),
         filterName = cms.untracked.string('')
@@ -104,8 +119,8 @@ process.output = cms.OutputModule("PoolOutputModule",
     outputCommands = process.FEVTDEBUGHLTEventContent.outputCommands,
     #outputCommands = cms.untracked.vstring('drop *','keep *_*_*_Test'),
     splitLevel = cms.untracked.int32(0),
-#    fileName = cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/digis/digis1.root')
-    fileName = cms.untracked.string('file:digis.root')
+    fileName = cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/digis/digis1.root')
+    #fileName = cms.untracked.string('file:digis.root')
 
 )
 
@@ -116,14 +131,16 @@ process.mix.digitizers = cms.PSet(process.theDigitizersValid)
 #process.simSiPixelDigis.pixel.ThresholdInElectrons_BPix = 3500.0 
 # disable dyn. ineff.
 process.mix.digitizers.pixel.AddPixelInefficiencyFromPython = cms.bool(False)
+process.mix.digitizers.pixel.NumPixelBarrel = cms.int32(4)
+process.mix.digitizers.pixel.NumPixelEndcap = cms.int32(3)
 
 # Path and EndPath definitions
 process.digitisation_step = cms.Path(process.pdigi_valid)
 process.L1simulation_step = cms.Path(process.SimL1Emulator)
 process.digi2raw_step = cms.Path(process.DigiToRaw)
 process.endjob_step = cms.EndPath(process.endOfProcess)
-process.output_step = cms.EndPath(process.output)
-#process.output_step = cms.EndPath(process.FEVTDEBUGHLToutput)
+#process.output_step = cms.EndPath(process.output)
+process.output_step = cms.EndPath(process.FEVTDEBUGHLToutput)
 
 # Schedule definition
 #process.schedule = cms.Schedule(process.digitisation_step,process.L1simulation_step,process.digi2raw_step,process.endjob_step,process.output_step)
@@ -133,9 +150,14 @@ process.schedule = cms.Schedule(process.digitisation_step,process.endjob_step,pr
 
 # Automatic addition of the customisation function from SLHCUpgradeSimulations.Configuration.combinedCustoms
 from SLHCUpgradeSimulations.Configuration.combinedCustoms import cust_2017 
-
+#from SLHCUpgradeSimulations.Configuration.postLS1Customs import customisePostLS1 
+#from SLHCUpgradeSimulations.Configuration.customise_mixing import customise_pixelMixing_PU
+#from SLHCUpgradeSimulations.Configuration.customise_mixing import customise_NoCrossing_PU
 #call to customisation function cust_2017 imported from SLHCUpgradeSimulations.Configuration.combinedCustoms
 process = cust_2017(process)
+#process = customisePostLS1(process)
+#process=customise_pixelMixing_PU(process)
+#process=customise_NoCrossing_PU(process)
 
 # End of customisation functions
 

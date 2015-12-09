@@ -12,8 +12,8 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) )
 

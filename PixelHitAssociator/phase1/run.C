@@ -146,7 +146,22 @@
   rms = RecHit_YRes_Disk33->GetRMS();
   cout<<" disk 3 y +z RMS = "<<rms<<endl;
 
+  // Special 
+  RecHit_XRes_Disk14->Fit("gaus");
+  rms = RecHit_XRes_Disk14->GetRMS();
+  cout<<" disk 1 x -z panel 1 RMS = "<<rms<<endl;
 
+  RecHit_YRes_Disk15->Fit("gaus");
+  rms = RecHit_YRes_Disk15->GetRMS();
+  cout<<" disk 1 y -z panel 1 RMS = "<<rms<<endl;
+
+  RecHit_XRes_Disk16->Fit("gaus");
+  rms = RecHit_XRes_Disk16->GetRMS();
+  cout<<" disk 1 x +z panel 1 RMS = "<<rms<<endl;
+
+  RecHit_YRes_Disk17->Fit("gaus");
+  rms = RecHit_YRes_Disk17->GetRMS();
+  cout<<" disk 1 y +z panel 1 RMS = "<<rms<<endl;
 
 
 

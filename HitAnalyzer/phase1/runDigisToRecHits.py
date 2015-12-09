@@ -33,8 +33,8 @@ process.load("Configuration.StandardSequences.Reconstruction_cff")
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
-
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '76X_upgrade2017_design_v8', '')
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
@@ -56,9 +56,9 @@ process.MessageLogger = cms.Service("MessageLogger",
 # get the files from DBS:
 process.source = cms.Source("PoolSource",
   fileNames = cms.untracked.vstring(
-    'file:digis_1k_GT.root'
+#    'file:digis_1k_GT.root'
 #    'file:digis.root'
-#    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/digis/digis1.root'
+    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/digis/digis1_pixonly.root'
   )
 )
 
@@ -72,7 +72,7 @@ process.TFileService = cms.Service("TFileService",
 #           record = cms.string('SiPixelFedCablingMapRcd'),
 #           tag = cms.string('SiPixelFedCablingMap_v17')
 # GenError
-useLocalGenErrors = False
+useLocalGenErrors = True
 if useLocalGenErrors :
     process.GenErrorReader = cms.ESSource("PoolDBESSource",
      DBParameters = cms.PSet(
@@ -85,13 +85,15 @@ if useLocalGenErrors :
           tag = cms.string('SiPixelGenErrorDBObject_phase1_38T_mc_v1')
        ),
       ),
-      connect= cms.string('sqlite_file:../../../../../DB/phase1/SiPixelGenErrorDBObject_phase1_38T_mc_v1.db')
+      #connect= cms.string('sqlite_file:../../../../../DB/phase1/SiPixelGenErrorDBObject_phase1_38T_mc_v1.db')
+      #connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS') #NEW
+      connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS') #NEW
     ) # end process
     process.GenErrorprefer = cms.ESPrefer("PoolDBESSource","GenErrorReader")
 # endif 
 
 # LA 
-useLocalLA = False
+useLocalLA = True
 if useLocalLA :
     process.LAReader = cms.ESSource("PoolDBESSource",
      DBParameters = cms.PSet(
@@ -105,7 +107,9 @@ if useLocalLA :
         tag = cms.string("SiPixelLorentzAngle_phase1_mc_v1")
  		),
  	),
-      connect= cms.string('sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_phase1_mc_v1.db')
+      #connect= cms.string('sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_phase1_mc_v1.db')
+      #connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS') #NEW
+      connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS') #NEW
     ) # end process
 
     process.LAprefer = cms.ESPrefer("PoolDBESSource","LAReader")
@@ -122,7 +126,9 @@ if useLocalLA :
         tag = cms.string("SiPixelLorentzAngle_forWidth_phase1_mc_v1")
        ),
      ),
-     connect= cms.string('sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_forWidth_phase1_mc_v1.db')
+     #connect= cms.string('sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_forWidth_phase1_mc_v1.db')
+     #connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS') #NEW
+     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS') #NEW
     ) # end process
 
     process.LAWidthprefer = cms.ESPrefer("PoolDBESSource","LAWidthReader")
@@ -140,19 +146,21 @@ if useLocalGain :
     toGet = cms.VPSet(
       cms.PSet(
         record = cms.string('SiPixelGainCalibrationOfflineRcd'),
-        #tag = cms.string('SiPixelGainCalibration_phase1_ideal')
-        tag = cms.string('SiPixelGainCalibration_phase1_mc_v1')
+        tag = cms.string('SiPixelGainCalibration_phase1_ideal')
+        #tag = cms.string('SiPixelGainCalibration_phase1_mc_v1')
     )),
-    connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_phase1_mc_v1.db')
+    #connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_phase1_mc_v1.db')
     #connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_phase1_ideal.db')
+    #connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS') #NEW
+    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS') #NEW
   ) # end process
   process.Gainprefer = cms.ESPrefer("PoolDBESSource","GainsReader")
 # end if
 
 process.o1 = cms.OutputModule("PoolOutputModule",
           outputCommands = cms.untracked.vstring('drop *','keep *_*_*_RecHitTest'),
-          fileName = cms.untracked.string('file:rechits.root')
-#         fileName = cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/clus/rechits1.root')
+#          fileName = cms.untracked.string('file:rechits.root')
+         fileName = cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/clus/rechits1_pixonly.root')
 )
 
 # My 
@@ -193,11 +201,11 @@ process.analysis = cms.EDAnalyzer("PixRecHitTest",
 # because they are not made persistant.
 
 # pixel clusters 
-process.p1 = cms.Path(process.siPixelClustersPreSplitting)
+#process.p1 = cms.Path(process.siPixelClustersPreSplitting)
 # pixel clusters & rechits
 #process.p1 = cms.Path(process.pixeltrackerlocalreco)
 # plus analysis
-#process.p1 = cms.Path(process.pixeltrackerlocalreco*process.analysis)
+process.p1 = cms.Path(process.pixeltrackerlocalreco*process.analysis)
 
 # RAW
 # clusterize through raw (OK)

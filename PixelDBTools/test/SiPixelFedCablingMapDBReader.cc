@@ -33,6 +33,8 @@ void SiPixelFedCablingMapDBReader::analyze( const edm::Event& iEvent, const edm:
 
    std::cout << "====== SiPixelFedCablingMapDBReader" << std::endl;
 
+   std::cout << "====== does not work for phase1 " << std::endl;
+
    edm::ESHandle<SiPixelFedCablingMap> map;
    iSetup.get<SiPixelFedCablingMapRcd>().get(map);
 

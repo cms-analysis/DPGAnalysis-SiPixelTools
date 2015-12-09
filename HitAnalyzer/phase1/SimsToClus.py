@@ -1,46 +1,49 @@
 ##############################################################################
+# start from simhits, do trackerlocal, compare sim and rec-hits
 import FWCore.ParameterSet.Config as cms
+process = cms.Process("TestValid")
 
-process = cms.Process("Test")
-
-process.load("FWCore.MessageLogger.MessageLogger_cfi")
+# process.load("Configuration.StandardSequences.Geometry_cff")
+#process.load("Configuration.Geometry.GeometryDB_cff")
 process.load('Configuration.Geometry.GeometryExtended2017Reco_cff')
 
 #process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
 
+process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.load("Configuration.StandardSequences.Services_cff")
 process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
 
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-from Configuration.AlCa.GlobalTag import GlobalTag
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, '76X_upgrade2017_design_v8', '')
-
-#process.load('Configuration.StandardSequences.Digi_cff')
-
-# from v7
-#process.load("SimGeneral.MixingModule.pixelDigitizer_cfi")
 # process.load("SimTracker.Configuration.SimTracker_cff")
 process.load("SimG4Core.Configuration.SimG4Core_cff")
 
-process.MessageLogger = cms.Service("MessageLogger",
-    #debugModules = cms.untracked.vstring('Digitize'),
-    debugModules = cms.untracked.vstring('PixelDigitizer'),
-    destinations = cms.untracked.vstring('cout'),
-    #destinations = cms.untracked.vstring("log","cout"),
-    cout = cms.untracked.PSet(
-        threshold = cms.untracked.string('ERROR')
-    )
-    #log = cms.untracked.PSet(
-    #    threshold = cms.untracked.string('DEBUG')
-    #)
+# for strips 
+process.load("CalibTracker.SiStripESProducers.SiStripGainSimESProducer_cfi")
+
+# clusterizers & rhs 
+process.load("RecoLocalTracker.Configuration.RecoLocalTracker_cff")
+# needed for pixel RecHits (templates?)
+process.load("Configuration.StandardSequences.Reconstruction_cff")
+
+#process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
+from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
+#from Configuration.AlCa.GlobalTag import GlobalTag
+# to use no All 
+
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '76X_upgrade2017_design_v8', '')
+
+process.maxEvents = cms.untracked.PSet(
+    input = cms.untracked.int32(-1)
 )
 
+# process.load("SimGeneral.MixingModule.mixNoPU_cfi")
 
-
-
-#process.load("SimGeneral.MixingModule.mixNoPU_cfi")
 from SimGeneral.MixingModule.aliases_cfi import * 
 from SimGeneral.MixingModule.mixObjects_cfi import *
 # from SimGeneral.MixingModule.digitizers_cfi import *
@@ -85,6 +88,7 @@ process.simSiPixelDigis = cms.EDProducer("MixingModule",
 #    trackingParticles
 #  )
 #),
+
 
     LabelPlayback = cms.string(' '),
     maxBunch = cms.int32(3),
@@ -158,31 +162,48 @@ process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService
 )
 
 
-process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
-)
-
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
-#       'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu_phase1/pt100_76/simhits/simHits1.root'
-       'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu_phase1/pt100_76/simhits/simHits1_eta1.root'
-#       'file:simHits_100eve.root'
+  #'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/simhits/simHits1.root',
+  'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu_phase1/pt100_76/simhits/simHits1_eta1.root'
+#  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_72/simhits/simHits1.root',
+#  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_72/simhits/simHits3.root',
+#  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_72/simhits/simHits4.root',
+# gen-sim
+# '/store/relval/CMSSW_7_0_0_pre8/RelValSingleMuPt100/GEN-SIM/START70_V2_RR-v7/00000/B464EA42-2B59-E311-A2C1-0025905964C2.root',
+# '/store/relval/CMSSW_7_0_0_pre10/RelValSingleMuPt100/GEN-SIM-RECO/START70_V3-v1/00000/908DD48F-1466-E311-BEBE-0025905A48F0.root',
+# '/store/relval/CMSSW_7_0_0_pre10/RelValSingleMuPt100/GEN-SIM-DIGI-RAW-HLTDEBUG/START70_V3-v1/00000/EAA29CCF-8965-E311-A43D-0025905A6084.root',
   )
 )
 
-
-process.o1 = cms.OutputModule("PoolOutputModule",
-            outputCommands = cms.untracked.vstring('drop *','keep *_*_*_Test'),
-#      fileName = cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/digis/digis1.root')
-#      fileName = cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/digis/digis1_pixonly.root')
-      fileName = cms.untracked.string('file:digis.root')
+process.MessageLogger = cms.Service("MessageLogger",
+    debugModules = cms.untracked.vstring('pixRecHitsValid'),
+    destinations = cms.untracked.vstring('cout'),
+#    destinations = cms.untracked.vstring("log","cout"),
+    cout = cms.untracked.PSet(
+        threshold = cms.untracked.string('ERROR')
+#        threshold = cms.untracked.string('DEBUG')
+    )
+#    log = cms.untracked.PSet(
+#        threshold = cms.untracked.string('DEBUG')
+#    )
 )
 
 
-# add sqlite DBs
+
+process.o1 = cms.OutputModule("PoolOutputModule",
+      outputCommands = cms.untracked.vstring('drop *','keep *_*_*_TestValid'),
+#      outputCommands = cms.untracked.vstring('keep *_*_*_*'),
+      fileName = cms.untracked.string('file:dummy.root')
+)
+
+
+# DB stuff 
+# for digitisation
+
 #LA
-useLocalLA = True
-if useLocalLA :
-  process.LAReader = cms.ESSource("PoolDBESSource",
+useLocalLASim = True
+if useLocalLASim :
+  process.LASimReader = cms.ESSource("PoolDBESSource",
     DBParameters = 
       cms.PSet(
         messageLevel = cms.untracked.int32(0),
@@ -195,10 +216,9 @@ if useLocalLA :
       ),
     ),
     #connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngleSim_phase1_mc_v1.db')
-    #connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
   ) # end process
-  process.es_prefer_DBReader = cms.ESPrefer("PoolDBESSource","LAReader")
+  process.lasimprefer = cms.ESPrefer("PoolDBESSource","LASimReader")
 #  end if
 
 # Quality
@@ -220,33 +240,96 @@ if useLocalQuality :
   process.es_prefer_QualityReader = cms.ESPrefer("PoolDBESSource","QualityReader")
 #  end if
 
-# Redefine parameters 
+# for reco 
+# LA 
+useLocalLA = True
+if useLocalLA :
+    process.LAReader = cms.ESSource("PoolDBESSource",
+     DBParameters = cms.PSet(
+         messageLevel = cms.untracked.int32(0),
+         authenticationPath = cms.untracked.string('')
+     ),
+     toGet = cms.VPSet(
+ 	 cms.PSet(
+# LA
+	record = cms.string("SiPixelLorentzAngleRcd"),
+        tag = cms.string("SiPixelLorentzAngle_phase1_mc_v1")
+# cabling
+#           record = cms.string('SiPixelFedCablingMapRcd'),
+#           tag = cms.string('SiPixelFedCablingMap_v17')
+# GenError
+#          record = cms.string('SiPixelGenErrorDBObjectRcd'),
+#          tag = cms.string('SiPixelGenErrorDBObject38Tv1')
+#          tag = cms.string('SiPixelGenErrorDBObject38TV10')
+#          tag = cms.string('SiPixelGenErrorDBObject38T_v0_mc1')
+#          tag = cms.string('SiPixelGenErrorDBObject_38T_v1_mc')
+ 		),
+ 	),
+     #connect= cms.string('sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_phase1_mc_v1.db')
+     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
+    ) # end process
+
+    process.LAprefer = cms.ESPrefer("PoolDBESSource","LAReader")
+
+    # now the forWidth LA
+    process.LAWidthReader = cms.ESSource("PoolDBESSource",
+     DBParameters = cms.PSet(
+         messageLevel = cms.untracked.int32(0),
+         authenticationPath = cms.untracked.string('')
+     ),
+     toGet = cms.VPSet(
+       cms.PSet(
+	record = cms.string("SiPixelLorentzAngleRcd"),
+        label = cms.untracked.string("forWidth"),
+        tag = cms.string("SiPixelLorentzAngle_phase1_mc_v1")
+       ),
+     ),
+     #connect= cms.string('sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_phase1_mc_v1.db')
+    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
+
+    ) # end process
+
+    process.LAWidthprefer = cms.ESPrefer("PoolDBESSource","LAWidthReader")
+
+# endif
+
+# Gain 
+useLocalGain = True
+if useLocalGain :
+  process.GainsReader = cms.ESSource("PoolDBESSource",
+    DBParameters = cms.PSet(
+       messageLevel = cms.untracked.int32(0),
+       authenticationPath = cms.untracked.string('')
+    ),
+    toGet = cms.VPSet(
+      cms.PSet(
+        record = cms.string('SiPixelGainCalibrationOfflineRcd'),
+        #tag = cms.string('SiPixelGainCalibration_phase1_ideal')
+        tag = cms.string('SiPixelGainCalibration_phase1_mc_v1')
+    )),
+    #connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_phase1_mc_v1.db')
+    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
+  ) # end process
+  process.Gainprefer = cms.ESPrefer("PoolDBESSource","GainsReader")
+# end if
+
+
+
 process.g4SimHits.Generator.HepMCProductLabel = 'source'
 
+# for direct digis
+process.siPixelClustersPreSplitting.src = 'simSiPixelDigis' # for V5, direct
+# process.siPixelClusters.src = 'mix'
 # modify digitizer parameters
-# with DB
-# disable dyn. ineff.
+#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix = 3500.0 
+#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix = 3500.0 
+#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix_L1 = 3500.0 
+#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_FPix = 3500.0 
+
 process.simSiPixelDigis.digitizers.pixel.AddPixelInefficiencyFromPython = cms.bool(False)
 process.simSiPixelDigis.digitizers.pixel.AddPixelInefficiency = cms.bool(False)
 #
-#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix_L1 = 5000.0 
-#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix = 5000.0 
-#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_FPix = 5000.0 
-# NO DB case 
-# use the simple linear response 
-#process.simSiPixelDigis.digitizers.pixel.MissCalibrate = cms.bool(False) 
-#process.simSiPixelDigis.digitizers.pixel.AddPixelInefficiencyFromPython = cms.bool(False)
-# use inefficiency from DB Gain calibration payload? NO
-#process.simSiPixelDigis.digitizers.pixel.useDB = cms.bool(False) 
-# do not kill modules 
-#process.simSiPixelDigis.digitizers.pixel.killModules = cms.bool(False) 
-#process.simSiPixelDigis.digitizers.pixel.DeadModules_DB = cms.bool(False) 
-# use LA from file 
-#process.simSiPixelDigis.digitizers.pixel.LorentzAngle_DB = cms.bool(False)
-#process.simSiPixelDigis.digitizers.pixel.TanLorentzAnglePerTesla_BPix = 0.10 
-#process.simSiPixelDigis.digitizers.pixel.TanLorentzAnglePerTesla_FPix = 0.06 
-
-# signal phase1 detector
+# tell the digitize it is phase1
 process.simSiPixelDigis.digitizers.pixel.NumPixelBarrel = 4 
 process.simSiPixelDigis.digitizers.pixel.NumPixelEndcap = 3 
 process.simSiPixelDigis.digitizers.pixel.thePixelColEfficiency_BPix1 = cms.double(1.0)
@@ -271,28 +354,38 @@ process.simSiPixelDigis.digitizers.pixel.thePixelChipEfficiency_FPix1 = cms.doub
 process.simSiPixelDigis.digitizers.pixel.thePixelChipEfficiency_FPix2 = cms.double(1.0)
 process.simSiPixelDigis.digitizers.pixel.thePixelChipEfficiency_FPix3 = cms.double(1.0)
 
-process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('histo_digis.root')
-)
-  
-process.analysis = cms.EDAnalyzer("PixDigisTest",
+
+# use inefficiency from DB Gain calibration payload? OFF BY DEFAULT
+#process.simSiPixelDigis.digitizers.pixel.useDB = cms.bool(False) 
+# use LA from file 
+#process.simSiPixelDigis.digitizers.pixel.LorentzAngle_DB = cms.bool(False)
+#process.simSiPixelDigis.digitizers.pixel.TanLorentzAnglePerTesla_BPix = 0.106 
+#process.simSiPixelDigis.digitizers.pixel.TanLorentzAnglePerTesla=FPix = 0.106 
+
+# clus , label of digis 
+process.siPixelClustersPreSplitting.src = 'simSiPixelDigis'
+#process.siPixelClustersPreSplitting.ClusterThreshold = 2000.
+#process.siPixelClustersPreSplitting.ChannelThreshold = 500
+#process.siPixelClustersPreSplitting.SeedThreshold = 1000
+# set to false to ignore the gain calibration
+#process.siPixelClustersPreSplitting.MissCalibrate = cms.untracked.bool(False)
+
+
+process.analysis = cms.EDAnalyzer("PixClusterTest",
     Verbosity = cms.untracked.bool(False),
     phase1 = cms.untracked.bool(True),
-# sim in V7
-#    src = cms.InputTag("mix"),
-# my own pixel only digis
-    src = cms.InputTag("simSiPixelDigis"),
-# old default
-#    src = cms.InputTag("siPixelDigis"),
+    src = cms.InputTag("siPixelClustersPreSplitting"),
 )
 
+process.TFileService = cms.Service("TFileService",
+    fileName = cms.string('clus_histos.root')
+)
 
-#This process is to run the digitizer, pixel gitizer is now clled by the mix module
+#This process is to run the digitizer + clusterizer + analysis 
 #process.p1 = cms.Path(process.simSiPixelDigis)
-# run digitizer and analyse digis
-process.p1 = cms.Path(process.simSiPixelDigis*process.analysis)
+#process.p1 = cms.Path(process.simSiPixelDigis*process.pixeltrackerlocalreco)
+process.p1 = cms.Path(process.simSiPixelDigis*process.pixeltrackerlocalreco*process.analysis)
 
-# Output file, comment out if not needed 
 #process.outpath = cms.EndPath(process.o1)
 
 

@@ -60,8 +60,8 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
         ), 
         cms.PSet(
             record = cms.string('SiPixelGainCalibrationForHLTRcd'),
-            tag = cms.string('SiPixelGainCalibration_hlt_phase1_ideal')
-            #tag = cms.string('SiPixelGainCalibration_hlt_phase1_mc_v1')
+            #tag = cms.string('SiPixelGainCalibration_hlt_phase1_ideal')
+            tag = cms.string('SiPixelGainCalibration_hlt_phase1_mc_v1')
         ),
         cms.PSet(
             record = cms.string('SiPixelGainCalibrationOfflineSimRcd'),
@@ -135,20 +135,20 @@ process.SiPixelGainsForHLTBuilder = cms.EDAnalyzer("SiPixelCondObjForHLTBuilder"
     meanGain = cms.double(3.48),
     meanPed = cms.double(25.3),
     # realistic (mc)
-    #rmsGain = cms.double(0.058),
-    #rmsPed = cms.double(8.1),
+    rmsGain = cms.double(0.058),
+    rmsPed = cms.double(8.1),
     # ideal 
-    rmsGain = cms.double(0.0),
-    rmsPed = cms.double(0.0),
+    #rmsGain = cms.double(0.0),
+    #rmsPed = cms.double(0.0),
     # separate input for the FPIX. If not entered the default values are used.
     meanGainFPix = cms.untracked.double(2.90),
     meanPedFPix = cms.untracked.double(27.7),
     #realistic (mc)
-    #rmsGainFPix = cms.untracked.double(0.054),
-    #rmsPedFPix = cms.untracked.double(9.5),
+    rmsGainFPix = cms.untracked.double(0.054),
+    rmsPedFPix = cms.untracked.double(9.5),
     # ideal 
-    rmsGainFPix = cms.untracked.double(0.0),
-    rmsPedFPix = cms.untracked.double(0.0),
+    #rmsGainFPix = cms.untracked.double(0.0),
+    #rmsPedFPix = cms.untracked.double(0.0),
     record = cms.string('SiPixelGainCalibrationForHLTRcd'),
     fromFile = cms.bool(False),
     fileName = cms.string(''),
@@ -182,8 +182,8 @@ process.SiPixelGainsForHLTSimBuilder = cms.EDAnalyzer("SiPixelCondObjForHLTBuild
 )
 
 #process.p = cms.Path(process.SiPixelGainsOfflineBuilder)
-#process.p = cms.Path(process.SiPixelGainsForHLTBuilder)
-process.p = cms.Path(process.SiPixelGainsOfflineBuilder*process.SiPixelGainsForHLTBuilder)
+process.p = cms.Path(process.SiPixelGainsForHLTBuilder)
+#process.p = cms.Path(process.SiPixelGainsOfflineBuilder*process.SiPixelGainsForHLTBuilder)
 
 #process.p = cms.Path(process.SiPixelGainsOfflineSimBuilder)
 #process.p = cms.Path(process.SiPixelGainsForHLTSimBuilder)
