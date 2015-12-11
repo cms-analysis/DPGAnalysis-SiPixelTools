@@ -36,9 +36,15 @@ SiPixelGainCalibrationAnalysis::SiPixelGainCalibrationAnalysis(const edm::Parame
   conf_(iConfig),
   bookkeeper_(),
   bookkeeper_pixels_(),
+  bookkeeper_1D_(),
+  bookkeeper_pixels_1D_(),
+  bookkeeper_2D_(),
+  bookkeeper_pixels_2D_(),
+ 
+
   nfitparameters_(iConfig.getUntrackedParameter<int>("numberOfFitParameters",2)),
   fitfunction_(iConfig.getUntrackedParameter<std::string>("fitFunctionRootFormula","pol1")),
-   listofdetids_(conf_.getUntrackedParameter<std::vector<uint32_t> >("listOfDetIDs")),
+  listofdetids_(conf_.getUntrackedParameter<std::vector<uint32_t> >("listOfDetIDs")),
   ignoreMode_(conf_.getUntrackedParameter<bool>("ignoreMode",false)),
   reject_plateaupoints_(iConfig.getUntrackedParameter<bool>("suppressPlateauInFit",true)),
   reject_single_entries_(iConfig.getUntrackedParameter<bool>("suppressPointsWithOneEntryOrLess",true)),
@@ -74,6 +80,7 @@ SiPixelGainCalibrationAnalysis::SiPixelGainCalibrationAnalysis(const edm::Parame
   ::putenv((char*)"CORAL_AUTH_USER=me");
   ::putenv((char*)"CORAL_AUTH_PASSWORD=test");   
   edm::LogInfo("SiPixelGainCalibrationAnalysis") << "now using fit function " << fitfunction_ << ", which has " << nfitparameters_ << " free parameters. " << std::endl;
+ 
   func_= new TF1("func",fitfunction_.c_str(),0,256*scalarVcalHigh_VcalLow_);
   graph_ = new TGraphErrors();
   currentDetID_=0;
@@ -92,19 +99,21 @@ SiPixelGainCalibrationAnalysis::~SiPixelGainCalibrationAnalysis()
 
 std::vector<float> SiPixelGainCalibrationAnalysis::CalculateAveragePerColumn(uint32_t detid, std::string label){
   std::vector<float> result;
-  int ncols= bookkeeper_[detid][label]->getNbinsX();
-  int nrows= bookkeeper_[detid][label]->getNbinsY();
+  int ncols= bookkeeper_2D_[detid][label]->GetNbinsX();
+  int nrows= bookkeeper_2D_[detid][label]->GetNbinsY();
   for(int icol=1; icol<=ncols; ++icol){
     float val=0;
     float ntimes =0;
     for(int irow=1; irow<=nrows; ++irow){
-      val+= bookkeeper_[detid][label]->getBinContent(icol,irow);
+      val+= bookkeeper_2D_[detid][label]->GetBinContent(icol,irow);
       ntimes++;
     }
     val/= ntimes;
     result.push_back(val);
   }
   return result;
+
+
 }
 
 bool
@@ -116,6 +125,7 @@ SiPixelGainCalibrationAnalysis::checkCorrectCalibrationType()
     return true;
   else if(calibrationMode_=="unknown"){
     edm::LogInfo("SiPixelGainCalibrationAnalysis") <<  "calibration mode is: " << calibrationMode_ << ", continuing anyway..." ;
+
     return true;
   }
   else{
@@ -132,7 +142,7 @@ void
 SiPixelGainCalibrationAnalysis::printSummary(){
 
   uint32_t detid=0;
-  for(std::map<uint32_t,std::map<std::string,MonitorElement *> >::const_iterator idet = bookkeeper_.begin(); idet != bookkeeper_.end(); ++idet){
+  for(std::map<uint32_t,std::map<std::string,TH2F *> >::const_iterator idet = bookkeeper_2D_.begin(); idet != bookkeeper_2D_.end(); ++idet){
     if(detid==idet->first)
       continue;// only do things once per detid
     detid=idet->first;
@@ -140,18 +150,18 @@ SiPixelGainCalibrationAnalysis::printSummary(){
     std::vector<float> pedvec =CalculateAveragePerColumn(detid,"ped_2d");
     std::vector<float> chi2vec = CalculateAveragePerColumn(detid,"chi2_2d");
     std::ostringstream summarytext;
-
+    
     summarytext << "Summary for det ID " << detid << "(" << translateDetIdToString(detid) << ")\n";
     summarytext << "\t Following: values per column: column #, gain, pedestal, chi2\n";
     for(uint32_t i=0; i<gainvec.size(); i++)
       summarytext << "\t " << i << " \t" << gainvec[i] << " \t" << pedvec[i] << " \t" << chi2vec[i] << "\n";
     summarytext << "\t list of pixels with high chi2 (chi2> " << chi2Threshold_ << "): \n";
-
     
-    for(std::map<std::string, MonitorElement *>::const_iterator ipix = bookkeeper_pixels_[detid].begin(); ipix!=bookkeeper_pixels_[detid].end(); ++ipix)
+    
+    for(std::map<std::string, TH1F *>::const_iterator ipix = bookkeeper_pixels_1D_[detid].begin(); ipix!=bookkeeper_pixels_1D_[detid].end(); ++ipix)
       summarytext << "\t " << ipix->first << "\n";
     edm::LogInfo("SiPixelGainCalibrationAnalysis") << summarytext.str() << std::endl;
-
+    
   }
   if(summary_.is_open()){
     summary_.close();
@@ -208,7 +218,7 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
   int status=0;
   statusNumbers_[9]++;
   
-  bookkeeper_[detid]["status_2d"]->setBinContent(ipix->col()+1,ipix->row()+1,0);
+  bookkeeper_2D_[detid]["status_2d"]->SetBinContent(ipix->col()+1,ipix->row()+1,0);
   if(writeSummary_ && detid!=currentDetID_){
     currentDetID_ = detid;
     summary_<<endl<<"DetId_"<<currentDetID_<<endl;
@@ -258,7 +268,7 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     //summary_<<"row_"<<ipix->row()<<" col_"<<ipix->col()<<"   "<<plateauval<<"  "<<NbofPointsInPlateau<<"  "<<nallpoints<<endl;
     if(NbofPointsInPlateau>=(nallpoints-2)){
       status=-2;
-      bookkeeper_[detid]["status_2d"]->setBinContent(ipix->col()+1,ipix->row()+1,status);
+      bookkeeper_2D_[detid]["status_2d"]->SetBinContent(ipix->col()+1,ipix->row()+1,status);
       if(writeSummary_){
         summary_<<"row_"<<ipix->row()<<" col_"<<ipix->col()<<" status_"<<status<<endl;
 	statusNumbers_[abs(status)]++;
@@ -315,9 +325,10 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
       }
     }
   }
+  float binwidth = useVcalHigh_? scalarVcalHigh_VcalLow_ : 1;
   if(npoints<2){
     status = -7;
-    bookkeeper_[detid]["status_2d"]->setBinContent(ipix->col()+1,ipix->row()+1,status);
+    bookkeeper_2D_[detid]["status_2d"]->SetBinContent(ipix->col()+1,ipix->row()+1,status);
     if(writeSummary_){
       summary_<<"row_"<<ipix->row()<<" col_"<<ipix->col()<<" status_"<<status<<endl;
       statusNumbers_[abs(status)]++;
@@ -327,10 +338,19 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     std::string tempname=translateDetIdToString(detid);
     tempname+="_";
     tempname+=pixelinfo.str();
-    setDQMDirectory(detid);
-    bookkeeper_pixels_[detid][pixelinfo.str()] = bookDQMHistogram1D(detid,pixelinfo.str(),tempname,105*nallpoints,xvalsall[0],xvalsall[nallpoints-1]*1.05);
+    // setDQMDirectory(detid);
+   
+    std::string correntDir = GetPixelDirectory( detid// , myTFileDirMap
+						);
+    //bookkeeper_pixels_[detid][pixelinfo.str()] = bookDQMHistogram1D(detid,pixelinfo.str(),tempname,105*nallpoints,xvalsall[0],xvalsall[nallpoints-1]*1.05);
+    bookkeeper_pixels_1D_[detid][pixelinfo.str()] = bookHistogram1D(detid,pixelinfo.str(),tempname,(xvalsall[nallpoints-1]-xvalsall[0])/binwidth+1,xvalsall[0]-binwidth/2.0,xvalsall[nallpoints-1]+binwidth/2.0 , correntDir );
+    // std::cout  << "before" << std::endl;
+    // std::cout  << "detid " << detid<< " pixelinfo.str() " << pixelinfo.str() << std::endl;
+    // std::cout << "tempname " << tempname << " 105* nallpoints " << 105*nallpoints << " xvalsall[0] " <<  xvalsall[0] << " xvalsall[nallpoints-1]*1.05 " << xvalsall[nallpoints-1]*1.05 <<std::endl;
+    // std::cout << "tempname " << tempname << " (xvalsall[nallpoints-1]-xvalsall[0])/binwidth+1 " << (xvalsall[nallpoints-1]-xvalsall[0])/binwidth+1 << " xvalsall[0]-binwidth/2.0 "<< xvalsall[0]-binwidth/2.0 << " xvalsall[nallpoints-1]+binwidth/2.0 " << xvalsall[nallpoints-1]+binwidth/2.0 << std::endl;
+
     for(int ii=0; ii<nallpoints; ++ii)
-      bookkeeper_pixels_[detid][pixelinfo.str()]->Fill(xvalsall[ii],yvalsall[ii]);
+      bookkeeper_pixels_1D_[detid][pixelinfo.str()]->Fill(xvalsall[ii],yvalsall[ii]);
     return false;
   }
     
@@ -376,7 +396,7 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     slope = 1./slope;
   if(isnan(slope) || isnan(intercept)){
     status=-6;
-    bookkeeper_[detid]["status_2d"]->setBinContent(ipix->col()+1,ipix->row()+1,status);
+    bookkeeper_2D_[detid]["status_2d"]->SetBinContent(ipix->col()+1,ipix->row()+1,status);
     if(writeSummary_){
       summary_<<"row_"<<ipix->row()<<" col_"<<ipix->col()<<" status_"<<status<<endl;
       statusNumbers_[abs(status)]++;
@@ -393,8 +413,7 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     status=-7;
   if(TMath::Abs(slope>maxGainInHist_) || slope < 0)
     status=-8;
-  if(status!=1)
-    makehistopersistent=true;
+  if(status!=1) makehistopersistent=true;
   statusNumbers_[abs(status)]++;
 
 
@@ -406,31 +425,31 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     pedhi_=intercept;
   if(intercept<pedlow_)
     pedlow_=intercept;
-  bookkeeper_[detid]["gain_1d"]->Fill(slope);
+  bookkeeper_1D_[detid]["gain_1d"]->Fill(slope);
   if(slope>maxGainInHist_){
     makehistopersistent=true;
     edm::LogWarning("SiPixelGainCalibration") << "For DETID " << detid << "pixel row,col " << ipix->row() << "," << ipix->col() << " Gain was measured to be " << slope << " which is outside the range of the summary plot (" <<maxGainInHist_ << ") !!!! " << std::endl;
   }
-  bookkeeper_[detid]["dynamicrange_2d"]->setBinContent(ipix->col()+1,ipix->row()+1,highmeanval-lowmeanval);
-  bookkeeper_[detid]["plateau_2d"]->setBinContent(ipix->col()+1,ipix->row()+1,highmeanval);
-  bookkeeper_[detid]["gain_2d"]->setBinContent(ipix->col()+1,ipix->row()+1,slope);
-  bookkeeper_[detid]["errorgain_2d"]->setBinContent(ipix->col()+1,ipix->row()+1,slopeerror);
-  bookkeeper_[detid]["ped_1d"]->Fill(intercept);
-  bookkeeper_[detid]["ped_2d"]->setBinContent(ipix->col()+1,ipix->row()+1,intercept);
-  bookkeeper_[detid]["errorped_2d"]->setBinContent(ipix->col()+1,ipix->row()+1,intercepterror);
-  bookkeeper_[detid]["chi2_1d"]->Fill(chi2);
-  bookkeeper_[detid]["chi2_2d"]->setBinContent(ipix->col()+1,ipix->row()+1,chi2);
-  bookkeeper_[detid]["prob_1d"]->Fill(prob);
-  bookkeeper_[detid]["prob_2d"]->setBinContent(ipix->col()+1,ipix->row()+1,prob);
-  bookkeeper_[detid]["lowpoint_1d"]->Fill(xvals[0]);
-  bookkeeper_[detid]["lowpoint_2d"]->setBinContent(ipix->col()+1,ipix->row()+1,xvals[0]);
-  bookkeeper_[detid]["highpoint_1d"]->Fill(xvals[npoints-1]);
-  bookkeeper_[detid]["highpoint_2d"]->setBinContent(ipix->col()+1,ipix->row()+1,xvals[npoints-1]);
-  bookkeeper_[detid]["nfitpoints_1d"]->Fill(npoints);
-  bookkeeper_[detid]["endpoint_1d"]->Fill((255 - intercept)*slope);
-  bookkeeper_[detid]["status_2d"]->setBinContent(ipix->col()+1,ipix->row()+1,status);
+  bookkeeper_2D_[detid]["dynamicrange_2d"]->SetBinContent(ipix->col()+1,ipix->row()+1,highmeanval-lowmeanval);
+  bookkeeper_2D_[detid]["plateau_2d"]->SetBinContent(ipix->col()+1,ipix->row()+1,highmeanval);
+  bookkeeper_2D_[detid]["gain_2d"]->SetBinContent(ipix->col()+1,ipix->row()+1,slope);
+  bookkeeper_2D_[detid]["errorgain_2d"]->SetBinContent(ipix->col()+1,ipix->row()+1,slopeerror);
+  bookkeeper_1D_[detid]["ped_1d"]->Fill(intercept);
+  bookkeeper_2D_[detid]["ped_2d"]->SetBinContent(ipix->col()+1,ipix->row()+1,intercept);
+  bookkeeper_2D_[detid]["errorped_2d"]->SetBinContent(ipix->col()+1,ipix->row()+1,intercepterror);
+  bookkeeper_1D_[detid]["chi2_1d"]->Fill(chi2);
+  bookkeeper_2D_[detid]["chi2_2d"]->SetBinContent(ipix->col()+1,ipix->row()+1,chi2);
+  bookkeeper_1D_[detid]["prob_1d"]->Fill(prob);
+  bookkeeper_2D_[detid]["prob_2d"]->SetBinContent(ipix->col()+1,ipix->row()+1,prob);
+  bookkeeper_1D_[detid]["lowpoint_1d"]->Fill(xvals[0]);
+  bookkeeper_2D_[detid]["lowpoint_2d"]->SetBinContent(ipix->col()+1,ipix->row()+1,xvals[0]);
+  bookkeeper_1D_[detid]["highpoint_1d"]->Fill(xvals[npoints-1]);
+  bookkeeper_2D_[detid]["highpoint_2d"]->SetBinContent(ipix->col()+1,ipix->row()+1,xvals[npoints-1]);
+  bookkeeper_1D_[detid]["nfitpoints_1d"]->Fill(npoints);
+  bookkeeper_1D_[detid]["endpoint_1d"]->Fill((255 - intercept)*slope);
+  bookkeeper_2D_[detid]["status_2d"]->SetBinContent(ipix->col()+1,ipix->row()+1,status);
 
-    if(!savePixelHists_)
+  if(!savePixelHists_)
     return true;
   if(detidfinder==listofdetids_.end() && listofdetids_.size()!=0)
     return true;
@@ -444,16 +463,28 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     // and book the histo
     // fill the last value of the vcal array...   
 
-    setDQMDirectory(detid);
-    bookkeeper_pixels_[detid][pixelinfo.str()] =  bookDQMHistogram1D(detid,pixelinfo.str(),tempname,105*nallpoints,xvalsall[0],xvalsall[nallpoints-1]*1.05);
+    // setDQMDirectory(detid);
+    std::string correntDir = GetPixelDirectory( detid  );
     
+    //bookkeeper_pixels_[detid][pixelinfo.str()] =  bookDQMHistogram1D(detid,pixelinfo.str(),tempname,105*nallpoints,xvalsall[0],xvalsall[nallpoints-1]*1.05);
+    //TH1D* h = new TH1D("h","h",105*nallpoints,xvalsall[0],xvalsall[nallpoints-1]*1.05);
+    //bookkeeper_pixels_[detid][pixelinfo.str()] =  bookDQMHistogram1D(detid,pixelinfo.str(),tempname,(xvalsall[nallpoints-1]-xvalsall[0])/binwidth+1,xvalsall[0]-binwidth/2.0,xvalsall[nallpoints-1]+binwidth/2.0);
+    //TH1D* h = new TH1D("h","h",(xvalsall[nallpoints-1]-xvalsall[0])/binwidth+1,xvalsall[0]-binwidth/2.0,xvalsall[nallpoints-1]+binwidth/2.0);
+ 
+    // std::cout  << "Later"<<std::endl;
+    // std::cout  << "detid " << detid<< " pixelinfo.str() " << pixelinfo.str() << std::endl;
+    // std::cout << "tempname " << tempname << " 105* nallpoints " << 105*nallpoints << " xvalsall[0] " <<  xvalsall[0] << " xvalsall[nallpoints-1]*1.05 " << xvalsall[nallpoints-1]*1.05 <<std::endl;
+    // std::cout << "tempname " << tempname << " (xvalsall[nallpoints-1]-xvalsall[0])/binwidth+1 " << (xvalsall[nallpoints-1]-xvalsall[0])/binwidth+1 << " xvalsall[0]-binwidth/2.0 "<< xvalsall[0]-binwidth/2.0 << " xvalsall[nallpoints-1]+binwidth/2.0 " << xvalsall[nallpoints-1]+binwidth/2.0 << std::endl;
+
+
     edm::LogInfo("SiPixelGainCalibrationAnalysis") << "now saving histogram for pixel " << tempname << ", gain = " << slope << ", pedestal = " << intercept << ", chi2/NDF=" << chi2 << "(prob:" << prob << "), fit status " << status;
-    for(int ii=0; ii<nallpoints; ++ii){
-      //      std::cout << xvalsall[ii]<<","<<yvalsall[ii]<< " " << tempfloats[ii] << std::endl;
-      bookkeeper_pixels_[detid][pixelinfo.str()]->Fill(xvalsall[ii],yvalsall[ii]);
-    }
+    //for(int ii=0; ii<nallpoints; ++ii){
+    //  //      std::cout << xvalsall[ii]<<","<<yvalsall[ii]<< " " << tempfloats[ii] << std::endl;
+    //  bookkeeper_pixels_[detid][pixelinfo.str()]->Fill(xvalsall[ii],yvalsall[ii]);
+    //  //std::cout<<"i: "<<ii<<" x: "<<xvalsall[ii]<<" center: "<<h->GetBinCenter(h->FindBin(xvalsall[ii]))<<std::endl;
+    //}
     
-    //    addTF1ToDQMMonitoringElement(bookkeeper_pixels_[detid][pixelinfo.str()],func_);
+    //    addTF1ToDQMMonitoringElement(bookkeeper_pixels_[detid][pixelinfo.str()],func_); ////adding func_ to the list of functions of the hist
     
     
     if(writeSummary_){
@@ -470,27 +501,29 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
 void 
 SiPixelGainCalibrationAnalysis::newDetID(uint32_t detid)
 {
-  setDQMDirectory(detid);
+  // setDQMDirectory(detid);
+  std::string correntDir = GetPixelDirectory( detid// , myTFileDirMap
+					      );
   std::string tempname=translateDetIdToString(detid);
-  bookkeeper_[detid]["gain_1d"] = bookDQMHistogram1D(detid,"Gain1d","gain for "+tempname,100,0.,maxGainInHist_);
-  bookkeeper_[detid]["gain_2d"] = bookDQMHistoPlaquetteSummary2D(detid, "Gain2d","gain for "+tempname);
-  bookkeeper_[detid]["errorgain_2d"] = bookDQMHistoPlaquetteSummary2D(detid, "ErrorGain2d","error on gain for "+tempname);
-  bookkeeper_[detid]["ped_1d"] = bookDQMHistogram1D(detid,"Pedestal1d","pedestal for "+tempname,256,0.,256.0);
-  bookkeeper_[detid]["ped_2d"] = bookDQMHistoPlaquetteSummary2D(detid,"Pedestal2d","pedestal for "+tempname);
-  bookkeeper_[detid]["errorped_2d"] = bookDQMHistoPlaquetteSummary2D(detid,"ErrorPedestal2d","error on pedestal for "+tempname);
-  bookkeeper_[detid]["chi2_1d"] = bookDQMHistogram1D(detid,"GainChi2NDF1d","#chi^{2}/NDOF for "+tempname,100,0.,maxChi2InHist_);
-  bookkeeper_[detid]["chi2_2d"] = bookDQMHistoPlaquetteSummary2D(detid,"GainChi2NDF2d","#chi^{2}/NDOF for "+tempname);
-  bookkeeper_[detid]["prob_1d"] = bookDQMHistogram1D(detid,"GainChi2Prob1d","P(#chi^{2},NDOF) for "+tempname,100,0.,1.0);
-  bookkeeper_[detid]["prob_2d"] = bookDQMHistoPlaquetteSummary2D(detid,"GainChi2Prob2d","P(#chi^{2},NDOF) for "+tempname);
-  bookkeeper_[detid]["status_2d"] = bookDQMHistoPlaquetteSummary2D(detid,"GainFitResult2d","Fit result for "+tempname);
-  bookkeeper_[detid]["endpoint_1d"]= bookDQMHistogram1D(detid,"GainEndPoint1d","point where fit meets ADC=255 for "+tempname,256,0.,256.*scalarVcalHigh_VcalLow_);
-  bookkeeper_[detid]["lowpoint_1d"]= bookDQMHistogram1D(detid,"GainLowPoint1d","lowest fit point for "+tempname,256,0.,256.*scalarVcalHigh_VcalLow_);
-  bookkeeper_[detid]["highpoint_1d"]= bookDQMHistogram1D(detid,"GainHighPoint1d","highest fit point for "+tempname,256,0.,256.*scalarVcalHigh_VcalLow_);
-  bookkeeper_[detid]["nfitpoints_1d"]= bookDQMHistogram1D(detid,"GainNPoints1d","number of fit point for "+tempname,20,0.,20);
-  bookkeeper_[detid]["dynamicrange_2d"]=bookDQMHistoPlaquetteSummary2D(detid,"GainDynamicRange2d","Difference lowest and highest points on gain curve for "+tempname); 
-  bookkeeper_[detid]["lowpoint_2d"]=bookDQMHistoPlaquetteSummary2D(detid,"GainLowPoint2d","lowest fit point for "+tempname);
-  bookkeeper_[detid]["highpoint_2d"]=bookDQMHistoPlaquetteSummary2D(detid,"GainHighPoint2d","highest fit point for "+tempname);
-  bookkeeper_[detid]["plateau_2d"]=bookDQMHistoPlaquetteSummary2D(detid,"GainSaturate2d","Highest points on gain curve for "+tempname);
+  bookkeeper_1D_[detid]["gain_1d"] = bookHistogram1D(detid,"Gain1d","gain for "+tempname,100,0.,maxGainInHist_,correntDir);
+  bookkeeper_2D_[detid]["gain_2d"] = bookHistoPlaquetteSummary2D(detid, "Gain2d","gain for "+tempname, correntDir);
+  bookkeeper_2D_[detid]["errorgain_2d"] = bookHistoPlaquetteSummary2D(detid, "ErrorGain2d","error on gain for "+tempname, correntDir);
+  bookkeeper_1D_[detid]["ped_1d"] = bookHistogram1D(detid,"Pedestal1d","pedestal for "+tempname,256,0.,256.0,correntDir);
+  bookkeeper_2D_[detid]["ped_2d"] = bookHistoPlaquetteSummary2D(detid,"Pedestal2d","pedestal for "+tempname, correntDir);
+  bookkeeper_2D_[detid]["errorped_2d"] = bookHistoPlaquetteSummary2D(detid,"ErrorPedestal2d","error on pedestal for "+tempname, correntDir);
+  bookkeeper_1D_[detid]["chi2_1d"] = bookHistogram1D(detid,"GainChi2NDF1d","#chi^{2}/NDOF for "+tempname,100,0.,maxChi2InHist_,correntDir);
+  bookkeeper_2D_[detid]["chi2_2d"] = bookHistoPlaquetteSummary2D(detid,"GainChi2NDF2d","#chi^{2}/NDOF for "+tempname, correntDir);
+  bookkeeper_1D_[detid]["prob_1d"] = bookHistogram1D(detid,"GainChi2Prob1d","P(#chi^{2},NDOF) for "+tempname,100,0.,1.0,correntDir);
+  bookkeeper_2D_[detid]["prob_2d"] = bookHistoPlaquetteSummary2D(detid,"GainChi2Prob2d","P(#chi^{2},NDOF) for "+tempname, correntDir);
+  bookkeeper_2D_[detid]["status_2d"] = bookHistoPlaquetteSummary2D(detid,"GainFitResult2d","Fit result for "+tempname, correntDir);
+  bookkeeper_1D_[detid]["endpoint_1d"]= bookHistogram1D(detid,"GainEndPoint1d","point where fit meets ADC=255 for "+tempname,256,0.,256.*scalarVcalHigh_VcalLow_,correntDir);
+  bookkeeper_1D_[detid]["lowpoint_1d"]= bookHistogram1D(detid,"GainLowPoint1d","lowest fit point for "+tempname,256,0.,256.*scalarVcalHigh_VcalLow_,correntDir);
+  bookkeeper_1D_[detid]["highpoint_1d"]= bookHistogram1D(detid,"GainHighPoint1d","highest fit point for "+tempname,256,0.,256.*scalarVcalHigh_VcalLow_,correntDir);
+  bookkeeper_1D_[detid]["nfitpoints_1d"]= bookHistogram1D(detid,"GainNPoints1d","number of fit point for "+tempname,20,0.,20,correntDir);
+  bookkeeper_2D_[detid]["dynamicrange_2d"]=bookHistoPlaquetteSummary2D(detid,"GainDynamicRange2d","Difference lowest and highest points on gain curve for "+tempname, correntDir); 
+  bookkeeper_2D_[detid]["lowpoint_2d"]=bookHistoPlaquetteSummary2D(detid,"GainLowPoint2d","lowest fit point for "+tempname, correntDir);
+  bookkeeper_2D_[detid]["highpoint_2d"]=bookHistoPlaquetteSummary2D(detid,"GainHighPoint2d","highest fit point for "+tempname, correntDir);
+  bookkeeper_2D_[detid]["plateau_2d"]=bookHistoPlaquetteSummary2D(detid,"GainSaturate2d","Highest points on gain curve for "+tempname, correntDir);
 
 }
 //define this as a plug-in

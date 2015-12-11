@@ -1,0 +1,863 @@
+
+
+
+
+\documentclass[a4paper,10pt]{article}
+
+%\textwidth=19.3cm
+\usepackage{color,graphicx,subfigure}
+\usepackage{fullpage}
+\linespread{1.5} 
+%\usepackage{lineno}
+%\usepackage{fancyhdr}
+%\pagestyle{fancy}
+%\headheight=12pt
+\usepackage[left=2cm,top=1cm,right=2cm,bottom=1cm,nohead,nofoot]{geometry}
+\usepackage{hyperref}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%My own variables:
+\usepackage{ifthen}
+\def\DIFF{DIFF_TO_REPLACE}
+\ifthenelse{\DIFF = 1}{\def\high_gain_frac{0.5}}{\def\high_gain_frac{7}}
+
+
+
+
+\begin{document}
+
+\tableofcontents
+
+\clearpage
+
+\section{Summary of Run RUNNUMBER}
+
+TOREPLACE
+
+\clearpage
+
+\section{Subdetector plots\label{sec:subdetector}}
+
+\begin{figure}[htp]
+ \centering
+\includegraphics[width=0.65\textwidth]{SUB_Gain_whole_RunRUNNUMBER.png}
+\caption{Gain}
+\end{figure}
+
+
+\begin{figure}[htp]
+ \centering
+\includegraphics[width=0.65\textwidth]{SUB_Pedestal_whole_RunRUNNUMBER.png}
+\caption{Pedestal}
+\end{figure}
+
+
+\begin{figure}[htp]
+ \centering
+\includegraphics[width=0.65\textwidth]{SUB_ErrorGain_whole_RunRUNNUMBER.png}
+\caption{Error on 1/Gain}
+\end{figure}
+
+
+\begin{figure}[htp]
+ \centering
+\includegraphics[width=0.65\textwidth]{SUB_ErrorPedestal_whole_RunRUNNUMBER.png}
+\caption{Error on pedestal}
+\end{figure}
+
+\begin{figure}[htp]
+ \centering
+  \includegraphics[width=0.65\textwidth]{SUB_frac_gain_high_whole_RunRUNNUMBER.png}
+\caption{Fraction of pixel in the module with gain higher than given normal threshold (7 for normal Summary , difference of 0.5
+for run comparisons).}
+\end{figure}
+
+\begin{figure}[htp]
+ \centering
+  \includegraphics[width=0.65\textwidth]{SUB_GainSaturate_whole_RunRUNNUMBER.png}
+\caption{ADC value at which the gain curve saturates, ie value of the plateau.}
+\end{figure}
+
+\begin{figure}[htp]
+ \centering
+  \includegraphics[width=0.65\textwidth]{SUB_GainDynamicRange_whole_RunRUNNUMBER.png}
+\caption{range in ADC of the fitted part of the gain curve.}
+\end{figure}
+
+\begin{figure}[htp]
+ \centering
+  \includegraphics[width=0.65\textwidth]{SUB_GainLowPoint_whole_RunRUNNUMBER.png}
+\caption{Lowest point in vcal where the fit starts on the X-axis.}
+\end{figure}
+
+
+\begin{figure}[htp]
+ \centering
+  \includegraphics[width=0.65\textwidth]{SUB_GainHighPoint_whole_RunRUNNUMBER.png}
+\caption{Highest point in vcal where the fit ends on the X-axis.}
+\end{figure}
+
+
+\begin{figure}[htp]
+ \centering
+  \includegraphics[width=0.65\textwidth]{SUB_GainNPoints_whole_RunRUNNUMBER.png}
+\caption{Number of points used by the fit.}
+\end{figure}
+
+
+\begin{figure}[htp]
+ \centering
+  \includegraphics[width=0.65\textwidth]{SUB_GainChi2NDF_whole_RunRUNNUMBER.png}
+\caption{$\chi^2$/NDOF of the fit.}
+\end{figure}
+
+
+\begin{figure}[htp]
+ \centering
+  \includegraphics[width=0.65\textwidth]{SUB_GainChi2Prob_whole_RunRUNNUMBER.png}
+\caption{Probability of the $\chi^2$.}
+\end{figure}
+
+\begin{figure}[htp]
+ \centering
+  \includegraphics[width=0.65\textwidth]{SUB_GainFitResult_whole_RunRUNNUMBER.png}
+\caption{Status of the fit.}
+\end{figure}
+
+\clearpage
+\pagebreak
+
+
+
+
+\section{Summary plots\label{sec:summary}}
+
+The following plots are summary plots. There is one entry per module along the X-axis. They are not ordered the same way as for DQM. The Y-axis presents the mean of the considered variable for each of the modules.
+
+\begin{figure}[htp]
+ \centering
+\includegraphics[width=0.90\textwidth]{SUM_Gain_whole_RunRUNNUMBER.png}
+\caption{Gain}
+\end{figure}
+
+
+\begin{figure}[htp]
+ \centering
+\includegraphics[width=0.90\textwidth]{SUM_Pedestal_whole_RunRUNNUMBER.png}
+\caption{Pedestal}
+\end{figure}
+
+
+\begin{figure}[htp]
+ \centering
+\includegraphics[width=0.90\textwidth]{SUM_ErrorGain_whole_RunRUNNUMBER.png}
+\caption{Error on 1/Gain}
+\end{figure}
+
+
+\begin{figure}[htp]
+ \centering
+\includegraphics[width=0.90\textwidth]{SUM_ErrorPedestal_whole_RunRUNNUMBER.png}
+\caption{Error on pedestal}
+\end{figure}
+
+\begin{figure}[htp]
+ \centering
+  \includegraphics[width=0.90\textwidth]{SUM_frac_gain_high_whole_RunRUNNUMBER.png}
+\caption{Fraction of pixel in the module with gain higher than given normal threshold (7 for normal summary , difference of 1
+for run comparisons).}
+\end{figure}
+
+\begin{figure}[htp]
+ \centering
+  \includegraphics[width=0.90\textwidth]{SUM_GainSaturate_whole_RunRUNNUMBER.png}
+\caption{ADC value at which the gain curve saturates, ie value of the plateau.}
+\end{figure}
+
+\begin{figure}[htp]
+ \centering
+  \includegraphics[width=0.90\textwidth]{SUM_GainDynamicRange_whole_RunRUNNUMBER.png}
+\caption{range in ADC of the fitted part of the gain curve.}
+\end{figure}
+
+\begin{figure}[htp]
+ \centering
+  \includegraphics[width=0.90\textwidth]{SUM_GainLowPoint_whole_RunRUNNUMBER.png}
+\caption{Lowest point in vcal where the fit starts on the X-axis.}
+\end{figure}
+
+
+\begin{figure}[htp]
+ \centering
+  \includegraphics[width=0.90\textwidth]{SUM_GainHighPoint_whole_RunRUNNUMBER.png}
+\caption{Highest point in vcal where the fit ends on the X-axis.}
+\end{figure}
+
+
+\begin{figure}[htp]
+ \centering
+  \includegraphics[width=0.90\textwidth]{SUM_GainNPoints_whole_RunRUNNUMBER.png}
+\caption{Number of points used by the fit.}
+\end{figure}
+
+
+\begin{figure}[htp]
+ \centering
+  \includegraphics[width=0.90\textwidth]{SUM_GainChi2NDF_whole_RunRUNNUMBER.png}
+\caption{$\chi^2$/NDOF of the fit.}
+\end{figure}
+
+
+\begin{figure}[htp]
+ \centering
+  \includegraphics[width=0.90\textwidth]{SUM_GainChi2Prob_whole_RunRUNNUMBER.png}
+\caption{Probability of the $\chi^2$.}
+\end{figure}
+
+\begin{figure}[htp]
+ \centering
+  \includegraphics[width=0.90\textwidth]{SUM_GainFitResult_whole_RunRUNNUMBER.png}
+\caption{Status of the fit.}
+\end{figure}
+
+\pagebreak
+\clearpage
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Distributions per Pixel\label{sec:pixel}}
+
+The following plots have one entry per pixel. Left plots are for BPIX, right are for FPIX
+
+\subsection{Gain}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.45\textwidth]{TOT_GainBPix_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.45\textwidth]{TOT_GainFPix_RunRUNNUMBER.png}}
+\caption{Gain distribution. One entry per pixel. Left : BPIX, Right : FPIX.}
+\end{figure}
+%\pagebreak
+
+
+
+\subsection{Pedestal}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.45\textwidth]{TOT_PedestalBPix_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.45\textwidth]{TOT_PedestalFPix_RunRUNNUMBER.png}}
+\caption{Pedestal distribution. One entry per pixel. Left : BPIX, Right : FPIX.}
+\end{figure}
+\clearpage
+
+
+
+\subsection{Correlation gain-pedestal}
+
+\begin{figure}[ht]
+ \centering
+\subfigure
+ {\includegraphics[width=0.45\textwidth]{CorrelationGainPedBPix_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.45\textwidth]{CorrelationGainPedFPix_RunRUNNUMBER.png}}
+\caption{Gain on the X-axis, Pedestal on the Y-axis. One entry per pixel. Left : BPIX, Right : FPIX.}
+\end{figure}
+%\pagebreak
+
+
+
+\subsection{Error on 1/gain}
+
+\begin{figure}[htc]
+ \centering
+\subfigure
+ {\includegraphics[width=0.45\textwidth]{TOT_ErrorGainBPix_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.45\textwidth]{TOT_ErrorGainFPix_RunRUNNUMBER.png}}
+\caption{Fit error on 1/gain. One entry per pixel. Left : BPIX, Right : FPIX.}
+\end{figure}
+\clearpage
+
+
+
+\subsection{Error on pedestal}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.45\textwidth]{TOT_ErrorPedestalBPix_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.45\textwidth]{TOT_ErrorPedestalFPix_RunRUNNUMBER.png}}
+\caption{Fit error on pedestal. One entry per pixel. Left : BPIX, Right : FPIX.}
+\end{figure}
+%\clearpage
+
+
+
+\subsection{correlation gain-error on 1/gain}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.45\textwidth]{ErrorVsGainBPix_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.45\textwidth]{ErrorVsGainFPix_RunRUNNUMBER.png}}
+\caption{Gain on the X-axis, Fit error on 1/gain on the Y-axis. One entry per pixel. Left : BPIX, Right : FPIX.}
+\end{figure}
+\clearpage
+
+
+
+\subsection{correlation pedestal-error on pedestal}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.45\textwidth]{ErrorVsPedestalBPix_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.45\textwidth]{ErrorVsPedestalFPix_RunRUNNUMBER.png}}
+\caption{Pedestal on the X-axis, Fit error on pedestal on the Y-axis. One entry per pixel. Left : BPIX, Right : FPIX.}
+\end{figure}
+%\pagebreak
+
+
+
+\subsection{correlation error on 1/gain - error on pedestal}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.45\textwidth]{CorrelationErrorBPix_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.45\textwidth]{CorrelationErrorFPix_RunRUNNUMBER.png}}
+\caption{Fit error on 1/gain on the X-axis, Fit error on pedestal on the Y-axis. One entry per pixel. Left : BPIX, Right : FPIX.}
+\end{figure}
+%\clearpage
+
+
+\pagebreak
+
+
+
+
+
+
+
+
+
+\section{Distributions per columns\label{sec:col}}
+
+The following plots have one entry per column. Left plots are for BPIX, right are for FPIX
+
+\subsection{Gain}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.45\textwidth]{TOT_GainPerColBPix_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.45\textwidth]{TOT_GainPerColFPix_RunRUNNUMBER.png}}
+\caption{Gain distribution. One entry per column. Left : BPIX, Right : FPIX.}
+\end{figure}
+%\pagebreak
+
+
+
+\subsection{Pedestal}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.45\textwidth]{TOT_PedestalPerColBPix_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.45\textwidth]{TOT_PedestalPerColFPix_RunRUNNUMBER.png}}
+\caption{Pedestal distribution. One entry per column. Left : BPIX, Right : FPIX.}
+\end{figure}
+\clearpage
+
+
+\pagebreak
+
+
+
+
+
+
+\section{Distributions per ROCs\label{sec:ROC}}
+
+The following plots have one entry per ROC. Left plots are for BPIX, right are for FPIX
+
+\subsection{Gain}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.45\textwidth]{TOT_GainPerROCBPix_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.45\textwidth]{TOT_GainPerROCFPix_RunRUNNUMBER.png}}
+\caption{Gain distribution. One entry per ROC. Left : BPIX, Right : FPIX.}
+\end{figure}
+%\pagebreak
+
+
+
+\subsection{Pedestal}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.45\textwidth]{TOT_PedestalPerROCBPix_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.45\textwidth]{TOT_PedestalPerROCFPix_RunRUNNUMBER.png}}
+\caption{Pedestal distribution. One entry per ROC. Left : BPIX, Right : FPIX.}
+\end{figure}
+\clearpage
+
+
+\pagebreak
+
+
+
+
+
+
+
+
+
+
+
+
+\section{2D Maps\label{sec:maps}}
+
+\subsection{gains}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_Gain_layer1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_Gain_layer2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_Gain_layer3_RunRUNNUMBER.png}}
+\caption{2D Maps of the mean gain value per module for the 3 barrel layers (left: layer 1 , center: layer 2 , right: layer 3)}
+\end{figure}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_Gain_disk-2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_Gain_disk-1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_Gain_disk+1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_Gain_disk+2_RunRUNNUMBER.png}}
+\caption{2D Maps of the mean gain value per module for the 4 endcap disks (from top left to bottom right: disk-2 , disk-1 , disk+1 , disk+2 )}
+\end{figure}
+
+\pagebreak
+
+
+
+\subsection{pedestals}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_Pedestal_layer1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_Pedestal_layer2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_Pedestal_layer3_RunRUNNUMBER.png}}
+\caption{2D Maps of the mean pedestal value per module for the 3 barrel layers (left: layer 1 , center: layer 2 , right: layer 3)}
+\end{figure}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_Pedestal_disk-2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_Pedestal_disk-1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_Pedestal_disk+1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_Pedestal_disk+2_RunRUNNUMBER.png}}
+\caption{2D Maps of the mean pedestal value per module for the 4 endcap disks (from top left to bottom right: disk-2 , disk-1 , disk+1 , disk+2 )}
+\end{figure}
+
+
+\pagebreak
+
+
+
+\subsection{fraction of high gain}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_frac_gain_high_layer1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_frac_gain_high_layer2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_frac_gain_high_layer3_RunRUNNUMBER.png}}
+\caption{2D Maps of the fraction of pixels with gain $>$ \high_gain_frac per module for the 3 barrel layers (left: layer 1 , center: layer 2 , right: layer 3)}
+\end{figure}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_frac_gain_high_disk-2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_frac_gain_high_disk-1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_frac_gain_high_disk+1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_frac_gain_high_disk+2_RunRUNNUMBER.png}}
+\caption{2D Maps of the fraction of pixels with gain $>$ \high_gain_frac per module for the 4 endcap disks (from top left to bottom right: disk-2 , disk-1 , disk+1 , disk+2 )}
+\end{figure}
+
+\pagebreak
+
+
+\subsection{fraction of bad fits}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_frac_bad_fit_layer1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_frac_bad_fit_layer2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_frac_bad_fit_layer3_RunRUNNUMBER.png}}
+\caption{2D Maps of the fraction of pixels with bad fits per module for the 3 barrel layers (left: layer 1 , center: layer 2 , right: layer 3)}
+\end{figure}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_frac_bad_fit_disk-2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_frac_bad_fit_disk-1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_frac_bad_fit_disk+1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_frac_bad_fit_disk+2_RunRUNNUMBER.png}}
+\caption{2D Maps of the fraction of pixels with bad fits per module for the 4 endcap disks (from top left to bottom right: disk-2 , disk-1 , disk+1 , disk+2 )}
+\end{figure}
+
+\pagebreak
+
+
+
+\subsection{Error on 1/gain}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_ErrorGain_layer1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_ErrorGain_layer2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_ErrorGain_layer3_RunRUNNUMBER.png}}
+\caption{2D Maps of the mean error of 1/gain value per module for the 3 barrel layers (left: layer 1 , center: layer 2 , right: layer 3)}
+\end{figure}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_ErrorGain_disk-2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_ErrorGain_disk-1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_ErrorGain_disk+1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_ErrorGain_disk+2_RunRUNNUMBER.png}}
+\caption{2D Maps of the mean error of 1/gain value per module for the 4 endcap disks (from top left to bottom right: disk-2 , disk-1 , disk+1 , disk+2 )}
+\end{figure}
+
+\pagebreak
+
+
+
+\subsection{Error on pedestal}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_ErrorPedestal_layer1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_ErrorPedestal_layer2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_ErrorPedestal_layer3_RunRUNNUMBER.png}}
+\caption{2D Maps of the mean error of pedestal value per module for the 3 barrel layers (left: layer 1 , center: layer 2 , right: layer 3)}
+\end{figure}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_ErrorPedestal_disk-2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_ErrorPedestal_disk-1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_ErrorPedestal_disk+1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_ErrorPedestal_disk+2_RunRUNNUMBER.png}}
+\caption{2D Maps of the mean error of pedestal value per module for the 4 endcap disks (from top left to bottom right: disk-2 , disk-1 , disk+1 , disk+2 )}
+\end{figure}
+
+\pagebreak
+
+
+
+
+\subsection{Saturation in ADC}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_GainSaturate_layer1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_GainSaturate_layer2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_GainSaturate_layer3_RunRUNNUMBER.png}}
+\caption{2D Maps of the mean plateau value per module for the 3 barrel layers (left: layer 1 , center: layer 2 , right: layer 3)}
+\end{figure}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainSaturate_disk-2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainSaturate_disk-1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainSaturate_disk+1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainSaturate_disk+2_RunRUNNUMBER.png}}
+\caption{2D Maps of the mean plateau value per module for the 4 endcap disks (from top left to bottom right: disk-2 , disk-1 , disk+1 , disk+2 )}
+\end{figure}
+
+
+\pagebreak
+
+
+
+
+\subsection{Range in ADC}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_GainDynamicRange_layer1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_GainDynamicRange_layer2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_GainDynamicRange_layer3_RunRUNNUMBER.png}}
+\caption{2D Maps of the mean range value per module for the 3 barrel layers (left: layer 1 , center: layer 2 , right: layer 3)}
+\end{figure}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainDynamicRange_disk-2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainDynamicRange_disk-1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainDynamicRange_disk+1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainDynamicRange_disk+2_RunRUNNUMBER.png}}
+\caption{2D Maps of the mean range value per module for the 4 endcap disks (from top left to bottom right: disk-2 , disk-1 , disk+1 , disk+2 )}
+\end{figure}
+
+
+\pagebreak
+
+
+
+
+
+\subsection{Lowest Fit point in VCAL}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_GainLowPoint_layer1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_GainLowPoint_layer2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_GainLowPoint_layer3_RunRUNNUMBER.png}}
+\caption{2D Maps of the mean lowest fitted VCAL value per module for the 3 barrel layers (left: layer 1 , center: layer 2 , right: layer 3)}
+\end{figure}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainLowPoint_disk-2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainLowPoint_disk-1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainLowPoint_disk+1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainLowPoint_disk+2_RunRUNNUMBER.png}}
+\caption{2D Maps of the mean lowest fitted VCAL value per module for the 4 endcap disks (from top left to bottom right: disk-2 , disk-1 , disk+1 , disk+2 )}
+\end{figure}
+
+
+\pagebreak
+
+
+
+
+
+\subsection{Highest Fit point in VCAL}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_GainHighPoint_layer1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_GainHighPoint_layer2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_GainHighPoint_layer3_RunRUNNUMBER.png}}
+\caption{2D Maps of the mean highest fitted VCAL value per module for the 3 barrel layers (left: layer 1 , center: layer 2 , right: layer 3)}
+\end{figure}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainHighPoint_disk-2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainHighPoint_disk-1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainHighPoint_disk+1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainHighPoint_disk+2_RunRUNNUMBER.png}}
+\caption{2D Maps of the mean highest fitted VCAL value per module for the 4 endcap disks (from top left to bottom right: disk-2 , disk-1 , disk+1 , disk+2 )}
+\end{figure}
+
+
+\pagebreak
+
+
+
+\subsection{Number of fitted points}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_GainNPoints_layer1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_GainNPoints_layer2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_GainNPoints_layer3_RunRUNNUMBER.png}}
+\caption{2D Maps of the mean number of fitted points per module for the 3 barrel layers (left: layer 1 , center: layer 2 , right: layer 3)}
+\end{figure}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainNPoints_disk-2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainNPoints_disk-1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainNPoints_disk+1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainNPoints_disk+2_RunRUNNUMBER.png}}
+\caption{2D Maps of the mean number of fitted points per module for the 4 endcap disks (from top left to bottom right: disk-2 , disk-1 , disk+1 , disk+2 )}
+\end{figure}
+
+
+\pagebreak
+
+
+
+
+
+\subsection{Fit $\chi^2$/NDOF}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_GainChi2NDF_layer1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_GainChi2NDF_layer2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_GainChi2NDF_layer3_RunRUNNUMBER.png}}
+\caption{2D Maps of the mean $\chi^2$/NDOF value per module for the 3 barrel layers (left: layer 1 , center: layer 2 , right: layer 3)}
+\end{figure}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainChi2NDF_disk-2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainChi2NDF_disk-1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainChi2NDF_disk+1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainChi2NDF_disk+2_RunRUNNUMBER.png}}
+\caption{2D Maps of the mean $\chi^2$/NDOF value per module for the 4 endcap disks (from top left to bottom right: disk-2 , disk-1 , disk+1 , disk+2 )}
+\end{figure}
+
+
+\pagebreak
+
+
+
+
+
+\subsection{Fit Probability}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_GainChi2Prob_layer1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_GainChi2Prob_layer2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.32\textwidth]{MAP_GainChi2Prob_layer3_RunRUNNUMBER.png}}
+\caption{2D Maps of the mean probability value per module for the 3 barrel layers (left: layer 1 , center: layer 2 , right: layer 3)}
+\end{figure}
+
+\begin{figure}[htp]
+ \centering
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainChi2Prob_disk-2_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainChi2Prob_disk-1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainChi2Prob_disk+1_RunRUNNUMBER.png}}
+\subfigure
+ {\includegraphics[width=0.36\textwidth]{MAP_GainChi2Prob_disk+2_RunRUNNUMBER.png}}
+\caption{2D Maps of the mean probability value per module for the 4 endcap disks (from top left to bottom right: disk-2 , disk-1 , disk+1 , disk+2 )}
+\end{figure}
+
+
+\pagebreak
+
+
+
+
+
+
+
+
+\end{document}
+
