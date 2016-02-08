@@ -68,7 +68,17 @@ SiPixelCalibDigiProducer::SiPixelCalibDigiProducer(const edm::ParameterSet& iCon
   produces< edm::DetSetVector<SiPixelCalibDigi> >();
   if(includeErrors_)
     produces< edm::DetSetVector<SiPixelCalibDigiError> > ();
-
+  std::vector<int> vCalValues_Int = iConfig.getParameter<std::vector<int> >("vCalValues_Int");
+  std::vector<int> calibcols_Int = iConfig.getParameter<std::vector<int> >("calibcols_Int");
+  std::vector<int> calibrows_Int = iConfig.getParameter<std::vector<int> >("calibrows_Int");
+  std::vector<short> vCalValues_short; for (int n : vCalValues_Int) vCalValues_short.push_back((short)n);
+  std::vector<short> calibcols_short;  for (int n : calibcols_Int) calibcols_short.push_back((short)n);
+  std::vector<short> calibrows_short;  for (int n : calibrows_Int) calibrows_short.push_back((short)n);
+  calib_.setCalibrationMode(iConfig.getParameter<std::string>("CalibMode"));
+  calib_.setNTriggers((short)iConfig.getParameter<int>("Repeat"));
+  calib_.setRowPattern(calibrows_short);
+  calib_.setColumnPattern(calibcols_short);
+  calib_.setVCalValues(vCalValues_short);
 }
 
 
@@ -96,7 +106,7 @@ SiPixelCalibDigiProducer::store()
     //    std::cout << "now at event " << iEventCounter_ <<" where we save the calibration information into the CMSSW digi";
     return 1;
   }
-  else if(iEventCounter_==calib_->expectedTotalEvents())
+  else if(iEventCounter_==calib_.expectedTotalEvents())
     return 1;
   else
     return 0;
@@ -110,7 +120,7 @@ SiPixelCalibDigiProducer::fill(edm::Event& iEvent, const edm::EventSetup& iSetup
 {
 
   // figure out which calibration point we're on now..
-  short icalibpoint = calib_->vcalIndexForEvent(iEventCounter_);
+  short icalibpoint = calib_.vcalIndexForEvent(iEventCounter_);
   edm::Handle< edm::DetSetVector<PixelDigi> > pixelDigis;
   iEvent.getByToken( tPixelDigi, pixelDigis );
   
@@ -171,7 +181,7 @@ void SiPixelCalibDigiProducer::fillPixel(uint32_t detid, short row, short col, s
   std::map<pixelstruct,SiPixelCalibDigi>::const_iterator ipix = intermediate_data_.find(temppixelworker);
   
   if(ipix == intermediate_data_.end()){
-    SiPixelCalibDigi tempdigi(calib_->nVCal());
+    SiPixelCalibDigi tempdigi(calib_.nVCal());
     tempdigi.setrowcol(row,col);
     intermediate_data_[temppixelworker]=tempdigi;
   }
@@ -214,12 +224,12 @@ void
 SiPixelCalibDigiProducer::setPattern(){
   //  edm::LogInfo("SiPixelCalibProducer") << "in setPattern()" << std::endl;
   uint32_t patternnumber = abs(iEventCounter_-1)/pattern_repeat_;
-  uint32_t rowpatternnumber = patternnumber/calib_->nColumnPatterns();
-  uint32_t colpatternnumber = patternnumber%calib_->nColumnPatterns();
+  uint32_t rowpatternnumber = patternnumber/calib_.nColumnPatterns();
+  uint32_t colpatternnumber = patternnumber%calib_.nColumnPatterns();
   edm::LogInfo("SiPixelCalibDigiProducer") << " rowpatternnumbers = " << rowpatternnumber << " " << colpatternnumber << " " << patternnumber << std::endl;
   // update currentpattern_
-  std::vector<short> calibcols = calib_->getColumnPattern();
-  std::vector<short> calibrows = calib_->getRowPattern();
+  std::vector<short> calibcols = calib_.getColumnPattern();
+  std::vector<short> calibrows = calib_.getRowPattern();
   std::vector<short> temprowvals(0);
   std::vector<short> tempcolvals(0);
   uint32_t nminuscol=0;
@@ -272,10 +282,9 @@ SiPixelCalibDigiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 {
   //  edm::LogInfo("SiPixelCalibDigiProducer") <<"in produce() " << std::endl;
   using namespace edm;
-  iSetup.get<SiPixelCalibConfigurationRcd>().get(calib_);
   iSetup.get<TrackerDigiGeometryRecord>().get( theGeometry_ );
   iSetup.get<SiPixelFedCablingMapRcd>().get(theCablingMap_);
-  pattern_repeat_=calib_->getNTriggers()*calib_->nVCal();
+  pattern_repeat_=calib_.getNTriggers()*calib_.nVCal();
   if(use_realeventnumber_){
     iEventCounter_= iEvent.id().event()-1;
   }
@@ -296,7 +305,7 @@ SiPixelCalibDigiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     for(std::map<pixelstruct,SiPixelCalibDigi>::const_iterator idet=intermediate_data_.begin(); idet!=intermediate_data_.end();++idet){
       uint32_t detid=idet->first.first;
       if(!control_pattern_size_){
-	if(! checkPixel(idet->first.first,idet->first.second.first,idet->first.second.second))
+ 	if(! checkPixel(idet->first.first,idet->first.second.first,idet->first.second.second))
 	  continue;
       }
 

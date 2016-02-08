@@ -83,9 +83,9 @@ class SiPixelCalibDigiProducer : public edm::EDProducer {
       uint32_t number_of_pixels_per_pattern_;
       bool use_realeventnumber_;
       
-      edm::ESHandle<SiPixelCalibConfiguration> calib_; // keeps track of the calibration constants
       edm::ESHandle<TrackerGeometry> theGeometry_; // the tracker geometry
       edm::ESHandle<SiPixelFedCablingMap> theCablingMap_;
+      SiPixelCalibConfiguration calib_; // keeps track of the calibration constants
 
       // worker variables
       std::map<pixelstruct,SiPixelCalibDigi> intermediate_data_; // data container, copied over into the event every pattern_repeat_ events
