@@ -13,7 +13,8 @@ eval `scram runtime -csh`
 cd DPGAnalysis-SiPixelTools/PixelHitAssociator/phase1 
 
 #cmsRun DigisToRecHitsValid.py
-cmsRun Sims_To_ValidRecHits.py
+#cmsRun Sims_To_ValidRecHits.py
+cmsRun runSimitsToRecHitsValid_customlhc.py
 
 
 

@@ -50,6 +50,7 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
   tPixelRecHit = consumes<edmNew::DetSetVector<SiPixelRecHit>>( src_ );
 
   outputFile_ = ps.getUntrackedParameter<string>("outputFile", "pixelrechitshisto.root");
+  verbose_ = ps.getUntrackedParameter<bool>("verbose", false);
 
 #ifdef PIXEL_ASSOCIATOR
   cout<<" Compare Sim-Rec pixel hits, using pixel hit associator "<<endl;
@@ -283,7 +284,7 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
 	sprintf(histo, "RecHit_YRes_Layer3_Module%d", i+1);
 	recHitYResLayer3Modules[i] = dbe_->book1D(histo, "RecHit YRes Layer3 by module", 100, -200., 200.); 
 	
-	//RecHit Y resolution by module for Layer3
+	//RecHit Y resolution by module for Layer4
 	sprintf(histo, "RecHit_YRes_Layer4_Module%d", i+1);
 	recHitYResLayer4Modules[i] = dbe_->book1D(histo, "RecHit YRes Layer4 by module", 100, -200., 200.); 
       } // end for
@@ -446,7 +447,12 @@ void SiPixelRecHitsValid_pix::beginJob() {
 }
 
 void SiPixelRecHitsValid_pix::endJob() {
-  if ( outputFile_.size() != 0 && dbe_ ) dbe_->save(outputFile_);
+  if ( outputFile_.size() != 0 && dbe_ ) {
+    cout<<" Save file "<<endl;
+    dbe_->save(outputFile_);
+  } else {
+    cout<<" not saved "<<outputFile_.size()<<endl;
+  }
 }
 
 void SiPixelRecHitsValid_pix::analyze(const edm::Event& e, const edm::EventSetup& es) {
@@ -462,7 +468,7 @@ void SiPixelRecHitsValid_pix::analyze(const edm::Event& e, const edm::EventSetup
   es.get<TrackerTopologyRcd>().get(tTopoHand);
   const TrackerTopology *tTopo=tTopoHand.product();
 
-  if ( (int) e.id().event() % 1000 == 0 )
+  if ( ((int) e.id().event() % 1000 == 0) || verbose_ )
     cout << " Run = " << e.id().run() << " Event = " << e.id().event() << endl;
   
   //Get RecHits
@@ -475,7 +481,7 @@ void SiPixelRecHitsValid_pix::analyze(const edm::Event& e, const edm::EventSetup
   es.get<TrackerDigiGeometryRecord>().get(geom); 
   const TrackerGeometry& theTracker(*geom);
   
-  //cout<<" Call associator "<<endl;
+  if(verbose_) cout<<" Call associator "<<endl;
 #ifdef PIXEL_ASSOCIATOR
   PixelHitAssociator associate( e); 
   //PixelHitAssociator associate( e, conf_ ); 
@@ -502,13 +508,14 @@ void SiPixelRecHitsValid_pix::analyze(const edm::Event& e, const edm::EventSetup
       SiPixelRecHitCollection::DetSet::const_iterator pixeliter = pixelrechitRangeIteratorBegin;
       std::vector<PSimHit> matched;
       
-      //cout<<" pixel det "<<pixeldet->size()<<endl;
+      if(verbose_) cout<<" pixel det "<<pixeldet->size()<<endl;
       //----Loop over rechits for this detId
       for ( ; pixeliter != pixelrechitRangeIteratorEnd; pixeliter++)  {
 	  matched.clear();
 	  matched = associate.associateHit(*pixeliter); // get the matched simhits
 
-	  //cout<<" rechit "<<pixeliter->localPosition().x()<<" "<<matched.size()<<endl;
+	  if(verbose_) 
+	    cout<<" rechit "<<pixeliter->localPosition().x()<<" "<<matched.size()<<endl;
 
 	  if ( !matched.empty() ) {
 	      float closest = 9999.9;
@@ -538,19 +545,20 @@ void SiPixelRecHitsValid_pix::analyze(const edm::Event& e, const edm::EventSetup
 		    closest = dist;
 		    closestit = m;
 		    
-		    //std::cout<<" simhit "
-		    //       <<(*m).pabs()<<" "
-		    //       <<(*m).thetaAtEntry()<<" "
-		    //       <<(*m).phiAtEntry()<<" "
-		    //       <<(*m).particleType()<<" "
-		    //       <<(*m).trackId()<<" "
-		    //       <<(*m).momentumAtEntry()
-		    //      <<std::endl;
+		    if(verbose_) 
+		      std::cout<<" simhit "
+			       <<(*m).pabs()<<" "
+			       <<(*m).thetaAtEntry()<<" "
+			       <<(*m).phiAtEntry()<<" "
+			       <<(*m).particleType()<<" "
+			       <<(*m).trackId()<<" "
+			       <<(*m).momentumAtEntry()
+			       <<std::endl;
 		    
 		  }
 		} // end sim hit loop
 	      
-	      //cout<<" closest "<<closest<<endl;
+	      if(verbose_) cout<<" closest "<<closest<<" "<<subid<<endl;
 
 	      if (subid==1) {         //<----------barrel
 		fillBarrel(*pixeliter, *closestit, detId, theGeomDet,tTopo);	
@@ -570,7 +578,7 @@ void SiPixelRecHitsValid_pix::fillBarrel(const SiPixelRecHit& recHit, const PSim
   const float cmtomicron = 10000.0; 
   const float PI = 3.1416;
   const int NumLayers = 4;
-  const bool PRINT = false; //dk
+  bool PRINT = verbose_;
 #ifdef QUICK
   const bool quick = true; // fill only essential histos
 #else
@@ -596,6 +604,7 @@ void SiPixelRecHitsValid_pix::fillBarrel(const SiPixelRecHit& recHit, const PSim
 
   unsigned int layer = tTopo->pxbLayer(detId);
   unsigned int module = tTopo->pxbModule(detId);
+  if(PRINT) cout<<" layer "<<layer<<" eta "<<eta<<" phi "<<phi<<endl;
 
     if(layer==1) {
       htest1->Fill(eta,phi);
@@ -612,10 +621,9 @@ void SiPixelRecHitsValid_pix::fillBarrel(const SiPixelRecHit& recHit, const PSim
 		     <<pid<<" "
 		     <<phi<<" "
 		     <<theta<<" "
-		     <<simHit.trackId()<<" "
-		     <<layer<<" "
-		     <<module<<" "
-		     <<std::endl;
+		     <<simHit.trackId()<<" lay "
+		     <<layer<<" mod "
+		     <<module<<std::endl;
 
   if(!quick) {
     if(layer==1) {

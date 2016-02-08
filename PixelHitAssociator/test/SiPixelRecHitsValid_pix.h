@@ -63,6 +63,7 @@ class SiPixelRecHitsValid_pix : public edm::EDAnalyzer {
    private:
 	DQMStore* dbe_;
 	std::string outputFile_;
+	bool verbose_;
 	edm::EDGetTokenT<edmNew::DetSetVector<SiPixelRecHit>>tPixelRecHit;
 	edm::ParameterSet conf_;
 

@@ -12,25 +12,26 @@ process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.load("Configuration.StandardSequences.Services_cff")
-process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
 
+##process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
+##process.load('Configuration.StandardSequences.EndOfProcess_cff')
+#process.load('SimGeneral.MixingModule.mixNoPU_cfi')
 # process.load("SimTracker.Configuration.SimTracker_cff")
-process.load("SimG4Core.Configuration.SimG4Core_cff")
+
+process.load("SimG4Core.Configuration.SimG4Core_cff") # needed
 
 # for strips 
-process.load("CalibTracker.SiStripESProducers.SiStripGainSimESProducer_cfi")
+#process.load("CalibTracker.SiStripESProducers.SiStripGainSimESProducer_cfi")
 
 # clusterizers & rhs 
 process.load("RecoLocalTracker.Configuration.RecoLocalTracker_cff")
 # needed for pixel RecHits (templates?)
-process.load("Configuration.StandardSequences.Reconstruction_cff")
+process.load("Configuration.StandardSequences.Reconstruction_cff") # needed
 
-#process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 #from Configuration.AlCa.GlobalTag import GlobalTag
 # to use no All 
-
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
@@ -42,6 +43,7 @@ process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
 )
 
+# mix replaced by the code below
 # process.load("SimGeneral.MixingModule.mixNoPU_cfi")
 
 from SimGeneral.MixingModule.aliases_cfi import * 
@@ -305,17 +307,20 @@ if useLocalGain :
       cms.PSet(
         record = cms.string('SiPixelGainCalibrationOfflineRcd'),
         #tag = cms.string('SiPixelGainCalibration_phase1_ideal')
-        tag = cms.string('SiPixelGainCalibration_phase1_mc_v1')
+        #tag = cms.string('SiPixelGainCalibration_phase1_mc_v1')
+        tag = cms.string('SiPixelGainCalibration_phase1_mc_v2')
+        #tag = cms.string('SiPixelGainCalibration_phase1_ideal_v2')
     )),
-    #connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_phase1_mc_v1.db')
-    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
+    connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_phase1_mc_v2.db')
+    #connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_phase1_ideal_v2.db')
+    #connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
   ) # end process
   process.Gainprefer = cms.ESPrefer("PoolDBESSource","GainsReader")
 # end if
 
 
 # GenError
-useLocalGenErr = False
+useLocalGenErr = True
 if useLocalGenErr :
     process.GenErrReader = cms.ESSource("PoolDBESSource",
      DBParameters = cms.PSet(
@@ -325,12 +330,9 @@ if useLocalGenErr :
      toGet = cms.VPSet(
  	 cms.PSet(
           record = cms.string('SiPixelGenErrorDBObjectRcd'),
-#          tag = cms.string('SiPixelGenErrorDBObject38Tv1')
-#          tag = cms.string('SiPixelGenErrorDBObject38TV10')
-          tag = cms.string('SiPixelGenErrorDBObject_38T_v1_mc')
+          tag = cms.string('SiPixelGenErrorDBObject_phase1_38T_mc_v1')
  	 ),
  	),
-#     connect = cms.string('sqlite_file:siPixelGenErrors38T.db')
 #     connect = cms.string('frontier://FrontierPrep/CMS_COND_PIXEL')
      connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
     ) # end process
@@ -344,10 +346,9 @@ process.g4SimHits.Generator.HepMCProductLabel = 'source'
 process.siPixelClustersPreSplitting.src = 'simSiPixelDigis' # for V5, direct
 # process.siPixelClusters.src = 'mix'
 # modify digitizer parameters
-#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix = 3500.0 
-#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix = 2000.0 
-#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix_L1 = 2000.0 
-#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_FPix = 2000.0 
+process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix = 2000.0 
+process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix_L1 = 2000.0 
+process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_FPix = 2000.0 
 
 process.simSiPixelDigis.digitizers.pixel.AddPixelInefficiencyFromPython = cms.bool(False)
 process.simSiPixelDigis.digitizers.pixel.AddPixelInefficiency = cms.bool(False)
@@ -377,6 +378,15 @@ process.simSiPixelDigis.digitizers.pixel.thePixelChipEfficiency_FPix1 = cms.doub
 process.simSiPixelDigis.digitizers.pixel.thePixelChipEfficiency_FPix2 = cms.double(1.0)
 process.simSiPixelDigis.digitizers.pixel.thePixelChipEfficiency_FPix3 = cms.double(1.0)
 
+# gain parameters
+process.simSiPixelDigis.digitizers.pixel.FPix_SignalResponse_p0 = cms.double(0.00174)
+process.simSiPixelDigis.digitizers.pixel.FPix_SignalResponse_p1 = cms.double(0.711)
+process.simSiPixelDigis.digitizers.pixel.FPix_SignalResponse_p2 = cms.double(203.)
+process.simSiPixelDigis.digitizers.pixel.FPix_SignalResponse_p3 = cms.double(148.)
+process.simSiPixelDigis.digitizers.pixel.BPix_SignalResponse_p0 = cms.double(0.00174)
+process.simSiPixelDigis.digitizers.pixel.BPix_SignalResponse_p1 = cms.double(0.711)
+process.simSiPixelDigis.digitizers.pixel.BPix_SignalResponse_p2 = cms.double(203.)
+process.simSiPixelDigis.digitizers.pixel.BPix_SignalResponse_p3 = cms.double(148.)
 
 # use inefficiency from DB Gain calibration payload? OFF BY DEFAULT
 #process.simSiPixelDigis.digitizers.pixel.useDB = cms.bool(False) 
@@ -427,7 +437,4 @@ process.p1 = cms.Path(process.simSiPixelDigis*process.pixeltrackerlocalreco*proc
 
 # for RelVal GEN-SIM-DIGI-RAW-HLTDEBUG
 #process.p1 = cms.Path(process.pixeltrackerlocalreco*process.pixRecHitsValid)
-
 #process.outpath = cms.EndPath(process.o1)
-
-
