@@ -147,7 +147,8 @@ PixelTree::PixelTree(edm::ParameterSet const& iConfig):
   fHLTResultsLabel(iConfig.getUntrackedParameter<InputTag>("HLTResultsLabel", edm::InputTag("TriggerResults::HLT"))),
   fL1MuGMTLabel(iConfig.getUntrackedParameter<InputTag>("l1muGmtLabel", edm::InputTag("gtDigis"))),
   fAccessSimHitInfo(iConfig.getUntrackedParameter<bool>( "accessSimHitInfo", false) ),
-
+  trackerHitAssociatorConfig_(consumesCollector()),
+  l1GtUtils(iConfig, consumesCollector(), false,*this),
   fInit(0)
 {
   cout << "----------------------------------------------------------------------" << endl;
@@ -195,9 +196,7 @@ PixelRecHitToken = consumes  <SiPixelRecHitCollection>(fPixelRecHitLabel) ;
 TrackToken=consumes  <std::vector<reco::Track>>(fTrackCollectionLabel) ;
 TTAToken=consumes  <TrajTrackAssociationCollection> (fTrajectoryInputLabel);
 
-
-
-  init();
+ init();
 
 }
 
@@ -455,7 +454,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
   std::vector<PSimHit> vec_simhits_assoc;
   TrackerHitAssociator *associate(0);
   if (fAccessSimHitInfo) {
-    associate = new TrackerHitAssociator(iEvent);
+    associate = new TrackerHitAssociator(iEvent,trackerHitAssociatorConfig_);
   }
   
   edm::Handle< edm::DetSetVector<PixelDigiSimLink> > pixeldigisimlink;
@@ -634,8 +633,8 @@ void PixelTree::analyze(const edm::Event& iEvent,
   iEvent.getByToken(L1TrigReadoutToken,L1GTRR);
   Handle<L1GlobalTriggerObjectMapRecord> hL1GTmap; 
   iEvent.getByToken(L1TrigObjectMapToken, hL1GTmap);
-
-  L1GtUtils l1GtUtils;
+  
+  //  L1GtUtils l1GtUtils;
   l1GtUtils.retrieveL1EventSetup(iSetup);
   static int first(1);
   if (first) {

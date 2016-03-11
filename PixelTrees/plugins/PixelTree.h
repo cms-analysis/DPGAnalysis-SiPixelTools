@@ -205,6 +205,9 @@ class PixelTree : public edm::EDAnalyzer {
   edm::EDGetTokenT<TrajTrackAssociationCollection> TTAToken;
 
   bool fAccessSimHitInfo;
+  TrackerHitAssociator::Config trackerHitAssociatorConfig_;
+  L1GtUtils l1GtUtils;
+  
 
   TFile *fFile; 
   TH1D  *fL1Thist, *fL1TThist, *fHLThist; 

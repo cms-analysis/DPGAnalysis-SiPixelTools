@@ -8,10 +8,12 @@
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include"Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 #include "SimDataFormats/TrackingHit/interface/PSimHit.h"
 #include "SimDataFormats/Track/interface/SimTrack.h"
 #include "SimDataFormats/Track/interface/SimTrackContainer.h"
+#include "SimTracker/TrackerHitAssociation/interface/TrackerHitAssociator.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHitCollection.h"
 #include "DQM/TrackerMonitorTrack/interface/MonitorTrackResiduals.h"
 #include "TrackingTools/TrackFitters/interface/TrajectoryFitter.h"
@@ -73,7 +75,7 @@ class PixelNtuplizer_RealData : public edm::EDAnalyzer
   edm::ParameterSet conf_;
   edm::ESHandle<TrackerGeometry> tkGeom_;
   edm::ESHandle<MagneticField> magneticField_;
-
+  TrackerHitAssociator::Config trackerHitAssociatorConfig_;
 
   TH1D *dummyhist;
   TTree* PixHitTree_;  // tree filled on every pixel rec hit
