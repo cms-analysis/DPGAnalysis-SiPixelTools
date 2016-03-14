@@ -12,7 +12,7 @@
 #dbs search --query='find file where run=208686 and dataset=/MinimumBias/Run2012D-v1/RAW' 
 
 # 2012
-das_client.py --limit=0 --query='file dataset=/JetHT/Run2012D-22Jan2013-v1/RECO run=208686' # 
+#das_client.py --limit=0 --query='file dataset=/JetHT/Run2012D-22Jan2013-v1/RECO run=208686' # 
 #das_client.py --limit=0 --query='file dataset=/MuOnia/Run2012D-22Jan2013-v1/AOD run=208686' # 
 
 # COSMICS 
@@ -82,4 +82,8 @@ das_client.py --limit=0 --query='file dataset=/JetHT/Run2012D-22Jan2013-v1/RECO 
 #/eos/cms/store/data/Run2015B/ZeroBias/RECO/PromptReco-v1/000/251/643/00000
 #/eos/cms/store/data/Run2015B/Commissioning/RECO/PromptReco-v1/000/251/643/00000
 
+# 2016
+#das_client.py --limit=0 --query='file dataset=/MinimumBias/Commissioning2016-v1/RAW run=266277' # 
+#das_client.py --limit=0 --query='file dataset=/Cosmics/Commissioning2016-v1/RAW run=266277' # 
 
+das_client.py --limit=0 --query='file dataset=/Cosmics/Commissioning2016-PromptReco-v1/RECO run=266277' # 

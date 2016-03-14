@@ -12,11 +12,11 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 # works with condDB and condDBv2
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'MCRUN2_73_V7', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgradePLS1', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_mc', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 # for phase1 
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '') #same
@@ -47,7 +47,7 @@ process.source = cms.Source("EmptySource",
 #)
 
 # DB stuff 
-useLocalDB = False
+useLocalDB = True
 if useLocalDB :
   process.GainsReader = cms.ESSource("PoolDBESSource",
   #    process.CondDBCommon,
@@ -58,19 +58,20 @@ if useLocalDB :
     ),
     toGet = cms.VPSet(
       cms.PSet(
-#       record = cms.string('SiPixelGainCalibrationForHLTRcd'),
-       record = cms.string('SiPixelGainCalibrationOfflineRcd'),
+       record = cms.string('SiPixelGainCalibrationForHLTRcd'),
+#       record = cms.string('SiPixelGainCalibrationOfflineRcd'),
        #SiPixelGainCalibrationForHLTSimRcd  
        #SiPixelGainCalibrationOfflineSimRcd 
 #       tag = cms.string('SiPixelGainCalibration_r203368_offline')
 #       tag = cms.string('SiPixelGainCalibration_r197749_offline')
 #       tag = cms.string('SiPixelGainCalib_2009CollRuns_offline')
-#       tag = cms.string('IOV1')
-       tag = cms.string('SiPixelGainCalibration_test')
+#       tag = cms.string('SiPixelGainCalibration_2016_v1_offline')
+       tag = cms.string('SiPixelGainCalibration_2016_v1_HTL')  # HLT
     )),
 #    connect = cms.string('frontier://FrontierProd/CMS_COND_31X_PIXEL')
-#    connect = cms.string('sqlite_file:gain_iov1.db')
-    connect = cms.string('sqlite_file:SiPixelGains_test.db')
+#    connect = cms.string('sqlite_file:../../../../../DB/Gains/SiPixelGainCalibration_2016_v1_offline.db')
+    connect = cms.string('sqlite_file:../../../../../DB/Gains/SiPixelGainCalibration_2016_v1_HLT.db')
+#    connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/eos/cms/store/group/dpg_tracker_pixel/comm_pixel/GainCalibrations/Run_265850/GainRun_265850/prova_GainRun265850.db')
   ) # end process
   # process.prefer("PoolDBESSource")
   process.myprefer = cms.ESPrefer("PoolDBESSource","GainsReader")
@@ -78,10 +79,10 @@ if useLocalDB :
 
 process.SiPixelGainsDBReader = cms.EDAnalyzer("SiPixelGainsDBReader",
     process.SiPixelGainCalibrationServiceParameters,
-#    payloadType = cms.string('HLT'),
-    payloadType = cms.string('Offline'),
-#    useSimRcd = cms.bool(False),
-    useSimRcd = cms.bool(True),
+    payloadType = cms.string('HLT'),
+#    payloadType = cms.string('Offline'),
+    useSimRcd = cms.bool(False),
+#    useSimRcd = cms.bool(True),
     maxRangeDeadPixHist = cms.untracked.double(0.001)
 
 )

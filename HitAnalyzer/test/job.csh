@@ -5,8 +5,8 @@ source /afs/cern.ch/cms/LCG/LCG-2/UI/cms_ui_env.csh
 
 #rfdir /castor/cern.ch/cms/store/data
 
-setenv SCRAM_ARCH slc6_amd64_gcc491
-cd /afs/cern.ch/user/d/dkotlins/public/CMSSW/CMSSW_7_4_11/src
+setenv SCRAM_ARCH slc6_amd64_gcc493
+cd /afs/cern.ch/user/d/dkotlins/public/CMSSW/CMSSW_8_0_0_patch2/src
 
 #source /afs/cern.ch/cms/sw/cmsset_default.csh
 source /afs/cern.ch/project/gd/apps/cms/cmsset_default.csh   # this works with gcc462
@@ -18,8 +18,8 @@ cd DPGAnalysis-SiPixelTools/HitAnalyzer/test
 pwd
 
 #  RAW
-# cmsRun runHotPixels_cfg.py 
-cmsRun runRawDumper.py 
+cmsRun runHotPixels.py 
+#cmsRun runRawDumper.py 
 #cmsRun runRawDumper_lumi.py 
 # cmsRun runRawToDigi_cfg.py 
 # cmsRun runFedErrorDumper.py

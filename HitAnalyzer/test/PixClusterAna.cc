@@ -4,7 +4,7 @@
 // Creation Date:  Initial version. 3/06
 // Modify to work with CMSSW354, 11/03/10 d.k.
 // Modify to work with CMSSW620, SLC6, CMSSW700, 10/10/13 d.k.
-// Change to ByToken (clusters only)
+// Change to ByToken (clusters only) so other data access does not work for the moment.
 // not yet for 4 layers.
 //--------------------------------------------
 #include <memory>
@@ -100,7 +100,8 @@ using namespace std;
 
 #define HISTOS
 //#define L1
-#define HLT
+//#define HLT
+//#define PV
 //#define HI
 //#define ROC_EFF
 //#define Lumi
@@ -2114,13 +2115,13 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 #endif
 
+#ifdef PV
   // PVs
   int numPVsGood = 0;
   if(run>165000) { // skip for earlier runs, crashes
     edm::Handle<reco::VertexCollection> vertices;
     e.getByLabel( "offlinePrimaryVertices", vertices );
-    
-    
+        
     //int numPVs = vertices->size(); // unused 
     if( !vertices.failedToGet() && vertices.isValid() ) {
       for( reco::VertexCollection::const_iterator iVertex = vertices->begin();
@@ -2149,6 +2150,7 @@ void PixClusterAna::analyze(const edm::Event& e,
       //hpvlsn->Fill(float(lumiBlock),tmp);
     //}
   } // if run
+#endif // PV 
     
 #ifdef BX
   //cout<<" for bx "<<bx<<endl;
@@ -2410,7 +2412,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 #ifdef NEW_ID
   //Retrieve tracker topology from geometry
   edm::ESHandle<TrackerTopology> tTopo;
-  es.get<IdealGeometryRecord>().get(tTopo);
+  es.get<TrackerTopologyRcd>().get(tTopo);
 #endif
 
   //---------------------------------------
@@ -3383,6 +3385,7 @@ void PixClusterAna::analyze(const edm::Event& e,
     hclus->Fill(float(numberOfClusters)); // clusters fpix+bpix
     hclus2->Fill(float(numberOfClusters));  // same, zoomed
 
+#ifdef PV
     //h2clupv->Fill(float(numberOfClusters),float(numPVsGood));
     //h2pixpv->Fill(float(numberOfPixels),float(numPVsGood));
     hclupv->Fill(float(numberOfClusters),float(numPVsGood));
@@ -3393,6 +3396,7 @@ void PixClusterAna::analyze(const edm::Event& e,
       //tmp = float(numberOfPixels)/float(numPVsGood);
       //hpixpvlsn->Fill(float(lumiBlock),tmp);
     //}
+#endif //PV
 
     int clusb = numOfClustersPerLay1+numOfClustersPerLay2+numOfClustersPerLay3;
     hclusBPix->Fill(float(clusb));  // clusters in bpix
@@ -3417,7 +3421,9 @@ void PixClusterAna::analyze(const edm::Event& e,
 
     hclubx->Fill(float(bx),float(numberOfClusters)); // clusters fpix+bpix
     hpixbx->Fill(float(bx),float(numberOfPixels)); // pixels fpix+bpix
+#if PB
     hpvbx->Fill(float(bx),float(numPVsGood)); // pvs
+#endif 
 
 #ifdef VDM_STUDIES
     hclusls1->Fill(float(lumiBlock),float(numOfClustersPerLay1)); // clusters bpix1
@@ -3482,7 +3488,9 @@ void PixClusterAna::analyze(const edm::Event& e,
       hclubxn->Fill(float(bx),tmp); // clusters fpix+bpix
       tmp = float( numberOfPixels) / instlumi;
       hpixbxn->Fill(float(bx),tmp); // pixels fpix+bpix
+#ifdef PV
       tmp = float( numPVsGood) / instlumi;
+#endif
       hpvbxn->Fill(float(bx),tmp); // pvs
 
 //       tmp = float(numOfClustersPerLay1)/float(numOfClustersPerLay3);

@@ -56,7 +56,7 @@ using namespace std;
 
 // #define L1  // L1 information not in RAW
 //#define OUTFILE 
-#define PHASE1
+//#define PHASE1
 
 namespace {
   bool printErrors  = false;
@@ -659,6 +659,7 @@ void SiPixelRawDump::beginJob() {
   printLocal = theConfig.getUntrackedParameter<int>("Verbosity",1);
   printThreshold = theConfig.getUntrackedParameter<double>("PrintThreshold",0.001); // threshold per event for printing errors
   cout<<" beginjob "<<printLocal<<" "<<printThreshold<<endl;  
+  if(phase1) cout<<" THIS IS FOR PHASE1 "<<endl;
 
   if(printLocal>0) printErrors  = true;
   else printErrors = false;

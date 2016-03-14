@@ -9,7 +9,7 @@ process.hltfilter = hlt.hltHighLevel.clone(
 # Min-Bias
 #    HLTPaths = ['HLT_Physics_v*'],  # not in ZB stream
 #    HLTPaths = ['DST_Physics_v*'], useless 
-#    HLTPaths = ['HLT_Random_v*'],
+    HLTPaths = ['HLT_Random_v*'],
 #    HLTPaths = ['HLT_ZeroBias*'],
 #    HLTPaths = ['HLT_L1Tech54_ZeroBias*'],
 # Commissioning:
@@ -46,7 +46,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 #process.MessageLogger.cerr.threshold = 'Debug'
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10)
+    input = cms.untracked.int32(-1)
 )
 
 process.TFileService = cms.Service("TFileService",
@@ -55,19 +55,24 @@ process.TFileService = cms.Service("TFileService",
 
 myfilelist = cms.untracked.vstring()
 myfilelist.extend([
-"/store/data/Run2015D/ZeroBias/RAW/v1/000/260/627/00000/00A76FFA-0C82-E511-B441-02163E01450F.root",
+"/store/data/Run2015D/ZeroBias/RAW/v1/000/260/627/00000/1A844C25-14E5-E511-B9B5-02163E013471.root",
 ])
 
 process.source = cms.Source("PoolSource",
 # fileNames =  myfilelist
     fileNames = cms.untracked.vstring(                          
-#    "file:../../../../../CMSSW_7_1_3/src/DPGAnalysis-SiPixelTools/HitAnalyzer/test/raw.root"
-#    "file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre7/raw/raw2.root"
- "/store/express/HIRun2015/HIExpressPhysics/FEVT/Express-v1/000/262/548/00000/FCBD965E-6293-E511-B9A2-02163E01463B.root",
+# data 2016
+#"root://eoscms//eos/cms/tier0/store/data/Commissioning2016/MinimumBias/RAW/v1/000/265/510/00000/02474E86-4BDC-E511-8222-02163E01364A.root",
+#"root://eoscms//eos/cms/tier0/store/data/Commissioning2016/MinimumBias/RAW/v1/000/266/150/00000/1A844C25-14E5-E511-B9B5-02163E013471.root",
+"root://eoscms//eos/cms/tier0/store/data/Commissioning2016/MinimumBias/RAW/v1/000/266/277/00000/0004807C-AFE5-E511-83C1-02163E011EAD.root",
 
+
+# MC
+#    "file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre7/raw/raw2.root"
 # "/store/data/Run2015D/ZeroBias/RAW/v1/000/258/655/00000/0C7D4CCE-886E-E511-A789-02163E0142E2.root",
 # "root://eoscms//eos/cms/tier0/store/data/Run2015D/ZeroBias/RAW/v1/000/258/655/00000/",
 # "/store/data/Run2015D/ZeroBias/RAW/v1/000/258/655/00000/F8BA24BF-866E-E511-BC31-02163E013890.root",
+# "/store/express/HIRun2015/HIExpressPhysics/FEVT/Express-v1/000/262/548/00000/FCBD965E-6293-E511-B9A2-02163E01463B.root",
 
 # "/store/data/Run2015D/Cosmics/RAW-RECO/CosmicSP-PromptReco-v4/000/258/415/00000/B66364BE-F56D-E511-A301-02163E0138F6.root",
 
@@ -81,11 +86,6 @@ process.source = cms.Source("PoolSource",
 
 # "root://eoscms//eos/cms/tier0/store/data/Run2015D/Cosmics/RAW/v1/000/256/856/00000/68555315-165F-E511-A279-02163E014228.root",
 
-# "/store/data/Run2015C/ZeroBias/RAW/v1/000/254/319/00000/0230C488-1543-E511-A00F-02163E01437A.root",
-#"root://eoscms//eos/cms/store/data/Run2015C/ZeroBias/RAW/v1/000/254/227/00000/FA244051-8141-E511-B22B-02163E014153.root",
-#"root://eoscms//eos/cms/store/data/Run2015C/ZeroBias/RAW/v1/000/254/227/00000/F4E6E4DE-8841-E511-922B-02163E014125.root",
-#"/store/data/Run2015B/Cosmics/RAW/v1/000/253/106/00000/98FDF449-DA37-E511-A847-02163E0124BA.root",
-#"/store/data/Run2015B/MinimumBias/RAW/v1/000/253/215/00000/04B30F2F-A839-E511-B855-02163E013717.root",
 #"/store/data/Run2015A/MinimumBias/RAW/v1/000/250/411/00000/2227CD91-A61F-E511-8ABC-02163E011D1C.root",
 #"/store/data/Run2015A/ZeroBias1/RAW/v1/000/248/025/00000/24014201-5C13-E511-AEFB-02163E0139DC.root",
 #"/store/data/Run2015A/ZeroBias1/RAW/v1/000/247/324/00000/00C00730-A00D-E511-8273-02163E014565.root",
@@ -98,21 +98,6 @@ process.source = cms.Source("PoolSource",
 
 )
 
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('191271:55-191271:9999')
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('191718:30-191718:9999')
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('194912:52-194912:9999')
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('194912:52-194912:330 ')
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('195099:61-195099:9999')
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('195109:85-195109:9999')
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('195841:73-195841:100','195841:116-195841:143')
-# 195774 OK from LS=0
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('198609:47-198609:112')
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('201657:77-201657:9999')
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('205217:0-205217:323')
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('205718:49-205718:734')
-
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('254227:20-254227:9999')
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('254227:21-254227:21')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('257487:50-257487:9999')
 
 process.d = cms.EDAnalyzer("SiPixelRawDump", 
@@ -134,8 +119,8 @@ process.d = cms.EDAnalyzer("SiPixelRawDump",
     PrintThreshold = cms.untracked.double(0.001)
 )
 
-#process.p = cms.Path(process.hltfilter*process.d)
-process.p = cms.Path(process.d)
+process.p = cms.Path(process.hltfilter*process.d)
+#process.p = cms.Path(process.d)
 
 # process.ep = cms.EndPath(process.out)
 

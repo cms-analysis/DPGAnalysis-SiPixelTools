@@ -55,8 +55,17 @@ process.TFileService = cms.Service("TFileService",
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring( 
 
-"/store/data/Run2015A/MinimumBias/RAW/v1/000/250/411/00000/2227CD91-A61F-E511-8ABC-02163E011D1C.root",
-"/store/data/Run2015A/MinimumBias/RAW/v1/000/250/411/00000/D2A60B28-A71F-E511-9950-02163E012AEE.root",
+# data 2016
+#"root://eoscms//eos/cms/tier0/store/data/Commissioning2016/MinimumBias/RAW/v1/000/265/510/00000/02474E86-4BDC-E511-8222-02163E01364A.root",
+
+#"root://eoscms//eos/cms/tier0/store/data/Commissioning2016/MinimumBias/RAW/v1/000/266/150/00000/1A844C25-14E5-E511-B9B5-02163E013471.root",
+
+"root://eoscms//eos/cms/tier0/store/data/Commissioning2016/MinimumBias/RAW/v1/000/266/277/00000/0004807C-AFE5-E511-83C1-02163E011EAD.root",
+
+
+
+#"/store/data/Run2015A/MinimumBias/RAW/v1/000/250/411/00000/2227CD91-A61F-E511-8ABC-02163E011D1C.root",
+#"/store/data/Run2015A/MinimumBias/RAW/v1/000/250/411/00000/D2A60B28-A71F-E511-9950-02163E012AEE.root",
 
 #"/store/data/Run2015A/MinimumBias/RAW/v1/000/248/566/00000/FE2A5536-B617-E511-8FB5-02163E0138F9.root",
 #"/store/data/Run2015A/MinimumBias/RAW/v1/000/248/607/00000/20B0B95A-4418-E511-94BB-02163E012973.root",
