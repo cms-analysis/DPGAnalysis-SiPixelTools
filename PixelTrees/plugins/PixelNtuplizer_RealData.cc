@@ -55,6 +55,7 @@ using namespace reco;
 
 PixelNtuplizer_RealData::PixelNtuplizer_RealData(edm::ParameterSet const& iConfig) : 
   conf_(iConfig),
+  trackerHitAssociatorConfig_(consumesCollector()),
   PixHitTree_(0),
   TrackTree_(0),
   maxsize_PixInfoStruct_(200)
@@ -479,7 +480,8 @@ void PixelNtuplizer_RealData::analyze(const edm::Event& iEvent, const edm::Event
 	  if(isSim == true) {
 	    edm::Handle<edm::SimTrackContainer> simtracks;
 	    iEvent.getByLabel("g4SimHits", simtracks);
-	    TrackerHitAssociator* associate = new TrackerHitAssociator(iEvent);
+	    
+	    TrackerHitAssociator* associate = new TrackerHitAssociator(iEvent,trackerHitAssociatorConfig_);
 	    std::vector<PSimHit> matched;
 	    matched.clear();
 	    matched = associate->associateHit(*persistentHit);
