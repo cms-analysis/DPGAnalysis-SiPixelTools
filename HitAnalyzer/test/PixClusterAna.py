@@ -138,8 +138,11 @@ myfilelist.extend([
 
 
 process.source = cms.Source("PoolSource",
- fileNames =  myfilelist
-#  fileNames = cms.untracked.vstring(    
+# fileNames =  myfilelist
+  fileNames = cms.untracked.vstring(    
+
+"/store/data/Run2015D/ZeroBias/RECO/PromptReco-v4/000/260/627/00000/000A8212-8284-E511-8BB1-02163E01184B.root",
+
 # muonia 
 #"/store/data/Run2015A/MuOnia/RECO/PromptReco-v1/000/248/038/00000/22A90F7F-5A14-E511-AD96-02163E012BE3.root",
 #single muon 
@@ -166,15 +169,13 @@ process.source = cms.Source("PoolSource",
 # "/store/data/Commissioning12/Commissioning/RECO/PromptReco-v1/000/186/791/6EC3470C-6F69-E111-93CA-001D09F241B9.root",
 # "/store/data/Commissioning12/Cosmics/RECO/PromptReco-v1/000/186/791/6A54D2A0-6D69-E111-ABA8-001D09F2441B.root",
 
-#  )   # end the list "by-hand"
+  )   # end the list "by-hand"
 
 )
 
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('124230:26-124230:9999','124030:2-124030:9999')
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('207469:0-207469:51')
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('207477:76-207477:570')
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('208686:73-208686:463')
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('210534:24-210534:347')
+process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('260627:97-260627:1910')
+
 
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string('clus_ana.root')
