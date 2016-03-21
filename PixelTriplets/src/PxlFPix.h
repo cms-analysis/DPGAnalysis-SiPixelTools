@@ -35,6 +35,7 @@
 #include "FWCore/Framework/interface/Event.h"
 //#include <FWCore/Framework/interface/EventSetup.h>
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 
 #include <DataFormats/BeamSpot/interface/BeamSpot.h>
 
@@ -126,6 +127,12 @@ private:
       edm::InputTag _triggerSrc;
       std::string _ttrhBuilder;
       HLTConfigProvider HLTConfig;
+
+  edm::EDGetTokenT<reco::BeamSpot>  t_offlineBeamSpot_;
+  edm::EDGetTokenT<reco::VertexCollection> t_offlinePrimaryVertices_ ;
+  edm::EDGetTokenT <edm::TriggerResults> t_triggerSrc_ ;
+  edm::EDGetTokenT <reco::TrackCollection>  t_generalTracks_;
+  edm::EDGetTokenT< edm::View<reco::PFMET>> t_pfMet_;
 
   // ----------member data ---------------------------
   std::string proccessName_;

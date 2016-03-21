@@ -32,6 +32,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/Event.h"
 #include <FWCore/Framework/interface/EventSetup.h>
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -132,6 +133,11 @@ private:
   std::string _ttrhBuilder;
   HLTConfigProvider HLTConfig;
 
+  edm::EDGetTokenT<reco::BeamSpot>  t_offlineBeamSpot_;
+  edm::EDGetTokenT<reco::VertexCollection> t_offlinePrimaryVertices_ ;
+  edm::EDGetTokenT <reco::TrackCollection>  t_generalTracks_;
+  edm::EDGetTokenT< edm::View<reco::PFMET>> t_pfMet_;
+
   // ----------member data ---------------------------
   std::map<int, Histos> runmap;
 
@@ -195,6 +201,12 @@ PxlFPix::PxlFPix(const edm::ParameterSet& iConfig)
   _ttrhBuilder = iConfig.getParameter<std::string>("ttrhBuilder");
   //std::cout<<_triggerSrc<<" "<<_triggerSrc.label()<<" "<<_triggerSrc.process()<<" "
   //	   <<_triggerSrc.instance()<<" "<<std::endl;
+
+  t_offlineBeamSpot_ =    consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
+  t_offlinePrimaryVertices_ =   consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
+  t_generalTracks_= consumes<reco::TrackCollection> (edm::InputTag("generalTracks"));
+  t_pfMet_= consumes< edm::View<reco::PFMET>>(edm::InputTag("pfMet"));
+
 }
 PxlFPix::~PxlFPix()
 {
@@ -342,8 +354,9 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   // beam spot:
   
   edm::Handle<reco::BeamSpot> rbs;
-  iEvent.getByLabel( "offlineBeamSpot", rbs );
-  
+  //iEvent.getByLabel( "offlineBeamSpot", rbs );
+  iEvent.getByToken( t_offlineBeamSpot_, rbs );
+
   XYZPoint bsP = XYZPoint(0,0,0);        // beam spot point
   //int ibs = 0;                           // boolean for valid beam spot point
   
@@ -362,7 +375,9 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   //--------------------------------------------------------------------
   // primary vertices:
   Handle<VertexCollection> vertices;
-  iEvent.getByLabel( "offlinePrimaryVertices", vertices );
+  //iEvent.getByLabel( "offlinePrimaryVertices", vertices );
+  iEvent.getByToken( t_offlinePrimaryVertices_,vertices );
+
   if( vertices.failedToGet() ) return;
   if( !vertices.isValid() ) return;
   //int nvertex = vertices->size();
@@ -397,8 +412,8 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   // MET:
   
   edm::Handle< edm::View<reco::PFMET> > pfMEThandle;
-  iEvent.getByLabel( "pfMet", pfMEThandle );
-  
+  //  iEvent.getByLabel( "pfMet", pfMEThandle );
+  iEvent.getByToken(t_pfMet_, pfMEThandle );
   
   //--------------------------------------------------------------------
   // get a fitter to refit TrackCandidates, the same fitter as used in standard reconstruction:
@@ -451,7 +466,9 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   //--------------------------------------------------------------------
   // tracks:
   Handle<TrackCollection> tracks;
-  iEvent.getByLabel( "generalTracks", tracks );
+  //iEvent.getByLabel( "generalTracks", tracks );
+  iEvent.getByToken( t_generalTracks_, tracks );
+
   if( tracks.failedToGet() ) return;
   if( !tracks.isValid() ) return;
   if( idbg ){

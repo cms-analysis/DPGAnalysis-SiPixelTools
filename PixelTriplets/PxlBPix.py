@@ -13,7 +13,8 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 # tags for 74X
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '76X_dataRun2_v15', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
 
 
@@ -47,7 +48,7 @@ process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
 # Get beamspot from DB
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 process.source = cms.Source("PoolSource",
 	fileNames = cms.untracked.vstring(
@@ -59,10 +60,13 @@ process.source = cms.Source("PoolSource",
 #    'file:/afs/cern.ch/work/d/dkotlins/public/data/tracks/r208686_1_3.root',
 
 # mc
-    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_73/tracks/tracks1_mc73_13.root',
+#    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_73/tracks/tracks1_mc73_13.root',
 #    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_73/tracks/tracks2_mc73_13.root',
 #    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_73/tracks/tracks3_mc73_13.root',
 #    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_73/tracks/tracks4_mc73_13.root',
+
+#data 2015
+     "/store/data/Run2015C/DoubleMuon/RECO/PromptReco-v1/000/254/905/00000/0E69BA5C-B24B-E511-BEF4-02163E01478C.root",
 	)
 )
 
