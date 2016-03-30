@@ -8,7 +8,8 @@ process.load("Configuration.Geometry.GeometryIdeal_cff")
 
 #process.GlobalTag.globaltag = "MCRUN2_73_V7::All"
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
-process.GlobalTag.globaltag = "PRE_R_72_V11A"
+#process.GlobalTag.globaltag = "PRE_R_72_V11A"
+process.GlobalTag.globaltag = '76X_dataRun2_v15'
 
 process.load("Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff")
 
@@ -29,7 +30,7 @@ process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
 
 # Number of events to process
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 # Files to run on
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
@@ -46,10 +47,11 @@ process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
         #'file:/afs/cern.ch/work/v/vlambert/public/Pixel/MC/tracks2_postls171.root'
         #'/store/relval/CMSSW_7_1_0_pre7/SingleMu/RECO/PRE_R_71_V2_RelVal_mu2012D-v1/00000/7052578E-B0D0-E311-9698-0026189437FD.root' #old data
         #'/store/data/Commissioning2015/Cosmics/RECO/PromptReco-v1/000/238/721/00000/728A34D5-6DD2-E411-B424-02163E0133D9.root'        
-        '/store/data/Run2012D/SingleMu/RECO/PromptReco-v1/000/203/777/24F0F702-110B-E211-99C9-001D09F248F8.root',
-        '/store/data/Run2012D/SingleMu/RECO/PromptReco-v1/000/203/777/440888DB-240B-E211-8398-003048D2BB58.root',
-        '/store/data/Run2012D/SingleMu/RECO/PromptReco-v1/000/203/778/3A8126C6-E10A-E211-8FEE-003048D2C01E.root',
-        '/store/data/Run2012D/SingleMu/RECO/PromptReco-v1/000/203/780/AEDB1CB4-DE0A-E211-A08F-5404A6388699.root',
+        #'/store/data/Run2012D/SingleMu/RECO/PromptReco-v1/000/203/777/24F0F702-110B-E211-99C9-001D09F248F8.root',
+        #'/store/data/Run2012D/SingleMu/RECO/PromptReco-v1/000/203/777/440888DB-240B-E211-8398-003048D2BB58.root',
+        #'/store/data/Run2012D/SingleMu/RECO/PromptReco-v1/000/203/778/3A8126C6-E10A-E211-8FEE-003048D2C01E.root',
+        #'/store/data/Run2012D/SingleMu/RECO/PromptReco-v1/000/203/780/AEDB1CB4-DE0A-E211-A08F-5404A6388699.root',
+        "/store/data/Run2015C/DoubleMuon/RECO/PromptReco-v1/000/254/905/00000/0E69BA5C-B24B-E511-BEF4-02163E01478C.root",
         )
                             )
 
@@ -85,7 +87,7 @@ process.fpix = cms.EDAnalyzer('PxlFPix',
 )
 
 process.TFileService = cms.Service('TFileService',
-                                 fileName = cms.string('/afs/cern.ch/work/v/vlambert/fpixjob_newtag3.root'),
+                                 fileName = cms.string('fpixjob_newtag3.root'),
                                  )
 
 process.p = cms.Path(process.offlineBeamSpot*process.fpix)

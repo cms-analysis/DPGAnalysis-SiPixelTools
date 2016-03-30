@@ -14,7 +14,7 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condD
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 # tags for 74X
 #process.GlobalTag.globaltag = 'FT_R_74_V15B' # for 251643
-process.GlobalTag.globaltag = '74X_dataRun2_Prompt_v3' # 
+process.GlobalTag.globaltag = '76X_dataRun2_v15' # 
 #process.GlobalTag.globaltag = '74X_dataRun2_Prompt_v2' # 
 #process.GlobalTag.globaltag = '74X_dataRun2_Prompt_v1' # only for 746
 #process.GlobalTag.globaltag = '74X_dataRun2_Prompt_v0' # for 251643
@@ -188,7 +188,7 @@ if useLocalDBTemplate :
 # endif
  
 
-process.Histos = cms.EDAnalyzer('PxlBPix',
+process.Histos = cms.EDAnalyzer('Pxl',#BPix',
 # for official RECO
 	triggerSource = cms.InputTag('TriggerResults::HLT'),
 # For MC or my rereco

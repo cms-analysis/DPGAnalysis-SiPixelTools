@@ -107,6 +107,9 @@
 #include "CondFormats/SiPixelObjects/interface/SiPixelLorentzAngle.h"
 #include "CondFormats/DataRecord/interface/SiPixelLorentzAngleRcd.h"
 
+#include "FWCore/Framework/interface/ConsumesCollector.h"
+
+
 // Flag for new tracking rechis, has to be ON for pre7 and later
 #define NEW_TRACKINGRECHITS  // For V71X_pre7 and later
 
@@ -541,13 +544,15 @@ struct Histos{
 class Pxl : public edm::EDAnalyzer, public Histos {
   
 public:
-  explicit Pxl(const edm::ParameterSet&);
+  explicit Pxl(const edm::ParameterSet& // ,edm::ConsumesCollector&&
+	       );
   ~Pxl();
 
 private:
   virtual void beginJob() ;
   virtual void beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup);
-  virtual void analyze(const edm::Event&, const edm::EventSetup&);
+  virtual void analyze(const edm::Event&, const edm::EventSetup&// ,edm::ConsumesCollector&&
+		       );
   virtual void endJob() ;
 
   edm::InputTag _triggerSrc;
@@ -555,6 +560,11 @@ private:
   HLTConfigProvider HLTConfig;
   bool singleParticleMC;
 
+  edm::EDGetTokenT<reco::BeamSpot>  t_offlineBeamSpot_;
+  edm::EDGetTokenT<reco::VertexCollection> t_offlinePrimaryVertices_ ;
+  edm::EDGetTokenT <edm::TriggerResults> t_triggerSrc_ ;
+  edm::EDGetTokenT <reco::TrackCollection>  t_generalTracks_;
+  edm::EDGetTokenT< edm::View<reco::PFMET>> t_pfMet_;
   // ----------member data:
   std::map<int, Histos> runmap;
 };
@@ -570,7 +580,8 @@ private:
 //
 // constructor:
 //
-Pxl::Pxl(const edm::ParameterSet& iConfig)
+Pxl::Pxl(const edm::ParameterSet& iConfig// , edm::ConsumesCollector && ic
+	 )
 {
   std::cout << "Pxl constructed\n";
   _triggerSrc = iConfig.getParameter<edm::InputTag>("triggerSource");
@@ -578,6 +589,17 @@ Pxl::Pxl(const edm::ParameterSet& iConfig)
   singleParticleMC  = iConfig.getUntrackedParameter<bool>("singleParticleMC",false);
   std::cout<<_triggerSrc<<" "<<_triggerSrc.label()<<" "<<_triggerSrc.process()<<" "
 	   <<_triggerSrc.instance()<<" "<<std::endl;
+
+
+
+  //Definition of parameters 
+  t_triggerSrc_ = consumes<edm::TriggerResults> (iConfig.getParameter<edm::InputTag>("triggerSource"));
+  t_offlineBeamSpot_ =    consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
+  t_offlinePrimaryVertices_ =   consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
+  t_generalTracks_= consumes<reco::TrackCollection> (edm::InputTag("generalTracks"));
+  t_pfMet_= consumes< edm::View<reco::PFMET>>(edm::InputTag("pfMet"));
+
+  // tok_caloHH_ = consumes<edm::PCaloHitContainer>(edm::InputTag("g4SimHits", "HcalHits"));
 }
 //
 // destructor:
@@ -2143,7 +2165,8 @@ void Pxl::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 	}
 }
 
-void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
+void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , edm::ConsumesCollector && ic
+		  ){
 
   using namespace std;
   using namespace edm;
@@ -2168,7 +2191,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   }// new run
 
-  int idbg = 0;  // printout for the first few events
+  int idbg = 1;  // printout for the first few events
   if( myCounters::neve < 2 ) idbg = 1;
 
   int jdbg = 0; // special printout
@@ -2185,30 +2208,39 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   //----------------- HLT -------------------------------------------
 
-  // Trigger information, do only if the container is defined
+  // // Trigger information, do only if the container is defined
   if(_triggerSrc.label()!="" && idbg==1 ) { 
     edm::Handle<edm::TriggerResults> triggerResults;
-    iEvent.getByLabel(_triggerSrc, triggerResults);
+    
+    iEvent.getByToken( t_triggerSrc_ , triggerResults);
+    
+    //   iEvent.getByLabel(_triggerSrc, triggerResults);
     assert(triggerResults->size() == HLTConfig.size());
 
     const edm::TriggerNames& triggerNames = iEvent.triggerNames(*triggerResults);
     for(unsigned int i = 0; i < triggerResults->size(); ++i)
-    {
-      std::string triggerName = triggerNames.triggerName(i);
-      // this does not work in 74X
-      //std::pair<int, int> prescale = HLTConfig.prescaleValues(iEvent, iSetup, triggerName);
-      // this compiles&runs but I am not sure how to use it?
-      std::pair<std::vector<std::pair<std::basic_string<char>, int> >, int> 
-	prescale = HLTConfig.prescaleValuesInDetail(iEvent, iSetup, triggerName);
-      std::cout << i << ": " << triggerName << ", " << prescale.second << std::endl;
-    }
+      {
+	std::string triggerName = triggerNames.triggerName(i);
+	// this does not work in 74X
+	//std::pair<int, int> prescale = HLTConfig.prescaleValues(iEvent, iSetup, triggerName);
+	// this compiles&runs but I am not sure how to use it?
+	// std::pair<std::vector<std::pair<std::basic_string<char>, int> >, int> 
+	// 	prescale = HLTConfig.prescaleValuesInDetail(iEvent, iSetup, triggerName);
+	// std::cout << i << ": " << triggerName << ", " << prescale.second << std::endl;
+      }
   }
 
   //--------------------------------------------------------------------
   // beam spot:
+  //CMSSW 74 
+  // edm::Handle<reco::BeamSpot> rbs;
+  // iEvent.getByLabel( "offlineBeamSpot", rbs );
 
   edm::Handle<reco::BeamSpot> rbs;
-  iEvent.getByLabel( "offlineBeamSpot", rbs );
+  iEvent.getByToken( t_offlineBeamSpot_, rbs );
+  
+
+
 
   XYZPoint bsP = XYZPoint(0,0,0);
   int ibs = 0;
@@ -2243,7 +2275,10 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   // primary vertices:
 
   Handle<VertexCollection> vertices;
-  iEvent.getByLabel( "offlinePrimaryVertices", vertices );
+  //iEvent.getByLabel( "offlinePrimaryVertices", vertices );
+  iEvent.getByToken( t_offlinePrimaryVertices_,vertices );
+
+
 
   if( vertices.failedToGet() ) return;
   if( !vertices.isValid() ) return;
@@ -2339,8 +2374,9 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   // MET:
   if(0) {
     edm::Handle< edm::View<reco::PFMET> > pfMEThandle;
-    iEvent.getByLabel( "pfMet", pfMEThandle );
-    
+    //iEvent.getByLabel( "pfMet", pfMEThandle );
+    iEvent.getByToken(t_pfMet_, pfMEThandle );
+
     if( !pfMEThandle.failedToGet() && pfMEThandle.isValid()){
       
       h026->Fill( pfMEThandle->front().sumEt() );
@@ -2406,13 +2442,13 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   //--------------------------------------------------------------------
   // tracks:
-  Handle<TrackCollection> tracks;
-
-  iEvent.getByLabel( "generalTracks", tracks );
+  Handle<reco::TrackCollection> tracks;
+  iEvent.getByToken( t_generalTracks_, tracks );
+  //iEvent.getByLabel( "generalTracks", tracks );
 
   if( tracks.failedToGet() ) return;
   if( !tracks.isValid() ) return;
-
+  cout << "  tracks " << tracks->size();
   if( idbg ){
     cout << "  tracks " << tracks->size();
     cout << endl;

@@ -27,6 +27,7 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 
 #include "FWCore/Framework/interface/Event.h"
 //#include <FWCore/Framework/interface/EventSetup.h>
@@ -561,6 +562,11 @@ private:
   HLTConfigProvider HLTConfig;
   bool singleParticleMC;
 
+  edm::EDGetTokenT<reco::BeamSpot>  t_offlineBeamSpot_;
+  edm::EDGetTokenT<reco::VertexCollection> t_offlinePrimaryVertices_ ;
+  edm::EDGetTokenT <edm::TriggerResults> t_triggerSrc_ ;
+  edm::EDGetTokenT <reco::TrackCollection>  t_generalTracks_;
+
   // ----------member data:
   std::map<int, Histos> runmap;
 
@@ -585,6 +591,12 @@ PxlBPix::PxlBPix(const edm::ParameterSet& iConfig)
   singleParticleMC  = iConfig.getUntrackedParameter<bool>("singleParticleMC",false);
   std::cout<<_triggerSrc<<" "<<_triggerSrc.label()<<" "<<_triggerSrc.process()<<" "
 	   <<_triggerSrc.instance()<<" "<<std::endl;
+  
+  t_triggerSrc_ = consumes<edm::TriggerResults> (iConfig.getParameter<edm::InputTag>("triggerSource"));
+  t_offlineBeamSpot_ =    consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
+  t_offlinePrimaryVertices_ =   consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
+  t_generalTracks_= consumes<reco::TrackCollection> (edm::InputTag("generalTracks"));
+ 
 }
 //
 // destructor:
@@ -2208,15 +2220,16 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   // Trigger information, do only if the container is defined
   if(_triggerSrc.label()!="" && idbg==1 ) { 
     edm::Handle<edm::TriggerResults> triggerResults;
-    iEvent.getByLabel(_triggerSrc, triggerResults);
+    //iEvent.getByLabel(_triggerSrc, triggerResults);
+    iEvent.getByToken( t_triggerSrc_ , triggerResults);
     assert(triggerResults->size() == HLTConfig.size());
     const edm::TriggerNames& triggerNames = iEvent.triggerNames(*triggerResults);
     for(unsigned int i = 0; i < triggerResults->size(); ++i) {
       std::string triggerName = triggerNames.triggerName(i);
       //std::pair<int, int> prescale = HLTConfig.prescaleValues(iEvent, iSetup, triggerName);
-      std::pair<std::vector<std::pair<std::basic_string<char>, int> >, int> 
-       prescale = HLTConfig.prescaleValuesInDetail(iEvent, iSetup, triggerName);
-     std::cout << i << ": " << triggerName << ", " << prescale.second << std::endl;
+      //std::pair<std::vector<std::pair<std::basic_string<char>, int> >, int> 
+	//prescale = HLTConfig.prescaleValuesInDetail(iEvent, iSetup, triggerName);
+	//std::cout << i << ": " << triggerName << ", " << prescale.second << std::endl;
     }
   }
 
@@ -2225,7 +2238,8 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   // beam spot:
 
   edm::Handle<reco::BeamSpot> rbs;
-  iEvent.getByLabel( "offlineBeamSpot", rbs );
+  //  iEvent.getByLabel( "offlineBeamSpot", rbs );
+  iEvent.getByToken( t_offlineBeamSpot_, rbs );
 
 #ifdef NOT_USED
   int ibs = 0;
@@ -2264,7 +2278,8 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   // primary vertices:
 
   Handle<VertexCollection> vertices;
-  iEvent.getByLabel( "offlinePrimaryVertices", vertices );
+  //iEvent.getByLabel( "offlinePrimaryVertices", vertices );
+  iEvent.getByToken( t_offlinePrimaryVertices_,vertices );
 
   if( vertices.failedToGet() ) return;
   if( !vertices.isValid() ) return;
@@ -2416,7 +2431,8 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   //--------------------------------------------------------------------
   // tracks:
   Handle<TrackCollection> tracks;
-  iEvent.getByLabel( "generalTracks", tracks );
+  //iEvent.getByLabel( "generalTracks", tracks );
+  iEvent.getByToken( t_generalTracks_, tracks );
 
   if( tracks.failedToGet() ) return;
   if( !tracks.isValid() ) return;
