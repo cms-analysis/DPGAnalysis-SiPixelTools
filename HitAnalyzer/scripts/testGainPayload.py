@@ -43,9 +43,10 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1))
 process.source = cms.Source("PoolSource",
 fileNames =  cms.untracked.vstring(
 
-"/store/data/Commissioning2016/Cosmics/RAW/v1/000/266/277/00000/02643438-E2E5-E511-A9AA-02163E013432.root",
+#"/store/data/Commissioning2016/Cosmics/RAW/v1/000/266/277/00000/02643438-E2E5-E511-A9AA-02163E013432.root",
 
-#"root://eoscms//eos/cms/tier0/store/data/Commissioning2016/MinimumBias/RAW/v1/000/266/277/00000/0004807C-AFE5-E511-83C1-02163E011EAD.root",
+"root://eoscms//eos/cms/tier0/store/data/Commissioning2016/Cosmics/RAW/v1/000/267/594/00000/00FE23B9-C4F0-E511-9C3A-02163E01347C.root",
+
 #  "rfio:/castor/cern.ch/cms/store/data/Run2012D/MinimumBias/RAW/v1/000/205/217/2EF61B7D-F216-E211-98C3-001D09F28D54.root",
  )
 )

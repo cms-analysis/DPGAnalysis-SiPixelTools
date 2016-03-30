@@ -18,7 +18,7 @@ cd DPGAnalysis-SiPixelTools/HitAnalyzer/test
 pwd
 
 #  RAW
-cmsRun runHotPixels.py 
+#cmsRun runHotPixels.py 
 #cmsRun runRawDumper.py 
 #cmsRun runRawDumper_lumi.py 
 # cmsRun runRawToDigi_cfg.py 
@@ -26,6 +26,8 @@ cmsRun runHotPixels.py
 #cmsRun testPxdigi.py
 #cmsRun PixClusterAna.py
 #cmsRun PixClusterTest.py
+
+cmsRun PixClusterAna_260627.py
 
 #cmsRun PixClusterAna_ZB_254905.py
 #cmsRun PixClusterAna_ZB_254833.py
