@@ -95,8 +95,22 @@ process.a = cms.EDAnalyzer("FindHotPixelFromRaw",
 )
 
 
+process.b = cms.EDAnalyzer("PixClustersWithTracks",
+    Verbosity = cms.untracked.bool(False),
+#    src = cms.InputTag("generalTracks"),
+# for cosmics 
+    src = cms.InputTag("ctfWithMaterialTracksP5"),
+#     PrimaryVertexLabel = cms.untracked.InputTag("offlinePrimaryVertices"),
+#     trajectoryInput = cms.string("TrackRefitterP5")
+#     trajectoryInput = cms.string('cosmictrackfinderP5')
+)
+
+
+
+
 #process.p = cms.Path(process.hltfilter*process.d)
 #process.p = cms.Path(process.d) # reco, cluster analysis 
-process.p = cms.Path(process.hltfilter*process.a) # raw, noisy pixels
+process.p = cms.Path(process.b) # reco, track analysis 
+#process.p = cms.Path(process.hltfilter*process.a) # raw, noisy pixels
 
 

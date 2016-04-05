@@ -23,27 +23,21 @@ pwd
 #cmsRun runRawDumper_lumi.py 
 # cmsRun runRawToDigi_cfg.py 
 # cmsRun runFedErrorDumper.py
+
 #cmsRun testPxdigi.py
+
+
 #cmsRun PixClusterAna.py
 #cmsRun PixClusterTest.py
 
 cmsRun PixClusterAna_260627.py
-
-#cmsRun PixClusterAna_ZB_254905.py
-#cmsRun PixClusterAna_ZB_254833.py
-#cmsRun PixClusterAna_ZB_254790.py
-#cmsRun PixClusterAna_ZB_254608.py
-#cmsRun PixClusterAna_ZB_254227.py
-#cmsRun PixClusterAna_ZB_251643.py
-#cmsRun PixClusterAna_ZB_247607.py
-#cmsRun PixClusterAna_ZB_248025.py
 
 #cmsRun PixClusterAna_Phys_254227.py
 #cmsRun PixClusterAna_Comm_248025.py
 
 #cmsRun PixClusterAna_Lumi.py
 
-#cmsRun testTracks_251643.py
+#cmsRun testTracks.py
 
 # ls /tmp/dkotlins
 

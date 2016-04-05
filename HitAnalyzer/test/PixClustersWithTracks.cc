@@ -2,6 +2,7 @@
 // Author: Danek Kotlinski 
 // Creation Date:  Initial version. 3/06
 // Fails in V71 because of TrackingRecHit. <--- fix 
+// Move to getByToken, 80X, 4/16
 //--------------------------------------------
 #include <memory>
 #include <string>
@@ -118,7 +119,7 @@
 //#define VDM_STUDIES
 //#define ALIGN_STUDIES
 
-const bool isData = false; // set false for MC
+const bool isData = true; // set false for MC
 
 using namespace std;
 
@@ -139,6 +140,16 @@ class PixClustersWithTracks : public edm::EDAnalyzer {
   bool PRINT;
   float countTracks, countGoodTracks, countTracksInPix, countPVs, countEvents, countLumi;  
   float count1, count2, count3, count4;
+
+  // Needed for the ByToken method
+  //edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster> > myClus;
+  //edm::EDGetTokenT<SiPixelRecHitCollection> PixelRecHitToken;
+  edm::EDGetTokenT<LumiSummary> LumiToken;
+  edm::EDGetTokenT<edm::ConditionsInLumiBlock> ConditionsInLumiBlockToken;
+  edm::EDGetTokenT<L1GlobalTriggerReadoutRecord> L1TrigReadoutToken;
+  edm::EDGetTokenT<edm::TriggerResults> TrigResultsToken;
+  edm::EDGetTokenT<reco::VertexCollection> VertexCollectionToken;
+  edm::EDGetTokenT<std::vector<reco::Track>> TrackToken;
 
   TH1D *hcharge1,*hcharge2, *hcharge3, *hcharge4, *hcharge5;  // ADD FPIX
   TH1D *hsize1,*hsize2,*hsize3, 
@@ -234,9 +245,18 @@ PixClustersWithTracks::PixClustersWithTracks(edm::ParameterSet const& conf)
   src_ =  conf.getParameter<edm::InputTag>( "src" );
   //if(PRINT) cout<<" Construct "<<endl;
 
+  // Consumes 
+  // For the ByToken method
+  //myClus = consumes<edmNew::DetSetVector<SiPixelCluster> >(conf.getParameter<edm::InputTag>( "src" ));
+  //PixelRecHitToken = consumes  <SiPixelRecHitCollection>("...") ;
+  LumiToken                  = consumes <LumiSummary>(edm::InputTag("lumiProducer"));
+  ConditionsInLumiBlockToken = consumes <edm::ConditionsInLumiBlock> (edm::InputTag("conditionsInEdm"));
+  L1TrigReadoutToken         = consumes <L1GlobalTriggerReadoutRecord>(edm::InputTag("gtDigis"));
+  TrigResultsToken           = consumes <edm::TriggerResults>(edm::InputTag("TriggerResults","","HLT"));
+  VertexCollectionToken      = consumes <reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
+  TrackToken                 = consumes <std::vector<reco::Track>>(src_) ;
+
 }
-
-
 
 // Virtual destructor needed.
 PixClustersWithTracks::~PixClustersWithTracks() { }  
@@ -674,12 +694,17 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 
 #ifdef LUMI
   edm::LuminosityBlock const& iLumi = e.getLuminosityBlock();
+
   edm::Handle<LumiSummary> lumi;
-  iLumi.getByLabel("lumiProducer", lumi);
+  //iLumi.getByLabel("lumiProducer", lumi);
+  iLumi.getByToken(LumiToken, lumi);
+
   edm::Handle<edm::ConditionsInLumiBlock> cond;
+  //iLumi.getByLabel("conditionsInEdm", cond);
+  iLumi.getByToken(ConditionsInLumiBlockToken, cond);
+
   float intlumi = 0, instlumi=0;
   int beamint1=0, beamint2=0;
-  iLumi.getByLabel("conditionsInEdm", cond);
   // This will only work when running on RECO until (if) they fix it in the FW
   // When running on RAW and reconstructing, the LumiSummary will not appear
   // in the event before reaching endLuminosityBlock(). Therefore, it is not
@@ -702,7 +727,8 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 #ifdef L1
   // Get L1
   Handle<L1GlobalTriggerReadoutRecord> L1GTRR;
-  e.getByLabel("gtDigis",L1GTRR);
+  //e.getByLabel("gtDigis",L1GTRR);
+  e.getByToken(L1TrigReadoutToken,L1GTRR);
 
   if (L1GTRR.isValid()) {
     //bool l1a = L1GTRR->decision();  // global decission?
@@ -722,11 +748,13 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
   bool hlt[256];
   for(int i=0;i<256;++i) hlt[i]=false;
 
+
+  // HLT results 
   edm::TriggerNames TrigNames;
   edm::Handle<edm::TriggerResults> HLTResults;
+  //e.getByLabel(edm::InputTag("TriggerResults","","HLT"),HLTResults);
+  e.getByToken(TrigResultsToken, HLTResults);
 
-  // Extract the HLT results
-  e.getByLabel(edm::InputTag("TriggerResults","","HLT"),HLTResults);
   if ((HLTResults.isValid() == true) && (HLTResults->size() > 0)) {
 
     //TrigNames.init(*HLTResults);
@@ -766,7 +794,8 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
   // -- Primary vertices
   // ----------------------------------------------------------------------
   edm::Handle<reco::VertexCollection> vertices;
-  e.getByLabel("offlinePrimaryVertices", vertices);
+  //e.getByLabel("offlinePrimaryVertices", vertices);
+  e.getByToken(VertexCollectionToken, vertices);
 
   if(PRINT) cout<<" PV list "<<vertices->size()<<endl;
   int pvNotFake = 0, pvsTrue = 0;
@@ -810,14 +839,26 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 
   if(PRINT) cout<<" Not fake PVs = "<<pvNotFake<<" good position "<<pvsTrue<<endl;
    
+  // Clusters and rechits, not needed
+  //edm::Handle<SiPixelRecHitCollection> hRecHitColl;
+  //iEvent.getByToken(PixelRecHitToken, hRecHitColl); 
+
+  // Get Cluster Collection from InputTag
+  //edm::Handle< edmNew::DetSetVector<SiPixelCluster> > clusters;
+  //e.getByToken( myClus , clusters);
+  //const edmNew::DetSetVector<SiPixelCluster>& input = *clusters;     
+
+
   // -- Tracks
   // ----------------------------------------------------------------------
   Handle<reco::TrackCollection> recTracks;
+  //edm::Handle<std::vector<reco::Track> > hTrackCollection;
   // e.getByLabel("generalTracks", recTracks);
   // e.getByLabel("ctfWithMaterialTracksP5", recTracks);
   // e.getByLabel("splittedTracksP5", recTracks);
   //e.getByLabel("cosmictrackfinderP5", recTracks);
-  e.getByLabel(src_ , recTracks);
+  ///e.getByLabel(src_ , recTracks);
+  e.getByToken(TrackToken, recTracks);
 
   bool missingHit=false, missingHitB=false;
   if(PRINT) cout<<" Tracks "<<recTracks->size()<<endl;

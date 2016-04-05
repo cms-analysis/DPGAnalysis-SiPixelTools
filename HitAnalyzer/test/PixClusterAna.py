@@ -56,7 +56,7 @@ process.hltfilter = hlt.hltHighLevel.clone(
 
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100000)
+    input = cms.untracked.int32(-1)
 )
 
 process.MessageLogger = cms.Service("MessageLogger",

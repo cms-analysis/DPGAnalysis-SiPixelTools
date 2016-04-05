@@ -100,8 +100,8 @@ using namespace std;
 
 #define HISTOS
 //#define L1
-//#define HLT
-//#define PV
+#define HLT
+#define PV
 //#define HI
 //#define ROC_EFF
 //#define Lumi
@@ -896,6 +896,11 @@ class PixClusterAna : public edm::EDAnalyzer {
 
   // Needed for the ByToken method
   edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster> > myClus;
+  edm::EDGetTokenT<LumiSummary> LumiToken;
+  edm::EDGetTokenT<edm::ConditionsInLumiBlock> ConditionsInLumiBlockToken;
+  edm::EDGetTokenT<L1GlobalTriggerReadoutRecord> L1TrigReadoutToken;
+  edm::EDGetTokenT<edm::TriggerResults> TrigResultsToken;
+  edm::EDGetTokenT<reco::VertexCollection> VertexCollectionToken;
 
 #ifdef HF
 edm::EDGetTokenT<HFRecHitCollection> HFHitsToken_;
@@ -1064,6 +1069,12 @@ PixClusterAna::PixClusterAna(edm::ParameterSet const& conf)
 
   // For the ByToken method
   myClus = consumes<edmNew::DetSetVector<SiPixelCluster> >(conf.getParameter<edm::InputTag>( "src" ));
+  LumiToken                  = consumes <LumiSummary>(edm::InputTag("lumiProducer"));
+  ConditionsInLumiBlockToken = consumes <edm::ConditionsInLumiBlock> (edm::InputTag("conditionsInEdm"));
+  L1TrigReadoutToken         = consumes <L1GlobalTriggerReadoutRecord>(edm::InputTag("gtDigis"));
+  TrigResultsToken           = consumes <edm::TriggerResults>(edm::InputTag("TriggerResults","","HLT"));
+  VertexCollectionToken      = consumes <reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
+
 
 #ifdef HF
   //HFHits_       = iConfig.getParameter<edm::InputTag>("HFHitCollection");
@@ -2035,13 +2046,18 @@ void PixClusterAna::analyze(const edm::Event& e,
 
   // Lumi 
   edm::LuminosityBlock const& iLumi = e.getLuminosityBlock();
+
   edm::Handle<LumiSummary> lumi;
   edm::Handle<LumiDetails> ld;
-  iLumi.getByLabel("lumiProducer", lumi);
-  iLumi.getByLabel("lumiProducer", ld);
+  //iLumi.getByLabel("lumiProducer", lumi);
+  //iLumi.getByLabel("lumiProducer", ld);
+  iLumi.getByToken(LumiToken, lumi);
+  iLumi.getByToken(LumiToken, ld);
 
   edm::Handle<edm::ConditionsInLumiBlock> cond;
-  iLumi.getByLabel("conditionsInEdm", cond);
+  //iLumi.getByLabel("conditionsInEdm", cond);
+  iLumi.getByToken(ConditionsInLumiBlockToken, cond);
+
   // This will only work when running on RECO until (if) they fix it in the FW
   // When running on RAW and reconstructing, the LumiSummary will not appear
   // in the event before reaching endLuminosityBlock(). Therefore, it is not
@@ -2090,8 +2106,9 @@ void PixClusterAna::analyze(const edm::Event& e,
   int numPVsGood = 0;
   if(run>165000) { // skip for earlier runs, crashes
     edm::Handle<reco::VertexCollection> vertices;
-    e.getByLabel( "offlinePrimaryVertices", vertices );
-        
+    //e.getByLabel( "offlinePrimaryVertices", vertices );
+    e.getByToken(VertexCollectionToken, vertices);
+
     //int numPVs = vertices->size(); // unused 
     if( !vertices.failedToGet() && vertices.isValid() ) {
       for( reco::VertexCollection::const_iterator iVertex = vertices->begin();
@@ -2195,8 +2212,8 @@ void PixClusterAna::analyze(const edm::Event& e,
 #ifdef L1
   // Get L1
   Handle<L1GlobalTriggerReadoutRecord> L1GTRR;
-  e.getByLabel("gtDigis",L1GTRR);
-
+  //e.getByLabel("gtDigis",L1GTRR);
+  e.getByToken(L1TrigReadoutToken,L1GTRR);
 
   if (L1GTRR.isValid()) {
     //bool l1a = L1GTRR->decision();  // global decission?  unused
@@ -2267,11 +2284,11 @@ void PixClusterAna::analyze(const edm::Event& e,
 
   edm::TriggerNames TrigNames;
   edm::Handle<edm::TriggerResults> HLTResults;
-
   // Extract the HLT results
-  e.getByLabel(edm::InputTag("TriggerResults","","HLT"),HLTResults);
-  if ((HLTResults.isValid() == true) && (HLTResults->size() > 0)) {
+  //e.getByLabel(edm::InputTag("TriggerResults","","HLT"),HLTResults);
+  e.getByToken(TrigResultsToken, HLTResults);
 
+  if ((HLTResults.isValid() == true) && (HLTResults->size() > 0)) {
     //TrigNames.init(*HLTResults);
     const edm::TriggerNames & TrigNames = e.triggerNames(*HLTResults);
 
