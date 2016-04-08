@@ -961,10 +961,12 @@ void PixelTree::analyze(const edm::Event& iEvent,
 
 
   // -- Pixel cluster
+  const edmNew::DetSetVector<SiPixelCluster> *clustColl = 0;
   edm::Handle< edmNew::DetSetVector<SiPixelCluster> > hClusterColl;
   iEvent.getByToken(SiPixelClusterToken, hClusterColl);
-  const edmNew::DetSetVector<SiPixelCluster> clustColl = *(hClusterColl.product());
+  clustColl = hClusterColl.product();
 
+ 
   // -- Pixel RecHit
   edm::Handle<SiPixelRecHitCollection> hRecHitColl;
   iEvent.getByToken(PixelRecHitToken, hRecHitColl); 
@@ -1069,8 +1071,9 @@ void PixelTree::analyze(const edm::Event& iEvent,
 	    gPhiDirection  = surface.toGlobal(lPhiDirection),
 	    gROrZDirection = surface.toGlobal(lROrZDirection);
 	  
-	  
-	  float phiorientation = deltaPhi(gPhiDirection.phi(), gPModule.phi()) >= 0 ? +1. : -1.;
+	  float directionPhi = gPhiDirection.phi();
+	  float modulePhi = gPModule.phi();
+	  float phiorientation = deltaPhi(directionPhi, modulePhi) >= 0 ? +1. : -1.;
 	  
 	  LocalTrajectoryParameters ltp = tsos.localParameters();
 	  LocalVector localDir = ltp.momentum()/ltp.momentum().mag();
@@ -1647,7 +1650,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
       DetId detId = (*it)->geographicalId();
 
       // -- clusters on this det
-      edmNew::DetSetVector<SiPixelCluster>::const_iterator isearch = clustColl.find(detId);
+      edmNew::DetSetVector<SiPixelCluster>::const_iterator isearch = clustColl->find(detId);
       // -- rechits on this det
       SiPixelRecHitCollection::const_iterator dsmatch = hRecHitColl->find(detId);
       SiPixelRecHitCollection::DetSet rhRange;
@@ -1660,7 +1663,7 @@ void PixelTree::analyze(const edm::Event& iEvent,
         rhIteratorEnd = rhRange.end();
 }
 
-      if (isearch != clustColl.end()) {  // Not an empty iterator
+      if (isearch != clustColl->end()) {  // Not an empty iterator
 	edmNew::DetSet<SiPixelCluster>::const_iterator  di;
 	for (di = isearch->begin(); di != isearch->end(); ++di) {
 	  if (fClN > CLUSTERMAX - 1) break;
