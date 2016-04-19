@@ -26,8 +26,6 @@ process.load("RecoLocalTracker.Configuration.RecoLocalTracker_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-#process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
-#from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 from Configuration.AlCa.GlobalTag import GlobalTag
 # to use no All 
 
@@ -167,8 +165,6 @@ process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
   'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_74/simhits/simHits1.root',
 # gen-sim
 # '/store/relval/CMSSW_7_0_0_pre8/RelValSingleMuPt100/GEN-SIM/START70_V2_RR-v7/00000/B464EA42-2B59-E311-A2C1-0025905964C2.root',
-# '/store/relval/CMSSW_7_0_0_pre10/RelValSingleMuPt100/GEN-SIM-RECO/START70_V3-v1/00000/908DD48F-1466-E311-BEBE-0025905A48F0.root',
-# '/store/relval/CMSSW_7_0_0_pre10/RelValSingleMuPt100/GEN-SIM-DIGI-RAW-HLTDEBUG/START70_V3-v1/00000/EAA29CCF-8965-E311-A43D-0025905A6084.root',
   )
 )
 
@@ -318,22 +314,19 @@ process.g4SimHits.Generator.HepMCProductLabel = 'source'
 process.siPixelClustersPreSplitting.src = 'simSiPixelDigis' # for V5, direct
 # process.siPixelClusters.src = 'mix'
 # modify digitizer parameters
-#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix = 3500.0 
-#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix = 3500.0 
-#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix_L1 = 3500.0 
-#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_FPix = 3500.0 
-
+#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix = 4500.0  # 3500.
+#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix_L1 = 4500.0  # 3500.
+#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_FPix = 4500.0  # 3500.
+#
 process.simSiPixelDigis.digitizers.pixel.AddPixelInefficiencyFromPython = cms.bool(False)
 process.simSiPixelDigis.digitizers.pixel.AddPixelInefficiency = cms.bool(False)
 #
-# tell the digitize it is phase1
-
 # use inefficiency from DB Gain calibration payload? OFF BY DEFAULT
 #process.simSiPixelDigis.digitizers.pixel.useDB = cms.bool(False) 
 # use LA from file 
 #process.simSiPixelDigis.digitizers.pixel.LorentzAngle_DB = cms.bool(False)
-#process.simSiPixelDigis.digitizers.pixel.TanLorentzAnglePerTesla_BPix = 0.106 
-#process.simSiPixelDigis.digitizers.pixel.TanLorentzAnglePerTesla=FPix = 0.106 
+#process.simSiPixelDigis.digitizers.pixel.TanLorentzAnglePerTesla_BPix = 0.100 
+#process.simSiPixelDigis.digitizers.pixel.TanLorentzAnglePerTesla_FPix = 0.058 
 
 # clus , label of digis 
 process.siPixelClustersPreSplitting.src = 'simSiPixelDigis'
@@ -342,14 +335,22 @@ process.siPixelClustersPreSplitting.src = 'simSiPixelDigis'
 #process.siPixelClustersPreSplitting.SeedThreshold = 1000
 # set to false to ignore the gain calibration
 #process.siPixelClustersPreSplitting.MissCalibrate = cms.untracked.bool(False)
+# rechits 
+#process.PixelCPEGenericESProducer.lAOffset = cms.double(0.100) 
+#process.PixelCPEGenericESProducer.useLAWidthFromDB = cms.bool(False)
 
+# read rechits
+#process.analysis = cms.EDAnalyzer("ReadPixelRecHit",
+#    Verbosity = cms.untracked.bool(False),
+#    src = cms.InputTag("siPixelRecHits"),
+#)
 
 #process.analysis = cms.EDAnalyzer("PixClusterTest",
 #    Verbosity = cms.untracked.bool(False),
 #    src = cms.InputTag("siPixelClustersPreSplitting"),
 #)
 process.analysis = cms.EDAnalyzer("PixClusterAna",
-    Verbosity = cms.untracked.bool(True),
+    Verbosity = cms.untracked.bool(False),
     #src = cms.InputTag("siPixelClusters"),
     src = cms.InputTag("siPixelClustersPreSplitting"),
     Select1 = cms.untracked.int32(1),  # cut on the num of dets <4 skip, 0 means 4 default 
