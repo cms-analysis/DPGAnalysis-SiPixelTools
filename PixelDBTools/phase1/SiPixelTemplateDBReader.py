@@ -2,8 +2,8 @@ import FWCore.ParameterSet.Config as cms
 import sys
 
 process = cms.Process("SiPixelTemplateDBReaderTest")
-
-process.load("CondCore.DBCommon.CondDBSetup_cfi")
+#process.load("CondCore.DBCommon.CondDBSetup_cfi")
+process.load("CondCore.CondDB.CondDB_cfi")
 #process.load("FWCore.MessageService.MessageLogger_cfi")
 process.load("CalibTracker.SiPixelESProducers.SiPixelTemplateDBObjectESProducer_cfi")
 # needed for trackertopology
@@ -29,15 +29,15 @@ process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(1)
     )
 
-#process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
-from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-#process.GlobalTag.globaltag = "MC_70_V4::All"
+process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
+from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag.globaltag = "74X_dataRun2_Prompt_v3"
-process.GlobalTag = GlobalTag(process.GlobalTag, '75X_upgrade2017_design_v4', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, '75X_upgrade2017_design_v4', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, '80X_upgrade2017_design_v10', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
 
 # use a local sqlite file instead of GT
-testLocal = True
+testLocal = False
 if testLocal :
   process.DBReader = cms.ESSource("PoolDBESSource",
      process.CondDBSetup,
@@ -55,12 +55,10 @@ if testLocal :
 #     connect = cms.string('sqlite_file:../../../../../DB/310815/SiPixelTemplateDBObject_38T_2015_v3.db')
 #     connect = cms.string('sqlite_file:../../../../../DB/310815/SiPixelTemplateDBObject_0T_2015_v3.db')
 #     connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelTemplateDBObject_phase1_38T_mc_v1.db')
-     connect = cms.string('sqlite_file:SiPixelTemplateDBObject_phase1_38T_mc_v1.db')
+#     connect = cms.string('sqlite_file:SiPixelTemplateDBObject_phase1_38T_mc_v1.db')
 #     connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
-#     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
+     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
     )
-    #process.PoolDBESSource.DBParameters.authenticationPath='.'
-    #process.PoolDBESSource.DBParameters.messageLevel=0
   process.es_prefer_DBReader = cms.ESPrefer("PoolDBESSource","DBReader")
 # end if
 

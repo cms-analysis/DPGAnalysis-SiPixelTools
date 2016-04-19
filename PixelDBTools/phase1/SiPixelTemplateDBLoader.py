@@ -2,7 +2,8 @@ import FWCore.ParameterSet.Config as cms
 import sys
 
 process = cms.Process("SiPixelTemplateDBUpload")
-process.load("CondCore.DBCommon.CondDBCommon_cfi")
+#process.load("CondCore.DBCommon.CondDBCommon_cfi")
+process.load("CondCore.CondDB.CondDB_cfi")
 process.load("FWCore.MessageService.MessageLogger_cfi")
 
 #process.load("Configuration.StandardSequences.Geometry_cff")
@@ -10,23 +11,17 @@ process.load("FWCore.MessageService.MessageLogger_cfi")
 process.load("Configuration.Geometry.GeometryExtended2017Reco_cff")
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-#process.GlobalTag.globaltag = "MC_70_V4::All"
-#process.GlobalTag.globaltag = "START71_V1::All"
-process.GlobalTag = GlobalTag(process.GlobalTag, '75X_upgrade2017_design_v4', '')
+from Configuration.AlCa.GlobalTag import GlobalTag
+#process.GlobalTag = GlobalTag(process.GlobalTag, '75X_upgrade2017_design_v4', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, '80X_upgrade2017_design_v10', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
 
-#MagFieldValue = 3.8
-#MagFieldString = '38T'
-#MagFieldString = '38'
 files_to_upload = cms.vstring(
         "../../DB/MC/template_summary_zp0030.out",
         "../../DB/MC/template_summary_zp0031.out"
 )
 theDetIds      = cms.vuint32( 1, 2)
 theTemplateIds = cms.vuint32(30,31)
-#version = 'v1'
-#template_base = 'SiPixelTemplateDBObject_phase1_38T_mc_v1'
-#theTemplateBaseString = cms.string(template_base)
 
 process.source = cms.Source("EmptyIOVSource",
                             timetype = cms.string('runnumber'),
@@ -62,11 +57,4 @@ process.uploader = cms.EDAnalyzer("SiPixelTemplateDBLoader", # DPGAnalysis
                                   templateIds = theTemplateIds
 )
 
-
-#process.myprint = cms.OutputModule("AsciiOutputModule")
-
 process.p = cms.Path(process.uploader)
-
-#process.CondDBCommon.connect = 'sqlite_file:siPixelTemplates' + MagFieldString + 'T.db'
-#process.CondDBCommon.DBParameters.messageLevel = 0
-#process.CondDBCommon.DBParameters.authenticationPath = './'
