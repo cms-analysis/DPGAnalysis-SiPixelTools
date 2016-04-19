@@ -38,7 +38,7 @@ using namespace edm;
 using namespace reco;
 
 SiPixelLorentzAngle::SiPixelLorentzAngle(edm::ParameterSet const& conf) : 
-  conf_(conf), filename_(conf.getParameter<std::string>("fileName")), filenameFit_(conf.getParameter<std::string>("fileNameFit")), ptmin_(conf.getParameter<double>("ptMin")), simData_(conf.getParameter<bool>("simData")),	normChi2Max_(conf.getParameter<double>("normChi2Max")), clustSizeYMin_(conf.getParameter<int>("clustSizeYMin")), residualMax_(conf.getParameter<double>("residualMax")), clustChargeMax_(conf.getParameter<double>("clustChargeMax")),hist_depth_(conf.getParameter<int>("binsDepth")), hist_drift_(conf.getParameter<int>("binsDrift"))
+  filename_(conf.getParameter<std::string>("fileName")), filenameFit_(conf.getParameter<std::string>("fileNameFit")), ptmin_(conf.getParameter<double>("ptMin")), simData_(conf.getParameter<bool>("simData")),	normChi2Max_(conf.getParameter<double>("normChi2Max")), clustSizeYMin_(conf.getParameter<int>("clustSizeYMin")), residualMax_(conf.getParameter<double>("residualMax")), clustChargeMax_(conf.getParameter<double>("clustChargeMax")),hist_depth_(conf.getParameter<int>("binsDepth")), hist_drift_(conf.getParameter<int>("binsDrift")), trackerHitAssociatorConfig_(consumesCollector())
 {
   //   	anglefinder_=new  TrackLocalAngle(conf);
   hist_x_ = 50;
@@ -162,7 +162,7 @@ void SiPixelLorentzAngle::analyze(const edm::Event& e, const edm::EventSetup& es
 {
   //Retrieve tracker topology from geometry
   edm::ESHandle<TrackerTopology> tTopoHandle;
-  es.get<IdealGeometryRecord>().get(tTopoHandle);
+  es.get<TrackerTopologyRcd>().get(tTopoHandle);
   const TrackerTopology* const tTopo = tTopoHandle.product();
   
   event_counter_++;
@@ -183,15 +183,15 @@ void SiPixelLorentzAngle::analyze(const edm::Event& e, const edm::EventSetup& es
   edm::Handle<edm::PCaloHitContainer> pcaloee;
   edm::Handle<edm::PCaloHitContainer> pcalohh;
 
-  TrackerHitAssociator* associate = 0;
+  TrackerHitAssociator* associate(0);
   if(simData_){ 
     	e.getByToken(tok_simTk_,SimTk);
     	e.getByToken(tok_simVtx_,SimVtx);
     	e.getByToken(tok_caloEB_, pcaloeb);
    	e.getByToken(tok_caloEE_, pcaloee);
 	e.getByToken(tok_caloHH_, pcalohh);
-	associate = new TrackerHitAssociator(e);
-}
+	associate = new TrackerHitAssociator(e, trackerHitAssociatorConfig_);
+  }
  // eout << associate << endl;
   // reset values
   module_=-1;
