@@ -410,22 +410,20 @@ int MyDecode::data(int word, int & fedChannel, int fed, int & stat1, int & stat2
 
       if(CHECK_PIXELS) {
 
-	// invalid roc number
-	if( (fed>31 && roc_>24) || (fed<=31 && roc_>16)  ) {  //inv ROC
+	// Check invalid ROC numbers
+	if( ((fed>31) && (roc_>24)) || ((fed<=31) && (roc_>16))  ) {  //inv ROC
           //if(printErrors) 
 	  cout<<" Fed "<<fed<<" wrong roc number chan/roc/dcol/pix/adc = "<<channel_<<"/"
 			      <<roc_-1<<"/"<<dcol_<<"/"<<pix_<<"/"<<adc_<<endl;
 	  status = -4;
 
 	 
-	} else if( fed<=31 && channel_<=24 && roc_>8 ) {
-	  // Check invalid ROC numbers
-
 	  // protect for rerouted signals
-	  if( !( (fed==13 && channel_==17) ||(fed==15 && channel_==5) ||(fed==31 && channel_==10) 
-		                          ||(fed==27 && channel_==15) )  ) {
+	} else if( fed<=31 && channel_<=24 && roc_>8 ) {
+	  if( !( (fed==6 && channel_==1) ||(fed==9 && channel_==16) ||(fed==23 && channel_==15)
+		 || (fed==31 && channel_==10) ||(fed==27 && channel_==15) )  ) {
 	    //if(printErrors) 
-	    cout<<" Fed "<<fed<<" wrong roc number, chan/roc/dcol/pix/adc = "<<channel_<<"/"
+	    cout<<" Fed "<<fed<<" wrong channel number, chan/roc/dcol/pix/adc = "<<channel_<<"/"
 				<<roc_-1<<"/"<<dcol_<<"/"<<pix_<<"/"<<adc_<<endl;
 	    status = -4;
 	  }
