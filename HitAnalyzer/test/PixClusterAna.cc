@@ -2276,7 +2276,7 @@ void PixClusterAna::analyze(const edm::Event& e,
   //---------------------------------------
   // Analyse HLT
   //bool passHLT1=false,passHLT2=false,passHLT3=false,passHLT4=false,passHLT5=false;
-  const int hltSize = 512;
+  const int hltSize = 1024;
   bool hlt[hltSize];
   for(int i=0;i<hltSize;++i) hlt[i]=false;
 

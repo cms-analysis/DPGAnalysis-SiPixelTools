@@ -167,7 +167,7 @@ class PixClustersWithTracks : public edm::EDAnalyzer {
   TH2F *hDetMap1, *hDetMap2, *hDetMap3;  // clusters 
   TH2F *hcluDetMap1, *hcluDetMap2, *hcluDetMap3; // MODULE PROJECTION 
 
-  TH2F *hpvxy, *hclusMap1, *hclusMap2, *hclusMap3; // Z vs PHI
+  TH2F *hpvxy, *hclusMap1, *hclusMap2, *hclusMap3; // eta vs PHI
 
   TH1D *hladder1id,*hladder2id,*hladder3id,*hz1id,*hz2id,*hz3id;
 
@@ -476,9 +476,9 @@ void PixClustersWithTracks::beginJob() {
    hbx0    = fs->make<TH1D>("hbx0",   "bx",   4000,0,4000.);  
    hbx    = fs->make<TH1D>("hbx",   "bx",     4000,0,4000.);  
 
-   hclusMap1 = fs->make<TH2F>("hclusMap1","clus - lay1",260,-26.,26.,350,-3.5,3.5);
-   hclusMap2 = fs->make<TH2F>("hclusMap2","clus - lay2",260,-26.,26.,350,-3.5,3.5);
-   hclusMap3 = fs->make<TH2F>("hclusMap3","clus - lay3",260,-26.,26.,350,-3.5,3.5);
+   hclusMap1 = fs->make<TH2F>("hclusMap1","clus - lay1",250,-2.5,2.5,350,-3.5,3.5);
+   hclusMap2 = fs->make<TH2F>("hclusMap2","clus - lay2",250,-2.5,2.5,350,-3.5,3.5);
+   hclusMap3 = fs->make<TH2F>("hclusMap3","clus - lay3",250,-2.5,2.5,350,-3.5,3.5);
    
    hstatus = fs->make<TH1D>("hstatus","status", 100, -0.5, 99.5);
 
@@ -1224,14 +1224,14 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    //hrows1->Fill(row);
 	    hladder1id->Fill(float(ladderOn));
 	    hz1id->Fill(float(module));
-	    hPhi1->Fill(phi);
+	    hPhi1->Fill(phi);  // track phi
 	    hbpixXY->Fill(gX,gY);
-	    hzphi1->Fill(gZ,gPhi);
+	    hzphi1->Fill(gZ,gPhi);  // hit phi
 	    htest->Fill(gPhi,float(size));
 	    htest2->Fill(gPhi,float(sizeX));
 	    htest3->Fill(gPhi,float(sizeY));
 
-	    hclusMap1->Fill(gZ,phi);
+	    hclusMap1->Fill(eta,phi);
 	    hstatus->Fill(12.);
 #ifdef USE_PROFILES
 	    hmult1->Fill(zindex,float(size));
@@ -1286,7 +1286,7 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    htest2->Fill(gPhi,float(sizeX));
 	    htest3->Fill(gPhi,float(sizeY));
 
-	    hclusMap2->Fill(gZ,phi);
+	    hclusMap2->Fill(eta,phi);
 	    hstatus->Fill(13.);
 
 #ifdef USE_PROFILES
@@ -1339,7 +1339,7 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    htest2->Fill(gPhi,float(sizeX));
 	    htest3->Fill(gPhi,float(sizeY));
 
-	    hclusMap3->Fill(gZ,phi);
+	    hclusMap3->Fill(eta,phi);
 	    hstatus->Fill(14.);
 
 #ifdef USE_PROFILES
