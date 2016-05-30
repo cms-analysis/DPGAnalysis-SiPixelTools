@@ -4,7 +4,8 @@
  *  Added class to interpret the data d.k. 30/10/08
  *  Add histograms. Add pix 0 detection.
  * Works with v7x, comment out the digis access.
- * Adopted for Phase1, not commited yet. Need to port to 8X
+ * Adopted for Phase1.
+ * Add simple error vs fed num histos.
  */
 
 #include "FWCore/Framework/interface/EDAnalyzer.h"
@@ -21,19 +22,6 @@
 #include "DataFormats/FEDRawData/interface/FEDNumbering.h"
 
 #include "EventFilter/SiPixelRawToDigi/interface/PixelDataFormatter.h"
-
-
-// For L1  NOT IN RAW
-//#include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
-//#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutSetupFwd.h"
-//#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutSetup.h"
-//#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
-//#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerObjectMapRecord.h"
-
-// For luminisoty NOT IN RAW
-//#include "FWCore/Framework/interface/LuminosityBlock.h"
-//#include "DataFormats/Luminosity/interface/LumiSummary.h"
-//#include "DataFormats/Common/interface/ConditionsInEdm.h"
 
 // To use root histos
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -55,7 +43,7 @@
 
 using namespace std;
 
-// #define L1  // L1 information not in RAW
+//#define L1  // L1 information not in RAW
 //#define OUTFILE 
 //#define PHASE1
 
@@ -81,7 +69,7 @@ namespace {
 #endif
 }
 
-// Include the helper decoding class
+// Include the helper decoding class (how did I mange to avoid linking conflicts?)
 /////////////////////////////////////////////////////////////////////////////
 class MyDecode {
 public:
@@ -587,6 +575,7 @@ private:
   TH1D *hfedchannelsizeb,*hfedchannelsizeb1,*hfedchannelsizeb2,*hfedchannelsizeb3,
     *hfedchannelsizef;
   TH1D *hadc1,*hadc2,*hadc3,*hadc0; 
+  TH1D *htimeoutFed, *hoverflowFed, *hnorFed, *heneFed, *hpixFed;
 
   MyDecode decode;
 };
@@ -964,6 +953,12 @@ void SiPixelRawDump::beginJob() {
   hadc3 = fs->make<TH1D>("hadc3","adc lay 3",255,0.,255.);
   hadc0 = fs->make<TH1D>("hadc0","adc lay 0",255,0.,255.);
 
+  htimeoutFed  = fs->make<TH1D>("htimeoutFed","timeouts",41,0.,41.);
+  hoverflowFed = fs->make<TH1D>("hoverflowFed","overflow",41,0.,41.);
+  hnorFed      = fs->make<TH1D>("hnorFed","nors",41,0.,41.);
+  heneFed      = fs->make<TH1D>("heneFed","enes",41,0.,41.);
+  hpixFed      = fs->make<TH1D>("hpixFed","pix&dcol",41,0.,41.);
+
 #ifdef OUTFILE
   outfile.open("pixfed.csv");
   for(int i = 0; i < n_of_FEDs; ++i) {if(i<39) outfile<<i<<","; else outfile<<i<<endl;}
@@ -984,20 +979,6 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
   hlumi0->Fill(float(lumiBlock));
   hbx0->Fill(float(bx));
   //horbit->Fill(float(orbit));
-
-#ifdef L1
-  // Get L1
-  edm::Handle<L1GlobalTriggerReadoutRecord> L1GTRR;
-  ev.getByLabel("gtDigis",L1GTRR);
-
-  if (L1GTRR.isValid()) {
-    bool l1a = L1GTRR->decision();
-    cout<<" L1 status :"<<l1a<<endl;
-  } else {
-    cout<<" NO L1 status "<<endl;
-  } // if l1a
-#endif
-
 
   // Get lumi info (does not work for raw)
 //  edm::LuminosityBlock const& iLumi = ev.getLuminosityBlock();
@@ -1181,6 +1162,7 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 
 	  case(10) : { // Timeout
 
+	    htimeoutFed->Fill(float(fedId-fedId0));
 	    countErrors[10]++;
 	    fedErrorsTime[fedId-fedId0][(fedChannel-1)]++;
 	    hfed2DErrors10->Fill(float(fedId-fedId0),float(fedChannel));
@@ -1197,6 +1179,7 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 
 	  case(14) : {  // OVER
 
+	    hoverflowFed->Fill(float(fedId-fedId0));
 	    countErrors[14]++;
 	    fedErrorsOver[fedId-fedId0][(fedChannel-1)]++;
 	    hfed2DErrors14->Fill(float(fedId-fedId0),float(fedChannel));
@@ -1212,6 +1195,7 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 
 	  case(11) : {  // ENE
 
+	    heneFed->Fill(float(fedId-fedId0));
 	    countErrors[11]++;
 	    hfed2DErrors11->Fill(float(fedId-fedId0),float(fedChannel));
 	    hfed2DErrors11ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
@@ -1228,6 +1212,7 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 
 	  case(12) : {  // NOR
 
+	    hnorFed->Fill(float(fedId-fedId0));
 	    countErrors[12]++;
 	    hfed2DErrors12->Fill(float(fedId-fedId0),float(fedChannel));
 	    hfed2DErrors12ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
@@ -1249,7 +1234,7 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 	    break; }
 
 	  case(3) : {  //  inv. pix-dcol
-
+	    hpixFed->Fill(float(fedId-fedId0));
 	    countErrors[3]++;
 	    hfed2DErrors3->Fill(float(fedId-fedId0),float(fedChannel));
 	    hfed2DErrors3ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors

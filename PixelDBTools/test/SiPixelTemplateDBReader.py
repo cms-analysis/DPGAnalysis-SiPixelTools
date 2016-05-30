@@ -2,9 +2,7 @@ import FWCore.ParameterSet.Config as cms
 import sys
 process = cms.Process("SiPixelTemplateDBReaderTest")
 
-#process.load("CondCore.DBCommon.CondDBSetup_cfi")
 process.load("CondCore.CondDB.CondDB_cfi")
-
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
 
@@ -33,31 +31,33 @@ process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(1)
     )
 
-#process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
-#process.GlobalTag.globaltag = "MC_70_V4::All"
-#process.GlobalTag.globaltag = "74X_dataRun2_Prompt_v4"
-#process.GlobalTag.globaltag = "75X_dataRun2_Prompt_v2"
-#process.GlobalTag.globaltag = "80X_dataRun2_Prompt_v3"
-process.GlobalTag.globaltag = "76X_dataRun2_v19"
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+from Configuration.AlCa.GlobalTag import GlobalTag
+# works with condDB and condDBv2
+# process.GlobalTag = GlobalTag(process.GlobalTag, '74X_dataRun2_Prompt_v3', '')
+# process.GlobalTag = GlobalTag(process.GlobalTag, 'GR_R_75_V1A', '')
+# process.GlobalTag = GlobalTag(process.GlobalTag, 'FT_R_74_V15B', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
+# process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 
 # use a local sqlite file instead of GT
-testLocal = False
+testLocal = True
 if testLocal :
   process.DBReader = cms.ESSource("PoolDBESSource",
-     process.CondDBSetup,
         toGet = cms.VPSet(cms.PSet(
           label = cms.untracked.string('0T'),
           record = cms.string('SiPixelTemplateDBObjectRcd'),
-#          tag = cms.string('SiPixelTemplateDBObject38Tv10')
-          tag = cms.string('SiPixelTemplateDBObject0Tv10')
+          tag = cms.string('SiPixelTemplateDBObject3p8Tv8')
+#          tag = cms.string('SiPixelTemplateDBObject0Tv10')
 #          tag = cms.string('SiPixelTemplateDBObject_0T_2015_v1_hltvalidation')
 #          tag = cms.string('SiPixelTemplateDBObject0Tv2_express')
 #          tag = cms.string('SiPixelTemplateDBObject_0T_v3_offline')
+#          tag = cms.string('SiPixelTemplateDBObject_38T_2016_v1')
         )),
         timetype = cms.string('runnumber'),
 #     connect = cms.string('sqlite_file:../../../../../DB/310815/SiPixelTemplateDBObject_38T_2015_v3.db')
-     connect = cms.string('sqlite_file:../../../../../DB/310815/SiPixelTemplateDBObject_0T_2015_v3.db')
+     connect = cms.string('sqlite_file:../../../../../DB/90516/SiPixelTemplateDBObject_38T_2016_v1.db')
 #     connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
 #     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
     )
