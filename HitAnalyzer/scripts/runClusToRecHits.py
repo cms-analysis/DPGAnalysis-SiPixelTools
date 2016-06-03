@@ -3,28 +3,37 @@
 # To go from pixel clusters to rechits
 #
 ##############################################################################
-
 import FWCore.ParameterSet.Config as cms
-
 process = cms.Process("RecHitTest")
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 # select one of these
-#process.load("Configuration.Geometry.GeometryIdeal_cff")     # works for MC
-#process.load("Configuration.StandardSequences.Geometry_cff") # works with MC & data
 process.load("Configuration.StandardSequences.GeometryRecoDB_cff") # works for MC & data
 
 process.load("Configuration.StandardSequences.MagneticField_38T_cff")
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("Configuration.StandardSequences.Services_cff")
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
+
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+from Configuration.AlCa.GlobalTag import GlobalTag
+# to use no All 
+# Choose the global tag here:
+# 2012
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
+#process.GlobalTag.globaltag = autoCond['run1_data']
+#process.GlobalTag.globaltag = 'GR_R_73_V0A'
+# 2015
+#process.GlobalTag.globaltag = autoCpnd['run2_data']
+# 2015
+#process.GlobalTag.globaltag = 'GR_P_V49::All'
+# 2016
+process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v8' # for 272
 
 # clusterizer & rechits 
 #process.load("RecoLocalTracker.Configuration.RecoLocalTracker_cff")
 # or use this
 process.load("Configuration.StandardSequences.Reconstruction_cff")
-
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(10)
@@ -50,41 +59,18 @@ process.source = cms.Source("PoolSource",
 # 'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre7/tracks/tracks2_mc71.root'
 # 'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre7/rechits/rechits2_mc71.root'
 
-# '/store/relval/CMSSW_7_3_3/RelValMinBias_13/GEN-SIM-RECO/MCRUN2_73_V11-v1/00000/28F9E4CD-E0C3-E411-9656-0025905A6082.root'
-
-# "/store/express/Commissioning2015/ExpressCosmics/FEVT/Express-v1/000/238/721/00000/005ABD91-D6D0-E411-A46C-02163E01241E.root",
-
- "/store/data/Run2012C/MinimumBias/RECO/22Jan2013-v1/20020/2C3E2BB3-4173-E211-8417-003048F0117C.root",
-
-# "/store/data/Run2012D/MinimumBias/RECO/PromptReco-v1/000/208/686/F60495B3-1E41-E211-BB7C-003048D3756A.root",
-##"/store/data/Run2012D/MinimumBias/RECO/PromptReco-v1/000/208/686/F2BA6B22-2C41-E211-9D7A-003048D2BED6.root",
-## "/store/data/Run2012D/MinimumBias/RECO/PromptReco-v1/000/208/686/E4E6B318-2041-E211-B351-001D09F29114.root",
+ "/store/express/Run2016B/ExpressPhysics/FEVT/Express-v2/000/274/314/00000/1A57B62A-4328-E611-9D78-02163E01339F.root",
 
   )
 )
+
+process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('274314:97-274314:9999')
 
 # a service to use root histos
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string('histo.root')
 )
 
-# Choose the global tag here:
-# old 70&71 MC tags
-#process.GlobalTag.globaltag = "MC_70_V1::All"
-#process.GlobalTag.globaltag = "START70_V1::All"
-#process.GlobalTag.globaltag = "POSTLS170_V5::All"
-#process.GlobalTag.globaltag = "START71_V1::All"
-#process.GlobalTag.globaltag = "MC_71_V1::All"
-#process.GlobalTag.globaltag = "POSTLS171_V1::All"
-#process.GlobalTag.globaltag = "PRE_MC_71_V2::All"
-# for 73X
-#process.GlobalTag.globaltag = "MCRUN1_73_V5::All" # OK for condDB
-
-# for data 2012
-process.GlobalTag.globaltag = "GR_R_73_V2A::All"
-
-# for data 2015
-#process.GlobalTag.globaltag = "GR_R_73_V3A::All"
 
 # DB stuff 
 # GenError
@@ -159,7 +145,7 @@ process.o1 = cms.OutputModule("PoolOutputModule",
 #process.siPixelClusters.ClusterThreshold = 4000.0
 
 # read rechits
-process.analysis = cms.EDAnalyzer("ReadPixelRecHit",
+process.analysis = cms.EDAnalyzer("PixRecHitTest",
     Verbosity = cms.untracked.bool(True),
     src = cms.InputTag("siPixelRecHits"),
 )

@@ -165,7 +165,7 @@ process.o1 = cms.OutputModule("PoolOutputModule",
 process.siPixelClusters.src = 'simSiPixelDigis'
 
 # read rechits
-process.analysis = cms.EDAnalyzer("ReadPixelRecHit",
+process.analysis = cms.EDAnalyzer("PixRecHitTest",
     Verbosity = cms.untracked.bool(False),
     src = cms.InputTag("siPixelRecHits"),
 )

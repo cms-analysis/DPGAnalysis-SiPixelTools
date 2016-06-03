@@ -172,11 +172,16 @@ process.analysis = cms.EDAnalyzer("ReadPixClusters",
     src = cms.InputTag("siPixelClusters"),
 )
 
-process.d = cms.EDAnalyzer("TestClusters",
+process.d2 = cms.EDAnalyzer("TestClusters",
     Verbosity = cms.untracked.bool(False),
     src = cms.InputTag("siPixelClusters"),
     Select1 = cms.untracked.int32(1),  # cut on the num of dets <4 skip, 0 means 4 default 
     Select2 = cms.untracked.int32(0),  # 6 no bptx, 0 no selection                               
+)
+
+process.d = cms.EDAnalyzer("PixRecHitTest",
+    Verbosity = cms.untracked.bool(True),
+    src = cms.InputTag("siPixelRecHits"),
 )
 
 
