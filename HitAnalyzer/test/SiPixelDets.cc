@@ -30,6 +30,7 @@
 
 #define NEW_NAMES
 //#define OLD_NAMES
+#define CHECK_ORIENT
 
 using namespace std;
 using namespace edm;
@@ -117,6 +118,23 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
     if(PRINT) cout<<"Position "<<detR<<" "<<detZ<<" "<<detPhi<<" "
 		  <<detThick<<" "<<nrows<<" "<<ncols<<endl;
 
+#ifdef CHECK_ORIENT
+    //const PixelGeomDetUnit * pixDet  = dynamic_cast<const PixelGeomDetUnit*>(geoUnit);
+    const PixelTopology * ptopol = &(pixDet->specificTopology());       
+
+    MeasurementPoint mp1(0.,0.);
+    LocalPoint lp1 = ptopol->localPosition(mp1);
+    //cout<<lp1.x()<<" "<<lp1.y()<<endl;    
+    GlobalPoint gp1 = pixDet->surface().toGlobal(lp1); // or need? Local3DPoint?
+    //cout<<gp1.x()<<" "<<gp1.y()<<endl;
+        
+    MeasurementPoint mp2((float(nrows)-1.),(float(ncols)-1.));
+    LocalPoint lp2 = ptopol->localPosition(mp2);
+    //cout<<lp2.x()<<" "<<lp2.y()<<endl;
+    GlobalPoint gp2 = pixDet->surface().toGlobal(lp2); // or need? Local3DPoint?
+
+#endif // CHECK_ORIENT
+
     // bpix  
     if(detId.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel)) {	
       //continue;
@@ -124,8 +142,6 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       unsigned int rawId = detId.rawId();
       if(PRINT) 
 	cout<<"Det raw: "<<rawId<<" "<<detId.null()<<" "<<detId.det()<<" "<<detId.subdetId()<<endl;
-
-
 
 
 #ifdef NEW_NAMES 
@@ -278,6 +294,14 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       if(pxbdet.rawId() != det.rawId()) cout<<" wrong rawid "<<endl;
       if(rawId != det.rawId()) cout<<" wrong rawid "<<endl;
 #endif //NEW & OLD_NAMES
+
+
+#ifdef CHECK_ORIENT
+    cout<<"     0-0:  "<<lp1.x()<<" "<<lp1.y()<<" "
+	<<gp1.perp()<<" "<<gp1.phi()<<" "<<gp1.z()<<endl;
+    cout<<"   "<<(nrows-1)<<"-"<<(ncols-1)<<": "<<lp2.x()<<" "<<lp2.y()<<" "
+	<<gp2.perp()<<" "<<gp2.phi()<<" "<<gp2.z()<<endl;
+#endif // CHECK_ORIENT
 	
       // FPIX 
     } else if(detId.subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap)) {
@@ -400,6 +424,12 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       if(rawId != det.rawId()) cout<<" wrong rawid "<<endl;
 #endif
 
+#ifdef CHECK_ORIENT
+      cout<<"     0-0:  "<<lp1.x()<<" "<<lp1.y()<<" "<<gp1.perp()<<" "<<gp1.phi()<<" "<<gp1.z()
+	  <<endl;
+      cout<<"   "<<(nrows-1)<<"-"<<(ncols-1)<<": "<<lp2.x()<<" "<<lp2.y()<<" "
+	  <<gp2.perp()<<" "<<gp2.phi()<<" "<<gp2.z()<<endl;
+#endif // CHECK_ORIENT
 
     } else { // b/fpix
 
