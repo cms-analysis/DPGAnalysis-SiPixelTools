@@ -3,11 +3,19 @@ process = cms.Process("SiPixelDets")
 # needed for det-id
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
 
-#process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
+#Load the correct Magnetic Field
+# Control the template selection either through the run number or by explicitly 
+# using the specific mag field map
+#process.load("Configuration.StandardSequences.MagneticField_0T_cff")
+process.load("Configuration.StandardSequences.MagneticField_38T_cff")
+#process.load("Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff")
+#process.load("Configuration.StandardSequences.MagneticField_cff") # same
 
-from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-#from Configuration.AlCa.GlobalTag import GlobalTag
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+#process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
+
+#from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
+from Configuration.AlCa.GlobalTag import GlobalTag
 # to use no All 
 
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')

@@ -15,6 +15,8 @@
 
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 #include "Geometry/Records/interface/TrackerTopologyRcd.h"
+#include "MagneticField/Engine/interface/MagneticField.h"
+#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 #include "DataFormats/SiPixelDetId/interface/PixelBarrelName.h"
@@ -93,6 +95,10 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
   const TrackerTopology* tt = tTopo.product();
 #endif
 
+  // Mag field 
+  edm::ESHandle<MagneticField> magfield;
+  es.get<IdealMagneticFieldRecord>().get(magfield);
+
   for(TrackerGeometry::DetUnitContainer::const_iterator it = tkgeom->detUnits().begin(); 
       it != tkgeom->detUnits().end(); it++) {
 
@@ -132,6 +138,8 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
     LocalPoint lp2 = ptopol->localPosition(mp2);
     //cout<<lp2.x()<<" "<<lp2.y()<<endl;
     GlobalPoint gp2 = pixDet->surface().toGlobal(lp2); // or need? Local3DPoint?
+
+    LocalVector Bfield = pixDet->surface().toLocal(magfield->inTesla(pixDet->surface().position()));
 
 #endif // CHECK_ORIENT
 
@@ -192,7 +200,7 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       if(PRINT_TABLE) 
 	cout<<detId.rawId()<<" "<<name<<" r/phi/z = "<<detR<<"/"<<detPhi<<"/"<<detZ
 	    <<" cmssw layer/ladder/module "<<layerC<<"/"<<ladderC<<"/"<<zindex
-	    <<" E-phi "<<normVect.phi()    // <<" "<<normVect.barePhi() same
+	    <<" E-phi "<<normVect.phi() // <<" "<<normVect.perp()   <<" "<<normVect.barePhi() same
 	    <<endl;
 
       // Now check if teh id is the same
@@ -301,6 +309,7 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
 	<<gp1.perp()<<" "<<gp1.phi()<<" "<<gp1.z()<<endl;
     cout<<"   "<<(nrows-1)<<"-"<<(ncols-1)<<": "<<lp2.x()<<" "<<lp2.y()<<" "
 	<<gp2.perp()<<" "<<gp2.phi()<<" "<<gp2.z()<<endl;
+    cout<<" B: "<<Bfield.x()<<" "<<Bfield.y()<<" "<<Bfield.z()<<endl;
 #endif // CHECK_ORIENT
 	
       // FPIX 
@@ -429,6 +438,7 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
 	  <<endl;
       cout<<"   "<<(nrows-1)<<"-"<<(ncols-1)<<": "<<lp2.x()<<" "<<lp2.y()<<" "
 	  <<gp2.perp()<<" "<<gp2.phi()<<" "<<gp2.z()<<endl;
+    cout<<" B: "<<Bfield.x()<<" "<<Bfield.y()<<" "<<Bfield.z()<<endl;
 #endif // CHECK_ORIENT
 
     } else { // b/fpix
