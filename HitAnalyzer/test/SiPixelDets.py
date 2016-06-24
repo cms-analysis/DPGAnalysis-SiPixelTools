@@ -11,6 +11,27 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 #process.load("Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff")
 #process.load("Configuration.StandardSequences.MagneticField_cff") # same
 
+# turn off alignment 
+# (1) does not work  
+#process.load('Geometry.TrackerGeometryBuilder.idealForDigiTrackerGeometryDB_cff')
+
+# (2) 
+process.load('Geometry.TrackerGeometryBuilder.trackerGeometryDB_cfi')
+# does not define trackerGeometryDB
+# this does, needs false 
+#from Geometry.TrackerGeometryBuilder.trackerGeometryDB_cfi import trackerGeometryDB
+trackerGeometryDB.applyAlignment = cms.bool(False)
+
+# (3) DOES not  work
+#process.load('RecoTracker.GeometryESProducer.TrackerRecoGeometryESProducer_cfi')
+#from RecoTracker.GeometryESProducer.TrackerRecoGeometryESProducer_cfi import trackerGeometryDB
+#trackerGeometryDB.applyAlignment = cms.bool(False)
+
+# (4) works, needs false
+#from Configuration.StandardSequences.GeometryDB_cff import trackerGeometryDB
+#trackerGeometryDB.applyAlignment = cms.bool(False)
+
+
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
 

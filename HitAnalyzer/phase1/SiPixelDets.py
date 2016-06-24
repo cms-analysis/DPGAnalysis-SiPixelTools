@@ -5,6 +5,11 @@ process = cms.Process("SiPixelDets")
 process.load('Configuration.Geometry.GeometryExtended2017Reco_cff')
 process.load('Configuration.Geometry.GeometryExtended2017_cff')
 
+# turn off alignment  (presently for phase1 there is no alignment correction)
+#from Geometry.TrackerGeometryBuilder.trackerGeometryDB_cfi import trackerGeometryDB
+#trackerGeometryDB.applyAlignment = cms.bool(False)
+
+
 #Load the correct Magnetic Field
 # Control the template selection either through the run number or by explicitly 
 # using the specific mag field map
