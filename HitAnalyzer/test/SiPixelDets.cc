@@ -62,7 +62,7 @@ SiPixelDets::~SiPixelDets() {
 // Analyzer: Functions that gets called by framework every event
 
 void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
-  const bool PRINT = false;
+  const bool PRINT = true;
   const bool PRINT_TABLE = true;
   const bool doReversedTest = true;
 
@@ -138,6 +138,10 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
     LocalPoint lp2 = ptopol->localPosition(mp2);
     //cout<<lp2.x()<<" "<<lp2.y()<<endl;
     GlobalPoint gp2 = pixDet->surface().toGlobal(lp2); // or need? Local3DPoint?
+
+    LocalPoint lp3(0.,0.);
+    //cout<<lp3.x()<<" "<<lp3.y()<<endl;
+    GlobalPoint gp3 = pixDet->surface().toGlobal(lp3); // or need? Local3DPoint?
 
     LocalVector Bfield = pixDet->surface().toLocal(magfield->inTesla(pixDet->surface().position()));
 
@@ -309,6 +313,8 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
 	<<gp1.perp()<<" "<<gp1.phi()<<" "<<gp1.z()<<endl;
     cout<<"   "<<(nrows-1)<<"-"<<(ncols-1)<<": "<<lp2.x()<<" "<<lp2.y()<<" "
 	<<gp2.perp()<<" "<<gp2.phi()<<" "<<gp2.z()<<endl;
+    cout<<" center: "<<lp3.x()<<" "<<lp3.y()<<" "
+	<<gp3.perp()<<" "<<gp3.phi()<<" "<<gp3.z()<<endl;
     cout<<" B: "<<Bfield.x()<<" "<<Bfield.y()<<" "<<Bfield.z()<<endl;
 #endif // CHECK_ORIENT
 	
@@ -438,6 +444,8 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
 	  <<endl;
       cout<<"   "<<(nrows-1)<<"-"<<(ncols-1)<<": "<<lp2.x()<<" "<<lp2.y()<<" "
 	  <<gp2.perp()<<" "<<gp2.phi()<<" "<<gp2.z()<<endl;
+    cout<<" center: "<<lp3.x()<<" "<<lp3.y()<<" "
+	<<gp3.perp()<<" "<<gp3.phi()<<" "<<gp3.z()<<endl;
     cout<<" B: "<<Bfield.x()<<" "<<Bfield.y()<<" "<<Bfield.z()<<endl;
 #endif // CHECK_ORIENT
 

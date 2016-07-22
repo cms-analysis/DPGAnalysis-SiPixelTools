@@ -51,6 +51,7 @@ namespace {
   bool printErrors  = false;
   bool printData    = false;
   bool printHeaders = false;
+  const bool printBX = false;
   const bool CHECK_PIXELS = true;
   const bool PRINT_BASELINE = false;
   // to store the previous pixel 
@@ -1087,7 +1088,7 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
     //if(fedId = fedIds.first) 
     if(bx != int(bxid) ) { 
       wrongBX=true;
-      if(printErrors && !phase1) 
+      if(printErrors && printBX && !phase1) 
 	cout<<" Inconsistent BX: for event "<<event<<" (fed-header event "<<eventId<<") for LS "<<lumiBlock
 	    <<" for run "<<run<<" for bx "<<bx<<" fed bx "<<bxid<<endl;
     }
@@ -1370,7 +1371,7 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 
   htotPixels->Fill(float(countPixels));
   htotPixels0->Fill(float(countPixels));
-  if(wrongBX && !phase1) {
+  if(wrongBX && printBX && !phase1) {
     cout<<" Inconsistent BX: for event "<<event<<" (fed-header event "<<eventId<<") for LS "<<lumiBlock
 	<<" for run "<<run<<" for bx "<<bx<<" pix= "<<countPixels<<endl;
     htotPixels2->Fill(float(countPixels));

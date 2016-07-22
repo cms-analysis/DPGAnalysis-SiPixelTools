@@ -23,6 +23,10 @@
 <use name="heppdt"/>
 <use name="SimGeneral/HepPDTRecord"/>
 
+# for mag field 
+<use name="MagneticField/Records"/>
+<use name="MagneticField/Engine"/>
+
 # for raw data
 <use   name="DataFormats/FEDRawData"/>
 <use   name="EventFilter/SiPixelRawToDigi"/>

@@ -11,7 +11,7 @@ process.load('Configuration.Geometry.GeometryExtended2017_cff')
 
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(100)
 )
 
 process.MessageLogger = cms.Service("MessageLogger",
@@ -63,14 +63,14 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
 # or from DPGAnalysis 
 process.analysis =  cms.EDAnalyzer("PixSimHitsTest",
 	src = cms.string("g4SimHits"),
-#	list = cms.string("TrackerHitsPixelBarrelLowTof"),
+        mode = cms.untracked.string("bpix"),
+	list = cms.string("TrackerHitsPixelBarrelLowTof"),
 #	list = cms.string("TrackerHitsPixelBarrelHighTof"),
-	list = cms.string("TrackerHitsPixelEndcapLowTof"),
+#        mode = cms.untracked.string("fpix"),
+#	list = cms.string("TrackerHitsPixelEndcapLowTof"),
 #	list = cms.string("TrackerHitsPixelEndcapHighTof"),
-        Verbosity = cms.untracked.bool(False),
+        Verbosity = cms.untracked.bool(True),
         phase1 = cms.untracked.bool(True),
-#        mode = cms.untracked.string("bpix"),
-        mode = cms.untracked.string("fpix"),
 )
 
 process.p = cms.Path(process.analysis)

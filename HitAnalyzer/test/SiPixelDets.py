@@ -16,10 +16,10 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 #process.load('Geometry.TrackerGeometryBuilder.idealForDigiTrackerGeometryDB_cff')
 
 # (2) 
-process.load('Geometry.TrackerGeometryBuilder.trackerGeometryDB_cfi')
+#process.load('Geometry.TrackerGeometryBuilder.trackerGeometryDB_cfi')
 # does not define trackerGeometryDB
 # this does, needs false 
-#from Geometry.TrackerGeometryBuilder.trackerGeometryDB_cfi import trackerGeometryDB
+from Geometry.TrackerGeometryBuilder.trackerGeometryDB_cfi import trackerGeometryDB
 trackerGeometryDB.applyAlignment = cms.bool(False)
 
 # (3) DOES not  work

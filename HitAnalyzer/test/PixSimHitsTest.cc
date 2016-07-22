@@ -494,19 +494,19 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
      int procType = (*isim).processType();
      
      float x = (*isim).entryPoint().x(); // width (row index, in col direction)
-     float y = (*isim).entryPoint().y(); // length (col index, in row direction) 
-     float z = (*isim).entryPoint().z(); // thick
+     float y = (*isim).entryPoint().y(); // length (col index, in row direction)
+     float z = (*isim).entryPoint().z(); // thickness, + or -142.5um
      
      float x2 = (*isim).exitPoint().x();
      float y2 = (*isim).exitPoint().y();
-     float z2 = (*isim).exitPoint().z();
+     float z2 = (*isim).exitPoint().z();  //+- 142.5
 
-     float dz = abs(z-z2);
+     float dz = abs(z-z2); // should be the sensor thickness 285um
      bool moduleDirectionUp = ( z < z2 ); // for positive direction z2>z
 
      float xpos = (x+x2)/2.;
      float ypos = (y+y2)/2.;
-     float zpos = (z+z2)/2.;
+     float zpos = (z+z2)/2.; // should be z=0
 
      if(pt>0.1) {goodHits++;}
      if(PRINT) {
@@ -517,8 +517,12 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	   <<eloss<<" pt "<<pt<<" entry "<<x<<"/"<<y<<"/"<<z<<" lenz "<<dz<<" "
 	   <<moduleDirectionUp<<endl;
      }
-     if(DEBUG) cout<<"  center pos "<<xpos<<" "<<ypos<<" "<<zpos;
-     
+     if(DEBUG) {
+       cout<<"  entry  pos "<<x<<" "<<y<<" "<<z;
+       cout<<", exit   pos "<<x2<<" "<<y2<<" "<<z2;
+       cout<<", center pos "<<xpos<<" "<<ypos<<" "<<zpos<<endl;
+     }
+
      LocalPoint loc(xpos,ypos,zpos);
      double gloX = theGeomDet->surface().toGlobal(loc).x(); // 
      double gloY = theGeomDet->surface().toGlobal(loc).y(); // 
