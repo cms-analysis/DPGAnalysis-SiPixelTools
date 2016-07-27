@@ -215,6 +215,7 @@ int MyDecode::error(int word, int & fedChannel, int fed, int & stat1, int & stat
   const unsigned int  dummyMask      = 0x03600000;
   const unsigned int  gapMask        = 0x03400000;
   const unsigned int  timeOut        = 0x3a00000;
+  const unsigned int  timeOut2       = 0x3b00000;
   const unsigned int  eventNumError  = 0x3e00000;
   const unsigned int  trailError     = 0x3c00000;
   const unsigned int  fifoError      = 0x3800000;
@@ -245,7 +246,7 @@ int MyDecode::error(int word, int & fedChannel, int fed, int & stat1, int & stat
     //cout<<" Gap word";
     return 0;
     
-  } else if( (word&errorMask)==timeOut ) { // TIMEOUT
+  } else if( ((word&errorMask)==timeOut) || ((word&errorMask)==timeOut2) ) { // TIMEOUT
 
     unsigned int bit20 =      (word & 0x100000)>>20; // works only for slink format
 
@@ -253,7 +254,6 @@ int MyDecode::error(int word, int & fedChannel, int fed, int & stat1, int & stat
 
       unsigned int timeoutCnt = (word &  0x7f800)>>11; // only for slink
       // unsigned int timeoutCnt = ((word&0xfc000000)>>24) + ((word&0x1800)>>11); // only for fifo
-      // More than 1 channel within a group can have a timeout error
       // More than 1 channel within a group can have a timeout error
 
       unsigned int index = (word & 0x1F);  // index within a group of 4/5
@@ -968,6 +968,7 @@ void SiPixelRawDump::beginJob() {
 }
 //-----------------------------------------------------------------------
 void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
+  const bool printEventInfo = false;
 
   // Access event information
   int run       = ev.id().run();
@@ -975,11 +976,34 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
   int lumiBlock = ev.luminosityBlock();
   int bx        = ev.bunchCrossing();
   //int orbit     = ev.orbitNumber();
-
+  static int oldEvent=0; // ,LS=0;
+  
+  countAllEvents++;
   hevent->Fill(float(event));
   hlumi0->Fill(float(lumiBlock));
   hbx0->Fill(float(bx));
   //horbit->Fill(float(orbit));
+
+  if(printEventInfo) {
+    // if(countAllEvents<100 || (countAllEvents&1000)==0 )
+    //   cout<<" Run "<<run<<" LS "<<lumiBlock<<" event "<<event<<" bx "<<bx
+    // 	  <<" all "<<countAllEvents<<endl;
+    //if( lumiBlock != LS) {
+      cout<<" Run "<<run<<" LS "<<lumiBlock<<" event "<<event<<" bx "<<bx
+	  <<" all "<<countAllEvents<<endl;
+      //LS=lumiBlock;
+      //}
+      //if(event<oldEvent) 
+      cout<<"   Lower event number: Run "<<run<<" LS "<<lumiBlock<<" event "<<event<<" bx "<<bx
+	  <<" all "<<countAllEvents<<" "<<oldEvent<<endl;
+    //oldEvent=event;
+    //return; // skip the rest 
+  }
+
+  if(printHeaders) 
+    cout<<"Event = "<<countAllEvents<<" Event number "<<event<<" Run "<<run
+	<<" LS "<<lumiBlock<<endl;
+
 
   // Get lumi info (does not work for raw)
 //  edm::LuminosityBlock const& iLumi = ev.getLuminosityBlock();
@@ -1041,11 +1065,6 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
   bool wrongBX=false;
   int countErrors[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
-  countAllEvents++;
-
-  if(printHeaders) 
-    cout<<"Event = "<<countEvents<<" Event number "<<event<<" Run "<<run
-	<<" LS "<<lumiBlock<<endl;
 
   // Loop over FEDs
   for (int fedId = fedIds.first; fedId <= fedIds.second; fedId++) {
@@ -1142,8 +1161,8 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 	} else if(status<0) {  // error word
 	  countErrorsInFed++;
 	  //if( status == -6 || status == -5) 
-	  if(printErrors) cout<<" Bad stats for FED "<<fedId<<" Event "<<eventId<<"/"
-			      <<countAllEvents<<" chan "<<fedChannel<<" status "<<status<<endl;
+	  if(printErrors) cout<<"    Bad stats for FED "<<fedId<<" Event "<<eventId<<"/"<<(eventId%256)
+			      <<" count "<<countAllEvents<<" chan "<<fedChannel<<" status "<<status<<endl;
 	  status=abs(status);
 	  // 2 - wrong channel
 	  // 3 - wrong pix or dcol 

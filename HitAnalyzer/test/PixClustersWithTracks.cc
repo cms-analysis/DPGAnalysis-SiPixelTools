@@ -118,6 +118,7 @@
 
 //#define VDM_STUDIES
 //#define ALIGN_STUDIES
+#define OVERLAP_STUDIES
 
 const bool isData = true; // set false for MC
 
@@ -140,7 +141,7 @@ class PixClustersWithTracks : public edm::EDAnalyzer {
   bool PRINT;
   float countTracks, countGoodTracks, countTracksInPix, countPVs, countEvents, countLumi;  
   float count1, count2, count3, count4;
-
+  float countTracks1, countTracks2, countTracks3, countTracks4;
   // Needed for the ByToken method
   //edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster> > myClus;
   //edm::EDGetTokenT<SiPixelRecHitCollection> PixelRecHitToken;
@@ -234,6 +235,11 @@ class PixClustersWithTracks : public edm::EDAnalyzer {
   TProfile *hclubx, *hpvbx, *htrackbx; // *hcharClubx, *hcharPixbx,*hsizeClubx, *hsizeYClubx;
 #endif
 
+#ifdef OVERLAP_STUDIES
+  TH1D *hcluphi1,*hcluphi2,*hcluphi3,*hcluphi4 ;
+#endif
+
+
 };
 /////////////////////////////////////////////////////////////////
 // Contructor,
@@ -272,7 +278,7 @@ void PixClustersWithTracks::beginJob() {
 
   countTracks=0.; countGoodTracks=0.; countTracksInPix=0.; countPVs=0.; countEvents=0.; countLumi=0.;  
   count1=0.; count2=0.; count3=0.; count4=0.; 
-
+  countTracks1=0; countTracks2=0; countTracks3=0; countTracks4=0; 
   edm::Service<TFileService> fs;
 
   int sizeH=20;
@@ -576,6 +582,17 @@ void PixClustersWithTracks::beginJob() {
    hclubx  = fs->make<TProfile>("hclubx", "clus vs bx ",4000,-0.5,3999.5,0.0,1000000.);
    hpvbx   = fs->make<TProfile>("hpvbx",  "pvs vs bx ", 4000,-0.5,3999.5,0.0,1000000.);
    htrackbx   = fs->make<TProfile>("htrackbx",  "tracks vs bx ", 4000,-0.5,3999.5,0.0,1000000.);
+#endif
+
+#ifdef OVERLAP_STUDIES
+   hcluphi1 = fs->make<TH1D>("hcluphi1",  "clus1 per track vs phi", 
+				 1400,-3.5,3.5);
+   hcluphi2 = fs->make<TH1D>("hcluphi2",  "clus2 per track vs phi", 
+				 1400,-3.5,3.5);
+   hcluphi3 = fs->make<TH1D>("hcluphi3",  "clus3 per track vs phi", 
+				 1400,-3.5,3.5);
+   hcluphi4 = fs->make<TH1D>("hcluphi4",  "clus4 per track vs phi", 
+				 1400,-3.5,3.5);
 
 #endif
 
@@ -597,6 +614,8 @@ void PixClustersWithTracks::endJob(){
     cout<<" Average tracks/event "<< countTracks<<" good "<< countGoodTracks<<" in pix "<< countTracksInPix
 	<<" PVs "<< countPVs<<" events " << countEvents<<" lumi pb-1 "<< countLumi<<"/10, bug!"<<endl;  
     cout<<"Missing clus "<<count1<<" "<<count2<<endl;
+    cout<<" Tracks in layers "<<countTracks1<<" "<<countTracks2<<" "
+	<<countTracks3<<" "<<countTracks4<<endl;
   }
 
 }
@@ -1230,9 +1249,11 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    htest->Fill(gPhi,float(size));
 	    htest2->Fill(gPhi,float(sizeX));
 	    htest3->Fill(gPhi,float(sizeY));
-
 	    hclusMap1->Fill(eta,phi);
 	    hstatus->Fill(12.);
+#ifdef OVERLAP_STUDIES
+	    hcluphi1->Fill(gPhi);
+#endif
 #ifdef USE_PROFILES
 	    hmult1->Fill(zindex,float(size));
 #endif
@@ -1289,6 +1310,9 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    hclusMap2->Fill(eta,phi);
 	    hstatus->Fill(13.);
 
+#ifdef OVERLAP_STUDIES
+	    hcluphi2->Fill(gPhi);
+#endif
 #ifdef USE_PROFILES
 	    hmult2->Fill(zindex,float(size));
 #endif 
@@ -1342,6 +1366,9 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    hclusMap3->Fill(eta,phi);
 	    hstatus->Fill(14.);
 
+#ifdef OVERLAP_STUDIES
+	    hcluphi3->Fill(gPhi);
+#endif
 #ifdef USE_PROFILES
 	    hmult3->Fill(zindex,float(size));
 #endif 
@@ -1418,7 +1445,6 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    cout<<" which layer is this? "<<layer<<" "<< disk<<endl;
 	  } // if layer
 	  
-
       } // if valid
 
     } // clusters
@@ -1446,6 +1472,12 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
       if(PRINT) cout<<"Lay3: number of clusters per track = "<<numOfClusPerTrk1<<endl;
       hclusPerTrk4->Fill(float(numOfClusPerTrk4));  // fpix  disk1
       hclusPerTrk5->Fill(float(numOfClusPerTrk5)); // fpix disk2
+
+      if(numOfClusPerTrk1>0) countTracks1++;
+      if(numOfClusPerTrk2>0) countTracks2++;
+      if(numOfClusPerTrk3>0) countTracks3++;
+      if(numOfClusPerTrk4>0) countTracks4++;
+      if(numOfClusPerTrk5>0) countTracks4++;
 
       float clusPerTrkB = numOfClusPerTrk1 + numOfClusPerTrk2 + numOfClusPerTrk3;
       float clusPerTrkF = numOfClusPerTrk4 + numOfClusPerTrk5;

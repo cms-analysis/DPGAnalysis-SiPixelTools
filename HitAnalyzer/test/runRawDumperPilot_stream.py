@@ -46,7 +46,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 #process.MessageLogger.cerr.threshold = 'Debug'
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10000)
+    input = cms.untracked.int32(-1)
 )
 
 process.TFileService = cms.Service("TFileService",
@@ -58,21 +58,20 @@ process.TFileService = cms.Service("TFileService",
 #"/store/data/Run2016A/ZeroBias1/RAW/v1/000/271/056/00000/0097F016-0C09-E611-AA06-02163E011AE6.root",
 #])
 
-process.source = cms.Source("PoolSource",
-#process.source = cms.Source("NewEventStreamFileReader",
-  noEventSort=cms.untracked.bool(False),
+#process.source = cms.Source("PoolSource",
+process.source = cms.Source("NewEventStreamFileReader",
+#  noEventSort=cms.untracked.bool(False),
 #  firstEvent=cms.untracked.uint32(1),
 
 # fileNames =  myfilelist
     fileNames = cms.untracked.vstring(                          
-        'file:/afs/cern.ch/work/d/dkotlins/public/pilot/run277150_ls1.root',
-
 # data 2016
 #"/store/data/Run2016A/ZeroBias1/RAW/v1/000/271/056/00000/0097F016-0C09-E611-AA06-02163E011AE6.root",
 #"root://eoscms//eos/cms/tier0/store/data/Commissioning2016/MinimumBias/RAW/v1/000/265/510/00000/02474E86-4BDC-E511-8222-02163E01364A.root",
 # "root://eoscms//eos/cms/tier0/store/data/Run2015D/ZeroBias/RAW/v1/000/258/655/00000/",
+
 # "/store/t0streamer/Minidaq/A/000/277/108/run277108_ls0001_streamA_StorageManager.dat",
-# "/store/t0streamer/Minidaq/A/000/277/150/run277150_ls0001_streamA_StorageManager.dat",
+ "/store/t0streamer/Minidaq/A/000/277/150/run277150_ls0001_streamA_StorageManager.dat",
 # "/store/t0streamer/Minidaq/A/000/277/349/run277349_ls0001_streamA_StorageManager.dat",
 
    )
@@ -111,7 +110,7 @@ process.d = cms.EDAnalyzer("SiPixelRawDump",
 #    InputLabel = cms.untracked.string('source'),
     CheckPixelOrder = cms.untracked.bool(False),
 # 0 - nothing, 1 - error , 2- data, 3-headers, 4-hex
-    Verbosity = cms.untracked.int32(3),
+    Verbosity = cms.untracked.int32(0),
 # threshold, print fed/channel num of errors if tot_errors > events * PrintThreshold, default 0,001 
     PrintThreshold = cms.untracked.double(0.001)
 )

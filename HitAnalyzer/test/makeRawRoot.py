@@ -1,7 +1,7 @@
 #
 import FWCore.ParameterSet.Config as cms
 
-process = cms.Process("d")
+process = cms.Process("a")
 
 import HLTrigger.HLTfilters.hltHighLevel_cfi as hlt
 # accept if 'path_1' succeeds
@@ -46,11 +46,11 @@ process.MessageLogger = cms.Service("MessageLogger",
 #process.MessageLogger.cerr.threshold = 'Debug'
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10000)
+    input = cms.untracked.int32(-1)
 )
 
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('raw.root')
+    fileName = cms.string('r.root')
 )
 
 #myfilelist = cms.untracked.vstring()
@@ -58,21 +58,21 @@ process.TFileService = cms.Service("TFileService",
 #"/store/data/Run2016A/ZeroBias1/RAW/v1/000/271/056/00000/0097F016-0C09-E611-AA06-02163E011AE6.root",
 #])
 
-process.source = cms.Source("PoolSource",
-#process.source = cms.Source("NewEventStreamFileReader",
-  noEventSort=cms.untracked.bool(False),
+#process.source = cms.Source("PoolSource",
+process.source = cms.Source("NewEventStreamFileReader",
+#  noEventSort=cms.untracked.bool(False),
 #  firstEvent=cms.untracked.uint32(1),
 
 # fileNames =  myfilelist
     fileNames = cms.untracked.vstring(                          
-        'file:/afs/cern.ch/work/d/dkotlins/public/pilot/run277150_ls1.root',
-
+#        'file:t.root',
 # data 2016
 #"/store/data/Run2016A/ZeroBias1/RAW/v1/000/271/056/00000/0097F016-0C09-E611-AA06-02163E011AE6.root",
 #"root://eoscms//eos/cms/tier0/store/data/Commissioning2016/MinimumBias/RAW/v1/000/265/510/00000/02474E86-4BDC-E511-8222-02163E01364A.root",
 # "root://eoscms//eos/cms/tier0/store/data/Run2015D/ZeroBias/RAW/v1/000/258/655/00000/",
+
 # "/store/t0streamer/Minidaq/A/000/277/108/run277108_ls0001_streamA_StorageManager.dat",
-# "/store/t0streamer/Minidaq/A/000/277/150/run277150_ls0001_streamA_StorageManager.dat",
+ "/store/t0streamer/Minidaq/A/000/277/150/run277150_ls0001_streamA_StorageManager.dat",
 # "/store/t0streamer/Minidaq/A/000/277/349/run277349_ls0001_streamA_StorageManager.dat",
 
    )
@@ -84,7 +84,8 @@ process.output = cms.OutputModule("PoolOutputModule",
         filterName = cms.untracked.string('')
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(1048576),
-    fileName = cms.untracked.string('t.root'),
+    fileName = cms.untracked.string(
+        '/afs/cern.ch/work/d/dkotlins/public/pilot/run277150_ls1.root'),
     outputCommands = cms.untracked.vstring("keep *_*_*_*"),
 #    outputCommands = cms.untracked.vstring("drop *","keep *_siPixelRawData_*_*"),
     splitLevel = cms.untracked.int32(0)
@@ -117,8 +118,8 @@ process.d = cms.EDAnalyzer("SiPixelRawDump",
 )
 
 #process.p = cms.Path(process.hltfilter*process.d)
-process.p = cms.Path(process.d)
+#process.p = cms.Path(process.d)
 
-#process.ep = cms.EndPath(process.out)
+process.ep = cms.EndPath(process.output)
 
 
