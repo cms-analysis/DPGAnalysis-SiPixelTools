@@ -46,7 +46,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 #process.MessageLogger.cerr.threshold = 'Debug'
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10000)
+    input = cms.untracked.int32(100)
 )
 
 process.TFileService = cms.Service("TFileService",
@@ -97,7 +97,7 @@ process.output = cms.OutputModule("PoolOutputModule",
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('275828:69-275828:9999')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('277069:80-277069:9999')
 
-process.d = cms.EDAnalyzer("SiPixelRawDump", 
+process.d = cms.EDAnalyzer("SiPixelRawDumpPilot", 
     Timing = cms.untracked.bool(False),
     IncludeErrors = cms.untracked.bool(True),
 #   In 2015 data, label = rawDataCollector, extension = _LHC                                

@@ -70,10 +70,10 @@ process.source = cms.Source("PoolSource",
 # fileNames =  myfilelist
  fileNames =  cms.untracked.vstring(
 #    'file:tracks.root'
-    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_73/tracks/tracks1_mc73_13.root',
-    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_73/tracks/tracks2_mc73_13.root',
-    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_73/tracks/tracks3_mc73_13.root',
-    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_73/tracks/tracks4_mc73_13.root',
+#    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_73/tracks/tracks1_mc73_13.root',
+#    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_73/tracks/tracks2_mc73_13.root',
+#    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_73/tracks/tracks3_mc73_13.root',
+#    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_73/tracks/tracks4_mc73_13.root',
 
 # 272783
 #"/store/express/Run2016B/ExpressPhysics/FEVT/Express-v1/000/272/783/00000/008955C7-3A14-E611-99D8-02163E0133B7.root",
@@ -112,6 +112,7 @@ process.source = cms.Source("PoolSource",
 #"/store/express/Run2016B/ExpressPhysics/FEVT/Express-v2/000/273/725/00000/00ED8C57-4B1E-E611-AAE8-02163E0133C1.root",
 #"/store/express/Run2016B/ExpressPhysics/FEVT/Express-v2/000/273/725/00000/0203E153-6A1E-E611-B6ED-02163E011CAD.root",
 #"/store/express/Run2016B/ExpressPhysics/FEVT/Express-v2/000/273/725/00000/02132225-6B1E-E611-AD96-02163E014765.root",
+
 # 277069
 #"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/069/00000/0004128B-E74D-E611-A955-FA163E7DD696.root",
 #"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/069/00000/0049EB23-EA4D-E611-902C-FA163E652810.root",
@@ -134,12 +135,33 @@ process.source = cms.Source("PoolSource",
 #"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/069/00000/0A57D891-F94D-E611-AB10-02163E01419D.root",
 #"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/069/00000/0CC25B50-F54D-E611-A641-FA163EA74264.root",
 
+"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/087/00000/F8E6E4E7-BD4E-E611-969E-FA163E3F857B.root",
+"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/087/00000/F8F8F93E-A94E-E611-98B9-FA163E1C2B0A.root",
+"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/087/00000/FA04DFF6-A34E-E611-BF7D-FA163ED6BA75.root",
+"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/087/00000/FA481090-9F4E-E611-9E08-FA163E2AB1A1.root",
+"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/087/00000/FA4C897B-C84E-E611-8A1F-02163E011DF8.root",
+"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/087/00000/FA7B8C5C-CE4E-E611-920A-02163E0133D4.root",
+"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/087/00000/FAE5E4DF-D34E-E611-BEE2-FA163EA628DC.root",
+"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/087/00000/FC189CEE-D34E-E611-8D82-02163E01377E.root",
+"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/087/00000/FC270C78-C64E-E611-8E57-02163E0141A1.root",
+"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/087/00000/FCAAFEBD-B54E-E611-93AD-02163E011FA3.root",
+"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/087/00000/FCB0F591-BC4E-E611-AC16-02163E01384A.root",
+"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/087/00000/FCB438AD-C34E-E611-BDA6-02163E014660.root",
+"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/087/00000/FCC202A2-CE4E-E611-A788-02163E013680.root",
+"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/087/00000/FCF22E42-C84E-E611-9CBF-02163E0134F3.root",
+"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/087/00000/FE57568F-BF4E-E611-A853-02163E013388.root",
+"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/087/00000/FE8AC04D-C84E-E611-B093-02163E01464D.root",
+"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/087/00000/FE9039B4-B54E-E611-B18D-FA163EF2578D.root",
+"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/087/00000/FE95C69A-BF4E-E611-989A-02163E013411.root",
+"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/087/00000/FEE7D9CC-D74E-E611-A2DA-FA163E1AC66B.root",
+
     )
 )
 
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('260627:97-260627:1910')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('273725:83-273725:9999')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('277069:80-277069:9999')
+process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('277087:196-277087:1192')
 
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string('histo_tracks.root')
@@ -156,8 +178,8 @@ process.d = cms.EDAnalyzer("PixClustersWithTracks",
 #     trajectoryInput = cms.string('cosmictrackfinderP5')
 )
 
-#process.p = cms.Path(process.hltfilter*process.d)
-process.p = cms.Path(process.d)
+process.p = cms.Path(process.hltfilter*process.d)
+#process.p = cms.Path(process.d)
 
 
 

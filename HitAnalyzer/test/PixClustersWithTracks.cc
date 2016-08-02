@@ -180,7 +180,7 @@ class PixClustersWithTracks : public edm::EDAnalyzer {
   TH2F *hbpixXY, *hfpixXY1,*hfpixXY2,*hfpixXY3,*hfpixXY4, *hzphi1,*hzphi2,*hzphi3;
   TH2F *htest,*htest2,*htest3;
 
-  TH1D *hProbabilityXY, *hProbabilityQ;
+  TH1D *hProbabilityXYBpix, *hProbabilityQBpix,*hProbabilityXYFpix, *hProbabilityQFpix;
 
 #ifdef L1
   TH1D *hl1a, *hl1t, *hlt1;
@@ -410,8 +410,14 @@ void PixClustersWithTracks::beginJob() {
   hPhi5 = fs->make<TH1D>( "hPhi5", "track phi 5",70,-3.5,3.5);
   hPhi0 = fs->make<TH1D>( "hPhi0", "track phi 0",70,-3.5,3.5);
 
-  hProbabilityXY = fs->make<TH1D>( "hProbabilityXY", "hit probability XY",110,0.,1.1);
-  hProbabilityQ = fs->make<TH1D>( "hProbabilityQ", "hit probabaility Q",110,0.,1.1);
+  hProbabilityXYBpix = fs->make<TH1D>( "hProbabilityXYBpix", "hit probability XY- bpix",
+				       110,0.,1.1);
+  hProbabilityQBpix = fs->make<TH1D>( "hProbabilityQBpix", "hit probabaility Q - bpix",
+				      110,0.,1.1);
+  hProbabilityXYFpix = fs->make<TH1D>( "hProbabilityXYFpix", "hit probability XY- fpix",
+				       110,0.,1.1);
+  hProbabilityQFpix = fs->make<TH1D>( "hProbabilityQFpix", "hit probabaility Q - fpix",
+				      110,0.,1.1);
 
 #ifdef L1
   hl1a    = fs->make<TH1D>("hl1a",   "l1a",   128,-0.5,127.5);
@@ -496,9 +502,10 @@ void PixClustersWithTracks::beginJob() {
    hzphi1 = fs->make<TH2F>("hzphi1","bpix z phi 1",208,-26.,26.,140,-3.5,3.5);
    hzphi2 = fs->make<TH2F>("hzphi2","bpix z phi 2",208,-26.,26.,140,-3.5,3.5);
    hzphi3 = fs->make<TH2F>("hzphi3","bpix z phi 3",208,-26.,26.,140,-3.5,3.5);
-   htest = fs->make<TH2F>("htest","bpix phi-hit size",70,-3.5,3.5,10,0.,10.);
-   htest2 = fs->make<TH2F>("htest2","bpix phi-hit size-x",70,-3.5,3.5,10,0.,10.);
-   htest3 = fs->make<TH2F>("htest3","bpix phi-hit size-y",70,-3.5,3.5,10,0.,10.);
+
+   htest  = fs->make<TH2F>("htest", "bpix eta-hit size-y",50,-2.5,2.5,12,0.5,12.5);
+   htest2 = fs->make<TH2F>("htest2","bpix eta-hit size-x",50,-2.5,2.5,4, 0.5, 4.5);
+   htest3 = fs->make<TH2F>("htest3","bpix eta-hit size-y",50,-2.5,2.5,12,0.5,12.5);
 
 
    // RecHit errors
@@ -616,6 +623,8 @@ void PixClustersWithTracks::endJob(){
     cout<<"Missing clus "<<count1<<" "<<count2<<endl;
     cout<<" Tracks in layers "<<countTracks1<<" "<<countTracks2<<" "
 	<<countTracks3<<" "<<countTracks4<<endl;
+    //Divide the size histos
+    htest->Divide(htest,htest3,1.,1.);
   }
 
 }
@@ -894,8 +903,8 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
     
     int size = t->recHitsSize();
     float pt = t->pt();
-    float eta = t->eta();
-    float phi = t->phi();
+    float eta = t->eta(); // track eta
+    float phi = t->phi();  
     //float trackCharge = t->charge(); // unused 
     float d0 = t->d0();
     float dz = t->dz();
@@ -1064,8 +1073,6 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	// cout<<hit->probabilityQ()<<" ";
 	//cout<<endl;
 	//}
-	hProbabilityXY->Fill(hit->clusterProbability(0));
-	hProbabilityQ->Fill(hit->clusterProbability(2));
 
 
 #ifdef ALIGN_STUDIES
@@ -1246,9 +1253,11 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    hPhi1->Fill(phi);  // track phi
 	    hbpixXY->Fill(gX,gY);
 	    hzphi1->Fill(gZ,gPhi);  // hit phi
-	    htest->Fill(gPhi,float(size));
-	    htest2->Fill(gPhi,float(sizeX));
-	    htest3->Fill(gPhi,float(sizeY));
+
+	    htest->Fill(eta,float(sizeY),(hit->clusterProbability(0)) );
+	    htest2->Fill(eta,float(sizeX));
+	    htest3->Fill(eta,float(sizeY));
+
 	    hclusMap1->Fill(eta,phi);
 	    hstatus->Fill(12.);
 #ifdef OVERLAP_STUDIES
@@ -1287,6 +1296,9 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    hsizeXCluls1->Fill(lumiBlock,sizeX);
 #endif
 
+	    hProbabilityXYBpix->Fill(hit->clusterProbability(0));
+	    hProbabilityQBpix->Fill(hit->clusterProbability(2));
+
 	    numOfClusPerTrk1++;
 	    numOfClustersPerLay1++;
 	    numOfPixelsPerLay1 += size;     
@@ -1303,9 +1315,9 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    hPhi2->Fill(phi);
 	    hbpixXY->Fill(gX,gY);
 	    hzphi2->Fill(gZ,gPhi);
-	    htest->Fill(gPhi,float(size));
-	    htest2->Fill(gPhi,float(sizeX));
-	    htest3->Fill(gPhi,float(sizeY));
+	    //htest->Fill(gPhi,float(size));
+	    //htest2->Fill(gPhi,float(sizeX));
+	    //htest3->Fill(gPhi,float(sizeY));
 
 	    hclusMap2->Fill(eta,phi);
 	    hstatus->Fill(13.);
@@ -1343,6 +1355,9 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    hsizeXCluls2->Fill(lumiBlock,sizeX);
 #endif
 
+	    hProbabilityXYBpix->Fill(hit->clusterProbability(0));
+	    hProbabilityQBpix->Fill(hit->clusterProbability(2));
+
 	    numOfClusPerTrk2++;
 	    numOfClustersPerLay2++;
 	    numOfPixelsPerLay2 += size;     
@@ -1359,9 +1374,9 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    hPhi3->Fill(phi);
 	    hbpixXY->Fill(gX,gY);
 	    hzphi3->Fill(gZ,gPhi);
-	    htest->Fill(gPhi,float(size));
-	    htest2->Fill(gPhi,float(sizeX));
-	    htest3->Fill(gPhi,float(sizeY));
+	    //htest->Fill(gPhi,float(size));
+	    //htest2->Fill(gPhi,float(sizeX));
+	    //htest3->Fill(gPhi,float(sizeY));
 
 	    hclusMap3->Fill(eta,phi);
 	    hstatus->Fill(14.);
@@ -1398,6 +1413,9 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    hsizeXCluls3->Fill(lumiBlock,sizeX);
 #endif
 
+	    hProbabilityXYBpix->Fill(hit->clusterProbability(0));
+	    hProbabilityQBpix->Fill(hit->clusterProbability(2));
+
 	    numOfClusPerTrk3++;
 	    numOfClustersPerLay3++;
 	    numOfPixelsPerLay3 += size;     
@@ -1421,6 +1439,8 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    if(side==1) {numOfClustersPerDisk2++; hstatus->Fill(24.);hfpixXY2->Fill(gX,gY);}  // -z
 	    else if(side==2) {numOfClustersPerDisk3++; hstatus->Fill(25.);hfpixXY3->Fill(gX,gY);} // +z
 
+	    hProbabilityXYFpix->Fill(hit->clusterProbability(0));
+	    hProbabilityQFpix->Fill(hit->clusterProbability(2));
 
 	  } else if (disk==2) {
 
@@ -1439,6 +1459,9 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 
 	    if(side==1)      {numOfClustersPerDisk1++; hstatus->Fill(26.);hfpixXY1->Fill(gX,gY);}  // -z
 	    else if(side==2) {numOfClustersPerDisk4++; hstatus->Fill(27.);hfpixXY4->Fill(gX,gY);} // +z
+
+	    hProbabilityXYFpix->Fill(hit->clusterProbability(0));
+	    hProbabilityQFpix->Fill(hit->clusterProbability(2));
 
 	  } else {
 
