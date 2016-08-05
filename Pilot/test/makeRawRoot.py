@@ -46,7 +46,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 #process.MessageLogger.cerr.threshold = 'Debug'
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(-1)
 )
 
 process.TFileService = cms.Service("TFileService",
@@ -86,7 +86,7 @@ process.output = cms.OutputModule("PoolOutputModule",
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(1048576),
     fileName = cms.untracked.string(
-        '/afs/cern.ch/work/d/dkotlins/public/pilot/run278196_ls1_1k.root'),
+        '/afs/cern.ch/work/d/dkotlins/public/pilot/run278196_ls1.root'),
     outputCommands = cms.untracked.vstring("keep *_*_*_*"),
 #    outputCommands = cms.untracked.vstring("drop *","keep *_siPixelRawData_*_*"),
     splitLevel = cms.untracked.int32(0)
