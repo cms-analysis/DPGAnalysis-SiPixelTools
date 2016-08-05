@@ -22,11 +22,11 @@
 #include "DataFormats/FEDRawData/interface/FEDNumbering.h"
 
 #include "EventFilter/SiPixelRawToDigi/interface/PixelDataFormatter.h"
+#include "SiPixelRawDump.h"
 
 // To use root histos
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
-#include "SiPixelRawDump.h"
 
 // For ROOT
 //#include <TROOT.h>
