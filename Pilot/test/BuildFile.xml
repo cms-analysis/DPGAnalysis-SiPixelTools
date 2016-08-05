@@ -1,0 +1,41 @@
+<use   name="FWCore/Framework"/>
+<use   name="SimDataFormats/TrackingHit"/>
+<use   name="SimDataFormats/Track"/>
+<use   name="SimDataFormats/Vertex"/>
+<use   name="SimDataFormats/GeneratorProducts"/>
+<use   name="Geometry/TrackerNumberingBuilder"/>
+<use   name="Geometry/Records"/>
+<use   name="Geometry/TrackerGeometryBuilder"/>
+
+# for ?
+<use   name="CondFormats/SiPixelObjects"/>
+
+# for tracks
+#<use   name="TrackingTools/TrajectoryState"/>
+#<use   name="TrackingTools/TrackFitters"/>
+<use   name="TrackingTools/TransientTrack"/>
+
+# for HEPMC
+<use name="GeneratorInterface/Core"/>
+<use name="CommonTools/UtilAlgos"/>
+<use name="root"/>
+
+<use name="heppdt"/>
+<use name="SimGeneral/HepPDTRecord"/>
+
+# for mag field 
+<use name="MagneticField/Records"/>
+<use name="MagneticField/Engine"/>
+
+# for raw data
+<use   name="DataFormats/FEDRawData"/>
+<use   name="EventFilter/SiPixelRawToDigi"/>
+#
+<flags EDM_PLUGIN="1"/>
+<library   file="*.cc" name="Pilot">
+</library>
+
+#<library   file="*.cc" name="Pilot">
+# <flags   EDM_PLUGIN="1"/>
+#</library>
+

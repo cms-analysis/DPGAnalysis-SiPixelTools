@@ -46,7 +46,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 #process.MessageLogger.cerr.threshold = 'Debug'
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(1000)
 )
 
 process.TFileService = cms.Service("TFileService",
@@ -58,38 +58,25 @@ process.TFileService = cms.Service("TFileService",
 #"/store/data/Run2016A/ZeroBias1/RAW/v1/000/271/056/00000/0097F016-0C09-E611-AA06-02163E011AE6.root",
 #])
 
-process.source = cms.Source("PoolSource",
-#process.source = cms.Source("NewEventStreamFileReader",
-  noEventSort=cms.untracked.bool(False),
+#process.source = cms.Source("PoolSource",
+process.source = cms.Source("NewEventStreamFileReader",
+#  noEventSort=cms.untracked.bool(False),
 #  firstEvent=cms.untracked.uint32(1),
 
 # fileNames =  myfilelist
     fileNames = cms.untracked.vstring(                          
-        'file:/afs/cern.ch/work/d/dkotlins/public/pilot/run277150_ls1.root',
-
 # data 2016
 #"/store/data/Run2016A/ZeroBias1/RAW/v1/000/271/056/00000/0097F016-0C09-E611-AA06-02163E011AE6.root",
 #"root://eoscms//eos/cms/tier0/store/data/Commissioning2016/MinimumBias/RAW/v1/000/265/510/00000/02474E86-4BDC-E511-8222-02163E01364A.root",
 # "root://eoscms//eos/cms/tier0/store/data/Run2015D/ZeroBias/RAW/v1/000/258/655/00000/",
+
 # "/store/t0streamer/Minidaq/A/000/277/108/run277108_ls0001_streamA_StorageManager.dat",
-# "/store/t0streamer/Minidaq/A/000/277/150/run277150_ls0001_streamA_StorageManager.dat",
-# "/store/t0streamer/Minidaq/A/000/277/349/run277349_ls0001_streamA_StorageManager.dat",
+# "/store/t0streamer/Minidaq/A/000/277/108/run277108_ls0002_streamA_StorageManager.dat",
+ "/store/t0streamer/Minidaq/A/000/277/108/run277108_ls0001_streamA_StorageManager.dat",
 
    )
-)
 
-process.output = cms.OutputModule("PoolOutputModule",
-    dataset = cms.untracked.PSet(
-        dataTier = cms.untracked.string('RAW'),
-        filterName = cms.untracked.string('')
-    ),
-    eventAutoFlushCompressedSize = cms.untracked.int32(1048576),
-    fileName = cms.untracked.string('t.root'),
-    outputCommands = cms.untracked.vstring("keep *_*_*_*"),
-#    outputCommands = cms.untracked.vstring("drop *","keep *_siPixelRawData_*_*"),
-    splitLevel = cms.untracked.int32(0)
 )
-
 
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('257487:50-257487:9999')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('273725:83-273725:9999')
@@ -97,7 +84,7 @@ process.output = cms.OutputModule("PoolOutputModule",
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('275828:69-275828:9999')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('277069:80-277069:9999')
 
-process.d = cms.EDAnalyzer("SiPixelRawDumpPilot", 
+process.d = cms.EDAnalyzer("SiPixelRawDump", 
     Timing = cms.untracked.bool(False),
     IncludeErrors = cms.untracked.bool(True),
 #   In 2015 data, label = rawDataCollector, extension = _LHC                                
@@ -119,6 +106,6 @@ process.d = cms.EDAnalyzer("SiPixelRawDumpPilot",
 #process.p = cms.Path(process.hltfilter*process.d)
 process.p = cms.Path(process.d)
 
-#process.ep = cms.EndPath(process.out)
+# process.ep = cms.EndPath(process.out)
 
 

@@ -1,4 +1,4 @@
-/** \class SiPixelRawDumperPilot_H
+/** \class SiPixelRawDumper_H
  *  Plug-in module that dump raw data file 
  *  for pixel subdetector
  *  Added class to interpret the data d.k. 30/10/08
@@ -6,12 +6,12 @@
  * Works with v7x, comment out the digis access.
  * Adopted for Phase1.
  * Add simple error vs fed num histos.
- * Specific to the pilot detector.
  */
 
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+
 
 #include "DataFormats/Common/interface/Handle.h"
 
@@ -45,7 +45,7 @@ using namespace std;
 
 //#define L1  // L1 information not in RAW
 //#define OUTFILE 
-//#define PHASE1    // For pilot blade keep this commented out
+//#define PHASE1
 
 namespace {
   bool printErrors  = false;
@@ -72,10 +72,10 @@ namespace {
 
 // Include the helper decoding class (how did I mange to avoid linking conflicts?)
 /////////////////////////////////////////////////////////////////////////////
-class Decode {
+class MyDecode {
 public:
-  Decode() {}
-  ~Decode() {}
+  MyDecode() {}
+  ~MyDecode() {}
   static int error(int error,int & fedChannel, int fed, int & stat1, int & stat2, bool print=false);
   int data(int error, int & fedChannel, int fed, int & stat1, int & stat2, bool print=false);
   static int header(unsigned long long word64, int fed, bool print, unsigned int & bx);
@@ -97,7 +97,7 @@ private:
 //Returns 1,2,3 for layer 1,2,3 full modules, 11,12,13 for 1/2 modules
 // 0 for fpix
 // needs fedid 0-31, and channel 1-36.
-int Decode::checkLayerLink(int fed, int chan) {
+int MyDecode::checkLayerLink(int fed, int chan) {
   int layer = 0;
   if(fed<0 || fed>31) return layer;  // return 0 for invalid of fpix
 
@@ -167,18 +167,18 @@ int Decode::checkLayerLink(int fed, int chan) {
   }  // if chan
 }
 
-int Decode::convertToCol(int dcol, int pix) {
+int MyDecode::convertToCol(int dcol, int pix) {
   // First find if we are in the first or 2nd col of a dcol.
   int colEvenOdd = pix%2;  // module(2), 0-1st sol, 1-2nd col.
   // Transform
   return (dcol * 2 + colEvenOdd); // col address, starts from 0
 
 }
-int Decode::convertToRow(int pix) {
+int MyDecode::convertToRow(int pix) {
   return abs( int(pix/2) - 80); // row addres, starts from 0
 }
 
-int Decode::header(unsigned long long word64, int fed, bool print, unsigned int & bx) {
+int MyDecode::header(unsigned long long word64, int fed, bool print, unsigned int & bx) {
   int fed_id=(word64>>8)&0xfff;
   int event_id=(word64>>32)&0xffffff;
   bx =(word64>>20)&0xfff;
@@ -195,7 +195,7 @@ int Decode::header(unsigned long long word64, int fed, bool print, unsigned int 
   return event_id;
 }
 //
-int Decode::trailer(unsigned long long word64, int fed, bool print) {
+int MyDecode::trailer(unsigned long long word64, int fed, bool print) {
   int slinkLength = int( (word64>>32) & 0xffffff );
   int crc         = int( (word64&0xffff0000)>>16 );
   int tts         = int( (word64&0xf0)>>4);
@@ -207,7 +207,7 @@ int Decode::trailer(unsigned long long word64, int fed, bool print) {
 //
 // Decode error FIFO
 // Works for both, the error FIFO and the SLink error words. d.k. 25/04/07
-int Decode::error(int word, int & fedChannel, int fed, int & stat1, int & stat2, bool print) {
+int MyDecode::error(int word, int & fedChannel, int fed, int & stat1, int & stat2, bool print) {
   int status = -1;
   print = print || printErrors;
 
@@ -215,7 +215,6 @@ int Decode::error(int word, int & fedChannel, int fed, int & stat1, int & stat2,
   const unsigned int  dummyMask      = 0x03600000;
   const unsigned int  gapMask        = 0x03400000;
   const unsigned int  timeOut        = 0x3a00000;
-  const unsigned int  timeOut2       = 0x3b00000;
   const unsigned int  eventNumError  = 0x3e00000;
   const unsigned int  trailError     = 0x3c00000;
   const unsigned int  fifoError      = 0x3800000;
@@ -232,12 +231,22 @@ int Decode::error(int word, int & fedChannel, int fed, int & stat1, int & stat2,
   const unsigned int  ChnFifMask = 0x1f;   //channel mask for fifo error
   const unsigned int  Fif2NFMask = 0x40;   //mask for fifo2 NF
   const unsigned int  TrigNFMask = 0x80;   //mask for trigger fifo NF
+
+  //masks for diagnostic words from piggy pilot FED
+  const unsigned int  NORMask = 0x1f0000;  //number of ROCs 
+  const unsigned int  AutoResetMask = 0x80; //autoreset detected
+  const unsigned int  PKAMResetMask = 0x40; //PKAM reset detected
+  const unsigned int  TBMStackCntMask =0x1f; //TBM Stack Count
+  const unsigned int  TimeStampMask = 0xFFFFF; //Time Stamp for first ROC header & TBM trailer
+
   
   const int offsets[8] = {0,4,9,13,18,22,27,31};
   unsigned int channel = 0;
 
   //cout<<"error word "<<hex<<word<<dec<<endl;
   
+  /* ----------------------------------------------------------------------
+
   if( (word&errorMask) == dummyMask ) { // DUMMY WORD
     //cout<<" Dummy word";
     return 0;
@@ -246,7 +255,41 @@ int Decode::error(int word, int & fedChannel, int fed, int & stat1, int & stat2,
     //cout<<" Gap word";
     return 0;
     
-  } else if( ((word&errorMask)==timeOut) || ((word&errorMask)==timeOut2) ) { // TIMEOUT
+    ---------------------------------------------------------------------- */
+
+  if( (word&errorMask) == dummyMask ) { // DUMMY WORD
+    //cout<<"error word "<<hex<<word<<dec<<endl;                                                                                  
+    if( (word&channelMask) != 0 ) { //pilot piggy tbm trailer bits
+      unsigned int chan = (word&channelMask)>>26;
+      unsigned int nor = (word&NORMask)>>16;
+      unsigned int autoreset = (word&AutoResetMask) >> 7;
+      unsigned int pkamreset = (word&PKAMResetMask) >> 6;
+      unsigned int stackCnt = (word&TBMStackCntMask);
+      if(print) 
+	cout<<" Diag ch="<<chan<<" #Rocs=" <<nor<<" resets? Auto/PKAM=" << autoreset << "/"<< pkamreset 
+		    << " TBMStackCnt=" << stackCnt << endl;
+    }
+    //    else if(print) {
+    //      cout<<" Dummy word"<<endl;}
+    return 0;
+
+  } else if( (word&errorMask) == gapMask ) { // GAP WORD
+    //cout<<"error word "<<hex<<word<<dec<<endl;                                                                                  
+    if( (word&channelMask)!=0 ) { // pilot piggy timestamps first ROC header TBM trailer
+      unsigned int chan = (word&channelMask)>>26;
+      unsigned int bit20 = (word & 0x100000)>>20; // on=ROC header off=TBM trailer
+      unsigned int time = (word&TimeStampMask);
+      if(print) {
+	cout << " Chan=" << chan;
+	if(bit20==1) cout << " 1st ROC H timestamp= " ;
+	else cout << " TBM T timestamp= ";
+	cout << time << endl;
+      } //print
+    } // chan !=0
+    //    else if(print) cout<<" Gap word"<<endl;
+    return 0;
+
+  } else if( (word&errorMask)==timeOut ) { // TIMEOUT
 
     unsigned int bit20 =      (word & 0x100000)>>20; // works only for slink format
 
@@ -254,6 +297,7 @@ int Decode::error(int word, int & fedChannel, int fed, int & stat1, int & stat2,
 
       unsigned int timeoutCnt = (word &  0x7f800)>>11; // only for slink
       // unsigned int timeoutCnt = ((word&0xfc000000)>>24) + ((word&0x1800)>>11); // only for fifo
+      // More than 1 channel within a group can have a timeout error
       // More than 1 channel within a group can have a timeout error
 
       unsigned int index = (word & 0x1F);  // index within a group of 4/5
@@ -356,7 +400,7 @@ int Decode::error(int word, int & fedChannel, int fed, int & stat1, int & stat2,
   return status;
 }
 ///////////////////////////////////////////////////////////////////////////
-int Decode::data(int word, int & fedChannel, int fed, int & stat1, int & stat2, bool print) {
+int MyDecode::data(int word, int & fedChannel, int fed, int & stat1, int & stat2, bool print) {
 
   //const int ROCMAX = 24;
   const unsigned int plsmsk = 0xff;   // pulse height
@@ -501,17 +545,17 @@ int Decode::data(int word, int & fedChannel, int fed, int & stat1, int & stat2, 
 }
 ////////////////////////////////////////////////////////////////////////////
 
-class SiPixelRawDumpPilot : public edm::EDAnalyzer {
+class SiPixelRawDump : public edm::EDAnalyzer {
 public:
 
   /// ctor
-  explicit SiPixelRawDumpPilot( const edm::ParameterSet& cfg);
+  explicit SiPixelRawDump( const edm::ParameterSet& cfg);
 
-  //explicit SiPixelRawDumpPilot( const edm::ParameterSet& cfg) : theConfig(cfg) {
+  //explicit SiPixelRawDump( const edm::ParameterSet& cfg) : theConfig(cfg) {
   //consumes<FEDRawDataCollection>(theConfig.getUntrackedParameter<std::string>("InputLabel","source"));} 
 
   /// dtor
-  virtual ~SiPixelRawDumpPilot() {}
+  virtual ~SiPixelRawDump() {}
 
   void beginJob();
 
@@ -578,16 +622,16 @@ private:
   TH1D *hadc1,*hadc2,*hadc3,*hadc0; 
   TH1D *htimeoutFed, *hoverflowFed, *hnorFed, *heneFed, *hpixFed;
 
-  Decode decode;
+  MyDecode decode;
 };
 //----------------------------------------------------------------------------------
-SiPixelRawDumpPilot::SiPixelRawDumpPilot( const edm::ParameterSet& cfg) : theConfig(cfg) {
+SiPixelRawDump::SiPixelRawDump( const edm::ParameterSet& cfg) : theConfig(cfg) {
   string label = theConfig.getUntrackedParameter<std::string>("InputLabel","source");
   // For the ByToken method
   rawData = consumes<FEDRawDataCollection>(label);
 } 
 //----------------------------------------------------------------------------------------
-void SiPixelRawDumpPilot::endJob() {
+void SiPixelRawDump::endJob() {
   string errorName[18] = {" "," ","wrong channel","wrong pix or dcol","wrong roc","pix=0",
 			  " double-pix"," "," "," ","timeout","ENE","NOR","FSM","overflow",
 			  "trailer","fifo","reset/resync"};
@@ -661,7 +705,7 @@ void SiPixelRawDumpPilot::endJob() {
 
 }
 //----------------------------------------------------------------------
-void SiPixelRawDumpPilot::beginJob() {
+void SiPixelRawDump::beginJob() {
 
   printLocal = theConfig.getUntrackedParameter<int>("Verbosity",1);
   printThreshold = theConfig.getUntrackedParameter<double>("PrintThreshold",0.001); // threshold per event for printing errors
@@ -967,8 +1011,7 @@ void SiPixelRawDumpPilot::beginJob() {
 
 }
 //-----------------------------------------------------------------------
-void SiPixelRawDumpPilot::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
-  const bool printEventInfo = false;
+void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 
   // Access event information
   int run       = ev.id().run();
@@ -976,34 +1019,11 @@ void SiPixelRawDumpPilot::analyze(const  edm::Event& ev, const edm::EventSetup& 
   int lumiBlock = ev.luminosityBlock();
   int bx        = ev.bunchCrossing();
   //int orbit     = ev.orbitNumber();
-  static int oldEvent=0; // ,LS=0;
-  
-  countAllEvents++;
+
   hevent->Fill(float(event));
   hlumi0->Fill(float(lumiBlock));
   hbx0->Fill(float(bx));
   //horbit->Fill(float(orbit));
-
-  if(printEventInfo) {
-    // if(countAllEvents<100 || (countAllEvents&1000)==0 )
-    //   cout<<" Run "<<run<<" LS "<<lumiBlock<<" event "<<event<<" bx "<<bx
-    // 	  <<" all "<<countAllEvents<<endl;
-    //if( lumiBlock != LS) {
-      cout<<" Run "<<run<<" LS "<<lumiBlock<<" event "<<event<<" bx "<<bx
-	  <<" all "<<countAllEvents<<endl;
-      //LS=lumiBlock;
-      //}
-      //if(event<oldEvent) 
-      cout<<"   Lower event number: Run "<<run<<" LS "<<lumiBlock<<" event "<<event<<" bx "<<bx
-	  <<" all "<<countAllEvents<<" "<<oldEvent<<endl;
-    //oldEvent=event;
-    //return; // skip the rest 
-  }
-
-  if(printHeaders) 
-    cout<<"Event = "<<countAllEvents<<" Event number "<<event<<" Run "<<run
-	<<" LS "<<lumiBlock<<endl;
-
 
   // Get lumi info (does not work for raw)
 //  edm::LuminosityBlock const& iLumi = ev.getLuminosityBlock();
@@ -1065,6 +1085,11 @@ void SiPixelRawDumpPilot::analyze(const  edm::Event& ev, const edm::EventSetup& 
   bool wrongBX=false;
   int countErrors[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
+  countAllEvents++;
+
+  if(printHeaders) 
+    cout<<"Event = "<<countEvents<<" Event number "<<event<<" Run "<<run
+	<<" LS "<<lumiBlock<<endl;
 
   // Loop over FEDs
   for (int fedId = fedIds.first; fedId <= fedIds.second; fedId++) {
@@ -1103,7 +1128,7 @@ void SiPixelRawDumpPilot::analyze(const  edm::Event& ev, const edm::EventSetup& 
     //cout<<hex<<*header<<dec<<endl;
 
     unsigned int bxid = 0;
-    eventId = Decode::header(*header, fedId, printHeaders, bxid);
+    eventId = MyDecode::header(*header, fedId, printHeaders, bxid);
     //if(fedId = fedIds.first) 
     if(bx != int(bxid) ) { 
       wrongBX=true;
@@ -1116,7 +1141,7 @@ void SiPixelRawDumpPilot::analyze(const  edm::Event& ev, const edm::EventSetup& 
 
     const Word64* trailer = reinterpret_cast<const Word64* >(rawData.data())+(nWords-1);
     //cout<<hex<<*trailer<<dec<<endl;
-    status = Decode::trailer(*trailer,fedId, printHeaders);
+    status = MyDecode::trailer(*trailer,fedId, printHeaders);
 
     int countPixelsInFed=0;
     int countErrorsInFed=0;
@@ -1141,9 +1166,9 @@ void SiPixelRawDumpPilot::analyze(const  edm::Event& ev, const edm::EventSetup& 
 	num++;
 	if(printLocal>3) cout<<" "<<num<<" "<<hex<<w<<dec<<endl;
 
-	//status = Decode::data(w,fedChannel, fedId, stat1, stat2, printData);
+	//status = MyDecode::data(w,fedChannel, fedId, stat1, stat2, printData);
 	status = decode.data(w,fedChannel, fedId, stat1, stat2, printData);
-	int layer = Decode::checkLayerLink(fedId, fedChannel); // get bpix layer, works only for phase0 
+	int layer = MyDecode::checkLayerLink(fedId, fedChannel); // get bpix layer, works only for phase0 
 	if(phase1) layer=0;
 	if(layer>10) layer = layer-10; // ignore 1/2 modules 
 	if(status>0) {  // data
@@ -1161,8 +1186,8 @@ void SiPixelRawDumpPilot::analyze(const  edm::Event& ev, const edm::EventSetup& 
 	} else if(status<0) {  // error word
 	  countErrorsInFed++;
 	  //if( status == -6 || status == -5) 
-	  if(printErrors) cout<<"    Bad stats for FED "<<fedId<<" Event "<<eventId<<"/"<<(eventId%256)
-			      <<" count "<<countAllEvents<<" chan "<<fedChannel<<" status "<<status<<endl;
+	  if(printErrors) cout<<" Bad stats for FED "<<fedId<<" Event "<<eventId<<" mod 256 = " << (eventId&0xff) << "/"
+			      <<countAllEvents<<" chan "<<fedChannel<<" status "<<status<<endl;
 	  status=abs(status);
 	  // 2 - wrong channel
 	  // 3 - wrong pix or dcol 
@@ -1365,7 +1390,7 @@ void SiPixelRawDumpPilot::analyze(const  edm::Event& ev, const edm::EventSetup& 
       hfedchannelsize->Fill( float(fedId-fedId0), float(i+1), float(fedchannelsize[i]) );
       if(fedId<fedIdBpixMax) {
 	hfedchannelsizeb->Fill( float(fedchannelsize[i]) );
-	int layer = Decode::checkLayerLink(fedId, i); // get bpix layer 
+	int layer = MyDecode::checkLayerLink(fedId, i); // get bpix layer 
 	if(layer>10) layer = layer-10; // ignore 1/2 modules 
 	if(layer==3)      hfedchannelsizeb3->Fill( float(fedchannelsize[i]) );  // layer 3
 	else if(layer==2) hfedchannelsizeb2->Fill( float(fedchannelsize[i]) );  // layer 2
@@ -1374,9 +1399,9 @@ void SiPixelRawDumpPilot::analyze(const  edm::Event& ev, const edm::EventSetup& 
       } else         hfedchannelsizef->Fill( float(fedchannelsize[i]) );  // fpix
     }
     //    if(fedId == fedIds.first || countPixelsInFed>0 || countErrorsInFed>0 )  {
-    //       eventId = Decode::header(*header, true);
+    //       eventId = MyDecode::header(*header, true);
     //       if(countPixelsInFed>0 || countErrorsInFed>0 ) cout<<"fed "<<fedId<<" pix "<<countPixelsInFed<<" err "<<countErrorsInFed<<endl;
-    //       status = Decode::trailer(*trailer,true);
+    //       status = MyDecode::trailer(*trailer,true);
     //     }
     
 
@@ -1459,4 +1484,4 @@ void SiPixelRawDumpPilot::analyze(const  edm::Event& ev, const edm::EventSetup& 
   // 17 - reset/resync NOT INCLUDED YET
 
 #include "FWCore/Framework/interface/MakerMacros.h"
-DEFINE_FWK_MODULE(SiPixelRawDumpPilot);
+DEFINE_FWK_MODULE(SiPixelRawDump);
