@@ -213,7 +213,7 @@ process.siPixelClusters.src = 'siPixelDigis'
 # runs ok
 #process.p1 = cms.Path(process.siPixelRawData*process.SiStripDigiToRaw*process.siPixelDigis*process.siStripDigis*process.trackerlocalreco*process.offlineBeamSpot*process.MeasurementTrackerEvent*process.siPixelClusterShapeCache*process.recopixelvertexing)
 
-process.d = cms.EDAnalyzer("TestWithTracks",
+process.d = cms.EDAnalyzer("PixClustersWithTracks",
     Verbosity = cms.untracked.bool(False),
     src = cms.InputTag("generalTracks"),
 #     PrimaryVertexLabel = cms.untracked.InputTag("offlinePrimaryVertices"),                             
@@ -224,7 +224,6 @@ process.d = cms.EDAnalyzer("TestWithTracks",
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string('histo_tracks.root')
 )
-
 
 process.load("RecoTracker.IterativeTracking.iterativeTk_cff")
 

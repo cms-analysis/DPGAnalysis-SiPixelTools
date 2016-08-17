@@ -7,8 +7,8 @@ process.load("Configuration.Geometry.GeometryRecoDB_cff")
 process.load("CondTools.SiPixel.SiPixelGainCalibrationService_cfi")
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-#from Configuration.AlCa.GlobalTag import GlobalTag
+#from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
+from Configuration.AlCa.GlobalTag import GlobalTag
 # works with condDB and condDBv2
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'MCRUN2_73_V7', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgradePLS1', '')
@@ -34,10 +34,10 @@ process.source = cms.Source("EmptySource",
 # timetype = cms.string('runnumber'),
 #    numberEventsInRun = cms.untracked.uint32(10),
 #    select the IOV from the global tag
-#    firstRun = cms.untracked.uint32(190000)  # iov1-2012
+    firstRun = cms.untracked.uint32(190000)  # iov1-2012
 #    firstRun = cms.untracked.uint32(200000)  # iov2-2012
 #    firstRun = cms.untracked.uint32(208000)  # iov3-2012
-    firstRun = cms.untracked.uint32(240000)  # iov1-2015
+#    firstRun = cms.untracked.uint32(240000)  # iov1-2015
 )
 
 #process.Timing = cms.Service("Timing")
@@ -48,7 +48,7 @@ process.source = cms.Source("EmptySource",
 
 # DB stuff 
 useLocalDB = True
-if useLocalDB :
+if useLocalDB:
   process.GainsReader = cms.ESSource("PoolDBESSource",
   #    process.CondDBCommon,
    # BlobStreamerName = cms.untracked.string('TBufferBlobStreamingService'),
@@ -58,20 +58,23 @@ if useLocalDB :
     ),
     toGet = cms.VPSet(
       cms.PSet(
-       record = cms.string('SiPixelGainCalibrationForHLTRcd'),
-#       record = cms.string('SiPixelGainCalibrationOfflineRcd'),
+       record = cms.string('SiPixelGainCalibrationOfflineRcd'),
+#       record = cms.string('SiPixelGainCalibrationForHLTRcd'),
        #SiPixelGainCalibrationForHLTSimRcd  
        #SiPixelGainCalibrationOfflineSimRcd 
 #       tag = cms.string('SiPixelGainCalibration_r203368_offline')
 #       tag = cms.string('SiPixelGainCalibration_r197749_offline')
 #       tag = cms.string('SiPixelGainCalib_2009CollRuns_offline')
 #       tag = cms.string('SiPixelGainCalibration_2016_v1_offline')
-       tag = cms.string('SiPixelGainCalibration_2016_v1_HTL')  # HLT
+#       tag = cms.string('SiPixelGainCalibration_2016_v1_HLT')  # HLT
+       tag = cms.string('SiPixelGainCalibration_2016_v2_offline')
+#       tag = cms.string('SiPixelGainCalibration_2016_v2_HLT')  # HLT
     )),
 #    connect = cms.string('frontier://FrontierProd/CMS_COND_31X_PIXEL')
 #    connect = cms.string('sqlite_file:../../../../../DB/Gains/SiPixelGainCalibration_2016_v1_offline.db')
+#    connect = cms.string('sqlite_file:../../../../../DB/Gains/SiPixelGainCalibration_2016_v2_offline.db')
     connect = cms.string('sqlite_file:../../../../../DB/Gains/SiPixelGainCalibration_2016_v1_HLT.db')
-#    connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/eos/cms/store/group/dpg_tracker_pixel/comm_pixel/GainCalibrations/Run_265850/GainRun_265850/prova_GainRun265850.db')
+#    connect = cms.string('sqlite_file:../../../../../DB/Gains/SiPixelGainCalibration_2016_v2_HLT.db')
   ) # end process
   # process.prefer("PoolDBESSource")
   process.myprefer = cms.ESPrefer("PoolDBESSource","GainsReader")
@@ -79,8 +82,8 @@ if useLocalDB :
 
 process.SiPixelGainsDBReader = cms.EDAnalyzer("SiPixelGainsDBReader",
     process.SiPixelGainCalibrationServiceParameters,
-    payloadType = cms.string('HLT'),
-#    payloadType = cms.string('Offline'),
+#    payloadType = cms.string('HLT'),
+    payloadType = cms.string('Offline'),
     useSimRcd = cms.bool(False),
 #    useSimRcd = cms.bool(True),
     maxRangeDeadPixHist = cms.untracked.double(0.001)

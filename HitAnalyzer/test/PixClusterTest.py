@@ -32,7 +32,7 @@ process.hltfilter = hlt.hltHighLevel.clone(
     )
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10)
+    input = cms.untracked.int32(-1)
 )
 
 process.MessageLogger = cms.Service("MessageLogger",
@@ -55,7 +55,8 @@ myfilelist.extend([
 process.source = cms.Source("PoolSource",
 #  fileNames =  myfilelist
  fileNames = cms.untracked.vstring(    
- "/store/express/Run2016B/ExpressPhysics/FEVT/Express-v2/000/274/314/00000/1A57B62A-4328-E611-9D78-02163E01339F.root",
+# "/store/express/Run2016B/ExpressPhysics/FEVT/Express-v2/000/274/314/00000/1A57B62A-4328-E611-9D78-02163E01339F.root",
+ "root://eoscms//eos/cms/tier0/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/0E6E4ACA-4F5A-E611-97B5-FA163E1E4ACD.root",
 
 # for MC 
 #  'file:../scripts/tracks.root'
@@ -71,7 +72,8 @@ process.source = cms.Source("PoolSource",
 
 # for data 
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('206940:0-206940:1027')
-process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('274314:97-274314:9999')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('274314:97-274314:9999')
+process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('278193:77-278193:9999')
 
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string('clus.root')
@@ -91,10 +93,10 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag.globaltag = 'GR_P_V49::All'
 # 2016
 #process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v3' # for 266277
-process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v8' # for 272
+process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v9' # for 272
 
 process.analysis = cms.EDAnalyzer("PixClusterTest",
-    Verbosity = cms.untracked.bool(True),
+    Verbosity = cms.untracked.bool(False),
     src = cms.InputTag("siPixelClusters"),
 #    src = cms.InputTag("siPixelClustersPreSplitting"),
 )

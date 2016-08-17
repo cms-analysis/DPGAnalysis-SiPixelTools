@@ -64,7 +64,14 @@ process.source = cms.Source("PoolSource",
 fileNames =  cms.untracked.vstring(
 #"root://eoscms//eos/cms/store/data/Run2015C/ZeroBias/RAW/v1/000/254/227/00000/FA244051-8141-E511-B22B-02163E014153.root",
 
+#"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/069/00000/04BF9517-F54D-E611-B42B-02163E0144D3.root"
+#"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/087/00000/0014F268-DC4E-E611-AC39-02163E0141E7.root"
+
 "/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/0E6E4ACA-4F5A-E611-97B5-FA163E1E4ACD.root",
+"/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/106E5B0B-605A-E611-A5C2-FA163E664536.root",
+"/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/10E6864D-525A-E611-9181-FA163EF8E5AF.root",
+"/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/12222759-4F5A-E611-A38E-02163E011B22.root",
+"/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/12639720-455A-E611-A984-FA163EA2AA62.root",
 
  )
 #   skipEvents = cms.untracked.uint32(5000)
@@ -96,8 +103,8 @@ process.MessageLogger = cms.Service("MessageLogger",
 # pixel local reco (RecHits) needs the GenError object,
 # not yet in GT, add here:
 # DB stuff 
-useLocalDBGain = True
-if useLocalDBGain :
+useLocalDBGain = False 
+if useLocalDBGain:
     process.DBReaderGain = cms.ESSource("PoolDBESSource",
      DBParameters = cms.PSet(
          messageLevel = cms.untracked.int32(0),
@@ -107,22 +114,21 @@ if useLocalDBGain :
        cms.PSet(
         record = cms.string('SiPixelGainCalibrationOfflineRcd'),
         #tag = cms.string('SiPixelGainCalibration_2016_v1_offline')
-        tag = cms.string('SiPixelGainCalibration_2016_v2_offline')
+        tag = cms.string('SiPixelGainCalibration_2016_v2')
         #tag = cms.string('SiPixelGainCalibration_2016_v1_hltvalidation')
  	),
        ),
 #     connect = cms.string('sqlite_file:../../../../../DB/Gains/SiPixelGainCalibration_2016_v1_offline.db')
-     connect = cms.string('sqlite_file:../../../../../DB/Gains/SiPixelGainCalibration_2016_v2_offline.db')
+#     connect = cms.string('sqlite_file:../../../../../DB/Gains/SiPixelGainCalibration_2016_v2_offline.db')
 #     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
-#     connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
+     connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
     ) # end process
     process.myprefer = cms.ESPrefer("PoolDBESSource","DBReaderGain")
 # end 
 
-
 useLocalDBError = False
 if useLocalDBError :
-    process.DBReaderFrontier = cms.ESSource("PoolDBESSource",
+    process.DBReaderError = cms.ESSource("PoolDBESSource",
      DBParameters = cms.PSet(
          messageLevel = cms.untracked.int32(0),
          authenticationPath = cms.untracked.string('')
@@ -140,10 +146,8 @@ if useLocalDBError :
 #     connect = cms.string('frontier://FrontierPrep/CMS_COND_PIXEL')
      connect = cms.string('frontier://FrontierProd/CMS_COND_PIXEL_000')
     ) # end process
-    process.myprefer = cms.ESPrefer("PoolDBESSource","DBReaderFrontier")
+    process.myprefer = cms.ESPrefer("PoolDBESSource","DBReaderError")
 # end 
-
-
 
 process.out = cms.OutputModule("PoolOutputModule",
     fileName =  cms.untracked.string('file:reco.root'),
@@ -157,20 +161,6 @@ process.out = cms.OutputModule("PoolOutputModule",
         dataTier = cms.untracked.string('RECO')
     )
 )
-
-
-process.d = cms.EDAnalyzer("PixClustersWithTracks",
-    Verbosity = cms.untracked.bool(False),
-    src = cms.InputTag("generalTracks"),
-#     PrimaryVertexLabel = cms.untracked.InputTag("offlinePrimaryVertices"),                             
-#     trajectoryInput = cms.string("TrackRefitterP5")
-#     trajectoryInput = cms.string('cosmictrackfinderP5')
-)
-
-process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('histo_tracks.root')
-)
-
 
 # copy the sequence below from  
 # RecoTracker/IterativeTracking/python/iterativeTk_cff.py  - 71_pre7
@@ -189,6 +179,20 @@ process.myTracking = cms.Sequence(process.InitialStep*
                             process.conversionStepTracks
                             )
 
+process.histos = cms.EDAnalyzer('PxlBPix',
+# for official RECO
+#	triggerSource = cms.InputTag('TriggerResults::HLT'),
+# For MC or my rereco
+	triggerSource = cms.InputTag(''),
+# Using templates   
+#	ttrhBuilder = cms.string('WithAngleAndTemplate'),
+# Using generic 
+	ttrhBuilder = cms.string('WithTrackAngle'),
+        singleParticleMC = cms.untracked.bool(False),
+)
+process.TFileService = cms.Service('TFileService',
+	fileName = cms.string('triplets.root'),
+)
 #process.p = cms.Path(process.siPixelDigis)
 #process.p = cms.Path(process.siPixelDigis*process.siPixelClusters)
 #process.p = cms.Path(process.siPixelDigis*process.pixeltrackerlocalreco)
@@ -212,15 +216,15 @@ process.myTracking = cms.Sequence(process.InitialStep*
 process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
 process.reconstruction_step = cms.Path(process.reconstruction)
+process.histos_step = cms.Path(process.histos)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.RECOoutput_step = cms.EndPath(process.out)
-process.d_step = cms.Path(process.d)
 
 # Schedule definition
-# producing root files with tracks
+# save tracks
 #process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.endjob_step,process.RECOoutput_step)
-# producing track histos 
-process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.d_step)
+# do not save tracks, call triplets  
+process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.histos_step)
 
 # customisation of the process.
 

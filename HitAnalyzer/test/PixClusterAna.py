@@ -17,7 +17,10 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag.globaltag = '74X_dataRun2_Prompt_v0' # for 254227
 # 2016
 #process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v3' # for 266277
-process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v8' # for 272
+#process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v9' # >=8010
+#process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v10' # >=8014
+process.GlobalTag.globaltag = '80X_dataRun2_Express_v10' # >8010
+#process.GlobalTag.globaltag = '80X_dataRun2_Express_v12' # >8014
 # AUTO conditions 
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
@@ -50,7 +53,7 @@ process.hltfilter = hlt.hltHighLevel.clone(
 
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(100)
 )
 
 process.MessageLogger = cms.Service("MessageLogger",
@@ -123,16 +126,16 @@ process.source = cms.Source("PoolSource",
 #"/store/express/Run2016B/ExpressPhysics/FEVT/Express-v2/000/274/314/00000/1A57B62A-4328-E611-9D78-02163E01339F.root",
 
 # 276495
-"/store/express/Run2016D/ExpressPhysics/FEVT/Express-v2/000/276/495/00000/00F172F9-7A44-E611-A3DF-02163E013529.root",
-"/store/express/Run2016D/ExpressPhysics/FEVT/Express-v2/000/276/495/00000/040EB3FE-6444-E611-8D22-02163E013403.root",
-"/store/express/Run2016D/ExpressPhysics/FEVT/Express-v2/000/276/495/00000/04117770-7744-E611-BB06-02163E0143EF.root",
-"/store/express/Run2016D/ExpressPhysics/FEVT/Express-v2/000/276/495/00000/042091A5-7844-E611-A757-02163E01444D.root",
-"/store/express/Run2016D/ExpressPhysics/FEVT/Express-v2/000/276/495/00000/0435BE3D-8044-E611-90DE-02163E013617.root",
-"/store/express/Run2016D/ExpressPhysics/FEVT/Express-v2/000/276/495/00000/04A492CE-6F44-E611-9DAB-02163E01198C.root",
-"/store/express/Run2016D/ExpressPhysics/FEVT/Express-v2/000/276/495/00000/062A8714-7644-E611-B0EF-02163E013836.root",
-"/store/express/Run2016D/ExpressPhysics/FEVT/Express-v2/000/276/495/00000/0630C5B7-6144-E611-96AB-02163E0143EA.root",
-"/store/express/Run2016D/ExpressPhysics/FEVT/Express-v2/000/276/495/00000/086A39AF-7844-E611-95D6-02163E011E2B.root",
-"/store/express/Run2016D/ExpressPhysics/FEVT/Express-v2/000/276/495/00000/08768A3F-8144-E611-82B9-02163E01239B.root",
+#"/store/express/Run2016D/ExpressPhysics/FEVT/Express-v2/000/276/495/00000/00F172F9-7A44-E611-A3DF-02163E013529.root",
+#"/store/express/Run2016D/ExpressPhysics/FEVT/Express-v2/000/276/495/00000/040EB3FE-6444-E611-8D22-02163E013403.root",
+#"/store/express/Run2016D/ExpressPhysics/FEVT/Express-v2/000/276/495/00000/04117770-7744-E611-BB06-02163E0143EF.root",
+#"/store/express/Run2016D/ExpressPhysics/FEVT/Express-v2/000/276/495/00000/042091A5-7844-E611-A757-02163E01444D.root",
+#"/store/express/Run2016D/ExpressPhysics/FEVT/Express-v2/000/276/495/00000/0435BE3D-8044-E611-90DE-02163E013617.root",
+#"/store/express/Run2016D/ExpressPhysics/FEVT/Express-v2/000/276/495/00000/04A492CE-6F44-E611-9DAB-02163E01198C.root",
+#"/store/express/Run2016D/ExpressPhysics/FEVT/Express-v2/000/276/495/00000/062A8714-7644-E611-B0EF-02163E013836.root",
+#"/store/express/Run2016D/ExpressPhysics/FEVT/Express-v2/000/276/495/00000/0630C5B7-6144-E611-96AB-02163E0143EA.root",
+#"/store/express/Run2016D/ExpressPhysics/FEVT/Express-v2/000/276/495/00000/086A39AF-7844-E611-95D6-02163E011E2B.root",
+#"/store/express/Run2016D/ExpressPhysics/FEVT/Express-v2/000/276/495/00000/08768A3F-8144-E611-82B9-02163E01239B.root",
 
 # 277069
 #"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/069/00000/0004128B-E74D-E611-A955-FA163E7DD696.root",
@@ -156,6 +159,26 @@ process.source = cms.Source("PoolSource",
 #"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/069/00000/0A57D891-F94D-E611-AB10-02163E01419D.root",
 #"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/069/00000/0CC25B50-F54D-E611-A641-FA163EA74264.root",
 
+# 278193
+#"root://eoscms//eos/cms/tier0/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/04476347-4F5A-E611-AF5B-FA163EB8F285.root",
+#"root://eoscms//eos/cms/tier0/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/063A87B8-515A-E611-9AF6-02163E0136A1.root",
+#"root://eoscms//eos/cms/tier0/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/06EAFD59-525A-E611-BB68-02163E012626.root",
+#"root://eoscms//eos/cms/tier0/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/084F25A3-525A-E611-9D33-02163E011CFE.root",
+#"root://eoscms//eos/cms/tier0/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/08649C3B-425A-E611-BC0E-FA163EF071BF.root",
+#"root://eoscms//eos/cms/tier0/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/08690E6C-545A-E611-A200-FA163EDD08C4.root",
+#"root://eoscms//eos/cms/tier0/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/08DBAFB4-575A-E611-8BB2-FA163EDB8A5C.root",
+#"root://eoscms//eos/cms/tier0/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/0E35562B-535A-E611-BFAF-02163E0134BC.root",
+#"root://eoscms//eos/cms/tier0/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/0E5D88A4-525A-E611-BBFE-FA163E7939D9.root",
+#"root://eoscms//eos/cms/tier0/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/0E6E4ACA-4F5A-E611-97B5-FA163E1E4ACD.root",
+
+#"/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/509/00000/000D37E3-915E-E611-A2CB-02163E011AAE.root",
+#"/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/509/00000/002B0EDB-905E-E611-989E-FA163E721B2A.root",
+#"/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/509/00000/0079B580-8C5E-E611-B895-02163E012797.root",
+#"/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/509/00000/008E5634-915E-E611-9F52-02163E0140F7.root",
+#"/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/509/00000/0094ACA0-915E-E611-9D06-02163E0143E4.root",
+
+"/store/data/Run2016F/ZeroBias/ALCARECO/TkAlMinBias-PromptReco-v1/000/278/509/00000/18648660-5460-E611-9CDB-FA163ED6B29A.root",
+
 
   )   # end the list "by-hand"
 )
@@ -164,7 +187,9 @@ process.source = cms.Source("PoolSource",
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('273725:83-273725:9999')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('274314:97-274314:9999')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('277069:80-277069:9999')
-process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('276495:87-276495:9999')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('276495:87-276495:9999')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('278193:77-278193:9999')
+process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('278509:91-278509:9999')
 
 
 process.TFileService = cms.Service("TFileService",
@@ -172,11 +197,11 @@ process.TFileService = cms.Service("TFileService",
 )
 
 process.d = cms.EDAnalyzer("PixClusterAna",
-    Verbosity = cms.untracked.bool(False),
+    Verbosity = cms.untracked.bool(True),
     #src = cms.InputTag("siPixelClustersForLumi"),   # from the lumi stream
-    src = cms.InputTag("siPixelClusters"),
+    #src = cms.InputTag("siPixelClusters"),
     #src = cms.InputTag("siPixelClustersPreSplitting"),
-    #src = cms.InputTag("ALCARECOTkAlMinBias"), # ALCARECO
+    src = cms.InputTag("ALCARECOTkAlMinBias"), # ALCARECO
     Select1 = cms.untracked.int32(1),  # cut on the num of dets <4 skip, 0 means 4 default 
     Select2 = cms.untracked.int32(0),  # 6 no bptx, 0 no selection                               
 )

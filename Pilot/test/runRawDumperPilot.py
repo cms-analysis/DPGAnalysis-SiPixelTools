@@ -46,7 +46,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 #process.MessageLogger.cerr.threshold = 'Debug'
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(1000)
 )
 
 process.TFileService = cms.Service("TFileService",
@@ -66,7 +66,12 @@ process.source = cms.Source("PoolSource",
 # fileNames =  myfilelist
     fileNames = cms.untracked.vstring(                          
 #        'file:/afs/cern.ch/work/d/dkotlins/public/pilot/run277150_ls1.root',
-        'file:/afs/cern.ch/work/d/dkotlins/public/pilot/run278196_ls1_1k.root',
+#        'file:/afs/cern.ch/work/d/dkotlins/public/pilot/run278196_ls1.root',
+        'file:/afs/cern.ch/work/d/dkotlins/public/pilot/run278244_ls1.root',
+#        'file:/afs/cern.ch/work/d/dkotlins/public/pilot/run278245_ls1.root',
+#        'file:/afs/cern.ch/work/d/dkotlins/public/pilot/run278358_ls1.root',
+#        'file:/afs/cern.ch/work/d/dkotlins/public/pilot/run278362_ls1.root',
+#        'file:/afs/cern.ch/work/d/dkotlins/public/pilot/run278370_ls1.root',
 
 # data 2016
 #"/store/data/Run2016A/ZeroBias1/RAW/v1/000/271/056/00000/0097F016-0C09-E611-AA06-02163E011AE6.root",

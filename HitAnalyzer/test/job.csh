@@ -19,7 +19,7 @@ pwd
 
 #  RAW
 #cmsRun runHotPixels.py 
-cmsRun runRawDumper.py 
+#cmsRun runRawDumper.py 
 #cmsRun runRawDumperPilot.py 
 #cmsRun runRawDumper_lumi.py 
 # cmsRun runRawToDigi_cfg.py 
@@ -29,7 +29,7 @@ cmsRun runRawDumper.py
 
 #cmsRun PixClusterAna.py
 #cmsRun PixClusterAna_277069.py
-#cmsRun PixClusterTest.py
+cmsRun PixClusterTest.py
 #cmsRun PixClusterAna_Lumi.py
 #cmsRun testTracks.py
 

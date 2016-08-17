@@ -90,4 +90,7 @@
 #das_client.py --limit=0 --query='file dataset=/Cosmics/Commissioning2016-PromptReco-v1/RECO run=266665' # 
 #das_client.py --limit=0 --query='file dataset=/Cosmics/Commissioning2016-PromptReco-v1/RECO run=267594' # 
 
-das_client.py --limit=0 --query='file dataset=/ExpressPhysics/Run2016E-Express-v2/FEVT run=277148' # 
+#das_client.py --limit=0 --query='file dataset=/ExpressPhysics/Run2016E-Express-v2/FEVT run=277069' # 
+#das_client.py --limit=0 --query='file dataset=/ExpressPhysics/Run2016E-Express-v2/FEVT run=277148' # 
+
+/cvmfs/cms.cern.ch/common/das_client  --limit=0 --query='file dataset=/ExpressPhysics/Run2016F-Express-v1/FEVT run=278509' 

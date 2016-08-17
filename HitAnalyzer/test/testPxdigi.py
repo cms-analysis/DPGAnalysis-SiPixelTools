@@ -8,18 +8,19 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 # process.load("Configuration.StandardSequences.Services_cff")
 
 
-#process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-#from Configuration.AlCa.GlobalTag import GlobalTag
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
-from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+from Configuration.AlCa.GlobalTag import GlobalTag
+#process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
+#from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
-#process.GlobalTag.globaltag = 'GR_P_V56' # for 247607
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
+#process.GlobalTag.globaltag = '80X_dataRun2_Express_v10' # >8010
+
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(100)
 )
 
 process.MessageLogger = cms.Service("MessageLogger",
@@ -36,10 +37,14 @@ process.MessageLogger = cms.Service("MessageLogger",
 
 process.source = cms.Source("PoolSource",
     fileNames =  cms.untracked.vstring(
-#    'file:../scripts/digis4.root'
-    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_74/digis/digis1.root'
+    'file:../scripts/digis4.root'
+#    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_74/digis/digis1.root'
 #    'file:/afs/cern.ch/work/d/dkotlins/public/data/digis/digi_zb_248025.root'
 #    '/store/user/kotlinski/mu100_v74/digis/digis1.root'
+
+# there are no digis in express
+#"/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/509/00000/0094ACA0-915E-E611-9D06-02163E0143E4.root",
+
     )
 )
 

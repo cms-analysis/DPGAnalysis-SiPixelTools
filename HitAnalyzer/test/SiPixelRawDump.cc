@@ -576,6 +576,8 @@ private:
   TH1D *hfedchannelsizeb,*hfedchannelsizeb1,*hfedchannelsizeb2,*hfedchannelsizeb3,
     *hfedchannelsizef;
   TH1D *hadc1,*hadc2,*hadc3,*hadc0; 
+  TProfile *hadc1ls,*hadc2ls,*hadc3ls,*hadc0ls; 
+  TProfile *hadc1bx,*hadc2bx,*hadc3bx,*hadc0bx; 
   TH1D *htimeoutFed, *hoverflowFed, *hnorFed, *heneFed, *hpixFed;
 
   MyDecode decode;
@@ -967,6 +969,16 @@ void SiPixelRawDump::beginJob() {
   hadc3 = fs->make<TH1D>("hadc3","adc lay 3",255,0.,255.);
   hadc0 = fs->make<TH1D>("hadc0","adc fpix",255,0.,255.);
 
+  hadc1ls = fs->make<TProfile>("hadc1ls","adc1 vs ls",1000,0,1000,     0.,255.);
+  hadc1bx = fs->make<TProfile>("hadc1bx","adc1 vs bx",4000,-0.5,3999.5,0.,255.);
+  hadc2ls = fs->make<TProfile>("hadc2ls","adc2 vs ls",1000,0,1000,     0.,255.);
+  hadc2bx = fs->make<TProfile>("hadc2bx","adc2 vs bx",4000,-0.5,3999.5,0.,255.);
+  hadc3ls = fs->make<TProfile>("hadc3ls","adc3 vs ls",1000,0,1000,     0.,255.);
+  hadc3bx = fs->make<TProfile>("hadc3bx","adc3 vs bx",4000,-0.5,3999.5,0.,255.);
+  hadc0ls = fs->make<TProfile>("hadc0ls","adc0 vs ls",1000,0,1000,     0.,255.);
+  hadc0bx = fs->make<TProfile>("hadc0bx","adc0 vs bx",4000,-0.5,3999.5,0.,255.);
+
+
   htimeoutFed  = fs->make<TH1D>("htimeoutFed","timeouts per fed",41,0.,41.);
   hoverflowFed = fs->make<TH1D>("hoverflowFed","overflow per fed",41,0.,41.);
   hnorFed      = fs->make<TH1D>("hnorFed","nors per fed",41,0.,41.);
@@ -1166,10 +1178,14 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 	  fedchannelsize[fedChannel-1]++;
 	  
 	  int adc = decode.get_adc();
-	  if(layer==1)      hadc1->Fill(float(adc));
-	  else if(layer==2) hadc2->Fill(float(adc));
-	  else if(layer==3) hadc3->Fill(float(adc));
-	  else if(layer==0) hadc0->Fill(float(adc));
+	  if(layer==1)      
+	    {hadc1->Fill(float(adc));hadc1ls->Fill(float(lumiBlock),float(adc));hadc1bx->Fill(float(bx),float(adc));}
+	  else if(layer==2) 
+	    {hadc2->Fill(float(adc));hadc2ls->Fill(float(lumiBlock),float(adc));hadc2bx->Fill(float(bx),float(adc));}
+	  else if(layer==3) 
+	    {hadc3->Fill(float(adc));hadc3ls->Fill(float(lumiBlock),float(adc));hadc3bx->Fill(float(bx),float(adc));}
+	  else if(layer==0) 
+	    {hadc0->Fill(float(adc));hadc0ls->Fill(float(lumiBlock),float(adc));hadc0bx->Fill(float(bx),float(adc));}
 	  //cout<<adc<<endl;
 
 	} else if(status<0) {  // error word
