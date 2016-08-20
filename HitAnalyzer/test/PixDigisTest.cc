@@ -90,6 +90,7 @@
 #include <TF1.h>
 #include <TH2F.h>
 #include <TH1F.h>
+#include <TProfile.h>
 
 #define HISTOS
 #define L1
@@ -159,6 +160,11 @@ private:
 
   TH1F *hevent, *hlumi, *horbit, *hbx0, *hlumi0, *hlumi1,*hbx1,*hbx2,*hbx3,*hbx4,*hbx5,*hbx6;
   TH1F *hdets, *hdigis, *hdigis0, *hdigis1, *hdigis2,*hdigis3,*hdigis4,*hdigis5; 
+
+  TProfile *hadc1ls,*hadc2ls,*hadc3ls,*hadc4ls,*hadc0ls; 
+  TProfile *hadc1bx,*hadc2bx,*hadc3bx,*hadc4bx,*hadc0bx; 
+
+
 
 #endif
 
@@ -393,6 +399,17 @@ void PixDigisTest::beginJob() {
   hphiz2 = fs->make<TH2F>("hphiz2"," ",108,-27.,27.,140,-3.5,3.5);
   hphiz3 = fs->make<TH2F>("hphiz3"," ",108,-27.,27.,140,-3.5,3.5);
   hphiz4 = fs->make<TH2F>("hphiz4"," ",108,-27.,27.,140,-3.5,3.5);
+
+  hadc1ls = fs->make<TProfile>("hadc1ls","adc1 vs ls",1000,0,1000,     0.,255.);
+  hadc1bx = fs->make<TProfile>("hadc1bx","adc1 vs bx",4000,-0.5,3999.5,0.,255.);
+  hadc2ls = fs->make<TProfile>("hadc2ls","adc2 vs ls",1000,0,1000,     0.,255.);
+  hadc2bx = fs->make<TProfile>("hadc2bx","adc2 vs bx",4000,-0.5,3999.5,0.,255.);
+  hadc3ls = fs->make<TProfile>("hadc3ls","adc3 vs ls",1000,0,1000,     0.,255.);
+  hadc3bx = fs->make<TProfile>("hadc3bx","adc3 vs bx",4000,-0.5,3999.5,0.,255.);
+  hadc4ls = fs->make<TProfile>("hadc4ls","adc4 vs ls",1000,0,1000,     0.,255.);
+  hadc4bx = fs->make<TProfile>("hadc4bx","adc4 vs bx",4000,-0.5,3999.5,0.,255.);
+  hadc0ls = fs->make<TProfile>("hadc0ls","adc0 vs ls",1000,0,1000,     0.,255.);
+  hadc0bx = fs->make<TProfile>("hadc0bx","adc0 vs bx",4000,-0.5,3999.5,0.,255.);
 
 #endif
 
@@ -676,6 +693,9 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	   hcols1->Fill(float(col));
 	   hrows1->Fill(float(row));
 	   hpixMap1->Fill(float(col),float(row));
+	   hadc1ls->Fill(float(lumiBlock),float(adc));
+	   hadc1bx->Fill(float(bx),float(adc));
+
 	   totalNumOfDigis1++;
 	   //htest2->Fill(float(module),float(adc));
 	   numOfDigisPerDet1++;
@@ -706,6 +726,8 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	   hcols2->Fill(float(col));
 	   hrows2->Fill(float(row));
 	   hpixMap2->Fill(float(col),float(row));
+	   hadc2ls->Fill(float(lumiBlock),float(adc));
+	   hadc2bx->Fill(float(bx),float(adc));
 	   totalNumOfDigis2++;
 	   numOfDigisPerDet2++;
 	 } // noise 
@@ -716,6 +738,8 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	   hcols3->Fill(float(col));
 	   hrows3->Fill(float(row));
 	   hpixMap3->Fill(float(col),float(row));
+	   hadc3ls->Fill(float(lumiBlock),float(adc));
+	   hadc3bx->Fill(float(bx),float(adc));
 	   totalNumOfDigis3++;
 	   numOfDigisPerDet3++;
 	 } // noise
@@ -726,6 +750,8 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	   hcols4->Fill(float(col));
 	   hrows4->Fill(float(row));
 	   hpixMap4->Fill(float(col),float(row));
+	   hadc4ls->Fill(float(lumiBlock),float(adc));
+	   hadc4bx->Fill(float(bx),float(adc));
 	   totalNumOfDigis4++;
 	   numOfDigisPerDet4++;
 	 } // noise
@@ -735,6 +761,8 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	   helossF1->Fill(float(adc));
 	   hcolsF1->Fill(float(col));
 	   hrowsF1->Fill(float(row));
+	   hadc0ls->Fill(float(lumiBlock),float(adc));
+	   hadc0bx->Fill(float(bx),float(adc));
 	   totalNumOfDigisF1++;
 	   numOfDigisPerDetF1++;
 	 } // noise 
@@ -745,6 +773,8 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	   helossF2->Fill(float(adc));
 	   hcolsF2->Fill(float(col));
 	   hrowsF2->Fill(float(row));
+	   hadc0ls->Fill(float(lumiBlock),float(adc));
+	   hadc0bx->Fill(float(bx),float(adc));
 	   totalNumOfDigisF2++;
 	   numOfDigisPerDetF2++;
 	 } // noise 
@@ -754,6 +784,8 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	   helossF3->Fill(float(adc));
 	   hcolsF3->Fill(float(col));
 	   hrowsF3->Fill(float(row));
+	   hadc0ls->Fill(float(lumiBlock),float(adc));
+	   hadc0bx->Fill(float(bx),float(adc));
 	   totalNumOfDigisF3++;
 	   numOfDigisPerDetF3++;
 	 } // noise 

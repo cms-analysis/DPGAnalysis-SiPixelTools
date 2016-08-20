@@ -284,9 +284,9 @@ void PixClusterTest::beginJob() {
   hdetsPerLay4 = fs->make<TH1F>( "hdetsPerLay4", "Full dets per layer l4",
 				 512, -0.5, 511.5);
  
-  sizeH=120;
+  sizeH=400;
   lowH = 0.;
-  highH = 121.0; // charge limit in kelec
+  highH = 100.0; // charge limit in kelec
   hcharge1 = fs->make<TH1F>( "hcharge1", "Clu charge l1", sizeH, 0.,highH); //in ke
   hcharge2 = fs->make<TH1F>( "hcharge2", "Clu charge l2", sizeH, 0.,highH);
   hcharge3 = fs->make<TH1F>( "hcharge3", "Clu charge l3", sizeH, 0.,highH);
@@ -295,8 +295,8 @@ void PixClusterTest::beginJob() {
   hcharge6 = fs->make<TH1F>( "hcharge6", "Clu charge d2", sizeH, 0.,highH);
   hcharge7 = fs->make<TH1F>( "hcharge7", "Clu charge d3", sizeH, 0.,highH);
  
-  sizeH=90;
-  highH = 61.0; // charge limit in kelec
+  sizeH=300;
+  highH = 60.0; // charge limit in kelec
   hpixcharge1 = fs->make<TH1F>( "hpixcharge1", "Pix charge l1",sizeH, 0.,highH);//in ke
   hpixcharge2 = fs->make<TH1F>( "hpixcharge2", "Pix charge l2",sizeH, 0.,highH);
   hpixcharge3 = fs->make<TH1F>( "hpixcharge3", "Pix charge l3",sizeH, 0.,highH);
@@ -331,8 +331,8 @@ void PixClusterTest::beginJob() {
   hpx3 = fs->make<TH1F>( "hpx3", "layer 3 pix rows", 200,-0.5,199.5);
   hpx4 = fs->make<TH1F>( "hpx4", "layer 4 pix rows", 200,-0.5,199.5);
 
-  sizeH=1000;
-  highH = 999.5; // charge limit in kelec
+  sizeH=300;
+  highH = 299.5; // charge limit in kelec
   hsize1 = fs->make<TH1F>( "hsize1", "layer 1 clu size",sizeH,-0.5,highH);
   hsize2 = fs->make<TH1F>( "hsize2", "layer 2 clu size",sizeH,-0.5,highH);
   hsize3 = fs->make<TH1F>( "hsize3", "layer 3 clu size",sizeH,-0.5,highH);

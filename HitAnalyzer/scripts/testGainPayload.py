@@ -36,20 +36,48 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
 # 2016 cosmics 
-process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_Prompt_v3', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_Express_v0', '')
+
+
+import HLTrigger.HLTfilters.hltHighLevel_cfi as hlt
+# accept if 'path_1' succeeds
+process.hltfilter = hlt.hltHighLevel.clone(
+# Min-Bias	
+#    HLTPaths = ['HLT_Physics*'],
+#    HLTPaths = ['HLT_Random*'],
+    HLTPaths = ['HLT_ZeroBias*'],
+#    HLTPaths = ['HLT_L1SingleMuOpen_v*'],
+#    HLTPaths = ['HLT_PAZeroBias*'],
+#    HLTPaths = ['HLT_PARandom*'],
+#    HLTPaths = ['HLT_PAMinBias*'],
+# Commissioning:
+#    HLTPaths = ['HLT_L1Tech5_BPTX_PlusOnly_v*'],
+#    HLTPaths = ['HLT_L1Tech6_BPTX_MinusOnly_v*'],
+#    HLTPaths = ['HLT_L1Tech7_NoBPTX_v*'],
+#
+#    HLTPaths = ['p*'],
+#    HLTPaths = ['path_?'],
+    andOr = True,  # False = and, True=or
+    throw = False
+    )
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1))
 
 process.source = cms.Source("PoolSource",
-fileNames =  cms.untracked.vstring(
+ fileNames =  cms.untracked.vstring(
 
-#"/store/data/Commissioning2016/Cosmics/RAW/v1/000/266/277/00000/02643438-E2E5-E511-A9AA-02163E013432.root",
+#"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/069/00000/04BF9517-F54D-E611-B42B-02163E0144D3.root"
 
-"root://eoscms//eos/cms/tier0/store/data/Commissioning2016/Cosmics/RAW/v1/000/267/594/00000/00FE23B9-C4F0-E511-9C3A-02163E01347C.root",
+"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/087/00000/0014F268-DC4E-E611-AC39-02163E0141E7.root"
 
-#  "rfio:/castor/cern.ch/cms/store/data/Run2012D/MinimumBias/RAW/v1/000/205/217/2EF61B7D-F216-E211-98C3-001D09F28D54.root",
+#"root://eoscms//eos/cms/tier0/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/0E6E4ACA-4F5A-E611-97B5-FA163E1E4ACD.root",
+
  )
 )
+
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('277069:80-277069:9999')
+process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('277087:196-277087:1192')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('278193:77-278193:9999')
 
 # for Raw2digi for data
 process.siPixelDigis.InputLabel = 'rawDataCollector'
@@ -73,8 +101,8 @@ process.MessageLogger = cms.Service("MessageLogger",
 )
 
 process.out = cms.OutputModule("PoolOutputModule",
-    fileName =  cms.untracked.string('file:clus.root'),
-    #fileName =  cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/data/clus/clus_zb_248025.root'),
+    #fileName =  cms.untracked.string('file:clus.root'),
+    fileName =  cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/data/clus/clus_exp_zb_278193.root'),
     #outputCommands = cms.untracked.vstring("drop *","keep *_*_*_MyRawToClus"), # 12.4MB per 100 events
     # save only pixel clusters 
     outputCommands = cms.untracked.vstring("drop *","keep *_siPixelClustersPreSplitting_*_*"), # 5.6MB per 100 events
@@ -90,7 +118,7 @@ process.out = cms.OutputModule("PoolOutputModule",
 # pixel local reco (RecHits) needs the GenError object,
 # not yet in GT, add here:
 # DB stuff 
-useLocalDBError = True
+useLocalDBError = False
 if useLocalDBError :
     process.DBReaderFrontier = cms.ESSource("PoolDBESSource",
      DBParameters = cms.PSet(
@@ -100,12 +128,14 @@ if useLocalDBError :
      toGet = cms.VPSet(
        cms.PSet(
         record = cms.string('SiPixelGainCalibrationOfflineRcd'),
-        #tag = cms.string('SiPixelGainCalibration_2016_v1_offline')
-        tag = cms.string('SiPixelGainCalibration_2016_v1_hltvalidation')
+        tag = cms.string('SiPixelGainCalibration_2016_v1_offline')
+        #tag = cms.string('SiPixelGainCalibration_2016_v2_offline')
+        #tag = cms.string('SiPixelGainCalibration_2016_v1_hltvalidation')
  	),
        ),
-#     connect = cms.string('sqlite_file:../../../../../DB/Gains/SiPixelGainCalibration_2016_v1_offline.db')
-     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
+     connect = cms.string('sqlite_file:../../../../../DB/Gains/SiPixelGainCalibration_2016_v1_offline.db')
+#     connect = cms.string('sqlite_file:../../../../../DB/Gains/SiPixelGainCalibration_2016_v2_offline.db')
+#     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
 #     connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
     ) # end process
     process.myprefer = cms.ESPrefer("PoolDBESSource","DBReaderFrontier")
@@ -117,6 +147,17 @@ process.a = cms.EDAnalyzer("PixDigisTest",
 # sim in V7
 #    src = cms.InputTag("mix"),
 # old default
+    src = cms.InputTag("siPixelDigis"),
+)
+
+
+process.a = cms.EDAnalyzer("PixDigisTest",
+    Verbosity = cms.untracked.bool(False),
+    phase1 = cms.untracked.bool(False),
+# sim in V7
+#    src = cms.InputTag("mix"),
+# MC after raw->digi
+#    src = cms.InputTag("simSiPixelDigis"),
     src = cms.InputTag("siPixelDigis"),
 )
 
@@ -137,7 +178,8 @@ process.TFileService = cms.Service("TFileService",
 #process.p = cms.Path(process.siPixelDigis*process.a)
 #process.p = cms.Path(process.siPixelDigis*process.siPixelClusters)
 #process.p = cms.Path(process.siPixelDigis*process.pixeltrackerlocalreco)
-process.p = cms.Path(process.siPixelDigis*process.pixeltrackerlocalreco*process.d)
+#process.p = cms.Path(process.siPixelDigis*process.pixeltrackerlocalreco*process.d)
+process.p = cms.Path(process.hltfilter*process.siPixelDigis*process.pixeltrackerlocalreco*process.d*process.a)
 
 # suppress output file or not
 #process.ep = cms.EndPath(process.out)

@@ -212,6 +212,7 @@ int Decode::trailer(unsigned long long word64, int fed, bool print) {
 // Works for both, the error FIFO and the SLink error words. d.k. 25/04/07
 int Decode::error(int word, int & fedChannel, int fed, int & stat1, int & stat2, bool print) {
   int status = -1;
+  const bool PRINT_TS = false;
   print = print || printErrors;
 
   const unsigned int  errorMask      = 0x3e00000;
@@ -257,7 +258,7 @@ int Decode::error(int word, int & fedChannel, int fed, int & stat1, int & stat2,
       unsigned int autoreset = (word&AutoResetMask) >> 7;
       unsigned int pkamreset = (word&PKAMResetMask) >> 6;
       unsigned int stackCnt = (word&TBMStackCntMask);
-      if(print) 
+      if(print && PRINT_TS) 
         cout<<" Diag ch="<<chan<<" #Rocs=" <<nor<<" resets? Auto/PKAM=" << autoreset << "/"<< pkamreset 
 	    << " TBMStackCnt=" << stackCnt << endl;
     }
@@ -271,7 +272,7 @@ int Decode::error(int word, int & fedChannel, int fed, int & stat1, int & stat2,
       unsigned int chan = (word&channelMask)>>26;
       unsigned int bit20 = (word & 0x100000)>>20; // on=ROC header off=TBM trailer
       unsigned int time = (word&TimeStampMask);
-      if(print) {
+      if(print && PRINT_TS) {
         cout << " Chan=" << chan;
         if(bit20==1) cout << " 1st ROC H timestamp= " ;
         else cout << " TBM T timestamp= ";
