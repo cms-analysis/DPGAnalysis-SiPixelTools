@@ -319,15 +319,15 @@ void PixClustersWithTracks::beginJob() {
 			    sizeH, lowH, highH);
 
  
-  hcharge1 = fs->make<TH1D>( "hcharge1", "Clu charge l1", 400, 0.,200.); //in ke
-  hcharge2 = fs->make<TH1D>( "hcharge2", "Clu charge l2", 400, 0.,200.);
-  hcharge3 = fs->make<TH1D>( "hcharge3", "Clu charge l3", 400, 0.,200.);
-  hcharge4 = fs->make<TH1D>( "hcharge4", "Clu charge d1", 400, 0.,200.);
-  hcharge5 = fs->make<TH1D>( "hcharge5", "Clu charge d2", 400, 0.,200.);
+  hcharge1 = fs->make<TH1D>( "hcharge1", "Clu charge l1", 400, 0.,100.); //in ke
+  hcharge2 = fs->make<TH1D>( "hcharge2", "Clu charge l2", 400, 0.,100.);
+  hcharge3 = fs->make<TH1D>( "hcharge3", "Clu charge l3", 400, 0.,100.);
+  hcharge4 = fs->make<TH1D>( "hcharge4", "Clu charge d1", 400, 0.,100.);
+  hcharge5 = fs->make<TH1D>( "hcharge5", "Clu charge d2", 400, 0.,100.);
 
-  hsize1 = fs->make<TH1D>( "hsize1", "layer 1 clu size",100,-0.5,99.5);
-  hsize2 = fs->make<TH1D>( "hsize2", "layer 2 clu size",100,-0.5,99.5);
-  hsize3 = fs->make<TH1D>( "hsize3", "layer 3 clu size",100,-0.5,99.5);
+  hsize1 = fs->make<TH1D>( "hsize1", "layer 1 clu size",300,-0.5,299.5);
+  hsize2 = fs->make<TH1D>( "hsize2", "layer 2 clu size",300,-0.5,299.5);
+  hsize3 = fs->make<TH1D>( "hsize3", "layer 3 clu size",300,-0.5,299.5);
   hsizex1 = fs->make<TH1D>( "hsizex1", "lay1 clu size in x",
 		      20,-0.5,19.5);
   hsizex2 = fs->make<TH1D>( "hsizex2", "lay2 clu size in x",
