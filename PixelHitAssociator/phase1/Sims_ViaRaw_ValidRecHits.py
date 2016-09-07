@@ -192,8 +192,6 @@ process.MessageLogger = cms.Service("MessageLogger",
 #    )
 )
 
-
-
 process.o1 = cms.OutputModule("PoolOutputModule",
       outputCommands = cms.untracked.vstring('drop *','keep *_*_*_TestValid'),
 #      outputCommands = cms.untracked.vstring('keep *_*_*_*'),
@@ -345,7 +343,8 @@ if useLocalGenErr :
 process.g4SimHits.Generator.HepMCProductLabel = 'source'
 
 # for direct digis
-process.siPixelClustersPreSplitting.src = 'simSiPixelDigis' # for V5, direct
+#process.siPixelClustersPreSplitting.src = 'simSiPixelDigis' # for V5, direct
+process.siPixelClustersPreSplitting.src = 'siPixelDigis' # from raw
 # process.siPixelClusters.src = 'mix'
 # modify digitizer parameters
 #process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix = 2000.0 
@@ -397,12 +396,8 @@ process.siPixelClustersPreSplitting.src = 'simSiPixelDigis' # for V5, direct
 #process.simSiPixelDigis.digitizers.pixel.TanLorentzAnglePerTesla_BPix = 0.106 
 #process.simSiPixelDigis.digitizers.pixel.TanLorentzAnglePerTesla=FPix = 0.106 
 
-# clus , label of digis 
-#process.siPixelClustersPreSplitting.ClusterThreshold = 4000.
 # set to false to ignore the gain calibration
 #process.siPixelClustersPreSplitting.MissCalibrate = cms.untracked.bool(False)
-# set to false to use the gain calibration (set to false in era up to 1_0_pre11)
-#process.siPixelClustersPreSplitting.MissCalibrate = cms.untracked.bool(True)
 # rechits
 # force generic CPE to skip GenErrors. For parameters used by the producer us the producer process
 #process.PixelCPEGenericESProducer.UseErrorsFromTemplates = cms.bool(False)
@@ -423,10 +418,25 @@ process.siPixelClustersPreSplitting.src = 'simSiPixelDigis' # for V5, direct
 #process.load("Validation.TrackerRecHits.trackerRecHitsValidation_cff")
 #process.load("Validation.TrackerRecHits.SiPixelRecHitsValid_cfi")
 
+# for raw
+process.load("EventFilter.SiPixelRawToDigi.SiPixelDigiToRaw_cfi")
+process.load("EventFilter.SiPixelRawToDigi.SiPixelRawToDigi_cfi")
+# digi2raw
+process.siPixelRawData.UsePhase1 = cms.bool(True)
+# raw2digi
+process.siPixelDigis.InputLabel = 'siPixelRawData'
+# for data
+#process.siPixelDigis.InputLabel = 'source'
+#process.siPixelDigis.InputLabel = 'rawDataCollector'
+process.siPixelDigis.IncludeErrors = True
+process.siPixelDigis.Timing = False 
+process.siPixelDigis.UsePhase1 = cms.bool(True)
+
+
 # my rec-sim hit compare 
 process.load("DPGAnalysis-SiPixelTools.PixelHitAssociator.SiPixelRecHitsValid_cff")
 
-process.pixRecHitsValid.outputFile="pixelsimrechitshistos.root"
+process.pixRecHitsValid.outputFile="pixelsimrechitshistos2.root"
 #process.pixRecHitsValid.verbose=True
 process.pixRecHitsValid.src="siPixelRecHitsPreSplitting"
 #process.pixRecHitsValid.associatePixel = True
@@ -436,8 +446,7 @@ process.pixRecHitsValid.src="siPixelRecHitsPreSplitting"
 #This process is to run the digitizer:
 #process.p1 = cms.Path(process.simSiPixelDigis)
 #process.p1 = cms.Path(process.simSiPixelDigis*process.pixeltrackerlocalreco)
-process.p1 = cms.Path(process.simSiPixelDigis*process.pixeltrackerlocalreco*process.pixRecHitsValid)
-
+process.p1 = cms.Path(process.simSiPixelDigis*process.siPixelRawData*process.siPixelDigis*process.pixeltrackerlocalreco*process.pixRecHitsValid)
 # for RelVal GEN-SIM-DIGI-RAW-HLTDEBUG
 #process.p1 = cms.Path(process.pixeltrackerlocalreco*process.pixRecHitsValid)
 #process.outpath = cms.EndPath(process.o1)

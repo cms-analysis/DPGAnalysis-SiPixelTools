@@ -44,7 +44,7 @@ using namespace std;
 
 //#define L1  // L1 information not in RAW
 //#define OUTFILE 
-//#define PHASE1
+#define PHASE1
 
 namespace {
   bool printErrors  = false;

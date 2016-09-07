@@ -4,18 +4,18 @@ process = cms.Process("DigiToRaw1")
 process.load('Configuration.Geometry.GeometryExtended2017Reco_cff')
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, '76X_upgrade2017_design_v8', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, '76X_upgrade2017_design_v8', '')
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1))
 process.source = cms.Source("PoolSource",
   fileNames = cms.untracked.vstring(
-    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/digis/digis1_pixonly.root'
+    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_81/digis/digis1_pixonly.root'
   )
 )
 
 # Cabling
-useLocal = True
+useLocal = False
 if useLocal:
   process.CablingReader = cms.ESSource("PoolDBESSource",
     DBParameters = cms.PSet(
@@ -54,7 +54,10 @@ process.MessageLogger = cms.Service("MessageLogger",
 )
 
 process.out = cms.OutputModule("PoolOutputModule",
-    fileName =  cms.untracked.string('file:rawdata.root'),
+    fileName =  cms.untracked.string(
+    #'file:rawdata.root'
+    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_81/raw/raw1_l1roc.root'
+    ),
     outputCommands = cms.untracked.vstring("drop *","keep *_siPixelRawData_*_*")
 )
 

@@ -5,7 +5,7 @@
 ##############################################################################
 
 import FWCore.ParameterSet.Config as cms
-process = cms.Process("ClusTest")
+process = cms.Process("DigiTest")
 
 process.load('Configuration.Geometry.GeometryExtended2017Reco_cff')
 #process.load("Configuration.StandardSequences.MagneticField_38T_cff")
@@ -16,11 +16,11 @@ process.load('Configuration.EventContent.EventContent_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 
 # clusterizer 
-process.load("RecoLocalTracker.Configuration.RecoLocalTracker_cff")
+#process.load("RecoLocalTracker.Configuration.RecoLocalTracker_cff")
 
 # for raw
-#process.load("EventFilter.SiPixelRawToDigi.SiPixelDigiToRaw_cfi")
-#process.load("EventFilter.SiPixelRawToDigi.SiPixelRawToDigi_cfi")
+process.load("EventFilter.SiPixelRawToDigi.SiPixelDigiToRaw_cfi")
+process.load("EventFilter.SiPixelRawToDigi.SiPixelRawToDigi_cfi")
 #process.load('Configuration.StandardSequences.DigiToRaw_cff')
 #process.load('Configuration.StandardSequences.RawToDigi_cff')
 
@@ -55,8 +55,7 @@ process.source = cms.Source("PoolSource",
   fileNames = cms.untracked.vstring(
 #    'file:digis_100eve.root'
 #    'file:digis.root'
-#    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_81/digis/digis1_pixonly.root'
-    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_81/digis/digis1_fromraw.root'
+    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_81/digis/digis1_pixonly.root'
   )
 )
 
@@ -91,76 +90,56 @@ process.TFileService = cms.Service("TFileService",
 #    process.LAprefer = cms.ESPrefer("PoolDBESSource","LAReader")
 # endif
 
-# Gain 
-useLocalGain = False
-if useLocalGain :
-  process.GainsReader = cms.ESSource("PoolDBESSource",
-    DBParameters = cms.PSet(
-       messageLevel = cms.untracked.int32(0),
-       authenticationPath = cms.untracked.string('')
-    ),
-    toGet = cms.VPSet(
-      cms.PSet(
-        record = cms.string('SiPixelGainCalibrationOfflineRcd'),
-        #tag = cms.string('SiPixelGainCalibration_phase1_ideal')
-        tag = cms.string('SiPixelGainCalibration_phase1_mc_v1')
-    )),
-    #connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_phase1_mc_v1.db')
-    #connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_phase1_ideal.db')
-    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
-  ) # end process
-  process.Gainprefer = cms.ESPrefer("PoolDBESSource","GainsReader")
-# end if
-
-
 process.o1 = cms.OutputModule("PoolOutputModule",
-          outputCommands = cms.untracked.vstring('drop *','keep *_*_*_ClusTest'),
-#          fileName = cms.untracked.string('file:clus.root')
-         fileName = cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_81/clus/clus1_pixonly.root')
+          outputCommands = cms.untracked.vstring('drop *','keep *_*_*_DigiTest'),
+#          fileName = cms.untracked.string('file:digis.root')
+         fileName = cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_81/digis/digis1_l1roc.root')
 )
 
 # My 
-# modify clusterie parameters
-#process.siPixelClusters.ClusterThreshold = 4000.0
+
 
 # DIRECT
 # direct clusterization (no raw step)
 # label of digis 
-process.siPixelClustersPreSplitting.src = 'siPixelDigis'  # from raw
-#process.siPixelClustersPreSplitting.src = 'simSiPixelDigis' # direct from sims
-#process.siPixelClustersPreSplitting.ClusterThreshold = 4000.
-# set to false to ignore the gain calibration
-#process.siPixelClustersPreSplitting.MissCalibrate = cms.untracked.bool(False)
 
-# read rechits
-#process.analysis = cms.EDAnalyzer("ReadPixelRecHit",
-#    Verbosity = cms.untracked.bool(False),
-#    src = cms.InputTag("siPixelRecHits"),
-#)
 
-process.analysis = cms.EDAnalyzer("PixClusterTest",
+process.analysis = cms.EDAnalyzer("PixDigisTest",
     Verbosity = cms.untracked.bool(False),
     phase1 = cms.untracked.bool(True),
-    src = cms.InputTag("siPixelClustersPreSplitting"),
+# sim in V7
+#    src = cms.InputTag("mix"),
+# my own pixel only digis (after digi step)
+#    src = cms.InputTag("simSiPixelDigis"),
+# after raw (my raw2digi)
+    src = cms.InputTag("siPixelDigis"),
 )
 
-# pixel clusters  (OK)
-#process.p1 = cms.Path(process.siPixelClustersPreSplitting)
-# pixel clusters + analysis 
-process.p1 = cms.Path(process.siPixelClustersPreSplitting*process.analysis)
+process.TFileService = cms.Service("TFileService",
+    fileName = cms.string('histo_digis.root')
+)  
 
 # RAW
+# digi2raw
+process.siPixelRawData.UsePhase1 = cms.bool(True)
+# raw2digi
+process.siPixelDigis.InputLabel = 'siPixelRawData'
+# for data
+#process.siPixelDigis.InputLabel = 'source'
+#process.siPixelDigis.InputLabel = 'rawDataCollector'
+process.siPixelDigis.IncludeErrors = True
+process.siPixelDigis.Timing = False 
+process.siPixelDigis.UsePhase1 = cms.bool(True)
+
 # clusterize through raw (OK)
 # for Raw2digi for simulations 
 #process.siPixelRawData.InputLabel = 'mix'
 #process.siPixelRawData.InputLabel = 'simSiPixelDigis'
 #process.siPixelDigis.InputLabel = 'siPixelRawData'
-#process.siStripDigis.ProductLabel = 'SiStripDigiToRaw'
-#process.siPixelClusters.src = 'siPixelDigis'
 
 #process.p1 = cms.Path(process.siPixelRawData)
 #process.p1 = cms.Path(process.siPixelRawData*process.siPixelDigis)
-#process.p1 = cms.Path(process.siPixelRawData*process.siPixelDigis*process.siPixelClusters*process.analysis)
+process.p1 = cms.Path(process.siPixelRawData*process.siPixelDigis*process.analysis)
 
 # for no output comment it out
-#process.outpath = cms.EndPath(process.o1)
+process.outpath = cms.EndPath(process.o1)

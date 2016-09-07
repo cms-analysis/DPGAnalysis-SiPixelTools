@@ -57,13 +57,10 @@ process.TFileService = cms.Service("TFileService",
 process.source = cms.Source("PoolSource",
 # fileNames =  myfilelist
     fileNames = cms.untracked.vstring(                          
-    "file:rawdata.root"
-#    "file:../../../../../CMSSW_7_1_3/src/DPGAnalysis-SiPixelTools/HitAnalyzer/test/raw.root"
-#    "file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre7/raw/raw2.root"
-#
+    #"file:rawdata.root"
+    "file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_81/raw/raw1_l1roc.root"
 
    )
-
 )
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('254227:21-254227:21')
 

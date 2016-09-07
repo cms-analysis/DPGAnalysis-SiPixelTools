@@ -14,8 +14,8 @@ process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, '76X_upgrade2017_design_v8', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, '76X_upgrade2017_design_v8', '')
 
 #process.load('Configuration.StandardSequences.Digi_cff')
 
@@ -163,8 +163,8 @@ process.maxEvents = cms.untracked.PSet(
 )
 
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
-#       'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu_phase1/pt100_76/simhits/simHits1.root'
-       'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu_phase1/pt100_76/simhits/simHits1_eta1.root'
+       'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu_phase1/pt100_76/simhits/simHits1.root'
+#       'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu_phase1/pt100_76/simhits/simHits1_eta1.root'
 #       'file:simHits_100eve.root'
   )
 )
@@ -173,14 +173,14 @@ process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
 process.o1 = cms.OutputModule("PoolOutputModule",
             outputCommands = cms.untracked.vstring('drop *','keep *_*_*_Test'),
 #      fileName = cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/digis/digis1.root')
-#      fileName = cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/digis/digis1_pixonly.root')
-      fileName = cms.untracked.string('file:digis.root')
+      fileName = cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_81/digis/digis1_pixonly.root')
+      #fileName = cms.untracked.string('file:digis.root')
 )
 
 
 # add sqlite DBs
 #LA
-useLocalLA = True
+useLocalLA = False
 if useLocalLA :
   process.LAReader = cms.ESSource("PoolDBESSource",
     DBParameters = 
@@ -202,7 +202,7 @@ if useLocalLA :
 #  end if
 
 # Quality
-useLocalQuality = True
+useLocalQuality = False
 if useLocalQuality :
   process.QualityReader = cms.ESSource("PoolDBESSource",
     BlobStreamerName = cms.untracked.string('TBufferBlobStreamingService'),
@@ -288,11 +288,11 @@ process.analysis = cms.EDAnalyzer("PixDigisTest",
 
 
 #This process is to run the digitizer, pixel gitizer is now clled by the mix module
-#process.p1 = cms.Path(process.simSiPixelDigis)
+process.p1 = cms.Path(process.simSiPixelDigis)
 # run digitizer and analyse digis
-process.p1 = cms.Path(process.simSiPixelDigis*process.analysis)
+#process.p1 = cms.Path(process.simSiPixelDigis*process.analysis)
 
 # Output file, comment out if not needed 
-#process.outpath = cms.EndPath(process.o1)
+process.outpath = cms.EndPath(process.o1)
 
 

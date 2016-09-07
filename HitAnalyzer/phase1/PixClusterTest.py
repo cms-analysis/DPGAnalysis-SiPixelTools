@@ -68,8 +68,10 @@ process.source = cms.Source("PoolSource",
  fileNames = cms.untracked.vstring(    
 # for MC 
 #  'file:clus.root'
-  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/clus/clus1_gain_ideal.root'
+#  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/clus/clus1_gain_ideal.root'
 #  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/clus/clus1_gain_mc.root'
+#  'file:../../../../../../from_Matti/step3_RECO_orig.root'
+  'file:../../../../../../from_Matti/step3_RECO_new2.root'
   )
 )
 
@@ -82,10 +84,10 @@ process.TFileService = cms.Service("TFileService",
 
 
 process.analysis = cms.EDAnalyzer("PixClusterTest",
-    Verbosity = cms.untracked.bool(False),
+    Verbosity = cms.untracked.bool(True),
     phase1 = cms.untracked.bool(True),
-#    src = cms.InputTag("siPixelClusters"),
-    src = cms.InputTag("siPixelClustersPreSplitting"),
+    src = cms.InputTag("siPixelClusters"),
+#    src = cms.InputTag("siPixelClustersPreSplitting"),
 )
 
 # for data

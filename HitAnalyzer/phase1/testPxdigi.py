@@ -32,9 +32,10 @@ process.MessageLogger = cms.Service("MessageLogger",
 process.source = cms.Source("PoolSource",
     fileNames =  cms.untracked.vstring(
 #    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/digis/digis1.root'
-#    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/digis/digis1_pixonly.root'
-#    'file:digis.root'
-    'file:digis_fromraw.root'
+#     'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_81/digis/digis1_pixonly.root'
+     'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_81/digis/digis1_fromraw.root'
+    #'file:digis.root'
+    #'file:digis_fromraw.root'
     )
 )
 
@@ -50,7 +51,7 @@ process.analysis = cms.EDAnalyzer("PixDigisTest",
 #    src = cms.InputTag("mix"),
 # my own pixel only digis (after digi step)
 #    src = cms.InputTag("simSiPixelDigis"),
-# old default
+# after raw (my raw2digi)
     src = cms.InputTag("siPixelDigis"),
 )
 
