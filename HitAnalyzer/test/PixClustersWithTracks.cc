@@ -3,6 +3,7 @@
 // Creation Date:  Initial version. 3/06
 // Fails in V71 because of TrackingRecHit. <--- fix 
 // Move to getByToken, 80X, 4/16
+// Extend to phase1, 81X, 9/16 dk
 //--------------------------------------------
 #include <memory>
 #include <string>
@@ -32,11 +33,14 @@
 #include "DataFormats/Common/interface/Ref.h"
 #include "DataFormats/DetId/interface/DetId.h"
 
-#include "DataFormats/SiPixelDetId/interface/PXBDetId.h" 
-#include "DataFormats/SiPixelDetId/interface/PXFDetId.h" 
+//#include "DataFormats/SiPixelDetId/interface/PXBDetId.h" 
+//#include "DataFormats/SiPixelDetId/interface/PXFDetId.h" 
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
-
 #include "DataFormats/SiPixelDetId/interface/PixelBarrelName.h"
+#include "DataFormats/SiPixelDetId/interface/PixelEndcapName.h"
+
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
+#include "Geometry/Records/interface/IdealGeometryRecord.h"
 
 
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
@@ -90,6 +94,8 @@
 #include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
 #include <DataFormats/VertexReco/interface/VertexFwd.h>
 
+
+
 // hit pattern 
 #include "DataFormats/TrackReco/interface/HitPattern.h"
 
@@ -111,14 +117,13 @@
 #include <TProfile.h>
 #include <TVector3.h>
 
-
 //#define L1
 //#define HLT
 //#define LUMI
 
 //#define VDM_STUDIES
 //#define ALIGN_STUDIES
-#define OVERLAP_STUDIES
+//#define OVERLAP_STUDIES
 
 const bool isData = true; // set false for MC
 
@@ -138,10 +143,11 @@ class PixClustersWithTracks : public edm::EDAnalyzer {
   edm::ParameterSet conf_;
   edm::InputTag src_;
   //const static bool PRINT = false;
+  bool phase1_;
   bool PRINT;
   float countTracks, countGoodTracks, countTracksInPix, countPVs, countEvents, countLumi;  
   float count1, count2, count3, count4;
-  float countTracks1, countTracks2, countTracks3, countTracks4;
+  float countTracks1, countTracks2, countTracks3, countTracks4, countTracks5;
   // Needed for the ByToken method
   //edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster> > myClus;
   //edm::EDGetTokenT<SiPixelRecHitCollection> PixelRecHitToken;
@@ -152,32 +158,36 @@ class PixClustersWithTracks : public edm::EDAnalyzer {
   edm::EDGetTokenT<reco::VertexCollection> VertexCollectionToken;
   edm::EDGetTokenT<std::vector<reco::Track>> TrackToken;
 
-  TH1D *hcharge1,*hcharge2, *hcharge3, *hcharge4, *hcharge5;  // ADD FPIX
-  TH1D *hsize1,*hsize2,*hsize3, 
-    *hsizex1,*hsizex2,*hsizex3,
-    *hsizey1,*hsizey2,*hsizey3;
-  TH1D *hsize4,*hsize5,  // ADD FPIX
-    *hsizex4,*hsizex5,
-    *hsizey4,*hsizey5;
+  TH1D *hcharge1,*hcharge2, *hcharge3, *hcharge4, 
+    *hcharge5, *hcharge6, *hcharge7;  // ADD FPIX
+  TH1D *hsize1,*hsize2,*hsize3,*hsize4, 
+    *hsizex1,*hsizex2,*hsizex3,*hsizex4,
+    *hsizey1,*hsizey2,*hsizey3,*hsizey4;
+  TH1D *hsize5,*hsize6,*hsize7,  // ADD FPIX
+       *hsizex5,*hsizex6,*hsizex7,
+       *hsizey5,*hsizey6,*hsizey7;
 
-  TH1D *hclusPerTrk1,*hclusPerTrk2,*hclusPerTrk3,*hclusPerTrk4,*hclusPerTrk5;
-  TH1D *hclusPerLay1,*hclusPerLay2,*hclusPerLay3;
-  TH1D *hclusPerDisk1,*hclusPerDisk2,*hclusPerDisk3,*hclusPerDisk4;
+  TH1D *hclusPerTrk1,*hclusPerTrk2,*hclusPerTrk3,*hclusPerTrk4,
+    *hclusPerTrk5,*hclusPerTrk6,*hclusPerTrk7;
+  TH1D *hclusPerLay1,*hclusPerLay2,*hclusPerLay3,*hclusPerLay4;
+  TH1D *hclusPerDisk1,*hclusPerDisk2,*hclusPerDisk3;
   TH1D *hclusPerTrk,*hclusPerTrkB,*hclusPerTrkF;
 
-  TH2F *hDetMap1, *hDetMap2, *hDetMap3;  // clusters 
-  TH2F *hcluDetMap1, *hcluDetMap2, *hcluDetMap3; // MODULE PROJECTION 
+  TH2F *hDetMap1, *hDetMap2, *hDetMap3, *hDetMap4;  // clusters 
+  TH2F *hcluDetMap1, *hcluDetMap2,*hcluDetMap3,*hcluDetMap4; // MODULE PROJECTION 
 
-  TH2F *hpvxy, *hclusMap1, *hclusMap2, *hclusMap3; // eta vs PHI
+  TH2F *hpvxy, *hclusMap1, *hclusMap2,*hclusMap3,*hclusMap4; // eta vs PHI
 
-  TH1D *hladder1id,*hladder2id,*hladder3id,*hz1id,*hz2id,*hz3id;
+  TH1D *hladder1id,*hladder2id,*hladder3id,*hladder4id,
+    *hz1id,*hz2id,*hz3id,*hz4id;
 
   TH1D *hpvz, *hpvr, *hNumPv, *hNumPvClean;
   TH1D *hPt, *hEta, *hDz, *hD0,*hzdiff;
   TH1D *hPtP, *hEtaP, *hDzP, *hD0P,*hPhiP;
-  TH1D *hPhi,*hPhi1,*hPhi2,*hPhi3,*hPhi4,*hPhi5,*hPhi0;
+  TH1D *hPhi,*hPhi1,*hPhi2,*hPhi3,*hPhi4,*hPhi5,*hPhi6,*hPhi7,*hPhi0;
 
-  TH2F *hbpixXY, *hfpixXY1,*hfpixXY2,*hfpixXY3,*hfpixXY4, *hzphi1,*hzphi2,*hzphi3;
+  TH2F *hbpixXY, *hfpixXY1,*hfpixXY2,*hfpixXY3, 
+    *hzphi1,*hzphi2,*hzphi3,*hzphi4;
   TH2F *htest,*htest2,*htest3;
 
   TH1D *hProbabilityXYBpix, *hProbabilityQBpix,*hProbabilityXYFpix, *hProbabilityQFpix;
@@ -247,6 +257,7 @@ PixClustersWithTracks::PixClustersWithTracks(edm::ParameterSet const& conf)
 //  : conf_(conf), src_(conf.getParameter<edm::InputTag>( "src" )) { }
   : conf_(conf) { 
 
+  phase1_ = conf.getUntrackedParameter<bool>("phase1",false);
   PRINT = conf.getUntrackedParameter<bool>("Verbosity",false);
   src_ =  conf.getParameter<edm::InputTag>( "src" );
   //if(PRINT) cout<<" Construct "<<endl;
@@ -269,7 +280,7 @@ PixClustersWithTracks::~PixClustersWithTracks() { }
 
 // ------------ method called at the begining   ------------
 void PixClustersWithTracks::beginRun(const edm::EventSetup& iSetup) {
-  cout << "BeginRun, Verbosity =  " <<PRINT<<endl;
+  cout << "BeginRun, Verbosity =  " <<PRINT<<" Phase1 "<<phase1_<<endl;
 }
 
 // ------------ method called at the begining   ------------
@@ -278,7 +289,7 @@ void PixClustersWithTracks::beginJob() {
 
   countTracks=0.; countGoodTracks=0.; countTracksInPix=0.; countPVs=0.; countEvents=0.; countLumi=0.;  
   count1=0.; count2=0.; count3=0.; count4=0.; 
-  countTracks1=0; countTracks2=0; countTracks3=0; countTracks4=0; 
+  countTracks1=0; countTracks2=0; countTracks3=0; countTracks4=0, countTracks5=0; 
   edm::Service<TFileService> fs;
 
   int sizeH=20;
@@ -290,10 +301,15 @@ void PixClustersWithTracks::beginJob() {
 			    sizeH, lowH, highH);
   hclusPerTrk3 = fs->make<TH1D>( "hclusPerTrk3", "Clus per track l3",
 			    sizeH, lowH, highH);
-  hclusPerTrk4 = fs->make<TH1D>( "hclusPerTrk4", "Clus per track d1",
+  hclusPerTrk4 = fs->make<TH1D>( "hclusPerTrk4", "Clus per track l4",
 			    sizeH, lowH, highH);
-  hclusPerTrk5 = fs->make<TH1D>( "hclusPerTrk5", "Clus per track d2",
+  hclusPerTrk5 = fs->make<TH1D>( "hclusPerTrk5", "Clus per track d1",
 			    sizeH, lowH, highH);
+  hclusPerTrk6 = fs->make<TH1D>( "hclusPerTrk6", "Clus per track d2",
+			    sizeH, lowH, highH);
+  hclusPerTrk7 = fs->make<TH1D>( "hclusPerTrk7", "Clus per track d3",
+			    sizeH, lowH, highH);
+
   hclusPerTrk = fs->make<TH1D>( "hclusPerTrk", "Clus per track",
 			    sizeH, lowH, highH);
   hclusPerTrkB = fs->make<TH1D>( "hclusPerTrkB", "B Clus per track",
@@ -309,47 +325,60 @@ void PixClustersWithTracks::beginJob() {
 			    sizeH, lowH, highH);
   hclusPerLay3 = fs->make<TH1D>( "hclusPerLay3", "Clus per layer l3",
 			    sizeH, lowH, highH);
+  hclusPerLay4 = fs->make<TH1D>( "hclusPerLay4", "Clus per layer l4",
+			    sizeH, lowH, highH);
   hclusPerDisk1 = fs->make<TH1D>( "hclusPerDisk1", "Clus per disk 1",
 			    sizeH, lowH, highH);
   hclusPerDisk2 = fs->make<TH1D>( "hclusPerDisk2", "Clus per disk 2",
 			    sizeH, lowH, highH);
   hclusPerDisk3 = fs->make<TH1D>( "hclusPerDisk3", "Clus per disk 3",
 			    sizeH, lowH, highH);
-  hclusPerDisk4 = fs->make<TH1D>( "hclusPerDisk4", "Clus per disk 4",
-			    sizeH, lowH, highH);
-
  
   hcharge1 = fs->make<TH1D>( "hcharge1", "Clu charge l1", 400, 0.,100.); //in ke
   hcharge2 = fs->make<TH1D>( "hcharge2", "Clu charge l2", 400, 0.,100.);
   hcharge3 = fs->make<TH1D>( "hcharge3", "Clu charge l3", 400, 0.,100.);
-  hcharge4 = fs->make<TH1D>( "hcharge4", "Clu charge d1", 400, 0.,100.);
-  hcharge5 = fs->make<TH1D>( "hcharge5", "Clu charge d2", 400, 0.,100.);
+  hcharge4 = fs->make<TH1D>( "hcharge4", "Clu charge l4", 400, 0.,100.);
+  hcharge5 = fs->make<TH1D>( "hcharge5", "Clu charge d1", 400, 0.,100.);
+  hcharge6 = fs->make<TH1D>( "hcharge6", "Clu charge d2", 400, 0.,100.);
+  hcharge7 = fs->make<TH1D>( "hcharge7", "Clu charge d3", 400, 0.,100.);
 
   hsize1 = fs->make<TH1D>( "hsize1", "layer 1 clu size",300,-0.5,299.5);
   hsize2 = fs->make<TH1D>( "hsize2", "layer 2 clu size",300,-0.5,299.5);
   hsize3 = fs->make<TH1D>( "hsize3", "layer 3 clu size",300,-0.5,299.5);
+  hsize4 = fs->make<TH1D>( "hsize4", "layer 4 clu size",300,-0.5,299.5);
+  hsize5 = fs->make<TH1D>( "hsize5", "disk 1 clu size",100,-0.5,99.5);
+  hsize6 = fs->make<TH1D>( "hsize6", "disk 2 clu size",100,-0.5,99.5);
+  hsize7 = fs->make<TH1D>( "hsize7", "disk 3 clu size",100,-0.5,99.5);
+
   hsizex1 = fs->make<TH1D>( "hsizex1", "lay1 clu size in x",
 		      20,-0.5,19.5);
   hsizex2 = fs->make<TH1D>( "hsizex2", "lay2 clu size in x",
 		      20,-0.5,19.5);
   hsizex3 = fs->make<TH1D>( "hsizex3", "lay3 clu size in x",
 		      20,-0.5,19.5);
+  hsizex4 = fs->make<TH1D>( "hsizex4", "lay4 clu size in x",
+		      20,-0.5,19.5);
+  hsizex5 = fs->make<TH1D>( "hsizex5", "d1 clu size in x",
+		      20,-0.5,19.5);
+  hsizex6 = fs->make<TH1D>( "hsizex6", "d2 clu size in x",
+		      20,-0.5,19.5);
+  hsizex7 = fs->make<TH1D>( "hsizex7", "d2 clu size in x",
+		      20,-0.5,19.5);
+
+
   hsizey1 = fs->make<TH1D>( "hsizey1", "lay1 clu size in y",
 		      30,-0.5,29.5);
   hsizey2 = fs->make<TH1D>( "hsizey2", "lay2 clu size in y",
 		      30,-0.5,29.5);
   hsizey3 = fs->make<TH1D>( "hsizey3", "lay3 clu size in y",
 		      30,-0.5,29.5);
-
-  hsize4 = fs->make<TH1D>( "hsize4", "disk 1 clu size",100,-0.5,99.5);
-  hsize5 = fs->make<TH1D>( "hsize5", "disk 2 clu size",100,-0.5,99.5);
-  hsizex4 = fs->make<TH1D>( "hsizex4", "d1 clu size in x",
-		      20,-0.5,19.5);
-  hsizex5 = fs->make<TH1D>( "hsizex5", "d2 clu size in x",
-		      20,-0.5,19.5);
-  hsizey4 = fs->make<TH1D>( "hsizey4", "d1 clu size in y",
+  hsizey4 = fs->make<TH1D>( "hsizey4", "lay4 clu size in y",
 		      30,-0.5,29.5);
-  hsizey5 = fs->make<TH1D>( "hsizey5", "d2 clu size in y",
+  hsizey5 = fs->make<TH1D>( "hsizey5", "d1 clu size in y",
+		      30,-0.5,29.5);
+  hsizey6 = fs->make<TH1D>( "hsizey6", "d2 clu size in y",
+		      30,-0.5,29.5);
+  hsizey7 = fs->make<TH1D>( "hsizey7", "d3 clu size in y",
 		      30,-0.5,29.5);
 
   
@@ -359,25 +388,26 @@ void PixClustersWithTracks::beginJob() {
 		      11,-5.5,5.5,35,-17.5,17.5);
   hDetMap3 = fs->make<TH2F>( "hDetMap3", "layer 3 clus map",
 		      11,-5.5,5.5,47,-23.5,23.5);
-  //hpixDetMap1 = fs->make<TH2F>( "hpixDetMap1", "pix det layer 1",
-  //	      416,0.,416.,160,0.,160.);
-  //hpixDetMap2 = fs->make<TH2F>( "hpixDetMap2", "pix det layer 2",
-  //	      416,0.,416.,160,0.,160.);
-  //hpixDetMap3 = fs->make<TH2F>( "hpixDetMap3", "pix det layer 3",
-  //	      416,0.,416.,160,0.,160.);
+  hDetMap4 = fs->make<TH2F>( "hDetMap4", "layer 4 clus map",
+		      11,-5.5,5.5,47,-39.5,38.5);
+
   hcluDetMap1 = fs->make<TH2F>( "hcluDetMap1", "clu det layer 1",
 				416,0.,416.,160,0.,160.);
   hcluDetMap2 = fs->make<TH2F>( "hcluDetMap2", "clu det layer 2",
 				416,0.,416.,160,0.,160.);
   hcluDetMap3 = fs->make<TH2F>( "hcluDetMap3", "clu det layer 3",
 				416,0.,416.,160,0.,160.);
+  hcluDetMap4 = fs->make<TH2F>( "hcluDetMap4", "clu det layer 4",
+				416,0.,416.,160,0.,160.);
 
   hladder1id = fs->make<TH1D>( "hladder1id", "Ladder L1 id", 23, -11.5, 11.5);
   hladder2id = fs->make<TH1D>( "hladder2id", "Ladder L2 id", 35, -17.5, 17.5);
   hladder3id = fs->make<TH1D>( "hladder3id", "Ladder L3 id", 47, -23.5, 23.5);
+  hladder4id = fs->make<TH1D>( "hladder4id", "Ladder L4 id", 47, -39.5, 39.5);
   hz1id = fs->make<TH1D>( "hz1id", "Z-index id L1", 11, -5.5, 5.5);
   hz2id = fs->make<TH1D>( "hz2id", "Z-index id L2", 11, -5.5, 5.5);
   hz3id = fs->make<TH1D>( "hz3id", "Z-index id L3", 11, -5.5, 5.5);
+  hz4id = fs->make<TH1D>( "hz4id", "Z-index id L4", 11, -5.5, 5.5);
 
   htracksGoodInPix = fs->make<TH1D>( "htracksGoodInPix", "count good tracks in pix",2000,-0.5,1999.5);
   htracksGood = fs->make<TH1D>( "htracksGood", "count good tracks",2000,-0.5,1999.5);
@@ -408,6 +438,8 @@ void PixClustersWithTracks::beginJob() {
   hPhi3 = fs->make<TH1D>( "hPhi3", "track phi 3",70,-3.5,3.5);
   hPhi4 = fs->make<TH1D>( "hPhi4", "track phi 4",70,-3.5,3.5);
   hPhi5 = fs->make<TH1D>( "hPhi5", "track phi 5",70,-3.5,3.5);
+  hPhi6 = fs->make<TH1D>( "hPhi6", "track phi 6",70,-3.5,3.5);
+  hPhi7 = fs->make<TH1D>( "hPhi7", "track phi 7",70,-3.5,3.5);
   hPhi0 = fs->make<TH1D>( "hPhi0", "track phi 0",70,-3.5,3.5);
 
   hProbabilityXYBpix = fs->make<TH1D>( "hProbabilityXYBpix", "hit probability XY- bpix",
@@ -491,6 +523,7 @@ void PixClustersWithTracks::beginJob() {
    hclusMap1 = fs->make<TH2F>("hclusMap1","clus - lay1",250,-2.5,2.5,350,-3.5,3.5);
    hclusMap2 = fs->make<TH2F>("hclusMap2","clus - lay2",250,-2.5,2.5,350,-3.5,3.5);
    hclusMap3 = fs->make<TH2F>("hclusMap3","clus - lay3",250,-2.5,2.5,350,-3.5,3.5);
+   hclusMap4 = fs->make<TH2F>("hclusMap4","clus - lay4",250,-2.5,2.5,350,-3.5,3.5);
    
    hstatus = fs->make<TH1D>("hstatus","status", 100, -0.5, 99.5);
 
@@ -498,10 +531,10 @@ void PixClustersWithTracks::beginJob() {
    hfpixXY1 = fs->make<TH2F>("hfpixXY1","fpix XY -z d2",160,-16.,16.,160,-16.,16.);
    hfpixXY2 = fs->make<TH2F>("hfpixXY2","fpix XY -z d1",160,-16.,16.,160,-16.,16.);
    hfpixXY3 = fs->make<TH2F>("hfpixXY3","fpix XY +z d1",160,-16.,16.,160,-16.,16.);
-   hfpixXY4 = fs->make<TH2F>("hfpixXY4","fpix XY +z d2",160,-16.,16.,160,-16.,16.);
    hzphi1 = fs->make<TH2F>("hzphi1","bpix z phi 1",208,-26.,26.,140,-3.5,3.5);
    hzphi2 = fs->make<TH2F>("hzphi2","bpix z phi 2",208,-26.,26.,140,-3.5,3.5);
    hzphi3 = fs->make<TH2F>("hzphi3","bpix z phi 3",208,-26.,26.,140,-3.5,3.5);
+   hzphi4 = fs->make<TH2F>("hzphi4","bpix z phi 4",208,-26.,26.,140,-3.5,3.5);
 
    htest  = fs->make<TH2F>("htest", "bpix eta-hit size-y",50,-2.5,2.5,12,0.5,12.5);
    htest2 = fs->make<TH2F>("htest2","bpix eta-hit size-x",50,-2.5,2.5,4, 0.5, 4.5);
@@ -622,7 +655,7 @@ void PixClustersWithTracks::endJob(){
 	<<" PVs "<< countPVs<<" events " << countEvents<<" lumi pb-1 "<< countLumi<<"/10, bug!"<<endl;  
     cout<<"Missing clus "<<count1<<" "<<count2<<endl;
     cout<<" Tracks in layers "<<countTracks1<<" "<<countTracks2<<" "
-	<<countTracks3<<" "<<countTracks4<<endl;
+	<<countTracks3<<" "<<countTracks4<<" "<<countTracks5<<endl;
     //Divide the size histos
     htest->Divide(htest,htest3,1.,1.);
   }
@@ -648,6 +681,7 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
   int numberOfClusters = 0;
   int numberOfPixels   = 0;
 
+  // bpix
   int numOfClusPerTrk1=0;        
   int numOfClustersPerLay1=0;        
   int numOfPixelsPerLay1=0;        
@@ -664,14 +698,23 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
   int numOfClustersPerLay4=0;        
   int numOfPixelsPerLay4=0;     
 
+  // fpix
   int numOfClusPerTrk5=0;        
   int numOfClustersPerLay5=0;        
   int numOfPixelsPerLay5=0;     
+  int numOfClusPerTrk6=0;        
+  int numOfClustersPerLay6=0;        
+  int numOfPixelsPerLay6=0;     
+  int numOfClusPerTrk7=0;        
+  int numOfClustersPerLay7=0;        
+  int numOfPixelsPerLay7=0;     
 
   int numOfClustersPerDisk1=0;  
   int numOfClustersPerDisk2=0;  
   int numOfClustersPerDisk3=0; 
   int numOfClustersPerDisk4=0; 
+  int numOfClustersPerDisk5=0; 
+  int numOfClustersPerDisk6=0; 
 
   int run       = e.id().run();
   int event     = e.id().event();
@@ -818,6 +861,10 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
   es.get<TrackerDigiGeometryRecord>().get( geom );
   const TrackerGeometry& theTracker(*geom);
 
+  //Retrieve tracker topology from geometry
+  edm::ESHandle<TrackerTopology> tTopoH;
+  es.get<TrackerTopologyRcd>().get(tTopoH);
+  const TrackerTopology *tTopo=tTopoH.product();
 
   // -- Primary vertices
   // ----------------------------------------------------------------------
@@ -887,6 +934,8 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
   //e.getByLabel("cosmictrackfinderP5", recTracks);
   ///e.getByLabel(src_ , recTracks);
   e.getByToken(TrackToken, recTracks);
+
+
 
   bool missingHit=false, missingHitB=false;
   if(PRINT) cout<<" Tracks "<<recTracks->size()<<endl;
@@ -994,20 +1043,26 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	if(PRINT) cout<<" a pixel b rechit "<<endl;
 	hstatus->Fill(11.);
 
-	// Pixel detector
-	PXBDetId pdetId = PXBDetId(hit_detId);
-	//unsigned int detTypeP=pdetId.det();
-	//unsigned int subidP=pdetId.subdetId();
-	// Barell layer = 1,2,3
-	layer=pdetId.layer();
-	// Barrel ladder id 1-20,32,44.
-	ladder=pdetId.ladder();
-	// Barrel Z-index=1,8
-	zindex=pdetId.module();
+	layer=tTopo->pxbLayer(hit_detId);
+	ladder=tTopo->pxbLadder(hit_detId);
+	zindex=tTopo->pxbModule(hit_detId);
 	if(zindex<5) side=1; else side=2;
+	PixelBarrelName pbn(hit_detId,tTopo,phase1_);
 
-	// Convert to online 
-	PixelBarrelName pbn(pdetId);
+	// // Pixel detector
+	// PXBDetId pdetId = PXBDetId(hit_detId);
+	// //unsigned int detTypeP=pdetId.det();
+	// //unsigned int subidP=pdetId.subdetId();
+	// // Barell layer = 1,2,3
+	// layer=pdetId.layer();
+	// // Barrel ladder id 1-20,32,44.
+	// ladder=pdetId.ladder();
+	// // Barrel Z-index=1,8
+	// zindex=pdetId.module();
+	// if(zindex<5) side=1; else side=2;
+	// // Convert to online 
+	// PixelBarrelName pbn(pdetId);
+
 	// Shell { mO = 1, mI = 2 , pO =3 , pI =4 };
 	PixelBarrelName::Shell sh = pbn.shell(); //enum
 	//sector = pbn.sectorName();
@@ -1028,12 +1083,19 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	if(PRINT) cout<<" a pixel f rechit "<<endl;
 	hstatus->Fill(21.);
 
-	PXFDetId pdetId = PXFDetId(hit_detId);       
-	disk=pdetId.disk(); //1,2,3
-	blade=pdetId.blade(); //1-24
-	zindexF=pdetId.module(); //
-	side=pdetId.side(); //size=1 for -z, 2 for +z
-	panel=pdetId.panel(); //panel=1
+	disk=tTopo->pxfDisk(hit_detId); //1,2,3
+	blade=tTopo->pxfBlade(hit_detId); //1-24
+	zindexF=tTopo->pxfModule(hit_detId); //
+	side=tTopo->pxfSide(hit_detId); //size=1 for -z, 2 for +z
+	panel=tTopo->pxfPanel(hit_detId); //panel=1
+	PixelEndcapName pen(hit_detId,tTopo,phase1_);
+
+	// PXFDetId pdetId = PXFDetId(hit_detId);       
+	// disk=pdetId.disk(); //1,2,3
+	// blade=pdetId.blade(); //1-24
+	// zindexF=pdetId.module(); //
+	// side=pdetId.side(); //size=1 for -z, 2 for +z
+	// panel=pdetId.panel(); //panel=1
 	
 	if(PRINT) cout<<" forward det, disk "<<disk<<", blade "
 		      <<blade<<", module "<<zindexF<<", side "<<side<<", panel "
@@ -1420,35 +1482,40 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    numOfClustersPerLay3++;
 	    numOfPixelsPerLay3 += size;     
 
-	  } else if (disk==1) {
-
-	    numOfClusPerTrk4++;
-	    numOfClustersPerLay4++;
-	    numOfPixelsPerLay4 += size;     
-	    hstatus->Fill(22.);
-	    hPhi4->Fill(phi);
-	    
-
+	  } else if(layer==4) {
+	
+	    hDetMap4->Fill(float(module),float(ladderOn));
+	    hcluDetMap4->Fill(col,row);
 	    hcharge4->Fill(charge);
+	    hladder4id->Fill(float(ladderOn));
+	    hz4id->Fill(float(module));
+	    hPhi4->Fill(phi);
+	    hbpixXY->Fill(gX,gY);
+	    hzphi4->Fill(gZ,gPhi);
+	    hclusMap4->Fill(eta,phi);
+	    hstatus->Fill(15.);
+
 	    if(pt>CLU_SIZE_PT_CUT) {
 	      hsize4->Fill(float(size));
 	      hsizex4->Fill(float(sizeX));
 	      hsizey4->Fill(float(sizeY));
 	    }
 
-	    if(side==1) {numOfClustersPerDisk2++; hstatus->Fill(24.);hfpixXY2->Fill(gX,gY);}  // -z
-	    else if(side==2) {numOfClustersPerDisk3++; hstatus->Fill(25.);hfpixXY3->Fill(gX,gY);} // +z
+	    hProbabilityXYBpix->Fill(hit->clusterProbability(0));
+	    hProbabilityQBpix->Fill(hit->clusterProbability(2));
 
-	    hProbabilityXYFpix->Fill(hit->clusterProbability(0));
-	    hProbabilityQFpix->Fill(hit->clusterProbability(2));
+	    numOfClusPerTrk4++;
+	    numOfClustersPerLay4++;
+	    numOfPixelsPerLay4 += size;     
 
-	  } else if (disk==2) {
+	  } else if (disk==1) {
 
 	    numOfClusPerTrk5++;
 	    numOfClustersPerLay5++;
-	    numOfPixelsPerLay5 += size;   
-	    hstatus->Fill(23.);
-  	    hPhi5->Fill(phi);
+	    numOfPixelsPerLay5 += size;     
+	    hstatus->Fill(22.);
+	    hPhi5->Fill(phi);
+	    
 
 	    hcharge5->Fill(charge);
 	    if(pt>CLU_SIZE_PT_CUT) {
@@ -1457,14 +1524,61 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	      hsizey5->Fill(float(sizeY));
 	    }
 
-	    if(side==1)      {numOfClustersPerDisk1++; hstatus->Fill(26.);hfpixXY1->Fill(gX,gY);}  // -z
-	    else if(side==2) {numOfClustersPerDisk4++; hstatus->Fill(27.);hfpixXY4->Fill(gX,gY);} // +z
+	    hfpixXY1->Fill(gX,gY);
+
+	    if(side==1) {numOfClustersPerDisk3++; hstatus->Fill(23.);}  // -z
+	    else if(side==2) {numOfClustersPerDisk4++; hstatus->Fill(24.);} //+z
+
+	    hProbabilityXYFpix->Fill(hit->clusterProbability(0));
+	    hProbabilityQFpix->Fill(hit->clusterProbability(2));
+
+	  } else if (disk==2) {
+
+	    numOfClusPerTrk6++;
+	    numOfClustersPerLay6++;
+	    numOfPixelsPerLay6 += size;   
+	    hstatus->Fill(25.);
+  	    hPhi6->Fill(phi);
+
+	    hcharge6->Fill(charge);
+	    if(pt>CLU_SIZE_PT_CUT) {
+	      hsize6->Fill(float(size));
+	      hsizex6->Fill(float(sizeX));
+	      hsizey6->Fill(float(sizeY));
+	    }
+
+	    hfpixXY2->Fill(gX,gY);
+
+	    if(side==1)      {numOfClustersPerDisk2++; hstatus->Fill(26.);} //-z
+	    else if(side==2) {numOfClustersPerDisk5++; hstatus->Fill(27.);} //+z
+
+	    hProbabilityXYFpix->Fill(hit->clusterProbability(0));
+	    hProbabilityQFpix->Fill(hit->clusterProbability(2));
+
+	  } else if (disk==3) {
+
+	    numOfClusPerTrk7++;
+	    numOfClustersPerLay7++;
+	    numOfPixelsPerLay7 += size;   
+	    hstatus->Fill(28.);
+  	    hPhi7->Fill(phi);
+
+	    hcharge7->Fill(charge);
+	    if(pt>CLU_SIZE_PT_CUT) {
+	      hsize7->Fill(float(size));
+	      hsizex7->Fill(float(sizeX));
+	      hsizey7->Fill(float(sizeY));
+	    }
+
+	    hfpixXY3->Fill(gX,gY);
+
+	    if(side==1)      {numOfClustersPerDisk1++; hstatus->Fill(29.);} //-z
+	    else if(side==2) {numOfClustersPerDisk6++; hstatus->Fill(30.);} //+z
 
 	    hProbabilityXYFpix->Fill(hit->clusterProbability(0));
 	    hProbabilityQFpix->Fill(hit->clusterProbability(2));
 
 	  } else {
-
 	    cout<<" which layer is this? "<<layer<<" "<< disk<<endl;
 	  } // if layer
 	  
@@ -1490,20 +1604,32 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
       hclusPerTrk1->Fill(float(numOfClusPerTrk1));
       if(PRINT) cout<<"Lay1: number of clusters per track = "<<numOfClusPerTrk1<<endl;
       hclusPerTrk2->Fill(float(numOfClusPerTrk2));
-      if(PRINT) cout<<"Lay2: number of clusters per track = "<<numOfClusPerTrk1<<endl;
+      if(PRINT) cout<<"Lay2: number of clusters per track = "<<numOfClusPerTrk2<<endl;
       hclusPerTrk3->Fill(float(numOfClusPerTrk3));
-      if(PRINT) cout<<"Lay3: number of clusters per track = "<<numOfClusPerTrk1<<endl;
-      hclusPerTrk4->Fill(float(numOfClusPerTrk4));  // fpix  disk1
-      hclusPerTrk5->Fill(float(numOfClusPerTrk5)); // fpix disk2
+      if(PRINT) cout<<"Lay3: number of clusters per track = "<<numOfClusPerTrk3<<endl;
+      hclusPerTrk4->Fill(float(numOfClusPerTrk4));
+      if(PRINT) cout<<"Lay4: number of clusters per track = "<<numOfClusPerTrk4<<endl;
+      hclusPerTrk5->Fill(float(numOfClusPerTrk5));  // fpix  disk1
+      if(PRINT) cout<<"Disk1: number of clusters per track = "
+		    <<numOfClusPerTrk5<<endl;
+      hclusPerTrk6->Fill(float(numOfClusPerTrk6)); // fpix disk2
+      if(PRINT) cout<<"Disk2: number of clusters per track = "
+		    <<numOfClusPerTrk6<<endl;
+      hclusPerTrk7->Fill(float(numOfClusPerTrk7)); // fpix disk3
+      if(PRINT) cout<<"Disk3: number of clusters per track = "
+		    <<numOfClusPerTrk7<<endl;
 
       if(numOfClusPerTrk1>0) countTracks1++;
       if(numOfClusPerTrk2>0) countTracks2++;
       if(numOfClusPerTrk3>0) countTracks3++;
       if(numOfClusPerTrk4>0) countTracks4++;
-      if(numOfClusPerTrk5>0) countTracks4++;
+      if(numOfClusPerTrk5>0) countTracks5++;
+      if(numOfClusPerTrk6>0) countTracks5++;
+      if(numOfClusPerTrk7>0) countTracks5++;
 
-      float clusPerTrkB = numOfClusPerTrk1 + numOfClusPerTrk2 + numOfClusPerTrk3;
-      float clusPerTrkF = numOfClusPerTrk4 + numOfClusPerTrk5;
+      float clusPerTrkB = numOfClusPerTrk1 + numOfClusPerTrk2 + 
+	numOfClusPerTrk3 + numOfClusPerTrk4;
+      float clusPerTrkF = numOfClusPerTrk5 + numOfClusPerTrk6+ numOfClusPerTrk7;
       float clusPerTrk =  clusPerTrkB + clusPerTrkF;
       
       hclusPerTrkB->Fill(clusPerTrkB);
@@ -1527,20 +1653,15 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
     hclusPerLay1->Fill(float(numOfClustersPerLay1));
     hclusPerLay2->Fill(float(numOfClustersPerLay2));
     hclusPerLay3->Fill(float(numOfClustersPerLay3));
+    hclusPerLay4->Fill(float(numOfClustersPerLay4));
 
-    hclusPerDisk1->Fill(float(numOfClustersPerDisk1));
+    hclusPerDisk3->Fill(float(numOfClustersPerDisk1));
     hclusPerDisk2->Fill(float(numOfClustersPerDisk2));
-    hclusPerDisk3->Fill(float(numOfClustersPerDisk3));
-    hclusPerDisk4->Fill(float(numOfClustersPerDisk4));
+    hclusPerDisk1->Fill(float(numOfClustersPerDisk3));
+    hclusPerDisk1->Fill(float(numOfClustersPerDisk4));
+    hclusPerDisk2->Fill(float(numOfClustersPerDisk5));
+    hclusPerDisk3->Fill(float(numOfClustersPerDisk6));
 
-    //hdetsPerLay1->Fill(float(numberOfDetUnits1));
-    //hdetsPerLay2->Fill(float(numberOfDetUnits2));
-    //hdetsPerLay3->Fill(float(numberOfDetUnits3));
-    //int tmp = numberOfDetUnits1+numberOfDetUnits2+numberOfDetUnits3;
-    //hpixPerLay1->Fill(float(numOfPixelsPerLay1));
-    //hpixPerLay2->Fill(float(numOfPixelsPerLay2));
-    //hpixPerLay3->Fill(float(numOfPixelsPerLay3));
-    //htest7->Fill(float(tmp));
     hclusBpix->Fill(float(numberOfClusters));
     hpixBpix->Fill(float(numberOfPixels));
 
