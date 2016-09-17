@@ -387,9 +387,9 @@ void PixClustersWithTracks::beginJob() {
   hDetMap2 = fs->make<TH2F>( "hDetMap2", "layer 2 clus map",
 		      11,-5.5,5.5,35,-17.5,17.5);
   hDetMap3 = fs->make<TH2F>( "hDetMap3", "layer 3 clus map",
-		      11,-5.5,5.5,47,-23.5,23.5);
+		      11,-5.5,5.5,51,-25.5,25.5);
   hDetMap4 = fs->make<TH2F>( "hDetMap4", "layer 4 clus map",
-		      11,-5.5,5.5,47,-39.5,38.5);
+		      11,-5.5,5.5,79,-39.5,39.5);
 
   hcluDetMap1 = fs->make<TH2F>( "hcluDetMap1", "clu det layer 1",
 				416,0.,416.,160,0.,160.);
@@ -402,8 +402,8 @@ void PixClustersWithTracks::beginJob() {
 
   hladder1id = fs->make<TH1D>( "hladder1id", "Ladder L1 id", 23, -11.5, 11.5);
   hladder2id = fs->make<TH1D>( "hladder2id", "Ladder L2 id", 35, -17.5, 17.5);
-  hladder3id = fs->make<TH1D>( "hladder3id", "Ladder L3 id", 47, -23.5, 23.5);
-  hladder4id = fs->make<TH1D>( "hladder4id", "Ladder L4 id", 47, -39.5, 39.5);
+  hladder3id = fs->make<TH1D>( "hladder3id", "Ladder L3 id", 51, -25.5, 25.5);
+  hladder4id = fs->make<TH1D>( "hladder4id", "Ladder L4 id", 79, -39.5, 39.5);
   hz1id = fs->make<TH1D>( "hz1id", "Z-index id L1", 11, -5.5, 5.5);
   hz2id = fs->make<TH1D>( "hz2id", "Z-index id L2", 11, -5.5, 5.5);
   hz3id = fs->make<TH1D>( "hz3id", "Z-index id L3", 11, -5.5, 5.5);
