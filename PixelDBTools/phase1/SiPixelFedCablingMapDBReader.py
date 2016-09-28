@@ -1,6 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("SiPixelCablingReader")
+
+#process.load("CondCore.DBCommon.CondDBCommon_cfi")
+process.load("CondCore.CondDB.CondDB_cfi")
 #process.load("Geometry.CMSCommonData.cmsIdealGeometryXML_cfi")
 #process.load("Geometry.TrackerGeometryBuilder.trackerGeometry_cfi")
 #process.load("Geometry.TrackerNumberingBuilder.trackerNumberingGeometry_cfi")
@@ -9,9 +12,9 @@ process = cms.Process("SiPixelCablingReader")
 process.load("Configuration.Geometry.GeometryExtended2017Reco_cff")
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-#process.GlobalTag.globaltag = 'PRE_MC_71_V5::All'
-process.GlobalTag = GlobalTag(process.GlobalTag, '76X_upgrade2017_design_v8', '')
+from Configuration.AlCa.GlobalTag import GlobalTag
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, '76X_upgrade2017_design_v8', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 
 process.MessageLogger = cms.Service("MessageLogger",
@@ -43,21 +46,29 @@ process.source = cms.Source("EmptySource",
 
 
 ##### DATABASE CONNECTION INFO ######
-process.load("CondCore.DBCommon.CondDBCommon_cfi")
-#process.CondDBCommon.connect='sqlite_file:../../../CalibTracker/SiPixelConnectivity/test/cabling_test.db'
-process.CondDBCommon.connect='sqlite_file:../../../../../DB/phase1/SiPixelFedCablingMap_phase1_v1.db'
-process.CondDBCommon.DBParameters.authenticationPath = '.'
-process.CondDBCommon.DBParameters.messageLevel = 1
+#process.CondDBCommon.connect='sqlite_file:cabling.db'
+#process.CondDBCommon.connect='sqlite_file:../../../../../DB/phase1/SiPixelFedCablingMap_phase1_v1.db'
+#process.CondDBCommon.DBParameters.authenticationPath = '.'
+#process.CondDBCommon.DBParameters.messageLevel = 1
+
+#process.CondDB.connect='sqlite_file:cabling.db'
+process.CondDB.connect='sqlite_file:../../../../../DB/phase1/SiPixelFedCablingMap_phase1_v2.db'
+process.CondDB.DBParameters.authenticationPath = '.'
+process.CondDB.DBParameters.messageLevel = 1
 
 
 ###### TAGS TO READ ######
 process.PoolDBESSourceForReader = cms.ESSource("PoolDBESSource",
-    process.CondDBCommon,
+#    process.CondDBCommon,
+    process.CondDB,
     BlobStreamerName = cms.untracked.string('TBufferBlobStreamingService'),
     toGet = cms.VPSet(
         cms.PSet(
             record = cms.string('SiPixelFedCablingMapRcd'),
-            tag = cms.string('SiPixelFedCablingMap_phase1_v1')
+#            tag = cms.string('SiPixelFedCablingMap_phase1_v1')
+#            tag = cms.string('SiPixelFedCablingMap_phase1_v100')
+#            tag = cms.string('SiPixelFedCablingMap_phase1_v101')
+            tag = cms.string('SiPixelFedCablingMap_phase1_v2')
        ))
 )
 
