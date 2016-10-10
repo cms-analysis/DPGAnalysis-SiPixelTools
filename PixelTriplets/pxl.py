@@ -14,12 +14,12 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condD
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 # tags for 74X
 #process.GlobalTag.globaltag = 'FT_R_74_V15B' # for 251643
-process.GlobalTag.globaltag = '76X_dataRun2_v15' # 
+#process.GlobalTag.globaltag = '76X_dataRun2_v15' # 
 #process.GlobalTag.globaltag = '74X_dataRun2_Prompt_v2' # 
 #process.GlobalTag.globaltag = '74X_dataRun2_Prompt_v1' # only for 746
 #process.GlobalTag.globaltag = '74X_dataRun2_Prompt_v0' # for 251643
 #process.GlobalTag.globaltag = '74X_dataRun2_PromptValidation_forPostTS2_v2' # for 251643
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
@@ -101,8 +101,8 @@ myfilelist.extend([
 process.source = cms.Source("PoolSource",
 # fileNames =  myfilelist
 	fileNames = cms.untracked.vstring(
-"/store/data/Run2015C/DoubleMuon/RECO/PromptReco-v1/000/254/905/00000/0E69BA5C-B24B-E511-BEF4-02163E01478C.root",
 
+"/store/express/Run2016H/ExpressPhysics/FEVT/Express-v2/000/281/663/00000/72B55B7C-FD83-E611-934E-FA163E244B58.root",
 #"/store/data/Run2012D/MinimumBias/RECO/PromptReco-v1/000/208/686/F60495B3-1E41-E211-BB7C-003048D3756A.root",
 # my re-reco 
 #    'file:/afs/cern.ch/work/d/dkotlins/public/data/tracks/r208686_1_0.root',
@@ -159,7 +159,7 @@ if useLocalDB :
 # endif
 
 # SQ_LITE Templates 
-useLocalDBTemplate = True
+useLocalDBTemplate = False
 if useLocalDBTemplate :
     process.DBReaderFrontier3 = cms.ESSource("PoolDBESSource",
      DBParameters = cms.PSet(

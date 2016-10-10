@@ -110,6 +110,8 @@
 #define NEW_TRACKINGRECHITS  // For V71X_pre7 and later 
 
 struct Histos{
+  TH1D *hclusprob_fpix;
+  
   TH1D *h420f1, *h421f1, *h420f2, *h421f2, *h420f3, *h421f3;
   TH1D *h077f1, *h078f1, *h079f1, *h069f1;
   TH1D *h077f2, *h078f2, *h079f2, *h069f2;
@@ -154,6 +156,11 @@ private:
   int run_num = -999;
   int lumi_block = -999;
 
+  //Cluster Probability
+  int clusSize_X = -999;
+  int clusSize_Y = -999;
+  float clusProb_FPix = -999;
+  
   // Rechit coordinates in local - 3 hits (xpx1_l, xpy1_l), (xpx2_l, xpy2_l), and (xpx3_l, xpy3_l)
   double xpx1_l = -999;
   double xpy1_l = -999;
@@ -242,13 +249,15 @@ Pixel::~Pixel()
 void Histos::InitFPix(TFileDirectory* fs)
 {
   /*         Initialize histograms for FPIX residuals         */
-  h420f1 = fs->make<TH1D>( "h420f1", "PXB1 residuals #Deltax, p_{t} > 2;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
-  h420f2 = fs->make<TH1D>( "h420f2", "PXF1 residuals #Deltax, p_{t} > 2;PXF1 #Deltax [#mum];hits", 100, -150, 150 );
-  h420f3 = fs->make<TH1D>( "h420f3", "PXF2 residuals #Deltax, p_{t} > 2;PXF2 #Deltax [#mum];hits", 100, -150, 150 );
+  hclusprob_fpix = fs->make<TH1D>( "hclusprob_fpix", "FPix Cluster Probability;", 120, 0, 1.2 );
 
-  h421f1 = fs->make<TH1D>( "h421f1", "PXB1 residuals #Deltay, p_{t} > 2;PXB1 #Deltay [#mum];hits", 100, -300, 300 );
-  h421f2 = fs->make<TH1D>( "h421f2", "PXF1 residuals #Deltay, p_{t} > 2;PXF1 #Deltay [#mum];hits", 100, -300, 300 );
-  h421f3 = fs->make<TH1D>( "h421f3", "PXF2 residuals #Deltay, p_{t} > 2;PXF2 #Deltay [#mum];hits", 100, -300, 300 );
+  h420f1 = fs->make<TH1D>( "h420f1", "PXB1 residuals #Deltax, p_{t} > 4;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
+  h420f2 = fs->make<TH1D>( "h420f2", "PXF1 residuals #Deltax, p_{t} > 4;PXF1 #Deltax [#mum];hits", 100, -150, 150 );
+  h420f3 = fs->make<TH1D>( "h420f3", "PXF2 residuals #Deltax, p_{t} > 4;PXF2 #Deltax [#mum];hits", 100, -150, 150 );
+
+  h421f1 = fs->make<TH1D>( "h421f1", "PXB1 residuals #Deltay, p_{t} > 4;PXB1 #Deltay [#mum];hits", 100, -300, 300 );
+  h421f2 = fs->make<TH1D>( "h421f2", "PXF1 residuals #Deltay, p_{t} > 4;PXF1 #Deltay [#mum];hits", 100, -300, 300 );
+  h421f3 = fs->make<TH1D>( "h421f3", "PXF2 residuals #Deltay, p_{t} > 4;PXF2 #Deltay [#mum];hits", 100, -300, 300 );
 
   h077f1 = fs->make<TH1D>( "h077f1", "PXB1 x error ", 100, 0., 100. );
   h077f2 = fs->make<TH1D>( "h077f2", "PXF1 x error ", 100, 0., 100. );
@@ -271,6 +280,7 @@ void Histos::InitFPix(TFileDirectory* fs)
 void Histos::InitBPix(TFileDirectory* fs)
 {
   /*         Initialize histograms for BPIX residuals         */
+  
   h420b1 = fs->make<TH1D>( "h420b1", "PXB1 residuals #Deltax, p_{t} > 12;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
   h420b2 = fs->make<TH1D>( "h420b2", "PXB2 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h420b3 = fs->make<TH1D>( "h420b3", "PXB3 residuals #Deltax, p_{t} > 12;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
@@ -451,6 +461,12 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
     cout << ", z " << rbs->z0();
     cout << endl;
   }
+ 
+  //Retrieve tracker topology from geometry
+  edm::ESHandle<TrackerTopology> tTopoH;
+  iSetup.get<TrackerTopologyRcd>().get(tTopoH);
+  const TrackerTopology *tTopo=tTopoH.product();
+
   //--------------------------------------------------------------------
   // primary vertices:
   Handle<VertexCollection> vertices;
@@ -723,7 +739,7 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
 	// PXB:      
 	if( subDet == PixelSubdetector::PixelBarrel ) {
 	  
-	  int ilay = PXBDetId(detId).layer();
+	  int ilay=tTopo->pxbLayer(detId);
 	  
 	  if( ilay == 1 ) {
 	    
@@ -750,6 +766,7 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
 	    fPX2 = sqrt( vyloc );
 	    
 	    det2 = transRecHit->det();
+	  
 	    
 	  }//PXB2
 	  
@@ -766,8 +783,9 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
 
 	    det3 = transRecHit->det();
 	    
-	  }//PXB3
+	  }//PXB3	  
 	}// Pixel
+
       }// doBPIX
 
       // ==============================================================
@@ -777,9 +795,9 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
 	
 	// PXB:      
 	if( subDet == PixelSubdetector::PixelBarrel ) {
+
+	  int ilay=tTopo->pxbLayer(detId);
 	  
-	  int ilay = PXBDetId(detId).layer();
-	    
 	  if( ilay == 1 ) {
 	        
 	    n1++;
@@ -792,16 +810,16 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
 	    fPX1 = sqrt( vyloc );
 
 	    det1 = transRecHit->det();
-	       
+	    
 	  }// BPIX1
 	  
 	}//PXB1
     
     
 	if( subDet == PixelSubdetector::PixelEndcap) {
-	    
-	  int idisk = PXFDetId(detId).disk();
-	    
+
+	  int idisk=tTopo->pxfDisk(detId); 
+
 	  if( idisk == 1 ){
 	    n2++;
 	    xPX2 = gX; // precise hit in CMS global coordinates
@@ -814,6 +832,20 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
 	        	        
 	    det2 = transRecHit->det();
 	        
+	    const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( &*(*irecHit) );
+	    
+	    if( pixhit->hasFilledProb() ){
+	      clusProb_FPix = pixhit->clusterProbability(0);                                      
+	    }
+	   
+	    edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster> const & clust = pixhit->cluster();
+
+	    if( clust.isNonnull() ) {
+	      clusSize_Y = clust->sizeY();
+	      clusSize_X = clust->sizeX();
+	    }
+	    
+
 	  }//PXF1
 	    
 	  if( idisk == 2 ){
@@ -828,9 +860,11 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
 	    fPX3 = sqrt( vyloc );
 
 	    det3 = transRecHit->det();
-	  }//PXF2
-	    
+
+	  }//PXF2	  
+	  
 	}//PXF
+	
       }//doFPix
       else{
 	cout << "detector tag not specified"<< endl;
@@ -989,8 +1023,8 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
 	if(detTag == "bpix"){
 	  if( subDet == PixelSubdetector::PixelBarrel ) {
 	        
-	    int ilay = PXBDetId(detId).layer();
-	        
+	    int ilay=tTopo->pxbLayer(detId);
+ 
 	    if( ilay == 1 ) {
 	      xPX1 = gX;
 	      yPX1 = gY;
@@ -1028,9 +1062,9 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
 	// ================================================
 	else if(detTag =="fpix"){
 	  if( subDet == PixelSubdetector::PixelBarrel ) {
-	    
-	    int ilay = PXBDetId(detId).layer();
-	    
+
+	    int ilay=tTopo->pxbLayer(detId);
+
 	    if( ilay == 1 ) {
 	      xPX1 = gX;
 	      yPX1 = gY;
@@ -1043,8 +1077,8 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
 	  }// barrel	  
 	  else if( subDet == PixelSubdetector::PixelEndcap) {
 	    
-	    int idisk = PXFDetId(detId).disk();
-	    
+	    int idisk=tTopo->pxfDisk(detId);
+
 	    if( idisk == 1 ) {
 	      xPX2 = gX;
 	      yPX2 = gY;
@@ -1142,8 +1176,10 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
 
 	// Fill Histograms for FPIX
 	if(detTag == "fpix"){
-
-	  if(pt>2){
+	  
+	  if(pt>4){
+	    
+	    hclusprob_fpix ->Fill(clusProb_FPix);
 
 	    h420f1->Fill( residual_x_1 ); 
 	    h421f1->Fill( residual_y_1 );
@@ -1179,8 +1215,9 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
       
 	// Fill Histograms for BPIX
 	else if(detTag == "bpix"){
-
-	  if(pt>12){
+	  
+	  if(pt>12){	  
+	    
 	    h420b1->Fill( residual_x_1 );
 	    h421b1->Fill( residual_y_1 );
 
