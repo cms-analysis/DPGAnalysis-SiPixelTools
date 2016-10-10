@@ -46,7 +46,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 #process.MessageLogger.cerr.threshold = 'Debug'
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10)
+    input = cms.untracked.int32(-1)
 )
 
 process.TFileService = cms.Service("TFileService",
@@ -58,7 +58,7 @@ process.source = cms.Source("PoolSource",
 # fileNames =  myfilelist
     fileNames = cms.untracked.vstring(                          
     #"file:rawdata.root"
-    "file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_81/raw/raw1_l1roc.root"
+    "file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_81/raw/raw1_formatfix.root"
 
    )
 )
@@ -79,7 +79,7 @@ process.d = cms.EDAnalyzer("SiPixelRawDump",
 #    InputLabel = cms.untracked.string('source'),
     CheckPixelOrder = cms.untracked.bool(False),
 # 0 - nothing, 1 - error , 2- data, 3-headers, 4-hex
-    Verbosity = cms.untracked.int32(3),
+    Verbosity = cms.untracked.int32(1),
 # threshold, print fed/channel num of errors if tot_errors > events * PrintThreshold, default 0,001 
     PrintThreshold = cms.untracked.double(0.001)
 )

@@ -57,9 +57,9 @@ namespace {
   int fed0 = -1, chan0 = -1, roc0 = -1, dcol0 = -1, pix0 =-1, count0=-1;
   int countDecodeErrors1=0, countDecodeErrors2=0;
 #ifdef PHASE1
-  const int n_of_FEDs = 56;
-  const int n_of_Channels = 96;
-  const int fedIdBpixMax = 40;
+  const int n_of_FEDs = 104;
+  const int n_of_Channels = 48;
+  const int fedIdBpixMax = 75;
   const bool phase1 = true;
 #else
   const int n_of_FEDs = 41;
@@ -361,17 +361,23 @@ int MyDecode::data(int word, int & fedChannel, int fed, int & stat1, int & stat2
   const unsigned int plsmsk = 0xff;   // pulse height
   const unsigned int pxlmsk = 0xff00; // pixel index
   const unsigned int dclmsk = 0x1f0000;
+
 #ifdef PHASE1
-  const unsigned int rocmsk  =  0x1e00000;  // 4 bits 
-  const unsigned int chnlmsk = 0xfe000000; // 7 bits 
-  const unsigned int rocshift = 21;
-  const unsigned int linkshift = 25;
-#else
-  const unsigned int rocmsk =   0x3e00000;   // 5 bits
+  //const unsigned int rocmsk  = 0x1e00000;  // 4 bits 
+  //const unsigned int chnlmsk = 0xfe000000; // 7 bits 
+  //const unsigned int rocshift = 21;
+  //const unsigned int linkshift = 25;
+
+  // for layer-1
+  const unsigned int rowmsk = 0x7f00; 
+  const unsigned int colmsk = 0x1f8000;
+
+#endif
+  // for both phase0 and phase1
+  const unsigned int rocmsk  = 0x3e00000;   // 5 bits
   const unsigned int chnlmsk = 0xfc000000; // 6 bits 
   const unsigned int rocshift = 21;
   const unsigned int linkshift = 26;
-#endif
 
   int status = 0;
 
@@ -388,93 +394,105 @@ int MyDecode::data(int word, int & fedChannel, int fed, int & stat1, int & stat2
       adc_=(word&plsmsk);
       fedChannel = channel_;
 
-      col_ = convertToCol(dcol_,pix_);
-      row_ = convertToRow(pix_);
+      if(phase1) {
 
-      // print the roc number according to the online 0-15 scheme
-      if(print) cout<<" Fed "<<fed<<" Channel- "<<channel_<<" ROC- "<<(roc_-1)<<" DCOL- "<<dcol_<<" Pixel- "
-		    <<pix_<<" ("<<col_<<","<<row_<<") ADC- "<<adc_<<endl;
-      status++;
+	col_=(word&colmsk)>>15;
+	row_=(word&rowmsk)>>8;
 
-      if(CHECK_PIXELS) {
+	// will need here a loopup table which can distuinguish layer 1 links
+	// to decide if we read dcol/pis or col/row
+	if(print) cout<<" Fed "<<fed<<" Channel- "<<channel_<<" ROC- "<<(roc_-1)<<" DCOL- "
+		      <<dcol_<<" Pixel- "<<pix_<<" OR col-"<<col_<<" row-"<<row_<<") ADC- "<<adc_<<endl;
 
-	// Check invalid ROC numbers
-	if( ((fed>31) && (roc_>24)) || ((fed<=31) && (roc_>16))  ) {  //inv ROC
-          //if(printErrors) 
-	  cout<<" Fed "<<fed<<" wrong roc number chan/roc/dcol/pix/adc = "<<channel_<<"/"
-			      <<roc_-1<<"/"<<dcol_<<"/"<<pix_<<"/"<<adc_<<endl;
-	  status = -4;
+	status++;
 
-	 
-	  // protect for rerouted signals
-	} else if( fed<=31 && channel_<=24 && roc_>8 ) {
-	  if( !( (fed==6 && channel_==1) ||(fed==9 && channel_==16) ||(fed==23 && channel_==15)
-		 || (fed==31 && channel_==10) ||(fed==27 && channel_==15) )  ) {
+      } else { // phase0 
+	col_ = convertToCol(dcol_,pix_);
+	row_ = convertToRow(pix_);
+	
+	// print the roc number according to the online 0-15 scheme
+	if(print) cout<<" Fed "<<fed<<" Channel- "<<channel_<<" ROC- "<<(roc_-1)<<" DCOL- "<<dcol_<<" Pixel- "
+		      <<pix_<<" ("<<col_<<","<<row_<<") ADC- "<<adc_<<endl;
+	status++;
+	
+	if(CHECK_PIXELS) {
+	  
+	  // Check invalid ROC numbers
+	  if( ((fed>31) && (roc_>24)) || ((fed<=31) && (roc_>16))  ) {  //inv ROC
 	    //if(printErrors) 
-	    cout<<" Fed "<<fed<<" wrong channel number, chan/roc/dcol/pix/adc = "<<channel_<<"/"
-				<<roc_-1<<"/"<<dcol_<<"/"<<pix_<<"/"<<adc_<<endl;
+	    cout<<" Fed "<<fed<<" wrong roc number chan/roc/dcol/pix/adc = "<<channel_<<"/"
+		<<roc_-1<<"/"<<dcol_<<"/"<<pix_<<"/"<<adc_<<endl;
 	    status = -4;
-	  }
-	}
-
-
-	// Check pixels
-        if(pix_==0) {  // PIX=0
-	  // Detect pixel 0 events
-          if(printErrors) 
-	    cout<<" Fed "<<fed
-		<<" pix=0 chan/roc/dcol/pix/adc = "<<channel_<<"/"<<roc_-1<<"/"<<dcol_<<"/"
-		<<pix_<<"/"<<adc_<<" ("<<col_<<","<<row_<<")"<<endl;
-	  count0++;
-	  stat1 = roc_-1;
-	  stat2 = count0;
-	  status = -5;
-
-	} else if( fed==fed0 && channel_==chan0 && roc_==roc0 && dcol_==dcol0 && pix_==pix0 ) {
-	  // detect multiple pixels 
-
-	  count0++;
-          if(printErrors) cout<<" Fed "<<fed
-	    //cout<<" Fed "<<fed
-	      <<" double pixel  chan/roc/dcol/pix/adc = "<<channel_<<"/"<<roc_-1<<"/"<<dcol_<<"/"
-	      <<pix_<<"/"<<adc_<<" ("<<col_<<","<<row_<<") "<<count0<<endl;
-	  stat1 = roc_-1;
-	  stat2 = count0;
-	  status = -6;
-
-	} else {  // normal
-
-	  count0=0;
-
-	  fed0 = fed; chan0 =channel_; roc0 =roc_; dcol0 =dcol_; pix0=pix_;
-
-	  // Decode errors
-	  if(pix_<2 || pix_>161) {  // inv PIX
-	    if(printErrors)cout<<" Fed "<<fed<<" wrong pix number chan/roc/dcol/pix/adc = "<<channel_<<"/"
-			       <<roc_-1<<"/"<<dcol_<<"/"<<pix_<<"/"<<adc_<<" ("<<col_<<","<<row_<<")"<<endl;
-	    status = -3;
+	    
+	    
+	    // protect for rerouted signals
+	  } else if( fed<=31 && channel_<=24 && roc_>8 ) {
+	    if( !( (fed==6 && channel_==1) ||(fed==9 && channel_==16) ||(fed==23 && channel_==15)
+		   || (fed==31 && channel_==10) ||(fed==27 && channel_==15) )  ) {
+	      //if(printErrors) 
+	      cout<<" Fed "<<fed<<" wrong channel number, chan/roc/dcol/pix/adc = "<<channel_<<"/"
+		  <<roc_-1<<"/"<<dcol_<<"/"<<pix_<<"/"<<adc_<<endl;
+	      status = -4;
+	    }
 	  }
 	  
-	  if(dcol_<0 || dcol_>25) {  // inv DCOL
-	    if(printErrors) cout<<" Fed "<<fed<<" wrong dcol number chan/roc/dcol/pix/adc = "<<channel_<<"/"
-				<<roc_-1<<"/"<<dcol_<<"/"<<pix_<<"/"<<adc_<<" ("<<col_<<","<<row_<<")"<<endl;
-	    status = -3;
-	  }
-
-	} // check pixels
-
+	  // Check pixels
+	  if(pix_==0) {  // PIX=0
+	    // Detect pixel 0 events
+	    if(printErrors) 
+	      cout<<" Fed "<<fed
+		  <<" pix=0 chan/roc/dcol/pix/adc = "<<channel_<<"/"<<roc_-1<<"/"<<dcol_<<"/"
+		  <<pix_<<"/"<<adc_<<" ("<<col_<<","<<row_<<")"<<endl;
+	    count0++;
+	    stat1 = roc_-1;
+	    stat2 = count0;
+	    status = -5;
+	    
+	  } else if( fed==fed0 && channel_==chan0 && roc_==roc0 && dcol_==dcol0 && pix_==pix0 ) {
+	    // detect multiple pixels 
+	    
+	    count0++;
+	    if(printErrors) cout<<" Fed "<<fed
+			      //cout<<" Fed "<<fed
+				<<" double pixel  chan/roc/dcol/pix/adc = "<<channel_<<"/"<<roc_-1<<"/"<<dcol_<<"/"
+				<<pix_<<"/"<<adc_<<" ("<<col_<<","<<row_<<") "<<count0<<endl;
+	    stat1 = roc_-1;
+	    stat2 = count0;
+	    status = -6;
+	    
+	  } else {  // normal
+	    
+	    count0=0;
+	    
+	    fed0 = fed; chan0 =channel_; roc0 =roc_; dcol0 =dcol_; pix0=pix_;
+	    
+	    // Decode errors
+	    if(pix_<2 || pix_>161) {  // inv PIX
+	      if(printErrors)cout<<" Fed "<<fed<<" wrong pix number chan/roc/dcol/pix/adc = "<<channel_<<"/"
+				 <<roc_-1<<"/"<<dcol_<<"/"<<pix_<<"/"<<adc_<<" ("<<col_<<","<<row_<<")"<<endl;
+	      status = -3;
+	    }
+	    
+	    if(dcol_<0 || dcol_>25) {  // inv DCOL
+	      if(printErrors) cout<<" Fed "<<fed<<" wrong dcol number chan/roc/dcol/pix/adc = "<<channel_<<"/"
+				  <<roc_-1<<"/"<<dcol_<<"/"<<pix_<<"/"<<adc_<<" ("<<col_<<","<<row_<<")"<<endl;
+	      status = -3;
+	    }
+	    
+	  } // check pixels
+	  
 	  // Summary error count (for testing only)
-	if(pix_<2 || pix_>161 || dcol_<0 || dcol_>25) {
-	  countDecodeErrors2++;  // count pixels with errors 
-	  if(pix_<2 || pix_>161)  countDecodeErrors1++; // count errors
-	  if(dcol_<0 || dcol_>25) countDecodeErrors1++; // count errors
-	  //if(fed==6 && channel==35 ) cout<<" Fed "<<fed<<" wrong dcol number chan/roc/dcol/pix/adc = "<<channel<<"/"
-	  //			 <<roc-1<<"/"<<dcol<<"/"<<pix<<"/"<<adc<<" ("<<col<<","<<row<<")"<<endl;
-	}
+	  if(pix_<2 || pix_>161 || dcol_<0 || dcol_>25) {
+	    countDecodeErrors2++;  // count pixels with errors 
+	    if(pix_<2 || pix_>161)  countDecodeErrors1++; // count errors
+	    if(dcol_<0 || dcol_>25) countDecodeErrors1++; // count errors
+	    //if(fed==6 && channel==35 ) cout<<" Fed "<<fed<<" wrong dcol number chan/roc/dcol/pix/adc = "<<channel<<"/"
+	    //			 <<roc-1<<"/"<<dcol<<"/"<<pix<<"/"<<adc<<" ("<<col<<","<<row<<")"<<endl;
+	  }
+	  
+	}  // if CHECK_PIXELS
 	
-	
-
-      }  // if CHECK_PIXELS
+      } // phase 
 
     } else { // channel
 
@@ -1063,7 +1081,7 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
   ev.getByToken(rawData , buffers);  // the new bytoken 
 
 #ifdef PHASE1
-  std::pair<int,int> fedIds(1200,1255); // phase 1
+  std::pair<int,int> fedIds(1200,1303); // phase 1
   const int fedId0=1200;
 #else // phase0
   std::pair<int,int> fedIds(FEDNumbering::MINSiPixelFEDID, FEDNumbering::MAXSiPixelFEDID); //0

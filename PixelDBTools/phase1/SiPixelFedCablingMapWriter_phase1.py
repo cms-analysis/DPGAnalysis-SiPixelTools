@@ -3,8 +3,8 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process("MapWriter")
 #process.load("CondCore.DBCommon.CondDBCommon_cfi")
 #process.load("CondCore.CondDB.CondDB_cfi")
-
-process.load("Configuration.Geometry.GeometryExtended2017Reco_cff")
+#process.load("Configuration.Geometry.GeometryExtended2017Reco_cff")
+process.load('Configuration.Geometry.GeometryExtended2017NewFPixReco_cff')
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag

@@ -4,19 +4,17 @@ process = cms.Process("MyRawToDigi")
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 #process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
-process.load('Configuration.Geometry.GeometryExtended2017Reco_cff')
+#process.load('Configuration.Geometry.GeometryExtended2017Reco_cff')
+process.load('Configuration.Geometry.GeometryExtended2017NewFPixReco_cff')
+
 #process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 #process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
 process.load("Configuration.StandardSequences.Services_cff")
 
-#process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
-from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-#from Configuration.AlCa.GlobalTag import GlobalTag
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+from Configuration.AlCa.GlobalTag import GlobalTag
 # to use no All 
 # 2015
-#process.GlobalTag.globaltag = 'GR_E_V48'
-#process.GlobalTag.globaltag = 'GR_P_V56' # works for 2469763
 #process.GlobalTag.globaltag = 'GR_P_V56' # for 247607
 # AUTO conditions 
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
@@ -30,14 +28,13 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1))
 
 process.source = cms.Source("PoolSource",
 fileNames =  cms.untracked.vstring(
-#"/store/data/Run2015A/ZeroBias1/RAW/v1/000/248/025/00000/24014201-5C13-E511-AEFB-02163E0139DC.root",
- 'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_81/raw/raw1_l1roc.root'
+ 'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_81/raw/raw1_formatfix.root'
 # 'file:rawdata_100.root',
  )
 )
 
 # Cabling
-useLocal = False
+useLocal = True
 if useLocal:
   process.CablingReader = cms.ESSource("PoolDBESSource",
     DBParameters = cms.PSet(
@@ -47,10 +44,10 @@ if useLocal:
     toGet = cms.VPSet(
       cms.PSet(
         record = cms.string('SiPixelFedCablingMapRcd'),
-        tag = cms.string('SiPixelFedCablingMap_phase1_v1')
+        tag = cms.string('SiPixelFedCablingMap_phase1_v2')
     )),
-    connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelFedCablingMap_phase1_v1.db')
-    #connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
+    #connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelFedCablingMap_phase1_v2.db')
+    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
   ) # end process
   process.prefer = cms.ESPrefer("PoolDBESSource","CablingReader")
 # end if
@@ -76,7 +73,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 process.out = cms.OutputModule("PoolOutputModule",
     #fileName =  cms.untracked.string('file:digis.root'),
 #    fileName =  cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/data/digis/digi_zb_248025.root'),
-    fileName =  cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_81/digis/digis1_from1lroc.root'),
+    fileName =  cms.untracked.string('file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_81/digis/digis1_formatfix.root'),
     outputCommands = cms.untracked.vstring("drop *","keep *_siPixelDigis_*_*")
 )
 

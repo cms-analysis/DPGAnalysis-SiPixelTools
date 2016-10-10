@@ -4,8 +4,9 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process("digiTest")
 
 #process.load("Configuration.StandardSequences.Geometry_cff")
-process.load('Configuration.Geometry.GeometryExtended2017Reco_cff')
-process.load('Configuration.Geometry.GeometryExtended2017_cff')
+#process.load('Configuration.Geometry.GeometryExtended2017Reco_cff')
+#process.load('Configuration.Geometry.GeometryExtended2017_cff')
+process.load('Configuration.Geometry.GeometryExtended2017NewFPixReco_cff')
 
 process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 
@@ -32,8 +33,8 @@ process.MessageLogger = cms.Service("MessageLogger",
 process.source = cms.Source("PoolSource",
     fileNames =  cms.untracked.vstring(
 #    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/digis/digis1.root'
-#     'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_81/digis/digis1_pixonly.root'
-     'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_81/digis/digis1_fromraw.root'
+     'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_81/digis/digis1_pixonly.root'
+#     'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_81/digis/digis1_fromraw.root'
     #'file:digis.root'
     #'file:digis_fromraw.root'
     )
@@ -50,9 +51,9 @@ process.analysis = cms.EDAnalyzer("PixDigisTest",
 # sim in V7
 #    src = cms.InputTag("mix"),
 # my own pixel only digis (after digi step)
-#    src = cms.InputTag("simSiPixelDigis"),
+    src = cms.InputTag("simSiPixelDigis"),
 # after raw (my raw2digi)
-    src = cms.InputTag("siPixelDigis"),
+#    src = cms.InputTag("siPixelDigis"),
 )
 
 process.p = cms.Path(process.analysis)
