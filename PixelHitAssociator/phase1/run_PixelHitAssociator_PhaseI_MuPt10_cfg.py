@@ -112,9 +112,54 @@ for path in process.paths:
 # Code inserted here
 # ----------------- PixelHitAssociator ----------------------
 
-# options
-process.maxEvents.input = 10000
+# Taken from Danek
+# PixelHitAssociator
+process.load("DPGAnalysis-SiPixelTools.PixelHitAssociator.SiPixelRecHitsValid_cff")
 
+# options
+useClustersOnTrack = True
+useTemplates       = True # For On-track clusters only
+saveRECO           = False
+
+if useClustersOnTrack:
+	process.pixRecHitsValid.useTracks = True
+	process.pixRecHitsValid.tracks="initialStepTracks"
+	#process.pixRecHitsValid.tracks="generalTracks"
+	if useTemplates:
+		process.initialStepTracks.TTRHBuilder = 'WithAngleAndTemplate'
+		process.pixRecHitsValid.outputFile = 'SimToRecHitHistos_TemplateReco_OnTrackHits.root'
+	else:
+		process.initialStepTracks.TTRHBuilder = 'WithTrackAngle'
+		process.pixRecHitsValid.outputFile = 'SimToRecHitHistos_GenericReco_OnTrackHits.root'
+else:
+	process.pixRecHitsValid.useTracks = False
+	#process.pixRecHitsValid.src="siPixelRecHitsPreSplitting"
+	process.pixRecHitsValid.src="siPixelRecHits"
+	process.pixRecHitsValid.outputFile = 'SimToRecHitHistos_GenericReco_siPixelRecHits.root'
+process.pixRecHitsValid.verbose=False
+#process.pixRecHitsValid.associatePixel = True
+#process.pixRecHitsValid.associateStrip = False
+#process.pixRecHitsValid.associateRecoTracks = False
+
+# Other statements
+#process.mix.digitizers = cms.PSet(process.theDigitizersValid)
+# modify digitizer parameters
+#process.simSiPixelDigis.pixel.ThresholdInElectrons_BPix = 3500.0 
+# disable dyn. ineff.
+process.mix.digitizers.pixel.AddPixelInefficiencyFromPython = cms.bool(False)
+#process.mix.digitizers.pixel.NumPixelBarrel = cms.int32(4)
+#process.mix.digitizers.pixel.NumPixelEndcap = cms.int32(3)
+
+# number of events to process (using tracks takes longer due to Reco!)
+process.maxEvents.input = 100
+
+#process.source = cms.Source("PoolSource", 
+#  fileNames = cms.untracked.vstring(
+#    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu_phase1/pt100_76/simhits/simHits1.root'
+#  ),
+#)
+
+# Test DB conditions
 useLocalLASim   = False
 LASim_tag       = "SiPixelLorentzAngleSim_phase1_mc_v1"
 #LASim_db        = 'sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngleSim_phase1_mc_v1.db'
@@ -154,87 +199,66 @@ GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_mc_v1'
 #GenErr_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
 GenErr_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
 
-
-# Taken from Danek
-process.MessageLogger = cms.Service("MessageLogger",
-    #debugModules = cms.untracked.vstring('Digitize'),
-    debugModules = cms.untracked.vstring('PixelDigitizer'),
-    destinations = cms.untracked.vstring('cout'),
-    #destinations = cms.untracked.vstring("log","cout"),
-    cout = cms.untracked.PSet(
-        threshold = cms.untracked.string('ERROR')
-    )
-    #log = cms.untracked.PSet(
-    #    threshold = cms.untracked.string('DEBUG')
-    #)
-)
-
-
-#process.source = cms.Source("PoolSource", 
-#  fileNames = cms.untracked.vstring(
-#    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu_phase1/pt100_76/simhits/simHits1.root'
-#  ),
+#process.MessageLogger = cms.Service("MessageLogger",
+#    #debugModules = cms.untracked.vstring('Digitize'),
+#    debugModules = cms.untracked.vstring('PixelDigitizer'),
+#    destinations = cms.untracked.vstring('cout'),
+#    #destinations = cms.untracked.vstring("log","cout"),
+#    cout = cms.untracked.PSet(
+#        threshold = cms.untracked.string('ERROR')
+#    )
+#    #log = cms.untracked.PSet(
+#    #    threshold = cms.untracked.string('DEBUG')
+#    #)
 #)
-
+process.MessageLogger.cerr.FwkReport.reportEvery = 10
 
 #LA
 if useLocalLASim :
 	process.LASimReader = cms.ESSource("PoolDBESSource",
 		DBParameters = cms.PSet(
 			messageLevel = cms.untracked.int32(0),
-			authenticationPath = cms.untracked.string('')
-			),
+			authenticationPath = cms.untracked.string('')),
 		toGet = cms.VPSet(cms.PSet(
 			record = cms.string("SiPixelLorentzAngleSimRcd"),
-			tag = cms.string(LASim_tag)),
-			),
-		connect = cms.string(LASim_db) 
-		) # end process
+			tag = cms.string(LASim_tag))),
+		connect = cms.string(LASim_db))
 	process.lasimprefer = cms.ESPrefer("PoolDBESSource","LASimReader")
 
 # Quality
 if useLocalQuality :
 	process.QualityReader = cms.ESSource("PoolDBESSource",
-		BlobStreamerName = cms.untracked.string('TBufferBlobStreamingService'),
 		DBParameters = cms.PSet(
 			messageLevel = cms.untracked.int32(0),
-			authenticationPath = cms.untracked.string('')
-			),
+			authenticationPath = cms.untracked.string('')),
 		toGet = cms.VPSet(cms.PSet(
 			record = cms.string('SiPixelQualityFromDbRcd'),
 			tag = cms.string('SiPixelQuality_phase1_ideal'))),
-		connect = cms.string(Qua_tag)
-		)
+		connect = cms.string(Qua_tag))
 	process.es_prefer_QualityReader = cms.ESPrefer("PoolDBESSource","QualityReader")
 
-
-# for reco 
+# for reco
 # LA 
 if useLocalLA :
 	process.LAReader = cms.ESSource("PoolDBESSource",
 		DBParameters = cms.PSet(
 			messageLevel = cms.untracked.int32(0),
-			authenticationPath = cms.untracked.string('')
-			),
+			authenticationPath = cms.untracked.string('')),
 		toGet = cms.VPSet(cms.PSet(
 			record = cms.string("SiPixelLorentzAngleRcd"),
 			tag = cms.string(LA_tag))),
-		connect = cms.string(LA_db)
-		)
+		connect = cms.string(LA_db))
 	process.LAprefer = cms.ESPrefer("PoolDBESSource","LAReader")
-	
 	# now the forWidth LA
 	process.LAWidthReader = cms.ESSource("PoolDBESSource",
 		DBParameters = cms.PSet(
 			messageLevel = cms.untracked.int32(0),
-			authenticationPath = cms.untracked.string('')
-			),
+			authenticationPath = cms.untracked.string('')),
 		toGet = cms.VPSet(cms.PSet(
 			record = cms.string("SiPixelLorentzAngleRcd"),
 			label = cms.untracked.string("forWidth"),
 			tag = cms.string(LA_Width_tag))),
-		connect = cms.string(LA_Width_db)
-		)
+		connect = cms.string(LA_Width_db))
 	process.LAWidthprefer = cms.ESPrefer("PoolDBESSource","LAWidthReader")
 
 # Gain 
@@ -242,13 +266,11 @@ if useLocalGain :
 	process.GainsReader = cms.ESSource("PoolDBESSource",
 		DBParameters = cms.PSet(
 			messageLevel = cms.untracked.int32(0),
-			authenticationPath = cms.untracked.string('')
-			),
+			authenticationPath = cms.untracked.string('')),
 		toGet = cms.VPSet(cms.PSet(
 			record = cms.string('SiPixelGainCalibrationOfflineRcd'),
 			tag = cms.string(Gain_tag))),
-		connect = cms.string(Gain_db)
-		)
+		connect = cms.string(Gain_db))
 	process.Gainprefer = cms.ESPrefer("PoolDBESSource","GainsReader")
 
 # GenError
@@ -256,47 +278,19 @@ if useLocalGenErr :
 	process.GenErrReader = cms.ESSource("PoolDBESSource",
 		DBParameters = cms.PSet(
 			messageLevel = cms.untracked.int32(0),
-			authenticationPath = cms.untracked.string('')
-			),
+			authenticationPath = cms.untracked.string('')),
 		toGet = cms.VPSet(cms.PSet(
 			record = cms.string('SiPixelGenErrorDBObjectRcd'),
 			tag = cms.string(GenErr_tag))),
-		connect = cms.string(GenErr_db)
-		)
+		connect = cms.string(GenErr_db))
 	process.generrprefer = cms.ESPrefer("PoolDBESSource","GenErrReader")
-
-
-# Other statements
-#process.mix.digitizers = cms.PSet(process.theDigitizersValid)
-
-# modify digitizer parameters
-#process.simSiPixelDigis.pixel.ThresholdInElectrons_BPix = 3500.0 
-# disable dyn. ineff.
-process.mix.digitizers.pixel.AddPixelInefficiencyFromPython = cms.bool(False)
-#process.mix.digitizers.pixel.NumPixelBarrel = cms.int32(4)
-#process.mix.digitizers.pixel.NumPixelEndcap = cms.int32(3)
-
-# to run rechit "official" validation
-#process.load("Validation.TrackerRecHits.trackerRecHitsValidation_cff")
-#process.load("Validation.TrackerRecHits.SiPixelRecHitsValid_cfi")
-
-# my rec-sim hit compare 
-process.load("DPGAnalysis-SiPixelTools.PixelHitAssociator.SiPixelRecHitsValid_cff")
-
-process.pixRecHitsValid.outputFile="pixelsimrechitshistos.root"
-process.pixRecHitsValid.verbose=False
-#process.pixRecHitsValid.src="siPixelRecHitsPreSplitting"
-process.pixRecHitsValid.src="siPixelRecHits"
-#process.pixRecHitsValid.associatePixel = True
-#process.pixRecHitsValid.associateStrip = False
-#process.pixRecHitsValid.associateRecoTracks = False
 
 #---------------------------
 #  Path/Schedule
 #---------------------------
 process.pixRecHitsValid_step = cms.Path(process.pixRecHitsValid)
 
-process.schedule.remove(process.RECOSIMoutput_step)
+if not saveRECO: process.schedule.remove(process.RECOSIMoutput_step)
 process.schedule.remove(process.endjob_step)
 process.schedule.remove(process.genfiltersummary_step)
 process.schedule.append(process.pixRecHitsValid_step)

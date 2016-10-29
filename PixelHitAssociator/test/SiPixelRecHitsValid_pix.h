@@ -26,6 +26,8 @@
 
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHitCollection.h"
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "TrackingTools/PatternTools/interface/TrajTrackAssociation.h"
 #include "DataFormats/DetId/interface/DetId.h"
 
 #include "Geometry/CommonTopologies/interface/PixelTopology.h"
@@ -42,6 +44,15 @@
 #include "DQMServices/Core/interface/MonitorElement.h"
 
 #include <string>
+
+// Hit Associator
+//#define PIXEL_ASSOCIATOR // use my special pixel associator
+
+#ifdef PIXEL_ASSOCIATOR
+#include "DPGAnalysis-SiPixelTools/PixelHitAssociator/interface/PixelHitAssociator.h"
+#else 
+#include "SimTracker/TrackerHitAssociation/interface/TrackerHitAssociator.h"
+#endif
 
 class TrackerTopology;
 
@@ -64,15 +75,23 @@ class SiPixelRecHitsValid_pix : public edm::EDAnalyzer {
 	DQMStore* dbe_;
 	std::string outputFile_;
 	bool verbose_;
-	edm::EDGetTokenT<edmNew::DetSetVector<SiPixelRecHit>>tPixelRecHit;
+	edm::EDGetTokenT<edmNew::DetSetVector<SiPixelRecHit>> tPixelRecHit;
+        edm::EDGetTokenT<TrajTrackAssociationCollection> tTracks;
 	edm::ParameterSet conf_;
 
 	TrackerHitAssociator::Config trackerHitAssociatorConfig_;
 
-	void fillBarrel(const SiPixelRecHit &,const PSimHit &, DetId, const PixelGeomDetUnit *,	
-			 const TrackerTopology *tTopo);
-	void fillForward(const SiPixelRecHit &, const PSimHit &, DetId, const PixelGeomDetUnit *,
-			 const TrackerTopology *tTopo);
+	void fillBarrel(const TrackingRecHit*,const PSimHit &, DetId, const PixelGeomDetUnit *,	
+			 const TrackerTopology *);
+	void fillForward(const TrackingRecHit*, const PSimHit &, DetId, const PixelGeomDetUnit *,
+			 const TrackerTopology *);
+#ifdef PIXEL_ASSOCIATOR
+        void matchToSimHits(const PixelHitAssociator&, const TrackingRecHit *,
+			    DetId, const PixelGeomDetUnit*, const TrackerTopology *);
+#else
+        void matchToSimHits(const TrackerHitAssociator&, const TrackingRecHit *, 
+			    DetId, const PixelGeomDetUnit*, const TrackerTopology *);
+#endif
 
 	//Clusters BPIX
 	MonitorElement* clustYSizeModule[8];
@@ -185,6 +204,8 @@ class SiPixelRecHitsValid_pix : public edm::EDAnalyzer {
 	MonitorElement* test;
 
         edm::InputTag src_;
+        bool useTracks_;
+        edm::InputTag tracks_;
 };
 
 #endif

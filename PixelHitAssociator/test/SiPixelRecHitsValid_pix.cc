@@ -5,6 +5,7 @@
 // Created 6/7/06
 //
 // Make standalone, independent from the validation code. dk 3/14
+// Add option for on-track hits 29/Oct/2016 Janos Karancsi
 //--------------------------------
 
 #include "SiPixelRecHitsValid_pix.h"
@@ -29,13 +30,6 @@
 
 #include "DQMServices/Core/interface/DQMStore.h"
 
-//#define PIXEL_ASSOCIATOR // use my special pixel associator
-#ifdef PIXEL_ASSOCIATOR
-#include "DPGAnalysis-SiPixelTools/PixelHitAssociator/interface/PixelHitAssociator.h"
-#else 
-#include "SimTracker/TrackerHitAssociation/interface/TrackerHitAssociator.h"
-#endif
-
 //#define QUICK
 
 using namespace std;
@@ -46,8 +40,14 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
   dbe_(0), 
   conf_(ps),
   trackerHitAssociatorConfig_(ps, consumesCollector() ),
-  src_( ps.getParameter<edm::InputTag>( "src" ) )  {
-  tPixelRecHit = consumes<edmNew::DetSetVector<SiPixelRecHit>>( src_ );
+  src_( ps.getParameter<edm::InputTag>( "src" ) ),
+  useTracks_( ps.getUntrackedParameter<bool>( "useTracks", false ) ),
+  tracks_( ps.getUntrackedParameter<edm::InputTag>( "tracks", edm::InputTag("generalTracks") ) )  {
+  if (useTracks_) {
+    tTracks = consumes<TrajTrackAssociationCollection>( tracks_ );
+  } else {
+    tPixelRecHit = consumes<edmNew::DetSetVector<SiPixelRecHit>>( src_ );
+  }
 
   outputFile_ = ps.getUntrackedParameter<string>("outputFile", "pixelrechitshisto.root");
   verbose_ = ps.getUntrackedParameter<bool>("verbose", false);
@@ -473,8 +473,15 @@ void SiPixelRecHitsValid_pix::analyze(const edm::Event& e, const edm::EventSetup
   
   //Get RecHits
   edm::Handle<SiPixelRecHitCollection> recHitColl;
-  //e.getByLabel( src_, recHitColl);
-  e.getByToken(tPixelRecHit , recHitColl);
+
+  // Get tracks
+  edm::Handle<TrajTrackAssociationCollection> hTTAC;
+  if (useTracks_) {
+    e.getByToken(tTracks, hTTAC);
+  } else {
+    //e.getByLabel( src_, recHitColl);
+    e.getByToken(tPixelRecHit , recHitColl);
+  }
   
   //Get event setup
   edm::ESHandle<TrackerGeometry> geom;
@@ -491,88 +498,127 @@ void SiPixelRecHitsValid_pix::analyze(const edm::Event& e, const edm::EventSetup
 #endif
 
   //iterate over detunits
-  for (TrackerGeometry::DetContainer::const_iterator it = geom->dets().begin(); it != geom->dets().end(); it++) 
-    {
-      DetId detId = ((*it)->geographicalId());
-      unsigned int subid=detId.subdetId();
-      
-      if (! ((subid==1) || (subid==2))) continue;
-      
-      const PixelGeomDetUnit * theGeomDet = dynamic_cast<const PixelGeomDetUnit*>(theTracker.idToDet(detId) );
+  for (TrackerGeometry::DetContainer::const_iterator it = geom->dets().begin(); it != geom->dets().end(); it++) {
+    DetId detId = ((*it)->geographicalId());
+    
+    if (!( (detId.subdetId() == PixelSubdetector::PixelBarrel)||
+	   (detId.subdetId() == PixelSubdetector::PixelEndcap) )) continue;
+    
+    const PixelGeomDetUnit * theGeomDet = dynamic_cast<const PixelGeomDetUnit*>(theTracker.idToDet(detId) );
+    
+    if (useTracks_) {
+      if (hTTAC.isValid()) {
+	const TrajTrackAssociationCollection ttac = *(hTTAC.product());
+	if (verbose_) cout << "   hTTAC.isValid()" << endl;
+	// Loop on traj-track pairs
+	for (TrajTrackAssociationCollection::const_iterator it = ttac.begin(); it !=  ttac.end(); ++it) {
+	  
+	  if (verbose_) cout << "      TracjTrackAssociationCollection iterating" << endl;
+	  reco::TrackRef trackref = it->val;
+	    
+	  for(trackingRecHit_iterator irecHit = trackref->recHitsBegin(); irecHit != trackref->recHitsEnd(); ++irecHit) {
+	    DetId trk_detId = (*irecHit)->geographicalId();
+	      // reject hits not in tracker
+	    if( trk_detId.det() != DetId::Tracker) continue;
+	    // reject non-pixel hits
+	    if (!( (trk_detId.subdetId() == PixelSubdetector::PixelBarrel) ||
+		   (trk_detId.subdetId() == PixelSubdetector::PixelEndcap) )) continue;
+	    matchToSimHits(associate, (*irecHit), detId, theGeomDet,tTopo);
+	  }
+	  
+	  //const edm::Ref<std::vector<Trajectory> > refTraj = it->key;
+	  //std::vector<TrajectoryMeasurement> tmeasColl =refTraj->measurements();
+	  //for (std::vector<TrajectoryMeasurement>::const_iterator tmeasIt = refTraj->measurements().begin(); 
+	  //     tmeasIt!=refTraj->measurements().end(); tmeasIt++) {   
+	  //  if (!tmeasIt->updatedState().isValid()) continue; 
+	  //  // reject missing hits
+	  //  TransientTrackingRecHit::ConstRecHitPointer hit = tmeasIt->recHit();
+	  //  if (!hit->isValid()) continue;
+	  //  // reject non-tracker hits
+	  //  DetId trk_detId = hit->geographicalId();
+	  //  if (trk_detId.det() != DetId::Tracker) continue; 
+	  //  // reject non-pixel hits 
+	  //  if (!( (trk_detId.subdetId() == PixelSubdetector::PixelBarrel) ||
+	  //         (trk_detId.subdetId() == PixelSubdetector::PixelEndcap) )) continue;
+	  //}
+	  }
+      }
+    } else {
       
       SiPixelRecHitCollection::const_iterator pixeldet = recHitColl->find(detId);
       if (pixeldet == recHitColl->end()) continue;
-      SiPixelRecHitCollection::DetSet pixelrechitRange = *pixeldet;
-      SiPixelRecHitCollection::DetSet::const_iterator pixelrechitRangeIteratorBegin = pixelrechitRange.begin();
-      SiPixelRecHitCollection::DetSet::const_iterator pixelrechitRangeIteratorEnd   = pixelrechitRange.end();
-      SiPixelRecHitCollection::DetSet::const_iterator pixeliter = pixelrechitRangeIteratorBegin;
-      std::vector<PSimHit> matched;
-      
       if(verbose_) cout<<" pixel det "<<pixeldet->size()<<endl;
       //----Loop over rechits for this detId
-      for ( ; pixeliter != pixelrechitRangeIteratorEnd; pixeliter++)  {
-	  matched.clear();
-	  matched = associate.associateHit(*pixeliter); // get the matched simhits
-
-	  if(verbose_) 
-	    cout<<" rechit "<<pixeliter->localPosition().x()<<" "<<matched.size()<<endl;
-
-	  if ( !matched.empty() ) {
-	      float closest = 9999.9;
-	      std::vector<PSimHit>::const_iterator closestit = matched.begin();
-	      LocalPoint lp = pixeliter->localPosition();
-	      float rechit_x = lp.x();
-	      float rechit_y = lp.y();
-	      
-
-	      //loop over sim hits and fill closet
-	      for (std::vector<PSimHit>::const_iterator m = matched.begin(); m<matched.end(); m++) {
-		  float sim_x1 = (*m).entryPoint().x();
-		  float sim_x2 = (*m).exitPoint().x();
-		  float sim_xpos = 0.5*(sim_x1+sim_x2);
-
-		  float sim_y1 = (*m).entryPoint().y();
-		  float sim_y2 = (*m).exitPoint().y();
-		  float sim_ypos = 0.5*(sim_y1+sim_y2);
-		  
-		  float x_res = fabs(sim_xpos - rechit_x);
-		  float y_res = fabs(sim_ypos - rechit_y);
-		  
-		  float dist = sqrt(x_res*x_res + y_res*y_res); // in cm
-
-		  if ( dist < closest ) {
-		    //closest = x_res;
-		    closest = dist;
-		    closestit = m;
-		    
-		    if(verbose_) 
-		      std::cout<<" simhit "
-			       <<(*m).pabs()<<" "
-			       <<(*m).thetaAtEntry()<<" "
-			       <<(*m).phiAtEntry()<<" "
-			       <<(*m).particleType()<<" "
-			       <<(*m).trackId()<<" "
-			       <<(*m).momentumAtEntry()
-			       <<std::endl;
-		    
-		  }
-		} // end sim hit loop
-	      
-	      if(verbose_) cout<<" closest "<<closest<<" "<<subid<<endl;
-
-	      if (subid==1) {         //<----------barrel
-		fillBarrel(*pixeliter, *closestit, detId, theGeomDet,tTopo);	
-	      }  else if (subid==2) { // <-------forward
-		fillForward(*pixeliter, *closestit, detId, theGeomDet,tTopo);
-	      }
-	      
-	  } // end matched emtpy
-	} // <-----end rechit loop 
-    } // <------ end detunit loop
-
+      SiPixelRecHitCollection::DetSet::const_iterator pixeliter = pixeldet->begin();
+      for (; pixeliter != pixeldet->end(); pixeliter++) matchToSimHits(associate, &(*pixeliter), detId, theGeomDet,tTopo);
+    }
+  } // <------ end detunit loop
 }
 
-void SiPixelRecHitsValid_pix::fillBarrel(const SiPixelRecHit& recHit, const PSimHit& simHit, 
+#ifdef PIXEL_ASSOCIATOR
+void SiPixelRecHitsValid_pix::matchToSimHits(const PixelHitAssociator& associate, const TrackingRecHit* hit, 
+					     DetId detId, const PixelGeomDetUnit* theGeomDet, const TrackerTopology *tTopo) {
+#else
+void SiPixelRecHitsValid_pix::matchToSimHits(const TrackerHitAssociator& associate, const TrackingRecHit* hit, 
+					     DetId detId, const PixelGeomDetUnit* theGeomDet, const TrackerTopology *tTopo) {
+#endif
+  std::vector<PSimHit> matched = associate.associateHit(*hit); // get the matched simhits
+  
+  if(verbose_) 
+    cout<<" rechit "<<hit->localPosition().x()<<" "<<matched.size()<<endl;
+  
+  if ( !matched.empty() ) {
+    float closest = 9999.9;
+    std::vector<PSimHit>::const_iterator closestit = matched.begin();
+    LocalPoint lp = hit->localPosition();
+    float rechit_x = lp.x();
+    float rechit_y = lp.y();
+    
+    
+    //loop over sim hits and fill closet
+    for (std::vector<PSimHit>::const_iterator m = matched.begin(); m<matched.end(); m++) {
+      float sim_x1 = (*m).entryPoint().x();
+      float sim_x2 = (*m).exitPoint().x();
+      float sim_xpos = 0.5*(sim_x1+sim_x2);
+      
+      float sim_y1 = (*m).entryPoint().y();
+      float sim_y2 = (*m).exitPoint().y();
+      float sim_ypos = 0.5*(sim_y1+sim_y2);
+      
+      float x_res = fabs(sim_xpos - rechit_x);
+      float y_res = fabs(sim_ypos - rechit_y);
+      
+      float dist = sqrt(x_res*x_res + y_res*y_res); // in cm
+      
+      if ( dist < closest ) {
+	//closest = x_res;
+	closest = dist;
+	closestit = m;
+        
+	if(verbose_) 
+	  std::cout<<" simhit "
+		   <<(*m).pabs()<<" "
+		   <<(*m).thetaAtEntry()<<" "
+		   <<(*m).phiAtEntry()<<" "
+		   <<(*m).particleType()<<" "
+		   <<(*m).trackId()<<" "
+		   <<(*m).momentumAtEntry()
+		   <<std::endl;
+	
+      }
+    } // end sim hit loop
+    
+    if(verbose_) cout<<" closest "<<closest<<" "<<detId.subdetId()<<endl;
+    
+    if (detId.subdetId() == PixelSubdetector::PixelBarrel)
+      fillBarrel(hit, *closestit, detId, theGeomDet,tTopo);
+    else if (detId.subdetId() == PixelSubdetector::PixelEndcap)
+      fillForward(hit, *closestit, detId, theGeomDet,tTopo);
+  } // end matched emtpy
+}
+
+
+void SiPixelRecHitsValid_pix::fillBarrel(const TrackingRecHit* recHit, const PSimHit& simHit, 
 				     DetId detId, const PixelGeomDetUnit* theGeomDet,
 				     const TrackerTopology *tTopo) {
   const float cmtomicron = 10000.0; 
@@ -636,11 +682,11 @@ void SiPixelRecHitsValid_pix::fillBarrel(const SiPixelRecHit& recHit, const PSim
       hbeta2->Fill(beta);
     }
   }
-  LocalPoint lp = recHit.localPosition();
+  LocalPoint lp = recHit->localPosition();
   float lp_y = lp.y();  
   float lp_x = lp.x();
 
-  LocalError lerr = recHit.localPositionError();
+  LocalError lerr = recHit->localPositionError();
   float lerr_x = sqrt(lerr.xx());
   float lerr_y = sqrt(lerr.yy());
   //cout<<lp_x<<" "<<lp_y<<" "<<lerr_x<<" "<<lerr_y<<endl;
@@ -741,10 +787,6 @@ void SiPixelRecHitsValid_pix::fillBarrel(const SiPixelRecHit& recHit, const PSim
     } // end if
 
   } // end if quick 
-  
-  //get cluster
-  SiPixelRecHit::ClusterRef const& clust = recHit.cluster();
-
   // as a function of layer
   for (unsigned int i=0; i<NumLayers; i++) {
     if (layer == i+1)  { // select layer
@@ -753,6 +795,18 @@ void SiPixelRecHitsValid_pix::fillBarrel(const SiPixelRecHit& recHit, const PSim
       if(!quick) {
 	recHitXResLayersP[i]->Fill(eta,std::abs(res_x));
 	recHitYResLayersP[i]->Fill(eta,std::abs(res_y));
+      } // end if quick
+    }
+  }  
+
+
+  //get cluster
+  SiPixelRecHit::ClusterRef const& clust = ((SiPixelRecHit*)recHit)->cluster();
+
+  // as a function of layer
+  for (unsigned int i=0; i<NumLayers; i++) {
+    if (layer == i+1)  { // select layer
+      if(!quick) {
 	int sizeX = (*clust).sizeX();
 	if(sizeX==1) {
 	  recHitXResLayersP1[i]->Fill(eta,std::abs(res_x));
@@ -767,7 +821,7 @@ void SiPixelRecHitsValid_pix::fillBarrel(const SiPixelRecHit& recHit, const PSim
 	  if(i==0) recHitL1XResSize3->Fill(res_x);
 	  else if(i==1) recHitL2XResSize3->Fill(res_x);
 	}
-
+	
 	int sizeY = (*clust).sizeY();
 	if(sizeY==1)      recHitYResLayersP1[i]->Fill(eta,std::abs(res_y));
 	else if(sizeY==2) recHitYResLayersP2[i]->Fill(eta,std::abs(res_y));
@@ -776,6 +830,19 @@ void SiPixelRecHitsValid_pix::fillBarrel(const SiPixelRecHit& recHit, const PSim
       } // end if quick
     }
   }
+  
+  // fill module dependent info
+  for (unsigned int i=0; i<8; i++) {
+    if (tTopo->pxbModule(detId) == i+1) {
+      int sizeY = (*clust).sizeY();
+      clustYSizeModule[i]->Fill(sizeY);
+      
+      float charge = (*clust).charge();
+      if (layer == 1) clustChargeLayer1Modules[i]->Fill(charge);
+      else if (layer == 2) clustChargeLayer2Modules[i]->Fill(charge);
+      else if (layer == 3) clustChargeLayer3Modules[i]->Fill(charge);
+      } // end if
+  } // end for
 
   if(quick) return; // skip the rest 
 
@@ -798,22 +865,14 @@ void SiPixelRecHitsValid_pix::fillBarrel(const SiPixelRecHit& recHit, const PSim
   // fill module dependent info
   for (unsigned int i=0; i<8; i++) {
     if (tTopo->pxbModule(detId) == i+1) {
-      int sizeY = (*clust).sizeY();
-      clustYSizeModule[i]->Fill(sizeY);
       
       if (layer == 1) {
-	float charge = (*clust).charge();
-	clustChargeLayer1Modules[i]->Fill(charge);
 	recHitYResLayer1Modules[i]->Fill(res_y);
 	recHitYPullLayer1Modules[i]->Fill(pull_y);
       } else if (layer == 2)  {
-	float charge = (*clust).charge();
-	clustChargeLayer2Modules[i]->Fill(charge);
 	recHitYResLayer2Modules[i]->Fill(res_y);
 	recHitYPullLayer2Modules[i]->Fill(pull_y);
       } else if (layer == 3) {
-	float charge = (*clust).charge();
-	clustChargeLayer3Modules[i]->Fill(charge);
 	recHitYResLayer3Modules[i]->Fill(res_y);
 	recHitYPullLayer3Modules[i]->Fill(pull_y);
       } // end if
@@ -828,7 +887,7 @@ void SiPixelRecHitsValid_pix::fillBarrel(const SiPixelRecHit& recHit, const PSim
 }
 
 // ------------------------------------------------------------------------------
-void SiPixelRecHitsValid_pix::fillForward(const SiPixelRecHit & recHit, const PSimHit & simHit, 
+void SiPixelRecHitsValid_pix::fillForward(const TrackingRecHit* recHit, const PSimHit & simHit, 
 				      DetId detId,const PixelGeomDetUnit * theGeomDet,
 				      const TrackerTopology *tTopo) {
   const float cmtomicron = 10000.0;
@@ -841,11 +900,11 @@ void SiPixelRecHitsValid_pix::fillForward(const SiPixelRecHit & recHit, const PS
   //int rows = theGeomDet->specificTopology().nrows();
   //int cols = theGeomDet->specificTopology().ncolumns();
   
-  LocalPoint lp = recHit.localPosition();
+  LocalPoint lp = recHit->localPosition();
   float lp_x = lp.x();
   float lp_y = lp.y();
   
-  LocalError lerr = recHit.localPositionError();
+  LocalError lerr = recHit->localPositionError();
   float lerr_x = sqrt(lerr.xx());
   float lerr_y = sqrt(lerr.yy());
 
@@ -864,9 +923,6 @@ void SiPixelRecHitsValid_pix::fillForward(const SiPixelRecHit & recHit, const PS
   float res_x = (lp.x() - sim_xpos)*cmtomicron;  
   float res_y = (lp.y() - sim_ypos)*cmtomicron;
 
-  // get cluster
-  SiPixelRecHit::ClusterRef const& clust = recHit.cluster();
-
   // integrated fpix results 
   recHitXResAllF->Fill(res_x);
   recHitYResAllF->Fill(res_y);  
@@ -875,6 +931,30 @@ void SiPixelRecHitsValid_pix::fillForward(const SiPixelRecHit & recHit, const PS
   int disk = tTopo->pxfDisk(detId);
   int panel = tTopo->pxfPanel(detId);
   int side = tTopo->pxfSide(detId);
+
+  // get cluster
+  SiPixelRecHit::ClusterRef const& clust = ((SiPixelRecHit*)recHit)->cluster();
+  int sizeX = (*clust).sizeX(), sizeY = (*clust).sizeY();
+  float charge = (*clust).charge();
+  if(disk==1) {
+    if(!quick) {
+      clustXSizeDisk1Plaquettes[0]->Fill(sizeX);
+      clustYSizeDisk1Plaquettes[0]->Fill(sizeY);
+      clustChargeDisk1Plaquettes[0]->Fill(charge);
+    }
+  } else if (disk==2) {
+    if(!quick) {
+      clustXSizeDisk2Plaquettes[0]->Fill(sizeX);	
+      clustYSizeDisk2Plaquettes[0]->Fill(sizeY);
+      clustChargeDisk2Plaquettes[0]->Fill(charge);
+    }
+    //} else if (disk==3) { // histios not defined yet
+    //  if(!quick) {
+    //    clustXSizeDisk3Plaquettes[0]->Fill(sizeX);	
+    //    clustYSizeDisk3Plaquettes[0]->Fill(sizeY);	
+    //    clustChargeDisk3Plaquettes[0]->Fill(charge);
+    //  } 
+  }
 
   if(disk==1) {
 
@@ -908,12 +988,6 @@ void SiPixelRecHitsValid_pix::fillForward(const SiPixelRecHit & recHit, const PS
     }
 
     if(!quick) {
-      int sizeX = (*clust).sizeX();
-      clustXSizeDisk1Plaquettes[0]->Fill(sizeX);	
-      int sizeY = (*clust).sizeY();
-      clustYSizeDisk1Plaquettes[0]->Fill(sizeY);	
-      float charge = (*clust).charge();
-      clustChargeDisk1Plaquettes[0]->Fill(charge);
       recHitXPullDisk1Plaquettes[0]->Fill(pull_x);
       recHitYPullDisk1Plaquettes[0]->Fill(pull_y);
     }
@@ -939,12 +1013,6 @@ void SiPixelRecHitsValid_pix::fillForward(const SiPixelRecHit & recHit, const PS
     }
 
     if(!quick) {
-      int sizeX = (*clust).sizeX();
-      clustXSizeDisk2Plaquettes[0]->Fill(sizeX);	
-      int sizeY = (*clust).sizeY();
-      clustYSizeDisk2Plaquettes[0]->Fill(sizeY);	
-      float charge = (*clust).charge();
-      clustChargeDisk2Plaquettes[0]->Fill(charge);
       recHitXPullDisk2Plaquettes[0]->Fill(pull_x);
       recHitYPullDisk2Plaquettes[0]->Fill(pull_y);
     }
@@ -970,12 +1038,6 @@ void SiPixelRecHitsValid_pix::fillForward(const SiPixelRecHit & recHit, const PS
     }
 
     // if(!quick) { // histios not defined yet
-    //   int sizeX = (*clust).sizeX();
-    //   clustXSizeDisk3Plaquettes[0]->Fill(sizeX);	
-    //   int sizeY = (*clust).sizeY();
-    //   clustYSizeDisk3Plaquettes[0]->Fill(sizeY);	
-    //   float charge = (*clust).charge();
-    //   clustChargeDisk3Plaquettes[0]->Fill(charge);
     //   recHitXPullDisk3Plaquettes[0]->Fill(pull_x);
     //   recHitYPullDisk3Plaquettes[0]->Fill(pull_y);
     // } 
@@ -1043,5 +1105,6 @@ void SiPixelRecHitsValid_pix::fillForward(const SiPixelRecHit & recHit, const PS
     
 
 }
+
 //define this as a plug-in
 DEFINE_FWK_MODULE(SiPixelRecHitsValid_pix);
