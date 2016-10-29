@@ -154,7 +154,11 @@ class SiPixelRecHitsValid_pix : public edm::EDAnalyzer {
 
 	//RecHits FPIX
 	MonitorElement* recHitXResAllF;
+	MonitorElement* recHitXResPosZF;
+	MonitorElement* recHitXResNegZF;
 	MonitorElement* recHitYResAllF;
+	MonitorElement* recHitYResPosZF;
+	MonitorElement* recHitYResNegZF;
 	//MonitorElement* recHitXPlaquetteSize1;
 	//MonitorElement* recHitXPlaquetteSize2;
 	//MonitorElement* recHitYPlaquetteSize2;

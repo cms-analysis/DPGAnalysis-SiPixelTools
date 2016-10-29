@@ -295,9 +295,13 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
   dbe_->setCurrentFolder("TrackerRecHitsV/TrackerRecHits/Pixel/recHitFPIX");
   //RecHit X resolution all plaquettes
   recHitXResAllF = dbe_->book1D("RecHit_xres_f_All", "RecHit X Res All in Forward", 100, -200., 200.);
+  recHitXResPosZF = dbe_->book1D("RecHit_xres_f_posZ", "RecHit X Res All in Forward Disks +Z", 100, -200., 200.);
+  recHitXResNegZF = dbe_->book1D("RecHit_xres_f_negZ", "RecHit X Res All in Forward Disks -Z", 100, -200., 200.);
   
   //RecHit Y resolution all plaquettes
   recHitYResAllF = dbe_->book1D("RecHit_yres_f_All", "RecHit Y Res All in Forward", 100, -200., 200.);
+  recHitYResPosZF = dbe_->book1D("RecHit_yres_f_posZ", "RecHit Y Res All in Forward Disks +Z", 100, -200., 200.);
+  recHitYResNegZF = dbe_->book1D("RecHit_yres_f_negZ", "RecHit Y Res All in Forward Disks -Z", 100, -200., 200.);
 
   // histograms per disk, side, panel, ring  
   for (int i=0; i<7; i++) { // 0 all, 1 -z, 2 +z, 3 panel 1, 4 panel 2, 5 ring 1, 6 ring 2
@@ -515,33 +519,21 @@ void SiPixelRecHitsValid_pix::analyze(const edm::Event& e, const edm::EventSetup
 	  
 	  if (verbose_) cout << "      TracjTrackAssociationCollection iterating" << endl;
 	  reco::TrackRef trackref = it->val;
-	    
-	  for(trackingRecHit_iterator irecHit = trackref->recHitsBegin(); irecHit != trackref->recHitsEnd(); ++irecHit) {
-	    DetId trk_detId = (*irecHit)->geographicalId();
-	      // reject hits not in tracker
-	    if( trk_detId.det() != DetId::Tracker) continue;
-	    // reject non-pixel hits
-	    if (!( (trk_detId.subdetId() == PixelSubdetector::PixelBarrel) ||
-		   (trk_detId.subdetId() == PixelSubdetector::PixelEndcap) )) continue;
-	    matchToSimHits(associate, (*irecHit), detId, theGeomDet,tTopo);
-	  }
+	  
+	  for(trackingRecHit_iterator irecHit = trackref->recHitsBegin();
+	      irecHit != trackref->recHitsEnd(); ++irecHit)
+	    if (detId == (*irecHit)->geographicalId())
+	      matchToSimHits(associate, (*irecHit), detId, theGeomDet,tTopo);
 	  
 	  //const edm::Ref<std::vector<Trajectory> > refTraj = it->key;
 	  //std::vector<TrajectoryMeasurement> tmeasColl =refTraj->measurements();
 	  //for (std::vector<TrajectoryMeasurement>::const_iterator tmeasIt = refTraj->measurements().begin(); 
 	  //     tmeasIt!=refTraj->measurements().end(); tmeasIt++) {   
 	  //  if (!tmeasIt->updatedState().isValid()) continue; 
-	  //  // reject missing hits
 	  //  TransientTrackingRecHit::ConstRecHitPointer hit = tmeasIt->recHit();
-	  //  if (!hit->isValid()) continue;
-	  //  // reject non-tracker hits
-	  //  DetId trk_detId = hit->geographicalId();
-	  //  if (trk_detId.det() != DetId::Tracker) continue; 
-	  //  // reject non-pixel hits 
-	  //  if (!( (trk_detId.subdetId() == PixelSubdetector::PixelBarrel) ||
-	  //         (trk_detId.subdetId() == PixelSubdetector::PixelEndcap) )) continue;
+	  //  if (detId == hit->geographicalId()) matchToSimHits(associate, &(*hit), detId, theGeomDet,tTopo);
 	  //}
-	  }
+	}
       }
     } else {
       
@@ -931,6 +923,14 @@ void SiPixelRecHitsValid_pix::fillForward(const TrackingRecHit* recHit, const PS
   int disk = tTopo->pxfDisk(detId);
   int panel = tTopo->pxfPanel(detId);
   int side = tTopo->pxfSide(detId);
+
+  if (side==1) {
+    recHitXResNegZF->Fill(res_x);
+    recHitYResNegZF->Fill(res_y);  
+  } else if (side==2) {
+    recHitXResPosZF->Fill(res_x);
+    recHitYResPosZF->Fill(res_y);  
+  }
 
   // get cluster
   SiPixelRecHit::ClusterRef const& clust = ((SiPixelRecHit*)recHit)->cluster();

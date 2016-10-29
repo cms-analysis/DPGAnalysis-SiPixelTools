@@ -151,7 +151,7 @@ process.mix.digitizers.pixel.AddPixelInefficiencyFromPython = cms.bool(False)
 #process.mix.digitizers.pixel.NumPixelEndcap = cms.int32(3)
 
 # number of events to process (using tracks takes longer due to Reco!)
-process.maxEvents.input = 100
+process.maxEvents.input = 1000
 
 #process.source = cms.Source("PoolSource", 
 #  fileNames = cms.untracked.vstring(
