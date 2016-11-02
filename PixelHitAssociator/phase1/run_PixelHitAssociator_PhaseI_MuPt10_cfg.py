@@ -2,7 +2,7 @@
 # using: 
 # Revision: 1.19 
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
-# with command line options: -s GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,RECO --evt_type SingleMuPt10_cfi --conditions auto:phase1_2017_realistic --era Run2_2017 --fileout file:MuPt10_GENSIMRECO.root --python_filename=run_PixelHitAssociator_PhaseI_MuPt10_cfg.py -n 10 --runUnscheduled --no_exec
+# with command line options: -s GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,RECO --evt_type SingleMuPt10_cfi --conditions auto:phase1_2017_realistic --era Run2_2017 --geometry Extended2017new --fileout file:MuPt10_GENSIMRECO.root --python_filename=run_PixelHitAssociator_PhaseI_MuPt10_cfg.py -n 10 --runUnscheduled --no_exec
 import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
@@ -15,8 +15,8 @@ process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
-process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
-process.load('Configuration.Geometry.GeometrySimDB_cff')
+process.load('Configuration.Geometry.GeometryExtended2017newReco_cff')
+process.load('Configuration.Geometry.GeometryExtended2017new_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Generator_cff')
 process.load('IOMC.EventVertexGenerators.VtxSmearedRealistic50ns13TeVCollision_cfi')
@@ -112,34 +112,172 @@ for path in process.paths:
 # Code inserted here
 # ----------------- PixelHitAssociator ----------------------
 
-# Taken from Danek
-# PixelHitAssociator
+# Load new FPix Geometry (comment these out in original cmsDriver config on top)
+
+# ### process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
+# ###### process.load('Configuration.Geometry.GeometryRecoDB_cff')
+# process.load('Geometry.CommonDetUnit.globalTrackingGeometryDB_cfi')
+# process.load('RecoTracker.GeometryESProducer.TrackerRecoGeometryESProducer_cfi')
+# process.load('Geometry.TrackerNumberingBuilder.trackerTopology_cfi')
+# process.load('RecoMuon.DetLayers.muonDetLayerGeometry_cfi')
+# process.load('Geometry.CaloEventSetup.CaloTopology_cfi')
+# process.load('Geometry.CaloEventSetup.AlignedCaloGeometryDBReader_cfi')
+# process.load('Geometry.CaloEventSetup.EcalTrigTowerConstituents_cfi')
+# process.load('Geometry.EcalMapping.EcalMapping_cfi')
+# process.load('Geometry.EcalMapping.EcalMappingRecord_cfi')
+# process.load('Geometry.HcalCommonData.hcalDDDSimConstants_cfi')
+# process.load('Geometry.HcalCommonData.hcalDDDRecConstants_cfi')
+# process.load('Geometry.HcalEventSetup.hcalTopologyIdeal_cfi')
+# process.load('Geometry.TrackerGeometryBuilder.idealForDigiTrackerGeometryDB_cff')
+# process.load('Geometry.CSCGeometryBuilder.idealForDigiCscGeometryDB_cff')
+# process.load('Geometry.DTGeometryBuilder.idealForDigiDtGeometryDB_cff')
+# 
+# ### process.load('Configuration.Geometry.GeometrySimDB_cff')
+# process.load('GeometryReaders.XMLIdealGeometryESSource.cmsGeometryDB_cff')
+# process.load('Geometry.MuonNumbering.muonNumberingInitialization_cfi')
+# process.load('Geometry.TrackerNumberingBuilder.trackerNumberingGeometryDB_cfi')
+# process.load('Geometry.HcalCommonData.hcalDDDSimConstants_cfi')
+
+# NEW FPix Geom
+#process.load('Configuration.Geometry.GeometryExtended2017NewFPixReco_cff')
+#process.load('Configuration.Geometry.GeometrySimDB_cff')
+
+
+#------------------------------------------
+#  Options - can be given from command line
+#------------------------------------------
+import FWCore.ParameterSet.VarParsing as opts
+
+opt = opts.VarParsing ('analysis')
+
+opt.register('globalTag',          '',
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.string,
+	     'Global Tag, Default="" which uses auto:run2_data')
+
+opt.register('useClustersOnTrack', True,
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
+	     'True: use RecHits of generalTracks, False: use siPixelRecHits')
+
+opt.register('useTemplates',       True,
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
+	     'Only for On-track clusters! True: use Template reco, False: use Generic reco')
+
+opt.register('saveRECO',           False,
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
+	     'Option to keep GEN-SIM-RECO')
+
+opt.register('outputFileName',      '',
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.string,
+	     'Name of the histograms file')
+
+opt.register('useLocalLASim',      False,
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
+	     'Test LA (SIM) conditions locally (prep/prod database or sqlite file')
+
+opt.register('useLocalQuality',    False,
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
+	     'Test Quality conditions locally (prep/prod database or sqlite file')
+
+opt.register('useLocalLA',         False,
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
+	     'Test LA (RECO) conditions locally (prep/prod database or sqlite file')
+
+opt.register('useLocalGain',       False,
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
+	     'Test Gain conditions locally (prep/prod database or sqlite file')
+
+opt.register('useLocalGenErr',     False,
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
+	     'Test GenError conditions locally (prep/prod database or sqlite file')
+
+### Events to process: 'maxEvents' is already registered by the framework
+opt.setDefault('maxEvents', 1000)
+
+# Proceed with settings from command line
+opt.parseArguments()
+
+process.maxEvents.input = opt.maxEvents
+
+# Configure PixelHitAssociator
 process.load("DPGAnalysis-SiPixelTools.PixelHitAssociator.SiPixelRecHitsValid_cff")
-
-# options
-useClustersOnTrack = True
-useTemplates       = True # For On-track clusters only
-saveRECO           = False
-
-if useClustersOnTrack:
+if opt.useClustersOnTrack:
 	process.pixRecHitsValid.useTracks = True
-	process.pixRecHitsValid.tracks="initialStepTracks"
-	#process.pixRecHitsValid.tracks="generalTracks"
-	if useTemplates:
+	#process.pixRecHitsValid.tracks="initialStepTracks" # first tracker step
+	process.pixRecHitsValid.tracks="generalTracks"
+	if opt.useTemplates:
 		process.initialStepTracks.TTRHBuilder = 'WithAngleAndTemplate'
-		process.pixRecHitsValid.outputFile = 'SimToRecHitHistos_TemplateReco_OnTrackHits.root'
+		if opt.outputFileName == '': opt.outputFileName = 'SimToRecHitHistos_TemplateReco_OnTrackHits.root'
 	else:
 		process.initialStepTracks.TTRHBuilder = 'WithTrackAngle'
-		process.pixRecHitsValid.outputFile = 'SimToRecHitHistos_GenericReco_OnTrackHits.root'
+		if opt.outputFileName == '': opt.outputFileName = 'SimToRecHitHistos_GenericReco_OnTrackHits.root'
 else:
 	process.pixRecHitsValid.useTracks = False
 	#process.pixRecHitsValid.src="siPixelRecHitsPreSplitting"
 	process.pixRecHitsValid.src="siPixelRecHits"
-	process.pixRecHitsValid.outputFile = 'SimToRecHitHistos_GenericReco_siPixelRecHits.root'
+	if opt.outputFileName == '': opt.outputFileName = 'SimToRecHitHistos_GenericReco_siPixelRecHits.root'
+process.pixRecHitsValid.outputFile = opt.outputFileName
 process.pixRecHitsValid.verbose=False
 #process.pixRecHitsValid.associatePixel = True
 #process.pixRecHitsValid.associateStrip = False
 #process.pixRecHitsValid.associateRecoTracks = False
+
+# Print settings
+print "Using options: "
+if opt.globalTag == '':
+    print "  globalTag (auto:phase1_2017_realistic) = "+str(process.GlobalTag.globaltag)
+else:
+    process.GlobalTag.globaltag = opt.globalTag
+    print "  globalTag (manually chosen)            = "+str(process.GlobalTag.globaltag)
+print "  useClustersOnTrack                     = "+str(opt.useClustersOnTrack)
+print "  useTemplates                           = "+str(opt.useTemplates)
+print "  saveRECO                               = "+str(opt.saveRECO)
+print "  outputFileName                         = "+str(opt.outputFileName)
+print "  maxEvents                              = "+str(opt.maxEvents)
+print "  useLocalLASim                          = "+str(opt.useLocalLASim)
+print "  useLocalQuality                        = "+str(opt.useLocalQuality)
+print "  useLocalLA                             = "+str(opt.useLocalLA)
+print "  useLocalGain                           = "+str(opt.useLocalGain)
+print "  useLocalGenErr                         = "+str(opt.useLocalGenErr)
+
+# Test Local DB conditions
+# LA (SIM)
+LASim_tag       = "SiPixelLorentzAngleSim_phase1_mc_v1"
+#LASim_db        = 'sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngleSim_phase1_mc_v1.db'
+LASim_db        = 'frontier://FrontierPrep/CMS_CONDITIONS'
+#LASim_db        = 'frontier://FrontierProd/CMS_CONDITIONS'
+
+# Quality
+Qua_tag         = 'SiPixelQuality_phase1_ideal'
+#Qua_db          = 'sqlite_file:../../../../../DB/phase1/SiPixelQuality_phase1_ideal.db'
+Qua_db          = 'frontier://FrontierPrep/CMS_CONDITIONS'
+#Qua_db          = 'frontier://FrontierProd/CMS_CONDITIONS'
+
+# LA (RECO)
+LA_tag          = 'SiPixelLorentzAngle_phase1_mc_v1'
+LA_Width_tag    = 'SiPixelLorentzAngle_phase1_mc_v1'
+#LA_db           = 'sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_phase1_mc_v1.db'
+#LA_db           = 'frontier://FrontierPrep/CMS_CONDITIONS'
+LA_db           = 'frontier://FrontierProd/CMS_CONDITIONS'
+#LA_Width_db     = 'sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_phase1_mc_v1.db'
+#LA_Width_db     = 'frontier://FrontierPrep/CMS_CONDITIONS'
+LA_Width_db     = 'frontier://FrontierProd/CMS_CONDITIONS'
+
+# Gains
+#Gain_tag        = 'SiPixelGainCalibration_phase1_mc_v1'
+Gain_tag        = 'SiPixelGainCalibration_phase1_mc_v2'
+#Gain_tag        = 'SiPixelGainCalibration_phase1_ideal'
+#Gain_tag        = 'SiPixelGainCalibration_phase1_ideal_v2'
+Gain_db         = 'sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_phase1_mc_v2.db'
+#Gain_db         = 'sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_phase1_ideal_v2.db'
+#Gain_db         = 'frontier://FrontierPrep/CMS_CONDITIONS'
+#Gain_db         = 'frontier://FrontierProd/CMS_CONDITIONS'
+
+# GenErrors
+GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_mc_v1'
+#GenErr_db       = 'sqlite_file:siPixelGenErrors38T.db'
+#GenErr_db       = 'frontier://FrontierPrep/CMS_COND_PIXEL'
+#GenErr_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
+GenErr_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
 
 # Other statements
 #process.mix.digitizers = cms.PSet(process.theDigitizersValid)
@@ -150,54 +288,12 @@ process.mix.digitizers.pixel.AddPixelInefficiencyFromPython = cms.bool(False)
 #process.mix.digitizers.pixel.NumPixelBarrel = cms.int32(4)
 #process.mix.digitizers.pixel.NumPixelEndcap = cms.int32(3)
 
-# number of events to process (using tracks takes longer due to Reco!)
-process.maxEvents.input = 1000
 
 #process.source = cms.Source("PoolSource", 
 #  fileNames = cms.untracked.vstring(
 #    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu_phase1/pt100_76/simhits/simHits1.root'
 #  ),
 #)
-
-# Test DB conditions
-useLocalLASim   = False
-LASim_tag       = "SiPixelLorentzAngleSim_phase1_mc_v1"
-#LASim_db        = 'sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngleSim_phase1_mc_v1.db'
-LASim_db        = 'frontier://FrontierPrep/CMS_CONDITIONS'
-#LASim_db        = 'frontier://FrontierProd/CMS_CONDITIONS'
-
-useLocalQuality = False
-Qua_tag         = 'SiPixelQuality_phase1_ideal'
-#Qua_db          = 'sqlite_file:../../../../../DB/phase1/SiPixelQuality_phase1_ideal.db'
-Qua_db          = 'frontier://FrontierPrep/CMS_CONDITIONS'
-#Qua_db          = 'frontier://FrontierProd/CMS_CONDITIONS'
-
-useLocalLA      = False
-LA_tag          = 'SiPixelLorentzAngle_phase1_mc_v1'
-LA_Width_tag    = 'SiPixelLorentzAngle_phase1_mc_v1'
-#LA_db           = 'sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_phase1_mc_v1.db'
-#LA_db           = 'frontier://FrontierPrep/CMS_CONDITIONS'
-LA_db           = 'frontier://FrontierProd/CMS_CONDITIONS'
-#LA_Width_db     = 'sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_phase1_mc_v1.db'
-#LA_Width_db     = 'frontier://FrontierPrep/CMS_CONDITIONS'
-LA_Width_db     = 'frontier://FrontierProd/CMS_CONDITIONS'
-
-useLocalGain    = False
-#Gain_tag        = 'SiPixelGainCalibration_phase1_mc_v1'
-Gain_tag        = 'SiPixelGainCalibration_phase1_mc_v2'
-#Gain_tag        = 'SiPixelGainCalibration_phase1_ideal'
-#Gain_tag        = 'SiPixelGainCalibration_phase1_ideal_v2'
-Gain_db         = 'sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_phase1_mc_v2.db'
-#Gain_db         = 'sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_phase1_ideal_v2.db'
-#Gain_db         = 'frontier://FrontierPrep/CMS_CONDITIONS'
-#Gain_db         = 'frontier://FrontierProd/CMS_CONDITIONS'
-
-useLocalGenErr  = False
-GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_mc_v1'
-#GenErr_db       = 'sqlite_file:siPixelGenErrors38T.db'
-#GenErr_db       = 'frontier://FrontierPrep/CMS_COND_PIXEL'
-#GenErr_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
-GenErr_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
 
 #process.MessageLogger = cms.Service("MessageLogger",
 #    #debugModules = cms.untracked.vstring('Digitize'),
@@ -214,7 +310,7 @@ GenErr_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
 process.MessageLogger.cerr.FwkReport.reportEvery = 10
 
 #LA
-if useLocalLASim :
+if opt.useLocalLASim :
 	process.LASimReader = cms.ESSource("PoolDBESSource",
 		DBParameters = cms.PSet(
 			messageLevel = cms.untracked.int32(0),
@@ -226,7 +322,7 @@ if useLocalLASim :
 	process.lasimprefer = cms.ESPrefer("PoolDBESSource","LASimReader")
 
 # Quality
-if useLocalQuality :
+if opt.useLocalQuality :
 	process.QualityReader = cms.ESSource("PoolDBESSource",
 		DBParameters = cms.PSet(
 			messageLevel = cms.untracked.int32(0),
@@ -239,7 +335,7 @@ if useLocalQuality :
 
 # for reco
 # LA 
-if useLocalLA :
+if opt.useLocalLA :
 	process.LAReader = cms.ESSource("PoolDBESSource",
 		DBParameters = cms.PSet(
 			messageLevel = cms.untracked.int32(0),
@@ -262,7 +358,7 @@ if useLocalLA :
 	process.LAWidthprefer = cms.ESPrefer("PoolDBESSource","LAWidthReader")
 
 # Gain 
-if useLocalGain :
+if opt.useLocalGain :
 	process.GainsReader = cms.ESSource("PoolDBESSource",
 		DBParameters = cms.PSet(
 			messageLevel = cms.untracked.int32(0),
@@ -274,7 +370,7 @@ if useLocalGain :
 	process.Gainprefer = cms.ESPrefer("PoolDBESSource","GainsReader")
 
 # GenError
-if useLocalGenErr :
+if opt.useLocalGenErr :
 	process.GenErrReader = cms.ESSource("PoolDBESSource",
 		DBParameters = cms.PSet(
 			messageLevel = cms.untracked.int32(0),
@@ -290,7 +386,7 @@ if useLocalGenErr :
 #---------------------------
 process.pixRecHitsValid_step = cms.Path(process.pixRecHitsValid)
 
-if not saveRECO: process.schedule.remove(process.RECOSIMoutput_step)
+if not opt.saveRECO: process.schedule.remove(process.RECOSIMoutput_step)
 process.schedule.remove(process.endjob_step)
 process.schedule.remove(process.genfiltersummary_step)
 process.schedule.append(process.pixRecHitsValid_step)

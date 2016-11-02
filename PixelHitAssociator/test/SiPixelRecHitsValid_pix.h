@@ -92,6 +92,7 @@ class SiPixelRecHitsValid_pix : public edm::EDAnalyzer {
         void matchToSimHits(const TrackerHitAssociator&, const TrackingRecHit *, 
 			    DetId, const PixelGeomDetUnit*, const TrackerTopology *);
 #endif
+        int PhaseIBladeOfflineToOnline(const int&);
 
 	//Clusters BPIX
 	MonitorElement* clustYSizeModule[8];
@@ -171,6 +172,8 @@ class SiPixelRecHitsValid_pix : public edm::EDAnalyzer {
 	MonitorElement* recHitYResDisk2[7];
 	MonitorElement* recHitXResDisk3[7];
 	MonitorElement* recHitYResDisk3[7];
+	MonitorElement* recHitXResSideXSideDiskRing[2][2][3][2];
+	MonitorElement* recHitYResSideXSideDiskRing[2][2][3][2];
 
 	// Pull distributions
 	//RecHits BPIX

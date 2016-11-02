@@ -57,7 +57,7 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
 #else
   cout<<" Compare Sim-Rec pixel hits, using tracker hit associator "<<endl;
 #endif
-  cout<<" source = "<<src_<<endl; //dk
+  cout<<" source = "<<(useTracks_? tracks_ : src_)<<endl; //dk
 
   dbe_ = Service<DQMStore>().operator->();
   //dbe_->showDirStructure();
@@ -134,6 +134,10 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
       sprintf(histo, "Clust_x_size_Disk2_Plaquette%d", i+1);
       clustXSizeDisk2Plaquettes[i] = dbe_->book1D(histo, "Cluster X-size for Disk2 by Plaquette", 20, 0.5, 20.5);
       
+      //Cluster x-size for Disk3 by Plaquette
+      sprintf(histo, "Clust_x_size_Disk3_Plaquette%d", i+1);
+      clustXSizeDisk3Plaquettes[i] = dbe_->book1D(histo, "Cluster X-size for Disk3 by Plaquette", 20, 0.5, 20.5);
+      
       //Cluster y-size for Disk1 by Plaquette
       sprintf(histo, "Clust_y_size_Disk1_Plaquette%d", i+1);
       clustYSizeDisk1Plaquettes[i] = dbe_->book1D(histo, "Cluster Y-size for Disk1 by Plaquette", 20, 0.5, 20.5);
@@ -142,6 +146,10 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
       sprintf(histo, "Clust_y_size_Disk2_Plaquette%d", i+1);
       clustYSizeDisk2Plaquettes[i] = dbe_->book1D(histo, "Cluster Y-size for Disk2 by Plaquette", 20, 0.5, 20.5);
       
+      //Cluster y-size for Disk3 by Plaquette
+      sprintf(histo, "Clust_y_size_Disk3_Plaquette%d", i+1);
+      clustYSizeDisk3Plaquettes[i] = dbe_->book1D(histo, "Cluster Y-size for Disk3 by Plaquette", 20, 0.5, 20.5);
+      
       //Cluster charge for Disk1 by Plaquette
       sprintf(histo, "Clust_charge_Disk1_Plaquette%d", i+1);
       clustChargeDisk1Plaquettes[i] = dbe_->book1D(histo, "Cluster charge for Disk1 by Plaquette", 50, 0., 200000.);
@@ -149,6 +157,10 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
       //Cluster charge for Disk2 by Plaquette
       sprintf(histo, "Clust_charge_Disk2_Plaquette%d", i+1);
       clustChargeDisk2Plaquettes[i] = dbe_->book1D(histo, "Cluster charge for Disk2 by Plaquette", 50, 0., 200000.);
+      
+      //Cluster charge for Disk3 by Plaquette
+      sprintf(histo, "Clust_charge_Disk3_Plaquette%d", i+1);
+      clustChargeDisk3Plaquettes[i] = dbe_->book1D(histo, "Cluster charge for Disk3 by Plaquette", 50, 0., 200000.);
     } // end for
     
   } // end if quick
@@ -324,10 +336,17 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
     //Y resolution for Disk3 
     sprintf(histo, "RecHit_YRes_Disk3%d", i+1);
     recHitYResDisk3[i] = dbe_->book1D(histo, "RecHit YRes Disk3", 100, -200., 200.);
-    
   }
 
   if(!quick) {
+    // jk 30/oct/2016
+    for (int side=0; side<2; side++) for (int xside=0; xside<2; xside++)
+      for (int disk=0; disk<3; disk++) for (int ring=0; ring<2; ring++) {
+        sprintf(histo, "RecHit_XRes_Side%d_XSide%d_Disk%d_Ring%d", side+1, xside+1, disk+1, ring+1);
+        recHitXResSideXSideDiskRing[side][xside][disk][ring] = dbe_->book1D(histo, histo, 100, -200., 200.); 
+        sprintf(histo, "RecHit_YRes_Side%d_XSide%d_Disk%d_Ring%d", side+1, xside+1, disk+1, ring+1);
+        recHitYResSideXSideDiskRing[side][xside][disk][ring] = dbe_->book1D(histo, histo, 100, -200., 200.); 
+      }
 
     recHitXAlignError4 = 
       dbe_->book1D("RecHitXAlignError4","RecHit X  Alignment errors fpix 1", 100, 0., 100.);
@@ -431,12 +450,15 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
       recHitXPullDisk1Plaquettes[i] = dbe_->book1D(histo, "RecHit XPull Disk1 by plaquette", 100, -10.0, 10.0); 
       sprintf(histo, "RecHit_XPull_Disk2_Plaquette%d", i+1);
       recHitXPullDisk2Plaquettes[i] = dbe_->book1D(histo, "RecHit XPull Disk2 by plaquette", 100, -10.0, 10.0);  
+      sprintf(histo, "RecHit_XPull_Disk3_Plaquette%d", i+1);
+      recHitXPullDisk3Plaquettes[i] = dbe_->book1D(histo, "RecHit XPull Disk3 by plaquette", 100, -10.0, 10.0);  
       
       sprintf(histo, "RecHit_YPull_Disk1_Plaquette%d", i+1);
-      recHitYPullDisk1Plaquettes[i] = dbe_->book1D(histo, "RecHit YPull Disk1 by plaquette", 100, -10.0, 10.0);
-      
+      recHitYPullDisk1Plaquettes[i] = dbe_->book1D(histo, "RecHit YPull Disk1 by plaquette", 100, -10.0, 10.0);      
       sprintf(histo, "RecHit_YPull_Disk2_Plaquette%d", i+1);
       recHitYPullDisk2Plaquettes[i] = dbe_->book1D(histo, "RecHit YPull Disk2 by plaquette", 100, -10.0, 10.0);
+      sprintf(histo, "RecHit_YPull_Disk3_Plaquette%d", i+1);
+      recHitYPullDisk3Plaquettes[i] = dbe_->book1D(histo, "RecHit YPull Disk3 by plaquette", 100, -10.0, 10.0);
     }
 
   } // end if quick
@@ -878,6 +900,18 @@ void SiPixelRecHitsValid_pix::fillBarrel(const TrackingRecHit* recHit, const PSi
 
 }
 
+int SiPixelRecHitsValid_pix::PhaseIBladeOfflineToOnline(const int& blade)
+{
+  int blade_online = -999;
+  if(1  <= blade && blade < 6)  blade_online = 6  - blade; // 5 on 1st quarter
+  if(6  <= blade && blade < 17) blade_online = 5  - blade; // 11 on 2nd half
+  if(17 <= blade && blade < 23) blade_online = 28 - blade; // 6 on 4th quarter
+  if(23 <= blade && blade < 31) blade_online = 31 - blade; // 8 on 1st quarter
+  if(31 <= blade && blade < 48) blade_online = 30 - blade; // 17 on 2nd half
+  if(48 <= blade && blade < 57) blade_online = 65 - blade; // 9 on 4th quarter
+  return blade_online;
+}
+
 // ------------------------------------------------------------------------------
 void SiPixelRecHitsValid_pix::fillForward(const TrackingRecHit* recHit, const PSimHit & simHit, 
 				      DetId detId,const PixelGeomDetUnit * theGeomDet,
@@ -921,12 +955,23 @@ void SiPixelRecHitsValid_pix::fillForward(const TrackingRecHit* recHit, const PS
   
   // spliy into disks etc.
   int disk = tTopo->pxfDisk(detId);
-  int panel = tTopo->pxfPanel(detId);
+  int panel = tTopo->pxfPanel(detId);      // Phase 1: Forward 1, Backward 2
   int side = tTopo->pxfSide(detId);
+  //int module = tTopo->pxfModule(detId);  // Phase 1: Always 1
+  // Phase 1 specific
+  int blade  = tTopo->pxfBlade(detId);     // Phase 1: Inner blades 1-22, Outer blades 23-56
+  int ring = 1 + (blade>22);               // Phase 1: Inner: 1, Outer: 2
+  int phase1_online_blade = PhaseIBladeOfflineToOnline(blade); // Phase 1: Ring1 +-1-11, Ring2 +-1-17
+  int xside = 1 + (phase1_online_blade>0); // Phase 1: -X 1, +X 2
+
+  if (!quick) {
+    recHitXResSideXSideDiskRing[side-1][xside-1][disk-1][ring-1]->Fill(res_x);
+    recHitYResSideXSideDiskRing[side-1][xside-1][disk-1][ring-1]->Fill(res_y);
+  }
 
   if (side==1) {
     recHitXResNegZF->Fill(res_x);
-    recHitYResNegZF->Fill(res_y);  
+    recHitYResNegZF->Fill(res_y);
   } else if (side==2) {
     recHitXResPosZF->Fill(res_x);
     recHitYResPosZF->Fill(res_y);  
@@ -948,12 +993,12 @@ void SiPixelRecHitsValid_pix::fillForward(const TrackingRecHit* recHit, const PS
       clustYSizeDisk2Plaquettes[0]->Fill(sizeY);
       clustChargeDisk2Plaquettes[0]->Fill(charge);
     }
-    //} else if (disk==3) { // histios not defined yet
-    //  if(!quick) {
-    //    clustXSizeDisk3Plaquettes[0]->Fill(sizeX);	
-    //    clustYSizeDisk3Plaquettes[0]->Fill(sizeY);	
-    //    clustChargeDisk3Plaquettes[0]->Fill(charge);
-    //  } 
+  } else if (disk==3) {
+    if(!quick) {
+      clustXSizeDisk3Plaquettes[0]->Fill(sizeX);	
+      clustYSizeDisk3Plaquettes[0]->Fill(sizeY);	
+      clustChargeDisk3Plaquettes[0]->Fill(charge);
+    } 
   }
 
   if(disk==1) {
@@ -1000,16 +1045,25 @@ void SiPixelRecHitsValid_pix::fillForward(const TrackingRecHit* recHit, const PS
     if(side==1) {  // -z 
       recHitXResDisk2[1]->Fill(res_x);
       recHitYResDisk2[1]->Fill(res_y);
+
+      if(panel==1) {  // panel 1 
+	recHitXResDisk2[3]->Fill(res_x);
+	recHitYResDisk2[3]->Fill(res_y);
+      } else { // panel 2
+	recHitXResDisk2[4]->Fill(res_x);
+	recHitYResDisk2[4]->Fill(res_y);
+      }
     } else { //+z
       recHitXResDisk2[2]->Fill(res_x);
       recHitYResDisk2[2]->Fill(res_y);
-    }
-    if(panel==1) {  // panel 1 
-      recHitXResDisk2[3]->Fill(res_x);
-      recHitYResDisk2[3]->Fill(res_y);
-    } else { // panel 2
-      recHitXResDisk2[4]->Fill(res_x);
-      recHitYResDisk2[4]->Fill(res_y);
+
+      if(panel==1) {  // panel 1 
+	recHitXResDisk2[5]->Fill(res_x);
+	recHitYResDisk2[5]->Fill(res_y);
+      } else { // panel 2
+	recHitXResDisk2[6]->Fill(res_x);
+	recHitYResDisk2[6]->Fill(res_y);
+      }
     }
 
     if(!quick) {
@@ -1025,22 +1079,31 @@ void SiPixelRecHitsValid_pix::fillForward(const TrackingRecHit* recHit, const PS
     if(side==1) {  // -z 
       recHitXResDisk3[1]->Fill(res_x);
       recHitYResDisk3[1]->Fill(res_y);
+
+      if(panel==1) {  // panel 1 
+	recHitXResDisk3[3]->Fill(res_x);
+	recHitYResDisk3[3]->Fill(res_y);
+      } else { // panel 2
+	recHitXResDisk3[4]->Fill(res_x);
+	recHitYResDisk3[4]->Fill(res_y);
+      }
     } else { //+z
       recHitXResDisk3[2]->Fill(res_x);
       recHitYResDisk3[2]->Fill(res_y);
-    }
-    if(panel==1) {  // panel 1 
-      recHitXResDisk3[3]->Fill(res_x);
-      recHitYResDisk3[3]->Fill(res_y);
-    } else { // panel 2
-      recHitXResDisk3[4]->Fill(res_x);
-      recHitYResDisk3[4]->Fill(res_y);
+
+      if(panel==1) {  // panel 1 
+	recHitXResDisk3[5]->Fill(res_x);
+	recHitYResDisk3[5]->Fill(res_y);
+      } else { // panel 2
+	recHitXResDisk3[6]->Fill(res_x);
+	recHitYResDisk3[6]->Fill(res_y);
+      }
     }
 
-    // if(!quick) { // histios not defined yet
-    //   recHitXPullDisk3Plaquettes[0]->Fill(pull_x);
-    //   recHitYPullDisk3Plaquettes[0]->Fill(pull_y);
-    // } 
+    if(!quick) {
+      recHitXPullDisk3Plaquettes[0]->Fill(pull_x);
+      recHitYPullDisk3Plaquettes[0]->Fill(pull_y);
+    }
 
   } // end disk 
 
