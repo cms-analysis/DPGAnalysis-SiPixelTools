@@ -347,6 +347,12 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
         sprintf(histo, "RecHit_YRes_Side%d_XSide%d_Disk%d_Ring%d", side+1, xside+1, disk+1, ring+1);
         recHitYResSideXSideDiskRing[side][xside][disk][ring] = dbe_->book1D(histo, histo, 100, -200., 200.); 
       }
+    for (int ring=0; ring<2; ring++) {
+      sprintf(histo, "RecHit_XRes_Ring%d",ring+1);
+      recHitXResRing[ring] = dbe_->book1D(histo, histo, 100, -200., 200.); 
+      sprintf(histo, "RecHit_YRes_Ring%d",ring+1);
+      recHitYResRing[ring] = dbe_->book1D(histo, histo, 100, -200., 200.); 
+    }
 
     recHitXAlignError4 = 
       dbe_->book1D("RecHitXAlignError4","RecHit X  Alignment errors fpix 1", 100, 0., 100.);
@@ -967,6 +973,8 @@ void SiPixelRecHitsValid_pix::fillForward(const TrackingRecHit* recHit, const PS
   if (!quick) {
     recHitXResSideXSideDiskRing[side-1][xside-1][disk-1][ring-1]->Fill(res_x);
     recHitYResSideXSideDiskRing[side-1][xside-1][disk-1][ring-1]->Fill(res_y);
+    recHitXResRing[ring-1]->Fill(res_x);
+    recHitYResRing[ring-1]->Fill(res_y);
   }
 
   if (side==1) {

@@ -174,6 +174,8 @@ class SiPixelRecHitsValid_pix : public edm::EDAnalyzer {
 	MonitorElement* recHitYResDisk3[7];
 	MonitorElement* recHitXResSideXSideDiskRing[2][2][3][2];
 	MonitorElement* recHitYResSideXSideDiskRing[2][2][3][2];
+	MonitorElement* recHitXResRing[2];
+	MonitorElement* recHitYResRing[2];
 
 	// Pull distributions
 	//RecHits BPIX
