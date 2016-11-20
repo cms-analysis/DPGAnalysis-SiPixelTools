@@ -2,7 +2,7 @@
 # using: 
 # Revision: 1.19 
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
-# with command line options: -s GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,RECO --evt_type SingleMuPt10_cfi --conditions auto:phase1_2017_realistic --era Run2_2017 --geometry Extended2017new --fileout file:MuPt10_GENSIMRECO.root --python_filename=run_PixelHitAssociator_PhaseI_MuPt10_cfg.py -n 10 --runUnscheduled --no_exec
+# with command line options: -s GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,RECO --evt_type SingleMuPt10_cfi --conditions auto:phase1_2017_realistic --era Run2_2017 --geometry DB:Extended --fileout file:GENSIMRECO_MuPt10.root --python_filename=PhaseI_MuPt10_cfg.py --runUnscheduled -n 10
 import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
@@ -15,8 +15,8 @@ process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
-process.load('Configuration.Geometry.GeometryExtended2017newReco_cff')
-process.load('Configuration.Geometry.GeometryExtended2017new_cff')
+process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
+process.load('Configuration.StandardSequences.GeometrySimDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Generator_cff')
 process.load('IOMC.EventVertexGenerators.VtxSmearedRealistic50ns13TeVCollision_cfi')
@@ -59,7 +59,7 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
         filterName = cms.untracked.string('')
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-    fileName = cms.untracked.string('file:MuPt10_GENSIMRECO.root'),
+    fileName = cms.untracked.string('file:GENSIMRECO_MuPt10.root'),
     outputCommands = process.RECOSIMEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
 )
@@ -67,6 +67,7 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
 # Additional output definition
 
 # Other statements
+process.XMLFromDBSource.label = cms.string("Extended")
 process.genstepfilter.triggerConditions=cms.vstring("generation_step")
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
@@ -109,40 +110,11 @@ for path in process.paths:
 
 
 
-# Code inserted here
-# ----------------- PixelHitAssociator ----------------------
-
-# Load new FPix Geometry (comment these out in original cmsDriver config on top)
-
-# ### process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
-# ###### process.load('Configuration.Geometry.GeometryRecoDB_cff')
-# process.load('Geometry.CommonDetUnit.globalTrackingGeometryDB_cfi')
-# process.load('RecoTracker.GeometryESProducer.TrackerRecoGeometryESProducer_cfi')
-# process.load('Geometry.TrackerNumberingBuilder.trackerTopology_cfi')
-# process.load('RecoMuon.DetLayers.muonDetLayerGeometry_cfi')
-# process.load('Geometry.CaloEventSetup.CaloTopology_cfi')
-# process.load('Geometry.CaloEventSetup.AlignedCaloGeometryDBReader_cfi')
-# process.load('Geometry.CaloEventSetup.EcalTrigTowerConstituents_cfi')
-# process.load('Geometry.EcalMapping.EcalMapping_cfi')
-# process.load('Geometry.EcalMapping.EcalMappingRecord_cfi')
-# process.load('Geometry.HcalCommonData.hcalDDDSimConstants_cfi')
-# process.load('Geometry.HcalCommonData.hcalDDDRecConstants_cfi')
-# process.load('Geometry.HcalEventSetup.hcalTopologyIdeal_cfi')
-# process.load('Geometry.TrackerGeometryBuilder.idealForDigiTrackerGeometryDB_cff')
-# process.load('Geometry.CSCGeometryBuilder.idealForDigiCscGeometryDB_cff')
-# process.load('Geometry.DTGeometryBuilder.idealForDigiDtGeometryDB_cff')
-# 
-# ### process.load('Configuration.Geometry.GeometrySimDB_cff')
-# process.load('GeometryReaders.XMLIdealGeometryESSource.cmsGeometryDB_cff')
-# process.load('Geometry.MuonNumbering.muonNumberingInitialization_cfi')
-# process.load('Geometry.TrackerNumberingBuilder.trackerNumberingGeometryDB_cfi')
-# process.load('Geometry.HcalCommonData.hcalDDDSimConstants_cfi')
-
-# NEW FPix Geom
-#process.load('Configuration.Geometry.GeometryExtended2017NewFPixReco_cff')
-#process.load('Configuration.Geometry.GeometrySimDB_cff')
 
 
+
+
+# begin inserting configs
 #------------------------------------------
 #  Options - can be given from command line
 #------------------------------------------
@@ -165,6 +137,14 @@ opt.register('useTemplates',       True,
 opt.register('saveRECO',           False,
 	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
 	     'Option to keep GEN-SIM-RECO')
+
+opt.register('useRECO',            False,
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
+	     'Option to use GEN-SIM-RECO')
+
+opt.register('RECOFileName',  '',
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.string,
+	     'Name of the histograms file')
 
 opt.register('outputFileName',      '',
 	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.string,
@@ -197,40 +177,98 @@ opt.setDefault('maxEvents', 1000)
 opt.parseArguments()
 
 process.maxEvents.input = opt.maxEvents
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
-# Configure PixelHitAssociator
+# Set some default options based on others
+if opt.useClustersOnTrack:
+	if opt.useTemplates:
+		process.initialStepTracks.TTRHBuilder = 'WithAngleAndTemplate'
+		if opt.RECOFileName == '': opt.RECOFileName = 'file:GENSIMRECO_MuPt10_TemplateReco_'+str(opt.maxEvents)+'.root'
+	else:
+		process.initialStepTracks.TTRHBuilder = 'WithTrackAngle'
+		if opt.RECOFileName == '': opt.RECOFileName = 'file:GENSIMRECO_MuPt10_GenericReco_'+str(opt.maxEvents)+'.root'
+else:
+	if opt.RECOFileName == '': opt.RECOFileName = 'file:GENSIMRECO_MuPt10_GenericReco_'+str(opt.maxEvents)+'.root'
+
+# Add Input file in case using it
+if opt.useRECO:
+	process.setName_("TEST")
+	process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
+		# This is the file you create with saveRECO, by default
+		opt.RECOFileName # Use previously saved RECO as input
+		))
+
+
+
+
+
+
+#________________________________________________________________________
+#                        Main Analysis Module
+
+# Other statements
+#process.mix.digitizers = cms.PSet(process.theDigitizersValid)
+# modify digitizer parameters
+#process.simSiPixelDigis.pixel.ThresholdInElectrons_BPix = 3500.0 
+# disable dyn. ineff.
+#process.mix.digitizers.pixel.AddPixelInefficiencyFromPython = cms.bool(False)
+#process.mix.digitizers.pixel.NumPixelBarrel = cms.int32(4)
+#process.mix.digitizers.pixel.NumPixelEndcap = cms.int32(3)
+
+# Load and confiugre the plugin you want to use
 process.load("DPGAnalysis-SiPixelTools.PixelHitAssociator.SiPixelRecHitsValid_cff")
+
+# Specify inputs/outputs
 if opt.useClustersOnTrack:
 	process.pixRecHitsValid.useTracks = True
 	#process.pixRecHitsValid.tracks="initialStepTracks" # first tracker step
 	process.pixRecHitsValid.tracks="generalTracks"
 	if opt.useTemplates:
-		process.initialStepTracks.TTRHBuilder = 'WithAngleAndTemplate'
-		if opt.outputFileName == '': opt.outputFileName = 'SimToRecHitHistos_TemplateReco_OnTrackHits.root'
+		if opt.outputFileName == '': opt.outputFileName = 'SimToRecHitHistos_TemplateReco_OnTrackHits_'+str(opt.maxEvents)+'.root'
 	else:
-		process.initialStepTracks.TTRHBuilder = 'WithTrackAngle'
-		if opt.outputFileName == '': opt.outputFileName = 'SimToRecHitHistos_GenericReco_OnTrackHits.root'
+		if opt.outputFileName == '': opt.outputFileName = 'SimToRecHitHistos_GenericReco_OnTrackHits_'+str(opt.maxEvents)+'.root'
 else:
 	process.pixRecHitsValid.useTracks = False
 	#process.pixRecHitsValid.src="siPixelRecHitsPreSplitting"
 	process.pixRecHitsValid.src="siPixelRecHits"
-	if opt.outputFileName == '': opt.outputFileName = 'SimToRecHitHistos_GenericReco_siPixelRecHits.root'
+	if opt.outputFileName == '': opt.outputFileName = 'SimToRecHitHistos_GenericReco_siPixelRecHits_'+str(opt.maxEvents)+'.root'
+
+# Some other options
 process.pixRecHitsValid.outputFile = opt.outputFileName
-process.pixRecHitsValid.verbose=False
+# showing defaults
+#process.pixRecHitsValid.verbose=False
 #process.pixRecHitsValid.associatePixel = True
 #process.pixRecHitsValid.associateStrip = False
 #process.pixRecHitsValid.associateRecoTracks = False
+
+# myAnalyzer Path
+if opt.useRECO and opt.useClustersOnTrack:
+	process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
+	process.TrackRefitter.src = "generalTracks"
+	process.pixRecHitsValid.tracks = 'TrackRefitter'
+	process.myAnalyzer_step = cms.Path(process.MeasurementTrackerEvent*process.TrackRefitter*process.pixRecHitsValid)
+else:
+	process.myAnalyzer_step = cms.Path(process.pixRecHitsValid)
+
+#________________________________________________________________________
+#                        DataBase Stuff
 
 # Print settings
 print "Using options: "
 if opt.globalTag == '':
     print "  globalTag (auto:phase1_2017_realistic) = "+str(process.GlobalTag.globaltag)
 else:
-    process.GlobalTag.globaltag = opt.globalTag
-    print "  globalTag (manually chosen)            = "+str(process.GlobalTag.globaltag)
+    if "auto:" in opt.globalTag:
+	process.GlobalTag = GlobalTag(process.GlobalTag, opt.globalTag, '')
+	print "  globalTag ("+opt.globalTag+") = "+str(process.GlobalTag.globaltag)
+    else:
+	process.GlobalTag.globaltag = opt.globalTag
+	print "  globalTag (manually chosen)            = "+str(process.GlobalTag.globaltag)
 print "  useClustersOnTrack                     = "+str(opt.useClustersOnTrack)
 print "  useTemplates                           = "+str(opt.useTemplates)
 print "  saveRECO                               = "+str(opt.saveRECO)
+print "  useRECO                                = "+str(opt.useRECO)
+print "  RECOFileName                           = "+str(opt.RECOFileName)
 print "  outputFileName                         = "+str(opt.outputFileName)
 print "  maxEvents                              = "+str(opt.maxEvents)
 print "  useLocalLASim                          = "+str(opt.useLocalLASim)
@@ -278,36 +316,6 @@ GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_mc_v1'
 #GenErr_db       = 'frontier://FrontierPrep/CMS_COND_PIXEL'
 #GenErr_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
 GenErr_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
-
-# Other statements
-#process.mix.digitizers = cms.PSet(process.theDigitizersValid)
-# modify digitizer parameters
-#process.simSiPixelDigis.pixel.ThresholdInElectrons_BPix = 3500.0 
-# disable dyn. ineff.
-process.mix.digitizers.pixel.AddPixelInefficiencyFromPython = cms.bool(False)
-#process.mix.digitizers.pixel.NumPixelBarrel = cms.int32(4)
-#process.mix.digitizers.pixel.NumPixelEndcap = cms.int32(3)
-
-
-#process.source = cms.Source("PoolSource", 
-#  fileNames = cms.untracked.vstring(
-#    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu_phase1/pt100_76/simhits/simHits1.root'
-#  ),
-#)
-
-#process.MessageLogger = cms.Service("MessageLogger",
-#    #debugModules = cms.untracked.vstring('Digitize'),
-#    debugModules = cms.untracked.vstring('PixelDigitizer'),
-#    destinations = cms.untracked.vstring('cout'),
-#    #destinations = cms.untracked.vstring("log","cout"),
-#    cout = cms.untracked.PSet(
-#        threshold = cms.untracked.string('ERROR')
-#    )
-#    #log = cms.untracked.PSet(
-#    #    threshold = cms.untracked.string('DEBUG')
-#    #)
-#)
-process.MessageLogger.cerr.FwkReport.reportEvery = 10
 
 #LA
 if opt.useLocalLASim :
@@ -382,17 +390,29 @@ if opt.useLocalGenErr :
 	process.generrprefer = cms.ESPrefer("PoolDBESSource","GenErrReader")
 
 #---------------------------
-#  Path/Schedule
+#  Schedule
 #---------------------------
-process.pixRecHitsValid_step = cms.Path(process.pixRecHitsValid)
 
-if not opt.saveRECO: process.schedule.remove(process.RECOSIMoutput_step)
-process.schedule.remove(process.endjob_step)
-process.schedule.remove(process.genfiltersummary_step)
-process.schedule.append(process.pixRecHitsValid_step)
+# Modify Schedule
+if opt.useRECO:
+	process.schedule = cms.Schedule(process.myAnalyzer_step)
+else:
+	if not opt.saveRECO:
+		process.schedule.remove(process.RECOSIMoutput_step)
+	else:
+		process.RECOSIMoutput.fileName = opt.RECOFileName
+		# Additionally, save the pixel sim hits and digis too
+		process.RECOSIMoutput.outputCommands.extend(('keep *_g4SimHits_*Pixel*_*','keep *_simSiPixelDigis_*_*','drop *_mix_simSiPixelDigis*_*'))
+	# Remove unnecessary steps and add Analyzer in the end of the chain
+	process.schedule.remove(process.endjob_step)
+	process.schedule.remove(process.genfiltersummary_step)
+	process.schedule.append(process.myAnalyzer_step)
+# End of inserted code
 
-# ------------ End of PixelHitAssociator ------------------
-# End ofinserted code
+
+
+
+
 
 
 

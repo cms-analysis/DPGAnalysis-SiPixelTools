@@ -121,6 +121,10 @@ class SiPixelRecHitsValid_pix : public edm::EDAnalyzer {
 	MonitorElement* recHitYAllModules;
 	MonitorElement* recHitXResFlippedLadderLayers[4];
 	MonitorElement* recHitXResNonFlippedLadderLayers[4];
+        MonitorElement *recHitXResFlippedLadderLayersSide[4][2];
+        MonitorElement *recHitXResNonFlippedLadderLayersSide[4][2];
+	MonitorElement *recHitL1XResSize1,*recHitL1XResSize2,*recHitL1XResSize3;   
+	MonitorElement *recHitL2XResSize1,*recHitL2XResSize2,*recHitL2XResSize3;   
 	MonitorElement* recHitYResLayer1Modules[8];
 	MonitorElement* recHitYResLayer2Modules[8];
 	MonitorElement* recHitYResLayer3Modules[8];
@@ -147,10 +151,6 @@ class SiPixelRecHitsValid_pix : public edm::EDAnalyzer {
   	MonitorElement *htheta2,*hbeta2,*hphi2;
 	MonitorElement* heta1, *heta2, *heta3;
 	MonitorElement* htest1, *htest2;
-	MonitorElement *recHitL1XResNonFlippedpZ,*recHitL1XResFlippedpZ,*recHitL1XResNonFlippedmZ,*recHitL1XResFlippedmZ,
-	  *recHitL1XResSize1,*recHitL1XResSize2,*recHitL1XResSize3;   
-	MonitorElement *recHitL2XResNonFlippedpZ,*recHitL2XResFlippedpZ,*recHitL2XResNonFlippedmZ,*recHitL2XResFlippedmZ,
-	  *recHitL2XResSize1,*recHitL2XResSize2,*recHitL2XResSize3;   
 	MonitorElement *recHitX11, *recHitX12, *recHitX21, *recHitX22;
 
 	//RecHits FPIX
@@ -172,10 +172,10 @@ class SiPixelRecHitsValid_pix : public edm::EDAnalyzer {
 	MonitorElement* recHitYResDisk2[7];
 	MonitorElement* recHitXResDisk3[7];
 	MonitorElement* recHitYResDisk3[7];
-	MonitorElement* recHitXResSideXSideDiskRing[2][2][3][2];
-	MonitorElement* recHitYResSideXSideDiskRing[2][2][3][2];
-	MonitorElement* recHitXResRing[2];
-	MonitorElement* recHitYResRing[2];
+	MonitorElement* recHitXResRing1SideEvenOdd[2][2];
+	MonitorElement* recHitYResRing1SideEvenOdd[2][2];
+	MonitorElement* recHitXResRing2SidePanel[2][2];
+        MonitorElement* recHitYResRing2SidePanel[2][2];
 
 	// Pull distributions
 	//RecHits BPIX
@@ -215,6 +215,7 @@ class SiPixelRecHitsValid_pix : public edm::EDAnalyzer {
         edm::InputTag src_;
         bool useTracks_;
         edm::InputTag tracks_;
+        bool phase_;
 };
 
 #endif

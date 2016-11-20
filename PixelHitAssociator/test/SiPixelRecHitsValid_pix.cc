@@ -180,15 +180,6 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
     if(!quick) {
 
       // special histos for layer 1
-      recHitL1XResNonFlippedpZ = dbe_->book1D("recHitL1XNonFlippedpZ", "XRes NonFlipped +z L1", 100, -200., 200.);      
-      recHitL1XResFlippedpZ    = dbe_->book1D("recHitL1XFlippedpZ",    "XRes Flipped +z L1", 100, -200., 200.);      
-      recHitL1XResNonFlippedmZ = dbe_->book1D("recHitL1XNonFlippedmZ", "XRes NonFlipped -z L1", 100, -200., 200.);      
-      recHitL1XResFlippedmZ    = dbe_->book1D("recHitL1XFlippedmZ",      "XRes Flipped -z L1", 100, -200., 200.);   
-      recHitL2XResNonFlippedpZ = dbe_->book1D("recHitL2XNonFlippedpZ", "XRes NonFlipped +z L2", 100, -200., 200.);      
-      recHitL2XResFlippedpZ    = dbe_->book1D("recHitL2XFlippedpZ",    "XRes Flipped +z L2", 100, -200., 200.);      
-      recHitL2XResNonFlippedmZ = dbe_->book1D("recHitL2XNonFlippedmZ", "XRes NonFlipped -z L2", 100, -200., 200.);      
-      recHitL2XResFlippedmZ    = dbe_->book1D("recHitL2XFlippedmZ",      "XRes Flipped -z L2", 100, -200., 200.);   
-
       recHitL1XResSize1    = dbe_->book1D("recHitL1XSize1",      "XRes size 1 L1", 100, -200., 200.);   
       recHitL1XResSize2    = dbe_->book1D("recHitL1XSize2",      "XRes size 2 L1", 100, -200., 200.);   
       recHitL1XResSize3    = dbe_->book1D("recHitL1XSize3",      "XRes size 3 L1", 100, -200., 200.);   
@@ -226,22 +217,22 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
       recHitYAllModules = dbe_->book1D("RecHit_y_AllModules", "RecHit Y distribution for all modules", 100, -4., 4.);
       
       // eta plots
-      for (int i=0; i<25; i++) {
+      for (int j=0; j<25; j++) {
 	//RecHit X resolution per layer
-	sprintf(histo, "RecHit_XRes_Layer1_Eta%d", i+1);
-	recHitXResLayer1Eta[i] = dbe_->book1D(histo, "RecHit XRes Layer1, eta", 100, -200., 200.);
-	sprintf(histo, "RecHit_XRes_Layer2_Eta%d", i+1);
-	recHitXResLayer2Eta[i] = dbe_->book1D(histo, "RecHit XRes Layer2, eta", 100, -200., 200.);
-	sprintf(histo, "RecHit_XRes_Layer3_Eta%d", i+1);
-	recHitXResLayer3Eta[i] = dbe_->book1D(histo, "RecHit XRes Layer3, eta", 100, -200., 200.);
+	sprintf(histo, "RecHit_XRes_Layer1_Eta%d", j+1);
+	recHitXResLayer1Eta[j] = dbe_->book1D(histo, "RecHit XRes Layer1, eta", 100, -200., 200.);
+	sprintf(histo, "RecHit_XRes_Layer2_Eta%d", j+1);
+	recHitXResLayer2Eta[j] = dbe_->book1D(histo, "RecHit XRes Layer2, eta", 100, -200., 200.);
+	sprintf(histo, "RecHit_XRes_Layer3_Eta%d", j+1);
+	recHitXResLayer3Eta[j] = dbe_->book1D(histo, "RecHit XRes Layer3, eta", 100, -200., 200.);
 	
 	//RecHit Y resolution per layer
-	sprintf(histo, "RecHit_YRes_Layer1_Eta%d", i+1);
-	recHitYResLayer1Eta[i] = dbe_->book1D(histo, "RecHit YRes Layer1, eta", 100, -200., 200.);
-	sprintf(histo, "RecHit_YRes_Layer2_Eta%d", i+1);
-	recHitYResLayer2Eta[i] = dbe_->book1D(histo, "RecHit YRes Layer2, eta", 100, -200., 200.);
-	sprintf(histo, "RecHit_YRes_Layer3_Eta%d", i+1);
-	recHitYResLayer3Eta[i] = dbe_->book1D(histo, "RecHit YRes Layer3, eta", 100, -200., 200.);
+	sprintf(histo, "RecHit_YRes_Layer1_Eta%d", j+1);
+	recHitYResLayer1Eta[j] = dbe_->book1D(histo, "RecHit YRes Layer1, eta", 100, -200., 200.);
+	sprintf(histo, "RecHit_YRes_Layer2_Eta%d", j+1);
+	recHitYResLayer2Eta[j] = dbe_->book1D(histo, "RecHit YRes Layer2, eta", 100, -200., 200.);
+	sprintf(histo, "RecHit_YRes_Layer3_Eta%d", j+1);
+	recHitYResLayer3Eta[j] = dbe_->book1D(histo, "RecHit YRes Layer3, eta", 100, -200., 200.);
       }
       
 
@@ -278,8 +269,18 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
       recHitXResFlippedLadderLayers[i] = dbe_->book1D(histo, "RecHit XRes Flipped Ladders by Layer", 100, -200., 200.);
       
       //RecHit X resolution for unflipped ladders by layer
-      sprintf(histo, "RecHit_XRes_UnFlippedLadder_Layer%d", i+1);
+      sprintf(histo, "RecHit_XRes_NonFlippedLadder_Layer%d", i+1);
       recHitXResNonFlippedLadderLayers[i] = dbe_->book1D(histo, "RecHit XRes NonFlipped Ladders by Layer", 100, -200., 200.);
+
+      // Same plots for -Z/+Z
+      sprintf(histo, "RecHit_XRes_FlippedLadder_Layer%d_mZ", i+1);
+      recHitXResFlippedLadderLayersSide[i][0] = dbe_->book1D(histo, "RecHit XRes Flipped Ladders by Layer, -Z", 100, -200., 200.);
+      sprintf(histo, "RecHit_XRes_NonFlippedLadder_Layer%d_mZ", i+1);
+      recHitXResNonFlippedLadderLayersSide[i][0] = dbe_->book1D(histo, "RecHit XRes NonFlipped Ladders by Layer, -Z", 100, -200., 200.);
+      sprintf(histo, "RecHit_XRes_FlippedLadder_Layer%d_pZ", i+1);
+      recHitXResFlippedLadderLayersSide[i][1] = dbe_->book1D(histo, "RecHit XRes Flipped Ladders by Layer, +Z", 100, -200., 200.);
+      sprintf(histo, "RecHit_XRes_NonFlippedLadder_Layer%d_pZ", i+1);
+      recHitXResNonFlippedLadderLayersSide[i][1] = dbe_->book1D(histo, "RecHit XRes NonFlipped Ladders by Layer, +Z", 100, -200., 200.);
 
       
       //RecHit Y resolutions for layers by module for barrel
@@ -339,19 +340,22 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
   }
 
   if(!quick) {
-    // jk 30/oct/2016
-    for (int side=0; side<2; side++) for (int xside=0; xside<2; xside++)
-      for (int disk=0; disk<3; disk++) for (int ring=0; ring<2; ring++) {
-        sprintf(histo, "RecHit_XRes_Side%d_XSide%d_Disk%d_Ring%d", side+1, xside+1, disk+1, ring+1);
-        recHitXResSideXSideDiskRing[side][xside][disk][ring] = dbe_->book1D(histo, histo, 100, -200., 200.); 
-        sprintf(histo, "RecHit_YRes_Side%d_XSide%d_Disk%d_Ring%d", side+1, xside+1, disk+1, ring+1);
-        recHitYResSideXSideDiskRing[side][xside][disk][ring] = dbe_->book1D(histo, histo, 100, -200., 200.); 
+    // jk 2016 Nov
+    for (int side=0; side<2; side++) {
+      sprintf(histo, "RecHit_XRes__Ring1_Side%d_Even", side+1);
+      recHitXResRing1SideEvenOdd[side][0] = dbe_->book1D(histo, histo, 100, -200., 200.); 
+      sprintf(histo, "RecHit_YRes__Ring1_Side%d_Even", side+1);
+      recHitYResRing1SideEvenOdd[side][0] = dbe_->book1D(histo, histo, 100, -200., 200.);
+      sprintf(histo, "RecHit_XRes__Ring1_Side%d_Odd", side+1);
+      recHitXResRing1SideEvenOdd[side][1] = dbe_->book1D(histo, histo, 100, -200., 200.); 
+      sprintf(histo, "RecHit_YRes__Ring1_Side%d_Odd", side+1);
+      recHitYResRing1SideEvenOdd[side][1] = dbe_->book1D(histo, histo, 100, -200., 200.);
+      for (int panel=0; panel<2; panel++) {
+	sprintf(histo, "RecHit_XRes_Ring2_Side%d_Panel%d", side+1, panel+1);
+	recHitXResRing2SidePanel[side][panel] = dbe_->book1D(histo, histo, 100, -200., 200.); 
+	sprintf(histo, "RecHit_YRes_Ring2_Side%d_Panel%d", side+1, panel+1);
+	recHitYResRing2SidePanel[side][panel] = dbe_->book1D(histo, histo, 100, -200., 200.);
       }
-    for (int ring=0; ring<2; ring++) {
-      sprintf(histo, "RecHit_XRes_Ring%d",ring+1);
-      recHitXResRing[ring] = dbe_->book1D(histo, histo, 100, -200., 200.); 
-      sprintf(histo, "RecHit_YRes_Ring%d",ring+1);
-      recHitYResRing[ring] = dbe_->book1D(histo, histo, 100, -200., 200.); 
     }
 
     recHitXAlignError4 = 
@@ -425,7 +429,7 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
       sprintf(histo, "RecHit_XPull_FlippedLadder_Layer%d", i+1);
       recHitXPullFlippedLadderLayers[i] = dbe_->book1D(histo, "RecHit XPull Flipped Ladders by Layer", 100, -10.0, 10.0);
       
-      sprintf(histo, "RecHit_XPull_UnFlippedLadder_Layer%d", i+1);
+      sprintf(histo, "RecHit_XPull_NonFlippedLadder_Layer%d", i+1);
       recHitXPullNonFlippedLadderLayers[i] = dbe_->book1D(histo, "RecHit XPull NonFlipped Ladders by Layer", 100, -10.0, 10.0);
     }
   
@@ -499,6 +503,14 @@ void SiPixelRecHitsValid_pix::analyze(const edm::Event& e, const edm::EventSetup
   edm::ESHandle<TrackerTopology> tTopoHand;
   es.get<TrackerTopologyRcd>().get(tTopoHand);
   const TrackerTopology *tTopo=tTopoHand.product();
+
+  // Check which phase we are in
+  edm::ESHandle<TrackerGeometry> trackerGeometryHandle;
+  es.get<TrackerDigiGeometryRecord>().get(trackerGeometryHandle);
+  auto trackerGeometry = trackerGeometryHandle.product();
+  phase_ = 
+    trackerGeometry -> isThere(GeomDetEnumerators::P1PXB) &&
+    trackerGeometry -> isThere(GeomDetEnumerators::P1PXEC);
 
   if ( ((int) e.id().event() % 1000 == 0) || verbose_ )
     cout << " Run = " << e.id().run() << " Event = " << e.id().event() << endl;
@@ -670,6 +682,15 @@ void SiPixelRecHitsValid_pix::fillBarrel(const TrackingRecHit* recHit, const PSi
 
   unsigned int layer = tTopo->pxbLayer(detId);
   unsigned int module = tTopo->pxbModule(detId);
+  // The inner ladder (in the smaller radius) are flipped
+  // unsigned int ladder = tTopo->pxbLadder(detId);
+  // bool odd_lad = ladder % 2;
+  // bool inner = (phase_ ? layer == 4 : layer % 2) ? !odd_lad : odd_lad;
+  // Determining flipped ladders automatically using surface
+  float tmp1 = theGeomDet->surface().toGlobal(Local3DPoint(0.,0.,0.)).perp();
+  float tmp2 = theGeomDet->surface().toGlobal(Local3DPoint(0.,0.,1.)).perp();
+  bool flipped = (tmp2<tmp1);
+  //std::cout<<"Flipped (Surface): "<<(tmp2<tmp1)<<" Flipped (Inner): "<<inner<<std::endl;
   if(PRINT) cout<<" layer "<<layer<<" eta "<<eta<<" phi "<<phi<<endl;
 
     if(layer==1) {
@@ -753,9 +774,6 @@ void SiPixelRecHitsValid_pix::fillBarrel(const TrackingRecHit* recHit, const PSi
     //if (rows == 160) recHitXFullModules->Fill(lp_x);
     //else if (rows == 80) recHitXHalfModules->Fill(lp_x);
     
-    float tmp1 = theGeomDet->surface().toGlobal(Local3DPoint(0.,0.,0.)).perp();
-    float tmp2 = theGeomDet->surface().toGlobal(Local3DPoint(0.,0.,1.)).perp();
-    
     LocalError lape = theGeomDet->localAlignmentError();
     if (lape.valid()) {
       float tmp11= 0.;
@@ -776,48 +794,24 @@ void SiPixelRecHitsValid_pix::fillBarrel(const TrackingRecHit* recHit, const PSi
     }  // if lape
 
     //int module = tTopo->pxbModule(detId);
-    if (tmp2<tmp1) { // flipped
-      for (unsigned int i=0; i<3; i++)  {
-	if (layer == i+1) {
-	  recHitXResFlippedLadderLayers[i]->Fill(res_x);
-	  recHitXPullFlippedLadderLayers[i]->Fill(pull_x);
-	  if(i==0) { // layer 1
-	    if(module>4) recHitL1XResFlippedpZ->Fill(res_x); 
-	    else recHitL1XResFlippedmZ->Fill(res_x); 
-	  } else if(i==1) { // layer 2
-	    if(module>4) recHitL2XResFlippedpZ->Fill(res_x); 
-	    else recHitL2XResFlippedmZ->Fill(res_x); 
-	  }
-	}
-      } 
+    if (flipped) {
+      recHitXResFlippedLadderLayers[layer-1]->Fill(res_x);
+      recHitXResFlippedLadderLayersSide[layer-1][module>4]->Fill(res_x);
+      recHitXPullFlippedLadderLayers[layer-1]->Fill(pull_x);
     } else {
-      for (unsigned int i=0; i<3; i++) {
-	if (layer == i+1) {
-	  recHitXResNonFlippedLadderLayers[i]->Fill(res_x);
-	  recHitXPullNonFlippedLadderLayers[i]->Fill(pull_x);
-	  if(i==0) { // layer 1
-	    if(module>4) recHitL1XResNonFlippedpZ->Fill(res_x); 
-	    else recHitL1XResNonFlippedmZ->Fill(res_x); 
-	  } else if(i==1) { // layer 2
-	    if(module>4) recHitL2XResNonFlippedpZ->Fill(res_x); 
-	    else recHitL2XResNonFlippedmZ->Fill(res_x); 
-	  }
-	}
-      }
+      recHitXResNonFlippedLadderLayers[layer-1]->Fill(res_x);
+      recHitXResNonFlippedLadderLayersSide[layer-1][module>4]->Fill(res_x);
+      recHitXPullNonFlippedLadderLayers[layer-1]->Fill(pull_x);
     } // end if
 
   } // end if quick 
   // as a function of layer
-  for (unsigned int i=0; i<NumLayers; i++) {
-    if (layer == i+1)  { // select layer
-      recHitXResLayers[i]->Fill(res_x);  //QUICK
-      recHitYResLayers[i]->Fill(res_y);  //QUICK
-      if(!quick) {
-	recHitXResLayersP[i]->Fill(eta,std::abs(res_x));
-	recHitYResLayersP[i]->Fill(eta,std::abs(res_y));
-      } // end if quick
-    }
-  }  
+  recHitXResLayers[layer-1]->Fill(res_x);  //QUICK
+  recHitYResLayers[layer-1]->Fill(res_y);  //QUICK
+  if(!quick) {
+    recHitXResLayersP[layer-1]->Fill(eta,std::abs(res_x));
+    recHitYResLayersP[layer-1]->Fill(eta,std::abs(res_y));
+  } // end if quick
 
 
   //get cluster
@@ -967,14 +961,14 @@ void SiPixelRecHitsValid_pix::fillForward(const TrackingRecHit* recHit, const PS
   // Phase 1 specific
   int blade  = tTopo->pxfBlade(detId);     // Phase 1: Inner blades 1-22, Outer blades 23-56
   int ring = 1 + (blade>22);               // Phase 1: Inner: 1, Outer: 2
-  int phase1_online_blade = PhaseIBladeOfflineToOnline(blade); // Phase 1: Ring1 +-1-11, Ring2 +-1-17
-  int xside = 1 + (phase1_online_blade>0); // Phase 1: -X 1, +X 2
+  //int phase1_online_blade = PhaseIBladeOfflineToOnline(blade); // Phase 1: Ring1 +-1-11, Ring2 +-1-17
+  //int xside = 1 + (phase1_online_blade>0); // Phase 1: -X 1, +X 2
 
   if (!quick) {
-    recHitXResSideXSideDiskRing[side-1][xside-1][disk-1][ring-1]->Fill(res_x);
-    recHitYResSideXSideDiskRing[side-1][xside-1][disk-1][ring-1]->Fill(res_y);
-    recHitXResRing[ring-1]->Fill(res_x);
-    recHitYResRing[ring-1]->Fill(res_y);
+    recHitXResRing1SideEvenOdd[side-1][ring%2]->Fill(res_x);
+    recHitYResRing1SideEvenOdd[side-1][ring%2]->Fill(res_y);
+    recHitXResRing2SidePanel[side-1][panel-1]->Fill(res_x);
+    recHitYResRing2SidePanel[side-1][panel-1]->Fill(res_y);
   }
 
   if (side==1) {
