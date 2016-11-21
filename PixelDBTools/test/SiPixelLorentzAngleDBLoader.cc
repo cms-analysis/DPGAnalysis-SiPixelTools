@@ -81,6 +81,7 @@ void SiPixelLorentzAngleDBLoader::analyze(const edm::Event& e, const edm::EventS
 	  if( dynamic_cast<PixelGeomDetUnit const*>((*it))!=0){
 	    DetId detid=(*it)->geographicalId();
 	    const DetId detidc = (*it)->geographicalId();
+	    int found = 0;
 	    
 	    // fill bpix values for LA 
 	    if(detid.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel)) {
@@ -91,7 +92,7 @@ void SiPixelLorentzAngleDBLoader::analyze(const edm::Event& e, const edm::EventS
 	      if(bPixLorentzAnglePerTesla_ != -9999.) {  // use common value for all 
 		cout<<" LA = "<< bPixLorentzAnglePerTesla_<<endl;
 		if(!LorentzAngle->putLorentzAngle(detid.rawId(),bPixLorentzAnglePerTesla_))
-		  cout<<"[SiPixelLorentzAngleDB::analyze] detid already exists"<<std::endl;
+		  cout<<"[SiPixelLorentzAngleDB::analyze] ERROR!: detid already exists"<<std::endl;
 		
 	      } else if(useFile_) {
 
@@ -104,21 +105,30 @@ void SiPixelLorentzAngleDBLoader::analyze(const edm::Event& e, const edm::EventS
 		    it != ModuleParameters_.end(); ++it) {
 		  if( it->getParameter<unsigned int>("rawid") == detidc.rawId() ) {
 		    float lorentzangle = (float)it->getParameter<double>("angle");
-		    LorentzAngle->putLorentzAngle(detid.rawId(),lorentzangle);
-		    cout << " LA= " << lorentzangle 
-			 << " individual value " << detid.rawId() << endl;
+		    if (!found) {
+		      LorentzAngle->putLorentzAngle(detid.rawId(),lorentzangle);
+		      cout << " LA= " << lorentzangle 
+			   << " individual value " << detid.rawId() << endl;
+		      found = 1;
+		    } else cout<<"[SiPixelLorentzAngleDB::analyze] ERROR!: detid already exists"<<std::endl;
 		  }
 		}
 		
 		//modules already put are automatically skipped
 		for(Parameters::iterator it = BPixParameters_.begin(); 
 		    it != BPixParameters_.end(); ++it) {
-		  if( it->getParameter<unsigned int>("module") == tTopo->pxbModule(detidc.rawId()) 
-		      && it->getParameter<unsigned int>("layer") == tTopo->pxbLayer(detidc.rawId()) ) {
+		  if (it->exists("layer"))  if (it->getParameter<unsigned int>("layer")  != tTopo->pxbLayer(detidc.rawId()))  continue;
+		  if (it->exists("ladder")) if (it->getParameter<unsigned int>("ladder") != tTopo->pxbLadder(detidc.rawId())) continue;
+		  if (it->exists("module")) if (it->getParameter<unsigned int>("module") != tTopo->pxbModule(detidc.rawId())) continue;
+		  if (it->exists("side"))   if (it->getParameter<unsigned int>("side")   != (tTopo->pxbModule(detidc.rawId())>4)+1) continue;
+		  if (!found) {
 		    float lorentzangle = (float)it->getParameter<double>("angle");
 		    LorentzAngle->putLorentzAngle(detid.rawId(),lorentzangle);
 		    cout << " LA= " << lorentzangle << endl;
-		  }
+		    found = 2;
+		  } else if (found==1) {
+		    cout<<"[SiPixelLorentzAngleDB::analyze] detid already given in ModuleParameters, skipping ..."<<std::endl;
+		  } else cout<<"[SiPixelLorentzAngleDB::analyze] ERROR!: detid already exists"<<std::endl;
 		}
 		
 	      }
@@ -145,19 +155,33 @@ void SiPixelLorentzAngleDBLoader::analyze(const edm::Event& e, const edm::EventS
 		    it != ModuleParameters_.end(); ++it) {
 		  if( it->getParameter<unsigned int>("rawid") == detidc.rawId() ) {
 		    float lorentzangle = (float)it->getParameter<double>("angle");
-		    LorentzAngle->putLorentzAngle(detid.rawId(),lorentzangle);
-		    cout << " LA= " << lorentzangle << " individual value " << detid.rawId() << endl;
+		    if (!found) {
+		      LorentzAngle->putLorentzAngle(detid.rawId(),lorentzangle);
+		      cout << " LA= " << lorentzangle 
+			   << " individual value " << detid.rawId() << endl;
+		      found = 1;
+		    } else cout<<"[SiPixelLorentzAngleDB::analyze] ERROR!: detid already exists"<<std::endl;
 		  } // if
 		} // for 
 		
 		//modules already put are automatically skipped
 		for(Parameters::iterator it = FPixParameters_.begin(); 
 		    it != FPixParameters_.end(); ++it) {
-		  if( it->getParameter<unsigned int>("side") == tTopo->pxfSide(detidc.rawId()) && it->getParameter<unsigned int>("disk") == tTopo->pxfDisk(detidc.rawId()) && it->getParameter<unsigned int>("HVgroup") == HVgroup( tTopo->pxfPanel(detidc.rawId()), tTopo->pxfModule(detidc.rawId()) ) ) {
+		  if (it->exists("side"))    if (it->getParameter<unsigned int>("side")    != tTopo->pxfSide(detidc.rawId()))   continue;
+		  if (it->exists("disk") )   if (it->getParameter<unsigned int>("disk")    != tTopo->pxfDisk(detidc.rawId()))   continue;
+		  if (it->exists("blade"))   if (it->getParameter<unsigned int>("blade")   != tTopo->pxfBlade(detidc.rawId()))  continue;
+		  if (it->exists("panel"))   if (it->getParameter<unsigned int>("panel")   != tTopo->pxfPanel(detidc.rawId()))  continue;
+		  if (it->exists("plq"))     if (it->getParameter<unsigned int>("plq")     != tTopo->pxfModule(detidc.rawId())) continue;
+		  if (it->exists("HVgroup")) if (it->getParameter<unsigned int>("HVgroup") != 
+						 HVgroup(tTopo->pxfPanel(detidc.rawId()), tTopo->pxfModule(detidc.rawId())))    continue;
+		  if (!found) {
 		    float lorentzangle = (float)it->getParameter<double>("angle");
 		    LorentzAngle->putLorentzAngle(detid.rawId(),lorentzangle);
 		    cout << " LA= " << lorentzangle << endl;
-		  } // endif 
+		    found = 2;
+		  } else if (found==1) {
+		    cout<<"[SiPixelLorentzAngleDB::analyze] detid already given in ModuleParameters, skipping ..."<<std::endl;
+		  } else cout<<"[SiPixelLorentzAngleDB::analyze] ERROR!: detid already exists"<<std::endl;
 		} // for  
 	
 	      } // if 	

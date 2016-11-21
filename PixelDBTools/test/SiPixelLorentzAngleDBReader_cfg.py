@@ -33,6 +33,8 @@ process.source = cms.Source("EmptySource",
 #    firstRun = cms.untracked.uint32(250000), # for prompt 
 # 2016, iov 1
     firstRun = cms.untracked.uint32(270000),
+# 2016, iov 2
+#    firstRun = cms.untracked.uint32(281500),
 )
 
 
@@ -49,8 +51,9 @@ process.MessageLogger = cms.Service("MessageLogger",
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 from Configuration.AlCa.GlobalTag import GlobalTag
+process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_Prompt_v15', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_Prompt_v5', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_v11', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_v11', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, '74X_dataRun2_Prompt_v0', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
@@ -60,7 +63,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_v11', '')
 
 
 # DB stuff 
-useLocalDB = False
+useLocalDB = True
 if useLocalDB :
   process.DBReader = cms.ESSource("PoolDBESSource",
     DBParameters = cms.PSet(
@@ -81,6 +84,10 @@ if useLocalDB :
 #			tag = cms.string("SiPixelLorentzAngle_2015_v3")
 #			tag = cms.string("SiPixelLorentzAngle_2015_v4")
 #			tag = cms.string("SiPixelLorentzAngle_2015_v2_hltvalidation")
+#			tag = cms.string("SiPixelLorentzAngle_2016_v1")
+#			tag = cms.string("SiPixelLorentzAngle_2016_v2")
+#			tag = cms.string("SiPixelLorentzAngle_2016_v3")
+			tag = cms.string("SiPixelLorentzAngle_2016_v4")
 #			tag = cms.string("SiPixelLorentzAngle_test") 
 
 #			tag = cms.string("SiPixelLorentzAngle_v02_mc")
@@ -100,7 +107,7 @@ if useLocalDB :
                         #tag = cms.string("SiPixelLorentzAngle_2009_v1_express")
                         #tag = cms.string("SiPixelLorentzAngle_2009_v1_hlt")
                         # offline
-                        tag = cms.string("SiPixelLorentzAngle_v4_offline")
+                        #tag = cms.string("SiPixelLorentzAngle_v4_offline")
                         #tag = cms.string("SiPixelLorentzAngle_v00")
                         #tag = cms.string("SiPixelLorentzAngle_v01")
                         #tag = cms.string("SiPixelLorentzAngle_offline")
@@ -137,20 +144,24 @@ if useLocalDB :
 	),
 
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_2015_v4.db')
-#    connect = cms.string('sqlite_file:../../../../../DB/MC/SiPixelLorentzAngle_forWidth_v01_mc.db')
+#    connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/public/CMSSW/DB/MC/SiPixelLorentzAngle_forWidth_v01_mc.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_forWidth_v01.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_fromAlignment_v01_mc.db')
 
-#    connect = cms.string('sqlite_file:../../../../../DB/SiPixelLorentzAngle_2015_v1.db')
-#    connect = cms.string('sqlite_file:../../../../../DB/SiPixelLorentzAngle_2015_v2.db')
-#    connect = cms.string('sqlite_file:../../../../../DB/310815/SiPixelLorentzAngle_2015_v3.db')
-#    connect = cms.string('sqlite_file:../../../../../DB/210915/SiPixelLorentzAngle_2015_v4.db')
+#    connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/public/CMSSW/DB/SiPixelLorentzAngle_2015_v1.db')
+#    connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/public/CMSSW/DB/SiPixelLorentzAngle_2015_v2.db')
+#    connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/public/CMSSW/DB/310815/SiPixelLorentzAngle_2015_v3.db')
+#    connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/public/CMSSW/DB/210915/SiPixelLorentzAngle_2015_v4.db')
+#    connect = cms.string('sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase0/2016_11_20/SiPixelLorentzAngle_2016_v1.db')
+#    connect = cms.string('sqlite_file:/afs/cern.ch/cms/CAF/CMSALCA/ALCA_TRACKERCALIB/Pixels/PixelDB2016/2SiPixelLorentzAngle/SiPixelLorentzAngle_2016_v2.db')
+#    connect = cms.string('sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase0/2016_11_20/SiPixelLorentzAngle_2016_v3.db')
+    connect = cms.string('sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase0/2016_11_20/SiPixelLorentzAngle_2016_v4.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_test.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngleSim_test.db')
 
 #    connect = cms.string('frontier://FrontierProd/CMS_COND_31X_PIXEL')
 #    connect = cms.string('frontier://FrontierPrep/CMS_COND_PIXEL')
-    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
+#    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
 #    connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
   ) # end process
   process.es_prefer_DBReader = cms.ESPrefer("PoolDBESSource","DBReader")

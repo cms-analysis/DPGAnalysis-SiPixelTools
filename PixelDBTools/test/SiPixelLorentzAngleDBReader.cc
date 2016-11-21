@@ -312,8 +312,8 @@ void SiPixelLorentzAngleDBReader::analyze( const edm::Event& e, const edm::Event
       //int side=pdetId.side(); //size=1 for -z, 2 for +z
       //int panel=pdetId.panel(); //panel=1
 
-      if(blade==1 && moduleF==1 && side==1 && panel==1) { // print once per disk 
-	std::cout<<"FPix - disk "<<disk<< " Lorentz angle  " << it->second  << std::endl;
+      if(blade==1 && side==1 && panel==1) { // print for 2 disks, 4 plaquettes
+	std::cout<<"FPix - disk "<<disk<< " Plq "<<moduleF<<" Lorentz angle  " << it->second  << std::endl;
 	//edm::LogInfo("SiPixelLorentzAngleReader")  <<"FPix - disk "<<disk<< " Lorentz angle  " << it->second;
       }
 
