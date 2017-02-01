@@ -2,7 +2,7 @@
 # using: 
 # Revision: 1.19 
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
-# with command line options: -s GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,RECO --evt_type SingleMuPt10_cfi --conditions auto:phase1_2017_realistic --era Run2_2017 --geometry DB:Extended --fileout file:GENSIMRECO_MuPt10.root --python_filename=PhaseI_MuPt10_cfg.py --runUnscheduled -n 10
+# with command line options: -s GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,RECO --evt_type SingleMuPt10_pythia8_cfi --conditions auto:phase1_2017_realistic --era Run2_2017 --geometry DB:Extended --fileout file:GENSIMRECO_MuPt10.root --python_filename=PhaseI_MuPt10_cfg.py --runUnscheduled -n 10 --no_exec
 import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
@@ -43,7 +43,7 @@ process.options = cms.untracked.PSet(
 
 # Production Info
 process.configurationMetadata = cms.untracked.PSet(
-    annotation = cms.untracked.string('SingleMuPt10_cfi nevts:10'),
+    annotation = cms.untracked.string('SingleMuPt10_pythia8_cfi nevts:10'),
     name = cms.untracked.string('Applications'),
     version = cms.untracked.string('$Revision: 1.19 $')
 )
@@ -72,16 +72,19 @@ process.genstepfilter.triggerConditions=cms.vstring("generation_step")
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
 
-process.generator = cms.EDProducer("FlatRandomPtGunProducer",
-    AddAntiParticle = cms.bool(True),
+process.generator = cms.EDFilter("Pythia8PtGun",
     PGunParameters = cms.PSet(
+        AddAntiParticle = cms.bool(True),
         MaxEta = cms.double(2.5),
         MaxPhi = cms.double(3.14159265359),
         MaxPt = cms.double(10.01),
         MinEta = cms.double(-2.5),
         MinPhi = cms.double(-3.14159265359),
         MinPt = cms.double(9.99),
-        PartID = cms.vint32(-13)
+        ParticleID = cms.vint32(-13)
+    ),
+    PythiaParameters = cms.PSet(
+        parameterSets = cms.vstring()
     ),
     Verbosity = cms.untracked.int32(0),
     firstRun = cms.untracked.uint32(1),
@@ -106,6 +109,8 @@ process.schedule = cms.Schedule(process.generation_step,process.genfiltersummary
 # filter all path with the production filter sequence
 for path in process.paths:
 	getattr(process,path)._seq = process.generator * getattr(process,path)._seq 
+
+
 
 
 
@@ -197,11 +202,6 @@ if opt.useRECO:
 		# This is the file you create with saveRECO, by default
 		opt.RECOFileName # Use previously saved RECO as input
 		))
-
-
-
-
-
 
 #________________________________________________________________________
 #                        Main Analysis Module
@@ -417,6 +417,13 @@ else:
 
 
 
+
+
+
+
+
+
+
 #do not add changes to your config after this point (unless you know what you are doing)
 from FWCore.ParameterSet.Utilities import convertToUnscheduled
 process=convertToUnscheduled(process)
@@ -425,3 +432,8 @@ process=cleanUnscheduled(process)
 
 
 # Customisation from command line
+
+# Add early deletion of temporary data products to reduce peak memory need
+from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
+process = customiseEarlyDelete(process)
+# End adding early deletion
