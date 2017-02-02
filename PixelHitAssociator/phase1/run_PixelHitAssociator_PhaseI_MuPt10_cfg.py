@@ -2,7 +2,7 @@
 # using: 
 # Revision: 1.19 
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
-# with command line options: -s GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,RECO --evt_type SingleMuPt10_pythia8_cfi --conditions auto:phase1_2017_realistic --era Run2_2017 --geometry DB:Extended --fileout file:GENSIMRECO_MuPt10.root --python_filename=PhaseI_MuPt10_cfg.py --runUnscheduled -n 10 --no_exec
+# with command line options: -s GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,RECO --evt_type SingleMuPt10_pythia8_cfi --conditions auto:phase1_2017_realistic --era Run2_2017 --geometry Extended2017 --fileout file:GENSIMRECO_MuPt10.root --python_filename=PhaseI_MuPt10_cfg.py --runUnscheduled -n 10
 import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
@@ -15,8 +15,8 @@ process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
-process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
-process.load('Configuration.StandardSequences.GeometrySimDB_cff')
+process.load('Configuration.Geometry.GeometryExtended2017Reco_cff')
+process.load('Configuration.Geometry.GeometryExtended2017_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Generator_cff')
 process.load('IOMC.EventVertexGenerators.VtxSmearedRealistic50ns13TeVCollision_cfi')
@@ -67,7 +67,6 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
 # Additional output definition
 
 # Other statements
-process.XMLFromDBSource.label = cms.string("Extended")
 process.genstepfilter.triggerConditions=cms.vstring("generation_step")
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
@@ -242,13 +241,10 @@ process.pixRecHitsValid.outputFile = opt.outputFileName
 #process.pixRecHitsValid.associateRecoTracks = False
 
 # myAnalyzer Path
-if opt.useRECO and opt.useClustersOnTrack:
-	process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
-	process.TrackRefitter.src = "generalTracks"
-	process.pixRecHitsValid.tracks = 'TrackRefitter'
-	process.myAnalyzer_step = cms.Path(process.MeasurementTrackerEvent*process.TrackRefitter*process.pixRecHitsValid)
-else:
-	process.myAnalyzer_step = cms.Path(process.pixRecHitsValid)
+process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
+process.TrackRefitter.src = "generalTracks"
+process.pixRecHitsValid.tracks = 'TrackRefitter'
+process.myAnalyzer_step = cms.Path(process.MeasurementTrackerEvent*process.TrackRefitter*process.pixRecHitsValid)
 
 #________________________________________________________________________
 #                        DataBase Stuff
