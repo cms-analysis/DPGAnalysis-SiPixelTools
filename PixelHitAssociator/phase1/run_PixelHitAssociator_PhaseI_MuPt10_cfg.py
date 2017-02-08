@@ -174,6 +174,10 @@ opt.register('useLocalGenErr',     False,
 	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
 	     'Test GenError conditions locally (prep/prod database or sqlite file')
 
+opt.register('useLocalTemplates',  False,
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
+	     'Test Template conditions locally (prep/prod database or sqlite file')
+
 ### Events to process: 'maxEvents' is already registered by the framework
 opt.setDefault('maxEvents', 1000)
 
@@ -313,6 +317,13 @@ GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_mc_v1'
 #GenErr_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
 GenErr_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
 
+# Templates
+Templates_tag      = 'SiPixelTemplateDBObject_phase1_38T_mc_v2'
+Templates_db       = 'sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/2017_02_07/SiPixelTemplateDBObject_phase1_38T_mc_v2.db'
+#Templates_db       = 'frontier://FrontierPrep/CMS_COND_PIXEL'
+#Templates_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
+#Templates_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
+
 #LA
 if opt.useLocalLASim :
 	process.LASimReader = cms.ESSource("PoolDBESSource",
@@ -384,6 +395,18 @@ if opt.useLocalGenErr :
 			tag = cms.string(GenErr_tag))),
 		connect = cms.string(GenErr_db))
 	process.generrprefer = cms.ESPrefer("PoolDBESSource","GenErrReader")
+
+# Templates
+if opt.useLocalTemplates :
+	process.TemplatesReader = cms.ESSource("PoolDBESSource",
+		DBParameters = cms.PSet(
+			messageLevel = cms.untracked.int32(0),
+			authenticationPath = cms.untracked.string('')),
+		toGet = cms.VPSet(cms.PSet(
+			record = cms.string('SiPixelTemplateDBObjectRcd'),
+			tag = cms.string(Templates_tag))),
+		connect = cms.string(Templates_db))
+	process.templateprefer = cms.ESPrefer("PoolDBESSource","TemplatesReader")
 
 #---------------------------
 #  Schedule
