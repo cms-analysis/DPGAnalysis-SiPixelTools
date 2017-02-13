@@ -279,9 +279,11 @@ print "  useLocalGenErr                         = "+str(opt.useLocalGenErr)
 
 # Test Local DB conditions
 # LA (SIM)
-LASim_tag       = "SiPixelLorentzAngleSim_phase1_mc_v1"
+#LASim_tag       = "SiPixelLorentzAngleSim_phase1_mc_v1"
+LASim_tag       = "SiPixelLorentzAngleSim_phase1_mc_v2"
 #LASim_db        = 'sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngleSim_phase1_mc_v1.db'
-LASim_db        = 'frontier://FrontierPrep/CMS_CONDITIONS'
+LASim_db        = 'sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/2017_02_13/SiPixelLorentzAngleSim_phase1_mc_v2.db'
+#LASim_db        = 'frontier://FrontierPrep/CMS_CONDITIONS'
 #LASim_db        = 'frontier://FrontierProd/CMS_CONDITIONS'
 
 # Quality
@@ -291,14 +293,16 @@ Qua_db          = 'frontier://FrontierPrep/CMS_CONDITIONS'
 #Qua_db          = 'frontier://FrontierProd/CMS_CONDITIONS'
 
 # LA (RECO)
-LA_tag          = 'SiPixelLorentzAngle_phase1_mc_v1'
-LA_Width_tag    = 'SiPixelLorentzAngle_phase1_mc_v1'
+LA_tag          = 'SiPixelLorentzAngle_phase1_mc_v2'
+LA_Width_tag    = 'SiPixelLorentzAngle_forWidth_phase1_mc_v2'
 #LA_db           = 'sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_phase1_mc_v1.db'
+LA_db           = 'sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/2017_02_13/SiPixelLorentzAngle_phase1_mc_v2.db'
 #LA_db           = 'frontier://FrontierPrep/CMS_CONDITIONS'
-LA_db           = 'frontier://FrontierProd/CMS_CONDITIONS'
-#LA_Width_db     = 'sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_phase1_mc_v1.db'
+#LA_db           = 'frontier://FrontierProd/CMS_CONDITIONS'
+#LA_Width_db     = 'sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_forWidth_phase1_mc_v1.db'
+LA_Width_db     = 'sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/2017_02_13/SiPixelLorentzAngle_forWidth_phase1_mc_v2.db'
 #LA_Width_db     = 'frontier://FrontierPrep/CMS_CONDITIONS'
-LA_Width_db     = 'frontier://FrontierProd/CMS_CONDITIONS'
+#LA_Width_db     = 'frontier://FrontierProd/CMS_CONDITIONS'
 
 # Gains
 #Gain_tag        = 'SiPixelGainCalibration_phase1_mc_v1'
@@ -311,15 +315,16 @@ Gain_db         = 'sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_p
 #Gain_db         = 'frontier://FrontierProd/CMS_CONDITIONS'
 
 # GenErrors
-GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_mc_v1'
+GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_mc_v2'
 #GenErr_db       = 'sqlite_file:siPixelGenErrors38T.db'
+GenErr_db       = 'sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/2017_02_13/SiPixelGenErrorDBObject_phase1_38T_mc_v2.db'
 #GenErr_db       = 'frontier://FrontierPrep/CMS_COND_PIXEL'
 #GenErr_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
 GenErr_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
 
 # Templates
 Templates_tag      = 'SiPixelTemplateDBObject_phase1_38T_mc_v2'
-Templates_db       = 'sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/2017_02_07/SiPixelTemplateDBObject_phase1_38T_mc_v2.db'
+Templates_db       = 'sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/2017_02_13/SiPixelTemplateDBObject_phase1_38T_mc_v2.db'
 #Templates_db       = 'frontier://FrontierPrep/CMS_COND_PIXEL'
 #Templates_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
 #Templates_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
