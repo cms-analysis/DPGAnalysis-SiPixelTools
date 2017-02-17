@@ -209,6 +209,9 @@ if opt.useRECO:
 #________________________________________________________________________
 #                        Main Analysis Module
 
+# Refitter
+process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
+
 # Other statements
 #process.mix.digitizers = cms.PSet(process.theDigitizersValid)
 # modify digitizer parameters
@@ -220,15 +223,18 @@ if opt.useRECO:
 
 # Load and confiugre the plugin you want to use
 process.load("DPGAnalysis-SiPixelTools.PixelHitAssociator.SiPixelRecHitsValid_cff")
+process.pixRecHitsValid.tracks = 'TrackRefitter'
 
 # Specify inputs/outputs
 if opt.useClustersOnTrack:
 	process.pixRecHitsValid.useTracks = True
-	#process.pixRecHitsValid.tracks="initialStepTracks" # first tracker step
-	process.pixRecHitsValid.tracks="generalTracks"
+	#process.TrackRefitter.src = "initialStepTracks" # first tracker step
+	process.TrackRefitter.src = "generalTracks"
 	if opt.useTemplates:
+		process.TrackRefitter.TTRHBuilder = 'WithAngleAndTemplate'
 		if opt.outputFileName == '': opt.outputFileName = 'SimToRecHitHistos_TemplateReco_OnTrackHits_'+str(opt.maxEvents)+'.root'
 	else:
+		process.TrackRefitter.TTRHBuilder = 'WithTrackAngle'
 		if opt.outputFileName == '': opt.outputFileName = 'SimToRecHitHistos_GenericReco_OnTrackHits_'+str(opt.maxEvents)+'.root'
 else:
 	process.pixRecHitsValid.useTracks = False
@@ -245,9 +251,6 @@ process.pixRecHitsValid.outputFile = opt.outputFileName
 #process.pixRecHitsValid.associateRecoTracks = False
 
 # myAnalyzer Path
-process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
-process.TrackRefitter.src = "generalTracks"
-process.pixRecHitsValid.tracks = 'TrackRefitter'
 process.myAnalyzer_step = cms.Path(process.MeasurementTrackerEvent*process.TrackRefitter*process.pixRecHitsValid)
 
 #________________________________________________________________________
@@ -320,7 +323,7 @@ GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_mc_v2'
 GenErr_db       = 'sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/2017_02_13/SiPixelGenErrorDBObject_phase1_38T_mc_v2.db'
 #GenErr_db       = 'frontier://FrontierPrep/CMS_COND_PIXEL'
 #GenErr_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
-GenErr_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
+#GenErr_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
 
 # Templates
 Templates_tag      = 'SiPixelTemplateDBObject_phase1_38T_mc_v2'
