@@ -340,21 +340,21 @@ SiPixelRecHitsValid_pix::SiPixelRecHitsValid_pix(const ParameterSet& ps):
   }
 
   if(!quick) {
-    // jk 2016 Nov
-    for (int side=0; side<2; side++) {
-      sprintf(histo, "RecHit_XRes__Ring1_Side%d_Even", side+1);
-      recHitXResRing1SideEvenOdd[side][0] = dbe_->book1D(histo, histo, 100, -200., 200.); 
-      sprintf(histo, "RecHit_YRes__Ring1_Side%d_Even", side+1);
-      recHitYResRing1SideEvenOdd[side][0] = dbe_->book1D(histo, histo, 100, -200., 200.);
-      sprintf(histo, "RecHit_XRes__Ring1_Side%d_Odd", side+1);
-      recHitXResRing1SideEvenOdd[side][1] = dbe_->book1D(histo, histo, 100, -200., 200.); 
-      sprintf(histo, "RecHit_YRes__Ring1_Side%d_Odd", side+1);
-      recHitYResRing1SideEvenOdd[side][1] = dbe_->book1D(histo, histo, 100, -200., 200.);
+    // jk 18 Feb 2017
+    for (int ring=0; ring<2; ring++) {
+      for (int side=0; side<2; side++) for (int panel=0; panel<2; panel++) {
+	sprintf(histo, "RecHit_XRes_Ring%d_Side%d_Panel%d", ring+1, side+1, panel+1);
+	recHitXResRingSidePanel[ring][side][panel] = dbe_->book1D(histo, histo, 100, -200., 200.); 
+	sprintf(histo, "RecHit_YRes_Ring%d_Side%d_Panel%d", ring+1, side+1, panel+1);
+	recHitYResRingSidePanel[ring][side][panel] = dbe_->book1D(histo, histo, 100, -200., 200.);
+      }
+      for (int side=0; side<2; side++) {
+	sprintf(histo, "RecHit_XRes_Ring%d_Side%d", ring+1, side+1);
+	recHitXResRingSide[ring][side] = dbe_->book1D(histo, histo, 100, -200., 200.); 
+      }
       for (int panel=0; panel<2; panel++) {
-	sprintf(histo, "RecHit_XRes_Ring2_Side%d_Panel%d", side+1, panel+1);
-	recHitXResRing2SidePanel[side][panel] = dbe_->book1D(histo, histo, 100, -200., 200.); 
-	sprintf(histo, "RecHit_YRes_Ring2_Side%d_Panel%d", side+1, panel+1);
-	recHitYResRing2SidePanel[side][panel] = dbe_->book1D(histo, histo, 100, -200., 200.);
+	sprintf(histo, "RecHit_YRes_Ring%d_Panel%d", ring+1, panel+1);
+	recHitYResRingPanel[ring][panel] = dbe_->book1D(histo, histo, 100, -200., 200.);
       }
     }
 
@@ -965,10 +965,10 @@ void SiPixelRecHitsValid_pix::fillForward(const TrackingRecHit* recHit, const PS
   //int xside = 1 + (phase1_online_blade>0); // Phase 1: -X 1, +X 2
 
   if (!quick) {
-    recHitXResRing1SideEvenOdd[side-1][ring%2]->Fill(res_x);
-    recHitYResRing1SideEvenOdd[side-1][ring%2]->Fill(res_y);
-    recHitXResRing2SidePanel[side-1][panel-1]->Fill(res_x);
-    recHitYResRing2SidePanel[side-1][panel-1]->Fill(res_y);
+    recHitXResRingSidePanel[ring-1][side-1][ring%2]->Fill(res_x);
+    recHitYResRingSidePanel[ring-1][side-1][ring%2]->Fill(res_y);
+    recHitXResRingSide[ring-1][side-1]->Fill(res_x);
+    recHitYResRingPanel[ring-1][panel-1]->Fill(res_y);
   }
 
   if (side==1) {
