@@ -965,8 +965,8 @@ void SiPixelRecHitsValid_pix::fillForward(const TrackingRecHit* recHit, const PS
   //int xside = 1 + (phase1_online_blade>0); // Phase 1: -X 1, +X 2
 
   if (!quick) {
-    recHitXResRingSidePanel[ring-1][side-1][ring%2]->Fill(res_x);
-    recHitYResRingSidePanel[ring-1][side-1][ring%2]->Fill(res_y);
+    recHitXResRingSidePanel[ring-1][side-1][panel-1]->Fill(res_x);
+    recHitYResRingSidePanel[ring-1][side-1][panel-1]->Fill(res_y);
     recHitXResRingSide[ring-1][side-1]->Fill(res_x);
     recHitYResRingPanel[ring-1][panel-1]->Fill(res_y);
   }
