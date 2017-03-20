@@ -36,7 +36,7 @@ class SiPixelLorentzAngleDBLoader : public edm::EDAnalyzer
   
  private:
 
-  unsigned int HVgroup(unsigned int panel, unsigned int module);
+  int HVgroup(int panel, int module);
 
   std::vector< std::pair<uint32_t, float> > detid_la;
   edm::ParameterSet conf_;
