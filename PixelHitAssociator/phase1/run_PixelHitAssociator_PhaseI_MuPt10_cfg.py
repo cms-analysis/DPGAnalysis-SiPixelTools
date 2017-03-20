@@ -417,17 +417,6 @@ if opt.useLocalTemplates :
 		connect = cms.string(Templates_db))
 	process.templateprefer = cms.ESPrefer("PoolDBESSource","TemplatesReader")
 
-# Intermittent solution to load new TrakerParameters
-process.TkParamsReader = cms.ESSource("PoolDBESSource",
-	DBParameters = cms.PSet(
-		messageLevel = cms.untracked.int32(0),
-		authenticationPath = cms.untracked.string('')),
-	toGet = cms.VPSet(cms.PSet(
-		record = cms.string('PTrackerParametersRcd'),
-		tag = cms.string('TKParameters_Geometry_90YV6'))),
-	connect = cms.string('frontier://PromptProd/CMS_CONDITIONS'))
-process.TkParamsprefer = cms.ESPrefer("PoolDBESSource","TkParamsReader")
-
 #---------------------------
 #  Schedule
 #---------------------------
