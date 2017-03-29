@@ -108,7 +108,10 @@ class SiPixelLorentzAngle : public edm::EDAnalyzer
   
   // tree branches barrel
   int run_;
-  int event_;
+  long int event_;
+  int lumiblock_;
+  int bx_;
+  int orbit_;
   int module_;
   int ladder_;
   int layer_;

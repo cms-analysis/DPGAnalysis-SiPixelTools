@@ -74,7 +74,10 @@ void SiPixelLorentzAngle::beginJob()
   // create tree structure
   SiPixelLorentzAngleTree_ = new TTree("SiPixelLorentzAngleTree_","SiPixel LorentzAngle tree", bufsize);
   SiPixelLorentzAngleTree_->Branch("run", &run_, "run/I", bufsize);
-  SiPixelLorentzAngleTree_->Branch("event", &event_, "event/I", bufsize);
+  SiPixelLorentzAngleTree_->Branch("event", &event_, "event/l", bufsize);
+  SiPixelLorentzAngleTree_->Branch("lumiblock", &lumiblock_, "lumiblock/I", bufsize);
+  SiPixelLorentzAngleTree_->Branch("bx", &bx_, "bx/I", bufsize);
+  SiPixelLorentzAngleTree_->Branch("orbit", &orbit_, "orbit/I", bufsize);
   SiPixelLorentzAngleTree_->Branch("module", &module_, "module/I", bufsize);
   SiPixelLorentzAngleTree_->Branch("ladder", &ladder_, "ladder/I", bufsize);
   SiPixelLorentzAngleTree_->Branch("layer", &layer_, "layer/I", bufsize);
@@ -97,7 +100,10 @@ void SiPixelLorentzAngle::beginJob()
 	
   SiPixelLorentzAngleTreeForward_ = new TTree("SiPixelLorentzAngleTreeForward_","SiPixel LorentzAngle tree forward", bufsize);
   SiPixelLorentzAngleTreeForward_->Branch("run", &run_, "run/I", bufsize);
-  SiPixelLorentzAngleTreeForward_->Branch("event", &event_, "event/I", bufsize);
+  SiPixelLorentzAngleTreeForward_->Branch("event", &event_, "event/l", bufsize);
+  SiPixelLorentzAngleTreeForward_->Branch("lumiblock", &lumiblock_, "lumiblock/I", bufsize);
+  SiPixelLorentzAngleTreeForward_->Branch("bx", &bx_, "bx/I", bufsize);
+  SiPixelLorentzAngleTreeForward_->Branch("orbit", &orbit_, "orbit/I", bufsize);
   SiPixelLorentzAngleTreeForward_->Branch("side", &sideF_, "side/I", bufsize);
   SiPixelLorentzAngleTreeForward_->Branch("disk", &diskF_, "disk/I", bufsize);
   SiPixelLorentzAngleTreeForward_->Branch("blade", &bladeF_, "blade/I", bufsize);
@@ -205,7 +211,10 @@ void SiPixelLorentzAngle::analyze(const edm::Event& e, const edm::EventSetup& es
 
   run_       = e.id().run();
   event_     = e.id().event();
-	
+  lumiblock_ = e.luminosityBlock();
+  bx_        = e.bunchCrossing();
+  orbit_     = e.orbitNumber();
+
   // get the association map between tracks and trajectories
   edm::Handle<TrajTrackAssociationCollection> trajTrackCollectionHandle;
   e.getByToken(t_trajTrack,trajTrackCollectionHandle);
