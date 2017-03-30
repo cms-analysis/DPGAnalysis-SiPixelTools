@@ -56,10 +56,10 @@ def main():
     config.section_("Data")
     config.Data.inputDataset = None
     # config.Data.inputDBS = 'phys03' #to be commented in case of global#
-    config.Data.splitting = 'LumiBased'#
-    config.Data.unitsPerJob = 10
+    #config.Data.splitting = 'LumiBased'#
+    config.Data.unitsPerJob = 2
     #config.Data.lumiMask = './JSON.txt'
-    #config.Data.splitting = 'FileBased'
+    config.Data.splitting = 'FileBased'
     #config.Data.unitsPerJob = 1
     config.Data.ignoreLocality = True
     config.Data.publication = False    

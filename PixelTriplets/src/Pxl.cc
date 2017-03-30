@@ -662,7 +662,7 @@ void Histos::init(TFileDirectory* fs)
 
   h030 = fs->make<TH1D>( "h030", "number of tracks;tracks", 200, 0, 2000 );
   h031 = fs->make<TH1D>( "h031", "track charge;charge", 11, -5.5, 5.5 );
-  h032 = fs->make<TH1D>( "h032", "p_{t};p_{t} [GeV]", 100, 0, 5 );
+  h032 = fs->make<TH1D>( "h032", "p_{t};p_{t} [GeV]", 1000, 0, 100 );
   h033 = fs->make<TH1D>( "h033", "p_{t} use logy, p_{t} [GeV]", 100, 0, 100 );
 
   h034 = fs->make<TH1D>( "h034", "number of rec hits;hits;tracks", 41, -0.5, 40.5 );
@@ -2525,7 +2525,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
   if( tracks.failedToGet() ) return;
   if( !tracks.isValid() ) return;
-  cout << "  tracks " << tracks->size();
+  // cout << "  tracks " << tracks->size();
   if( idbg ){
     cout << "  tracks " << tracks->size();
     cout << endl;
@@ -2767,9 +2767,9 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
     double ebca = sqrt( edca*edca + bx*by );//round beam
     double sbca = bcap / ebca;//impact parameter significance
 
-    if( hp.hasValidHitInFirstPixelBarrel() &&
-	hp.trackerLayersWithMeasurement() > 7 ) {
-
+    // if( hp.hasValidHitInFirstPixelBarrel() &&
+    // 	hp.trackerLayersWithMeasurement() > 7 ) {
+    if( hp.hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1) && hp.trackerLayersWithMeasurement() > 7 ) { 
       if( pt > 8 ) {
 
 	h040->Fill( bcap*1E4 );//26 um in Oct 2011, 21 um Apr 2012
@@ -2844,7 +2844,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
     // track at R(PXB1), from FUNPHI, FUNLEN:
 
-    double R1 = 4.4; // PXB1
+    double R1 = 3; //34.4; //3.0; // PXB1-4.4 in run 1 -3.0 in phase1
 
     double s1 = 0;
     double fpos1 = phi - pihalf;
@@ -3561,7 +3561,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  cout << endl;
 	}
 
-	h100->Fill( ilay ); // 1,2,3
+	h100->Fill( ilay ); // 1,2,3, 4
 
 	if( ilay == 1 ) {
 
@@ -3600,7 +3600,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	  if( abs(sbca) < 5 &&
 	      ! halfmod &&
-	      hp.hasValidHitInFirstPixelBarrel() &&
+	      hp.hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1) && //  hp.hasValidHitInFirstPixelBarrel() &&
 	      hp.trackerLayersWithMeasurement() > 7 ) {
 
 	    if( pt > 8 ) h121->Fill( xloc, sqrtpihalf*abs(bcap)*1E4 );
@@ -3696,7 +3696,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  h201->Fill( ilad );// 1..32
 	  h202->Fill( imod );//1..8
 
-	  h203->Fill( gR ); // <R2> = 7.28 cm
+	  h203->Fill( gR ); // <R2> = 7.28 cm-->phase 1 :6.8
 	  h204->Fill( gF*wt );
 	  h205->Fill( gZ );
 
@@ -4617,7 +4617,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	if( subDet == PixelSubdetector::PixelBarrel ) {
 
-	  int ilay = PXBDetId(detId).layer();
+	  int ilay = tTopo->pxbLayer(detId); //PXBDetId(detId).layer();
   
 	  if( ilay == 1 ) {
 	    xPXB1 = gX;
@@ -4642,9 +4642,9 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	if( subDet == StripSubdetector::TIB ) {
 
-	  if( TIBDetId(detId).isRPhi() ){
+	  if(TIBDetId(detId).isRPhi() ){
 
-	    if( TIBDetId(detId).layer() == 1 ) {
+	    if( tTopo->tibLayer(detId) == 1 ) {
 
 	      nTIB1++;
 	      xTIB1 = gX;
@@ -4653,7 +4653,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	      //phiNTIB1 = phiN;
 	    }
 
-	    if( TIBDetId(detId).layer() == 2 ) {
+	    if( tTopo->tibLayer(detId) == 2 ) {
 
 	      nTIB2++;
 	      xTIB2 = gX;
@@ -4662,7 +4662,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	      phiNTIB2 = phiN;
 	    }
 
-	    if( TIBDetId(detId).layer() == 3 ) {
+	    if( tTopo->tibLayer(detId)  == 3 ) {
 
 	      nTIB3++;
 	      xTIB3 = gX;
@@ -4671,7 +4671,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	      phiNTIB3 = phiN;
 	    }
 
-	    if( TIBDetId(detId).layer() == 4 ) {
+	    if(  tTopo->tibLayer(detId) == 4 ) {
 
 	      nTIB4++;
 	      xTIB4 = gX;
@@ -4916,6 +4916,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	double r1 = sqrt( xPXB1*xPXB1 + yPXB1*yPXB1 );
 	double r3 = sqrt( xPXB3*xPXB3 + yPXB3*yPXB3 );
+	
+	//	cout << "!!!warn r1 = " << r1 << ", r3 = " << r3 << endl;
 
 	if( r3-r1 < 2.0 ) cout << "warn r1 = " << r1 << ", r3 = " << r3 << endl;
 
