@@ -10,7 +10,7 @@ opt.register('outputFileName',
              'The name of the output file')
 
 opt.register('GlobalTag',
-             'auto:run2_data',
+              'auto:phase1_2017_realistic', #'auto:run2_data',
              opts.VarParsing.multiplicity.singleton,
              opts.VarParsing.varType.string,
              'Global tag for this run')
@@ -34,13 +34,13 @@ opt.register('useLocalDBTemplate',
              'Read Templates from local DB')
 
 opt.register('useTemplateReco',
-             True,
+             False,
              opts.VarParsing.multiplicity.singleton,
              opts.VarParsing.varType.bool,
              'Set if you want to use Template (True) or Generic Reco (False)')
 
 ### Events to process: 'maxEvents' is already registered by the framework
-opt.setDefault('maxEvents', 1000)
+opt.setDefault('maxEvents', -1)
 
 # Proceed with settings from command line
 opt.parseArguments()
@@ -145,7 +145,14 @@ myfilelist.extend([
 process.source = cms.Source("PoolSource",
 # fileNames =  myfilelist
 	fileNames = cms.untracked.vstring(
-"file:/data/store/express/Run2016H/ExpressPhysics/FEVT/Express-v2/000/282/735/00000/0050618F-5C8E-E611-BD9F-FA163E7C262F.root"
+"file:/afs/cern.ch/work/c/cgalloni/PXL_GIT/CMSSW_9_0_0_pre4/src/DPGAnalysis-SiPixelTools/PixelHitAssociator/GENSIMRECO_MuPt10_TemplateReco_100.root",
+#"/store/mc/PhaseIFall16DR/DYToMuMu_M-20_13TeV_pythia8/GEN-SIM-RECO/FlatPU20to50RECO_81X_upgrade2017_realistic_v26-v1/110000/FC2572D7-9EEE-E611-8C4D-0CC47A7EEE0E.root",
+#"/store/mc/PhaseIFall16DR/DYToMuMu_M-20_13TeV_pythia8/GEN-SIM-RECO/FlatPU20to50RECO_81X_upgrade2017_realistic_v26-v1/110000/FC55DA16-B3EE-E611-8108-6CC2173BC0A0.root",
+#"/store/mc/PhaseIFall16DR/DYToMuMu_M-20_13TeV_pythia8/GEN-SIM-RECO/FlatPU20to50RECO_81X_upgrade2017_realistic_v26-v1/110000/FC88E26C-3EF0-E611-8EB3-0CC47AD98C8A.root",
+#"/store/mc/PhaseIFall16DR/DYToMuMu_M-20_13TeV_pythia8/GEN-SIM-RECO/FlatPU20to50RECO_81X_upgrade2017_realistic_v26-v1/110000/FCE0054E-C0EE-E611-9D68-1418776420DF.root",
+#"/store/mc/PhaseIFall16DR/DYToMuMu_M-20_13TeV_pythia8/GEN-SIM-RECO/FlatPU20to50RECO_81X_upgrade2017_realistic_v26-v1/110000/FEAEA56F-98EE-E611-A78C-0CC47A706FF4.root",
+#"/store/mc/PhaseIFall16DR/DYToMuMu_M-20_13TeV_pythia8/GEN-SIM-RECO/FlatPU20to50RECO_81X_upgrade2017_realistic_v26-v1/110000/FEC5CDAA-CDEE-E611-896C-002590E7D7DE.root",
+#/data/store/express/Run2016H/ExpressPhysics/FEVT/Express-v2/000/282/735/00000/0050618F-5C8E-E611-BD9F-FA163E7C262F.root"
 #"/store/express/Run2016H/ExpressPhysics/FEVT/Express-v2/000/281/663/00000/72B55B7C-FD83-E611-934E-FA163E244B58.root",
 #"/store/data/Run2012D/MinimumBias/RECO/PromptReco-v1/000/208/686/F60495B3-1E41-E211-BB7C-003048D3756A.root",
 # my re-reco 
@@ -262,10 +269,10 @@ if opt.useLocalDBTemplate :
 
 process.Histos = cms.EDAnalyzer('Pxl',#BPix',
 # for official RECO
-	triggerSource = cms.InputTag('TriggerResults::HLT'),
+#	triggerSource = cms.InputTag('TriggerResults::HLT'),
 # For MC or my rereco
-#	triggerSource = cms.InputTag(''),
-#	singleParticleMC = cms.untracked.bool(True),
+	triggerSource = cms.InputTag(''),
+	singleParticleMC = cms.untracked.bool(True),
 )
 if opt.useTemplateReco:
     process.Histos.ttrhBuilder = cms.string('WithAngleAndTemplate')
