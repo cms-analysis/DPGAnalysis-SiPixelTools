@@ -64,8 +64,8 @@ if testTag :
 #           tag = cms.string('SiPixelGenErrorDBObject38Tv3')
 #           tag = cms.string('SiPixelGenErrorDBObject0Tv10')
 #           tag = cms.string('SiPixelGenErrorDBObject0Tv3')
-#           tag = cms.string('SiPixelGenErrorDBObject_phase1_38T_2017_v1')
-           tag = cms.string('SiPixelGenErrorDBObject_phase1_00T_2017_v1')
+           tag = cms.string('SiPixelGenErrorDBObject_phase1_38T_2017_v1')
+#           tag = cms.string('SiPixelGenErrorDBObject_phase1_00T_2017_v1')
 #           MC
 #           tag = cms.string('SiPixelGenErrorDBObject38TV10')
 #           tag = cms.string('SiPixelGenErrorDBObject_phase1_38T_mc_v1')
@@ -84,8 +84,8 @@ if testTag :
         #connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
         #connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
         #connect = cms.string('frontier://FrontierPrep/CMS_COND_PIXEL')
-#        connect = cms.string('sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/2017_03_20/SiPixelGenErrorDBObject_phase1_38T_2017_v1.db')
-        connect = cms.string('sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/2017_03_20/SiPixelGenErrorDBObject_phase1_00T_2017_v1.db')
+        connect = cms.string('sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/2017_03_20/SiPixelGenErrorDBObject_phase1_38T_2017_v1.db')
+#        connect = cms.string('sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/2017_03_20/SiPixelGenErrorDBObject_phase1_00T_2017_v1.db')
         # MC
         #connect = cms.string('sqlite_file:../../../../../DB/siPixelGenErrors38T_v1_mc.db')
         #connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/public/CMSSW/DB/phase1/SiPixelGenErrorDBObject_phase1_38T_mc_v1.db')

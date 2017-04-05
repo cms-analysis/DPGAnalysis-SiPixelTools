@@ -151,6 +151,11 @@ opt.register('RECOFileName',  '',
 	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.string,
 	     'Name of the histograms file')
 
+
+opt.register('noMagField',         False,
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
+	     'Test LA (SIM) conditions locally (prep/prod database or sqlite file')
+
 opt.register('outputFileName',      '',
 	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.string,
 	     'Name of the histograms file')
@@ -206,6 +211,11 @@ if opt.useRECO:
 		# This is the file you create with saveRECO, by default
 		opt.RECOFileName # Use previously saved RECO as input
 		))
+
+# Switch off magnetic field
+if opt.noMagField:
+	process.load('Configuration.StandardSequences.MagneticField_0T_cff')
+	process.g4SimHits.UseMagneticField = cms.bool(False)
 
 #________________________________________________________________________
 #                        Main Analysis Module
@@ -273,6 +283,7 @@ print "  useTemplates                           = "+str(opt.useTemplates)
 print "  saveRECO                               = "+str(opt.saveRECO)
 print "  useRECO                                = "+str(opt.useRECO)
 print "  RECOFileName                           = "+str(opt.RECOFileName)
+print "  noMagField                             = "+str(opt.noMagField)
 print "  outputFileName                         = "+str(opt.outputFileName)
 print "  maxEvents                              = "+str(opt.maxEvents)
 print "  useLocalLASim                          = "+str(opt.useLocalLASim)
@@ -281,65 +292,94 @@ print "  useLocalLA                             = "+str(opt.useLocalLA)
 print "  useLocalGain                           = "+str(opt.useLocalGain)
 print "  useLocalGenErr                         = "+str(opt.useLocalGenErr)
 
+
+dir   = 'sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/'
+Danek = 'sqlite_file:/afs/cern.ch/user/d/dkotlins/public/CMSSW/DB/phase1/'
+
 # Test Local DB conditions
-# LA (SIM)
-#LASim_tag       = "SiPixelLorentzAngleSim_phase1_mc_v1"
-#LASim_tag       = "SiPixelLorentzAngleSim_phase1_mc_v2"
-LASim_tag       = "SiPixelLorentzAngleSim_phase1_2017_v1_TESTONLY"
-#LASim_db        = 'sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngleSim_phase1_mc_v1.db'
-#LASim_db        = 'sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/2017_02_13/SiPixelLorentzAngleSim_phase1_mc_v2.db'
-LASim_db        = 'sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/2017_03_20/SiPixelLorentzAngleSim_phase1_2017_v1_TESTONLY.db'
-#LASim_db        = 'frontier://FrontierPrep/CMS_CONDITIONS'
-#LASim_db        = 'frontier://FrontierProd/CMS_CONDITIONS'
-
 # Quality
-Qua_tag         = 'SiPixelQuality_phase1_ideal'
+#Qua_db          = 'frontier://FrontierPrep/CMS_CONDITIONS'
+Qua_db          = 'frontier://FrontierProd/CMS_CONDITIONS'
 #Qua_db          = 'sqlite_file:../../../../../DB/phase1/SiPixelQuality_phase1_ideal.db'
-Qua_db          = 'frontier://FrontierPrep/CMS_CONDITIONS'
-#Qua_db          = 'frontier://FrontierProd/CMS_CONDITIONS'
-
-# LA (RECO)
-#LA_tag          = 'SiPixelLorentzAngle_phase1_mc_v2'
-LA_tag          = 'SiPixelLorentzAngle_phase1_2017_v1'
-LA_Width_tag    = 'SiPixelLorentzAngle_forWidth_phase1_mc_v2'
-#LA_db           = 'sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_phase1_mc_v1.db'
-#LA_db           = 'sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/2017_02_13/SiPixelLorentzAngle_phase1_mc_v2.db'
-LA_db           = 'sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/2017_03_20/SiPixelLorentzAngle_phase1_2017_v1.db'
-#LA_db           = 'frontier://FrontierPrep/CMS_CONDITIONS'
-#LA_db           = 'frontier://FrontierProd/CMS_CONDITIONS'
-#LA_Width_db     = 'sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_forWidth_phase1_mc_v1.db'
-LA_Width_db     = 'sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/2017_02_13/SiPixelLorentzAngle_forWidth_phase1_mc_v2.db'
-#LA_Width_db     = 'frontier://FrontierPrep/CMS_CONDITIONS'
-#LA_Width_db     = 'frontier://FrontierProd/CMS_CONDITIONS'
+Qua_tag         = 'SiPixelQuality_phase1_ideal'
 
 # Gains
-#Gain_tag        = 'SiPixelGainCalibration_phase1_mc_v1'
-Gain_tag        = 'SiPixelGainCalibration_phase1_mc_v2'
-#Gain_tag        = 'SiPixelGainCalibration_phase1_ideal'
-#Gain_tag        = 'SiPixelGainCalibration_phase1_ideal_v2'
-Gain_db         = 'sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_phase1_mc_v2.db'
-#Gain_db         = 'sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_phase1_ideal_v2.db'
 #Gain_db         = 'frontier://FrontierPrep/CMS_CONDITIONS'
 #Gain_db         = 'frontier://FrontierProd/CMS_CONDITIONS'
+#Gain_db         = Danek + 'SiPixelGainCalibration_phase1_ideal_v2.db'
+#Gain_tag        = 'SiPixelGainCalibration_phase1_ideal_v2'
+Gain_db         = Danek + 'SiPixelGainCalibration_phase1_mc_v2.db'
+Gain_tag        = 'SiPixelGainCalibration_phase1_mc_v2'
+
+# LA (SIM)
+#LASim_db        = 'frontier://FrontierPrep/CMS_CONDITIONS'
+#LASim_db        = 'frontier://FrontierProd/CMS_CONDITIONS'
+# MC
+#LASim_db        = Danek+'SiPixelLorentzAngleSim_phase1_mc_v1.db'
+#LASim_tag       = "SiPixelLorentzAngleSim_phase1_mc_v1"
+#LASim_db        = dir+'2017_02_13/SiPixelLorentzAngleSim_phase1_mc_v2.db'
+#LASim_tag       = "SiPixelLorentzAngleSim_phase1_mc_v2"
+# Data (DUMMY)
+LASim_db        = dir+'2017_03_20/SiPixelLorentzAngleSim_phase1_2017_v1_TESTONLY.db'
+LASim_tag       = "SiPixelLorentzAngleSim_phase1_2017_v1_TESTONLY"
+
+# LA (RECO)
+#LA_db           = 'frontier://FrontierPrep/CMS_CONDITIONS'
+#LA_db           = 'frontier://FrontierProd/CMS_CONDITIONS'
+# MC
+#LA_db           = dir+'2017_02_13/SiPixelLorentzAngle_phase1_mc_v2.db'
+#LA_tag          = 'SiPixelLorentzAngle_phase1_mc_v2'
+# Data
+LA_db           = dir+'2017_04_05/SiPixelLorentzAngle_phase1_2017_v1.db'
+LA_tag          = 'SiPixelLorentzAngle_phase1_2017_v1'
+
+# LA (Width)
+#LA_Width_db     = 'frontier://FrontierPrep/CMS_CONDITIONS'
+#LA_Width_db     = 'frontier://FrontierProd/CMS_CONDITIONS'
+LA_Width_db     = dir+'2017_02_13/SiPixelLorentzAngle_forWidth_phase1_mc_v2.db'
+LA_Width_tag    = 'SiPixelLorentzAngle_forWidth_phase1_mc_v2'
 
 # GenErrors
-#GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_mc_v2'
-GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_2017_v1'
-#GenErr_db       = 'sqlite_file:siPixelGenErrors38T.db'
-#GenErr_db       = 'sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/2017_02_13/SiPixelGenErrorDBObject_phase1_38T_mc_v2.db'
-GenErr_db       = 'sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/2017_03_20/SiPixelGenErrorDBObject_phase1_38T_2017_v1.db'
-#GenErr_db       = 'frontier://FrontierPrep/CMS_COND_PIXEL'
-#GenErr_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
-#GenErr_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
-
-# Templates
-#Templates_tag      = 'SiPixelTemplateDBObject_phase1_38T_mc_v2'
-Templates_tag      = 'SiPixelTemplateDBObject_phase1_38T_2017_v1'
-#Templates_db       = 'sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/2017_02_13/SiPixelTemplateDBObject_phase1_38T_mc_v2.db'
-Templates_db       = 'sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/2017_03_20/SiPixelTemplateDBObject_phase1_38T_2017_v1.db'
-#Templates_db       = 'frontier://FrontierPrep/CMS_COND_PIXEL'
-#Templates_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
-#Templates_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
+if opt.noMagField:
+	# 0T GenErrors
+	#GenErr_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
+	#GenErr_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
+	# MC
+	GenErr_db       = dir+'2017_04_05/SiPixelGenErrorDBObject_phase1_00T_mc_v2.db'
+	GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_00T_mc_v2'
+	# Data
+	#GenErr_db       = dir+'2017_03_20/SiPixelGenErrorDBObject_phase1_00T_2017_v1.db'
+	#GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_00T_2017_v1'
+	
+	# 0T Templates
+	#Templates_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
+	#Templates_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
+	# MC
+	Templates_db       = dir+'2017_04_05/SiPixelTemplateDBObject_phase1_00T_mc_v2.db'
+	Templates_tag      = 'SiPixelTemplateDBObject_phase1_00T_mc_v2'
+	# Data
+	#Templates_db       = dir+'2017_03_20/SiPixelTemplateDBObject_phase1_00T_2017_v1.db'
+	#Templates_tag      = 'SiPixelTemplateDBObject_phase1_00T_2017_v1'
+else:
+	# 3.8T GenErrors
+	#GenErr_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
+	#GenErr_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
+	# MC
+	#GenErr_db       = dir+'2017_02_13/SiPixelGenErrorDBObject_phase1_38T_mc_v2.db'
+	#GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_mc_v2'
+	# Data
+	GenErr_db       = dir+'2017_04_05/SiPixelGenErrorDBObject_phase1_38T_2017_v1.db'
+	GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_2017_v1'
+	
+	# 3.8T Templates
+	#Templates_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
+	#Templates_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
+	# MC
+	#Templates_db       = dir+'2017_02_13/SiPixelTemplateDBObject_phase1_38T_mc_v2.db'
+	#Templates_tag      = 'SiPixelTemplateDBObject_phase1_38T_mc_v2'
+	# Data
+	Templates_db       = dir+'2017_04_05/SiPixelTemplateDBObject_phase1_38T_2017_v1.db'
+	Templates_tag      = 'SiPixelTemplateDBObject_phase1_38T_2017_v1'
 
 #LA
 if opt.useLocalLASim :
@@ -423,6 +463,14 @@ if opt.useLocalTemplates :
 			record = cms.string('SiPixelTemplateDBObjectRcd'),
 			tag = cms.string(Templates_tag))),
 		connect = cms.string(Templates_db))
+	if opt.noMagField:
+		process.TemplatesReader.toGet = cms.VPSet(
+			cms.PSet(
+				label = cms.untracked.string('0T'),
+				record = cms.string('SiPixelTemplateDBObjectRcd'),
+				tag = cms.string(Templates_tag)
+				)
+			)
 	process.templateprefer = cms.ESPrefer("PoolDBESSource","TemplatesReader")
 
 #---------------------------
