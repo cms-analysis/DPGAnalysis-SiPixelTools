@@ -83,7 +83,7 @@ create(){
   echo "indir = $indir" 	>> $runningdir/config
   echo "storedir = $storedir" 	>> $runningdir/config
   
-  for i in `seq 0 39`;do
+  for i in "${PIXFEDarray[@]}";do
     file=GainCalibration_${i}_$run.$ext
     if [ `is_file_present $indir/$file` -eq 0 ];then echo "File $file is not present in $indir ...";continue;fi
     sed "s#FILENAME#file:$file#" gain_calib_template_cfg.py > $runningdir/gain_calib_${i}_cfg.py
@@ -128,7 +128,7 @@ wait_for_staging(){
   need_to_wait=1
   while [ $need_to_wait -eq 1 ];do
     need_to_wait=0
-    for i in `seq 0 39`;do
+    for i in "${PIXFEDarray[@]}";do
       file=GainCalibration_${i}_$run.$ext
       if [ `is_file_present $indir/$file` -eq 0 ];then echo "File $file is not present in $indir ...";continue;fi	 
       stager_qry -M $indir/$file
@@ -154,7 +154,7 @@ submit_calib(){
   sed -i "s#T2_OUT_CP#${T2_CP}#" ${runningdir}/submit_template.sh
   cd $runningdir
   
-  for i in `seq 0 39`;do
+  for i in "${PIXFEDarray[@]}";do
     make_dir ${runningdir}/JOB_${i}
     rm -f submit_${i}.sh
     sed "s/NUM/${i}/" submit_template.sh > submit_${i}.sh
@@ -557,6 +557,10 @@ file1=""
 run2=0
 file2=""
 dat_file=''
+
+FPIXFEDarray=(1296 1297 1298 1299 1300 1301 1302 1308 1309 1310 1311 1312 1313 1314 1320 1321 1322 1323 1324 1325 1326 1332 1333 1334 1335 1336 1337 1338)
+BPIXFEDarray=(1200 1201 1202 1203 1204 1205 1206 1207 1208 1209 1212 1213 1214 1215 1216 1217 1218 1219 1220 1221 1224 1225 1226 1227 1228 1229 1230 1231 1232 1233 1236 1237 1238 1239 1240 1241 1242 1243 1244 1245 1248 1249 1250 1251 1252 1253 1254 1255 1256 1257 1260 1261 1262 1263 1264 1265 1266 1267 1268 1269 1272 1273 1274 1275 1276 1277 1278 1279 1280 1281 1284 1285 1286 1287 1288 1289 1290 1291 1292 1293)
+PIXFEDarray=("${BPIX[@]}" "${FPIX[@]}")
 
 
 #lock

@@ -10,9 +10,14 @@ process.MessageLogger = cms.Service("MessageLogger",
     )
 
 # GlobalTag
-process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
-from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
+#Phase0
+# process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
+# from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
+# process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
+#Phase1
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+from Configuration.AlCa.GlobalTag import GlobalTag
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
 
 # SLink Data --> Digis
 process.load('Configuration.StandardSequences.RawToDigi_Data_cff')
@@ -22,6 +27,7 @@ process.source = cms.Source("PixelSLinkDataInputSource",
     fileNames = cms.untracked.vstring('FILENAME')
     )
 process.siPixelDigis.InputLabel = 'source'
+process.siPixelDigis.UsePhase1 = cms.bool(True)
 
 # Digis --> Calib Digis
 process.load("DPGAnalysis-SiPixelTools.GainCalibration.SiPixelCalibDigiProducer_cfi")
