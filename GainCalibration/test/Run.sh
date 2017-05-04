@@ -153,12 +153,19 @@ submit_calib(){
   set_specifics $storedir
   sed -i "s#T2_OUT_CP#${T2_CP}#" ${runningdir}/submit_template.sh
   cd $runningdir
-  
-  for i in "${PIXFEDarray[@]}";do
-    make_dir ${runningdir}/JOB_${i}
-    rm -f submit_${i}.sh
-    sed "s/NUM/${i}/" submit_template.sh > submit_${i}.sh
-    submit_to_queue ${run}_${i} ${runningdir}/JOB_${i}/stdout submit_${i}.sh
+  echo "pwd  "`pwd`
+  echo "Run "${run}
+  for i in "${PIXFEDarray[@]}";
+  do
+      if ls ${runningdir}/gain_calib_${i}_cfg.py > /dev/null 2>&1;
+	  then
+	  make_dir ${runningdir}/JOB_${i}
+	  rm -f submit_${i}.sh
+	  sed "s/NUM/${i}/" submit_template.sh > submit_${i}.sh
+	  submit_to_queue ${run}_${i} ${runningdir}/JOB_${i}/stdout submit_${i}.sh
+      else
+	  echo "Could not find: gain_calib_${i}_cfg.py"
+      fi
   done
   
   cd -
@@ -560,7 +567,7 @@ dat_file=''
 
 FPIXFEDarray=(1296 1297 1298 1299 1300 1301 1302 1308 1309 1310 1311 1312 1313 1314 1320 1321 1322 1323 1324 1325 1326 1332 1333 1334 1335 1336 1337 1338)
 BPIXFEDarray=(1200 1201 1202 1203 1204 1205 1206 1207 1208 1209 1212 1213 1214 1215 1216 1217 1218 1219 1220 1221 1224 1225 1226 1227 1228 1229 1230 1231 1232 1233 1236 1237 1238 1239 1240 1241 1242 1243 1244 1245 1248 1249 1250 1251 1252 1253 1254 1255 1256 1257 1260 1261 1262 1263 1264 1265 1266 1267 1268 1269 1272 1273 1274 1275 1276 1277 1278 1279 1280 1281 1284 1285 1286 1287 1288 1289 1290 1291 1292 1293)
-PIXFEDarray=("${BPIX[@]}" "${FPIX[@]}")
+PIXFEDarray=("${BPIXFEDarray[@]}" "${FPIXFEDarray[@]}")
 
 
 #lock
