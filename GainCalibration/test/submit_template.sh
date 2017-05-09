@@ -31,6 +31,8 @@ cat *.log
 
 echo -e "Copying output to pnfs:"
 echo "(T2_OUT_CP "GainCalibration.root" ${storedir}/NUM.root)"
+#remove leading "/" to make eos cp work
+if [ ${storedir:0:1} = "/" ]; then storedir=${storedir:1};fi
 T2_OUT_CP GainCalibration.root ${storedir}/NUM.root
 
 echo -e "end ... \n\n\n"

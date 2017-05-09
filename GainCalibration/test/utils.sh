@@ -45,7 +45,8 @@ set_eos_specifics(){
   # alias eos='/afs/cern.ch/project/eos/installation/cms/bin/eos.select' # This doesn't work (eos cmd missing in bash?)
   T2_LS='/afs/cern.ch/project/eos/installation/cms/bin/eos.select ls'
   T2_RM='/afs/cern.ch/project/eos/installation/cms/bin/eos.select rm -r /eos/cms' # Do not add space before next argument when using this cmd
-  T2_CP='cmsStage'
+  #T2_CP='cmsStage'
+  T2_CP='/afs/cern.ch/project/eos/installation/cms/bin/eos.select cp'
   T2_MKDIR='/afs/cern.ch/project/eos/installation/cms/bin/eos.select mkdir -p /eos/cms' # Do not add space before next argument when using this cmd
   T2_CHMOD='/afs/cern.ch/project/eos/installation/cms/bin/eos.select chmod 2777 /eos/cms' # Do not add space before next argument when using this cmd
   T2_FSYS='root://eoscms//eos/cms' # Can check what needs to be added with cmsPfn /store/...
