@@ -33,7 +33,7 @@
 #include "DataFormats/L1GlobalMuonTrigger/interface/L1MuGMTReadoutCollection.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "MagneticField/Engine/interface/MagneticField.h"
-#include "MagneticField/UniformEngine/src/UniformMagneticField.h"
+// #include "MagneticField/UniformEngine/src/UniformMagneticField.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 //#include "MagneticField/UniformEngine/src/UniformMagneticFieldESProducer.h"
 //class to take the pixel submodules

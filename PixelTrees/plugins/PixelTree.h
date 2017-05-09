@@ -82,6 +82,7 @@
 
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/CaloGeometry/interface/CaloSubdetectorGeometry.h"
+#include "Geometry/Records/interface/TrackerDigiGeometryRecord.h" // Ben
 
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 
@@ -138,6 +139,9 @@
 
 #include "TObject.h"
 
+// Ben
+#include "SiPixelCoordinates.h"
+
 using namespace reco;
 
 class TObject;
@@ -165,14 +169,8 @@ class PixelTree : public edm::EDAnalyzer {
   void fillRecHits();
   void fillVertex();
   void fillDigis();
-  
-  void bpixNames(const DetId &pID, int &DBlayer, int &DBladder, int &DBmodule);
-  void fpixNames(const DetId &pID, int &DBdisk, int &DBblade, int &DBpanel, int &DBplaquette);
-  
-  void onlineRocColRow(const DetId &pID, int offlineRow, int offlineCol, int &roc, int &col, int &row);
 
   void isPixelTrack(const edm::Ref<std::vector<Trajectory> > &refTraj, bool &isBpixtrack, bool &isFpixtrack);
-
 
  private:
   int             fVerbose; 
@@ -278,17 +276,14 @@ class PixelTree : public edm::EDAnalyzer {
   float        fClGx[CLUSTERMAX], fClGy[CLUSTERMAX], fClGz[CLUSTERMAX];
   float        fClCharge[CLUSTERMAX],  fClChargeCorr[CLUSTERMAX];
   int          fClType[CLUSTERMAX], fClTkN[CLUSTERMAX], fClTkI[CLUSTERMAX][TKPERCLMAX], fClDgN[CLUSTERMAX], fClDgI[CLUSTERMAX][DGPERCLMAX]; 
-  int          fClDetId[CLUSTERMAX];
-  int          fClLayer[CLUSTERMAX],  fClLadder[CLUSTERMAX], fClModule[CLUSTERMAX];
-  int          fClFlipped[CLUSTERMAX], fClDisk[CLUSTERMAX],  fClBlade[CLUSTERMAX], fClPanel[CLUSTERMAX], fClPlaquette[CLUSTERMAX];
+  int          fClDetId[CLUSTERMAX], fClFedId[CLUSTERMAX], fClROC[CLUSTERMAX], fClChannel[CLUSTERMAX];
+  int          fClLayer[CLUSTERMAX],  fClLadder[CLUSTERMAX], fClModule[CLUSTERMAX]; 
+  int          fClFlipped[CLUSTERMAX], fClDisk[CLUSTERMAX],  fClBlade[CLUSTERMAX], fClPanel[CLUSTERMAX], fClPlaquette[CLUSTERMAX], fClRing[CLUSTERMAX];
   float        fClRhLx[CLUSTERMAX], fClRhLy[CLUSTERMAX], fClRhLxE[CLUSTERMAX], fClRhLyE[CLUSTERMAX];
   float        fClRhGx[CLUSTERMAX], fClRhGy[CLUSTERMAX], fClRhGz[CLUSTERMAX];
   float        fClRhProb[CLUSTERMAX], fClRhProbX[CLUSTERMAX], fClRhProbY[CLUSTERMAX];
   unsigned int fClRhQualWord[CLUSTERMAX]; 
   int          fClRhqBin[CLUSTERMAX], fClRhSpansTwoROCs[CLUSTERMAX], fClRhIsOnEdge[CLUSTERMAX], fClRhHasBadPixels[CLUSTERMAX]; 
-
-
-
 
   // gavril@jhu.edu: Start: Add sim hit and sim track info ===========================================================
 
@@ -346,6 +341,10 @@ class PixelTree : public edm::EDAnalyzer {
 
   HLTConfigProvider fHltConfig;  
   bool fValidHLTConfig;
+
+  // Ben
+  SiPixelCoordinates        coord_;
+
 };
 
 #endif
