@@ -16,17 +16,22 @@ Usage:
 //
 // Original Author:  chiochia
 //         Created:  Thu Jan 26 23:49:46 CET 2006
+// Adopt for phase1 d.k. 5/17
 
 #include <boost/cstdint.hpp>
 #include <string>
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include "TFile.h"
 #include "TDirectory.h"
 #include "TSystem.h"
+
+class TrackerTopology;
+
 class SiPixelFolderOrganizerGC {
   
  public:
@@ -40,13 +45,17 @@ class SiPixelFolderOrganizerGC {
   /// Set folder name for a module or plaquette
   //type is: BPIX  mod=0, lad=1, lay=2, phi=3, 
   //         FPIX  mod=0, blade=4, disc=5, ring=6
-  bool setModuleFolder( std::map<std::string, TFileDirectory>  *myTFileDirMap, const uint32_t& rawdetid=0, int type=0, bool isUpgrade=false  );
-  void getModuleFolder(const uint32_t& rawdetid, std::string& path, bool isUpgrade);
+  //bool setModuleFolder( std::map<std::string, TFileDirectory>  *myTFileDirMap, const uint32_t& rawdetid=0, int type=0, bool isUpgrade=false  );
+  //void getModuleFolder(const uint32_t& rawdetid, std::string& path, bool isUpgrade);
+
+  bool setModuleFolder( std::map<std::string, TFileDirectory>  *myTFileDirMap, const uint32_t& rawdetid=0, const TrackerTopology* tt=0, int type=0, bool isUpgrade=false  );
+  void getModuleFolder(const uint32_t& rawdetid, const TrackerTopology* tt, std::string& path, bool isUpgrade);
 
   /// Set folder name for a FED (used in the case of errors without detId)
   bool setFedFolder( std::map< std::string, TFileDirectory>  *myTFileDirMap, const uint32_t FedId );
 
-  std::string setModuleFolderPath( const uint32_t& rawdetid=0, int type=0, bool isUpgrade=false  );
+  //std::string setModuleFolderPath( const uint32_t& rawdetid=0, int type=0, bool isUpgrade=false  );
+  std::string setModuleFolderPath( const uint32_t& rawdetid=0, const TrackerTopology* tt=0, int type=0, bool isUpgrade=false  );
 
   bool dirExists( const char *path);
   std::vector<std::string>  split(const std::string &s, char delim);
