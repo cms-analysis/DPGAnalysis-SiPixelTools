@@ -73,7 +73,8 @@ process.siPixelCalibDigis.calibrows_Int = cms.vint32(
 
 # Camilla's New Analyzer
 process.load("DPGAnalysis-SiPixelTools.GainCalibration.SiPixelGainCalibrationAnalysis_cfi")
-process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
+#process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
+process.load("Configuration.Geometry.GeometryRecoDB_cff")
 process.siPixelGainCalibrationAnalysis.saveFile = False
 process.siPixelGainCalibrationAnalysis.savePixelLevelHists = True 
 process.siPixelGainCalibrationAnalysis.prova = cms.string('FunzionaAncheDaQui')
@@ -82,6 +83,7 @@ process.siPixelGainCalibrationAnalysis.calibcols_Int = process.siPixelCalibDigis
 process.siPixelGainCalibrationAnalysis.calibrows_Int = process.siPixelCalibDigis.calibrows_Int
 process.siPixelGainCalibrationAnalysis.Repeat = process.siPixelCalibDigis.Repeat
 process.siPixelGainCalibrationAnalysis.CalibMode = process.siPixelCalibDigis.CalibMode
+process.siPixelGainCalibrationAnalysis.phase1 = True
 
 # Path
 process.p = cms.Path(process.siPixelDigis * process.siPixelCalibDigis * process.siPixelGainCalibrationAnalysis )
