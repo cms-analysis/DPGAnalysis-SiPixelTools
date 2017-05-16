@@ -332,8 +332,8 @@ void make_ComparisonPlots(TString fname="" , TString run="" , TString fname2="" 
 	   
 	   if(fabs(pix.gain) > gain_max || fabs(pix.pedestal) > ped_max){
 	     ++nPixHigherMax;
-	     cout << "      col,row " << xpix << "," << ypix
-	          <<" gain: "<< pix.gain << " ped: "<< pix.pedestal << endl;
+	     // cout << "      col,row " << xpix << "," << ypix
+	     //      <<" gain: "<< pix.gain << " ped: "<< pix.pedestal << endl;
 	     continue;
 	   }
 	   

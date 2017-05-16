@@ -20,7 +20,7 @@ echo -e "************************\n\n"
 echo -e "Copying file from storage to local ..."
 file=GainCalibration_NUM_RUN.EXT
 echo "(T2_CP $indir/$file $file)"
-T2_CP $indir/$file $file
+T2_CP T2_PREFIX$indir/$file $file
 echo -e "************************"
 echo -e "  => ls: \n`ls`"
 echo -e "************************\n\n"
@@ -33,7 +33,7 @@ echo -e "Copying output to pnfs:"
 echo "(T2_OUT_CP "GainCalibration.root" ${storedir}/NUM.root)"
 #remove leading "/" to make eos cp work
 if [ ${storedir:0:1} = "/" ]; then storedir=${storedir:1};fi
-T2_OUT_CP GainCalibration.root ${storedir}/NUM.root
+T2_OUT_CP GainCalibration.root T2_PREFIX${storedir}/NUM.root
 
 echo -e "end ... \n\n\n"
 
