@@ -398,20 +398,25 @@ compare_runs(){
 
 make_payload(){
 
+  if [ -z $db_version ] || [ -z $year ];
+  then echo -e "\e[31mYou must provide a year AND a version!\n  e.g.: ./Run.sh -payload RUNNUMBER YEAR VERSION --> SiPixelGainCalibration_YEAR_vVERSION_offline\n e.g.: ./Run.sh -payload 265850 2016 1\e[0m";exit
+  fi
+
   set_specifics $storedir
   stage_list_of_files $storedir/GainCalibration.root
   
   file=$T2_TMP_DIR/GainCalibration_$run.root
   echo "Copying $storedir/GainCalibration.root to $file"
-  $T2_CP $storedir/GainCalibration.root $file
+  $T2_CP $T2_PREFIX$storedir/GainCalibration.root $file
   
   ###########################################   OFFLINE PAYLOAD
   
-  
-  payload=prova_GainRun${run}.db
-  echo " Copying   $T2_CP prova.db $T2_TMP_DIR/$payload "
-  $T2_CP prova.db $T2_TMP_DIR/$payload
-  payload_root=Summary_payload_Run${run}.root
+  # payload=prova_GainRun${run}.db
+  # echo " Copying   $T2_CP prova.db $T2_TMP_DIR/$payload "
+  # $T2_CP prova.db $T2_TMP_DIR/$payload
+  # payload_root=Summary_payload_Run${run}.root
+  payload=SiPixelGainCalibration_${year}_v${db_version}_offline.db
+  payload_root=Summary_payload_Run${run}_${year}_v${db_version}.root
   
   echo -e "RM: $T2_RM$storedir/$payload"
   echo -e "RM: $T2_RM$storedir/$payload_root"
@@ -434,11 +439,11 @@ make_payload(){
   
   echo " finish SiPixelGainCalibrationDBUploader_Offline_cfg.py "
 
-  $T2_CP $T2_TMP_DIR/$payload $storedir/$payload
-  $T2_CP $T2_TMP_DIR/$payload_root $storedir/$payload_root
+  $T2_CP $T2_TMP_DIR/$payload $T2_PREFIX$storedir/$payload
+  $T2_CP $T2_TMP_DIR/$payload_root $T2_PREFIX$storedir/$payload_root
   
-  echo "Copying   $T2_CP $T2_TMP_DIR/$payload $storedir/$payload "
-  echo "Copying   $T2_CP $T2_TMP_DIR/$payload_root $storedir/$payload_root "
+  echo "Copying   $T2_CP $T2_TMP_DIR/$payload $T2_PREFIX$storedir/$payload "
+  echo "Copying   $T2_CP $T2_TMP_DIR/$payload_root $T2_PREFIX$storedir/$payload_root "
  
   rm -f $T2_TMP_DIR/${payload}
   rm -f $T2_TMP_DIR/${payload_root}
@@ -447,9 +452,11 @@ make_payload(){
   echo "removing  $T2_TMP_DIR/${payload_root} "
   ###########################################   HLT PAYLOAD
   
-  payload=prova_GainRun${run}_HLT.db
-  cp prova.db $T2_TMP_DIR/$payload
-  payload_root=Summary_payload_Run${run}_HLT.root
+  # payload=prova_GainRun${run}_HLT.db
+  # cp prova.db $T2_TMP_DIR/$payload
+  # payload_root=Summary_payload_Run${run}_HLT.root
+  payload=SiPixelGainCalibration_${year}_v${db_version}_HLT.db
+  payload_root=Summary_payload_Run${run}_${year}_v${db_version}_HLT.root
   
   echo -e "RM: `$T2_RM$storedir/$payload`"
   echo -e "RM: `$T2_RM$storedir/$payload_root`"
@@ -473,8 +480,8 @@ make_payload(){
   cmsRun SiPixelGainCalibrationDBUploader_HLT_cfg.py
   
   ls $T2_TMP_DIR
-  $T2_CP $T2_TMP_DIR/$payload $storedir/$payload
-  $T2_CP $T2_TMP_DIR/$payload_root $storedir/$payload_root
+  $T2_CP $T2_TMP_DIR/$payload $T2_PREFIX$storedir/$payload
+  $T2_CP $T2_TMP_DIR/$payload_root $T2_PREFIX$storedir/$payload_root
   
   rm -f $T2_TMP_DIR/${payload}
   rm -f $T2_TMP_DIR/${payload_root}
