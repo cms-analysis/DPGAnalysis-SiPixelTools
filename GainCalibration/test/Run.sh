@@ -149,7 +149,7 @@ wait_for_staging(){
 submit_calib(){
   set_specifics $indir
   sed "s;INDIR;$indir;;s;RUN;$run;;s;.EXT;.$ext;;s;STOREDIR;${storedir};" submit_template.sh |\
-      sed "s;T2_CP;${T2_CP};;s;T2_TMP_DIR;${T2_TMP_DIR};;s;CFGDIR;${runningdir};" > ${runningdir}/submit_template.sh
+      sed "s;T2_CP;${T2_CP};;s;T2_TMP_DIR;${T2_TMP_DIR};;s;CFGDIR;${runningdir};;s;T2_PREFIX;${T2_PREFIX};" > ${runningdir}/submit_template.sh
   set_specifics $storedir
   sed -i "s#T2_OUT_CP#${T2_CP}#" ${runningdir}/submit_template.sh
   cd $runningdir
@@ -398,20 +398,25 @@ compare_runs(){
 
 make_payload(){
 
+  if [ -z $db_version ] || [ -z $year ];
+  then echo -e "\e[31mYou must provide a year AND a version!\n  e.g.: ./Run.sh -payload RUNNUMBER YEAR VERSION --> SiPixelGainCalibration_YEAR_vVERSION_offline\n e.g.: ./Run.sh -payload 265850 2016 1\e[0m";exit
+  fi
+
   set_specifics $storedir
   stage_list_of_files $storedir/GainCalibration.root
   
   file=$T2_TMP_DIR/GainCalibration_$run.root
   echo "Copying $storedir/GainCalibration.root to $file"
-  $T2_CP $storedir/GainCalibration.root $file
+  $T2_CP $T2_PREFIX$storedir/GainCalibration.root $file
   
   ###########################################   OFFLINE PAYLOAD
   
-  
-  payload=prova_GainRun${run}.db
-  echo " Copying   $T2_CP prova.db $T2_TMP_DIR/$payload "
-  $T2_CP prova.db $T2_TMP_DIR/$payload
-  payload_root=Summary_payload_Run${run}.root
+  # payload=prova_GainRun${run}.db
+  # echo " Copying   $T2_CP prova.db $T2_TMP_DIR/$payload "
+  # $T2_CP prova.db $T2_TMP_DIR/$payload
+  # payload_root=Summary_payload_Run${run}.root
+  payload=SiPixelGainCalibration_${year}_v${db_version}_offline.db
+  payload_root=Summary_payload_Run${run}_${year}_v${db_version}.root
   
   echo -e "RM: $T2_RM$storedir/$payload"
   echo -e "RM: $T2_RM$storedir/$payload_root"
@@ -420,7 +425,8 @@ make_payload(){
   cat SiPixelGainCalibrationDBUploader_cfg.py |\
     sed "s#file:///tmp/rougny/test.root#`file_loc $file`#"  |\
     sed "s#sqlite_file:prova.db#sqlite_file:$T2_TMP_DIR/${payload}#" |\
-    sed "s#/tmp/rougny/histos.root#$T2_TMP_DIR/$payload_root#" > SiPixelGainCalibrationDBUploader_Offline_cfg.py
+    sed "s#/tmp/rougny/histos.root#$T2_TMP_DIR/$payload_root#" |\
+    sed "s#GainCalib_TEST_offline#SiPixelGainCalibration_${year}_v${db_version}_offline#" > SiPixelGainCalibrationDBUploader_Offline_cfg.py
     
     
   echo -e "\n--------------------------------------"
@@ -434,11 +440,11 @@ make_payload(){
   
   echo " finish SiPixelGainCalibrationDBUploader_Offline_cfg.py "
 
-  $T2_CP $T2_TMP_DIR/$payload $storedir/$payload
-  $T2_CP $T2_TMP_DIR/$payload_root $storedir/$payload_root
+  $T2_CP $T2_TMP_DIR/$payload $T2_PREFIX$storedir/$payload
+  $T2_CP $T2_TMP_DIR/$payload_root $T2_PREFIX$storedir/$payload_root
   
-  echo "Copying   $T2_CP $T2_TMP_DIR/$payload $storedir/$payload "
-  echo "Copying   $T2_CP $T2_TMP_DIR/$payload_root $storedir/$payload_root "
+  echo "Copying   $T2_CP $T2_TMP_DIR/$payload $T2_PREFIX$storedir/$payload "
+  echo "Copying   $T2_CP $T2_TMP_DIR/$payload_root $T2_PREFIX$storedir/$payload_root "
  
   rm -f $T2_TMP_DIR/${payload}
   rm -f $T2_TMP_DIR/${payload_root}
@@ -447,9 +453,11 @@ make_payload(){
   echo "removing  $T2_TMP_DIR/${payload_root} "
   ###########################################   HLT PAYLOAD
   
-  payload=prova_GainRun${run}_HLT.db
-  cp prova.db $T2_TMP_DIR/$payload
-  payload_root=Summary_payload_Run${run}_HLT.root
+  # payload=prova_GainRun${run}_HLT.db
+  # cp prova.db $T2_TMP_DIR/$payload
+  # payload_root=Summary_payload_Run${run}_HLT.root
+  payload=SiPixelGainCalibration_${year}_v${db_version}_HLT.db
+  payload_root=Summary_payload_Run${run}_${year}_v${db_version}_HLT.root
   
   echo -e "RM: `$T2_RM$storedir/$payload`"
   echo -e "RM: `$T2_RM$storedir/$payload_root`"
@@ -461,7 +469,7 @@ make_payload(){
     sed "s#/tmp/rougny/histos.root#$T2_TMP_DIR/$payload_root#" |\
     sed "s#cms.Path(process.gainDBOffline)#cms.Path(process.gainDBHLT)#"|\
     sed "s#record = cms.string('SiPixelGainCalibrationOfflineRcd')#record = cms.string('SiPixelGainCalibrationForHLTRcd')#"|\
-    sed "s#GainCalib_TEST_offline#GainCalib_TEST_hlt#" > SiPixelGainCalibrationDBUploader_HLT_cfg.py
+    sed "s#GainCalib_TEST#SiPixelGainCalibration_${year}_v${db_version}_HLT#" > SiPixelGainCalibrationDBUploader_HLT_cfg.py
   
   echo -e "\n--------------------------------------"
   echo "Making the payload for HLT:"
@@ -473,8 +481,8 @@ make_payload(){
   cmsRun SiPixelGainCalibrationDBUploader_HLT_cfg.py
   
   ls $T2_TMP_DIR
-  $T2_CP $T2_TMP_DIR/$payload $storedir/$payload
-  $T2_CP $T2_TMP_DIR/$payload_root $storedir/$payload_root
+  $T2_CP $T2_TMP_DIR/$payload $T2_PREFIX$storedir/$payload
+  $T2_CP $T2_TMP_DIR/$payload_root $T2_PREFIX$storedir/$payload_root
   
   rm -f $T2_TMP_DIR/${payload}
   rm -f $T2_TMP_DIR/${payload_root}
@@ -483,7 +491,6 @@ make_payload(){
    
   rm -f $file  
 }
-
 
 
 print_twiki_text(){
@@ -584,7 +591,7 @@ for arg in $* ; do
     -summary)      summary=1    ; run=$2 ; shift ;;
     -pdf)          pdf=1        ; run=$2 ; shift ;;
     -compare)      compare=1    ; run=0  ; run1=$2 ; file1=$3 ; run2=$4 ; file2=$5 ; shift ; shift ; shift ; shift ; shift ;;
-    -payload)      prova=1      ; run=$2 ; shift ;;
+    -payload)      prova=1      ; run=$2 ; year=$3 ; db_version=$4 ; shift ; shift ; shift ;;
     -twiki)        twiki=1      ; run=$2 ; shift ;;
     -comp_twiki)   comp_twiki=1 ; run=$2 ; shift ;;
     -info)         info=1       ; run=$2 ; shift ;;
