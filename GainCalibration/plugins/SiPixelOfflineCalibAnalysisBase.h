@@ -119,6 +119,7 @@ protected:
   edm::ESHandle<SiPixelCalibConfiguration> calib_;
   edm::ESHandle<TrackerGeometry> geom_;
   edm::ESHandle<SiPixelFedCablingMap> theCablingMap_;
+  const TrackerTopology* tt_;
  
   std::string calibrationMode_;
   short nTriggers_;
@@ -181,8 +182,7 @@ private:
  
   // checkPixel returns whether a particular pixel is to be expected during the entire run..
   bool checkPixel(uint32_t detid, short row, short column);
-
-
+  bool phase1_;
 
 };
 
