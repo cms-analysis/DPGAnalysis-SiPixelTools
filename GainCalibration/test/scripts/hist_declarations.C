@@ -48,9 +48,9 @@
   //----------------------------------------
   //Binning
   
-  int nbin_gain = 400 ; 	  double xmin_gain = 0 ,	  xmax_gain = 10;
+  int nbin_gain = 400 ; 	  double xmin_gain = 0 ,	  xmax_gain = 8;
   int nbin_errgain = 400 ;	  double xmin_errgain = 0 ,	  xmax_errgain = 0.01;
-  int nbin_ped = 1000 ; 	  double xmin_ped = -100 ,	  xmax_ped = 150;
+  int nbin_ped = 1000 ; 	  double xmin_ped = -50 ,	  xmax_ped = 250;
   int nbin_errped = 1000 ;	  double xmin_errped = -1 ,	  xmax_errped = 1;
   
   if(diff){
