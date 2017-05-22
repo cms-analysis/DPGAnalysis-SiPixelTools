@@ -174,7 +174,6 @@ submit_calib(){
 resubmit_job(){
   set_specifics $storedir 
   
-  cd $runningdir
   if [ `is_file_present $storedir/$ijob.root` -eq 1 ];then
     echo "Output of job $ijob is already in $storedir."
     exit
@@ -182,20 +181,23 @@ resubmit_job(){
   
   echo "Re-submitting job $ijob:"
   submit_to_queue ${run}_${ijob} ${runningdir}/JOB_${ijob}/stdout submit_${ijob}.sh
-  
-  cd -
 }
 
 resubmit_all(){
   set_specifics $storedir 
   cd $runningdir
-  
-  for ijob in `seq 0 39`;do
+  nothing_to_resubmit=true
+  for ijob in "${PIXFEDarray[@]}";do
     if [ `is_file_present $storedir/$ijob.root` -eq 0 ];then
-      resubmit_job
-    fi
-  
+	nothing_to_resubmit=false
+	resubmit_job
+    fi  
   done
+
+  if [ "$nothing_to_submit" = true ];
+  then
+      echo "Nothing to resubmit."
+  fi
 
   cd -
 }
