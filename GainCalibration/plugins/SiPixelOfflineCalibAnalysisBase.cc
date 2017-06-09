@@ -53,7 +53,6 @@ SiPixelOfflineCalibAnalysisBase::SiPixelOfflineCalibAnalysisBase(const edm::Para
    outputFileName_ = iConfig.getParameter<std::string>("outputFileName");
    daqBE_ = &*edm::Service<DQMStore>();
    tPixelCalibDigi = consumes <edm::DetSetVector<SiPixelCalibDigi> > (siPixelCalibDigiProducer_);
-   prova_ = iConfig.getParameter<std::string>("prova");
    calibrationMode_ = iConfig.getParameter<std::string>("CalibMode");
    nTriggers_ =  iConfig.getParameter<int>("Repeat");
    vCalValues_Int_ = iConfig.getParameter<std::vector<int> >("vCalValues_Int");
@@ -80,7 +79,7 @@ SiPixelOfflineCalibAnalysisBase::~SiPixelOfflineCalibAnalysisBase()
 // ------------ method called to for each event  ------------
 void
 SiPixelOfflineCalibAnalysisBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
-{ //  std::cout<< "Camilla Output di prova_ " << prova_ <<std::endl;
+{
    using namespace edm;
   
    iSetup.get<TrackerDigiGeometryRecord>().get( geom_ );

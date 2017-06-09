@@ -131,8 +131,6 @@ protected:
   std::vector< short >  calibcols;
 
   uint32_t & EventNumber() { return eventCounter_;}
-  std::string  prova_;
-
 
 private:
   

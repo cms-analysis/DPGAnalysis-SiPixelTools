@@ -51,7 +51,7 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
             tag = cms.string('GainCalib_TEST_offline')
             )
         ),
-    connect = cms.string('sqlite_file:prova.db')
+    connect = cms.string('sqlite_file:dummy.db')
 )
 
 process.p = cms.Path(process.gainDBOffline)
