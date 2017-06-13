@@ -77,7 +77,6 @@ process.load("DPGAnalysis-SiPixelTools.GainCalibration.SiPixelGainCalibrationAna
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
 process.siPixelGainCalibrationAnalysis.saveFile = False
 process.siPixelGainCalibrationAnalysis.savePixelLevelHists = True 
-process.siPixelGainCalibrationAnalysis.prova = cms.string('FunzionaAncheDaQui')
 process.siPixelGainCalibrationAnalysis.vCalValues_Int = process.siPixelCalibDigis.vCalValues_Int
 process.siPixelGainCalibrationAnalysis.calibcols_Int = process.siPixelCalibDigis.calibcols_Int
 process.siPixelGainCalibrationAnalysis.calibrows_Int = process.siPixelCalibDigis.calibrows_Int
