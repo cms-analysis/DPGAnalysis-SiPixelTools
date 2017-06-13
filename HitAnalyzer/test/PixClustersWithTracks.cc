@@ -178,6 +178,8 @@ class PixClustersWithTracks : public edm::EDAnalyzer {
 
   TH2F *hpvxy, *hclusMap1, *hclusMap2,*hclusMap3,*hclusMap4; // eta vs PHI
 
+  TH2F *hsizeyz1,*hsizeyz2,*hsizeyz3,*hsizeyz4 ;
+
   TH1D *hladder1id,*hladder2id,*hladder3id,*hladder4id,
     *hz1id,*hz2id,*hz3id,*hz4id;
 
@@ -188,7 +190,7 @@ class PixClustersWithTracks : public edm::EDAnalyzer {
 
   TH2F *hbpixXY, *hfpixXY1,*hfpixXY2,*hfpixXY3, 
     *hzphi1,*hzphi2,*hzphi3,*hzphi4;
-  TH2F *htest,*htest2,*htest3;
+  TH2F *htest,*htest1,*htest2,*htest3;
 
   TH1D *hProbabilityXYBpix, *hProbabilityQBpix,*hProbabilityXYFpix, *hProbabilityQFpix;
 
@@ -536,9 +538,10 @@ void PixClustersWithTracks::beginJob() {
    hzphi3 = fs->make<TH2F>("hzphi3","bpix z phi 3",208,-26.,26.,140,-3.5,3.5);
    hzphi4 = fs->make<TH2F>("hzphi4","bpix z phi 4",208,-26.,26.,140,-3.5,3.5);
 
-   htest  = fs->make<TH2F>("htest", "bpix eta-hit size-y",50,-2.5,2.5,12,0.5,12.5);
-   htest2 = fs->make<TH2F>("htest2","bpix eta-hit size-x",50,-2.5,2.5,4, 0.5, 4.5);
-   htest3 = fs->make<TH2F>("htest3","bpix eta-hit size-y",50,-2.5,2.5,12,0.5,12.5);
+   htest  = fs->make<TH2F>("htest", "bpix eta-hit size-y",54,-2.7,2.7,20,0.5,20.5);
+   htest1 = fs->make<TH2F>("htest1","bpix eta-hit size-y",60,-30.,30.,20,0.5,20.5);
+   htest2 = fs->make<TH2F>("htest2","bpix eta-hit size-x",54,-2.7,2.7,4, 0.5, 4.5);
+   htest3 = fs->make<TH2F>("htest3","bpix eta-hit size-y",54,-2.7,2.7,20,0.5,20.5);
 
 
    // RecHit errors
@@ -635,6 +638,14 @@ void PixClustersWithTracks::beginJob() {
 				 1400,-3.5,3.5);
 
 #endif
+  hsizeyz1 = fs->make<TH2F>( "hsizeyz1", "sizy vs z for layer 1",
+			     60,-3.0,3.0,20,0.5,20.5);
+  hsizeyz2 = fs->make<TH2F>( "hsizeyz2", "sizy vs z for layer 2",
+			     50,-2.5,2.5,14,0.5,14.5);
+  hsizeyz3 = fs->make<TH2F>( "hsizeyz3", "sizy vs z for layer 3",
+			     50,-2.5,2.5,14,0.5,14.5);
+  hsizeyz4 = fs->make<TH2F>( "hsizeyz4", "sizy vs z for layer 4",
+			     50,-2.5,2.5,14,0.5,14.5);
 
 }
 // ------------ method called to at the end of the job  ------------
@@ -722,7 +733,7 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
   int bx        = e.bunchCrossing();
   //int orbit     = e.orbitNumber(); // unused 
 
-  if(PRINT) cout<<"Run "<<run<<" Event "<<event<<" LS "<<lumiBlock<<" bx "<<endl;
+  if(PRINT) cout<<"Run "<<run<<" Event "<<event<<" LS "<<lumiBlock<<" bx "<<bx<<endl;
 
  // Inconsistent BX: for event 20659585 (fed-header event 3882369) for LS 21 for run 254227 for bx 895 pix= 8729
  // Inconsistent BX: for event 20752843 (fed-header event 3975627) for LS 21 for run 254227 for bx 895 pix= 9257
@@ -749,7 +760,8 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
   //20311581, 20444653, 20446682, 20454700, 20011376, 20013421, 20761275, 19948624, 20588638}; 
 
 
-  //bool select = false;
+  bool select = false;
+
   //if(lumiBlock==21) {
   ////if(event==20659585) cout<<" Event "<<event<<" LS "<<lumiBlock<<endl;
   //for(int i=0;i<19;++i) {
@@ -1263,8 +1275,8 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	
 	//cout<<" clus loc "<<row<<" "<<col<<endl;
 	
+	//select = (abs(eta)>2.)&&(abs(module)==4); 
 	if(PRINT) cout<<" cluster "<<numberOfClusters<<" charge = "<<charge<<" size = "<<size<<endl;
-	
 	
 	LocalPoint lp = topol->localPosition( MeasurementPoint( clust->x(), clust->y() ) );
 	//float x = lp.x();
@@ -1304,7 +1316,14 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	//float beta = atan2( locz, locy );
 	
 	if(layer==1) {
-	
+	  if(select) cout<<"Run "<<run<<" Event "<<event<<" bx "<<bx
+			 <<" track "<<trackNumber<<" eta "<<eta<<" pt "<<pt
+			 <<" ladder/module "<<ladderOn<<"/"<<module
+			 <<" cluster "<<numberOfClusters<<" x/y "<<col<<"/"<<row
+			 <<" charge = "<<charge
+			 <<" size = "<<size<<"/"<<sizeX<<"/"<<sizeY
+			 <<endl;
+
 	    hDetMap1->Fill(float(module),float(ladderOn)); 
 	    hcluDetMap1->Fill(col,row);
 	    hcharge1->Fill(charge);
@@ -1317,8 +1336,11 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    hzphi1->Fill(gZ,gPhi);  // hit phi
 
 	    htest->Fill(eta,float(sizeY),(hit->clusterProbability(0)) );
-	    htest2->Fill(eta,float(sizeX));
 	    htest3->Fill(eta,float(sizeY));
+ 	    htest2->Fill(eta,float(sizeX));
+ 	    htest1->Fill(gZ,float(sizeY));
+
+	    hsizeyz1->Fill(eta,float(sizeY));
 
 	    hclusMap1->Fill(eta,phi);
 	    hstatus->Fill(12.);
@@ -1420,6 +1442,9 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    hProbabilityXYBpix->Fill(hit->clusterProbability(0));
 	    hProbabilityQBpix->Fill(hit->clusterProbability(2));
 
+
+	    hsizeyz2->Fill(eta,float(sizeY));
+
 	    numOfClusPerTrk2++;
 	    numOfClustersPerLay2++;
 	    numOfPixelsPerLay2 += size;     
@@ -1475,6 +1500,8 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    hsizeXCluls3->Fill(lumiBlock,sizeX);
 #endif
 
+	    hsizeyz3->Fill(eta,float(sizeY));
+
 	    hProbabilityXYBpix->Fill(hit->clusterProbability(0));
 	    hProbabilityQBpix->Fill(hit->clusterProbability(2));
 
@@ -1500,6 +1527,8 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	      hsizex4->Fill(float(sizeX));
 	      hsizey4->Fill(float(sizeY));
 	    }
+
+	    hsizeyz4->Fill(eta,float(sizeY));
 
 	    hProbabilityXYBpix->Fill(hit->clusterProbability(0));
 	    hProbabilityQBpix->Fill(hit->clusterProbability(2));

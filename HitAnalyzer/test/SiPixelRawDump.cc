@@ -95,7 +95,7 @@ private:
 /////////////////////////////////////////////////////////////////////////////
 //Returns 1,2,3 for layer 1,2,3 full modules, 11,12,13 for 1/2 modules
 // 0 for fpix
-// needs fedid 0-31, and channel 1-36.
+// needs fedid 0-31, and channel 1-36.  DOES NOT WORK FOR PHASE1!!!!
 int MyDecode::checkLayerLink(int fed, int chan) {
   int layer = 0;
   if(fed<0 || fed>31) return layer;  // return 0 for invalid of fpix
@@ -402,7 +402,7 @@ int MyDecode::data(int word, int & fedChannel, int fed, int & stat1, int & stat2
 	// will need here a loopup table which can distuinguish layer 1 links
 	// to decide if we read dcol/pis or col/row
 	if(print) cout<<" Fed "<<fed<<" Channel- "<<channel_<<" ROC- "<<(roc_-1)<<" DCOL- "
-		      <<dcol_<<" Pixel- "<<pix_<<" OR col-"<<col_<<" row-"<<row_<<") ADC- "<<adc_<<endl;
+		      <<dcol_<<" Pixel- "<<pix_<<" (OR col-"<<col_<<" row-"<<row_<<") ADC- "<<adc_<<endl;
 
 	status++;
 
@@ -539,6 +539,7 @@ public:
 
   /// get data, convert to digis attach againe to Event
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
+  void analyzeHits(int fed, int channel, int roc, int dcol, int pix, int adc);
 
 private:
   edm::ParameterSet theConfig;
@@ -577,6 +578,9 @@ private:
     *hfed2DErrors6,*hfed2DErrors7,*hfed2DErrors8,*hfed2DErrors9,*hfed2DErrors10,*hfed2DErrors11,*hfed2DErrors12,
     *hfed2DErrors13,*hfed2DErrors14,*hfed2DErrors15,*hfed2DErrors16;
   TH2F *hfed2d, *hsize2d,*hfedErrorType1ls,*hfedErrorType2ls, *hcountDouble2, *hcount0002;
+  TH2F *hchannelRoc, *hchannelRocs, *hchannelPixels, *hchannelPixPerRoc;
+   
+
 #ifdef IND_FEDS
   TH2F *hfed2DErrors1ls,*hfed2DErrors2ls,*hfed2DErrors3ls,*hfed2DErrors4ls,*hfed2DErrors5ls,
     *hfed2DErrors6ls,*hfed2DErrors7ls,*hfed2DErrors8ls,*hfed2DErrors9ls,*hfed2DErrors10ls,*hfed2DErrors11ls,*hfed2DErrors12ls,
@@ -769,6 +773,13 @@ void SiPixelRawDump::beginJob() {
           300,0,3000, n_of_FEDs,-0.5,static_cast<float>(n_of_FEDs) - 0.5); // 
   herrorType1ls = fs->make<TProfile>("herrorType1ls","error type-1 (fed) vs ls",300,0,3000,0,1000.);
   herrorType1bx = fs->make<TProfile>("herrorType1bx"," error type-1 (fed) vs bx",4000,-0.5,3999.5,0,300000.);
+
+
+  //TH2F *hchannelRoc, *hchannelRocs, *hchannelPixels, *hchannelPixPerRoc;
+  hchannelRoc = fs->make<TH2F>("hchannelRoc", "roc in a channel",48,0.,48.,9, -0.5,8.5);
+  hchannelRocs = fs->make<TH2F>("hchannelRocs", "num of rocs in a channel",48,0.,48.,9, -0.5,8.5);
+  hchannelPixels = fs->make<TH2F>("hchannelPixels", "pixels in a channel",48,0.,48.,200, -0.5,199.5);
+  hchannelPixPerRoc = fs->make<TH2F>("hchannelPixPerRoc", "pixels in a roc",48,0.,48.,100, -0.5,199.5);
 
 
   herrorType2     = fs->make<TH1D>( "herrorType2", "readout errors type-2 (decode)per type", 
@@ -1010,6 +1021,14 @@ void SiPixelRawDump::beginJob() {
 
 }
 //-----------------------------------------------------------------------
+void SiPixelRawDump::analyzeHits(int fed, int channel, int roc, int dcol, int pix, int adc) {
+  //TH2F *hchannelRoc, *hchannelRocs, *hchannelPixels, *hchannelPixPerRoc;
+
+
+}
+
+
+//----------------------------------------------------------------------------
 void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
   const bool printEventInfo = false;
 

@@ -16,7 +16,7 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 #process.load('Geometry.TrackerGeometryBuilder.idealForDigiTrackerGeometryDB_cff')
 
 # (2) 
-#process.load('Geometry.TrackerGeometryBuilder.trackerGeometryDB_cfi')
+process.load('Geometry.TrackerGeometryBuilder.trackerGeometryDB_cfi')
 # does not define trackerGeometryDB
 # this does, needs false 
 from Geometry.TrackerGeometryBuilder.trackerGeometryDB_cfi import trackerGeometryDB
@@ -41,8 +41,9 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) )
 
@@ -62,7 +63,7 @@ process.TFileService = cms.Service("TFileService",
 
 # the analyzer itself - empty parameter set 
 process.test = cms.EDAnalyzer( "SiPixelDets",
-         phase1=cms.untracked.bool(False),   
+         phase1=cms.untracked.bool(True),   
 #        NPartForHisto = cms.untracked.int32(100),
 #        PtMaxForHisto = cms.untracked.double(200.0)
 )

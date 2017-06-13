@@ -64,7 +64,7 @@ class PixRecHitTest : public edm::EDAnalyzer {
  private:
   edm::ParameterSet conf_;
   edm::InputTag src_;
-  bool print;
+  bool print, phase1_;
   edm::EDGetTokenT<edmNew::DetSetVector<SiPixelRecHit>>tPixelRecHit;
 
   TH1F *hpixid,*hpixsubid,
@@ -96,8 +96,9 @@ class PixRecHitTest : public edm::EDAnalyzer {
   TH1F *hrecHitsPerLay1F,*hrecHitsPerLay2F,*hrecHitsPerLay3F;
   TH1F *hdetsPerLay1F,*hdetsPerLay2F,*hdetsPerLay3F;
 
-  TH2F *hxy, *hphiz1, *hphiz2, *hphiz3, *hphiz4; // bpix 
+  TH2F *hxy,*hxy1,*hxy2,*hxy3,*hxy4, *hphiz1, *hphiz2, *hphiz3, *hphiz4; // bpix 
   TH2F *hzr, *hxy11, *hxy12, *hxy21, *hxy22, *hxy31, *hxy32;  // fpix 
+  TH2F *hrhMap1, *hrhMap2, *hrhMap3, *hrhMap4;
 
   // Alignment 
   TH1F *hAlignErrorX1,*hAlignErrorX2,*hAlignErrorX3, *hAlignErrorX4,*hAlignErrorX5;
@@ -119,6 +120,7 @@ PixRecHitTest::PixRecHitTest(edm::ParameterSet const& conf) :
   conf_(conf),
   src_( conf.getParameter<edm::InputTag>( "src" ) ) { 
     print = conf.getUntrackedParameter<bool>("Verbosity",false);
+    phase1_ = conf.getUntrackedParameter<bool>("phase1",false);
     cout<<" Verbosity "<<print<<endl;
     tPixelRecHit = consumes<edmNew::DetSetVector<SiPixelRecHit>>( src_ );
 
@@ -186,15 +188,15 @@ void PixRecHitTest::beginJob() {
   hpixCharge4 = fs->make<TH1F>( "hpixCharge4", "pix charge l4", 50, 0.,50.); //in ke
   hpixCharge1big = fs->make<TH1F>( "hpixCharge1big", "big pix charge l1", 50, 0.,50.); //in ke
   
-  hypos1 = fs->make<TH1F>( "hypos1", "Layer 1 x pos", 700,-3.5,3.5);
-  hypos2 = fs->make<TH1F>( "hypos2", "Layer 2 x pos", 700,-3.5,3.5);
-  hypos3 = fs->make<TH1F>( "hypos3", "Layer 3 x pos", 700,-3.5,3.5);
-  hypos4 = fs->make<TH1F>( "hypos4", "Layer 4 x pos", 700,-3.5,3.5);
+  hypos1 = fs->make<TH1F>( "hypos1", "Layer 1 y pos", 700,-3.5,3.5);
+  hypos2 = fs->make<TH1F>( "hypos2", "Layer 2 y pos", 700,-3.5,3.5);
+  hypos3 = fs->make<TH1F>( "hypos3", "Layer 3 y pos", 700,-3.5,3.5);
+  hypos4 = fs->make<TH1F>( "hypos4", "Layer 4 y pos", 700,-3.5,3.5);
    
-  hxpos1 = fs->make<TH1F>( "hxpos1", "Layer 1 y pos", 200,-1.,1.);
-  hxpos2 = fs->make<TH1F>( "hxpos2", "Layer 2 y pos", 200,-1.,1.);
-  hxpos3 = fs->make<TH1F>( "hxpos3", "layer 3 y pos", 200,-1.,1.);
-  hxpos4 = fs->make<TH1F>( "hxpos4", "layer 4 y pos", 200,-1.,1.);
+  hxpos1 = fs->make<TH1F>( "hxpos1", "Layer 1 x pos", 200,-1.,1.);
+  hxpos2 = fs->make<TH1F>( "hxpos2", "Layer 2 x pos", 200,-1.,1.);
+  hxpos3 = fs->make<TH1F>( "hxpos3", "layer 3 x pos", 200,-1.,1.);
+  hxpos4 = fs->make<TH1F>( "hxpos4", "layer 4 x pos", 200,-1.,1.);
  
   hsize1 = fs->make<TH1F>( "hsize1", "layer 1 clu size",100,-0.5,99.5);
   hsize2 = fs->make<TH1F>( "hsize2", "layer 2 clu size",100,-0.5,99.5);
@@ -217,6 +219,7 @@ void PixRecHitTest::beginJob() {
   hsizey4 = fs->make<TH1F>( "hsizey4", "lay4 clu size in y",
                       20,-0.5,19.5);
   // 2D
+  // fpix 
   hzr = fs->make<TH2F>("hzr"," ",240,-60.,60.,68,0.,17.);  // x-y plane
   hxy11 = fs->make<TH2F>("hxy11"," ",320,-16.,16.,320,-16.,16.); // x-y pla 
   hxy12 = fs->make<TH2F>("hxy12"," ",320,-16.,16.,320,-16.,16.); // x-y pla
@@ -224,12 +227,21 @@ void PixRecHitTest::beginJob() {
   hxy22 = fs->make<TH2F>("hxy22"," ",320,-16.,16.,320,-16.,16.); // x-y pla
   hxy31 = fs->make<TH2F>("hxy31"," ",320,-16.,16.,320,-16.,16.); // x-y pla
   hxy32 = fs->make<TH2F>("hxy32"," ",320,-16.,16.,320,-16.,16.); // x-y plae
-
+  // bpix
   hxy = fs->make<TH2F>("hxy"," ",340,-17.,17.,340,-17.,17.);  // x-y plane
+  hxy1 = fs->make<TH2F>("hxy1"," ",80,-4.,4.,80,-4.,4.);  // x-y plane
+  hxy2 = fs->make<TH2F>("hxy2"," ",160,-8.,8.,160,-8.,8.);  // x-y plane
+  hxy3 = fs->make<TH2F>("hxy3"," ",240,-12.,12.,240,-12.,12.);  // x-y plane
+  hxy4 = fs->make<TH2F>("hxy4"," ",340,-17.,17.,340,-17.,17.);  // x-y plane
   hphiz1 = fs->make<TH2F>("hphiz1"," ",108,-27.,27.,140,-3.5,3.5);
   hphiz2 = fs->make<TH2F>("hphiz2"," ",108,-27.,27.,140,-3.5,3.5);
   hphiz3 = fs->make<TH2F>("hphiz3"," ",108,-27.,27.,140,-3.5,3.5);
   hphiz4 = fs->make<TH2F>("hphiz4"," ",108,-27.,27.,140,-3.5,3.5);
+
+  hrhMap1 = fs->make<TH2F>("hrhMap1"," ",350,-3.5,3.5,100,-1.,1.);
+  hrhMap2 = fs->make<TH2F>("hrhMap2"," ",350,-3.5,3.5,100,-1.,1.);
+  hrhMap3 = fs->make<TH2F>("hrhMap3"," ",350,-3.5,3.5,100,-1.,1.);
+  hrhMap4 = fs->make<TH2F>("hrhMap4"," ",350,-3.5,3.5,100,-1.,1.);
 
   hAlignErrorX1 = fs->make<TH1F>( "hAlignErrorX1", "Align error Layer 1 X", 100,0.0,100.);
   hAlignErrorY1 = fs->make<TH1F>( "hAlignErrorY1", "Align error Layer 1 Y", 100,0.0,100.);
@@ -521,6 +533,7 @@ void PixRecHitTest::analyze(const edm::Event& e,
     } // end BPix FPix if
 
 #ifdef DO_HISTO
+    // det histos
     if(layer==1) {
       hladder1id->Fill(float(ladder));
       hz1id->Fill(float(zindex));
@@ -685,6 +698,7 @@ void PixRecHitTest::analyze(const edm::Event& e,
 	//if(print && sizeY==1 && bigInY) 
 	//cout<<" single big y "<<yClu<<" "<<pixy<<" "<<endl;
 #ifdef DO_HISTO
+	// pixel histos
 	if(layer==1) {
 	  hpixCharge1->Fill(adc);
 	  //if(bigInX || bigInY) hpixCharge1big->Fill(adc);
@@ -705,10 +719,12 @@ void PixRecHitTest::analyze(const edm::Event& e,
       } // End pixel loop
       
 #ifdef DO_HISTO
+      // cluster rechit histos
       if(layer==1) {
 	hcharge1->Fill(ch);
 	hypos1->Fill(yRecHit);
 	hxpos1->Fill(xRecHit);
+	  hrhMap1->Fill(yRecHit,xRecHit);
 	hsize1->Fill(float(size));
 	hsizex1->Fill(float(sizeX));
 	hsizey1->Fill(float(sizeY));
@@ -719,6 +735,7 @@ void PixRecHitTest::analyze(const edm::Event& e,
 	hErrorXB->Fill(float(ladder+(110*(side-1))),xerror);
 	hErrorYB->Fill(float(ladder+(110*(side-1))),yerror);
 	hxy->Fill(gp.x(),gp.y());
+	hxy1->Fill(gp.x(),gp.y());
 	hphiz1->Fill(gp.z(),gp.phi());
 
       } else if(layer==2) {  // layer 2
@@ -726,6 +743,7 @@ void PixRecHitTest::analyze(const edm::Event& e,
 	hcharge2->Fill(ch);
 	hypos2->Fill(yRecHit);
 	hxpos2->Fill(xRecHit);
+	hrhMap2->Fill(yRecHit,xRecHit);
 	hsize2->Fill(float(size));
 	hsizex2->Fill(float(sizeX));
 	hsizey2->Fill(float(sizeY));
@@ -736,6 +754,7 @@ void PixRecHitTest::analyze(const edm::Event& e,
 	hErrorXB->Fill(float(ladder+25+(110*(side-1))),xerror);
 	hErrorYB->Fill(float(ladder+25+(110*(side-1))),yerror);
 	hxy->Fill(gp.x(),gp.y());
+	hxy2->Fill(gp.x(),gp.y());
 	hphiz2->Fill(gp.z(),gp.phi());
 
       } else if(layer==3) {  // Layer 3
@@ -743,6 +762,8 @@ void PixRecHitTest::analyze(const edm::Event& e,
 	hcharge3->Fill(ch);
 	hypos3->Fill(yRecHit);
 	hxpos3->Fill(xRecHit);
+ 	//if(ladder==24 && zindex==1)	
+	  hrhMap3->Fill(yRecHit,xRecHit);
 	hsize3->Fill(float(size));
 	hsizex3->Fill(float(sizeX));
 	hsizey3->Fill(float(sizeY));
@@ -753,6 +774,8 @@ void PixRecHitTest::analyze(const edm::Event& e,
 	hErrorXB->Fill(float(ladder+60+(110*(side-1))),xerror);
 	hErrorYB->Fill(float(ladder+60+(110*(side-1))),yerror);
 	hxy->Fill(gp.x(),gp.y());
+ 	//if(ladder==24 && zindex==1)	
+	  hxy3->Fill(gp.x(),gp.y());
 	hphiz3->Fill(gp.z(),gp.phi());
 
       } else if(layer==4) {  // Layer 4
@@ -760,6 +783,7 @@ void PixRecHitTest::analyze(const edm::Event& e,
 	hcharge4->Fill(ch);
 	hypos4->Fill(yRecHit);
 	hxpos4->Fill(xRecHit);
+	hrhMap4->Fill(yRecHit,xRecHit);
 	hsize4->Fill(float(size));
 	hsizex4->Fill(float(sizeX));
 	hsizey4->Fill(float(sizeY));
@@ -770,6 +794,7 @@ void PixRecHitTest::analyze(const edm::Event& e,
 	//hErrorXB->Fill(float(ladder+60+(110*(side-1))),xerror);
 	//hErrorYB->Fill(float(ladder+60+(110*(side-1))),yerror);
 	hxy->Fill(gp.x(),gp.y());
+	hxy4->Fill(gp.x(),gp.y());
 	hphiz4->Fill(gp.z(),gp.phi());
 
       } else if(disk==1) {

@@ -48,6 +48,9 @@
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 #include "Geometry/Records/interface/IdealGeometryRecord.h"
 #include "DataFormats/SiPixelDetId/interface/PixelBarrelName.h"
+#include "DataFormats/SiPixelDetId/interface/PixelBarrelNameUpgrade.h"
+#include "DataFormats/SiPixelDetId/interface/PixelEndcapName.h"
+#include "DataFormats/SiPixelDetId/interface/PixelEndcapNameUpgrade.h"
 
 // data formats
 #include "DataFormats/Common/interface/DetSetVector.h"
@@ -125,7 +128,7 @@ private:
 #ifdef USE_SIM_LINKS
   edm::EDGetTokenT< edm::DetSetVector<PixelDigiSimLink> > tPixelDigiSimLink;
 #endif
-
+  float count0, count1, count2, count3;
 
 #ifdef HISTOS
 
@@ -147,14 +150,18 @@ private:
   TH1F *hdetsPerLayF1,*hdetsPerLayF2,*hdetsPerLayF3;
   TH1F *hdetr, *hdetz, *hdetrF, *hdetzF;
   TH1F *hcolsB,  *hrowsB,  *hcolsF,  *hrowsF;
-  TH1F *hcols1big, *hrows1big, *heloss1bigx, *heloss1bigy;
+  TH1F *hcols1big, *hrows1big, *heloss1bigx, *heloss1bigy,*hcols11;
   TH1F *hsimlinks, *hfract;
   TH1F *hblade1, *hblade2, *hblade3;
+  
 
-  //TH2F *htest, *htest2;
-  TH2F *hdetMap4,*hdetMap3,*hdetMap2,*hdetMap1, 
-    *hpixMap1, *hpixMap2, *hpixMap3,*hpixMap4,
-    * hpixMapNoise; 
+  TH2F *hpdetMap4,*hpdetMap3,*hpdetMap2,*hpdetMap1; 
+  TH2F *hdetMap4,*hdetMap3,*hdetMap2,*hdetMap1; 
+  TH2F *hpixMap1, *hpixMap2, *hpixMap3,*hpixMap4;
+
+  TH2F *hpdetMaps4,*hpdetMaps3,*hpdetMaps2,*hpdetMaps1; 
+
+  //* hpixMapNoise; 
   TH2F *hxy, *hphiz1, *hphiz2, *hphiz3, *hphiz4; // bpix 
   TH2F *hzr, *hxy11, *hxy12, *hxy21, *hxy22, *hxy31, *hxy32;  // fpix 
 
@@ -214,6 +221,7 @@ void PixDigisTest::beginJob() {
 
    using namespace edm;
    cout << "Initialize PixDigisTest " <<endl;
+   count0=count1=count2=count3=0;
 
 #ifdef HISTOS
   edm::Service<TFileService> fs;
@@ -242,21 +250,24 @@ void PixDigisTest::beginJob() {
     hz4id = fs->make<TH1F>( "hz4id", "Z-index id L4", 11, -5.5, 5.5);
  
     hdigisPerDet1 = fs->make<TH1F>( "hdigisPerDet1", "Digis per det l1", 
-			      200, -0.5, 199.5);
+			      1000, -0.5, 999.5);
     hdigisPerDet2 = fs->make<TH1F>( "hdigisPerDet2", "Digis per det l2", 
-			      200, -0.5, 199.5);
+			      600, -0.5, 599.5);
     hdigisPerDet3 = fs->make<TH1F>( "hdigisPerDet3", "Digis per det l3", 
-			      200, -0.5, 199.5);
+			      400, -0.5, 399.5);
     hdigisPerDet4 = fs->make<TH1F>( "hdigisPerDet4", "Digis per det l4", 
-			      200, -0.5, 199.5);
+			      400, -0.5, 399.5);
+    //
+    //const float maxSize=199.5;
+    const float maxSize=9999.5;
     hdigisPerLay1 = fs->make<TH1F>( "hdigisPerLay1", "Digis per layer l1", 
-			      200, -0.5, 199.5);
+			      100, -0.5, maxSize);
     hdigisPerLay2 = fs->make<TH1F>( "hdigisPerLay2", "Digis per layer l2", 
-			      200, -0.5, 199.5);
+			      100, -0.5, maxSize);
     hdigisPerLay3 = fs->make<TH1F>( "hdigisPerLay3", "Digis per layer l3", 
-			      200, -0.5, 199.5);
+			      100, -0.5, maxSize);
     hdigisPerLay4 = fs->make<TH1F>( "hdigisPerLay4", "Digis per layer l4", 
-			      200, -0.5, 199.5);
+			      100, -0.5, maxSize);
     hdetsPerLay1 = fs->make<TH1F>( "hdetsPerLay1", "Full dets per layer l1", 
 			      161, -0.5, 160.5);
     hdetsPerLay2 = fs->make<TH1F>( "hdetsPerLay2", "Full dets per layer l2", 
@@ -301,6 +312,7 @@ void PixDigisTest::beginJob() {
     hcols3 = fs->make<TH1F>( "hcols3", "Layer 3 cols", 500,-1.5,498.5);
     hcols4 = fs->make<TH1F>( "hcols4", "Layer 4 cols", 500,-1.5,498.5);
     hcols1big = fs->make<TH1F>( "hcols1big", "Layer 1 big cols", 500,-1.5,498.5);
+    hcols11= fs->make<TH1F>( "hcols11", "Layer 1 cols testing", 500,-1.5,498.5);
  
     hrows1 = fs->make<TH1F>( "hrows1", "Layer 1 rows", 200,-1.5,198.5);
     hrows2 = fs->make<TH1F>( "hrows2", "Layer 2 rows", 200,-1.5,198.5);
@@ -335,14 +347,24 @@ void PixDigisTest::beginJob() {
     hsimlinks = fs->make<TH1F>("hsimlinks"," track ids",200,0.,200.);
     hfract = fs->make<TH1F>("hfract"," track rractions",100,0.,1.);
     //                                             mod      ladder
-    hdetMap1 = fs->make<TH2F>("hdetMap1"," ",9,-4.5,4.5,21,-10.5,10.5);
+    hdetMap1 = fs->make<TH2F>("hdetMap1"," ",9,-4.5,4.5,13,-6.5,6.5);
     hdetMap1->SetOption("colz");
-    hdetMap2 = fs->make<TH2F>("hdetMap2"," ",9,-4.5,4.5,33,-16.5,16.5);
+    hdetMap2 = fs->make<TH2F>("hdetMap2"," ",9,-4.5,4.5,29,-14.5,14.5);
     hdetMap2->SetOption("colz");
     hdetMap3 = fs->make<TH2F>("hdetMap3"," ",9,-4.5,4.5,45,-22.5,22.5);
     hdetMap3->SetOption("colz");
     hdetMap4 = fs->make<TH2F>("hdetMap4"," ",9,-4.5,4.5,65,-32.5,32.5);
     hdetMap4->SetOption("colz");
+
+    hpdetMap1 = fs->make<TH2F>("hpdetMap1"," ",9,-4.5,4.5,13,-6.5,6.5);
+    hpdetMap1->SetOption("colz");
+    hpdetMap2 = fs->make<TH2F>("hpdetMap2"," ",9,-4.5,4.5,29,-14.5,14.5);
+    hpdetMap2->SetOption("colz");
+    hpdetMap3 = fs->make<TH2F>("hpdetMap3"," ",9,-4.5,4.5,45,-22.5,22.5);
+    hpdetMap3->SetOption("colz");
+    hpdetMap4 = fs->make<TH2F>("hpdetMap4"," ",9,-4.5,4.5,65,-32.5,32.5);
+    hpdetMap4->SetOption("colz");
+
     hpixMap1 = fs->make<TH2F>("hpixMap1"," ",416,0.,416.,160,0.,160.);
     hpixMap1->SetOption("colz");
     hpixMap2 = fs->make<TH2F>("hpixMap2"," ",416,0.,416.,160,0.,160.);
@@ -351,8 +373,15 @@ void PixDigisTest::beginJob() {
     hpixMap3->SetOption("colz");
     hpixMap4 = fs->make<TH2F>("hpixMap4"," ",416,0.,416.,160,0.,160.);
     hpixMap4->SetOption("colz");
-    hpixMapNoise = fs->make<TH2F>("hpixMapNoise"," ",416,0.,416.,160,0.,160.);
-    hpixMapNoise->SetOption("colz");
+
+    hpdetMaps1 = fs->make<TH2F>("hpdetMaps1","slected hits in l1",9,-4.5,4.5,13,-6.5,6.5);
+    hpdetMaps1->SetOption("colz");
+    hpdetMaps2 = fs->make<TH2F>("hpdetMaps2","slected hits in l1",9,-4.5,4.5,13,-6.5,6.5);
+    hpdetMaps2->SetOption("colz");
+
+
+    //hpixMapNoise = fs->make<TH2F>("hpixMapNoise"," ",416,0.,416.,160,0.,160.);
+    //hpixMapNoise->SetOption("colz");
 
     //htest = fs->make<TH2F>("htest"," ",10,0.,10.,20,0.,20.);
     //htest2 = fs->make<TH2F>("htest2"," ",10,0.,10.,300,0.,300.);
@@ -428,7 +457,7 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
   using namespace edm;
   if(PRINT) cout<<" Analyze PixDigisTest for phase "<<phase1_<<endl;
 
-  //  int run       = iEvent.id().run();
+  int run       = iEvent.id().run();
   int event     = iEvent.id().event();
   int lumiBlock = iEvent.luminosityBlock();
   int bx        = iEvent.bunchCrossing();
@@ -504,6 +533,8 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
   int numOfDigisPerDetF2 = 0;
   int numOfDigisPerDetF3 = 0;
 
+  count0++; // count events 
+
   // Iterate on detector units
   edm::DetSetVector<PixelDigi>::const_iterator DSViter;
   for(DSViter = pixelDigis->begin(); DSViter != pixelDigis->end(); DSViter++) {
@@ -526,7 +557,8 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
     
     if(detType!=1) continue; // look only at tracker
     ++numberOfDetUnits;
-    
+    count1++; // count det untis
+
     // Get the geom-detector 
     const PixelGeomDetUnit * theGeomDet = 
       dynamic_cast<const PixelGeomDetUnit*> ( theTracker.idToDet(detId) );
@@ -590,6 +622,25 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 			 <<pitchX<<" "<<pitchY<<endl;
       }
 
+      // correct way 
+      PixelEndcapName pfn(detid,tt,phase1_);
+      if(PRINT) 
+	cout<<pfn.diskName()<<" "<<pfn.bladeName()<<" "<<pfn.pannelName()<<" "
+	    <<pfn.ringName()<<" "<<pfn.plaquetteName()<<" "<<pfn.name()<<endl;
+
+      // All these produce wrong names for phase1
+      // PixelEndcapName pfn1(detid,false);
+      // cout<<pfn1.diskName()<<" "<<pfn1.bladeName()<<" "<<pfn1.pannelName()<<" "<<pfn1.ringName()<<" "<<pfn1.plaquetteName()
+      // 	  <<" "<<pfn1.name()<<endl;
+      // PixelEndcapName pfn2(detid,true);
+      // cout<<pfn2.diskName()<<" "<<pfn2.bladeName()<<" "<<pfn2.pannelName()<<" "<<pfn2.ringName()<<" "<<pfn2.plaquetteName()
+      // 	  <<" "<<pfn2.name()<<endl;
+      // PixelEndcapNameUpgrade pfn3(detid);
+      // cout<<pfn3.diskName()<<" "<<pfn3.bladeName()<<" "<<pfn3.pannelName()<<" "<<pfn3.plaquetteName()
+      // 	  <<" "<<pfn3.name()<<endl;
+
+
+
     } else if(subid == 1) { // Barrel 
       
       // Barell layer = 1,2,3
@@ -624,6 +675,13 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	//  <<layer<<" "<<ladder<<" "<<zindex<<endl;
 	//cout<<" col/row, pitch "<<cols<<" "<<rows<<" "
 	//  <<pitchX<<" "<<pitchY<<endl;
+
+	// wrong for phase1
+	//PixelBarrelNameUpgrade pbn1(detid);
+	//cout<<pbn1.sectorName()<<" "<<pbn1.ladderName()<<" "<<pbn1.layerName()<<" "<<pbn1.moduleName()<<pbn1.name();
+
+
+
       }      
 
     } // end fb-bar
@@ -661,7 +719,12 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 
 #endif  // USE_SIM_LINKS
 
+    bool select = false; // (abs(module)==4) && (layer==1);
+    if(select) cout<<" run "<<run<<" event "<<event<<" bx "<<bx<<" ladder/module "<<ladder<<"/"<<module<<endl;
+
     unsigned int numberOfDigis = 0;
+    unsigned int numDigisInCol = 0;
+    int oldCol=-1;
 
     // Look at digis now
     edm::DetSet<PixelDigi>::const_iterator  di;
@@ -670,15 +733,31 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	
 	numberOfDigis++;
 	totalNumOfDigis++;
-       int adc = di->adc();    // charge, modifued to unsiged short 
-       int col = di->column(); // column 
-       int row = di->row();    // row
-       //int tof = di->time();    // tof always 0, method deleted
-
-       // channel index needed to look for the simlink to simtracks
-       int channel = PixelChannelIdentifier::pixelToChannel(row,col);
-       if(PRINT) cout <<numberOfDigis<< " Col: " << col << " Row: " << row 
-		      << " ADC: " << adc <<" channel = "<<channel<<endl;
+	count2++;
+	int adc = di->adc();    // charge, modifued to unsiged short 
+	int col = di->column(); // column 
+	int row = di->row();    // row
+	//int tof = di->time();    // tof always 0, method deleted
+	
+	// channel index needed to look for the simlink to simtracks
+	int channel = PixelChannelIdentifier::pixelToChannel(row,col);
+	if(PRINT || select) cout <<numberOfDigis<< " Col: " << col << " Row: " << row 
+		       << " ADC: " << adc <<" channel = "<<channel<<endl;
+	
+	if(col==oldCol) { // same column 
+	  numDigisInCol++;
+	} else {
+	  if( (layer==1) && (numDigisInCol>20)) {
+	    hpdetMaps2->Fill(float(module),float(ladder));
+	    hcols1big->Fill(float(oldCol));
+	    hcols11->Fill(float(oldCol),float(numDigisInCol));
+	    if(numDigisInCol>79) 
+	      cout<<" col with many hits "<<module<<" "<<ladder<<" "
+		  <<oldCol<<" "<<numDigisInCol<<endl;
+	  }
+	  numDigisInCol=1;
+	  oldCol=col;	  
+	}
 
        if(col>415) cout<<" Error: column index too large "<<col<<" Barrel layer, ladder, module "
 		       <<layer<<" "<<ladder<<" "<<zindex<<endl;
@@ -693,6 +772,8 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	   hcols1->Fill(float(col));
 	   hrows1->Fill(float(row));
 	   hpixMap1->Fill(float(col),float(row));
+	   hpdetMap1->Fill(float(module),float(ladder));
+	   if(adc<1) hpdetMaps1->Fill(float(module),float(ladder));
 	   hadc1ls->Fill(float(lumiBlock),float(adc));
 	   hadc1bx->Fill(float(bx),float(adc));
 
@@ -719,13 +800,14 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	 //noise = false; // (ladder==6) && (module==-2) && (col==364) && (row==1);
 	 if(noise) {
 	   //cout<<" noise pixel "<<layer<<" "<<sector<<" "<<shell<<endl;
-	   hpixMapNoise->Fill(float(col),float(row));
+	   //hpixMapNoise->Fill(float(col),float(row));
 	   hneloss2->Fill(float(adc));
 	 } else {		     
 	   heloss2->Fill(float(adc));
 	   hcols2->Fill(float(col));
 	   hrows2->Fill(float(row));
 	   hpixMap2->Fill(float(col),float(row));
+	   hpdetMap2->Fill(float(module),float(ladder));
 	   hadc2ls->Fill(float(lumiBlock),float(adc));
 	   hadc2bx->Fill(float(bx),float(adc));
 	   totalNumOfDigis2++;
@@ -737,6 +819,8 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	   heloss3->Fill(float(adc));
 	   hcols3->Fill(float(col));
 	   hrows3->Fill(float(row));
+	   //if(ladder==-13 && module==-4) 
+	   hpdetMap3->Fill(float(module),float(ladder));
 	   hpixMap3->Fill(float(col),float(row));
 	   hadc3ls->Fill(float(lumiBlock),float(adc));
 	   hadc3bx->Fill(float(bx),float(adc));
@@ -749,6 +833,7 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	   heloss4->Fill(float(adc));
 	   hcols4->Fill(float(col));
 	   hrows4->Fill(float(row));
+	   hpdetMap4->Fill(float(module),float(ladder));
 	   hpixMap4->Fill(float(col),float(row));
 	   hadc4ls->Fill(float(lumiBlock),float(adc));
 	   hadc4bx->Fill(float(bx),float(adc));
@@ -851,6 +936,7 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	    hladder1id->Fill(float(ladder));
 	    hz1id->Fill(float(module));
 	    hdetMap1->Fill(float(module),float(ladder));
+	    //if(numOfDigisPerDet1>200 ) hpdetMaps2->Fill(float(module),float(ladder));
 	    ++numberOfDetUnits1;
 	    hdigisPerDet1->Fill(float(numOfDigisPerDet1));
 	    numOfDigisPerDet1=0;
@@ -898,6 +984,7 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
   hdigis0->Fill(float(totalNumOfDigis));
 
   if(numberOfDetUnits>0) {
+    count3++; // count full events 
     hevent->Fill(float(event));
     hlumi1->Fill(float(lumiBlock));
     hbx1->Fill(float(bx));
@@ -945,8 +1032,31 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 // ------------ method called to at the end of the job  ------------
 void PixDigisTest::endJob(){
   cout << " End PixDigisTest " << endl;
-  //hFile->Write();
-  //hFile->Close();
+  if(count0>0) 
+    cout<<" events "<<count0<<" full events "<<count3<<" dets per event "<<count1/count0
+	<<" digis per event "<<count2/count0<<endl;
+  else 
+    cout<<count0<<" "<<count1<<" "<<count2<<" "<<count3<<endl;
+
+  float norm = 1.;
+  if(count3>0) {
+    norm = 1./float(count3);
+  }
+
+  // Rescale all 2D plots
+  hdetMap1->Scale(norm);
+  hdetMap2->Scale(norm);
+  hdetMap3->Scale(norm);
+  hdetMap4->Scale(norm);
+  hpdetMap1->Scale(norm);
+  hpdetMap2->Scale(norm);
+  hpdetMap3->Scale(norm);
+  hpdetMap4->Scale(norm);
+  hpdetMaps1->Scale(norm);
+  hpdetMaps2->Scale(norm);
+  //hpdetMaps3->Scale(norm);
+  //hpdetMaps4->Scale(norm);
+
 }
 
 //define this as a plug-in
