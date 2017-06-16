@@ -148,6 +148,8 @@ class PixClustersWithTracks : public edm::EDAnalyzer {
   float countTracks, countGoodTracks, countTracksInPix, countPVs, countEvents, countLumi;  
   float count1, count2, count3, count4;
   float countTracks1, countTracks2, countTracks3, countTracks4, countTracks5;
+  int select1, select2;
+
   // Needed for the ByToken method
   //edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster> > myClus;
   //edm::EDGetTokenT<SiPixelRecHitCollection> PixelRecHitToken;
@@ -193,6 +195,20 @@ class PixClustersWithTracks : public edm::EDAnalyzer {
   TH2F *htest,*htest1,*htest2,*htest3;
 
   TH1D *hProbabilityXYBpix, *hProbabilityQBpix,*hProbabilityXYFpix, *hProbabilityQFpix;
+  // single module 
+  TH2F *hpixDetMap10, *hpixDetMap20, *hpixDetMap30, *hpixDetMap40;
+  TH2F *hpixDetMap11, *hpixDetMap12, *hpixDetMap13, *hpixDetMap14, *hpixDetMap15;
+  TH2F *hpixDetMap16, *hpixDetMap17, *hpixDetMap18, *hpixDetMap19;
+  TH2F *hpixDetMap21, *hpixDetMap22, *hpixDetMap23, *hpixDetMap24, *hpixDetMap25;
+  TH2F *hpixDetMap26, *hpixDetMap27, *hpixDetMap28, *hpixDetMap29;
+  TH2F *hpixDetMap31, *hpixDetMap32, *hpixDetMap33, *hpixDetMap34, *hpixDetMap35;
+  TH2F *hpixDetMap36, *hpixDetMap37, *hpixDetMap38, *hpixDetMap39;
+  TH2F *hpixDetMap41, *hpixDetMap42, *hpixDetMap43, *hpixDetMap44, *hpixDetMap45;
+  TH2F *hpixDetMap46, *hpixDetMap47, *hpixDetMap48, *hpixDetMap49;
+
+  // pixel histos 
+  TH1D *hpixcharge1,*hpixcharge2, *hpixcharge3, *hpixcharge4, *hpixcharge5;
+  TH2F *hpixDetMap1, *hpixDetMap2, *hpixDetMap3, *hpixDetMap4;  // in a  modules
 
 #ifdef L1
   TH1D *hl1a, *hl1t, *hlt1;
@@ -262,6 +278,10 @@ PixClustersWithTracks::PixClustersWithTracks(edm::ParameterSet const& conf)
   phase1_ = conf.getUntrackedParameter<bool>("phase1",false);
   PRINT = conf.getUntrackedParameter<bool>("Verbosity",false);
   src_ =  conf.getParameter<edm::InputTag>( "src" );
+  select1 = conf.getUntrackedParameter<int>("Select1",0);
+  select2 = conf.getUntrackedParameter<int>("Select2",0);
+
+
   //if(PRINT) cout<<" Construct "<<endl;
 
   // Consumes 
@@ -543,6 +563,70 @@ void PixClustersWithTracks::beginJob() {
    htest2 = fs->make<TH2F>("htest2","bpix eta-hit size-x",54,-2.7,2.7,4, 0.5, 4.5);
    htest3 = fs->make<TH2F>("htest3","bpix eta-hit size-y",54,-2.7,2.7,20,0.5,20.5);
 
+  // Special test hitos for inefficiency effects
+  hpixDetMap10 = fs->make<TH2F>( "hpixDetMap10", "pix det layer 1",
+				 416,0.,416.,160,0.,160.);
+  hpixDetMap11 = fs->make<TH2F>( "hpixDetMap11", "pix det layer 1",
+				 416,0.,416.,160,0.,160.);
+  hpixDetMap12 = fs->make<TH2F>( "hpixDetMap12", "pix det layer 1",
+				 416,0.,416.,160,0.,160.);
+  hpixDetMap13 = fs->make<TH2F>( "hpixDetMap13", "pix det layer 1",
+				 416,0.,416.,160,0.,160.);
+  hpixDetMap14 = fs->make<TH2F>( "hpixDetMap14", "pix det layer 1",
+				  416,0.,416.,160,0.,160.);
+  hpixDetMap15 = fs->make<TH2F>( "hpixDetMap15", "pix det layer 1",
+				  416,0.,416.,160,0.,160.);
+  hpixDetMap16 = fs->make<TH2F>( "hpixDetMap16", "pix det layer 1",
+				  416,0.,416.,160,0.,160.);
+  hpixDetMap17 = fs->make<TH2F>( "hpixDetMap17", "pix det layer 1",
+				  416,0.,416.,160,0.,160.);
+  hpixDetMap18 = fs->make<TH2F>( "hpixDetMap18", "pix det layer 1",
+				  416,0.,416.,160,0.,160.);
+  hpixDetMap19 = fs->make<TH2F>( "hpixDetMap19", "pix det layer 1",
+				  416,0.,416.,160,0.,160.);
+
+  hpixDetMap20 = fs->make<TH2F>( "hpixDetMap20", "pix det layer 2",
+				 416,0.,416.,160,0.,160.);
+  hpixDetMap21 = fs->make<TH2F>( "hpixDetMap21", "pix det layer 2",
+				 416,0.,416.,160,0.,160.);
+  hpixDetMap22 = fs->make<TH2F>( "hpixDetMap22", "pix det layer 2",
+				 416,0.,416.,160,0.,160.);
+  hpixDetMap23 = fs->make<TH2F>( "hpixDetMap23", "pix det layer 2",
+				 416,0.,416.,160,0.,160.);
+  hpixDetMap24 = fs->make<TH2F>( "hpixDetMap24", "pix det layer 2",
+				  416,0.,416.,160,0.,160.);
+  hpixDetMap25 = fs->make<TH2F>( "hpixDetMap25", "pix det layer 2",
+				  416,0.,416.,160,0.,160.);
+  hpixDetMap26 = fs->make<TH2F>( "hpixDetMap26", "pix det layer 2",
+				  416,0.,416.,160,0.,160.);
+  hpixDetMap27 = fs->make<TH2F>( "hpixDetMap27", "pix det layer 2",
+				  416,0.,416.,160,0.,160.);
+  hpixDetMap28 = fs->make<TH2F>( "hpixDetMap28", "pix det layer 2",
+				  416,0.,416.,160,0.,160.);
+  hpixDetMap29 = fs->make<TH2F>( "hpixDetMap29", "pix det layer 2",
+				  416,0.,416.,160,0.,160.);
+
+  hpixDetMap30 = fs->make<TH2F>( "hpixDetMap30", "pix det layer 3",
+				 416,0.,416.,160,0.,160.);
+  hpixDetMap31 = fs->make<TH2F>( "hpixDetMap31", "pix det layer 3",
+				 416,0.,416.,160,0.,160.);
+  hpixDetMap32 = fs->make<TH2F>( "hpixDetMap32", "pix det layer 3",
+				 416,0.,416.,160,0.,160.);
+  hpixDetMap33 = fs->make<TH2F>( "hpixDetMap33", "pix det layer 3",
+				 416,0.,416.,160,0.,160.);
+  hpixDetMap34 = fs->make<TH2F>( "hpixDetMap34", "pix det layer 3",
+				  416,0.,416.,160,0.,160.);
+  hpixDetMap35 = fs->make<TH2F>( "hpixDetMap35", "pix det layer 3",
+				  416,0.,416.,160,0.,160.);
+  hpixDetMap36 = fs->make<TH2F>( "hpixDetMap36", "pix det layer 3",
+				  416,0.,416.,160,0.,160.);
+  hpixDetMap37 = fs->make<TH2F>( "hpixDetMap37", "pix det layer 3",
+				  416,0.,416.,160,0.,160.);
+  hpixDetMap38 = fs->make<TH2F>( "hpixDetMap38", "pix det layer 3",
+				  416,0.,416.,160,0.,160.);
+  hpixDetMap39 = fs->make<TH2F>( "hpixDetMap39", "pix det layer 3",
+				  416,0.,416.,160,0.,160.);
+
 
    // RecHit errors
    // alignment errors
@@ -646,6 +730,30 @@ void PixClustersWithTracks::beginJob() {
 			     50,-2.5,2.5,14,0.5,14.5);
   hsizeyz4 = fs->make<TH2F>( "hsizeyz4", "sizy vs z for layer 4",
 			     50,-2.5,2.5,14,0.5,14.5);
+
+  // pixel histos
+  sizeH=300; // 600
+  highH = 60.0; // charge limit in kelec
+  hpixcharge1 = fs->make<TH1D>( "hpixcharge1", "Pix charge l1",sizeH, 0.,highH);//in ke
+  hpixcharge2 = fs->make<TH1D>( "hpixcharge2", "Pix charge l2",sizeH, 0.,highH);
+  hpixcharge3 = fs->make<TH1D>( "hpixcharge3", "Pix charge l3",sizeH, 0.,highH);
+  hpixcharge4 = fs->make<TH1D>( "hpixcharge4", "Pix charge l4",sizeH, 0.,highH);
+  hpixcharge5 = fs->make<TH1D>( "hpixcharge5", "Pix charge d",sizeH, 0.,highH);
+
+  // pix in all dets (superimposed)
+  hpixDetMap1 = fs->make<TH2F>( "hpixDetMap1", "pix in det layer 1",
+		      416,0.,416.,160,0.,160.);
+  hpixDetMap1->SetOption("colz");
+  hpixDetMap2 = fs->make<TH2F>( "hpixDetMap2", "pix in det layer 2",
+		      416,0.,416.,160,0.,160.);
+  hpixDetMap2->SetOption("colz");
+  hpixDetMap3 = fs->make<TH2F>( "hpixDetMap3", "pix in det layer 3",
+		      416,0.,416.,160,0.,160.);
+  hpixDetMap3->SetOption("colz");
+  hpixDetMap4 = fs->make<TH2F>( "hpixDetMap4", "pix in det layer 4",
+		      416,0.,416.,160,0.,160.);
+  hpixDetMap4->SetOption("colz");
+
 
 }
 // ------------ method called to at the end of the job  ------------
@@ -945,12 +1053,32 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
   // e.getByLabel("splittedTracksP5", recTracks);
   //e.getByLabel("cosmictrackfinderP5", recTracks);
   ///e.getByLabel(src_ , recTracks);
+
   e.getByToken(TrackToken, recTracks);
-
-
-
   bool missingHit=false, missingHitB=false;
   if(PRINT) cout<<" Tracks "<<recTracks->size()<<endl;
+
+
+  float etaCut=-1;
+  if(select1>0) {
+    // skip events with few pixel dets
+    if(select1==1) { if( int(recTracks->size())<select2) return; } 
+    // select events only for a defined bx
+    else if(select1==2) { if(bx!=select2) return; } 
+    else if(select1==3) { if(  !( (bx==39)||(bx==201)||(bx==443)||(bx==499)||(bx==1083)||(bx==1337)||(bx==1492)||(bx==1977)||(bx==2231)||(bx==2287)||(bx==2871)||(bx==3224)||(bx==3280) )   ) return; } 
+    else if(select1==4) { if( ( (bx==1)||(bx==39)||(bx==201)||(bx==443)||(bx==499)||(bx==1083)||(bx==1337)||(bx==1492)||(bx==1977)||(bx==2231)||(bx==2287)||(bx==2871)||(bx==3224)||(bx==3280) )   ) return; } 
+    // select specific event
+    else if(select1==10) { if(event!=select2) return; } 
+    else if(select1==11) { 
+      if(select2==1) etaCut=0.2; 
+      else if(select2==2) etaCut=0.5; 
+      else if(select2==3) etaCut=1.0; 
+      else if(select2==4) etaCut=2.5; 
+    } 
+    //....
+  }
+
+
   for(reco::TrackCollection::const_iterator t=recTracks->begin();
       t!=recTracks->end(); ++t){
 
@@ -976,10 +1104,18 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
     if(PRINT) cout<<"Track "<<trackNumber<<" Pt "<<pt<<" Eta "<<eta<<" d0/dz "<<d0<<" "<<dz
 		  <<" Hits "<<size<<endl;
 
+    // applay special select cuts
+    if(etaCut>-1) {
+      if(select2<4 && abs(eta)>etaCut) continue;   // cut on max eta
+      if(select2>=4 && abs(eta)<etaCut) continue; // cut on min eta
+    }
+
     hEta->Fill(eta);
     hPhi->Fill(phi);
     hDz->Fill(dz);
-    if(TrackCuts && (abs(eta)>2.8 || abs(dz)>25.) ) continue;  //  skip  
+
+    // apply default selection cuts 
+    if(TrackCuts && (abs(eta)>2.9 || abs(dz)>25.) ) continue;  //  skip  
     
     hD0->Fill(d0);
     if(TrackCuts && d0>1.0) continue; // skip 
@@ -1607,9 +1743,71 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    hProbabilityXYFpix->Fill(hit->clusterProbability(0));
 	    hProbabilityQFpix->Fill(hit->clusterProbability(2));
 
-	  } else {
-	    cout<<" which layer is this? "<<layer<<" "<< disk<<endl;
-	  } // if layer
+	} else {
+	  cout<<" which layer is this? "<<layer<<" "<< disk<<endl;
+	} // if layer
+
+
+	// Get the pixels in the Cluster
+	const vector<SiPixelCluster::Pixel>& pixelsVec = clust->pixels();
+	if(PRINT) cout<<" Pixels in this cluster (i/x/y/char)"<<endl;
+	for (unsigned int i = 0;  i < pixelsVec.size(); ++i) { // loop over pixels
+	  //sumPixels++;
+	  //numberOfPixels++;
+	  float pixx = pixelsVec[i].x; // index as float=iteger, row index
+	  float pixy = pixelsVec[i].y; // same, col index
+	  float adc = (float(pixelsVec[i].adc)/1000.);
+
+	  if(layer==1) {
+	    hpixcharge1->Fill(adc);
+	    hpixDetMap1->Fill(pixy,pixx);
+
+	    if     ( ladder==1 && module==4) hpixDetMap10->Fill(pixy,pixx,adc); // 
+	    else if( ladder==2 && module==4) hpixDetMap11->Fill(pixy,pixx,adc); // " 
+	    else if( ladder==3 && module==4) hpixDetMap12->Fill(pixy,pixx,adc); // "
+	    else if( ladder==4 && module==4) hpixDetMap13->Fill(pixy,pixx,adc); // 
+	    else if( ladder==5 && module==4) hpixDetMap14->Fill(pixy,pixx,adc); // 
+	    else if( ladder==6 && module==4) hpixDetMap15->Fill(pixy,pixx,adc); // 
+	    else if( ladder==1 && module==-4) hpixDetMap16->Fill(pixy,pixx,adc); //
+	    else if( ladder==2 && module==-4) hpixDetMap17->Fill(pixy,pixx,adc); // 
+	    else if( ladder==3 && module==-4) hpixDetMap18->Fill(pixy,pixx,adc); // 
+	    else if( ladder==4 && module==-4) hpixDetMap19->Fill(pixy,pixx,adc); // 
+	    else if( ladder==5 && module==-4) hpixDetMap20->Fill(pixy,pixx,adc); // 
+	    else if( ladder==6 && module==-4) hpixDetMap21->Fill(pixy,pixx,adc); // 
+	    else if( ladder==-1 && module==4) hpixDetMap22->Fill(pixy,pixx,adc); // 
+	    else if( ladder==-2 && module==4) hpixDetMap23->Fill(pixy,pixx,adc); //
+	    else if( ladder==-3 && module==4) hpixDetMap24->Fill(pixy,pixx,adc); //
+	    else if( ladder==-4 && module==4) hpixDetMap25->Fill(pixy,pixx,adc); // 
+	    else if( ladder==-5 && module==4) hpixDetMap26->Fill(pixy,pixx,adc); // 
+	    else if( ladder==-6 && module==4) hpixDetMap27->Fill(pixy,pixx,adc); // 
+	    else if( ladder==-1 && module==-4) hpixDetMap28->Fill(pixy,pixx,adc); //
+	    else if( ladder==-2 && module==-4) hpixDetMap29->Fill(pixy,pixx,adc); // 
+	    else if( ladder==-3 && module==-4) hpixDetMap30->Fill(pixy,pixx,adc); // 
+	    else if( ladder==-4 && module==-4) hpixDetMap31->Fill(pixy,pixx,adc); // 
+	    else if( ladder==-5 && module==-4) hpixDetMap32->Fill(pixy,pixx,adc); // 
+	    else if( ladder==-6 && module==-4) hpixDetMap33->Fill(pixy,pixx,adc); // 
+
+	  } else if(layer==2) {
+
+	    hpixcharge2->Fill(adc);
+	    hpixDetMap2->Fill(pixy,pixx);
+
+	  } else if(layer==3) {
+
+	    hpixcharge3->Fill(adc);
+	    hpixDetMap3->Fill(pixy,pixx);
+
+	  } else if(layer==4) {
+
+	    hpixcharge4->Fill(adc);
+	    hpixDetMap4->Fill(pixy,pixx);
+
+	  } // if layer 
+
+
+	} // for loop 
+
+
 	  
       } // if valid
 

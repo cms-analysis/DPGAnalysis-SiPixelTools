@@ -615,6 +615,7 @@ edm::EDGetTokenT<HFRecHitCollection> HFHitsToken_;
   TH2F *hpixDetMap41, *hpixDetMap42, *hpixDetMap43, *hpixDetMap44, *hpixDetMap45;
   TH2F *hpixDetMap46, *hpixDetMap47, *hpixDetMap48, *hpixDetMap49;
 
+
   //TH2F *h2d1, *h2d2, *h2d3;
 
   TH1D *hevent, *hlumi, *hlumi0, *hlumi1, 
@@ -831,11 +832,11 @@ void PixClusterAna::beginJob() {
   //hpixPerLink3 = fs->make<TH1D>( "hpixPerLink3", "Pix per link l3",
   //			    sizeH, lowH, highH);
 
-  sizeH=5000;
+  sizeH=10000;
 #ifdef HI
   highH = 19999.5;
 #else
-  highH = 4999.5;
+  highH = 9999.5;
 #endif
 
   hclusPerLay1 = fs->make<TH1D>( "hclusPerLay1", "Clus per layer l1",
@@ -897,11 +898,11 @@ void PixClusterAna::beginJob() {
 			    sizeH, lowH, highH);
 
 
-  sizeH=2000;
+  sizeH=4000;
 #ifdef HI
   highH = 99999.5;
 #else
-  highH = 19999.5;
+  highH = 39999.5;
 #endif
 
   hpixPerLay1 = fs->make<TH1D>( "hpixPerLay1", "Pix per layer l1",
@@ -1818,20 +1819,6 @@ void PixClusterAna::analyze(const edm::Event& e,
   } // if run
 #endif // PV 
     
-#ifdef BX
-  //cout<<" for bx "<<bx<<endl;
-  int bxId = getbx->find(bx);  // get the bunch type 
-  // select special events only 
-  if(select2>0 && select2<11) {
-    // skip events which are not single beams, only if select2=2 
-    if( (select2==2) && (bxId!=1) && (bxId!=2) ) return;
-    // skip events which are not collisions 
-    if( (select2==1) && (bxId!=3) ) return;
-    // skip events which are not cempty
-    if( (select2==6) && (bxId!=0) ) return;
-    //cout<<" id is "<<bxId<<" "<<bx<<endl;
-  }
-#endif // BX
 
 #ifdef BX_NEW
   //cout<<" for bx "<<bx<<endl;
@@ -2029,10 +2016,18 @@ void PixClusterAna::analyze(const edm::Event& e,
   //----------------------------------------------
   hdets->Fill(float(numOf)); // number of modules with pix
 
-  // Select events with pixels
-  //if(numOf<1) return; // skip events with  pixel dets
-
-  if(select1>0) { if(numOf<select1) return; } // skip events with few pixel dets
+  // Select events if select1>0
+  if(select1>0) {
+    // skip events with few pixel dets
+    if(select1==1) { if(numOf<select2) return; } 
+    // select events only for a defined bx
+    else if(select1==2) { if(bx!=select2) return; } 
+    else if(select1==3) { if(  !( (bx==39)||(bx==201)||(bx==443)||(bx==499)||(bx==1083)||(bx==1337)||(bx==1492)||(bx==1977)||(bx==2231)||(bx==2287)||(bx==2871)||(bx==3224)||(bx==3280) )   ) return; } 
+    else if(select1==4) { if( ( (bx==1)||(bx==39)||(bx==201)||(bx==443)||(bx==499)||(bx==1083)||(bx==1337)||(bx==1492)||(bx==1977)||(bx==2231)||(bx==2287)||(bx==2871)||(bx==3224)||(bx==3280) )   ) return; } 
+    // select specific event
+    else if(select1==10) { if(event!=select2) return; } 
+    //....
+  }
 
   hevent->Fill(float(event));
   hlumi->Fill(float(lumiBlock));

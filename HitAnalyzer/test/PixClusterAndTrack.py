@@ -186,6 +186,18 @@ process.d = cms.EDAnalyzer("PixClusterAna",
     Select2 = cms.untracked.int32(0),  # select the cut value   
 )
 
+process.b = cms.EDAnalyzer("PixClusterAna",
+    Verbosity = cms.untracked.bool(False),
+    phase1 = cms.untracked.bool(True),
+    #src = cms.InputTag("siPixelClustersForLumi"),   # from the lumi stream
+    src = cms.InputTag("siPixelClusters"),
+    #src = cms.InputTag("siPixelClustersPreSplitting"),
+    #src = cms.InputTag("ALCARECOTkAlMinBias"), # ALCARECO
+    # additional selections, e.g. select bx=1 -> (2,1)
+    Select1 = cms.untracked.int32(2),  # select the cut type, 0 no cut
+    Select2 = cms.untracked.int32(1),  # select the cut value   
+)
+
 process.a = cms.EDAnalyzer("PixClusterTest",
     Verbosity = cms.untracked.bool(True),
     phase1 = cms.untracked.bool(True),
@@ -208,10 +220,9 @@ process.c = cms.EDAnalyzer("PixClustersWithTracks",
 )
 
 
-
 #process.p = cms.Path(process.hltfilter*process.a)
-process.p = cms.Path(process.hltfilter*process.d)
-#process.p = cms.Path(process.hltfilter*process.d*process.c)
+#process.p = cms.Path(process.hltfilter*process.d)
+process.p = cms.Path(process.hltfilter*process.d*process.b*process.c)
 #process.p = cms.Path(process.d) # for cosmics
 
 
