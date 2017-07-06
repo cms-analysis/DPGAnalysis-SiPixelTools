@@ -60,7 +60,7 @@ public:
   MyDecode() {}
   ~MyDecode() {}
   static int error(int error, bool print=false);
-  static int data(int error, int &channel, int &roc, int &dcol, int &pix, bool print=false);
+  static int data(int error, int &channel, int &roc, int &dcol, int &pix, int &adc, bool print=false);
   static int header(unsigned long long word64, bool print);
   static int trailer(unsigned long long word64, bool print);
 private:
@@ -187,7 +187,7 @@ int MyDecode::error(int word, bool printFlag) {
   return status;
 }
 ///////////////////////////////////////////////////////////////////////////
-int MyDecode::data(int word, int &c, int &r, int &d, int &p, bool printFlag) {
+int MyDecode::data(int word, int &c, int &r, int &d, int &p, int &a, bool printFlag) {
   
   //const int ROCMAX = 24;
   const unsigned int plsmsk = 0xff;   // pulse height
@@ -252,6 +252,7 @@ int MyDecode::data(int word, int &c, int &r, int &d, int &p, bool printFlag) {
       r = roc-1; // start roc counting from 0
       d = dcol;
       p = pix;
+      a = adc;
       status++;	
 
     } else { // channel
@@ -283,8 +284,22 @@ public:
   MyConvert() {}
   ~MyConvert() {}
   static string moduleNameFromFedChan(int fed,int fedChan, int roc, string & tbm);
+  static int layerFromName(string name);
+
 private:
 };
+
+// layer number form module name 
+int MyConvert::layerFromName(string modName) {
+  int layer=0;
+
+  if     ( modName.find("_LYR1_") != string::npos ) layer=1;  
+  else if( modName.find("_LYR2_") != string::npos ) layer=2;  
+  else if( modName.find("_LYR3_") != string::npos ) layer=3;  
+  else if( modName.find("_LYR4_") != string::npos ) layer=4;  
+
+  return layer;
+}
 
 // Method returns the module name and the tbm type as strings
 // input: int fed, fedChan
@@ -749,7 +764,7 @@ public:
 
   /// get data, convert to digis attach againe to Event
   void analyze(const edm::Event&, const edm::EventSetup&);
-  void analyzeHits(int fed, int channel, int roc, int dcol, int pix, int adc);
+  void analyzeHits(int fed, int channel, int layer, int roc, int dcol, int pix, int adc);
   void histogramHits(int fed);
 
 private:
@@ -765,6 +780,8 @@ private:
   TH1D *hsize0, *hsize1, *hsize2, *hsize3;
   TH2F *hchannelRoc, *hchannelRocs, *hchannelPixels, *hchannelPixPerRoc;
   TH1D *hrocs, *hpixels, *hpixPerRoc;
+  TH1D *hrow1, *hrow2,*hcol1, *hcol2,*hadc1, *hadc2; 
+  TH1D *hcol11, *hadc11; 
 };
 
 void FindHotPixelFromRaw::endJob() {
@@ -828,6 +845,16 @@ void FindHotPixelFromRaw::beginJob() {
   hchannelPixels = fs->make<TH2F>("hchannelPixels", "pixels in a channel",48,0.,48.,200, -0.5,199.5);
   hchannelPixPerRoc = fs->make<TH2F>("hchannelPixPerRoc", "pixels in a roc",48,0.,48.,100, -0.5,199.5);
 
+  hrow1 = fs->make<TH1D>( "hrow1", "pixel rows, l1",   101, -1.5, 99.5);
+  hrow2 = fs->make<TH1D>( "hrow2", "pixel rows, l2-4", 101, -1.5, 99.5);
+  hcol1 = fs->make<TH1D>( "hcol1", "pixel cols, l1",   101, -1.5, 99.5);
+  hcol2 = fs->make<TH1D>( "hcol2", "pixel cols, l2-4", 101, -1.5, 99.5);
+  hadc1 = fs->make<TH1D>( "hadc1", "pixel adc, l1",    300, -0.5, 299.5);
+  hadc2 = fs->make<TH1D>( "hadc2", "pixel adc, l2-4",  300, -0.5, 299.5);
+
+  hcol11 = fs->make<TH1D>( "hcol11", "pixel cols, l1",   101, -1.5, 99.5);
+  hadc11 = fs->make<TH1D>( "hadc11", "pixel adc, l1",    300, -0.5, 299.5);
+
 }
 //-----------------------------------------------------------------------
 void FindHotPixelFromRaw::histogramHits(int fed) {
@@ -865,15 +892,56 @@ void FindHotPixelFromRaw::histogramHits(int fed) {
   return;
 }
 //-----------------------------------------------------------------------
-void FindHotPixelFromRaw::analyzeHits(int fed, int channel, int roc, int dcol, int pix, int adc) {
+void FindHotPixelFromRaw::analyzeHits(int fed, int channel, int layer, int roc, int dcol, int pix, int adc) {
   //TH2F *hchannelRoc, *hchannelRocs, *hchannelPixels, *hchannelPixPerRoc;
   static int fed0=-1, channel0=-1, roc0=-1;
   static int numPixPerChannel=0, numRocsPerChannel=0, numPixPerRoc=0;
+  // for layer-1
+  const unsigned int rowmsk = 0x7f00; 
+  const unsigned int colmsk = 0x1f8000;
+
+  //cout<<fed<<endl;
 
   if(fed!=1200) return;
 
   // channels go from 1 to 48
   PixelsCount[channel-1][roc]++;
+
+
+  if( (channel>=1&&channel<=8) ||  (channel>=25 && channel<=32) ) { // layer 1 for fed 1200 
+    //cout<<" layer 1: "<<roc<<" "<<dcol<<" "<<pix<<" "<<adc<<endl;
+
+    // do a customise computation of col/row from dcol/pix, move to data() later 
+    int tmp = (dcol<<16) + (pix<<8);
+    int colROC = (tmp&colmsk)>>15;
+    int rowROC = (tmp&rowmsk)>>8;
+
+    //cout<<" layer 1: "<<roc<<" "<<colROC<<" "<<rowROC<<" "<<adc<<endl;
+
+    hrow1->Fill(float(rowROC));
+    hcol1->Fill(float(colROC));
+    hadc1->Fill(float(adc));
+
+    if(rowROC==80) {
+      hcol11->Fill(float(colROC));
+      hadc11->Fill(float(adc));
+    }
+
+  } else { // layers 2,3,4
+
+    // First find if we are in the first or 2nd col of a dcol.
+    int colEvenOdd = pix%2;  // module(2), 0-1st sol, 1-2nd col.
+    // Transform
+    int colROC = dcol * 2 + colEvenOdd; // col address, starts from 0
+    int rowROC = abs( int(pix/2) - 80); // row addres, starts from 0
+
+    //cout<<" layer 2-4: "<<roc<<" "<<colROC<<" "<<rowROC<<" "<<adc<<endl;
+
+    hrow2->Fill(float(rowROC));
+    hcol2->Fill(float(colROC));
+    hadc2->Fill(float(adc));
+
+  }
 
   return;
 
@@ -980,26 +1048,29 @@ void FindHotPixelFromRaw::analyze(const  edm::Event& ev, const edm::EventSetup& 
 
     int countPixelsInFed=0;
     int countErrorsInFed=0;
+    int layer=0;
     // Loop over payload words
     for (const Word64* word = header+1; word != trailer; word++) {
       static const Word64 WORD32_mask  = 0xffffffff;
+
       Word32 w1 =  *word       & WORD32_mask;
-      status = MyDecode::data(w1, channel, roc, dcol, pix, printData);
+      status = MyDecode::data(w1, channel, roc, dcol, pix, adc, printData);
       //if(fedId==1207 && channel==22) cout<<roc<<" "<<dcol<<" "<<pix<<endl;
       if(status>0) {
 	countPixels++;
 	countPixelsInFed++;
         if(findHot) hotPixels[fedId-fedId0].update(channel,roc,dcol,pix);
-	else        analyzeHits(fedId,channel,roc,dcol,pix,adc);
+	else        analyzeHits(fedId,channel,layer,roc,dcol,pix,adc);
       } else if(status<0) countErrorsInFed++;
-      Word32 w2 =  *word >> 32 & WORD32_mask;
-      status = MyDecode::data(w2, channel, roc, dcol, pix, printData);
+
+      Word32 w2 =  (*word >> 32) & WORD32_mask;
+      status = MyDecode::data(w2, channel, roc, dcol, pix, adc,  printData);
       //if(fedId==1207 && channel==22) cout<<roc<<" "<<dcol<<" "<<pix<<endl;
       if(status>0) {
 	countPixels++;
 	countPixelsInFed++;
         if(findHot) hotPixels[fedId-fedId0].update(channel,roc,dcol,pix);
-	else        analyzeHits(fedId,channel,roc,dcol,pix,adc);
+	else        analyzeHits(fedId,channel,layer,roc,dcol,pix,adc);
       } else if(status<0) countErrorsInFed++;
       //cout<<hex<<w1<<" "<<w2<<dec<<endl;
     } // loop over words

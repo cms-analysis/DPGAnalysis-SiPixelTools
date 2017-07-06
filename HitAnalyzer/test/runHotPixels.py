@@ -45,8 +45,8 @@ process.MessageLogger = cms.Service("MessageLogger",
 #process.MessageLogger.cerr.threshold = 'Debug'
 
 process.maxEvents = cms.untracked.PSet(
-#    input = cms.untracked.int32(-1)
     input = cms.untracked.int32(-1)
+#    input = cms.untracked.int32(10)
 )
 
 process.TFileService = cms.Service("TFileService",
@@ -56,8 +56,11 @@ process.TFileService = cms.Service("TFileService",
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring( 
 
- "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v1/000/295/439/00000/426B4782-FC43-E711-9328-02163E011A76.root",
- "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v1/000/295/439/00000/F853E939-FF43-E711-A59D-02163E013479.root",
+
+ "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v2/000/296/702/00000/FED4EA05-D64F-E711-82F9-02163E012A6B.root",
+
+# "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v1/000/295/439/00000/426B4782-FC43-E711-9328-02163E011A76.root",
+# "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v1/000/295/439/00000/F853E939-FF43-E711-A59D-02163E013479.root",
 
 # "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v1/000/295/209/00000/005E61C9-D341-E711-BEAE-02163E019C9F.root",
 
@@ -77,12 +80,7 @@ process.source = cms.Source("PoolSource",
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('205718:49-205718:734')
 
 
-#process.out = cms.OutputModule("PoolOutputModule",
-#    fileName =  cms.untracked.string('file:histos.root')
-#)
-
-#process.dumper = cms.EDAnalyzer("findHotPixels", 
-process.dumper = cms.EDAnalyzer("FindHotPixelFromRaw", 
+process.d = cms.EDAnalyzer("FindHotPixelFromRaw", 
     Timing = cms.untracked.bool(False),
     IncludeErrors = cms.untracked.bool(True),
 #    InputLabel = cms.untracked.string('source'),
@@ -96,7 +94,7 @@ process.dumper = cms.EDAnalyzer("FindHotPixelFromRaw",
     Fraction = cms.untracked.double(0.02)
 )
 
-process.p = cms.Path(process.hltfilter*process.dumper)
+process.p = cms.Path(process.hltfilter*process.d)
 #process.p = cms.Path(process.dumper)
 
 # process.ep = cms.EndPath(process.out)

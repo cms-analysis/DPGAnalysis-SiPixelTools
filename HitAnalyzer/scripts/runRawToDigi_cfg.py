@@ -56,6 +56,16 @@ process.source = cms.Source("PoolSource",
  # fileNames =  cms.untracked.vstring('file:rawdata.root')
  fileNames =  cms.untracked.vstring(
 
+# high Vibias  250
+"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/671/00000/1665877E-B15C-E711-8FC7-02163E0133E1.root",
+
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/494/00000/221DC7DD-1E5A-E711-A76A-02163E011BB6.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/495/00000/003591BD-1A5A-E711-AF2A-02163E01A508.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/496/00000/04813659-1B5A-E711-9DE9-02163E0143BD.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/499/00000/0E628ABD-225A-E711-8B40-02163E01A5E2.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/503/00000/0024EBBF-385A-E711-BF25-02163E019E77.root",
+
+
 # ctrl reg sca 
 # "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v2/000/296/795/00000/1A1C0A23-0851-E711-8692-02163E01472F.root",
 # "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v2/000/296/790/00000/02DC1127-0951-E711-851C-02163E0143F0.root",
@@ -133,9 +143,9 @@ process.siPixelDigis.UsePhase1 = True
 process.MessageLogger = cms.Service("MessageLogger",
     debugModules = cms.untracked.vstring('siPixelDigis'),
     destinations = cms.untracked.vstring('r2d'),
-    r2d = cms.untracked.PSet( threshold = cms.untracked.string('DEBUG'))
+#    r2d = cms.untracked.PSet( threshold = cms.untracked.string('DEBUG'))
 #    r2d = cms.untracked.PSet( threshold = cms.untracked.string('INFO'))
-#    r2d = cms.untracked.PSet( threshold = cms.untracked.string('WARNING'))
+    r2d = cms.untracked.PSet( threshold = cms.untracked.string('WARNING'))
 )
 
 process.out = cms.OutputModule("PoolOutputModule",
@@ -152,13 +162,22 @@ process.a = cms.EDAnalyzer("PixDigisTest",
 #    src = cms.InputTag("mix"),
 # old default
     src = cms.InputTag("siPixelDigis"),
+    Select1 = cms.untracked.int32(0),  # select the cut type, o no cut
+    Select2 = cms.untracked.int32(0),  # select the cut value   
 )
+
+process.d = cms.EDAnalyzer("PixelFedErrorDumper", 
+    Verbosity = cms.untracked.bool(False),
+    InputLabel = cms.untracked.string('siPixelDigis'),
+)
+
+
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string('digis_histo.root')
 )
 
 #process.p = cms.Path(process.siPixelDigis)
-#process.p = cms.Path(process.siPixelDigis*process.a)
-process.p = cms.Path(process.hltfilter*process.siPixelDigis*process.a)
+process.p = cms.Path(process.siPixelDigis*process.a)
+#process.p = cms.Path(process.hltfilter*process.siPixelDigis*process.a*process.d)
 # disable data write to disk 
 #process.ep = cms.EndPath(process.out)

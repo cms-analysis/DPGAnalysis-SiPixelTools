@@ -894,6 +894,7 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	    else if( ladder==-4 && module==-4) hpixDetMap31->Fill(pixy,pixx,adc); // 
 	    else if( ladder==-5 && module==-4) hpixDetMap32->Fill(pixy,pixx,adc); // 
 	    else if( ladder==-6 && module==-4) hpixDetMap33->Fill(pixy,pixx,adc); // 
+	    else if( ladder==-1 && module==-2) hpixDetMap34->Fill(pixy,pixx,adc); // 
 
 
 	   totalNumOfDigis1++;

@@ -324,9 +324,10 @@ int MyDecode::error(int word, int & fedChannel, int fed, int & stat1, int & stat
     }
 
     if(word & FsmErrMask) {
-      if(print) cout<<"Finite State Machine Error- "<<"channel: "<<channel
-			  <<" Error status:0x"<<hex<< ((word & FsmErrMask)>>9)<<dec<<" "; // <<endl;
-     status = -13;
+      if(print) cout<<"FSM Error-??? "<<"channel: "<<channel;
+      //if(print) cout<<"Finite State Machine Error- "<<"channel: "<<channel
+      //			  <<" Error status:0x"<<hex<< ((word & FsmErrMask)>>9)<<dec<<" "; // <<endl;
+      //status = -13;
     }
 
 
@@ -378,7 +379,6 @@ int MyDecode::data(int word, int & fedChannel, int fed, int & stat1, int & stat2
   const unsigned int chnlmsk = 0xfc000000; // 6 bits 
   const unsigned int rocshift = 21;
   const unsigned int linkshift = 26;
-
   int status = 0;
 
   roc_ = ((word&rocmsk)>>rocshift); // rocs start from 1
@@ -391,6 +391,8 @@ int MyDecode::data(int word, int & fedChannel, int fed, int & stat1, int & stat2
       //cout<<hex<<word<<dec;
       dcol_=(word&dclmsk)>>16;
       pix_=(word&pxlmsk)>>8;
+
+
       adc_=(word&plsmsk);
       fedChannel = channel_;
 
@@ -558,6 +560,7 @@ private:
   int decodeErrors000[n_of_FEDs][n_of_Channels];  // pix 0 problem
   int decodeErrorsDouble[n_of_FEDs][n_of_Channels];  // double pix  problem
   int errorType[20];
+  int fedId0;
 
 #ifdef OUTFILE
   ofstream outfile;
@@ -665,11 +668,11 @@ void SiPixelRawDump::endJob() {
   cout<<endl;
 
   cout<<" Total number of errors "<<countTotErrors<<" print threshold "<< int(countEvents*printThreshold) << " total errors per fed channel"<<endl;
-  cout<<" FED errors "<<endl<<"Fed Channel Tot-Errors ENE-Errors Time-Errors Over-Errors"<<endl;
+  cout<<" FED errors "<<endl<<"Fed Channel Tot-Errors ENE-Errors Time-Errors NOR-Errors"<<endl;
 
   for(int i = 0; i < n_of_FEDs; ++i) {
     for(int j=0;j<n_of_Channels;++j) if( (fedErrors[i][j]) > int(countEvents*printThreshold) || (fedErrorsENE[i][j] > 0) ) {
-      cout<<" "<<i<<"  -  "<<(j+1)<<" -  "<<fedErrors[i][j]<<" - "<<fedErrorsENE[i][j]<<" -  "<<fedErrorsTime[i][j]<<" - "<<fedErrorsOver[i][j]<<endl;
+	cout<<" "<<(i+fedId0)<<"  -  "<<(j+1)<<" -  "<<fedErrors[i][j]<<" - "<<fedErrorsENE[i][j]<<" -  "<<fedErrorsTime[i][j]<<" - "<<fedErrorsOver[i][j]<<endl;
     }
   }
   cout<<" Decode errors "<<endl<<"Fed Channel Errors Pix_000 Double_Pix"<<endl;
@@ -677,7 +680,7 @@ void SiPixelRawDump::endJob() {
     for(int j=0;j<n_of_Channels;++j) {
       int tmp = decodeErrors[i][j] + decodeErrors000[i][j] + decodeErrorsDouble[i][j];
       if(tmp>10) 
-	cout<<" "<<i<<" -  "<<(j+1)<<"   -  "
+	cout<<" "<<(i+fedId0)<<" -  "<<(j+1)<<"   -  "
 	    <<decodeErrors[i][j]<<"  -    "
 	    <<decodeErrors000[i][j]<<"  -   "
 	    <<decodeErrorsDouble[i][j]<<endl;
@@ -1101,10 +1104,10 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 
 #ifdef PHASE1
   std::pair<int,int> fedIds(1200,1303); // phase 1
-  const int fedId0=1200;
+  fedId0=1200;
 #else // phase0
   std::pair<int,int> fedIds(FEDNumbering::MINSiPixelFEDID, FEDNumbering::MAXSiPixelFEDID); //0
-  const int fedId0=0;
+  fedId0=0;
 #endif
 
 
@@ -1267,7 +1270,7 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 
 	    hoverflowFed->Fill(float(fedId-fedId0));
 	    countErrors[14]++;
-	    fedErrorsOver[fedId-fedId0][(fedChannel-1)]++;
+	    //fedErrorsOver[fedId-fedId0][(fedChannel-1)]++;
 	    hfed2DErrors14->Fill(float(fedId-fedId0),float(fedChannel));
 	    //hfed2DErrors14ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
 
@@ -1300,6 +1303,7 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 	    countErrors[12]++;
 	    hfed2DErrors12->Fill(float(fedId-fedId0),float(fedChannel));
 	    //hfed2DErrors12ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
+	    fedErrorsOver[fedId-fedId0][(fedChannel-1)]++;   // use oveflow to count NORs for phase1 
 	    break; }
 
 	  case(15) : {  // TBM Trailer

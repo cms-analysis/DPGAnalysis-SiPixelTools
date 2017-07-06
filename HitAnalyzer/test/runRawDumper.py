@@ -46,7 +46,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 #process.MessageLogger.cerr.threshold = 'Debug'
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10)
+    input = cms.untracked.int32(-1)
 )
 
 process.TFileService = cms.Service("TFileService",
@@ -62,7 +62,12 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(                          
 # 2017
 
- "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v1/000/295/209/00000/005E61C9-D341-E711-BEAE-02163E019C9F.root",
+ "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v2/000/296/702/00000/FED4EA05-D64F-E711-82F9-02163E012A6B.root",
+# "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v2/000/296/664/00000/00F38C8D-A54F-E711-A312-02163E01472F.root",
+# "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v2/000/296/643/00000/08070285-5E4F-E711-BB56-02163E01476C.root",
+
+
+# "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v1/000/295/209/00000/005E61C9-D341-E711-BEAE-02163E019C9F.root",
 
 # "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v1/000/295/128/00000/2E861F6A-1F41-E711-BEEC-02163E01A32B.root",
 
@@ -119,9 +124,9 @@ process.d = cms.EDAnalyzer("SiPixelRawDump",
 
     CheckPixelOrder = cms.untracked.bool(False),
 # 0 - nothing, 1 - error , 2- data, 3-headers, 4-hex
-    Verbosity = cms.untracked.int32(3),
+    Verbosity = cms.untracked.int32(0),
 # threshold, print fed/channel num of errors if tot_errors > events * PrintThreshold, default 0,001 
-    PrintThreshold = cms.untracked.double(0.001)
+    PrintThreshold = cms.untracked.double(0.01)
 )
 
 process.p = cms.Path(process.hltfilter*process.d)
