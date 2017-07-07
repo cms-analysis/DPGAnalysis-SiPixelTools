@@ -30,7 +30,7 @@ bool printSummary = true;
 bool printTexSummary = true;
 
 double gain_max = 20;
-double ped_max = 200;
+double ped_max = 250;
 
 // ******** Declaration of fonctions ********
 vector<TString> makedirlist(TFile*,TString);

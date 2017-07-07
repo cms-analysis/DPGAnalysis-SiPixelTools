@@ -49,8 +49,8 @@ create(){
   if [ "$indir" == "" ] && [ "$storedir" == "" ];then
     #indir=/castor/cern.ch/user/${USER:0:1}/$USER/GainCalib_run$run
     #storedir=/castor/cern.ch/user/${USER:0:1}/$USER/
-    indir=/store/group/dpg_tracker_pixel/comm_pixel/GainCalibrations/Run_$run
-    storedir=/store/group/dpg_tracker_pixel/comm_pixel/GainCalibrations/Run_$run
+    indir=/store/group/dpg_tracker_pixel/comm_pixel/GainCalibrations/Phase1/Run_$run
+    storedir=/store/group/dpg_tracker_pixel/comm_pixel/GainCalibrations/Phase1/Run_$run
   fi
   
   storedir=$storedir/GainRun_$run
@@ -174,24 +174,28 @@ submit_calib(){
 resubmit_job(){
   set_specifics $storedir 
   
-  cd $runningdir
-  if [ `is_file_present $storedir/$ijob.root` -eq 1 ];then
-    echo "Output of job $ijob is already in $storedir."
-    exit
-  fi
+  #echo "in resubmit job: $T2_LS $ijob"
+
+  # cd $runningdir
+  # if [ `is_file_present $storedir/$ijob.root` -eq 1 ];then
+  #   echo "Output of job $ijob is already in $storedir."
+  #   exit
+  # fi
   
   echo "Re-submitting job $ijob:"
   submit_to_queue ${run}_${ijob} ${runningdir}/JOB_${ijob}/stdout submit_${ijob}.sh
   
-  cd -
+  # cd -
 }
 
 resubmit_all(){
   set_specifics $storedir 
   cd $runningdir
   
-  for ijob in `seq 0 39`;do
-    if [ `is_file_present $storedir/$ijob.root` -eq 0 ];then
+  #for ijob in `seq 0 39`;do
+  for ijob in "${PIXFEDarray[@]}";do
+      # echo  `is_file_present "$storedir/$ijob.root"`
+    if [ `is_file_present "$storedir/$ijob.root"` -eq 0 ];then
       resubmit_job
     fi
   
