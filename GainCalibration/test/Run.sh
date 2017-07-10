@@ -424,6 +424,9 @@ make_payload(){
   
   echo -e "RM: $T2_RM$storedir/$payload"
   echo -e "RM: $T2_RM$storedir/$payload_root"
+
+  $T2_RM$storedir/$payload
+  $T2_RM$storedir/$payload_root
   
   #Changing some parameters in the python file:
   cat SiPixelGainCalibrationDBUploader_cfg.py |\
@@ -465,6 +468,9 @@ make_payload(){
   
   echo -e "RM: `$T2_RM$storedir/$payload`"
   echo -e "RM: `$T2_RM$storedir/$payload_root`"
+
+  $T2_RM$storedir/$payload
+  $T2_RM$storedir/$payload_root
   
   #Changing some parameters in the python file:
   cat SiPixelGainCalibrationDBUploader_cfg.py |\
@@ -491,6 +497,44 @@ make_payload(){
   rm -f $T2_TMP_DIR/${payload}
   rm -f $T2_TMP_DIR/${payload_root}
   
+  ####################################
+
+####testing the pixelbypixel payload
+  payload=SiPixelGainCalibration_${year}_v${db_version}_PP.db
+  payload_root=Summary_payload_Run${run}_${year}_v${db_version}_PP.root
+  
+  echo -e "RM: `$T2_RM$storedir/$payload`"
+  echo -e "RM: `$T2_RM$storedir/$payload_root`"
+
+  $T2_RM$storedir/$payload
+  $T2_RM$storedir/$payload_root
+  
+  #Changing some parameters in the python file:
+  cat SiPixelGainCalibrationDBUploader_cfg.py |\
+    sed "s#file:///tmp/rougny/test.root#`file_loc $file`#"  |\
+    sed "s#sqlite_file:prova.db#sqlite_file:$T2_TMP_DIR/${payload}#" |\
+    sed "s#/tmp/rougny/histos.root#$T2_TMP_DIR/$payload_root#" |\
+    sed "s#cms.Path(process.gainDBOffline)#cms.Path(process.gainDBOfflinePP)#"|\
+    sed "s#record = cms.string('SiPixelGainCalibrationOfflineRcd')#record = cms.string('SiPixelGainCalibrationOfflinePPRcd')#"|\
+    sed "s#GainCalib_TEST#SiPixelGainCalibration_${year}_v${db_version}_PP#" > SiPixelGainCalibrationDBUploader_PP_cfg.py
+  
+  echo -e "\n--------------------------------------"
+  echo "Making the payload for Offline PP:"
+  echo "  $storedir/$payload"
+  echo "  ==> Summary root file: $payload_root"
+  echo -e "--------------------------------------\n"
+  
+  echo "  (\" cmsRun SiPixelGainCalibrationDBUploader_PP_cfg.py \" )"
+  cmsRun SiPixelGainCalibrationDBUploader_PP_cfg.py
+  
+  ls $T2_TMP_DIR
+  $T2_CP $T2_TMP_DIR/$payload $T2_PREFIX$storedir/$payload
+  $T2_CP $T2_TMP_DIR/$payload_root $T2_PREFIX$storedir/$payload_root
+  
+  rm -f $T2_TMP_DIR/${payload}
+  rm -f $T2_TMP_DIR/${payload_root}
+  
+### end testing pixelbypixel
   ####################################
    
   rm -f $file  
