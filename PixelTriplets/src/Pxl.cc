@@ -65,7 +65,7 @@
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 
 #include "FWCore/Framework/interface/ESHandle.h"
-#include "Geometry/CommonDetUnit/interface/GlobalTrackingGeometry.h" //GeomDetUnit.h"
+//#include "Geometry/CommonDetUnit/interface/GlobalTrackingGeometry.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "Geometry/CommonTopologies/interface/Topology.h"
@@ -3827,8 +3827,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
     double PXB2_clusSizeY=-99;
     double PXB3_clusSizeX=-99;
     double PXB3_clusSizeY=-99;
-    double PXB4_clusSizeX=-99;
-    double PXB4_clusSizeY=-99;
+    //double PXB4_clusSizeX=-99;
+    //double PXB4_clusSizeY=-99;
 
     double xPXB2 = 0;
     double yPXB2 = 0;
@@ -3846,7 +3846,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
     double xPXB4 = 0;
     double yPXB4 = 0;
     double zPXB4 = 0;
-    double uPXB4 = 0;
+    //double uPXB4 = 0;
 
 
     double vPXB3 = 0;
@@ -3863,17 +3863,17 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
     double phiN4 = 0;
     //double clch1 = 0;
     double clch2 = 0;
-    double clch3 = 0;
+    //double clch3 = 0;
     //int ncol1 = 0;
     //int ncol2 = 0;
-    int ncol3 = 0;
+    //int ncol3 = 0;
     int nrow1 = 0;
     int nrow2 = 0;
     int nrow3 = 0;
     int nrow4 = 0;
     //double etaX1 = 0;
     double etaX2 = 0;
-    double etaX3 = 0;
+    //double etaX3 = 0;
     //double cogp1 = 0;
     double cogp2 = 0;
     double cogp3 = 0;
@@ -3889,11 +3889,11 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
     double xmid3 = 0;
     double ymid3 = 0;
     const GeomDet * det3 = NULL;
-    int ilad3 = 0;
-    int xmin3 = 0;
-    int xmax3 = 0;
-    int zmin3 = 0;
-    int zmax3 = 0;
+    //int ilad3 = 0;
+    //int xmin3 = 0;
+    //int xmax3 = 0;
+    //int zmin3 = 0;
+    //int zmax3 = 0;
 
     int nTIB1 = 0;
     double xTIB1 = 0;
@@ -4097,10 +4097,10 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	      PXB3_clusSizeX = clust->sizeX();
 	      PXB3_clusSizeY = clust->sizeY();
 	    }
-	    if( ilay ==4) {
-	      PXB4_clusSizeX = clust->sizeX();
-	      PXB4_clusSizeY = clust->sizeY();
-	    }
+	    //if( ilay ==4) {
+	    //  PXB4_clusSizeX = clust->sizeX();
+	    //  PXB4_clusSizeY = clust->sizeY();
+	    //}
 	    if( idbg ) {
 	      cout << setprecision(0);
 	      cout << "  charge " << clust->charge();
@@ -4563,18 +4563,18 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  ePXB3 = sqrt( vxloc );
 	  fPXB3 = sqrt( vyloc );
 	  phiN3 = phiN;
-	  clch3 = clch;
-	  ncol3 = ncol;
+	  //clch3 = clch;
+	  //ncol3 = ncol;
 	  nrow3 = nrow;
-	  etaX3 = etaX;
+	  //etaX3 = etaX;
 	  cogp3 = cogp;
 	  xmid3 = xmid; // middle of sensor in global CMS coordinates
 	  ymid3 = ymid;
-	  ilad3 = ilad;
-	  xmin3 = xmin;
-	  xmax3 = xmax;
-	  zmin3 = ymin;
-	  zmax3 = ymax;
+	  //ilad3 = ilad;
+	  //xmin3 = xmin;
+	  //xmax3 = xmax;
+	  //zmin3 = ymin;
+	  //zmax3 = ymax;
 
 	  det3 = transRecHit->det();
 	  
@@ -4603,7 +4603,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  xPXB4 = gX;
 	  yPXB4 = gY;
 	  zPXB4 = gZ;
-	  uPXB4 = xloc;
+	  //uPXB4 = xloc;
 	  //vPXB4 = yloc;
 	  //ePXB4 = sqrt( vxloc );
 	  //fPXB4 = sqrt( vyloc );
@@ -5933,45 +5933,45 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	// local y = z in barrel
 	// local z = radial in barrel (thickness)
 
-	double xpix = fmod( uPXB2 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed
-	double xpx2 = fmod( uPXB2 + 0.82, 0.02 ); // xpix = 0..0.02 reconstructed
-	double xpx1 = fmod( uPXB1 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed
-	double xpx4 = fmod( uPXB4 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed
+	//double xpix = fmod( uPXB2 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed
+	//double xpx2 = fmod( uPXB2 + 0.82, 0.02 ); // xpix = 0..0.02 reconstructed
+	//double xpx1 = fmod( uPXB1 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed
+	//double xpx4 = fmod( uPXB4 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed
 
 	//double dpix = fmod( uPXB2 + dca2 + 0.82, 0.01 ); // dpix = 0..0.01 predicted
 
 	double vpix = fmod( vv, 0.01 ); // vpix = 0..0.01 predicted
 	if( uPXB2 < 0 ) vpix = -vpix; // vv is unsigned distance from module center
 
-	double lpix = fmod( lp2.x() + 0.82, 0.01 ); // lpix = 0..0.01 predicted
-	double tpix = fmod( lp2.x() + 0.82, 0.02 ); // tpix = 0..0.02 predicted
+	//double lpix = fmod( lp2.x() + 0.82, 0.01 ); // lpix = 0..0.01 predicted
+	//double tpix = fmod( lp2.x() + 0.82, 0.02 ); // tpix = 0..0.02 predicted
 
-	double zpix = fmod( lp2.y() + 3.24, 0.015 ); // zpix = 0..0.015 predicted
-	double spix = fmod( lp2.y() + 3.24, 0.03  ); // spix = 0..0.03  predicted
+	//double zpix = fmod( lp2.y() + 3.24, 0.015 ); // zpix = 0..0.015 predicted
+	//double spix = fmod( lp2.y() + 3.24, 0.03  ); // spix = 0..0.03  predicted
 
-	int smin = zmin2%52; // 0..51 column along z
-	int smax = zmax2%52; // 0..51 column along z
+	//int smin = zmin2%52; // 0..51 column along z
+	//int smax = zmax2%52; // 0..51 column along z
 
 	double cogx = (cogp2 + 0.5 - 80) * 0.01 - 0.0054; // Lorentz shift
 	if( cogp2 < 79 ) cogx -= 0.01; // big pix
 	if( cogp2 > 80 ) cogx += 0.01; // big pix
 
-	double mpix = fmod( cogx + 0.82, 0.01 ); // mpix = 0..0.01 from cluster COG
-	double cogdx = cogx - lp2.x(); // residual
+	//double mpix = fmod( cogx + 0.82, 0.01 ); // mpix = 0..0.01 from cluster COG
+	//double cogdx = cogx - lp2.x(); // residual
 
 	// hybrid method:
 
-	double hybx = uPXB2; // template
-	if( mpix*1E4 < 20 ) hybx = cogx; // COG
-	if( mpix*1E4 > 75 ) hybx = cogx;
+	//double hybx = uPXB2; // template
+	//if( mpix*1E4 < 20 ) hybx = cogx; // COG
+	//if( mpix*1E4 > 75 ) hybx = cogx;
 	//double hpix = fmod( hybx + 0.82, 0.01 ); // hpix = 0..0.01 from cluster hybrid method
-	double hybdx = hybx - lp2.x(); // residual
+	//double hybdx = hybx - lp2.x(); // residual
 
-	bool halfmod = 0;
-	if(      ilad2 ==  8 ) halfmod = 1;
-	else if( ilad2 ==  9 ) halfmod = 1;
-	else if( ilad2 == 24 ) halfmod = 1;
-	else if( ilad2 == 25 ) halfmod = 1;
+	//bool halfmod = 0;
+	//if(      ilad2 ==  8 ) halfmod = 1;
+	//else if( ilad2 ==  9 ) halfmod = 1;
+	//else if( ilad2 == 24 ) halfmod = 1;
+	//else if( ilad2 == 25 ) halfmod = 1;
 
 	if( pt > 4 ) {
 
@@ -6703,10 +6703,10 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
       	  // local y = z in barrel
       	  // local z = radial in barrel (thickness)
 
-      	  double xpix = fmod( uPXB3 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed
-      	  double xpx3 = fmod( uPXB3 + 0.82, 0.02 ); // xpix = 0..0.02 reconstructed
-      	  double xpx2 = fmod( uPXB2 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed
-      	  double xpx4 = fmod( uPXB4 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed
+      	  //double xpix = fmod( uPXB3 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed
+      	  //double xpx3 = fmod( uPXB3 + 0.82, 0.02 ); // xpix = 0..0.02 reconstructed
+      	  //double xpx2 = fmod( uPXB2 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed
+      	  //double xpx4 = fmod( uPXB4 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed
 
       	  //double dpix = fmod( uPXB3 + dca3 + 0.82, 0.01 ); // dpix = 0..0.01 predicted
 
@@ -6714,34 +6714,34 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
       	  if( uPXB3 < 0 ) vpix = -vpix; // vv is unsigned distance from module center
 
       	  double lpix = fmod( lp3.x() + 0.82, 0.01 ); // lpix = 0..0.01 predicted
-      	  double tpix = fmod( lp3.x() + 0.82, 0.02 ); // tpix = 0..0.02 predicted
+      	  //double tpix = fmod( lp3.x() + 0.82, 0.02 ); // tpix = 0..0.02 predicted
 
-      	  double zpix = fmod( lp3.y() + 3.24, 0.015 ); // zpix = 0..0.015 predicted
-      	  double spix = fmod( lp3.y() + 3.24, 0.03  ); // spix = 0..0.03  predicted
+      	  //double zpix = fmod( lp3.y() + 3.24, 0.015 ); // zpix = 0..0.015 predicted
+      	  //double spix = fmod( lp3.y() + 3.24, 0.03  ); // spix = 0..0.03  predicted
 
-      	  int smin = zmin3%52; // 0..51 column along z
-      	  int smax = zmax3%52; // 0..51 column along z
+      	  //int smin = zmin3%52; // 0..51 column along z
+      	  //int smax = zmax3%52; // 0..51 column along z
 
       	  double cogx = (cogp3 + 0.5 - 80) * 0.01 - 0.0054; // Lorentz shift
       	  if( cogp3 < 79 ) cogx -= 0.01; // big pix
       	  if( cogp3 > 80 ) cogx += 0.01; // big pix
 
-      	  double mpix = fmod( cogx + 0.82, 0.01 ); // mpix = 0..0.01 from cluster COG
+      	  //double mpix = fmod( cogx + 0.82, 0.01 ); // mpix = 0..0.01 from cluster COG
       	  double cogdx = cogx - lp3.x(); // residual
 
       	  // hybrid method:
 
-      	  double hybx = uPXB3; // template
-      	  if( mpix*1E4 < 20 ) hybx = cogx; // COG
-      	  if( mpix*1E4 > 75 ) hybx = cogx;
+      	  //double hybx = uPXB3; // template
+      	  //if( mpix*1E4 < 20 ) hybx = cogx; // COG
+      	  //if( mpix*1E4 > 75 ) hybx = cogx;
       	  //double hpix = fmod( hybx + 0.82, 0.01 ); // hpix = 0..0.01 from cluster hybrid method
-      	  double hybdx = hybx - lp3.x(); // residual
+      	  //double hybdx = hybx - lp3.x(); // residual
 
-      	  bool halfmod = 0;
-      	  if(      ilad3 ==  8 ) halfmod = 1;
-      	  else if( ilad3 ==  9 ) halfmod = 1;
-      	  else if( ilad3 == 24 ) halfmod = 1;
-      	  else if( ilad3 == 25 ) halfmod = 1;
+      	  //bool halfmod = 0;
+      	  //if(      ilad3 ==  8 ) halfmod = 1;
+      	  //else if( ilad3 ==  9 ) halfmod = 1;
+      	  //else if( ilad3 == 24 ) halfmod = 1;
+      	  //else if( ilad3 == 25 ) halfmod = 1;
 
       	  if( pt > 4 ) {
 
@@ -6831,9 +6831,9 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
       	    // h078->Fill( fPXB3*1E4 );
       	    if(idbg) cout<<" residuals "<<dca3*1E4<<" "<<ePXB3*1E4<<" "<<dz3*1E4
       			 <<" "<<fPXB3*1E4<<endl;
-      	    double pulx=0., puly=0.;
-      	    if(ePXB3!=0.0) pulx = dca3/ePXB3;
-      	    if(fPXB3!=0.0) puly = dz3/fPXB3;
+      	    //double pulx=0., puly=0.;
+      	    //if(ePXB3!=0.0) pulx = dca3/ePXB3;
+      	    //if(fPXB3!=0.0) puly = dz3/fPXB3;
       	    // h079->Fill( pulx );
       	    // h069->Fill( puly );
 
@@ -6844,10 +6844,10 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
       	      LocalError lape = geomDet2->localAlignmentError();
       	      //cout<< lape.valid() <<endl;
       	      if (lape.valid()) {
-      		float tmp11= 0.;
-      		if(lape.xx()>0.) tmp11= sqrt(lape.xx())*1E4;
-      		float tmp14= 0.;
-      		if(lape.yy()>0.) tmp14= sqrt(lape.yy())*1E4;
+      		//float tmp11= 0.;
+      		//if(lape.xx()>0.) tmp11= sqrt(lape.xx())*1E4;
+      		//float tmp14= 0.;
+      		//if(lape.yy()>0.) tmp14= sqrt(lape.yy())*1E4;
       		//cout<<" layer 3 "<<tmp11<<" "<<tmp14<<endl;
       		// h088->Fill( tmp11 );
       		// h089->Fill( tmp14 );
