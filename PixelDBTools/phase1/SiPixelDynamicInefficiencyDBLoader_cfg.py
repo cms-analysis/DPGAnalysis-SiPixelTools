@@ -2,9 +2,9 @@ import FWCore.ParameterSet.Config as cms
 import shlex, shutil, getpass
 import os.path
 
-db_file = "SiPixelDynamicInefficiency_dcol0p8.db"
+db_file = "SiPixelDynamicInefficiency_L1_dcol0p8.db"
 
-tag = 'SiPixelDynamicInefficiency_dcol0p8'
+tag = 'SiPixelDynamicInefficiency_L1_dcol0p8'
 
 Phase = 1 # If testing Phase 0, run this in 80X, There's no way I can configure this to work with Phase 0 in 81X
 
