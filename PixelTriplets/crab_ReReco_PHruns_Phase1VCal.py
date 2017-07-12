@@ -20,7 +20,7 @@ config.Data.runRange = '297664,297671'
 config.Data.splitting = 'EventAwareLumiBased'
 config.Data.unitsPerJob = 2000
 config.Data.outLFNDirBase = '/store/group/dpg_tracker_pixel/comm_pixel/Resolution/Phase1'
-config.Data.outputDatasetTag = 'PH_Runs-CMSSW_9_2_5_patch2-92X_dataRun2_Prompt_v4-Phase1VCalCalib-RERECO'
+config.Data.outputDatasetTag = 'PH_Runs-CMSSW_9_2_6-92X_dataRun2_Prompt_v4-Phase1VCalCalib-RERECO'
 
 config.section_('Site')
 config.Site.storageSite = 'T2_CH_CERN'
