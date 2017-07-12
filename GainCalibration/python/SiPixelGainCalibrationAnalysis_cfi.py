@@ -55,6 +55,7 @@ siPixelGainCalibrationAnalysis = cms.EDAnalyzer("SiPixelGainCalibrationAnalysis"
     # vcalHighToLowConversionFac = cms.double(7.0),
     vcalHighToLowConversionFac = cms.double(6.5),
     # use this mode if you want to analyze S-Curve data with the Gain analysis
-    ignoreMode = cms.untracked.bool(False),                                         phase1 = cms.untracked.bool(False)                                        
+    ignoreMode = cms.untracked.bool(False),
+    phase1 = cms.untracked.bool(False)                                   
 )
 

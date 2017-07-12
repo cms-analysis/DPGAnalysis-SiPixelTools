@@ -174,32 +174,31 @@ submit_calib(){
 resubmit_job(){
   set_specifics $storedir 
   
-  #echo "in resubmit job: $T2_LS $ijob"
-
-  # cd $runningdir
-  # if [ `is_file_present $storedir/$ijob.root` -eq 1 ];then
-  #   echo "Output of job $ijob is already in $storedir."
-  #   exit
-  # fi
+  if [ `is_file_present $storedir/$ijob.root` -eq 1 ];then
+    echo "Output of job $ijob is already in $storedir."
+    exit
+  fi
   
   echo "Re-submitting job $ijob:"
   submit_to_queue ${run}_${ijob} ${runningdir}/JOB_${ijob}/stdout submit_${ijob}.sh
-  
-  # cd -
 }
 
 resubmit_all(){
   set_specifics $storedir 
   cd $runningdir
-  
-  #for ijob in `seq 0 39`;do
+
+  nothing_to_resubmit=true
   for ijob in "${PIXFEDarray[@]}";do
-      # echo  `is_file_present "$storedir/$ijob.root"`
-    if [ `is_file_present "$storedir/$ijob.root"` -eq 0 ];then
-      resubmit_job
-    fi
-  
+    if [ `is_file_present $storedir/$ijob.root` -eq 0 ];then
+	nothing_to_resubmit=false
+	resubmit_job
+    fi  
   done
+
+  if [ "$nothing_to_submit" = true ];
+  then
+      echo "Nothing to resubmit."
+  fi
 
   cd -
 }
@@ -415,10 +414,6 @@ make_payload(){
   
   ###########################################   OFFLINE PAYLOAD
   
-  # payload=prova_GainRun${run}.db
-  # echo " Copying   $T2_CP prova.db $T2_TMP_DIR/$payload "
-  # $T2_CP prova.db $T2_TMP_DIR/$payload
-  # payload_root=Summary_payload_Run${run}.root
   payload=SiPixelGainCalibration_${year}_v${db_version}_offline.db
   payload_root=Summary_payload_Run${run}_${year}_v${db_version}.root
   
@@ -431,7 +426,7 @@ make_payload(){
   #Changing some parameters in the python file:
   cat SiPixelGainCalibrationDBUploader_cfg.py |\
     sed "s#file:///tmp/rougny/test.root#`file_loc $file`#"  |\
-    sed "s#sqlite_file:prova.db#sqlite_file:$T2_TMP_DIR/${payload}#" |\
+    sed "s#sqlite_file:dummy.db#sqlite_file:$T2_TMP_DIR/${payload}#" |\
     sed "s#/tmp/rougny/histos.root#$T2_TMP_DIR/$payload_root#" |\
     sed "s#GainCalib_TEST_offline#SiPixelGainCalibration_${year}_v${db_version}_offline#" > SiPixelGainCalibrationDBUploader_Offline_cfg.py
     
@@ -460,9 +455,6 @@ make_payload(){
   echo "removing  $T2_TMP_DIR/${payload_root} "
   ###########################################   HLT PAYLOAD
   
-  # payload=prova_GainRun${run}_HLT.db
-  # cp prova.db $T2_TMP_DIR/$payload
-  # payload_root=Summary_payload_Run${run}_HLT.root
   payload=SiPixelGainCalibration_${year}_v${db_version}_HLT.db
   payload_root=Summary_payload_Run${run}_${year}_v${db_version}_HLT.root
   
@@ -475,7 +467,7 @@ make_payload(){
   #Changing some parameters in the python file:
   cat SiPixelGainCalibrationDBUploader_cfg.py |\
     sed "s#file:///tmp/rougny/test.root#`file_loc $file`#"  |\
-    sed "s#sqlite_file:prova.db#sqlite_file:$T2_TMP_DIR/${payload}#" |\
+    sed "s#sqlite_file:dummy.db#sqlite_file:$T2_TMP_DIR/${payload}#" |\
     sed "s#/tmp/rougny/histos.root#$T2_TMP_DIR/$payload_root#" |\
     sed "s#cms.Path(process.gainDBOffline)#cms.Path(process.gainDBHLT)#"|\
     sed "s#record = cms.string('SiPixelGainCalibrationOfflineRcd')#record = cms.string('SiPixelGainCalibrationForHLTRcd')#"|\
@@ -609,7 +601,7 @@ pdf=0
 compare=0
 verbose=0
 ijob=-1
-prova=0
+createPayload=0
 twiki=0
 comp_twiki=0
 info=0
@@ -639,7 +631,7 @@ for arg in $* ; do
     -summary)      summary=1    ; run=$2 ; shift ;;
     -pdf)          pdf=1        ; run=$2 ; shift ;;
     -compare)      compare=1    ; run=0  ; run1=$2 ; file1=$3 ; run2=$4 ; file2=$5 ; shift ; shift ; shift ; shift ; shift ;;
-    -payload)      prova=1      ; run=$2 ; year=$3 ; db_version=$4 ; shift ; shift ; shift ;;
+    -payload)      createPayload=1      ; run=$2 ; year=$3 ; db_version=$4 ; shift ; shift ; shift ;;
     -twiki)        twiki=1      ; run=$2 ; shift ;;
     -comp_twiki)   comp_twiki=1 ; run=$2 ; shift ;;
     -info)         info=1       ; run=$2 ; shift ;;
@@ -701,7 +693,7 @@ if [ $compare -eq 1 ];then
 fi
 
 
-if [ $prova -eq 1 ];then
+if [ $createPayload -eq 1 ];then
   read_config
   make_payload
 fi

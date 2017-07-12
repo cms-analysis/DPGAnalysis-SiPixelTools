@@ -310,10 +310,13 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
 
 #ifdef CHECK_ORIENT
     cout<<"     0-0:  "<<lp1.x()<<" "<<lp1.y()<<" "
+	<<gp1.x()<<" "<<gp1.y()<<" "<<gp1.z()<<" "
 	<<gp1.perp()<<" "<<gp1.phi()<<" "<<gp1.z()<<endl;
     cout<<"   "<<(nrows-1)<<"-"<<(ncols-1)<<": "<<lp2.x()<<" "<<lp2.y()<<" "
+	<<gp2.x()<<" "<<gp2.y()<<" "<<gp2.z()<<" "
 	<<gp2.perp()<<" "<<gp2.phi()<<" "<<gp2.z()<<endl;
     cout<<" center: "<<lp3.x()<<" "<<lp3.y()<<" "
+	<<gp3.x()<<" "<<gp3.y()<<" "<<gp3.z()<<" "
 	<<gp3.perp()<<" "<<gp3.phi()<<" "<<gp3.z()<<endl;
     cout<<" B: "<<Bfield.x()<<" "<<Bfield.y()<<" "<<Bfield.z()<<endl;
 #endif // CHECK_ORIENT

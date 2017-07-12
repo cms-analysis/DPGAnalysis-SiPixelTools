@@ -497,6 +497,8 @@ void PixClusterTest::analyze(const edm::Event& e,
   hbx->Fill(float(bx));
   horbit->Fill(float(orbit));
 
+
+
   countEvents++;
   int numberOfDetUnits = 0;
   int numberOfClusters = 0;

@@ -122,8 +122,8 @@ protected:
   edm::ESHandle<SiPixelCalibConfiguration> calib_;
   edm::ESHandle<TrackerGeometry> geom_;
   edm::ESHandle<SiPixelFedCablingMap> theCablingMap_;
-  const TrackerTopology* tt;
-
+  const TrackerTopology* tt_;
+ 
   std::string calibrationMode_;
   short nTriggers_;
   static  std::vector< int >   vCalValues_Int_;
@@ -134,8 +134,6 @@ protected:
   std::vector< short >  calibcols;
 
   uint32_t & EventNumber() { return eventCounter_;}
-  std::string  prova_;
-
 
 private:
   

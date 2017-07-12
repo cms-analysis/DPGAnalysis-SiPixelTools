@@ -142,7 +142,7 @@ process.d = cms.EDAnalyzer("PixClustersWithTracks",
 #     trajectoryInput = cms.string("TrackRefitterP5")
 #     trajectoryInput = cms.string('cosmictrackfinderP5')
     Select1 = cms.untracked.int32(11),  # select the cut type
-    Select2 = cms.untracked.int32(4),  # select the cut value   
+    Select2 = cms.untracked.int32(1),  # select the cut value   
 )
 
 process.p = cms.Path(process.hltfilter*process.d)

@@ -199,7 +199,7 @@ void SiPixelGainCalibrationAnalysis::fillDatabase(){
 bool
 SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibDigi>::const_iterator ipix)
 {
-  std::string currentDir = GetPixelDirectory( detid);
+  std::string currentDir = GetPixelDirectory(detid);
   float lowmeanval=255;
   float highmeanval=0;
   bool makehistopersistent = saveALLHistograms_;
@@ -340,9 +340,7 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     tempname+="_";
     tempname+=pixelinfo.str();
     // setDQMDirectory(detid);
-   
-    //std::string correntDir = GetPixelDirectory( detid// , myTFileDirMap
-						// );
+
     //bookkeeper_pixels_[detid][pixelinfo.str()] = bookDQMHistogram1D(detid,pixelinfo.str(),tempname,105*nallpoints,xvalsall[0],xvalsall[nallpoints-1]*1.05);
     bookkeeper_pixels_1D_[detid][pixelinfo.str()] = bookHistogram1D(detid,pixelinfo.str(),tempname,(xvalsall[nallpoints-1]-xvalsall[0])/binwidth+1,xvalsall[0]-binwidth/2.0,xvalsall[nallpoints-1]+binwidth/2.0 , currentDir );
     // std::cout  << "before" << std::endl;
@@ -469,9 +467,7 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     // and book the histo
     // fill the last value of the vcal array...   
 
-    // setDQMDirectory(detid);
-    //std::string correntDir = GetPixelDirectory( detid  );
-    
+
     //bookkeeper_pixels_[detid][pixelinfo.str()] =  bookDQMHistogram1D(detid,pixelinfo.str(),tempname,105*nallpoints,xvalsall[0],xvalsall[nallpoints-1]*1.05);
     //TH1D* h = new TH1D("h","h",105*nallpoints,xvalsall[0],xvalsall[nallpoints-1]*1.05);
     //bookkeeper_pixels_[detid][pixelinfo.str()] =  bookDQMHistogram1D(detid,pixelinfo.str(),tempname,(xvalsall[nallpoints-1]-xvalsall[0])/binwidth+1,xvalsall[0]-binwidth/2.0,xvalsall[nallpoints-1]+binwidth/2.0);

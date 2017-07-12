@@ -1,16 +1,18 @@
 import FWCore.ParameterSet.Config as cms
 
+phase=1
+
 process = cms.Process("PixelGainDB")
-#Phase0
-#process.load("Configuration.StandardSequences.GeometryDB_cff")
-# process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
-# from Configuration.AlCa.autoCond_condDBv2 import autoCond
-# process.GlobalTag.globaltag = autoCond['run2_design']
-#Phase1
-process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
+if phase==0:
+    process.load("Configuration.StandardSequences.GeometryDB_cff")
+    process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
+    from Configuration.AlCa.autoCond_condDBv2 import autoCond
+    process.GlobalTag.globaltag = autoCond['run2_design']
+elif phase==1:
+    process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
+    process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+    from Configuration.AlCa.GlobalTag import GlobalTag
+    process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1))
 process.TFileService = cms.Service("TFileService", fileName = cms.string('/tmp/rougny/histos.root') )
@@ -56,7 +58,7 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
             tag = cms.string('GainCalib_TEST_offline')
             )
         ),
-    connect = cms.string('sqlite_file:prova.db')
+    connect = cms.string('sqlite_file:dummy.db')
 )
 
 process.p = cms.Path(process.gainDBOffline)

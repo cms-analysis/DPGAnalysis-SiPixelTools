@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 process = cms.Process("SiPixelDets")
-# needed for det-id
+
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
 
 #Load the correct Magnetic Field
@@ -19,8 +19,8 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 #process.load('Geometry.TrackerGeometryBuilder.trackerGeometryDB_cfi')
 # does not define trackerGeometryDB
 # this does, needs false 
-from Geometry.TrackerGeometryBuilder.trackerGeometryDB_cfi import trackerGeometryDB
-trackerGeometryDB.applyAlignment = cms.bool(False)
+#from Geometry.TrackerGeometryBuilder.trackerGeometryDB_cfi import trackerGeometryDB
+#trackerGeometryDB.applyAlignment = cms.bool(False)
 
 # (3) DOES not  work
 #process.load('RecoTracker.GeometryESProducer.TrackerRecoGeometryESProducer_cfi')
@@ -33,27 +33,23 @@ trackerGeometryDB.applyAlignment = cms.bool(False)
 
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-#process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
-
-#from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 from Configuration.AlCa.GlobalTag import GlobalTag
-# to use no All 
 
+# 
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
+process.GlobalTag.globaltag = '92X_dataRun2_Express_v2' # 
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) )
 
 
-process.source = cms.Source( "EmptySource",
-#process.source = cms.Source( "PoolSource",
-#                             fileNames = cms.untracked.vstring(
-#			     'file:$home/work/MC/mu/pt100_71_pre5/simhits/simHits1.root'
-#			     )
+process.source = cms.Source("EmptySource",
+   firstRun = cms.untracked.uint32(296000), #must be number from phase1 2017
 )
-	      
+ 	      
 # FileService is mandatory, as the following analyzer module 
 # will want it, to create output histogram file
 process.TFileService = cms.Service("TFileService",
@@ -62,7 +58,7 @@ process.TFileService = cms.Service("TFileService",
 
 # the analyzer itself - empty parameter set 
 process.test = cms.EDAnalyzer( "SiPixelDets",
-         phase1=cms.untracked.bool(False),   
+         phase1=cms.untracked.bool(True),   
 #        NPartForHisto = cms.untracked.int32(100),
 #        PtMaxForHisto = cms.untracked.double(200.0)
 )

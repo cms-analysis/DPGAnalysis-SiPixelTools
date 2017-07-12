@@ -473,7 +473,7 @@ SiPixelGainCalibrationDBUploader::SiPixelGainCalibrationDBUploader(const edm::Pa
   gainlow_(10.),gainhi_(0.),pedlow_(255.),pedhi_(-256),
   usemeanwhenempty_(conf_.getUntrackedParameter<bool>("useMeanWhenEmpty",false)),
   rootfilestring_(conf_.getUntrackedParameter<std::string>("inputrootfile","inputfile.root")),
-  gainmax_(20),pedmax_(200),badchi2_(conf_.getUntrackedParameter<double>("badChi2Prob",0.01)),nmaxcols(10*52),nmaxrows(160)
+  gainmax_(20),pedmax_(250),badchi2_(conf_.getUntrackedParameter<double>("badChi2Prob",0.01)),nmaxcols(10*52),nmaxrows(160)
 
 
 

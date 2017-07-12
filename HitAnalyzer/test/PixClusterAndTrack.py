@@ -13,11 +13,10 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
 # to use no All 
-# 2015
-#process.GlobalTag.globaltag = '74X_dataRun2_Prompt_v0' # for 254227
 # 2017
 #process.GlobalTag.globaltag = '90X_dataRun2_Express_v4' # 
 process.GlobalTag.globaltag = '92X_dataRun2_Express_v2' # 
+#process.GlobalTag.globaltag = '92X_dataRun2_Express_v4' # 
 # 2016
 #process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v3' # for 266277
 #process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v9' # >=8010
@@ -39,6 +38,12 @@ process.hltfilter = hlt.hltHighLevel.clone(
 #    HLTPaths = ['HLT_Physics*'],
 #    HLTPaths = ['HLT_Random*'],
     HLTPaths = ['HLT_ZeroBias*'],
+#    HLTPaths = ['HLT_ZeroBias_part*'],  # empty
+#    HLTPaths = ['HLT_ZeroBias_FirstCollisionInTrain_*'], # empty
+#    HLTPaths = ['HLT_ZeroBias_LastCollisionInTrain_*'],  # empty
+#    HLTPaths = ['HLT_ZeroBias_FirstBXAfterTrain_*'], # empty
+#    HLTPaths = ['HLT_ZeroBias_IsolatedBunches_*'], # empty
+#    HLTPaths = ['HLT_ZeroBias_FirstCollisionAfterAbortGap_*'],
 #    HLTPaths = ['HLT_L1SingleMuOpen_v*'],
 #    HLTPaths = ['HLT_PAZeroBias*'],
 #    HLTPaths = ['HLT_PARandom*'],
@@ -79,6 +84,70 @@ process.source = cms.Source("PoolSource",
 #fileNames =  myfilelist
 
   fileNames = cms.untracked.vstring(    
+
+# mc
+#"/store/relval/CMSSW_9_2_3/RelValNuGun/GEN-SIM-RECO/PUpmx25ns_92X_upgrade2017_realistic_v2_earlyBS2017-v1/10000/12995CE4-3851-E711-B4A6-0CC47A4D7602.root",
+# "/store/relval/CMSSW_9_2_3/RelValNuGun/GEN-SIM-DIGI-RAW-HLTDEBUG/PUpmx25ns_92X_upgrade2017_realistic_v2_earlyBS2017-v1/10000/1ECCAF11-2E51-E711-AE03-0025905B8594.root",
+
+
+"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/670/00000/A4AFA400-9E5C-E711-ABFB-02163E01A6AD.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/671/00000/1665877E-B15C-E711-8FC7-02163E0133E1.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/672/00000/0645B604-AA5C-E711-8231-02163E013778.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/673/00000/08A31073-A95C-E711-90CA-02163E01A45A.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/674/00000/00090DB9-B85C-E711-9A6A-02163E0134D8.root",
+
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/664/00000/0268DAE5-6C5C-E711-BC2D-02163E019DE0.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/663/00000/1078B975-6C5C-E711-886A-02163E01237E.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/662/00000/1CEE72F3-675C-E711-AE3B-02163E019E36.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/656/00000/701D9DCD-535C-E711-A3AD-02163E019B52.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/661/00000/00FB7699-5E5C-E711-9877-02163E01450F.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/666/00000/0247FEAC-845C-E711-B03B-02163E011CE3.root",
+
+# high Vibias  250
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/494/00000/221DC7DD-1E5A-E711-A76A-02163E011BB6.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/495/00000/003591BD-1A5A-E711-AF2A-02163E01A508.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/496/00000/04813659-1B5A-E711-9DE9-02163E0143BD.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/499/00000/0E628ABD-225A-E711-8B40-02163E01A5E2.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/501/00000/00CCEF78-235A-E711-8A06-02163E019C00.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/502/00000/04EA9099-215A-E711-AD16-02163E01427E.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/503/00000/0024EBBF-385A-E711-BF25-02163E019E77.root",
+
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/424/00000/08244BBE-9758-E711-968E-02163E013479.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/426/00000/02E7F5BF-A158-E711-A567-02163E01412C.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/430/00000/00B72BF4-AF58-E711-A68D-02163E011A70.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/432/00000/00305E99-C358-E711-867B-02163E012A01.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/435/00000/004B3ABB-DC58-E711-82F3-02163E01A1D9.root",
+
+# +11ns 200VforL1
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/281/00000/847D13F4-0657-E711-ACBE-02163E019BAA.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/287/00000/0E731E39-1457-E711-BC95-02163E01383A.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/288/00000/0803556C-1657-E711-8F2C-02163E019BD7.root",
+
+# +12ns 
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/211/00000/028283A8-CF55-E711-A842-02163E0133E6.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/178/00000/00179E1E-7055-E711-811C-02163E01283D.root",
+# +11ns 
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/215/00000/0C4DCA2A-D755-E711-BFB4-02163E01A5F0.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/179/00000/00346B77-9655-E711-B4F3-02163E0123BE.root",
+# +10ns 
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/180/00000/00038195-9D55-E711-96E2-02163E011F67.root",
+# +9ns 
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/181/00000/0054993F-A355-E711-B2D7-02163E01422D.root",
+
+
+# high Vibias  100
+# +18ns
+#"/store/express/Run2017A/ExpressPhysics/FEVT/Express-v3/000/297/019/00000/00D8147A-B752-E711-B5A8-02163E011D5B.root",
+# +15ns
+#"/store/express/Run2017A/ExpressPhysics/FEVT/Express-v3/000/297/018/00000/1AEA423A-B652-E711-AEAD-02163E01180A.root",
+# +10.5ns
+#"/store/express/Run2017A/ExpressPhysics/FEVT/Express-v3/000/297/017/00000/06A19196-B852-E711-884E-02163E0138C1.root",
+# +12ns
+#"/store/express/Run2017A/ExpressPhysics/FEVT/Express-v3/000/297/016/00000/0255F076-B552-E711-9E49-02163E011FA9.root",
+# +7.5ns
+#"/store/express/Run2017A/ExpressPhysics/FEVT/Express-v3/000/297/012/00000/02E7996A-B852-E711-B96F-02163E0143F0.root",
+# nominal
+#"/store/express/Run2017A/ExpressPhysics/FEVT/Express-v3/000/297/003/00000/029D5DDE-A252-E711-9166-02163E0146E9.root",
 
 # time 
 #"/store/express/Run2017A/ExpressPhysics/FEVT/Express-v2/000/296/902/00000/008557CF-BE51-E711-A29A-02163E01A4E0.root",
@@ -167,8 +236,8 @@ process.source = cms.Source("PoolSource",
 )
 
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('124230:26-124230:9999','124030:2-124030:9999')
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('296902:1-296902:25')
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('274314:97-274314:9999')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('297211:26-297211:83')
+
 
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string('clus_ana.root')
@@ -186,7 +255,19 @@ process.d = cms.EDAnalyzer("PixClusterAna",
     Select2 = cms.untracked.int32(0),  # select the cut value   
 )
 
-process.a = cms.EDAnalyzer("PixClusterTest",
+process.d2 = cms.EDAnalyzer("PixClusterAna",
+    Verbosity = cms.untracked.bool(False),
+    phase1 = cms.untracked.bool(True),
+    #src = cms.InputTag("siPixelClustersForLumi"),   # from the lumi stream
+    src = cms.InputTag("siPixelClusters"),
+    #src = cms.InputTag("siPixelClustersPreSplitting"),
+    #src = cms.InputTag("ALCARECOTkAlMinBias"), # ALCARECO
+    # additional selections, e.g. select bx=1 -> (2,1)
+    Select1 = cms.untracked.int32(2),  # select the cut type, 0 no cut
+    Select2 = cms.untracked.int32(1),  # select the cut value   
+)
+
+process.clutest = cms.EDAnalyzer("PixClusterTest",
     Verbosity = cms.untracked.bool(True),
     phase1 = cms.untracked.bool(True),
     src = cms.InputTag("siPixelClusters"),
@@ -206,12 +287,38 @@ process.c = cms.EDAnalyzer("PixClustersWithTracks",
     Select1 = cms.untracked.int32(0),  # select the cut type, o no cut
     Select2 = cms.untracked.int32(0),  # select the cut value   
 )
+process.c1 = cms.EDAnalyzer("PixClustersWithTracks",
+    Verbosity = cms.untracked.bool(False),
+    phase1 = cms.untracked.bool(True),
+    src = cms.InputTag("generalTracks"),
+# for cosmics 
+#    src = cms.InputTag("ctfWithMaterialTracksP5"),
+#     PrimaryVertexLabel = cms.untracked.InputTag("offlinePrimaryVertices"),
+#     trajectoryInput = cms.string("TrackRefitterP5")
+#     trajectoryInput = cms.string('cosmictrackfinderP5')
+# additional selections
+    Select1 = cms.untracked.int32(13),  # select the cut type, o no cut
+    Select2 = cms.untracked.int32(1),  # select the cut value   
+)
+process.c2 = cms.EDAnalyzer("PixClustersWithTracks",
+    Verbosity = cms.untracked.bool(False),
+    phase1 = cms.untracked.bool(True),
+    src = cms.InputTag("generalTracks"),
+# for cosmics 
+#    src = cms.InputTag("ctfWithMaterialTracksP5"),
+#     PrimaryVertexLabel = cms.untracked.InputTag("offlinePrimaryVertices"),
+#     trajectoryInput = cms.string("TrackRefitterP5")
+#     trajectoryInput = cms.string('cosmictrackfinderP5')
+# additional selections
+    Select1 = cms.untracked.int32(14),  # select the cut type, o no cut
+    Select2 = cms.untracked.int32(1),  # select the cut value   
+)
 
 
-
-#process.p = cms.Path(process.hltfilter*process.a)
-process.p = cms.Path(process.hltfilter*process.d)
-#process.p = cms.Path(process.hltfilter*process.d*process.c)
+#process.p = cms.Path(process.hltfilter*process.c2)
+#process.p = cms.Path(process.hltfilter*process.d)
+process.p = cms.Path(process.hltfilter*process.d*process.c*process.c1*process.c2)
+#process.p = cms.Path(process.d*process.b*process.c)  # for mc 
 #process.p = cms.Path(process.d) # for cosmics
 
 
