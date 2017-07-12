@@ -89,7 +89,7 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
 
   size_t ntimes=0;
   std::cout << "Filling record " << record_ << std::endl;
-  if(record_!="SiPixelGainCalibrationForHLTRcd" && record_!="SiPixelGainCalibrationOfflineRcd"){
+  if(record_!="SiPixelGainCalibrationForHLTRcd" && record_!="SiPixelGainCalibrationOfflineRcd" && record_!="SiPixelGainCalibrationRcd"){
     std::cout << "you passed record " << record_ << ", which I have no idea what to do with!" << std::endl;
     return;
   }
@@ -315,8 +315,10 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
 	  theGainCalibrationDbInputOffline_->setDeadPixel(theSiPixelGainCalibrationGainPerColPedPerPixel);
 	}
 
+	//nrowsrocsplit == 80 --> the gain is written at the end of each column
 	if(jrow%nrowsrocsplit==0){
 	  if(nusedrows[iglobalrow]>0){
+	    //std::cout << "nusedrows[iglobalrow]: " << nusedrows[iglobalrow] << std::endl;
 	    pedforthiscol[iglobalrow]/=(float)nusedrows[iglobalrow];
 	    gainforthiscol[iglobalrow]/=(float)nusedrows[iglobalrow];
 	  } 
@@ -351,6 +353,7 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
     SiPixelGainCalibration::Range range(theSiPixelGainCalibrationPerPixel.begin(),theSiPixelGainCalibrationPerPixel.end());
     SiPixelGainCalibrationForHLT::Range hltrange(theSiPixelGainCalibrationPerColumn.begin(),theSiPixelGainCalibrationPerColumn.end());
     SiPixelGainCalibrationOffline::Range offlinerange(theSiPixelGainCalibrationGainPerColPedPerPixel.begin(),theSiPixelGainCalibrationGainPerColPedPerPixel.end());
+
     
     // now start creating the various database objects
     if( !theGainCalibrationDbInput_->put(detid,range,ncols) )
@@ -435,6 +438,23 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
 								    theGainCalibrationDbInputOffline_, 
 								    mydbservice->currentTime(),
 								    "SiPixelGainCalibrationOfflineRcd");
+	
+      }
+    }
+    else if (record_=="SiPixelGainCalibrationRcd"){
+      std::cout << "now doing SiPixelGainCalibrationRcd payload..." << std::endl; 
+      if( mydbservice->isNewTagRequest(record_) ){
+	mydbservice->createNewIOV<SiPixelGainCalibration>(
+								 theGainCalibrationDbInput_,
+								 mydbservice->beginOfTime(),
+								 mydbservice->endOfTime(),
+								 "SiPixelGainCalibrationRcd");
+      }
+      else{
+	mydbservice->appendSinceTime<SiPixelGainCalibration>(
+								    theGainCalibrationDbInput_, 
+								    mydbservice->currentTime(),
+								    "SiPixelGainCalibrationRcd");
 	
       }
     }

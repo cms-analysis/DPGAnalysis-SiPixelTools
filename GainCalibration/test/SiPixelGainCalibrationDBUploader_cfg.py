@@ -1,10 +1,16 @@
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("PixelGainDB")
-process.load("Configuration.StandardSequences.GeometryDB_cff")
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
-from Configuration.AlCa.autoCond_condDBv2 import autoCond
-process.GlobalTag.globaltag = autoCond['run2_design']
+#Phase0
+#process.load("Configuration.StandardSequences.GeometryDB_cff")
+# process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
+# from Configuration.AlCa.autoCond_condDBv2 import autoCond
+# process.GlobalTag.globaltag = autoCond['run2_design']
+#Phase1
+process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+from Configuration.AlCa.GlobalTag import GlobalTag
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1))
 process.TFileService = cms.Service("TFileService", fileName = cms.string('/tmp/rougny/histos.root') )
@@ -12,6 +18,13 @@ process.TFileService = cms.Service("TFileService", fileName = cms.string('/tmp/r
 process.gainDBOffline = cms.EDAnalyzer("SiPixelGainCalibrationDBUploader",
     inputrootfile = cms.untracked.string('file:///tmp/rougny/test.root'),
     record = cms.untracked.string('SiPixelGainCalibrationOfflineRcd'),
+    useMeanWhenEmpty = cms.untracked.bool(True),
+    badChi2Prob = cms.untracked.double(0.00001)                                       
+    )
+
+process.gainDBOfflineFull = cms.EDAnalyzer("SiPixelGainCalibrationDBUploader",
+    inputrootfile = cms.untracked.string('file:///tmp/rougny/test.root'),
+    record = cms.untracked.string('SiPixelGainCalibrationRcd'),
     useMeanWhenEmpty = cms.untracked.bool(True),
     badChi2Prob = cms.untracked.double(0.00001)                                       
     )
