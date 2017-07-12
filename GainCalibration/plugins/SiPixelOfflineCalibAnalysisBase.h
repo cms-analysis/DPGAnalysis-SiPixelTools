@@ -51,6 +51,7 @@
 
 #include "TF1.h"
 #include "TH1F.h"
+#include "TGraphErrors.h"
 
 #include "DQMServices/Core/interface/DQMStore.h"
 #include "DQMServices/Core/interface/MonitorElement.h"
@@ -101,6 +102,8 @@ public:
   
   TH2F*                         bookHistoPlaquetteSummary2D(uint32_t detid, std::string name,std::string title, std::string dir); // take the detid to determine the size of rows and columns, this saves looking up everything in the cabling map by the user. 
 
+  TGraphErrors* bookTGraphs(uint32_t detid, std::string name, int points, double *x, double *y, double *xE, double *yE, std::string dir);
+
   void                                  addTF1ToDQMMonitoringElement(MonitorElement *ele, TF1 *func);
   
   bool				        setDQMDirectory(std::string dirName);	
@@ -119,7 +122,8 @@ protected:
   edm::ESHandle<SiPixelCalibConfiguration> calib_;
   edm::ESHandle<TrackerGeometry> geom_;
   edm::ESHandle<SiPixelFedCablingMap> theCablingMap_;
- 
+  const TrackerTopology* tt;
+
   std::string calibrationMode_;
   short nTriggers_;
   static  std::vector< int >   vCalValues_Int_;
@@ -181,8 +185,7 @@ private:
  
   // checkPixel returns whether a particular pixel is to be expected during the entire run..
   bool checkPixel(uint32_t detid, short row, short column);
-
-
+  bool phase1_;
 
 };
 
