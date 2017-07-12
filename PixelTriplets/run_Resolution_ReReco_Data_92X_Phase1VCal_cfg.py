@@ -160,7 +160,7 @@ process.schedule = cms.Schedule(
     process.L1Reco_step,
     process.reconstruction_step,
     process.TrackRefitter_step,
-    #rocess.FPixResolution_step,
+    process.FPixResolution_step,
     process.BPixResolution_step
     )
 

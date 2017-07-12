@@ -65,7 +65,6 @@
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 
 #include "FWCore/Framework/interface/ESHandle.h"
-#include "Geometry/CommonDetUnit/interface/GlobalTrackingGeometry.h" //GeomDetUnit.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "Geometry/CommonTopologies/interface/Topology.h"
@@ -112,15 +111,47 @@
 struct Histos{
   TH1D *hclusprob_fpix;
   
-  TH1D *h420f1, *h421f1, *h420f2, *h421f2, *h420f3, *h421f3;
-  TH1D *h077f1, *h078f1, *h079f1, *h069f1;
-  TH1D *h077f2, *h078f2, *h079f2, *h069f2;
-  TH1D *h077f3, *h078f3, *h079f3, *h069f3;
+  TH1D *h420f1_123, *h421f1_123, *h420f2_123, *h421f2_123, *h420f3_123, *h421f3_123;
+  TH1D *h077f1_123, *h078f1_123, *h079f1_123, *h069f1_123;
+  TH1D *h077f2_123, *h078f2_123, *h079f2_123, *h069f2_123;
+  TH1D *h077f3_123, *h078f3_123, *h079f3_123, *h069f3_123;
 
-  TH1D *h420b1, *h421b1, *h420b2, *h421b2, *h420b3, *h421b3;
-  TH1D *h077b1, *h078b1, *h079b1, *h069b1;
-  TH1D *h077b2, *h078b2, *h079b2, *h069b2;
-  TH1D *h077b3, *h078b3, *h079b3, *h069b3;
+  TH1D *h420b1_123, *h421b1_123, *h420b2_123, *h421b2_123, *h420b3_123, *h421b3_123;
+  TH1D *h077b1_123, *h078b1_123, *h079b1_123, *h069b1_123;
+  TH1D *h077b2_123, *h078b2_123, *h079b2_123, *h069b2_123;
+  TH1D *h077b3_123, *h078b3_123, *h079b3_123, *h069b3_123;
+
+  TH1D *h420f1_124, *h421f1_124, *h420f2_124, *h421f2_124, *h420f4_124, *h421f4_124;
+  TH1D *h077f1_124, *h078f1_124, *h079f1_124, *h069f1_124;
+  TH1D *h077f2_124, *h078f2_124, *h079f2_124, *h069f2_124;
+  TH1D *h077f4_124, *h078f4_124, *h079f4_124, *h069f4_124;
+
+  TH1D *h420b1_124, *h421b1_124, *h420b2_124, *h421b2_124, *h420b4_124, *h421b4_124;
+  TH1D *h077b1_124, *h078b1_124, *h079b1_124, *h069b1_124;
+  TH1D *h077b2_124, *h078b2_124, *h079b2_124, *h069b2_124;
+  TH1D *h077b4_124, *h078b4_124, *h079b4_124, *h069b4_124;
+
+  TH1D *h420f1_134, *h421f1_134, *h420f3_134, *h421f3_134, *h420f4_134, *h421f4_134;
+  TH1D *h077f1_134, *h078f1_134, *h079f1_134, *h069f1_134;
+  TH1D *h077f3_134, *h078f3_134, *h079f3_134, *h069f3_134;
+  TH1D *h077f4_134, *h078f4_134, *h079f4_134, *h069f4_134;
+
+  TH1D *h420b1_134, *h421b1_134, *h420b3_134, *h421b3_134, *h420b4_134, *h421b4_134;
+  TH1D *h077b1_134, *h078b1_134, *h079b1_134, *h069b1_134;
+  TH1D *h077b3_134, *h078b3_134, *h079b3_134, *h069b3_134;
+  TH1D *h077b4_134, *h078b4_134, *h079b4_134, *h069b4_134;
+
+  TH1D *h420f2_234, *h421f2_234, *h420f3_234, *h421f3_234, *h420f4_234, *h421f4_234;
+  TH1D *h077f2_234, *h078f2_234, *h079f2_234, *h069f2_234;
+  TH1D *h077f3_234, *h078f3_234, *h079f3_234, *h069f3_234;
+  TH1D *h077f4_234, *h078f4_234, *h079f4_234, *h069f4_234;
+
+  TH1D *h420b2_234, *h421b2_234, *h420b3_234, *h421b3_234, *h420b4_234, *h421b4_234;
+  TH1D *h077b2_234, *h078b2_234, *h079b2_234, *h069b2_234;
+  TH1D *h077b3_234, *h078b3_234, *h079b3_234, *h069b3_234;
+  TH1D *h077b4_234, *h078b4_234, *h079b4_234, *h069b4_234;
+
+
   void InitBPix(TFileDirectory* fs);
   void InitFPix(TFileDirectory* fs);
 };
@@ -171,6 +202,9 @@ private:
   double xpx3_l = -999;
   double xpy3_l = -999;
 
+  double xpx4_l = -999;
+  double xpy4_l = -999;
+
   // Estimated coordinates in local 
   double xl_ideal_1 = -999;
   double yl_ideal_1 = -999;
@@ -181,14 +215,19 @@ private:
   double xl_ideal_3 = -999;
   double yl_ideal_3 = -999;
 
+  double xl_ideal_4 = -999;
+  double yl_ideal_4 = -999;
+
   // Residuals
   double residual_x_1 = -999;
   double residual_x_2 = -999;
   double residual_x_3 = -999;
+  double residual_x_4 = -999;
 
   double residual_y_1 = -999;
   double residual_y_2 = -999;
   double residual_y_3 = -999;
+  double residual_y_4 = -999;
 
   // Errors on Rechit coordinates in local
   double x_local_error_1 = -999;
@@ -199,6 +238,9 @@ private:
 
   double x_local_error_3 = -999;
   double y_local_error_3 = -999;
+
+  double x_local_error_4 = -999;
+  double y_local_error_4 = -999;
 
   // Helix parameters
   int Pass = -99;
@@ -251,29 +293,101 @@ void Histos::InitFPix(TFileDirectory* fs)
   /*         Initialize histograms for FPIX residuals         */
   hclusprob_fpix = fs->make<TH1D>( "hclusprob_fpix", "FPix Cluster Probability;", 120, 0, 1.2 );
 
-  h420f1 = fs->make<TH1D>( "h420f1", "PXB1 residuals #Deltax, p_{t} > 4;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
-  h420f2 = fs->make<TH1D>( "h420f2", "PXF1 residuals #Deltax, p_{t} > 4;PXF1 #Deltax [#mum];hits", 100, -150, 150 );
-  h420f3 = fs->make<TH1D>( "h420f3", "PXF2 residuals #Deltax, p_{t} > 4;PXF2 #Deltax [#mum];hits", 100, -150, 150 );
+  h420f1_123 = fs->make<TH1D>( "h420f1_123", "PXB1 residuals #Deltax, p_{t} > 4;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
+  h420f2_123 = fs->make<TH1D>( "h420f2_123", "PXF1 residuals #Deltax, p_{t} > 4;PXF1 #Deltax [#mum];hits", 100, -150, 150 );
+  h420f3_123 = fs->make<TH1D>( "h420f3_123", "PXF2 residuals #Deltax, p_{t} > 4;PXF2 #Deltax [#mum];hits", 100, -150, 150 );
 
-  h421f1 = fs->make<TH1D>( "h421f1", "PXB1 residuals #Deltay, p_{t} > 4;PXB1 #Deltay [#mum];hits", 100, -300, 300 );
-  h421f2 = fs->make<TH1D>( "h421f2", "PXF1 residuals #Deltay, p_{t} > 4;PXF1 #Deltay [#mum];hits", 100, -300, 300 );
-  h421f3 = fs->make<TH1D>( "h421f3", "PXF2 residuals #Deltay, p_{t} > 4;PXF2 #Deltay [#mum];hits", 100, -300, 300 );
+  h421f1_123 = fs->make<TH1D>( "h421f1_123", "PXB1 residuals #Deltay, p_{t} > 4;PXB1 #Deltay [#mum];hits", 100, -300, 300 );
+  h421f2_123 = fs->make<TH1D>( "h421f2_123", "PXF1 residuals #Deltay, p_{t} > 4;PXF1 #Deltay [#mum];hits", 100, -300, 300 );
+  h421f3_123 = fs->make<TH1D>( "h421f3_123", "PXF2 residuals #Deltay, p_{t} > 4;PXF2 #Deltay [#mum];hits", 100, -300, 300 );
 
-  h077f1 = fs->make<TH1D>( "h077f1", "PXB1 x error ", 100, 0., 100. );
-  h077f2 = fs->make<TH1D>( "h077f2", "PXF1 x error ", 100, 0., 100. );
-  h077f3 = fs->make<TH1D>( "h077f3", "PXF2 x error ", 100, 0., 100. );
+  h077f1_123 = fs->make<TH1D>( "h077f1_123", "PXB1 x error ", 100, 0., 100. );
+  h077f2_123 = fs->make<TH1D>( "h077f2_123", "PXF1 x error ", 100, 0., 100. );
+  h077f3_123 = fs->make<TH1D>( "h077f3_123", "PXF2 x error ", 100, 0., 100. );
 
-  h078f1 = fs->make<TH1D>( "h078f1", "PXB1 y error ", 100, 0., 100. );
-  h078f2 = fs->make<TH1D>( "h078f2", "PXF1 y error ", 100, 0., 100. );
-  h078f3 = fs->make<TH1D>( "h078f3", "PXF2 y error ", 100, 0., 100. );
+  h078f1_123 = fs->make<TH1D>( "h078f1_123", "PXB1 y error ", 100, 0., 100. );
+  h078f2_123 = fs->make<TH1D>( "h078f2_123", "PXF1 y error ", 100, 0., 100. );
+  h078f3_123 = fs->make<TH1D>( "h078f3_123", "PXF2 y error ", 100, 0., 100. );
 
-  h079f1 = fs->make<TH1D>( "h079f1", "PXB1 x pull ", 100, -10., 10. );
-  h079f2 = fs->make<TH1D>( "h079f2", "PXF1 x pull ", 100, -10., 10. );
-  h079f3 = fs->make<TH1D>( "h079f3", "PXF2 x pull ", 100, -10., 10. );
+  h079f1_123 = fs->make<TH1D>( "h079f1_123", "PXB1 x pull ", 100, -10., 10. );
+  h079f2_123 = fs->make<TH1D>( "h079f2_123", "PXF1 x pull ", 100, -10., 10. );
+  h079f3_123 = fs->make<TH1D>( "h079f3_123", "PXF2 x pull ", 100, -10., 10. );
 
-  h069f1 = fs->make<TH1D>( "h069f1", "PXB1 y pull ", 100, -10., 10. );
-  h069f2 = fs->make<TH1D>( "h069f2", "PXF1 y pull ", 100, -10., 10. );
-  h069f3 = fs->make<TH1D>( "h069f3", "PXF2 y pull ", 100, -10., 10. );
+  h069f1_123 = fs->make<TH1D>( "h069f1_123", "PXB1 y pull ", 100, -10., 10. );
+  h069f2_123 = fs->make<TH1D>( "h069f2_123", "PXF1 y pull ", 100, -10., 10. );
+  h069f3_123 = fs->make<TH1D>( "h069f3_123", "PXF2 y pull ", 100, -10., 10. );
+
+  h420f1_124 = fs->make<TH1D>( "h420f1_124", "PXB1 residuals #Deltax, p_{t} > 4;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
+  h420f2_124 = fs->make<TH1D>( "h420f2_124", "PXF1 residuals #Deltax, p_{t} > 4;PXF1 #Deltax [#mum];hits", 100, -150, 150 );
+  h420f4_124 = fs->make<TH1D>( "h420f4_124", "PXF2 residuals #Deltax, p_{t} > 4;PXF2 #Deltax [#mum];hits", 100, -150, 150 );
+
+  h421f1_124 = fs->make<TH1D>( "h421f1_124", "PXB1 residuals #Deltay, p_{t} > 4;PXB1 #Deltay [#mum];hits", 100, -300, 300 );
+  h421f2_124 = fs->make<TH1D>( "h421f2_124", "PXF1 residuals #Deltay, p_{t} > 4;PXF1 #Deltay [#mum];hits", 100, -300, 300 );
+  h421f4_124 = fs->make<TH1D>( "h421f4_124", "PXF2 residuals #Deltay, p_{t} > 4;PXF2 #Deltay [#mum];hits", 100, -300, 300 );
+
+  h077f1_124 = fs->make<TH1D>( "h077f1_124", "PXB1 x error ", 100, 0., 100. );
+  h077f2_124 = fs->make<TH1D>( "h077f2_124", "PXF1 x error ", 100, 0., 100. );
+  h077f4_124 = fs->make<TH1D>( "h077f4_124", "PXF2 x error ", 100, 0., 100. );
+
+  h078f1_124 = fs->make<TH1D>( "h078f1_124", "PXB1 y error ", 100, 0., 100. );
+  h078f2_124 = fs->make<TH1D>( "h078f2_124", "PXF1 y error ", 100, 0., 100. );
+  h078f4_124 = fs->make<TH1D>( "h078f4_124", "PXF2 y error ", 100, 0., 100. );
+
+  h079f1_124 = fs->make<TH1D>( "h079f1_124", "PXB1 x pull ", 100, -10., 10. );
+  h079f2_124 = fs->make<TH1D>( "h079f2_124", "PXF1 x pull ", 100, -10., 10. );
+  h079f4_124 = fs->make<TH1D>( "h079f4_124", "PXF2 x pull ", 100, -10., 10. );
+
+  h069f1_124 = fs->make<TH1D>( "h069f1_124", "PXB1 y pull ", 100, -10., 10. );
+  h069f2_124 = fs->make<TH1D>( "h069f2_124", "PXF1 y pull ", 100, -10., 10. );
+  h069f4_124 = fs->make<TH1D>( "h069f4_124", "PXF2 y pull ", 100, -10., 10. );
+
+  h420f1_134 = fs->make<TH1D>( "h420f1_134", "PXB1 residuals #Deltax, p_{t} > 4;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
+  h420f3_134 = fs->make<TH1D>( "h420f3_134", "PXF1 residuals #Deltax, p_{t} > 4;PXF1 #Deltax [#mum];hits", 100, -150, 150 );
+  h420f4_134 = fs->make<TH1D>( "h420f4_134", "PXF2 residuals #Deltax, p_{t} > 4;PXF2 #Deltax [#mum];hits", 100, -150, 150 );
+
+  h421f1_134 = fs->make<TH1D>( "h421f1_134", "PXB1 residuals #Deltay, p_{t} > 4;PXB1 #Deltay [#mum];hits", 100, -300, 300 );
+  h421f3_134 = fs->make<TH1D>( "h421f3_134", "PXF1 residuals #Deltay, p_{t} > 4;PXF1 #Deltay [#mum];hits", 100, -300, 300 );
+  h421f4_134 = fs->make<TH1D>( "h421f4_134", "PXF2 residuals #Deltay, p_{t} > 4;PXF2 #Deltay [#mum];hits", 100, -300, 300 );
+
+  h077f1_134 = fs->make<TH1D>( "h077f1_134", "PXB1 x error ", 100, 0., 100. );
+  h077f3_134 = fs->make<TH1D>( "h077f3_134", "PXF1 x error ", 100, 0., 100. );
+  h077f4_134 = fs->make<TH1D>( "h077f4_134", "PXF2 x error ", 100, 0., 100. );
+
+  h078f1_134 = fs->make<TH1D>( "h078f1_134", "PXB1 y error ", 100, 0., 100. );
+  h078f3_134 = fs->make<TH1D>( "h078f3_134", "PXF1 y error ", 100, 0., 100. );
+  h078f4_134 = fs->make<TH1D>( "h078f4_134", "PXF2 y error ", 100, 0., 100. );
+
+  h079f1_134 = fs->make<TH1D>( "h079f1_134", "PXB1 x pull ", 100, -10., 10. );
+  h079f3_134 = fs->make<TH1D>( "h079f3_134", "PXF1 x pull ", 100, -10., 10. );
+  h079f4_134 = fs->make<TH1D>( "h079f4_134", "PXF2 x pull ", 100, -10., 10. );
+
+  h069f1_134 = fs->make<TH1D>( "h069f1_134", "PXB1 y pull ", 100, -10., 10. );
+  h069f3_134 = fs->make<TH1D>( "h069f3_134", "PXF1 y pull ", 100, -10., 10. );
+  h069f4_134 = fs->make<TH1D>( "h069f4_134", "PXF2 y pull ", 100, -10., 10. );
+
+  h420f2_234 = fs->make<TH1D>( "h420f2_234", "PXB2 residuals #Deltax, p_{t} > 4;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  h420f3_234 = fs->make<TH1D>( "h420f3_234", "PXF2 residuals #Deltax, p_{t} > 4;PXF2 #Deltax [#mum];hits", 100, -150, 150 );
+  h420f4_234 = fs->make<TH1D>( "h420f4_234", "PXF2 residuals #Deltax, p_{t} > 4;PXF2 #Deltax [#mum];hits", 100, -150, 150 );
+
+  h421f2_234 = fs->make<TH1D>( "h421f2_234", "PXB2 residuals #Deltay, p_{t} > 4;PXB2 #Deltay [#mum];hits", 100, -300, 300 );
+  h421f3_234 = fs->make<TH1D>( "h421f3_234", "PXF2 residuals #Deltay, p_{t} > 4;PXF2 #Deltay [#mum];hits", 100, -300, 300 );
+  h421f4_234 = fs->make<TH1D>( "h421f4_234", "PXF2 residuals #Deltay, p_{t} > 4;PXF2 #Deltay [#mum];hits", 100, -300, 300 );
+
+  h077f2_234 = fs->make<TH1D>( "h077f2_234", "PXB2 x error ", 100, 0., 100. );
+  h077f3_234 = fs->make<TH1D>( "h077f3_234", "PXF2 x error ", 100, 0., 100. );
+  h077f4_234 = fs->make<TH1D>( "h077f4_234", "PXF2 x error ", 100, 0., 100. );
+
+  h078f2_234 = fs->make<TH1D>( "h078f2_234", "PXB2 y error ", 100, 0., 100. );
+  h078f3_234 = fs->make<TH1D>( "h078f3_234", "PXF2 y error ", 100, 0., 100. );
+  h078f4_234 = fs->make<TH1D>( "h078f4_234", "PXF2 y error ", 100, 0., 100. );
+
+  h079f2_234 = fs->make<TH1D>( "h079f2_234", "PXB2 x pull ", 100, -10., 10. );
+  h079f3_234 = fs->make<TH1D>( "h079f3_234", "PXF2 x pull ", 100, -10., 10. );
+  h079f4_234 = fs->make<TH1D>( "h079f4_234", "PXF2 x pull ", 100, -10., 10. );
+
+  h069f2_234 = fs->make<TH1D>( "h069f2_234", "PXB2 y pull ", 100, -10., 10. );
+  h069f3_234 = fs->make<TH1D>( "h069f3_234", "PXF2 y pull ", 100, -10., 10. );
+  h069f4_234 = fs->make<TH1D>( "h069f4_234", "PXF2 y pull ", 100, -10., 10. );
 
 }
 
@@ -281,29 +395,78 @@ void Histos::InitBPix(TFileDirectory* fs)
 {
   /*         Initialize histograms for BPIX residuals         */
   
-  h420b1 = fs->make<TH1D>( "h420b1", "PXB1 residuals #Deltax, p_{t} > 12;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
-  h420b2 = fs->make<TH1D>( "h420b2", "PXB2 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
-  h420b3 = fs->make<TH1D>( "h420b3", "PXB3 residuals #Deltax, p_{t} > 12;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+  h420b1_123 = fs->make<TH1D>( "h420b1_123", "PXB1 residuals #Deltax, p_{t} > 12;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
+  h420b2_123 = fs->make<TH1D>( "h420b2_123", "PXB2 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  h420b3_123 = fs->make<TH1D>( "h420b3_123", "PXB3 residuals #Deltax, p_{t} > 12;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
 
-  h421b1 = fs->make<TH1D>( "h421b1", "PXB1 residuals #Deltay, p_{t} > 12;PXB1 #Deltay [#mum];hits", 100, -300, 300 );
-  h421b2 = fs->make<TH1D>( "h421b2", "PXB2 residuals #Deltay, p_{t} > 12;PXB2 #Deltay [#mum];hits", 100, -300, 300 );
-  h421b3 = fs->make<TH1D>( "h421b3", "PXB3 residuals #Deltay, p_{t} > 12;PXB3 #Deltay [#mum];hits", 100, -300, 300 );
+  h421b1_123 = fs->make<TH1D>( "h421b1_123", "PXB1 residuals #Deltay, p_{t} > 12;PXB1 #Deltay [#mum];hits", 100, -300, 300 );
+  h421b2_123 = fs->make<TH1D>( "h421b2_123", "PXB2 residuals #Deltay, p_{t} > 12;PXB2 #Deltay [#mum];hits", 100, -300, 300 );
+  h421b3_123 = fs->make<TH1D>( "h421b3_123", "PXB3 residuals #Deltay, p_{t} > 12;PXB3 #Deltay [#mum];hits", 100, -300, 300 );
 
-  h077b1 = fs->make<TH1D>( "h077b1", "PXB1 x error ", 100, 0., 100. );
-  h077b2 = fs->make<TH1D>( "h077b2", "PXB2 x error ", 100, 0., 100. );
-  h077b3 = fs->make<TH1D>( "h077b3", "PXB3 x error ", 100, 0., 100. );
+  h077b1_123 = fs->make<TH1D>( "h077b1_123", "PXB1 x error ", 100, 0., 100. );
+  h077b2_123 = fs->make<TH1D>( "h077b2_123", "PXB2 x error ", 100, 0., 100. );
+  h077b3_123 = fs->make<TH1D>( "h077b3_123", "PXB3 x error ", 100, 0., 100. );
 
-  h078b1 = fs->make<TH1D>( "h078b1", "PXB1 y error ", 100, 0., 100. );
-  h078b2 = fs->make<TH1D>( "h078b2", "PXB2 y error ", 100, 0., 100. );
-  h078b3 = fs->make<TH1D>( "h078b3", "PXB3 y error ", 100, 0., 100. );
+  h078b1_123 = fs->make<TH1D>( "h078b1_123", "PXB1 y error ", 100, 0., 100. );
+  h078b2_123 = fs->make<TH1D>( "h078b2_123", "PXB2 y error ", 100, 0., 100. );
+  h078b3_123 = fs->make<TH1D>( "h078b3_123", "PXB3 y error ", 100, 0., 100. );
 
-  h079b1 = fs->make<TH1D>( "h079b1", "PXB1 x pull ", 100, -10., 10. );
-  h079b2 = fs->make<TH1D>( "h079b2", "PXB2 x pull ", 100, -10., 10. );
-  h079b3 = fs->make<TH1D>( "h079b3", "PXB3 x pull ", 100, -10., 10. );
+  h079b1_123 = fs->make<TH1D>( "h079b1_123", "PXB1 x pull ", 100, -10., 10. );
+  h079b2_123 = fs->make<TH1D>( "h079b2_123", "PXB2 x pull ", 100, -10., 10. );
+  h079b3_123 = fs->make<TH1D>( "h079b3_123", "PXB3 x pull ", 100, -10., 10. );
 
-  h069b1 = fs->make<TH1D>( "h069b1", "PXB1 y pull ", 100, -10., 10. );
-  h069b2 = fs->make<TH1D>( "h069b2", "PXB2 y pull ", 100, -10., 10. );
-  h069b3 = fs->make<TH1D>( "h069b3", "PXB3 y pull ", 100, -10., 10. );
+  h069b1_123 = fs->make<TH1D>( "h069b1_123", "PXB1 y pull ", 100, -10., 10. );
+  h069b2_123 = fs->make<TH1D>( "h069b2_123", "PXB2 y pull ", 100, -10., 10. );
+  h069b3_123 = fs->make<TH1D>( "h069b3_123", "PXB3 y pull ", 100, -10., 10. );
+  
+  h420b1_124 = fs->make<TH1D>( "h420b1_124", "PXB1 residuals #Deltax, p_{t} > 12;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
+  h420b2_124 = fs->make<TH1D>( "h420b2_124", "PXB2 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  h420b4_124 = fs->make<TH1D>( "h420b4_124", "PXB3 residuals #Deltax, p_{t} > 12;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+
+  h421b1_124 = fs->make<TH1D>( "h421b1_124", "PXB1 residuals #Deltay, p_{t} > 12;PXB1 #Deltay [#mum];hits", 100, -300, 300 );
+  h421b2_124 = fs->make<TH1D>( "h421b2_124", "PXB2 residuals #Deltay, p_{t} > 12;PXB2 #Deltay [#mum];hits", 100, -300, 300 );
+  h421b4_124 = fs->make<TH1D>( "h421b4_124", "PXB3 residuals #Deltay, p_{t} > 12;PXB3 #Deltay [#mum];hits", 100, -300, 300 );
+
+  h077b1_124 = fs->make<TH1D>( "h077b1_124", "PXB1 x error ", 100, 0., 100. );
+  h077b2_124 = fs->make<TH1D>( "h077b2_124", "PXB2 x error ", 100, 0., 100. );
+  h077b4_124 = fs->make<TH1D>( "h077b4_124", "PXB3 x error ", 100, 0., 100. );
+
+  h078b1_124 = fs->make<TH1D>( "h078b1_124", "PXB1 y error ", 100, 0., 100. );
+  h078b2_124 = fs->make<TH1D>( "h078b2_124", "PXB2 y error ", 100, 0., 100. );
+  h078b4_124 = fs->make<TH1D>( "h078b4_124", "PXB3 y error ", 100, 0., 100. );
+
+  h079b1_124 = fs->make<TH1D>( "h079b1_124", "PXB1 x pull ", 100, -10., 10. );
+  h079b2_124 = fs->make<TH1D>( "h079b2_124", "PXB2 x pull ", 100, -10., 10. );
+  h079b4_124 = fs->make<TH1D>( "h079b4_124", "PXB3 x pull ", 100, -10., 10. );
+
+  h069b1_124 = fs->make<TH1D>( "h069b1_124", "PXB1 y pull ", 100, -10., 10. );
+  h069b2_124 = fs->make<TH1D>( "h069b2_124", "PXB2 y pull ", 100, -10., 10. );
+  h069b4_124 = fs->make<TH1D>( "h069b4_124", "PXB3 y pull ", 100, -10., 10. );
+
+  h420b1_134 = fs->make<TH1D>( "h420b1_134", "PXB1 residuals #Deltax, p_{t} > 12;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
+  h420b3_134 = fs->make<TH1D>( "h420b3_134", "PXB3 residuals #Deltax, p_{t} > 12;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+  h420b4_134 = fs->make<TH1D>( "h420b4_134", "PXB3 residuals #Deltax, p_{t} > 12;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+
+  h421b1_134 = fs->make<TH1D>( "h421b1_134", "PXB1 residuals #Deltay, p_{t} > 12;PXB1 #Deltay [#mum];hits", 100, -300, 300 );
+  h421b3_134 = fs->make<TH1D>( "h421b3_134", "PXB3 residuals #Deltay, p_{t} > 12;PXB3 #Deltay [#mum];hits", 100, -300, 300 );
+  h421b4_134 = fs->make<TH1D>( "h421b4_134", "PXB3 residuals #Deltay, p_{t} > 12;PXB3 #Deltay [#mum];hits", 100, -300, 300 );
+
+  h077b1_134 = fs->make<TH1D>( "h077b1_134", "PXB1 x error ", 100, 0., 100. );
+  h077b3_134 = fs->make<TH1D>( "h077b3_134", "PXB3 x error ", 100, 0., 100. );
+  h077b4_134 = fs->make<TH1D>( "h077b4_134", "PXB3 x error ", 100, 0., 100. );
+
+  h078b1_134 = fs->make<TH1D>( "h078b1_134", "PXB1 y error ", 100, 0., 100. );
+  h078b3_134 = fs->make<TH1D>( "h078b3_134", "PXB3 y error ", 100, 0., 100. );
+  h078b4_134 = fs->make<TH1D>( "h078b4_134", "PXB3 y error ", 100, 0., 100. );
+
+  h079b1_134 = fs->make<TH1D>( "h079b1_134", "PXB1 x pull ", 100, -10., 10. );
+  h079b3_134 = fs->make<TH1D>( "h079b3_134", "PXB3 x pull ", 100, -10., 10. );
+  h079b4_134 = fs->make<TH1D>( "h079b4_134", "PXB3 x pull ", 100, -10., 10. );
+
+  h069b1_134 = fs->make<TH1D>( "h069b1_134", "PXB1 y pull ", 100, -10., 10. );
+  h069b3_134 = fs->make<TH1D>( "h069b3_134", "PXB3 y pull ", 100, -10., 10. );
+  h069b4_134 = fs->make<TH1D>( "h069b4_134", "PXB3 y pull ", 100, -10., 10. );
+
 }
 
 // member functions:
@@ -648,13 +811,21 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
     double ePX3 = 0;
     double fPX3 = 0;
 
+    double xPX4 = 0;
+    double yPX4 = 0;
+    double zPX4 = 0;
+    double ePX4 = 0;
+    double fPX4 = 0;
+
     int n1 = 0;
     int n2 = 0;
     int n3 = 0;
+    int n4 = 0;
     const GeomDet * det1 = NULL;  // Detector for first hit
     const GeomDet * det2 = NULL;
     const GeomDet * det3 = NULL;
-    
+    const GeomDet * det4 = NULL;    
+
     edm::OwnVector<TrackingRecHit> recHitVector;                     // for seed
     std::vector<TransientTrackingRecHit::RecHitPointer> myTTRHvec;
     Trajectory::RecHitContainer coTTRHvec;                           // for fit, constant
@@ -783,7 +954,21 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
 
 	    det3 = transRecHit->det();
 	    
-	  }//PXB3	  
+	  }//PXB3
+	  if( ilay == 4 ){
+	    
+	    n4++;
+	    xPX4 = gX;
+	    yPX4 = gY;
+	    zPX4 = gZ;
+	    xpx4_l = xloc;
+	    xpy4_l = yloc;
+	    ePX4 = sqrt( vxloc );
+	    fPX4 = sqrt( vyloc );
+
+	    det4 = transRecHit->det();
+	    
+	    }//PXB4	  
 	}// Pixel
 
       }// doBPIX
@@ -798,7 +983,7 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
 
 	  int ilay=tTopo->pxbLayer(detId);
 	  
-	  if( ilay == 1 ) {
+	  if( ilay == 2 ) {
 	        
 	    n1++;
 	    xPX1 = gX;
@@ -861,7 +1046,22 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
 
 	    det3 = transRecHit->det();
 
-	  }//PXF2	  
+	  }//PXF2
+	  	  
+	  if( idisk == 3 ){
+	        
+	    n4++;
+	    xPX4 = gX;
+	    yPX4 = gY;
+	    zPX4 = gZ;
+	    xpx4_l = xloc;
+	    xpy4_l = yloc;
+	    ePX4 = sqrt( vxloc );
+	    fPX4 = sqrt( vyloc );
+
+	    det4 = transRecHit->det();
+
+	    }//PXF3
 	  
 	}//PXF
 	
@@ -1052,6 +1252,15 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
 	      xpy3_l=lY;
 	      det3 = iTM->recHit()->det();
 	    }// layer 3
+	    else if( ilay == 4) {
+	      xPX4 = gX;
+	      yPX4 = gY;
+	      zPX4 = gZ;
+	      
+	      xpx4_l=lX;
+	      xpy4_l=lY;
+	      det4 = iTM->recHit()->det();
+	      }// layer 4
 	      
 	        
 	  }// barrel
@@ -1065,7 +1274,7 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
 
 	    int ilay=tTopo->pxbLayer(detId);
 
-	    if( ilay == 1 ) {
+	    if( ilay == 2 ) {
 	      xPX1 = gX;
 	      yPX1 = gY;
 	      zPX1 = gZ;
@@ -1097,6 +1306,15 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
 	      xpy3_l=lY;
 	      det3 = iTM->recHit()->det();
 	    }// disk 2
+	    else if( idisk == 3 ) {
+	      xPX4 = gX;
+	      yPX4 = gY;
+	      zPX4 = gZ;
+	      
+	      xpx4_l=lX;
+	      xpy4_l=lY;
+	      det4 = iTM->recHit()->det();
+	      }// disk 3
 	    
 	  }// endcaps
 	}// doFPix
@@ -1178,37 +1396,37 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
 	if(detTag == "fpix"){
 	  
 	  if(pt>4){
-	    
+	    //cout << residual_x_2 << endl;
 	    hclusprob_fpix ->Fill(clusProb_FPix);
 
-	    h420f1->Fill( residual_x_1 ); 
-	    h421f1->Fill( residual_y_1 );
+	    h420f1_123->Fill( residual_x_1 ); 
+	    h421f1_123->Fill( residual_y_1 );
 	    
-	    h420f2->Fill( residual_x_2 );
-	    h421f2->Fill( residual_y_2 );
+	    h420f2_123->Fill( residual_x_2 );
+	    h421f2_123->Fill( residual_y_2 );
 	    
-	    h420f3->Fill( residual_x_3 );
-	    h421f3->Fill( residual_y_3 );
+	    h420f3_123->Fill( residual_x_3 );
+	    h421f3_123->Fill( residual_y_3 );
 	    
 	    // Fill errors
-	    h077f1->Fill( x_local_error_1 );
-	    h078f1->Fill( y_local_error_1 );
+	    h077f1_123->Fill( x_local_error_1 );
+	    h078f1_123->Fill( y_local_error_1 );
 	    
-	    h077f2->Fill( x_local_error_2 );
-	    h078f2->Fill( y_local_error_2 );
+	    h077f2_123->Fill( x_local_error_2 );
+	    h078f2_123->Fill( y_local_error_2 );
 	  
-	    h077f3->Fill( x_local_error_3 );
-	    h078f3->Fill( y_local_error_3 );
+	    h077f3_123->Fill( x_local_error_3 );
+	    h078f3_123->Fill( y_local_error_3 );
 
 	    // Fill pulls
-	    h079f1->Fill( pulx1 );
-	    h069f1->Fill( puly1 );
+	    h079f1_123->Fill( pulx1 );
+	    h069f1_123->Fill( puly1 );
 
-	    h079f2->Fill( pulx2 );
-	    h069f2->Fill( puly2 );
+	    h079f2_123->Fill( pulx2 );
+	    h069f2_123->Fill( puly2 );
 
-	    h079f3->Fill( pulx3 );
-	    h069f3->Fill( puly3 );
+	    h079f3_123->Fill( pulx3 );
+	    h069f3_123->Fill( puly3 );
 
 	  }
 	}
@@ -1218,40 +1436,470 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
 	  
 	  if(pt>12){	  
 	    
-	    h420b1->Fill( residual_x_1 );
-	    h421b1->Fill( residual_y_1 );
+	    h420b1_123->Fill( residual_x_1 );
+	    h421b1_123->Fill( residual_y_1 );
 
-	    h420b2->Fill( residual_x_2 );
-	    h421b2->Fill( residual_y_2 );
+	    h420b2_123->Fill( residual_x_2 );
+	    h421b2_123->Fill( residual_y_2 );
 
-	    h420b3->Fill( residual_x_3 );
-	    h421b3->Fill( residual_y_3 );
+	    h420b3_123->Fill( residual_x_3 );
+	    h421b3_123->Fill( residual_y_3 );
 
 	    // Fill errors
-	    h077b1->Fill( x_local_error_1 );
-	    h078b1->Fill( y_local_error_1 );
+	    h077b1_123->Fill( x_local_error_1 );
+	    h078b1_123->Fill( y_local_error_1 );
 
-	    h077b2->Fill( x_local_error_2 );
-	    h078b2->Fill( y_local_error_2 );
+	    h077b2_123->Fill( x_local_error_2 );
+	    h078b2_123->Fill( y_local_error_2 );
 
-	    h077b3->Fill( x_local_error_3 );
-	    h078b3->Fill( y_local_error_3 );
+	    h077b3_123->Fill( x_local_error_3 );
+	    h078b3_123->Fill( y_local_error_3 );
 
 	    // Fill pulls
-	    h079b1->Fill( pulx1 );
-	    h069b1->Fill( puly1 );
+	    h079b1_123->Fill( pulx1 );
+	    h069b1_123->Fill( puly1 );
 
-	    h079b2->Fill( pulx2 );
-	    h069b2->Fill( puly2 );
+	    h079b2_123->Fill( pulx2 );
+	    h069b2_123->Fill( puly2 );
 
-	    h079b3->Fill( pulx3 );
-	    h069b3->Fill( puly3 );
+	    h079b3_123->Fill( pulx3 );
+	    h069b3_123->Fill( puly3 );
 	  }
 	}
 	else{}
 
       }//triplet 
-    }// three hits
+    }// three hits: 1-2-3
+    // 1-2-4 pixel triplet:
+    //cout << "=====> " << "n1: " << n1 << " n2: " << n2 << " n3: " << n3 << " n1*n2*n4: " << n1*n2*n4 << endl;
+    if( n1*n2*n4 > 0 ) {
+
+      {// let's open a scope, so we can redefine the variables further down
+       
+	// create points to feed helix
+	std::vector<double> p1 = {xPX1, yPX1, zPX1};
+	std::vector<double> p2 = {xPX2, yPX2, zPX2};
+	std::vector<double> p4 = {xPX4, yPX4, zPX4};
+	
+	std::vector<double> intersection1 = {};
+	std::vector<double> intersection2 = {};
+	std::vector<double> intersection4 = {};
+	
+	// Create helix from two points and curvature, return the intersection point in local coordinates
+	std::vector<double> IntersectionPointLocal_1 = Pixel::getIntersection(p2, p4, rho, det1, intersection1); 
+	std::vector<double> IntersectionPointLocal_2 = Pixel::getIntersection(p1, p4, rho, det2, intersection2);
+	std::vector<double> IntersectionPointLocal_4 = Pixel::getIntersection(p1, p2, rho, det4, intersection4);
+	
+	// Intersection point in local coordinates
+	xl_ideal_1 = IntersectionPointLocal_1[0];
+	yl_ideal_1 = IntersectionPointLocal_1[1];
+	
+	xl_ideal_2 = IntersectionPointLocal_2[0];
+	yl_ideal_2 = IntersectionPointLocal_2[1];
+	
+	xl_ideal_4 = IntersectionPointLocal_4[0];
+	yl_ideal_4 = IntersectionPointLocal_4[1];
+	
+	// Residuals with rechit and intersection point
+	residual_x_1= (xpx1_l - xl_ideal_1)*1E4;
+	residual_y_1= (xpy1_l - yl_ideal_1)*1E4;
+	
+	residual_x_2= (xpx2_l - xl_ideal_2)*1E4;
+	residual_y_2= (xpy2_l - yl_ideal_2)*1E4;
+	
+	residual_x_4= (xpx4_l - xl_ideal_4)*1E4;
+	residual_y_4= (xpy4_l - yl_ideal_4)*1E4;
+	
+	// Local errors for rechit
+	x_local_error_1 = ePX1*1E4;
+	y_local_error_1 = fPX1*1E4;
+	
+	x_local_error_2 = ePX2*1E4;
+	y_local_error_2 = fPX2*1E4;
+	
+	x_local_error_4 = ePX4*1E4;
+	y_local_error_4 = fPX4*1E4;
+      
+	// Add errors and pulls
+	double pulx1=0.;
+	double pulx2=0.;
+	double pulx4=0.;
+	double puly1=0.;
+	double puly2=0.;
+	double puly4=0.;
+	
+	if(x_local_error_1!=0.0) pulx1 = residual_x_1/x_local_error_1;
+	if(x_local_error_2!=0.0) pulx2 = residual_x_2/x_local_error_2;
+	if(x_local_error_4!=0.0) pulx4 = residual_x_4/x_local_error_4;
+
+	if(y_local_error_1!=0.0) puly1 = residual_y_1/y_local_error_1;
+	if(y_local_error_2!=0.0) puly2 = residual_y_2/y_local_error_2;
+	if(y_local_error_4!=0.0) puly4 = residual_y_4/y_local_error_4;
+
+	// Fill Histograms for FPIX
+	if(detTag == "fpix"){
+	  
+	  if(pt>4){
+	    //cout << residual_x_2 << endl;
+	    hclusprob_fpix ->Fill(clusProb_FPix);
+	    
+	    h420f1_124->Fill( residual_x_1 ); 
+	    h421f1_124->Fill( residual_y_1 );
+	    
+	    h420f2_124->Fill( residual_x_2 );
+	    h421f2_124->Fill( residual_y_2 );
+	    
+	    h420f4_124->Fill( residual_x_4 );
+	    h421f4_124->Fill( residual_y_4 );
+	    
+	    // Fill errors
+	    h077f1_124->Fill( x_local_error_1 );
+	    h078f1_124->Fill( y_local_error_1 );
+	    
+	    h077f2_124->Fill( x_local_error_2 );
+	    h078f2_124->Fill( y_local_error_2 );
+	  
+	    h077f4_124->Fill( x_local_error_4 );
+	    h078f4_124->Fill( y_local_error_4 );
+	    
+	    // Fill pulls
+	    h079f1_124->Fill( pulx1 );
+	    h069f1_124->Fill( puly1 );
+
+	    h079f2_124->Fill( pulx2 );
+	    h069f2_124->Fill( puly2 );
+
+	    h079f4_124->Fill( pulx4 );
+	    h069f4_124->Fill( puly4 );
+
+	  }
+	}
+      
+	// Fill Histograms for BPIX
+	else if(detTag == "bpix"){
+	  
+	  if(pt>12){	  
+	    
+	    h420b1_124->Fill( residual_x_1 );
+	    h421b1_124->Fill( residual_y_1 );
+
+	    h420b2_124->Fill( residual_x_2 );
+	    h421b2_124->Fill( residual_y_2 );
+
+	    h420b4_124->Fill( residual_x_4 );
+	    h421b4_124->Fill( residual_y_4 );
+
+	    // Fill errors
+	    h077b1_124->Fill( x_local_error_1 );
+	    h078b1_124->Fill( y_local_error_1 );
+
+	    h077b2_124->Fill( x_local_error_2 );
+	    h078b2_124->Fill( y_local_error_2 );
+
+	    h077b4_124->Fill( x_local_error_4 );
+	    h078b4_124->Fill( y_local_error_4 );
+	    
+	    // Fill pulls
+	    h079b1_124->Fill( pulx1 );
+	    h069b1_124->Fill( puly1 );
+
+	    h079b2_124->Fill( pulx2 );
+	    h069b2_124->Fill( puly2 );
+
+	    h079b4_124->Fill( pulx4 );
+	    h069b4_124->Fill( puly4 );
+	  }
+	}
+	else{}
+
+      }//triplet 
+      }// three hits: 1-3-4
+    if( n1*n3*n4 > 0 ) {
+
+      {// let's open a scope, so we can redefine the variables further down
+       
+	// create points to feed helix
+	std::vector<double> p1 = {xPX1, yPX1, zPX1};
+	std::vector<double> p3 = {xPX3, yPX3, zPX3};
+	std::vector<double> p4 = {xPX4, yPX4, zPX4};
+	
+	std::vector<double> intersection1 = {};
+	std::vector<double> intersection3 = {};
+	std::vector<double> intersection4 = {};
+	
+	// Create helix from two points and curvature, return the intersection point in local coordinates
+	std::vector<double> IntersectionPointLocal_1 = Pixel::getIntersection(p3, p4, rho, det1, intersection1); 
+	std::vector<double> IntersectionPointLocal_3 = Pixel::getIntersection(p1, p4, rho, det3, intersection3);
+	std::vector<double> IntersectionPointLocal_4 = Pixel::getIntersection(p1, p3, rho, det4, intersection4);
+	
+	// Intersection point in local coordinates
+	xl_ideal_1 = IntersectionPointLocal_1[0];
+	yl_ideal_1 = IntersectionPointLocal_1[1];
+	
+	xl_ideal_3 = IntersectionPointLocal_3[0];
+	yl_ideal_3 = IntersectionPointLocal_3[1];
+	
+	xl_ideal_4 = IntersectionPointLocal_4[0];
+	yl_ideal_4 = IntersectionPointLocal_4[1];
+	
+	// Residuals with rechit and intersection point
+	residual_x_1= (xpx1_l - xl_ideal_1)*1E4;
+	residual_y_1= (xpy1_l - yl_ideal_1)*1E4;
+	
+	residual_x_3= (xpx3_l - xl_ideal_3)*1E4;
+	residual_y_3= (xpy3_l - yl_ideal_3)*1E4;
+	
+	residual_x_4= (xpx4_l - xl_ideal_4)*1E4;
+	residual_y_4= (xpy4_l - yl_ideal_4)*1E4;
+	
+	// Local errors for rechit
+	x_local_error_1 = ePX1*1E4;
+	y_local_error_1 = fPX1*1E4;
+	
+	x_local_error_3 = ePX3*1E4;
+	y_local_error_3 = fPX3*1E4;
+	
+	x_local_error_4 = ePX4*1E4;
+	y_local_error_4 = fPX4*1E4;
+      
+	// Add errors and pulls
+	double pulx1=0.;
+	double pulx3=0.;
+	double pulx4=0.;
+	double puly1=0.;
+	double puly3=0.;
+	double puly4=0.;
+	
+	if(x_local_error_1!=0.0) pulx1 = residual_x_1/x_local_error_1;
+	if(x_local_error_3!=0.0) pulx3 = residual_x_3/x_local_error_3;
+	if(x_local_error_4!=0.0) pulx4 = residual_x_4/x_local_error_4;
+
+	if(y_local_error_1!=0.0) puly1 = residual_y_1/y_local_error_1;
+	if(y_local_error_3!=0.0) puly3 = residual_y_3/y_local_error_3;
+	if(y_local_error_4!=0.0) puly4 = residual_y_4/y_local_error_4;
+
+	// Fill Histograms for FPIX
+	if(detTag == "fpix"){
+	  
+	  if(pt>4){
+	    //cout << residual_x_3 << endl;
+	    hclusprob_fpix ->Fill(clusProb_FPix);
+	    
+	    h420f1_134->Fill( residual_x_1 ); 
+	    h421f1_134->Fill( residual_y_1 );
+	    
+	    h420f3_134->Fill( residual_x_3 );
+	    h421f3_134->Fill( residual_y_3 );
+	    
+	    h420f4_134->Fill( residual_x_4 );
+	    h421f4_134->Fill( residual_y_4 );
+	    
+	    // Fill errors
+	    h077f1_134->Fill( x_local_error_1 );
+	    h078f1_134->Fill( y_local_error_1 );
+	    
+	    h077f3_134->Fill( x_local_error_3 );
+	    h078f3_134->Fill( y_local_error_3 );
+	  
+	    h077f4_134->Fill( x_local_error_4 );
+	    h078f4_134->Fill( y_local_error_4 );
+	    
+	    // Fill pulls
+	    h079f1_134->Fill( pulx1 );
+	    h069f1_134->Fill( puly1 );
+
+	    h079f3_134->Fill( pulx3 );
+	    h069f3_134->Fill( puly3 );
+
+	    h079f4_134->Fill( pulx4 );
+	    h069f4_134->Fill( puly4 );
+
+	  }
+	}
+      
+	// Fill Histograms for BPIX
+	else if(detTag == "bpix"){
+	  
+	  if(pt>12){	  
+	    
+	    h420b1_134->Fill( residual_x_1 );
+	    h421b1_134->Fill( residual_y_1 );
+
+	    h420b3_134->Fill( residual_x_3 );
+	    h421b3_134->Fill( residual_y_3 );
+
+	    h420b4_134->Fill( residual_x_4 );
+	    h421b4_134->Fill( residual_y_4 );
+
+	    // Fill errors
+	    h077b1_134->Fill( x_local_error_1 );
+	    h078b1_134->Fill( y_local_error_1 );
+
+	    h077b3_134->Fill( x_local_error_3 );
+	    h078b3_134->Fill( y_local_error_3 );
+
+	    h077b4_134->Fill( x_local_error_4 );
+	    h078b4_134->Fill( y_local_error_4 );
+	    
+	    // Fill pulls
+	    h079b1_134->Fill( pulx1 );
+	    h069b1_134->Fill( puly1 );
+
+	    h079b3_134->Fill( pulx3 );
+	    h069b3_134->Fill( puly3 );
+
+	    h079b4_134->Fill( pulx4 );
+	    h069b4_134->Fill( puly4 );
+	  }
+	}
+	else{}
+
+      }//triplet 
+      }// three hits: 1-3-4
+
+    if( n2*n3*n4 > 0 ) {
+
+      {// let's open a scope, so we can redefine the variables further down
+       
+	// create points to feed helix
+	std::vector<double> p2 = {xPX2, yPX2, zPX2};
+	std::vector<double> p3 = {xPX3, yPX3, zPX3};
+	std::vector<double> p4 = {xPX4, yPX4, zPX4};
+	
+	std::vector<double> intersection2 = {};
+	std::vector<double> intersection3 = {};
+	std::vector<double> intersection4 = {};
+	
+	// Create helix from two points and curvature, return the intersection point in local coordinates
+	std::vector<double> IntersectionPointLocal_2 = Pixel::getIntersection(p3, p4, rho, det2, intersection2); 
+	std::vector<double> IntersectionPointLocal_3 = Pixel::getIntersection(p2, p4, rho, det3, intersection3);
+	std::vector<double> IntersectionPointLocal_4 = Pixel::getIntersection(p2, p3, rho, det4, intersection4);
+	
+	// Intersection point in local coordinates
+	xl_ideal_2 = IntersectionPointLocal_2[0];
+	yl_ideal_2 = IntersectionPointLocal_2[1];
+	
+	xl_ideal_3 = IntersectionPointLocal_3[0];
+	yl_ideal_3 = IntersectionPointLocal_3[1];
+	
+	xl_ideal_4 = IntersectionPointLocal_4[0];
+	yl_ideal_4 = IntersectionPointLocal_4[1];
+	
+	// Residuals with rechit and intersection point
+	residual_x_2= (xpx2_l - xl_ideal_2)*1E4;
+	residual_y_2= (xpy2_l - yl_ideal_2)*1E4;
+	
+	residual_x_3= (xpx3_l - xl_ideal_3)*1E4;
+	residual_y_3= (xpy3_l - yl_ideal_3)*1E4;
+	
+	residual_x_4= (xpx4_l - xl_ideal_4)*1E4;
+	residual_y_4= (xpy4_l - yl_ideal_4)*1E4;
+	
+	// Local errors for rechit
+	x_local_error_2 = ePX2*1E4;
+	y_local_error_2 = fPX2*1E4;
+	
+	x_local_error_3 = ePX3*1E4;
+	y_local_error_3 = fPX3*1E4;
+	
+	x_local_error_4 = ePX4*1E4;
+	y_local_error_4 = fPX4*1E4;
+      
+	// Add errors and pulls
+	double pulx2=0.;
+	double pulx3=0.;
+	double pulx4=0.;
+	double puly2=0.;
+	double puly3=0.;
+	double puly4=0.;
+	
+	if(x_local_error_2!=0.0) pulx2 = residual_x_2/x_local_error_2;
+	if(x_local_error_3!=0.0) pulx3 = residual_x_3/x_local_error_3;
+	if(x_local_error_4!=0.0) pulx4 = residual_x_4/x_local_error_4;
+
+	if(y_local_error_2!=0.0) puly2 = residual_y_2/y_local_error_2;
+	if(y_local_error_3!=0.0) puly3 = residual_y_3/y_local_error_3;
+	if(y_local_error_4!=0.0) puly4 = residual_y_4/y_local_error_4;
+
+	// Fill Histograms for FPIX
+	if(detTag == "fpix"){
+	  
+	  if(pt>4){
+	    //cout << residual_x_3 << endl;
+	    hclusprob_fpix ->Fill(clusProb_FPix);
+	    
+	    h420f2_234->Fill( residual_x_2 ); 
+	    h421f2_234->Fill( residual_y_2 );
+	    
+	    h420f3_234->Fill( residual_x_3 );
+	    h421f3_234->Fill( residual_y_3 );
+	    
+	    h420f4_234->Fill( residual_x_4 );
+	    h421f4_234->Fill( residual_y_4 );
+	    
+	    // Fill errors
+	    h077f2_234->Fill( x_local_error_2 );
+	    h078f2_234->Fill( y_local_error_2 );
+	    
+	    h077f3_234->Fill( x_local_error_3 );
+	    h078f3_234->Fill( y_local_error_3 );
+	  
+	    h077f4_234->Fill( x_local_error_4 );
+	    h078f4_234->Fill( y_local_error_4 );
+	    
+	    // Fill pulls
+	    h079f2_234->Fill( pulx2 );
+	    h069f2_234->Fill( puly2 );
+
+	    h079f3_234->Fill( pulx3 );
+	    h069f3_234->Fill( puly3 );
+
+	    h079f4_234->Fill( pulx4 );
+	    h069f4_234->Fill( puly4 );
+
+	  }
+	}
+      
+	// Fill Histograms for BPIX
+	else if(detTag == "bpix"){
+	  
+	  if(pt>12){	  
+	    
+	    h420b2_234->Fill( residual_x_2 );
+	    h421b2_234->Fill( residual_y_2 );
+
+	    h420b3_234->Fill( residual_x_3 );
+	    h421b3_234->Fill( residual_y_3 );
+
+	    h420b4_234->Fill( residual_x_4 );
+	    h421b4_234->Fill( residual_y_4 );
+
+	    // Fill errors
+	    h077b2_234->Fill( x_local_error_2 );
+	    h078b2_234->Fill( y_local_error_2 );
+
+	    h077b3_234->Fill( x_local_error_3 );
+	    h078b3_234->Fill( y_local_error_3 );
+
+	    h077b4_234->Fill( x_local_error_4 );
+	    h078b4_234->Fill( y_local_error_4 );
+	    
+	    // Fill pulls
+	    h079b2_234->Fill( pulx2 );
+	    h069b2_234->Fill( puly2 );
+
+	    h079b3_234->Fill( pulx3 );
+	    h069b3_234->Fill( puly3 );
+
+	    h079b4_234->Fill( pulx4 );
+	    h069b4_234->Fill( puly4 );
+	  }
+	}
+	else{}
+
+      }//triplet 
+      }// three hits: 2-3-4
+
 
   }// loop over tracks
  

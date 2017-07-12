@@ -4,7 +4,7 @@ config = Configuration()
 config.section_('General')
 config.General.transferOutputs = True
 config.General.transferLogs = True
-config.General.requestName = 'ReReco_PHruns_Phase0VCal'
+config.General.requestName = 'ReReco_PHruns_Phase0VCal_withFPix'
 
 config.section_('JobType')
 config.JobType.pluginName = 'Analysis'
