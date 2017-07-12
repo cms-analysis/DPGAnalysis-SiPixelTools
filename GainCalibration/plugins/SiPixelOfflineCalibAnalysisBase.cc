@@ -324,7 +324,7 @@ SiPixelOfflineCalibAnalysisBase::setDQMDirectory(std::string dirName)
 bool
 SiPixelOfflineCalibAnalysisBase::setDQMDirectory(uint32_t detID)
 {
-  return folderMaker_->setModuleFolder( &myTFileDirMap_,detID,tt,0,phase1_ ); //Camilla da cambiare o da riscrivere quella vecchia
+  return folderMaker_->setModuleFolder( &myTFileDirMap_,detID,tt_,0,phase1_ ); //Camilla da cambiare o da riscrivere quella vecchia
 ;
 }
 // bool
