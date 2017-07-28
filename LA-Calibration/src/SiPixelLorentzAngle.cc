@@ -11,7 +11,7 @@
 #include "DataFormats/GeometryVector/interface/LocalVector.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "Geometry/CommonDetUnit/interface/GeomDetType.h"
-#include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
+//#include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHit.h"
 #include "DataFormats/TrackReco/interface/TrackExtra.h"
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
@@ -128,7 +128,7 @@ void SiPixelLorentzAngle::beginJob()
   //book histograms
   char name[128];
   for(int i_module = 1; i_module<=8; i_module++){
-    for(int i_layer = 1; i_layer<=3; i_layer++){
+    for(int i_layer = 1; i_layer<=4; i_layer++){
       sprintf(name, "h_drift_depth_adc_layer%i_module%i", i_layer, i_module); 
       _h_drift_depth_adc_[i_module + (i_layer -1) * 8] = new TH2F(name,name,hist_drift_ , min_drift_, max_drift_, hist_depth_, min_depth_, max_depth_);
       sprintf(name, "h_drift_depth_adc2_layer%i_module%i", i_layer, i_module); 
@@ -483,7 +483,7 @@ void SiPixelLorentzAngle::endJob()
   cout.precision( 4 );
   fLorentzFit << "module" << "\t" << "layer" << "\t" << "offset" << "\t" << "error" << "\t" << "slope" << "\t" << "error" << "\t" "rel.err" << "\t" "pull" << "\t" << "chi2" << "\t" << "prob" << endl;
   //loop over modlues and layers to fit the lorentz angle
-  for( int i_layer = 1; i_layer<=3; i_layer++){
+  for( int i_layer = 1; i_layer<=4; i_layer++){
     for(int i_module = 1; i_module<=8; i_module++){
       //loop over bins in depth (z-local-coordinate) (in order to fit slices)
       for( int i = 1; i <= hist_depth_; i++){
@@ -502,7 +502,7 @@ void SiPixelLorentzAngle::endJob()
   fLorentzFit.close(); 
   hFile_->cd();
   for(int i_module = 1; i_module<=8; i_module++){
-    for(int i_layer = 1; i_layer<=3; i_layer++){
+    for(int i_layer = 1; i_layer<=4; i_layer++){
       _h_drift_depth_adc_[i_module + (i_layer -1) * 8]->Write();
       _h_drift_depth_adc2_[i_module + (i_layer -1) * 8]->Write();
       _h_drift_depth_noadc_[i_module + (i_layer -1) * 8]->Write();
