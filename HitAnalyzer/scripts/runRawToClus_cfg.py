@@ -66,6 +66,11 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1))
 process.source = cms.Source("PoolSource",
  fileNames =  cms.untracked.vstring(
 
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/122/00000/001BAA8B-BA74-E711-9564-02163E01A3CB.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/122/00000/02F7A4F5-E074-E711-AAF3-02163E0133FC.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/088/00000/003E6DDF-4974-E711-A723-02163E0133C2.root",
+
+
 
 # time 
 #"/store/express/Run2017A/ExpressPhysics/FEVT/Express-v2/000/296/902/00000/008557CF-BE51-E711-A29A-02163E01A4E0.root",
@@ -138,8 +143,8 @@ process.MessageLogger = cms.Service("MessageLogger",
 #    destinations = cms.untracked.vstring("log","cout"),
     cout = cms.untracked.PSet(
 #       threshold = cms.untracked.string('INFO')
-#       threshold = cms.untracked.string('ERROR')
-        threshold = cms.untracked.string('WARNING')
+       threshold = cms.untracked.string('ERROR')
+#        threshold = cms.untracked.string('WARNING')
     )
 #    log = cms.untracked.PSet(
 #        threshold = cms.untracked.string('DEBUG')

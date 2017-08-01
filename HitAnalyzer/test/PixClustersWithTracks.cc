@@ -564,43 +564,41 @@ void PixClustersWithTracks::beginJob() {
   hNumPvClean = fs->make<TH1D>( "hNumPvClean", "num of pv clean",100,0.,100.);
 
   hPt = fs->make<TH1D>( "hPt", "pt",120,0.,120.);
-  hEta = fs->make<TH1D>( "hEta", "eta",60,-3.0,3.0);
-  hPhi = fs->make<TH1D>( "hPhi", "track phi",70,-3.5,3.5);
   hD0 = fs->make<TH1D>( "hD0", "d0",500,0.,20.);
   hDz = fs->make<TH1D>( "hDz", "pt",200,-100.,100.);
   hPtP = fs->make<TH1D>( "hPtP", "pt",120,0.,120.);
-  hEtaP = fs->make<TH1D>( "hEtaP", "eta",60,-3.0,3.0);
-  hPhiP = fs->make<TH1D>( "hPhiP", "track phi",70,-3.5,3.5);
   hD0P = fs->make<TH1D>( "hD0P", "d0",500,0.,20.);
   hDzP = fs->make<TH1D>( "hDzP", "pt",200,-100.,100.);
   hzdiff = fs->make<TH1D>( "hzdiff", "PVz-Trackz",200,-10.,10.);
+
+  hEta = fs->make<TH1D>( "hEta", "eta",120,-3.0,3.0);
+  hPhi = fs->make<TH1D>( "hPhi", "track phi",350,-3.5,3.5);
+  hEtaP = fs->make<TH1D>( "hEtaP", "eta",120,-3.0,3.0);
+  hPhiP = fs->make<TH1D>( "hPhiP", "track phi",350,-3.5,3.5);
 
   hPhi1 = fs->make<TH1D>( "hPhi1", "track phi 1",350,-3.5,3.5);
   hPhi2 = fs->make<TH1D>( "hPhi2", "track phi 2",350,-3.5,3.5);
   hPhi3 = fs->make<TH1D>( "hPhi3", "track phi 3",350,-3.5,3.5);
   hPhi4 = fs->make<TH1D>( "hPhi4", "track phi 4",350,-3.5,3.5);
-  // hPhi5 = fs->make<TH1D>( "hPhi5", "track phi 5",70,-3.5,3.5);
-  // hPhi6 = fs->make<TH1D>( "hPhi6", "track phi 6",70,-3.5,3.5);
-  // hPhi7 = fs->make<TH1D>( "hPhi7", "track phi 7",70,-3.5,3.5);
-  hPhi0 = fs->make<TH1D>( "hPhi0", "track phi 0",70,-3.5,3.5);
+  hPhi0 = fs->make<TH1D>( "hPhi0", "track phi 0",350,-3.5,3.5);
 
-  hEta1 = fs->make<TH1D>( "hEta1", "eta1",30,-3.0,3.0);
-  hEta2 = fs->make<TH1D>( "hEta2", "eta2",30,-3.0,3.0);
-  hEta3 = fs->make<TH1D>( "hEta3", "eta3",30,-3.0,3.0);
-  hEta4 = fs->make<TH1D>( "hEta4", "eta4",30,-3.0,3.0);
-  hEta5 = fs->make<TH1D>( "hEta5", "eta5",30,-3.0,3.0);
-  hEta6 = fs->make<TH1D>( "hEta6", "eta6",30,-3.0,3.0);
-  hEta7 = fs->make<TH1D>( "hEta7", "eta7",30,-3.0,3.0);
-  hEta0 = fs->make<TH1D>( "hEta0", "eta0",30,-3.0,3.0);
+  hEta1 = fs->make<TH1D>( "hEta1", "eta1",120,-3.0,3.0);
+  hEta2 = fs->make<TH1D>( "hEta2", "eta2",120,-3.0,3.0);
+  hEta3 = fs->make<TH1D>( "hEta3", "eta3",120,-3.0,3.0);
+  hEta4 = fs->make<TH1D>( "hEta4", "eta4",120,-3.0,3.0);
+  hEta5 = fs->make<TH1D>( "hEta5", "eta5",120,-3.0,3.0);
+  hEta6 = fs->make<TH1D>( "hEta6", "eta6",120,-3.0,3.0);
+  hEta7 = fs->make<TH1D>( "hEta7", "eta7",120,-3.0,3.0);
+  hEta0 = fs->make<TH1D>( "hEta0", "eta0",120,-3.0,3.0);
 
-  hEta10 = fs->make<TH1D>( "hEta10", "eta1 no hit",30,-3.0,3.0);
-  hEta20 = fs->make<TH1D>( "hEta20", "eta2 no hit",30,-3.0,3.0);
-  hEta30 = fs->make<TH1D>( "hEta30", "eta3 no hit",30,-3.0,3.0);
-  hEta40 = fs->make<TH1D>( "hEta40", "eta4 no hit",30,-3.0,3.0);
+  hEta10 = fs->make<TH1D>( "hEta10", "eta1 no hit",120,-3.0,3.0);
+  hEta20 = fs->make<TH1D>( "hEta20", "eta2 no hit",120,-3.0,3.0);
+  hEta30 = fs->make<TH1D>( "hEta30", "eta3 no hit",120,-3.0,3.0);
+  hEta40 = fs->make<TH1D>( "hEta40", "eta4 no hit",120,-3.0,3.0);
 
   // special l1 tests
-  hEta11 = fs->make<TH1D>( "hEta11", "eta1",300,-3.0,3.0);
-  hEta12 = fs->make<TH1D>( "hEta12", "eta1",300,-3.0,3.0);
+  hEta11 = fs->make<TH1D>( "hEta11", "eta1",120,-3.0,3.0);
+  hEta12 = fs->make<TH1D>( "hEta12", "eta1",120,-3.0,3.0);
   hPhi11 = fs->make<TH1D>( "hPhi11", "phi1",350,-3.5,3.5);
   hPhi12 = fs->make<TH1D>( "hPhi12", "phi1",350,-3.5,3.5);
 

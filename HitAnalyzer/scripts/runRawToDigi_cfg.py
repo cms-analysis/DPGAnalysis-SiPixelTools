@@ -56,8 +56,13 @@ process.source = cms.Source("PoolSource",
  # fileNames =  cms.untracked.vstring('file:rawdata.root')
  fileNames =  cms.untracked.vstring(
 
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/122/00000/001BAA8B-BA74-E711-9564-02163E01A3CB.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/122/00000/02F7A4F5-E074-E711-AAF3-02163E0133FC.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/088/00000/003E6DDF-4974-E711-A723-02163E0133C2.root",
+
+
 # high Vibias  250
-"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/671/00000/1665877E-B15C-E711-8FC7-02163E0133E1.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/671/00000/1665877E-B15C-E711-8FC7-02163E0133E1.root",
 
 #"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/494/00000/221DC7DD-1E5A-E711-A76A-02163E011BB6.root",
 #"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/495/00000/003591BD-1A5A-E711-AF2A-02163E01A508.root",
@@ -145,7 +150,8 @@ process.MessageLogger = cms.Service("MessageLogger",
     destinations = cms.untracked.vstring('r2d'),
 #    r2d = cms.untracked.PSet( threshold = cms.untracked.string('DEBUG'))
 #    r2d = cms.untracked.PSet( threshold = cms.untracked.string('INFO'))
-    r2d = cms.untracked.PSet( threshold = cms.untracked.string('WARNING'))
+#    r2d = cms.untracked.PSet( threshold = cms.untracked.string('WARNING'))
+    r2d = cms.untracked.PSet( threshold = cms.untracked.string('ERROR'))
 )
 
 process.out = cms.OutputModule("PoolOutputModule",

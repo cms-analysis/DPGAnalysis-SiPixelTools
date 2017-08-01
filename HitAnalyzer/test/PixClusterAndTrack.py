@@ -16,7 +16,7 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 # 2017
 #process.GlobalTag.globaltag = '90X_dataRun2_Express_v4' # 
 process.GlobalTag.globaltag = '92X_dataRun2_Express_v2' # 
-#process.GlobalTag.globaltag = '92X_dataRun2_Express_v4' # 
+#process.GlobalTag.globaltag = '92X_dataRun2_Express_v4' # for 926
 # 2016
 #process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v3' # for 266277
 #process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v9' # >=8010
@@ -89,12 +89,25 @@ process.source = cms.Source("PoolSource",
 #"/store/relval/CMSSW_9_2_3/RelValNuGun/GEN-SIM-RECO/PUpmx25ns_92X_upgrade2017_realistic_v2_earlyBS2017-v1/10000/12995CE4-3851-E711-B4A6-0CC47A4D7602.root",
 # "/store/relval/CMSSW_9_2_3/RelValNuGun/GEN-SIM-DIGI-RAW-HLTDEBUG/PUpmx25ns_92X_upgrade2017_realistic_v2_earlyBS2017-v1/10000/1ECCAF11-2E51-E711-AE03-0025905B8594.root",
 
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/122/00000/001BAA8B-BA74-E711-9564-02163E01A3CB.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/122/00000/02F7A4F5-E074-E711-AAF3-02163E0133FC.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/088/00000/003E6DDF-4974-E711-A723-02163E0133C2.root",
 
-"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/670/00000/A4AFA400-9E5C-E711-ABFB-02163E01A6AD.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/299/649/00000/FEF76138-1B70-E711-94DF-02163E011DDE.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/299/616/00000/001C4B9E-066F-E711-9ED0-02163E011EB4.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/299/594/00000/000BD417-7F6E-E711-8EB8-02163E019DC2.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/299/478/00000/0221EEC7-5C6D-E711-B39F-02163E014767.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/299/381/00000/02F106ED-456C-E711-9FC0-02163E011EB4.root",
+
+
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/670/00000/A4AFA400-9E5C-E711-ABFB-02163E01A6AD.root",
 #"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/671/00000/1665877E-B15C-E711-8FC7-02163E0133E1.root",
 #"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/672/00000/0645B604-AA5C-E711-8231-02163E013778.root",
 #"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/673/00000/08A31073-A95C-E711-90CA-02163E01A45A.root",
 #"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/674/00000/00090DB9-B85C-E711-9A6A-02163E0134D8.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/675/00000/0032C48B-C45C-E711-8408-02163E0137F9.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/675/00000/FEF30EFA-BE5C-E711-A66D-02163E01A553.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/678/00000/488C603D-C55C-E711-9841-02163E013406.root",
 
 #"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/664/00000/0268DAE5-6C5C-E711-BC2D-02163E019DE0.root",
 #"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/663/00000/1078B975-6C5C-E711-886A-02163E01237E.root",
@@ -236,7 +249,7 @@ process.source = cms.Source("PoolSource",
 )
 
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('124230:26-124230:9999','124030:2-124030:9999')
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('297211:26-297211:83')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('300122:44-300122:9999')
 
 
 process.TFileService = cms.Service("TFileService",

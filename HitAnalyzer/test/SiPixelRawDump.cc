@@ -210,27 +210,47 @@ int MyDecode::error(int word, int & fedChannel, int fed, int & stat1, int & stat
   int status = -1;
   print = print || printErrors;
 
-  const unsigned int  errorMask      = 0x3e00000;
-  const unsigned int  dummyMask      = 0x03600000;
-  const unsigned int  gapMask        = 0x03400000;
-  const unsigned int  timeOut        = 0x3a00000;
-  const unsigned int  timeOut2       = 0x3b00000;
-  const unsigned int  eventNumError  = 0x3e00000;
-  const unsigned int  trailError     = 0x3c00000;
-  const unsigned int  fifoError      = 0x3800000;
+  const unsigned int  errorMask      = 0x03e00000;
 
-//  const unsigned int  timeOutChannelMask = 0x1f;  // channel mask for timeouts
+  const unsigned int  maskedMask     = 0x03200000; // roc=25
+  const unsigned int  gapMask        = 0x03400000; // roc=26
+  const unsigned int  dummyMask      = 0x03600000; // roc=27
+  const unsigned int  fifoError      = 0x03800000; // roc-28
+  const unsigned int  timeOut        = 0x03a00000; // roc=29
+  const unsigned int  timeOut2       = 0x03b00000; //     
+  const unsigned int  trailError     = 0x03c00000; // roc=30
+  const unsigned int  eventNumError  = 0x03e00000; // rpc=31 
+
+  //const unsigned int  timeOutChannelMask = 0x1f;  // channel mask for timeouts
   //const unsigned int  eventNumMask = 0x1fe000; // event number mask
   const unsigned int  channelMask = 0xfc000000; // channel num mask
-  const unsigned int  tbmEventMask = 0xff;    // tbm event num mask
-  const unsigned int  overflowMask = 0x100;   // data overflow
-  const unsigned int  tbmStatusMask = 0xff;   //TBM trailer info
-  const unsigned int  BlkNumMask = 0x700;   //pointer to error fifo #
-  const unsigned int  FsmErrMask = 0x600;   //pointer to FSM errors
-  const unsigned int  RocErrMask = 0x800;   //pointer to #Roc errors
+
+  const unsigned int  tbmEventMask  = 0xff;    // tbm event num mask
+  const unsigned int  tbmStatusMask = 0xff;   // TBM trailer info
+  const unsigned int  ErrBitsMask = 0x3F00;   // ErrBits  info
   const unsigned int  ChnFifMask = 0x1f;   //channel mask for fifo error
   const unsigned int  Fif2NFMask = 0x40;   //mask for fifo2 NF
   const unsigned int  TrigNFMask = 0x80;   //mask for trigger fifo NF
+
+  const unsigned int  BlkNumMask = 0x700;   // 
+  //const unsigned int  FsmErrMask = 0x600;   //pointer to FSM errors
+
+  const unsigned int  RocErrMask = 0x800;   // bit 11, NOR 
+  const unsigned int  AutoMask   = 0x400;   // bit 10, Autoreset 
+  const unsigned int  PKAMMask   = 0x200;   // bit 9, PKAM 
+  const unsigned int  overflowMask=0x100;  // bit 8, Overflow 
+  const unsigned int  noTrailerMask=0x300;  // bit 8&9 trailer missing  
+
+
+  //TBM08 status masks
+  const unsigned int  NTPMask = 0x80; // No Token Pass
+  const unsigned int  TBMResetMask = 0x40;
+  const unsigned int  ROCResetMask = 0x20;
+  const unsigned int  SyncErrMask = 0x10;
+  const unsigned int  SyncTrigMask = 0x8;
+  const unsigned int  EvtNumRstMask = 0x4;
+  const unsigned int  CalMask = 0x2;
+  const unsigned int  StackFullMask = 0x1;
   
   const int offsets[8] = {0,4,9,13,18,22,27,31};
   unsigned int channel = 0;
@@ -245,6 +265,21 @@ int MyDecode::error(int word, int & fedChannel, int fed, int & stat1, int & stat
     //cout<<" Gap word";
     return 0;
     
+  } else if( (word&errorMask) == maskedMask ) { // Masked  WORD
+    channel =  (word & channelMask) >>26;
+    fedChannel = channel;
+    
+    unsigned int bit20 =      (word & 0x100000)>>20; // works only for slink format    
+    if(bit20==1) {
+      if(print) cout<<" Masked: channel "<<channel<<" by automasking";   
+      status=-18;
+    } else {
+      //if(print)cout<<" Masked: channel "<<channel<<" by permanent mask";
+      status=-17;
+      return 0; // skip printing it 
+    }
+    
+
   } else if( ((word&errorMask)==timeOut) || ((word&errorMask)==timeOut2) ) { // TIMEOUT
 
     unsigned int bit20 =      (word & 0x100000)>>20; // works only for slink format
@@ -304,30 +339,52 @@ int MyDecode::error(int word, int & fedChannel, int fed, int & stat1, int & stat
   } else if( ((word&errorMask) == trailError)) {  // TRAILER 
     channel =  (word & channelMask) >>26;
     unsigned int tbm_status   =  (word & tbmStatusMask);
+    unsigned int bits8_11   =  (word & ErrBitsMask)>>8;
     
 
     if(tbm_status!=0) {
       if(print) cout<<" Trailer Error- "<<"channel: "<<channel<<" TBM status:0x"
-			  <<hex<<tbm_status<<dec<<" "; // <<endl;
+		    <<hex<<tbm_status<<" ErrBits:0x"<<bits8_11<<dec; // <<endl;
      status = -15;
+     if(tbm_status)
      // implement the resync/reset 17
-    }
+
+       if(print) {
+	 if(tbm_status & NTPMask) cout << " NTP, ";
+	 if(tbm_status & TBMResetMask) {cout << " TBM Reset, "; status=-19;}
+	 if(tbm_status & ROCResetMask) {cout << " ROC Reset, ";}
+	 if(tbm_status & SyncErrMask) cout << " SyncErr, ";
+	 if(tbm_status & SyncTrigMask) cout << " SyncTrig, ";
+	 if(tbm_status & EvtNumRstMask) cout << " TBMEvt#Clear, ";
+	 if(tbm_status & CalMask) cout << " CalTrig, ";
+	 if(tbm_status & StackFullMask) cout << " Stack Full, ";
+       }
+     
+   }
 
     if(word & RocErrMask) {
-      if(print) cout<<"Number of Rocs Error- "<<"channel: "<<channel<<" "; // <<endl;
+      if(print) cout<<"NOR Error, "; // <<endl;
      status = -12;
     }
 
-    if(word & overflowMask) {
-      if(print) cout<<"Overflow Error- "<<"channel: "<<channel<<" "; // <<endl;
-     status = -14;
+    if( (word&noTrailerMask) ) { // bit 8 OR 9 on
+      if( (word&noTrailerMask)==noTrailerMask ) { // both bits noTrailer
+	if(print) cout<<"noTrailer Error, "; // <<endl;
+	status = -20;
+      } else if(word & overflowMask) { // bit 8 
+	if(print) cout<<"OV Error, "; // <<endl;
+	status = -14;
+      } else if(word &PKAMMask) { // bit 9
+	if(print) cout<<"PKAM, ";
+	status = -16;
+      }
     }
 
-    if(word & FsmErrMask) {
-      if(print) cout<<"FSM Error-??? "<<"channel: "<<channel;
+    if(word &AutoMask) {
+      if(print) cout<<"Autoreset, ";
       //if(print) cout<<"Finite State Machine Error- "<<"channel: "<<channel
       //			  <<" Error status:0x"<<hex<< ((word & FsmErrMask)>>9)<<dec<<" "; // <<endl;
-      //status = -13;
+      status = -13;
     }
 
 
@@ -339,7 +396,7 @@ int MyDecode::error(int word, int & fedChannel, int fed, int & stat1, int & stat
       if(word & TrigNFMask) cout<<"The trigger fifo is nearly Full - ";
       if(word & ChnFifMask) cout<<"fifo-1 is nearly full for channel"<<(word & ChnFifMask);
       //cout<<endl;
-      status = -16;
+      status = -21;
     }
 
   } else {
@@ -352,7 +409,7 @@ int MyDecode::error(int word, int & fedChannel, int fed, int & stat1, int & stat
     }
   }
 
-  if(print && status <0) cout<<" FED "<<fed<<" status "<<status<<endl;
+  if(print && status <0) cout<<", FED "<<fed<<" status "<<status<<endl;
   return status;
 }
 ///////////////////////////////////////////////////////////////////////////
@@ -504,10 +561,12 @@ int MyDecode::data(int word, int & fedChannel, int fed, int & stat1, int & stat2
 
     }
 
-  } else if(roc_==25) {  // ROC? 
-    unsigned int chan = ((word&chnlmsk)>>26);
-    cout<<"Wrong roc 25 "<<" in fed/chan "<<fed<<"/"<<chan<<endl;
-    status=-4;
+    //} else if(roc_==25) {  // ROC? 
+    //unsigned int chan = ((word&chnlmsk)>>26);
+    //cout<<"Wrong roc 25 "<<" in fed/chan "<<fed<<"/"<<chan<<endl;
+    //status=-4;
+
+    // now roc=25 goes to error processing 
 
   } else {  // error word
 
@@ -615,23 +674,9 @@ SiPixelRawDump::SiPixelRawDump( const edm::ParameterSet& cfg) : theConfig(cfg) {
 } 
 //----------------------------------------------------------------------------------------
 void SiPixelRawDump::endJob() {
-  string errorName[18] = {" "," ","wrong channel","wrong pix or dcol","wrong roc","pix=0",
-			  " double-pix"," "," "," ","timeout","ENE","NOR","FSM","overflow",
-			  "trailer","fifo","reset/resync"};
-
-  // 2 - wrong channel
-  // 3 - wrong pix or dcol 
-  // 4 - wrong roc
-  // 5 - pix=0
-  // 6 - double pixel 
-  // 10 - timeout ()
-  // 11 - ene ()
-  // 12 - mum pf rocs error ()
-  // 13 - fsm ()
-  // 14 - overflow ()
-  // 15 - trailer ()
-  // 16 - fifo  (30)
-  // 17 - reset/resync NOT INCLUDED YET
+  string errorName[20] = {" "," ","wrong channel","wrong pix or dcol","wrong roc","pix=0",
+			  " double-pix"," "," "," ","timeout","ENE","NOR","autoreset","overflow",
+			  "trailer","pkam","masked","automasked","reset/resync"};
 
   cout<<"2 - wrong channel"<<endl
       <<"3 - wrong pix or dcol"<<endl 
@@ -640,12 +685,14 @@ void SiPixelRawDump::endJob() {
       <<"6 - double pixel"<<endl 
       <<"10 - timeout"<<endl
       <<"11 - ene"<<endl
-      <<"12 - mum pf rocs error"<<endl
-      <<"13 - fsm"<<endl
+      <<"12 - nor"<<endl
+      <<"13 - autoreset"<<endl
       <<"14 - overflow"<<endl
       <<"15 - trailer"<<endl
-      <<"16 - fifo"<<endl
-      <<"17 - reset/resync NOT INCLUDED YET"<<endl;
+      <<"16 - pkam"<<endl
+      <<"17 - masked"<<endl
+      <<"18 - automasked"<<endl
+      <<"19 - reset"<<endl;
 
   double tmp = sumPixels;
   if(countEvents>0) {
@@ -1129,6 +1176,7 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
   int fedchannelsize[n_of_Channels];
   bool wrongBX=false;
   int countErrors[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  //int countErrorsInEvent=0;
 
 
   // Loop over FEDs
@@ -1241,12 +1289,14 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 	  // 6 - double pixel
 	  // 10 - timeout ()
 	  // 11 - ene ()
-	  // 12 - mum pf rocs error ()
-	  // 13 - fsm ()
+	  // 12 - nor ()
+	  // 13 - autoreset ()
 	  // 14 - overflow ()
 	  // 15 - trailer ()
-	  // 16 - fifo  (30)
-	  // 17 - reset/resync NOT INCLUDED YET
+	  // 16 - pkam  (30)
+	  // 17 - masked
+	  // 18 - automasked
+	  // 19 - reset 
 	  
 	  switch(status) {
 
@@ -1491,6 +1541,10 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
   //havsizels->Fill(float(lumiBlock),aveFedSize);
   havsizebx->Fill(float(bx),aveFedSize);
 
+  if(countErrorsPerEvent>0) {
+    cout<<"EVENT: "<<countEvents<<" "<<eventId<<" pixels "<<countPixels<<" errors "<<countErrorsPerEvent<<endl;
+  }
+
   if(countPixels>0) {
     hlumi->Fill(float(lumiBlock));
     hbx->Fill(float(bx));
@@ -1515,12 +1569,15 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 
   // 10 - timeout ()
   // 11 - ene ()
-  // 12 - mum pf rocs error ()
-  // 13 - fsm ()
+  // 12 - nor ()
+  // 13 - autoreset ()
   // 14 - overflow ()
   // 15 - trailer ()
-  // 16 - fifo  (30)
-  // 17 - reset/resync NOT INCLUDED YET
+  // 16 - pkam  (30)
+  // 17 - masked
+  // 18 - automasked
+  // 19 - 
+  // 20 - 
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(SiPixelRawDump);
