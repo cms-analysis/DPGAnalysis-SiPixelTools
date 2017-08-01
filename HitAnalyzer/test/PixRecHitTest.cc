@@ -18,7 +18,7 @@
 
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "Geometry/CommonDetUnit/interface/GeomDetType.h"
-#include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
+//#include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
 
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetType.h"
