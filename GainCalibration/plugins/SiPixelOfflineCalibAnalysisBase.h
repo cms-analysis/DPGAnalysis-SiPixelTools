@@ -51,6 +51,7 @@
 
 #include "TF1.h"
 #include "TH1F.h"
+#include "TGraphErrors.h"
 
 #include "DQMServices/Core/interface/DQMStore.h"
 #include "DQMServices/Core/interface/MonitorElement.h"
@@ -100,6 +101,8 @@ public:
   TH2F* 			bookHistogram2D(uint32_t detid, std::string name, std::string title, int nchX, double lowX, double highX, int nchY, double lowY, double highY, std::string dir);
   
   TH2F*                         bookHistoPlaquetteSummary2D(uint32_t detid, std::string name,std::string title, std::string dir); // take the detid to determine the size of rows and columns, this saves looking up everything in the cabling map by the user. 
+
+  TGraphErrors* bookTGraphs(uint32_t detid, std::string name, int points, double *x, double *y, double *xE, double *yE, std::string dir);
 
   void                                  addTF1ToDQMMonitoringElement(MonitorElement *ele, TF1 *func);
   

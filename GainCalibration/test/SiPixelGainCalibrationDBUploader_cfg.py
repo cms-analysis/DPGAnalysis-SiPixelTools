@@ -24,6 +24,13 @@ process.gainDBOffline = cms.EDAnalyzer("SiPixelGainCalibrationDBUploader",
     badChi2Prob = cms.untracked.double(0.00001)                                       
     )
 
+process.gainDBOfflineFull = cms.EDAnalyzer("SiPixelGainCalibrationDBUploader",
+    inputrootfile = cms.untracked.string('file:///tmp/rougny/test.root'),
+    record = cms.untracked.string('SiPixelGainCalibrationRcd'),
+    useMeanWhenEmpty = cms.untracked.bool(True),
+    badChi2Prob = cms.untracked.double(0.00001)                                       
+    )
+
 process.gainDBHLT = cms.EDAnalyzer("SiPixelGainCalibrationDBUploader",
     inputrootfile = cms.untracked.string('file:///tmp/rougny/test.root'),
     record = cms.untracked.string('SiPixelGainCalibrationForHLTRcd'),

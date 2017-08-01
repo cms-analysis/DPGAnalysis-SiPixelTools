@@ -117,6 +117,7 @@ file_loc(){
 }
 
 is_file_present(){
+    #echo "command: $T2_LS"
     if eval $T2_LS $1 >/dev/null 2>&1; then echo 1;else echo 0;fi
   # if [ `$T2_LS $1 2>&1|grep "No such"|wc -l` -eq 1 ];then echo 0;
   # else echo 1;

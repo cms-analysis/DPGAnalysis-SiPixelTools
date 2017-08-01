@@ -15,8 +15,9 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, '75X_upgrade2017_design_v4', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.destinations = cms.untracked.vstring("cout")
@@ -50,7 +51,7 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
     timetype = cms.untracked.string('runnumber'),
 #    connect = cms.string("sqlite_file:SiPixelLorentzAngle_phase1_mc_v1.db"),
 #    connect = cms.string("sqlite_file:SiPixelLorentzAngle_phase1_mc_v2.db"),
-    connect = cms.string("sqlite_file:SiPixelLorentzAngle_phase1_2017_v1.db"),
+    connect = cms.string("sqlite_file:SiPixelLorentzAngle_phase1_2017_v3.db"),
 #    connect = cms.string("sqlite_file:SiPixelLorentzAngleSim_phase1_mc_v1.db"),
 #    connect = cms.string("sqlite_file:SiPixelLorentzAngleSim_phase1_mc_v2.db"),
 #    connect = cms.string("sqlite_file:SiPixelLorentzAngleSim_phase1_2017_v1_TESTONLY.db"),
@@ -59,7 +60,7 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
             record = cms.string('SiPixelLorentzAngleRcd'),
 #            tag = cms.string('SiPixelLorentzAngle_phase1_mc_v1')
 #            tag = cms.string('SiPixelLorentzAngle_phase1_mc_v2')
-            tag = cms.string('SiPixelLorentzAngle_phase1_2017_v1')
+            tag = cms.string('SiPixelLorentzAngle_phase1_2017_v3')
 #	     tag = cms.string("SiPixelLorentzAngle_fromAlignment_v01_mc")	
 #	     tag = cms.string("SiPixelLorentzAngle_fromAlignment_v01")	
 #	     tag = cms.string("SiPixelLorentzAngle_forWidth_v01_mc")
@@ -79,6 +80,10 @@ FPix_300V_RNG1_PNL2 = 0.0799
 FPix_300V_RNG2_PNL1 = 0.0782
 FPix_300V_RNG2_PNL2 = 0.0777
 
+BPIX_LAYER1=0.1036
+BPIX_LAYER_2_4_MODULE_1_4=0.1318
+BPIX_LAYER_2_4_MODULE_5_8=0.1449
+
 ###### LORENTZ ANGLE OBJECT ######
 process.SiPixelLorentzAngle = cms.EDAnalyzer("SiPixelLorentzAngleDBLoader",
     # common input for all bpix/fpix
@@ -90,11 +95,43 @@ process.SiPixelLorentzAngle = cms.EDAnalyzer("SiPixelLorentzAngleDBLoader",
 
     #in case of PSet (only works if above is -9999)
     # One common value for BPix for now
-    BPixParameters = cms.untracked.VPSet(
-        cms.PSet(
-            angle = cms.double(0.115)
-        ),
+#   BPixParameters = cms.untracked.VPSet(
+#        cms.PSet(
+#            angle = cms.double(0.115)
+#        ),
+#    ),
+   BPixParameters = cms.untracked.VPSet(
+        cms.PSet(layer = cms.int32(1), angle = cms.double(BPIX_LAYER1)),
+
+        cms.PSet(layer = cms.int32(2), module = cms.int32(1), angle = cms.double(BPIX_LAYER_2_4_MODULE_1_4)),
+        cms.PSet(layer = cms.int32(2), module = cms.int32(2), angle = cms.double(BPIX_LAYER_2_4_MODULE_1_4)),
+        cms.PSet(layer = cms.int32(2), module = cms.int32(3), angle = cms.double(BPIX_LAYER_2_4_MODULE_1_4)),
+        cms.PSet(layer = cms.int32(2), module = cms.int32(4), angle = cms.double(BPIX_LAYER_2_4_MODULE_1_4)),
+        cms.PSet(layer = cms.int32(2), module = cms.int32(5), angle = cms.double(BPIX_LAYER_2_4_MODULE_5_8)),
+        cms.PSet(layer = cms.int32(2), module = cms.int32(6), angle = cms.double(BPIX_LAYER_2_4_MODULE_5_8)),
+        cms.PSet(layer = cms.int32(2), module = cms.int32(7), angle = cms.double(BPIX_LAYER_2_4_MODULE_5_8)),
+        cms.PSet(layer = cms.int32(2), module = cms.int32(8), angle = cms.double(BPIX_LAYER_2_4_MODULE_5_8)),
+
+        cms.PSet(layer = cms.int32(3), module = cms.int32(1), angle = cms.double(BPIX_LAYER_2_4_MODULE_1_4)),
+        cms.PSet(layer = cms.int32(3), module = cms.int32(2), angle = cms.double(BPIX_LAYER_2_4_MODULE_1_4)),
+        cms.PSet(layer = cms.int32(3), module = cms.int32(3), angle = cms.double(BPIX_LAYER_2_4_MODULE_1_4)),
+        cms.PSet(layer = cms.int32(3), module = cms.int32(4), angle = cms.double(BPIX_LAYER_2_4_MODULE_1_4)),
+        cms.PSet(layer = cms.int32(3), module = cms.int32(5), angle = cms.double(BPIX_LAYER_2_4_MODULE_5_8)),
+        cms.PSet(layer = cms.int32(3), module = cms.int32(6), angle = cms.double(BPIX_LAYER_2_4_MODULE_5_8)),
+        cms.PSet(layer = cms.int32(3), module = cms.int32(7), angle = cms.double(BPIX_LAYER_2_4_MODULE_5_8)),
+        cms.PSet(layer = cms.int32(3), module = cms.int32(8), angle = cms.double(BPIX_LAYER_2_4_MODULE_5_8)),
+
+        cms.PSet(layer = cms.int32(4), module = cms.int32(1), angle = cms.double(BPIX_LAYER_2_4_MODULE_1_4)),
+        cms.PSet(layer = cms.int32(4), module = cms.int32(2), angle = cms.double(BPIX_LAYER_2_4_MODULE_1_4)),
+        cms.PSet(layer = cms.int32(4), module = cms.int32(3), angle = cms.double(BPIX_LAYER_2_4_MODULE_1_4)),
+        cms.PSet(layer = cms.int32(4), module = cms.int32(4), angle = cms.double(BPIX_LAYER_2_4_MODULE_1_4)),
+        cms.PSet(layer = cms.int32(4), module = cms.int32(5), angle = cms.double(BPIX_LAYER_2_4_MODULE_5_8)),
+        cms.PSet(layer = cms.int32(4), module = cms.int32(6), angle = cms.double(BPIX_LAYER_2_4_MODULE_5_8)),
+        cms.PSet(layer = cms.int32(4), module = cms.int32(7), angle = cms.double(BPIX_LAYER_2_4_MODULE_5_8)),
+        cms.PSet(layer = cms.int32(4), module = cms.int32(8), angle = cms.double(BPIX_LAYER_2_4_MODULE_5_8)),
+        
     ),
+
     FPixParameters = cms.untracked.VPSet(
         # Normal 150V FPix modules
         cms.PSet(

@@ -49,8 +49,8 @@ create(){
   if [ "$indir" == "" ] && [ "$storedir" == "" ];then
     #indir=/castor/cern.ch/user/${USER:0:1}/$USER/GainCalib_run$run
     #storedir=/castor/cern.ch/user/${USER:0:1}/$USER/
-    indir=/store/group/dpg_tracker_pixel/comm_pixel/GainCalibrations/Run_$run
-    storedir=/store/group/dpg_tracker_pixel/comm_pixel/GainCalibrations/Run_$run
+    indir=/store/group/dpg_tracker_pixel/comm_pixel/GainCalibrations/Phase1/Run_$run
+    storedir=/store/group/dpg_tracker_pixel/comm_pixel/GainCalibrations/Phase1/Run_$run
   fi
   
   storedir=$storedir/GainRun_$run
@@ -186,6 +186,7 @@ resubmit_job(){
 resubmit_all(){
   set_specifics $storedir 
   cd $runningdir
+
   nothing_to_resubmit=true
   for ijob in "${PIXFEDarray[@]}";do
     if [ `is_file_present $storedir/$ijob.root` -eq 0 ];then
@@ -397,7 +398,6 @@ compare_runs(){
 
 
 
-
 make_payload(){
 
   if [ -z $db_version ] || [ -z $year ];
@@ -411,6 +411,7 @@ make_payload(){
   echo "Copying $storedir/GainCalibration.root to $file"
   $T2_CP $T2_PREFIX$storedir/GainCalibration.root $file
   
+
   ###########################################   OFFLINE PAYLOAD
   
   payload=SiPixelGainCalibration_${year}_v${db_version}_offline.db
@@ -418,6 +419,9 @@ make_payload(){
   
   echo -e "RM: $T2_RM$storedir/$payload"
   echo -e "RM: $T2_RM$storedir/$payload_root"
+
+  $T2_RM$storedir/$payload
+  $T2_RM$storedir/$payload_root
   
   #Changing some parameters in the python file:
   cat SiPixelGainCalibrationDBUploader_cfg.py |\
@@ -454,8 +458,11 @@ make_payload(){
   payload=SiPixelGainCalibration_${year}_v${db_version}_HLT.db
   payload_root=Summary_payload_Run${run}_${year}_v${db_version}_HLT.root
   
-  echo -e "RM: `$T2_RM$storedir/$payload`"
-  echo -e "RM: `$T2_RM$storedir/$payload_root`"
+  echo -e "RM: $T2_RM$storedir/$payload"
+  echo -e "RM: $T2_RM$storedir/$payload_root"
+
+  $T2_RM$storedir/$payload
+  $T2_RM$storedir/$payload_root
   
   #Changing some parameters in the python file:
   cat SiPixelGainCalibrationDBUploader_cfg.py |\
@@ -482,6 +489,44 @@ make_payload(){
   rm -f $T2_TMP_DIR/${payload}
   rm -f $T2_TMP_DIR/${payload_root}
   
+  ####################################
+
+####testing the pixelbypixel payload
+  payload=SiPixelGainCalibration_${year}_v${db_version}_full.db
+  payload_root=Summary_payload_Run${run}_${year}_v${db_version}_full.root
+  
+  echo -e "RM: $T2_RM$storedir/$payload"
+  echo -e "RM: $T2_RM$storedir/$payload_root"
+
+  $T2_RM$storedir/$payload
+  $T2_RM$storedir/$payload_root
+  
+  #Changing some parameters in the python file:
+  cat SiPixelGainCalibrationDBUploader_cfg.py |\
+    sed "s#file:///tmp/rougny/test.root#`file_loc $file`#"  |\
+    sed "s#sqlite_file:dummy.db#sqlite_file:$T2_TMP_DIR/${payload}#" |\
+    sed "s#/tmp/rougny/histos.root#$T2_TMP_DIR/$payload_root#" |\
+    sed "s#cms.Path(process.gainDBOffline)#cms.Path(process.gainDBOfflineFull)#"|\
+    sed "s#record = cms.string('SiPixelGainCalibrationOfflineRcd')#record = cms.string('SiPixelGainCalibrationRcd')#"|\
+    sed "s#GainCalib_TEST_offline#SiPixelGainCalibration_${year}_v${db_version}#" > SiPixelGainCalibrationDBUploader_full_cfg.py
+  
+  echo -e "\n--------------------------------------"
+  echo "Making the payload for Offline pixel by pixel:"
+  echo "  $storedir/$payload"
+  echo "  ==> Summary root file: $payload_root"
+  echo -e "--------------------------------------\n"
+  
+  echo "  (\" cmsRun SiPixelGainCalibrationDBUploader_full_cfg.py \" )"
+  cmsRun SiPixelGainCalibrationDBUploader_full_cfg.py
+  
+  ls $T2_TMP_DIR
+  $T2_CP $T2_TMP_DIR/$payload $T2_PREFIX$storedir/$payload
+  $T2_CP $T2_TMP_DIR/$payload_root $T2_PREFIX$storedir/$payload_root
+  
+  rm -f $T2_TMP_DIR/${payload}
+  rm -f $T2_TMP_DIR/${payload_root}
+  
+### end testing pixelbypixel
   ####################################
    
   rm -f $file  

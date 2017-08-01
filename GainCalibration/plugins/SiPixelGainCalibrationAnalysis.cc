@@ -340,7 +340,6 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     tempname+="_";
     tempname+=pixelinfo.str();
     // setDQMDirectory(detid);
-   
 
     //bookkeeper_pixels_[detid][pixelinfo.str()] = bookDQMHistogram1D(detid,pixelinfo.str(),tempname,105*nallpoints,xvalsall[0],xvalsall[nallpoints-1]*1.05);
     bookkeeper_pixels_1D_[detid][pixelinfo.str()] = bookHistogram1D(detid,pixelinfo.str(),tempname,(xvalsall[nallpoints-1]-xvalsall[0])/binwidth+1,xvalsall[0]-binwidth/2.0,xvalsall[nallpoints-1]+binwidth/2.0 , currentDir );
@@ -364,6 +363,11 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     graph_->SetPointError(ipointtemp,0,yerrvals[ipointtemp]);
   }
   Int_t tempresult = graph_->Fit("func","FQ0N");
+  if (makehistopersistent) 
+    {
+      //std::cout << "swdebug: saving TGraph." << std::endl;
+      TGraphErrors *savedGraph = bookTGraphs(detid, "savedGraph", npoints, xvals, yvals, 0, yerrvals, GetPixelDirectory(detid)) ;
+    }
   slope=func_->GetParameter(1);
   slopeerror=func_->GetParError(1);
   intercept=func_->GetParameter(0);
@@ -462,6 +466,7 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     
     // and book the histo
     // fill the last value of the vcal array...   
+
 
     //bookkeeper_pixels_[detid][pixelinfo.str()] =  bookDQMHistogram1D(detid,pixelinfo.str(),tempname,105*nallpoints,xvalsall[0],xvalsall[nallpoints-1]*1.05);
     //TH1D* h = new TH1D("h","h",105*nallpoints,xvalsall[0],xvalsall[nallpoints-1]*1.05);

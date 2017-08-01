@@ -28,7 +28,9 @@
 #include "CondFormats/SiPixelObjects/interface/ElectronicIndex.h"
 #include "CondFormats/SiPixelObjects/interface/DetectorIndex.h"
 #include "CondFormats/SiPixelObjects/interface/LocalPixel.h"
+
 #include "TList.h"
+#include "TGraphErrors.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -208,7 +210,7 @@ SiPixelOfflineCalibAnalysisBase::translateDetIdToString(uint32_t detid)
    }
    if (detSubId == 2)  	//FPIX
    {
-     PixelEndcapName nameworker(detid,tt_,phase1_);
+     PixelEndcapName nameworker(detid,tt_,phase1_); //or detID(detid)
       output = nameworker.name();
    } else 		//BPIX
    {
@@ -248,6 +250,20 @@ SiPixelOfflineCalibAnalysisBase::translateDetIdToString(uint32_t detid)
 //   std::string hid = theHistogramIdWorker_->setHistoId(name,detid);
 //   return daqBE_->book2D(hid,title,maxcol,0,maxcol,maxrow,0,maxrow);
 // }
+
+TGraphErrors* SiPixelOfflineCalibAnalysisBase::bookTGraphs(uint32_t detid, std::string name, int points, double *x, double *y, double *xE, double *yE, std::string dir)  
+{
+  TGraphErrors * temp;
+  std::string hid = theHistogramIdWorker_->setHistoId(name,detid);
+  //return fs->make<TH1F>( hid.c_str()  , title.c_str(), nchX,  lowX, highX );
+
+  if (myTFileDirMap_.find(dir)==myTFileDirMap_.end()){
+    temp= fs->make<TGraphErrors>( points, x, y, xE, yE); 
+  }  
+  else  temp= myTFileDirMap_[dir].make<TGraphErrors>( points, x, y, xE, yE);
+  return temp;// TH1F * TEMP= new TH1F( hid.c_str()  , title.c_str(), nchX,  lowX, highX );
+  // return  new TH1F( hid.c_str()  , title.c_str(), nchX,  lowX, highX );
+}
 
 TH1F* SiPixelOfflineCalibAnalysisBase::bookHistogram1D(uint32_t detid, std::string name, std::string title, int nchX, double lowX, double highX, std::string dir)  
 {TH1F * temp;
@@ -308,7 +324,7 @@ SiPixelOfflineCalibAnalysisBase::setDQMDirectory(std::string dirName)
 bool
 SiPixelOfflineCalibAnalysisBase::setDQMDirectory(uint32_t detID)
 {
-  return folderMaker_->setModuleFolder( &myTFileDirMap_, detID,0 ); //Camilla da cambiare o da riscrivere quella vecchia
+  return folderMaker_->setModuleFolder( &myTFileDirMap_,detID,tt_,0,phase1_ ); //Camilla da cambiare o da riscrivere quella vecchia
 ;
 }
 // bool
