@@ -227,7 +227,7 @@ int MyDecode::error(int word, int & fedChannel, int fed, int & stat1, int & stat
 
   const unsigned int  tbmEventMask  = 0xff;    // tbm event num mask
   const unsigned int  tbmStatusMask = 0xff;   // TBM trailer info
-  const unsigned int  ErrBitsMask = 0x3F00;   // ErrBits  info
+  const unsigned int  ErrBitsMask = 0x1F00;   // ErrBits  info
   const unsigned int  ChnFifMask = 0x1f;   //channel mask for fifo error
   const unsigned int  Fif2NFMask = 0x40;   //mask for fifo2 NF
   const unsigned int  TrigNFMask = 0x80;   //mask for trigger fifo NF
@@ -235,11 +235,12 @@ int MyDecode::error(int word, int & fedChannel, int fed, int & stat1, int & stat
   const unsigned int  BlkNumMask = 0x700;   // 
   //const unsigned int  FsmErrMask = 0x600;   //pointer to FSM errors
 
-  const unsigned int  RocErrMask = 0x800;   // bit 11, NOR 
-  const unsigned int  AutoMask   = 0x400;   // bit 10, Autoreset 
-  const unsigned int  PKAMMask   = 0x200;   // bit 9, PKAM 
-  const unsigned int  overflowMask=0x100;  // bit 8, Overflow 
-  const unsigned int  noTrailerMask=0x300;  // bit 8&9 trailer missing  
+  // Error flags 
+  const unsigned int  RocErrMask   = 0x800;   // bit 11, NOR 
+  const unsigned int  AutoMask     = 0x400;   // bit 10, Autoreset 
+  const unsigned int  PKAMMask     = 0x200;   // bit 9, PKAM 
+  const unsigned int  overflowMask = 0x100;  // bit 8, Overflow 
+  const unsigned int  noTrailerMask= 0x300;  // bit 8&9 trailer missing  
 
 
   //TBM08 status masks
@@ -339,12 +340,13 @@ int MyDecode::error(int word, int & fedChannel, int fed, int & stat1, int & stat
   } else if( ((word&errorMask) == trailError)) {  // TRAILER 
     channel =  (word & channelMask) >>26;
     unsigned int tbm_status   =  (word & tbmStatusMask);
-    unsigned int bits8_11   =  (word & ErrBitsMask)>>8;
+    unsigned int bits8_11     =  (word & ErrBitsMask)>>8;
     
 
+    if(print) cout<<"Trailer Error- "<<"channel: "<<channel<<" TBM status:0x"
+		  <<hex<<tbm_status<<" ErrBits:0x"<<bits8_11<<dec<<" "; // <<endl;
+
     if(tbm_status!=0) {
-      if(print) cout<<" Trailer Error- "<<"channel: "<<channel<<" TBM status:0x"
-		    <<hex<<tbm_status<<" ErrBits:0x"<<bits8_11<<dec; // <<endl;
      status = -15;
      if(tbm_status)
      // implement the resync/reset 17
@@ -360,13 +362,13 @@ int MyDecode::error(int word, int & fedChannel, int fed, int & stat1, int & stat
 	 if(tbm_status & StackFullMask) cout << " Stack Full, ";
        }
      
-   }
-
+    }
+    
     if(word & RocErrMask) {
       if(print) cout<<"NOR Error, "; // <<endl;
-     status = -12;
+      status = -12;
     }
-
+    
     if( (word&noTrailerMask) ) { // bit 8 OR 9 on
       if( (word&noTrailerMask)==noTrailerMask ) { // both bits noTrailer
 	if(print) cout<<"noTrailer Error, "; // <<endl;
@@ -382,8 +384,6 @@ int MyDecode::error(int word, int & fedChannel, int fed, int & stat1, int & stat
 
     if(word &AutoMask) {
       if(print) cout<<"Autoreset, ";
-      //if(print) cout<<"Finite State Machine Error- "<<"channel: "<<channel
-      //			  <<" Error status:0x"<<hex<< ((word & FsmErrMask)>>9)<<dec<<" "; // <<endl;
       status = -13;
     }
 

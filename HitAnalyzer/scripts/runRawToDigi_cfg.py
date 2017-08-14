@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
-
-process = cms.Process("MyRawToDigi")
+from Configuration.StandardSequences.Eras import eras
+process = cms.Process("MyRawToDigi",eras.Run2_2017)
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 #process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
@@ -16,7 +16,9 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag.globaltag = 'GR_P_V56' # works for 2469763
 #process.GlobalTag.globaltag = 'GR_P_V56' # for 247607
 # 2017
-process.GlobalTag.globaltag = '92X_dataRun2_Express_v2' # 
+#process.GlobalTag.globaltag = '92X_dataRun2_Express_v2' # 90X
+#process.GlobalTag.globaltag = '92X_dataRun2_Express_v4' # 92X
+process.GlobalTag.globaltag = '92X_dataRun2_Express_v7' # cmssw927
 # 2016
 #process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v3' # for 266277
 #process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v8' # for 272
@@ -56,9 +58,24 @@ process.source = cms.Source("PoolSource",
  # fileNames =  cms.untracked.vstring('file:rawdata.root')
  fileNames =  cms.untracked.vstring(
 
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/633/00000/0085677A-AC7B-E711-B37E-02163E01A1C6.root",
+
+
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/233/00000/062F0768-5676-E711-B303-02163E014626.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/226/00000/02BBC9F3-2F76-E711-B29A-02163E019C08.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/155/00000/0052B596-8F75-E711-B704-02163E011C13.root",
+
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/122/00000/001BAA8B-BA74-E711-9564-02163E01A3CB.root",
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/122/00000/02F7A4F5-E074-E711-AAF3-02163E0133FC.root",
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/088/00000/003E6DDF-4974-E711-A723-02163E0133C2.root",
+
+
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/299/649/00000/FEF76138-1B70-E711-94DF-02163E011DDE.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/299/616/00000/001C4B9E-066F-E711-9ED0-02163E011EB4.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/299/594/00000/000BD417-7F6E-E711-8EB8-02163E019DC2.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/299/478/00000/0221EEC7-5C6D-E711-B39F-02163E014767.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/299/381/00000/02F106ED-456C-E711-9FC0-02163E011EB4.root",
+
 
 
 # high Vibias  250
@@ -106,15 +123,13 @@ process.source = cms.Source("PoolSource",
 
 # "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v1/000/294/929/00000/000E8FD5-1D40-E711-80C9-02163E01467E.root",
 
-
 # 273725
 #"/store/express/Run2016B/ExpressPhysics/FEVT/Express-v2/000/273/725/00000/00030CAB-6C1E-E611-90F9-02163E0137A8.root",
 # 273730
 #"/store/express/Run2016B/ExpressPhysics/FEVT/Express-v2/000/273/730/00000/00821BA0-381F-E611-BBC5-02163E0142C0.root",
 
-
-
 #    "file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_71_pre7/raw/raw2.root"
+
  )
 )
 
@@ -183,7 +198,8 @@ process.TFileService = cms.Service("TFileService",
 )
 
 #process.p = cms.Path(process.siPixelDigis)
-process.p = cms.Path(process.siPixelDigis*process.a)
+#process.p = cms.Path(process.siPixelDigis*process.a)
+process.p = cms.Path(process.hltfilter*process.siPixelDigis*process.a)
 #process.p = cms.Path(process.hltfilter*process.siPixelDigis*process.a*process.d)
 # disable data write to disk 
 #process.ep = cms.EndPath(process.out)

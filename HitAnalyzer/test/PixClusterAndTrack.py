@@ -15,8 +15,10 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 # to use no All 
 # 2017
 #process.GlobalTag.globaltag = '90X_dataRun2_Express_v4' # 
-process.GlobalTag.globaltag = '92X_dataRun2_Express_v2' # 
+#process.GlobalTag.globaltag = '92X_dataRun2_Express_v2' # 
 #process.GlobalTag.globaltag = '92X_dataRun2_Express_v4' # for 926
+process.GlobalTag.globaltag = '92X_dataRun2_Express_v7' # for 927
+
 # 2016
 #process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v3' # for 266277
 #process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v9' # >=8010
@@ -62,15 +64,18 @@ process.hltfilter = hlt.hltHighLevel.clone(
 
 process.MessageLogger = cms.Service("MessageLogger",
     debugModules = cms.untracked.vstring('siPixelClusters'),
-    destinations = cms.untracked.vstring('cout'),
-#    destinations = cms.untracked.vstring("log","cout"),
+#    destinations = cms.untracked.vstring('cout'),
+    destinations = cms.untracked.vstring("log","cout"),
+    log = cms.untracked.PSet(
+        threshold = cms.untracked.string('DEBUG')
+    ),
     cout = cms.untracked.PSet(
         threshold = cms.untracked.string('ERROR')
     )
-#    log = cms.untracked.PSet(
-#        threshold = cms.untracked.string('DEBUG')
-#    )
 )
+
+
+# ----------------------------------------------------------------------
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
@@ -78,6 +83,16 @@ process.maxEvents = cms.untracked.PSet(
 
 myfilelist = cms.untracked.vstring()
 myfilelist.extend([
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/226/00000/0218D0FB-2376-E711-B5B1-02163E014257.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/226/00000/02BBC9F3-2F76-E711-B29A-02163E019C08.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/226/00000/0417B4A8-3C76-E711-B636-02163E014736.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/226/00000/04C35059-2A76-E711-B472-02163E011B3C.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/226/00000/04E0C5F9-2E76-E711-AB1D-02163E019E27.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/226/00000/04E863BB-3576-E711-9544-02163E01241E.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/226/00000/04F849D3-3676-E711-9A4E-02163E0144EB.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/226/00000/064CFC23-2476-E711-B4EB-02163E0144E9.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/226/00000/06A17E58-2776-E711-8D3B-02163E019B1E.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/226/00000/06AA944F-1676-E711-B456-02163E014257.root",
 ])
 
 process.source = cms.Source("PoolSource",
@@ -88,6 +103,39 @@ process.source = cms.Source("PoolSource",
 # mc
 #"/store/relval/CMSSW_9_2_3/RelValNuGun/GEN-SIM-RECO/PUpmx25ns_92X_upgrade2017_realistic_v2_earlyBS2017-v1/10000/12995CE4-3851-E711-B4A6-0CC47A4D7602.root",
 # "/store/relval/CMSSW_9_2_3/RelValNuGun/GEN-SIM-DIGI-RAW-HLTDEBUG/PUpmx25ns_92X_upgrade2017_realistic_v2_earlyBS2017-v1/10000/1ECCAF11-2E51-E711-AE03-0025905B8594.root",
+
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/301/",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/300/742/00000/00538B29-837C-E711-BCD7-02163E011F61.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/633/00000/0085677A-AC7B-E711-B37E-02163E01A1C6.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/000EC621-B57A-E711-80D2-02163E0141D3.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/515/00000/0006E53E-F579-E711-B581-02163E0143DC.root",
+
+# timing scan
+# 6ns
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/389/00000/06209B1F-9078-E711-839D-02163E01A2C3.root",
+# 7ns
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/394/00000/0C0D2CC8-9578-E711-9843-02163E0144B7.root",
+# 5ns
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/393/00000/08945602-9578-E711-98F1-02163E01373E.root",
+# 4ns
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/392/00000/0287DB6E-9378-E711-87CC-02163E019E0F.root",
+# 8ns
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/395/00000/12656917-9778-E711-A794-02163E019B4F.root",
+# 3ns
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/391/00000/08AEC003-9278-E711-A009-02163E013664.root",
+# 9ns
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/396/00000/026D172C-9678-E711-9B9E-02163E012742.root",
+# 1ns
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/390/00000/0631B613-9378-E711-BE3F-02163E01A49E.root",
+# 11ns
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/397/00000/260C1141-9778-E711-8815-02163E013809.root",
+
+
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/364/00000/06FE411A-4D78-E711-A073-02163E01A6BD.root",
+
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/233/00000/062F0768-5676-E711-B303-02163E014626.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/226/00000/02BBC9F3-2F76-E711-B29A-02163E019C08.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/155/00000/0052B596-8F75-E711-B704-02163E011C13.root",
 
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/122/00000/001BAA8B-BA74-E711-9564-02163E01A3CB.root",
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/122/00000/02F7A4F5-E074-E711-AAF3-02163E0133FC.root",
@@ -328,10 +376,9 @@ process.c2 = cms.EDAnalyzer("PixClustersWithTracks",
 )
 
 
-#process.p = cms.Path(process.hltfilter*process.c2)
 #process.p = cms.Path(process.hltfilter*process.d)
 process.p = cms.Path(process.hltfilter*process.d*process.c*process.c1*process.c2)
+
 #process.p = cms.Path(process.d*process.b*process.c)  # for mc 
 #process.p = cms.Path(process.d) # for cosmics
-
 

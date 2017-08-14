@@ -120,6 +120,9 @@ public:
   virtual void beginJob();
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void endJob(); 
+  int moduleIndex(int ladder,int module); 
+  bool validIndex(int index, bool print); 
+  int rocId(int pixy,int pixx);  // 0-15, column, row
 
 private:
   // ----------member data ---------------------------
@@ -151,7 +154,7 @@ private:
   TH1F *hdetsPerLayF1,*hdetsPerLayF2,*hdetsPerLayF3;
   TH1F *hdetr, *hdetz, *hdetrF, *hdetzF;
   TH1F *hcolsB,  *hrowsB,  *hcolsF,  *hrowsF;
-  TH1F *hcols1big, *hrows1big, *heloss1bigx, *heloss1bigy,*hcols11;
+  TH1F *hcols1Many,*hcols1ManyCounts; // , *hrows1big, *heloss1bigx, *heloss1bigy,*hcols11;
   TH1F *hsimlinks, *hfract;
   TH1F *hblade1, *hblade2, *hblade3;
   
@@ -180,15 +183,18 @@ private:
   TH1F *hevent, *hlumi, *horbit, *hbx0, *hlumi0, *hlumi1,*hbx1,*hbx2,*hbx3,*hbx4,*hbx5,*hbx6;
   TH1F *hdets, *hdigis, *hdigis0, *hdigis1, *hdigis2,*hdigis3,*hdigis4,*hdigis5; 
 
+  TH1F *hDcolsCount;
   TProfile *hadc1ls,*hadc2ls,*hadc3ls,*hadc4ls,*hadc0ls; 
   TProfile *hadc1bx,*hadc2bx,*hadc3bx,*hadc4bx,*hadc0bx; 
-
 
 
 #endif
 
   edm::InputTag src_;  
   bool phase1_;
+  int countFullDcols;
+  int oneModule[416][160];
+  int dCols[120][16][26];
 
 };
 
@@ -229,6 +235,41 @@ PixDigisTest::~PixDigisTest() {
 
 //
 // member functions
+// decode a simplified ROC address
+int PixDigisTest::rocId(int col, int row) {
+  int rocRow = row/80;
+  int rocCol = col/52;
+  int rocId = rocCol + rocRow*8;
+  return rocId;
+ }
+//      int roc = rocId(int(pixy),int(pixx));  // 0-15, column, row
+
+
+// this is just to turn the L1 ladder&module into a 1D index 
+int PixDigisTest::moduleIndex(int ladder, int module) {
+  int index=-1;
+  if(module>0) index = module-1;
+  else         index = abs(module)-1+4;
+  if(ladder>0) index = index + (ladder-1)*10;
+  else         index = index + (abs(ladder)-1)*10 + 60;
+  return index;
+}
+//
+bool PixDigisTest::validIndex(int index, bool print = false) {
+  bool valid=true;
+  int module = index%10;
+  int ladder = index/10;
+  if(module<0 || module>7)  valid=false;
+  if(ladder<0 || ladder>11) valid=false;
+  if(print) {
+    module += 1;
+    ladder += 1;
+    if(module>4) module = -(module - 4);
+    if(ladder>6) ladder = -(ladder - 6);
+    cout<<index<<" module "<<(module)<<" ladder "<<(ladder)<<endl;
+  }
+  return valid;
+}
 //
 // ------------ method called at the begining   ------------
 void PixDigisTest::beginJob() {
@@ -236,6 +277,17 @@ void PixDigisTest::beginJob() {
    using namespace edm;
    cout << "Initialize PixDigisTest " <<endl;
    count0=count1=count2=count3=0;
+   countFullDcols=0;
+
+   for(int col=0;col<416;++col)
+     for(int row=0;row<160;++row)
+       oneModule[col][row]=0;
+
+   for(int ind=0;ind<120;++ind)
+     for(int roc=0;roc<16;++roc)
+       for(int dcol=0;dcol<26;++dcol)
+	 dCols[ind][roc][dcol]=0;
+
 
 #ifdef HISTOS
   edm::Service<TFileService> fs;
@@ -318,21 +370,21 @@ void PixDigisTest::beginJob() {
     hneloss2 = fs->make<TH1F>( "hneloss2", "Pix noise charge l2", 256, 0., 256.);
     hneloss3 = fs->make<TH1F>( "hneloss3", "Pix noise charge l3", 256, 0., 256.);
     hneloss4 = fs->make<TH1F>( "hneloss4", "Pix noise charge l4", 256, 0., 256.);
-    heloss1bigx = fs->make<TH1F>( "heloss1bigx", "L1 big-x pix", 256, 0., 256.);
-    heloss1bigy = fs->make<TH1F>( "heloss1bigy", "L1 big-y pix", 256, 0., 256.);
+    //heloss1bigx = fs->make<TH1F>( "heloss1bigx", "L1 big-x pix", 256, 0., 256.);
+    //heloss1bigy = fs->make<TH1F>( "heloss1bigy", "L1 big-y pix", 256, 0., 256.);
 
     hcols1 = fs->make<TH1F>( "hcols1", "Layer 1 cols", 500,-1.5,498.5);
     hcols2 = fs->make<TH1F>( "hcols2", "Layer 2 cols", 500,-1.5,498.5);
     hcols3 = fs->make<TH1F>( "hcols3", "Layer 3 cols", 500,-1.5,498.5);
     hcols4 = fs->make<TH1F>( "hcols4", "Layer 4 cols", 500,-1.5,498.5);
-    hcols1big = fs->make<TH1F>( "hcols1big", "Layer 1 big cols", 500,-1.5,498.5);
-    hcols11= fs->make<TH1F>( "hcols11", "Layer 1 cols testing", 500,-1.5,498.5);
+    hcols1Many = fs->make<TH1F>( "hcols1Many", "Layer 1 cols with many hits", 500,-1.5,498.5);
+    hcols1ManyCounts= fs->make<TH1F>( "hcols1ManyCounts","Layer 1: hits per dcol",200,-1.5,198.5);
  
     hrows1 = fs->make<TH1F>( "hrows1", "Layer 1 rows", 200,-1.5,198.5);
     hrows2 = fs->make<TH1F>( "hrows2", "Layer 2 rows", 200,-1.5,198.5);
     hrows3 = fs->make<TH1F>( "hrows3", "layer 3 rows", 200,-1.5,198.5);
     hrows4 = fs->make<TH1F>( "hrows4", "layer 4 rows", 200,-1.5,198.5);
-    hrows1big = fs->make<TH1F>( "hrows1big", "Layer 1 big rows", 200,-1.5,198.5);
+    //hrows1big = fs->make<TH1F>( "hrows1big", "Layer 1 big rows", 200,-1.5,198.5);
  
     hblade1 = fs->make<TH1F>( "hblade1", "blade num, disk1", 60, 0., 60.);
     hblade2 = fs->make<TH1F>( "hblade2", "blade num, disk2", 60, 0., 60.);
@@ -388,9 +440,9 @@ void PixDigisTest::beginJob() {
     hpixMap4 = fs->make<TH2F>("hpixMap4"," ",416,0.,416.,160,0.,160.);
     hpixMap4->SetOption("colz");
 
-    hpdetMaps1 = fs->make<TH2F>("hpdetMaps1","slected hits in l1",9,-4.5,4.5,13,-6.5,6.5);
+    hpdetMaps1 = fs->make<TH2F>("hpdetMaps1","hits in l1 with adc<0",9,-4.5,4.5,13,-6.5,6.5);
     hpdetMaps1->SetOption("colz");
-    hpdetMaps2 = fs->make<TH2F>("hpdetMaps2","slected hits in l1",9,-4.5,4.5,13,-6.5,6.5);
+    hpdetMaps2 = fs->make<TH2F>("hpdetMaps2","l1 with many hits per col",9,-4.5,4.5,13,-6.5,6.5);
     hpdetMaps2->SetOption("colz");
 
 
@@ -518,6 +570,8 @@ void PixDigisTest::beginJob() {
   hadc4bx = fs->make<TProfile>("hadc4bx","adc4 vs bx",4000,-0.5,3999.5,0.,255.);
   hadc0ls = fs->make<TProfile>("hadc0ls","adc0 vs ls",1000,0,1000,     0.,255.);
   hadc0bx = fs->make<TProfile>("hadc0bx","adc0 vs bx",4000,-0.5,3999.5,0.,255.);
+
+  hDcolsCount = fs->make<TH1F>( "hDcolsCount", "Counts per dcol ",400,0.,4000.);
 
 #endif
 
@@ -815,10 +869,17 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
     if(select) cout<<" run "<<run<<" event "<<event<<" bx "<<bx<<" ladder/module "<<ladder<<"/"<<module<<endl;
 
     unsigned int numberOfDigis = 0;
-    unsigned int numDigisInCol = 0;
-    int oldCol=-1;
+    //unsigned int numDigisInCol = 0;
+    //int oldCol=-1;
 
-    // Look at digis now
+    // Clear the module matrix
+    if(layer==1) {
+      for(int col=0;col<416;++col)
+	for(int row=0;row<160;++row)
+	  oneModule[col][row]=0;
+    }
+
+    // Look at digis in this module 
     edm::DetSet<PixelDigi>::const_iterator  di;
       for(di = DSViter->data.begin(); di != DSViter->data.end(); di++) {
 	//for(di = begin; di != end; di++) {
@@ -836,20 +897,33 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	if(PRINT || select) cout <<numberOfDigis<< " Col: " << col << " Row: " << row 
 		       << " ADC: " << adc <<" channel = "<<channel<<endl;
 	
-	if(col==oldCol) { // same column 
-	  numDigisInCol++;
-	} else {
-	  if( (layer==1) && (numDigisInCol>20)) {
-	    hpdetMaps2->Fill(float(module),float(ladder));
-	    hcols1big->Fill(float(oldCol));
-	    hcols11->Fill(float(oldCol),float(numDigisInCol));
-	    if(numDigisInCol>79) 
-	      cout<<" col with many hits "<<module<<" "<<ladder<<" "
-		  <<oldCol<<" "<<numDigisInCol<<endl;
-	  }
-	  numDigisInCol=1;
-	  oldCol=col;	  
+	
+	// Accumuate dcols, do only for L1
+	if(layer==1) {
+	  // fill the module 
+	  oneModule[col][row]++;
+	  int ind = moduleIndex(ladder,module);
+	  int roc = rocId(col,row);
+	  int dcol = (col%52)/2;
+	  dCols[ind][roc][dcol]++;
+	  //cout<<layer<<" "<<ladder<<" "<<module<<" "<<col<<" "<<row<<" "
+	  //  <<ind<<" "<<roc<<" "<<dcol<<" "<<dCols[ind][roc][dcol]<<endl;
 	}
+
+	// // Analyse dcols with many hits 
+	// if(col==oldCol) { // same column 
+	//   numDigisInCol++;
+	// } else {
+	//   if( (layer==1) && (numDigisInCol>20)) {
+	//     if(numDigisInCol>79) { 
+	//       cout<<" col with many hits "<<module<<" "<<ladder<<" "
+	// 	  <<oldCol<<" "<<numDigisInCol<<endl;
+	//       //countFullDcols++;
+	//     }
+	//   }
+	//   numDigisInCol=1;
+	//   oldCol=col;	  
+	// }
 
        if(col>415) cout<<" Error: column index too large "<<col<<" Barrel layer, ladder, module "
 		       <<layer<<" "<<ladder<<" "<<zindex<<endl;
@@ -1001,6 +1075,7 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 #endif
        
       } // end for digis in detunit
+
       //if(PRINT) 
       //cout<<" for det "<<detid<<" digis = "<<numberOfDigis<<endl;
 
@@ -1090,7 +1165,72 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	    hphiz4->Fill(detZ,detPhi);
 	    
 	  } // layer
+
+
+	  if(layer==1) {
+	    const int dcolThr = 54;
+	    // Analyse this module 
+	    for(int col=0;col<416;col+=2) {
+	      //cout<<col<<endl;
+	      int dcolCount=0;
+	      for(int row=0;row<80;++row) { 
+		if(oneModule[col][row]>0)   
+		  {dcolCount++;}
+		//{dcolCount++; cout<<col<<" "<<row<<" "<<oneModule[col][row]<<endl;}
+	      }
+	      for(int row=0;row<80;++row) {
+		if(oneModule[col+1][row]>0) 
+		  {dcolCount++;}
+		//{dcolCount++; cout<<(col+1)<<" "<<row<<" "<<oneModule[col+1][row]<<endl;}
+	      }
+	      hcols1ManyCounts->Fill(float(dcolCount));
+	      if(dcolCount>dcolThr) {
+		cout<<" full dcol (lower roc) "<<dcolCount<<" "
+		    <<col<<" "<<module<<" "<<ladder<<endl;
+		countFullDcols++;
+		hpdetMaps2->Fill(float(module),float(ladder));
+		hcols1Many->Fill(float(col));
+		
+		// for(int row=0;row<80;++row) 
+		//   if(oneModule[col][row]>0)   
+		//     {cout<<col<<" "<<row<<" "<<oneModule[col][row]<<endl;}
+		// for(int row=0;row<80;++row) 
+		//   if(oneModule[col+1][row]>0) 
+		//     {cout<<(col+1)<<" "<<row<<" "<<oneModule[col+1][row]<<endl;}
+		
+	      }
+	      dcolCount=0;
+	      for(int row=80;row<160;++row) 
+		if(oneModule[col][row]>0)   
+		  {dcolCount++;}
+	      //{dcolCount++; cout<<col<<" "<<row<<" "<<oneModule[col][row]<<endl;}
+	      for(int row=80;row<160;++row) 
+		if(oneModule[col+1][row]>0) 
+		  {dcolCount++;}
+	      //{dcolCount++; cout<<(col+1)<<" "<<row<<" "<<oneModule[col+1][row]<<endl;}
+	      hcols1ManyCounts->Fill(float(dcolCount));
+	      if(dcolCount>dcolThr) {
+		cout<<" full dcol (upper roc)"<<dcolCount<<" "
+		    <<col<<" "<<module<<" "<<ladder<<endl;
+		countFullDcols++;
+		hpdetMaps2->Fill(float(module),float(ladder));
+		hcols1Many->Fill(float(col));
+		
+		// for(int row=80;row<160;++row) 
+		//   if(oneModule[col][row]>0)   
+		//     {cout<<col<<" "<<row<<" "<<oneModule[col][row]<<endl;}
+		// for(int row=80;row<160;++row) 
+		//   if(oneModule[col+1][row]>0) 
+		//     {cout<<(col+1)<<" "<<row<<" "<<oneModule[col+1][row]<<endl;}
+		
+	      }
+	    }
+	  } // if layer 1
+
+
 	} // if bpix	
+	
+
       } // if valid
 #endif
 
@@ -1157,6 +1297,45 @@ void PixDigisTest::endJob(){
 	<<" digis per event "<<count2/count0<<endl;
   else 
     cout<<count0<<" "<<count1<<" "<<count2<<" "<<count3<<endl;
+
+  cout<<" Cols with many hits "<<countFullDcols<<endl;
+
+  if(1) {
+    int emptyROC=0, totalEmptyCols=0, rocsWithEmptyCols=0;
+    for(int ind=0;ind<120;++ind) {
+      if( !validIndex(ind) ) continue;
+      for(int roc=0;roc<16;++roc) {
+	int rocCount=0;
+	int emptyCols=0;
+	for(int dcol=0;dcol<26;++dcol) {
+	  int count = dCols[ind][roc][dcol];
+	  rocCount += count;
+	  hDcolsCount->Fill(float(count));
+	  if(count==0) {
+	    emptyCols++;
+	    //cout<<" empty dcol "<<dcol<<" "<<roc<<" "<<ind<<" "
+	    //	<<validIndex(ind,true)<<endl;
+	  } else if(count>2000) {
+	    cout<<" hot dcol "<<count<<" "<<dcol<<" "
+		<<roc<<" "<<ind<<endl;
+	    //} else {
+	    //cout<<" count "<<count<<" "<<dcol<<" "
+	    //	<<roc<<" "<<ind<<" "<<validIndex(ind,true)<<endl;
+	  }
+	} // dcol
+	if(rocCount==0) {emptyROC++;} //cout<<" empty roc "<<ind<<" "<<roc<<endl;
+	else {
+	  if(emptyCols>0) { 
+	    totalEmptyCols += emptyCols;
+	    rocsWithEmptyCols++;
+	    cout<<" empty cols in module (index)="<<ind<<" roc "<<roc<<" num "<<emptyCols<<endl;
+	  }
+	}
+      } // roc
+    } // module 
+    cout<<" empty ROCs "<<emptyROC<<" empty cols "<<totalEmptyCols
+	<<" rocs with empty cols"<<rocsWithEmptyCols<<endl;
+  }
 
   float norm = 1.;
   if(count3>0) {

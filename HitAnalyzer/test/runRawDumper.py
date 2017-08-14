@@ -46,7 +46,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 #process.MessageLogger.cerr.threshold = 'Debug'
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10000)
+    input = cms.untracked.int32(1000)
 )
 
 process.TFileService = cms.Service("TFileService",
@@ -61,9 +61,13 @@ process.source = cms.Source("PoolSource",
 # fileNames =  myfilelist
     fileNames = cms.untracked.vstring(                          
 # 2017
-#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/122/00000/001BAA8B-BA74-E711-9564-02163E01A3CB.root",
-"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/088/00000/003E6DDF-4974-E711-A723-02163E0133C2.root",
 
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/233/00000/062F0768-5676-E711-B303-02163E014626.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/226/00000/02BBC9F3-2F76-E711-B29A-02163E019C08.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/155/00000/0052B596-8F75-E711-B704-02163E011C13.root",
+
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/122/00000/001BAA8B-BA74-E711-9564-02163E01A3CB.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/088/00000/003E6DDF-4974-E711-A723-02163E0133C2.root",
 
 # "/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/299/479/00000/000AE42E-696D-E711-AC50-02163E0142C8.root",
 

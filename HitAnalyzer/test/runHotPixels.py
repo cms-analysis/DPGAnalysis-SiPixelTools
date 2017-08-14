@@ -9,8 +9,8 @@ process.hltfilter = hlt.hltHighLevel.clone(
 # Min-Bias
 #    HLTPaths = ['HLT_Physics_v*'],
 #    HLTPaths = ['HLT_L1Tech_BSC_minBias_threshold1_v*'],
-#    HLTPaths = ['HLT_Random_*'],
-    HLTPaths = ['HLT_ZeroBias_*'],
+    HLTPaths = ['HLT_Random_*'],
+#    HLTPaths = ['HLT_ZeroBias_*'],
 # Commissioning:
 #    HLTPaths = ['HLT_L1_Interbunch_BSC_v*'],
 #    HLTPaths = ['HLT_L1_PreCollisions_v*'],
@@ -56,8 +56,18 @@ process.TFileService = cms.Service("TFileService",
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring( 
 
+"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/04BBD43B-0876-E711-8C3E-02163E0119F7.root",
+"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/04CC776E-0376-E711-850D-02163E0141D5.root",
+"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/0624BE8A-0A76-E711-9D53-02163E011825.root",
+"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/086C8B4F-0676-E711-8081-02163E01A20D.root",
+"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/1C743D35-1676-E711-B5A3-02163E013412.root",
+"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/1EF32E71-0376-E711-B413-02163E011B72.root",
+"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/206382F8-0676-E711-B222-02163E011D78.root",
+"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/22A3A271-0376-E711-9918-02163E013734.root",
+"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/24C3FE4A-0676-E711-8961-02163E01A5FB.root",
+"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/288C0969-0676-E711-A54D-02163E01384A.root",
 
- "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v2/000/296/702/00000/FED4EA05-D64F-E711-82F9-02163E012A6B.root",
+# "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v2/000/296/702/00000/FED4EA05-D64F-E711-82F9-02163E012A6B.root",
 
 # "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v1/000/295/439/00000/426B4782-FC43-E711-9328-02163E011A76.root",
 # "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v1/000/295/439/00000/F853E939-FF43-E711-A59D-02163E013479.root",

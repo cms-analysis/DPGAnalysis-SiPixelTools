@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
-
-process = cms.Process("MyRawToClus")
+from Configuration.StandardSequences.Eras import eras
+process = cms.Process("MyRawToClus",eras.Run2_2017)
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 #process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
@@ -25,7 +25,8 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
 # to use no All 
 # 2017
-process.GlobalTag.globaltag = '92X_dataRun2_Express_v2' # 
+#process.GlobalTag.globaltag = '92X_dataRun2_Express_v2' # fpr 90W 
+process.GlobalTag.globaltag = '92X_dataRun2_Express_v7' # from CMSSW927
 # 2015
 #process.GlobalTag.globaltag = 'GR_E_V48'
 #process.GlobalTag.globaltag = 'GR_P_V56' # works for 2469763
@@ -66,10 +67,17 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1))
 process.source = cms.Source("PoolSource",
  fileNames =  cms.untracked.vstring(
 
-"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/122/00000/001BAA8B-BA74-E711-9564-02163E01A3CB.root",
+
+
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/633/00000/0085677A-AC7B-E711-B37E-02163E01A1C6.root",
+
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/233/00000/062F0768-5676-E711-B303-02163E014626.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/226/00000/02BBC9F3-2F76-E711-B29A-02163E019C08.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/155/00000/0052B596-8F75-E711-B704-02163E011C13.root",
+
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/122/00000/001BAA8B-BA74-E711-9564-02163E01A3CB.root",
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/122/00000/02F7A4F5-E074-E711-AAF3-02163E0133FC.root",
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/088/00000/003E6DDF-4974-E711-A723-02163E0133C2.root",
-
 
 
 # time 
@@ -169,8 +177,8 @@ process.out = cms.OutputModule("PoolOutputModule",
 # pixel local reco (RecHits) needs the GenError object,
 # not yet in GT, add here:
 # DB stuff 
-useLocalDBError = False
-if useLocalDBError :
+useLocalDB = False
+if useLocalDB :
     process.DBReaderFrontier = cms.ESSource("PoolDBESSource",
      DBParameters = cms.PSet(
          messageLevel = cms.untracked.int32(0),
@@ -179,12 +187,20 @@ if useLocalDBError :
      toGet = cms.VPSet(
        cms.PSet(
         record = cms.string('SiPixelGainCalibrationOfflineRcd'),
-        #tag = cms.string('SiPixelGainCalibration_2017_v2_offline')
-        tag = cms.string('SiPixelGainCalibration_phase1_ideal_v2')
+#        record = cms.string('SiPixelGainCalibrationRcd'),
+#        tag = cms.string('SiPixelGainCalibration_2017_v4')
+        tag = cms.string('SiPixelGainCalibration_2017_v2_offline')
+#        tag = cms.string('SiPixelGainCalibration_2017_v3_offline')
+#        tag = cms.string('SiPixelGainCalibration_2017_v4_offline')
+#        tag = cms.string('SiPixelGainCalibration_2017_v4_1337_offline')
+        #tag = cms.string('SiPixelGainCalibration_phase1_ideal_v2')
  	),
        ),
-#     connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_2017_v2_offline.db')
-     connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_phase1_ideal_v2.db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v4_full.db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v4_1337_offline.db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v4_offline.db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v3_offline.db')
+     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v2_offline.db')
 #     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
 #     connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
     ) # end process
@@ -196,16 +212,19 @@ process.siPixelDigis.InputLabel = 'rawDataCollector'
 process.siPixelDigis.IncludeErrors = True
 process.siPixelDigis.Timing = False 
 #process.siPixelDigis.UsePilotBlade = True 
-process.siPixelDigis.UsePhase1 = True 
+process.siPixelDigis.UsePhase1 = True
 
 # digis from raw (this is the default)
 #process.siPixelClustersPreSplitting.src = 'siPixelDigis'
 # modify clusterie parameters
-process.siPixelClustersPreSplitting.VCaltoElectronGain = 47
-process.siPixelClustersPreSplitting.VCaltoElectronOffset = -60
+#process.siPixelClustersPreSplitting.VCaltoElectronGain = 47  # default
+#process.siPixelClustersPreSplitting.VCaltoElectronOffset = -60
+#process.siPixelClustersPreSplitting.VCaltoElectronGain_L1 = 47  # default
+#process.siPixelClustersPreSplitting.VCaltoElectronOffset_L1 = -60
 process.siPixelClustersPreSplitting.SeedThreshold = 1000
 process.siPixelClustersPreSplitting.ChannelThreshold = 2 #must be bigger than 1
-process.siPixelClustersPreSplitting.ClusterThreshold = 1.0
+process.siPixelClustersPreSplitting.ClusterThreshold = 1 # integer?
+process.siPixelClustersPreSplitting.ClusterThreshold_L1 = 1 # integer?
 
 
 process.a = cms.EDAnalyzer("PixDigisTest",
