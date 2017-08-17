@@ -205,9 +205,11 @@ struct Histos{
   TH1D     *h421_mod1, *h421_mod2, *h421_mod3, *h421_mod4, *h421_mod5, *h421_mod6, *h421_mod7, *h421_mod8;
   TH1D     *h420_x_plus,*h420_x_minus, *h421_x_plus,*h421_x_minus;
   TH1D     *h420_out_xplus_zplus,*h420_out_xminus_zplus, *h420_out_xplus_zminus,*h420_out_xminus_zminus;
+  TH1D     *h420_out,*h420_in ;
   TH1D     *h420_in_xplus_zplus,*h420_in_xminus_zplus, *h420_in_xplus_zminus,*h420_in_xminus_zminus;
   TH1D     *h421_out_xplus_zplus,*h421_out_xminus_zplus, *h421_out_xplus_zminus,*h421_out_xminus_zminus;
   TH1D     *h421_in_xplus_zplus,*h421_in_xminus_zplus, *h421_in_xplus_zminus,*h421_in_xminus_zminus;
+  TH1D     *h421_out,*h421_in;
   TH1D     *h_cluster_prob;
   TH1D     *h420_cluster_prob_0_010,    *h420_cluster_prob_010_075,    *h420_cluster_prob_075_090, *h420_cluster_prob_090_101;
   TH1D     *h421_cluster_prob_0_010,    *h421_cluster_prob_010_075,    *h421_cluster_prob_075_090, *h421_cluster_prob_090_101;
@@ -272,7 +274,7 @@ struct Histos{
   TH1D     *hf480, *hf481, *hf482,                      *hf486, *hf487, *hf488, *hf489;
   TProfile                      *hf483, *hf484, *hf485;
   TH1D     *hf490, *hf491, *hf492, *hf493, *hf494, *hf495, *hf496, *hf497, *hf498, *hf499;
-TH1D     *hg400, *hg401, *hg402, *hg403, *hg404, *hg405, *hg406, *hg407, *hg408;
+  TH1D     *hg400, *hg401, *hg402, *hg403, *hg404, *hg405, *hg406, *hg407, *hg408;
   TProfile                                                                *hg409;
   TH1D     *hg410, *hg411;
   TProfile               *hg412, *hg412_out_zplus, *hg412_out_zminus, *hg412_in_zplus, *hg412_in_zminus, *hg413, *hg414, *hg415, *hg416, *hg417, *hg418, *hg419;
@@ -285,7 +287,11 @@ TH1D     *hg400, *hg401, *hg402, *hg403, *hg404, *hg405, *hg406, *hg407, *hg408;
   TH1D     *hg421_out_xplus_zplus,*hg421_out_xminus_zplus, *hg421_out_xplus_zminus,*hg421_out_xminus_zminus;
   TH1D     *hg421_in_xplus_zplus,*hg421_in_xminus_zplus, *hg421_in_xplus_zminus,*hg421_in_xminus_zminus;
  
- TH1D     *hg420_cluster_prob_0_010,    *hg420_cluster_prob_010_075,    *hg420_cluster_prob_075_090, *hg420_cluster_prob_090_101;
+  TH1D     *hg420_out,*hg420_in ;
+  TH1D     *hg421_out,*hg421_in ;
+  
+  
+  TH1D     *hg420_cluster_prob_0_010,    *hg420_cluster_prob_010_075,    *hg420_cluster_prob_075_090, *hg420_cluster_prob_090_101;
   TH1D     *hg421_cluster_prob_0_010,    *hg421_cluster_prob_010_075,    *hg421_cluster_prob_075_090, *hg421_cluster_prob_090_101;
   TH1D     *hg420_cluster_prob_0_010_etaM0p8,    *hg420_cluster_prob_010_075_etaM0p8,    *hg420_cluster_prob_075_090_etaM0p8, *hg420_cluster_prob_090_101_etaM0p8;
   TH1D     *hg421_cluster_prob_0_010_etaM0p8,    *hg421_cluster_prob_010_075_etaM0p8,    *hg421_cluster_prob_075_090_etaM0p8, *hg421_cluster_prob_090_101_etaM0p8;
@@ -318,6 +324,9 @@ TH1D     *hg400, *hg401, *hg402, *hg403, *hg404, *hg405, *hg406, *hg407, *hg408;
   TH1D     *h520, *h521;
   TH1D *h520_out_zplus, *h520_out_zminus, *h520_in_zplus, *h520_in_zminus, *h521_out_zplus, *h521_out_zminus, *h521_in_zplus, *h521_in_zminus;
   TH1D     *h520_1, *h520_2, *h520_3, *h520_4, *h520_5;
+  TH1D *h520_out,*h520_in;
+  TH1D *h521_out,*h521_in;
+
   TProfile               *h522, *h523, *h524, *h525, *h526, *h527, *h528, *h529;
   TH1D     *h530, *h531, *h532,                      *h536, *h537, *h538, *h539;
   TProfile                      *h533, *h534, *h535;
@@ -420,6 +429,11 @@ TH1D     *hg400, *hg401, *hg402, *hg403, *hg404, *hg405, *hg406, *hg407, *hg408;
   TH1D     *g510, *g511;
   TProfile               *g512, *g512_out_zplus, *g512_out_zminus, *g512_in_zplus, *g512_in_zminus, *g513, *g514, *g515, *g516, *g517, *g518, *g519;
   TH1D     *g520, *g520_out_zplus, *g520_out_zminus, *g520_in_zplus, *g520_in_zminus, *g521, *g521_out_zplus, *g521_out_zminus, *g521_in_zplus, *g521_in_zminus;
+
+  TH1D     *g520_out,*g520_in ;
+  TH1D     *g521_out,*g521_in ;
+  
+
   TH1D     *g520_1, *g520_2, *g520_3, *g520_4, *g520_5;
   TProfile               *g522, *g523, *g524, *g525, *g526, *g527, *g528, *g529;
   TH1D     *g530, *g531, *g532,                      *g536, *g537, *g538, *g539;
@@ -1129,7 +1143,12 @@ void Histos::init(TFileDirectory* fs)
   h421_in_zplus = fs->make<TH1D>( "h421_in_zplus", "PXB2 residuals #Deltaz, p_{t} > 12, inward-facing modules, z+;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
   h421_in_zminus = fs->make<TH1D>( "h421_in_zminus", "PXB2 residuals #Deltaz, p_{t} > 12, inward-facing modules, z-;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
   h421 = fs->make<TH1D>( "h421", "PXB2 residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
- 
+
+  h420_out = fs->make<TH1D>( "h420_out", "PXB2 residuals #Deltax, p_{t} > 12, outward-facing modules;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  h420_in = fs->make<TH1D>( "h420_in", "PXB2 residuals #Deltax, p_{t} > 12, in-facing modules;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  h421_out = fs->make<TH1D>( "h421_out", "PXB2 residuals #Deltaz, p_{t} > 12, outward-facing modules;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+  h421_in = fs->make<TH1D>( "h421_in", "PXB2 residuals #Deltaz, p_{t} > 12, inward-facing modules;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+
   h420_x_plus = fs->make<TH1D>( "h420_x_plus", "PXB2 residuals #Deltax, p_{t} > 12, local x>0 ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h420_x_minus = fs->make<TH1D>( "h420_x_minus", "PXB2 residuals #Deltax, p_{t} > 12, local x<0 ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h421_x_plus = fs->make<TH1D>( "h421_x_plus", "PXB2 residuals #Deltaz, p_{t} > 12, local x>0 ;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
@@ -1611,6 +1630,13 @@ void Histos::init(TFileDirectory* fs)
   hg421_x_plus = fs->make<TH1D>( "hg421_x_plus", "PXB3 residuals #Deltaz, p_{t} > 12, local x>0 ;PXB3 #Deltaz [#mum];hits", 100, -300, 300 );
   hg421_x_minus = fs->make<TH1D>( "hg421_x_minus", "PXB3 residuals #Deltaz, p_{t} > 12, local x<0 ;PXB3 #Deltaz [#mum];hits", 100, -300, 300 );
 
+  hg420_out = fs->make<TH1D>( "hg420_out", "PXB3 residuals #Deltax, p_{t} > 12, outward-facing modules;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+  hg420_in = fs->make<TH1D>( "hg420_in", "PXB3 residuals #Deltax, p_{t} > 12, in-facing modules;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+  hg421_out = fs->make<TH1D>( "hg421_out", "PXB3 residuals #Deltaz, p_{t} > 12, outward-facing modules;PXB3 #Deltaz [#mum];hits", 300, -300, 300 );
+  hg421_in = fs->make<TH1D>( "hg421_in", "PXB3 residuals #Deltaz, p_{t} > 12, inward-facing modules;PXB3 #Deltaz [#mum];hits", 300, -300, 300 );
+
+
+
   hg420_out_xplus_zplus = fs->make<TH1D>( "hg420_out_xplus_zplus", "PXB3 residuals #Deltax, p_{t} > 12, local x>0 z-plus out facing modules ;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
   hg420_out_xminus_zplus = fs->make<TH1D>( "hg420_out_xminus_zplus", "PXB3 residuals #Deltax, p_{t} > 12, local x<0 z-plus out facing modules ;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
   hg420_out_xplus_zminus = fs->make<TH1D>( "hg420_out_xplus_zminus", "PXB3 residuals #Deltax, p_{t} > 12, local x>0 z-minus out facing modules ;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
@@ -1845,6 +1871,11 @@ void Histos::init(TFileDirectory* fs)
   h520_3 = fs->make<TH1D>( "h520_3", "PXB1 residuals #Deltax, p_{t} > 12, lever 3;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
   h520_4 = fs->make<TH1D>( "h520_4", "PXB1 residuals #Deltax, p_{t} > 12, lever 4;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
   h520_5 = fs->make<TH1D>( "h520_5", "PXB1 residuals #Deltax, p_{t} > 12, lever 5;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
+ 
+  h520_out = fs->make<TH1D>( "h520_out", "PXB1 residuals #Deltax, p_{t} > 12, outward-facing modules;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
+  h520_in = fs->make<TH1D>( "h520_in", "PXB1 residuals #Deltax, p_{t} > 12, in-facing modules;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
+  h521_out = fs->make<TH1D>( "h521_out", "PXB1 residuals #Deltaz, p_{t} > 12, outward-facing modules;PXB1 #Deltaz [#mum];hits", 300, -300, 300 );
+  h521_in = fs->make<TH1D>( "h521_in", "PXB1 residuals #Deltaz, p_{t} > 12, inward-facing modules;PXB1 #Deltaz [#mum];hits", 300, -300, 300 );
 
   // width profiles:
 
@@ -2354,6 +2385,11 @@ void Histos::init(TFileDirectory* fs)
   g520_3 = fs->make<TH1D>( "g520_3", "PXB4 residuals #Deltax, p_{t} > 12, lever 3;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
   g520_4 = fs->make<TH1D>( "g520_4", "PXB4 residuals #Deltax, p_{t} > 12, lever 4;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
   g520_5 = fs->make<TH1D>( "g520_5", "PXB4 residuals #Deltax, p_{t} > 12, lever 5;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+
+  g520_out = fs->make<TH1D>( "g520_out", "PXB4 residuals #Deltax, p_{t} > 12, outward-facing modules;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+  g520_in = fs->make<TH1D>( "g520_in", "PXB4 residuals #Deltax, p_{t} > 12, in-facing modules;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+  g521_out = fs->make<TH1D>( "g521_out", "PXB4 residuals #Deltaz, p_{t} > 12, outward-facing modules;PXB4 #Deltaz [#mum];hits", 300, -300, 300 );
+  g521_in = fs->make<TH1D>( "g521_in", "PXB4 residuals #Deltaz, p_{t} > 12, inward-facing modules;PXB4 #Deltaz [#mum];hits", 300, -300, 300 );
 
   // width profiles:
 
@@ -6434,6 +6470,17 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    else if(bb/aa >= 1.57 && bb/aa < 1.80) g520_4->Fill(dca4*1E4);
 	    else if(bb/aa >= 1.80 && bb/aa < 2.00) g520_5->Fill(dca4*1E4);
 
+	    if( abs( phi4 - phiN4 ) < pihalf ) {
+	      g520_out->Fill( dca4*1E4 );
+	      g521_out->Fill( dz4*1E4 );
+	    }
+	    else{
+	      g520_in->Fill( dca4*1E4 );
+	      g521_in->Fill( dz4*1E4 );
+	    }
+
+
+
 	    if( abs( phi4 - phiN4 ) < pihalf ) // outward facing module
 	      if(zPXB4 > 0){
 		g520_out_zplus->Fill(dca4*1E4);
@@ -6825,6 +6872,18 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	 
 	
       	    hg421->Fill( dz3*1E4 );
+
+
+	    if( abs( phi3 - phiN3 ) < pihalf ) {
+	      hg420_out->Fill( dca3*1E4 );
+	      hg421_out->Fill( dz3*1E4 );
+	    }
+	    else{
+	      hg420_in->Fill( dca3*1E4 );
+	      hg421_in->Fill( dz3*1E4 );
+	    }
+
+
 
       	    // Add errors and pulls
       	    // h077->Fill( ePXB3*1E4 );
@@ -7901,14 +7960,30 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
           else if(bb/aa >= 0.015 && bb/aa < 0.065) h420_2->Fill(dca2*1E4);
           else h420_3->Fill(dca2*1E4);
 
+
+	  if( abs( phi2 - phiN2 ) < pihalf ) {
+	    h420_out->Fill( dca2*1E4 );
+	    h421_out->Fill( dz2*1E4 );
+	  }
+	  else{
+	    h420_in->Fill( dca2*1E4 );
+	    h421_in->Fill( dz2*1E4 );
+
+	  }
+
+
+
 	  //Flipped/non-flipped
 	  if( abs( phi2 - phiN2 ) < pihalf ) // outward facing module
+	    
             if(zPXB2 > 0){
 	      h420_out_zplus->Fill( dca2*1E4 );
               h421_out_zplus->Fill( dz2*1E4 );}
 	    else{
 	      h420_out_zminus->Fill( dca2*1E4 );
 	      h421_out_zminus->Fill( dz2*1E4 );}
+	      
+	     
 	  else
             if(zPXB2 > 0){
 	      h420_in_zplus->Fill( dca2*1E4 );
@@ -8069,7 +8144,9 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	// => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
 	// point resolution = 1/sqrt(3/2) * triplet middle residual width
 	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
-
+	//For the properties of the folded normal distribution with mean 0.
+	////https://en.wikipedia.org/wiki/Folded_normal_distribution
+	
 	if( pt > 4 ) {
 
 	  h422->Fill( f2*wt, abs(dca2)*1E4 );
@@ -8718,6 +8795,17 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	  h520->Fill( dca1*1E4 );
 	  h521->Fill( dz1*1E4 );
+
+	  if( abs( phi1 - phiN1 ) < pihalf ) {
+	    h520_out->Fill( dca1*1E4 );
+	    h521_out->Fill( dz1*1E4 );
+	    }
+	    else{
+	      h520_in->Fill( dca1*1E4 );
+	      h521_in->Fill( dz1*1E4 );
+	    }
+
+
 	  if( abs( phi1 - phiN1 ) < pihalf ) // outward facing module
 	    if(zPXB1 > 0){
 	      h520_out_zplus->Fill( dca1*1E4 );  
