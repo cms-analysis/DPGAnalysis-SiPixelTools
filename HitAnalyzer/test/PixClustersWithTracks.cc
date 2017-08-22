@@ -2504,12 +2504,9 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
     hclusPerLay3->Fill(float(numOfClustersPerLay3));
     hclusPerLay4->Fill(float(numOfClustersPerLay4));
     
-    hclusPerDisk3->Fill(float(numOfClustersPerDisk1));
-    hclusPerDisk2->Fill(float(numOfClustersPerDisk2));
-    hclusPerDisk1->Fill(float(numOfClustersPerDisk3));
-    hclusPerDisk1->Fill(float(numOfClustersPerDisk4));
-    hclusPerDisk2->Fill(float(numOfClustersPerDisk5));
-    hclusPerDisk3->Fill(float(numOfClustersPerDisk6));
+    hclusPerDisk1->Fill(float(numOfClustersPerDisk3+numOfClustersPerDisk4));
+    hclusPerDisk2->Fill(float(numOfClustersPerDisk2+numOfClustersPerDisk5));
+    hclusPerDisk3->Fill(float(numOfClustersPerDisk1+numOfClustersPerDisk6));
 
     hclusBpix->Fill(float(numberOfClusters));
     hpixBpix->Fill(float(numberOfPixels));

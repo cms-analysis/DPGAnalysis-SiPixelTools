@@ -57,9 +57,9 @@ namespace {
   int fed0 = -1, chan0 = -1, roc0 = -1, dcol0 = -1, pix0 =-1, count0=-1;
   int countDecodeErrors1=0, countDecodeErrors2=0;
 #ifdef PHASE1
-  const int n_of_FEDs = 104;
+  const int n_of_FEDs = 139;
   const int n_of_Channels = 48;
-  const int fedIdBpixMax = 75;
+  const int fedIdBpixMax = 93;
   const bool phase1 = true;
 #else
   const int n_of_FEDs = 41;
@@ -714,11 +714,14 @@ void SiPixelRawDump::endJob() {
   for(int i = 0; i < n_of_FEDs; ++i) cout<< sumFedPixels[i]<<" ";
   cout<<endl;
 
-  cout<<" Total number of errors "<<countTotErrors<<" print threshold "<< int(countEvents*printThreshold) << " total errors per fed channel"<<endl;
+  int errorThreshold = int(countEvents*printThreshold);
+  if(errorThreshold<10) errorThreshold=10;
+
+  cout<<" Total number of errors "<<countTotErrors<<" print threshold "<< errorThreshold << " total errors per fed channel"<<endl;
   cout<<" FED errors "<<endl<<"Fed Channel Tot-Errors ENE-Errors Time-Errors NOR-Errors"<<endl;
 
   for(int i = 0; i < n_of_FEDs; ++i) {
-    for(int j=0;j<n_of_Channels;++j) if( (fedErrors[i][j]) > int(countEvents*printThreshold) || (fedErrorsENE[i][j] > 0) ) {
+    for(int j=0;j<n_of_Channels;++j) if( (fedErrors[i][j]) > errorThreshold || (fedErrorsENE[i][j] > 0) ) {
 	cout<<" "<<(i+fedId0)<<"  -  "<<(j+1)<<" -  "<<fedErrors[i][j]<<" - "<<fedErrorsENE[i][j]<<" -  "<<fedErrorsTime[i][j]<<" - "<<fedErrorsOver[i][j]<<endl;
     }
   }
@@ -857,7 +860,7 @@ void SiPixelRawDump::beginJob() {
   hfed2d = fs->make<TH2F>( "hfed2d", "error type versus fed#", n_of_FEDs,-0.5,static_cast<float>(n_of_FEDs) - 0.5,
 			   21, -0.5, 20.5); // ALL
 
-  hsize2d = fs->make<TH2F>( "hsize2d", "size vs fed",n_of_FEDs,-0.5,static_cast<float>(n_of_FEDs) - 0.5, 50,0,500); // ALL
+  hsize2d = fs->make<TH2F>( "hsize2d", "size vs fed",n_of_FEDs,-0.5,static_cast<float>(n_of_FEDs) - 0.5, 100,0,1000); // ALL
   hsizep  = fs->make<TProfile>( "hsizep", "size vs fed",n_of_FEDs,-0.5,static_cast<float>(n_of_FEDs) - 0.5,0,100000); // ALL
   //hsize2dls = fs->make<TH2F>( "hsize2dls", "size vs lumi",100,0,1000, 50,0.,500.); // ALL
 
@@ -1150,7 +1153,7 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
   ev.getByToken(rawData , buffers);  // the new bytoken 
 
 #ifdef PHASE1
-  std::pair<int,int> fedIds(1200,1303); // phase 1
+  std::pair<int,int> fedIds(1200,1338); // phase 1
   fedId0=1200;
 #else // phase0
   std::pair<int,int> fedIds(FEDNumbering::MINSiPixelFEDID, FEDNumbering::MAXSiPixelFEDID); //0
@@ -1197,19 +1200,21 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
     //cout<<" size "<<nWords<<endl;
 
     sumFedSize += float(nWords);    
-    if(fedId<32) aveFedSize += double(2.*nWords);
 
     hsize->Fill(float(2*nWords)); // fed buffer size in words (32bit)
     hsize0->Fill(float(2*nWords)); // fed buffer size in words (32bit)
-    if(fedId<32) hsize1->Fill(float(2*nWords)); // bpix fed buffer size in words (32bit)
-    else hsize2->Fill(float(2*nWords)); // fpix fed buffer size in words (32bit)
+    if((fedId-fedId0)<fedIdBpixMax) {
+      hsize1->Fill(float(2*nWords)); // bpix fed buffer size in words (32bit)
+      aveFedSize += double(2.*nWords);
+    } else hsize2->Fill(float(2*nWords)); // fpix fed buffer size in words (32bit)
 
 #ifdef IND_FEDS
     hsizeFeds[fedId-fedId0]->Fill(float(2*nWords)); // size, includes errors and dummy words
 #endif
     hsize2d->Fill(float(fedId-fedId0),float(2*nWords));  // 2d 
     hsizep->Fill(float(fedId-fedId0),float(2*nWords)); // profile 
-    if(fedId<fedIdBpixMax) hsizels->Fill(float(lumiBlock),float(2*nWords)); // bpix versu sls
+    if((fedId-fedId0)<fedIdBpixMax) 
+      hsizels->Fill(float(lumiBlock),float(2*nWords)); // bpix versu sls
 
     // check headers
     const Word64* header = reinterpret_cast<const Word64* >(rawData.data()); 
@@ -1470,21 +1475,24 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
     hpixels->Fill(float(countPixelsInFed));
     hpixels0->Fill(float(countPixelsInFed));
     if(countPixelsInFed>0) hpixels1->Fill(float(countPixelsInFed));
-    if(countPixelsInFed>0 && fedId<fedIdBpixMax)  hpixels2->Fill(float(countPixelsInFed));
-    if(countPixelsInFed>0 && fedId>=fedIdBpixMax) hpixels3->Fill(float(countPixelsInFed));
+    if(countPixelsInFed>0 && (fedId-fedId0) <fedIdBpixMax)  {
+      hpixels2->Fill(float(countPixelsInFed));
+      hpixels3->Fill(float(countPixelsInFed));
+    }
     herrors->Fill(float(countErrorsInFed));
 
     for(int i=0;i<n_of_Channels;++i) { 
       hfedchannelsize->Fill( float(fedId-fedId0), float(i+1), float(fedchannelsize[i]) );
-      if(fedId<fedIdBpixMax) {
-	hfedchannelsizeb->Fill( float(fedchannelsize[i]) );
-	int layer = MyDecode::checkLayerLink(fedId, i); // get bpix layer 
-	if(layer>10) layer = layer-10; // ignore 1/2 modules 
-	if(layer==3)      hfedchannelsizeb3->Fill( float(fedchannelsize[i]) );  // layer 3
-	else if(layer==2) hfedchannelsizeb2->Fill( float(fedchannelsize[i]) );  // layer 2
-	else if(layer==1) hfedchannelsizeb1->Fill( float(fedchannelsize[i]) );  // layer 1
-	else cout<<" Cannot be "<<layer<<" "<<fedId<<" "<<i<<endl;
-      } else         hfedchannelsizef->Fill( float(fedchannelsize[i]) );  // fpix
+      if((fedId-fedId0)<fedIdBpixMax) hfedchannelsizeb->Fill( float(fedchannelsize[i]) );
+      // 	int layer = MyDecode::checkLayerLink(fedId, i); // get bpix layer 
+      // 	if(layer>10) layer = layer-10; // ignore 1/2 modules 
+      // 	if(layer==3)      hfedchannelsizeb3->Fill( float(fedchannelsize[i]) );  // layer 3
+      // 	else if(layer==2) hfedchannelsizeb2->Fill( float(fedchannelsize[i]) );  // layer 2
+      // 	else if(layer==1) hfedchannelsizeb1->Fill( float(fedchannelsize[i]) );  // layer 1
+      // 	else cout<<" Cannot be "<<layer<<" "<<fedId<<" "<<i<<endl;
+      else  hfedchannelsizef->Fill( float(fedchannelsize[i]) );  // fpi
+      
+    
     }
     //    if(fedId == fedIds.first || countPixelsInFed>0 || countErrorsInFed>0 )  {
     //       eventId = MyDecode::header(*header, true);

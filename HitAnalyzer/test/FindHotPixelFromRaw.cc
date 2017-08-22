@@ -46,7 +46,7 @@ namespace {
   const bool printData    = false;
   const bool printHeaders = false;
   int count0=0, count1=0, count2=0, count3=0;
-  const int FEDs=94;
+  const int FEDs=139;
   const int fedId0=1200;
   const bool findHot=true;
 }
@@ -423,7 +423,7 @@ private:
 };
 
 int HotPixels::code(int channel, int roc, int dcol, int pix) {
-  // pix 0 - 182, dcol 0 - 26 , roc 0 -15, chan 1-36
+  // pix 0 - 182, dcol 0 - 26 , roc 0-7, chan 1- 48
   int index = pix + 1000 * dcol + 100000 * roc + 10000000 * channel;
   return index;
 }
@@ -773,6 +773,7 @@ private:
   edm::EDGetTokenT<FEDRawDataCollection> rawData;
 
   int countEvents, countAllEvents;
+  int countTest;
   float sumPixels, sumFedPixels[FEDs];
   HotPixels hotPixels[FEDs];
   double fraction_;
@@ -817,11 +818,13 @@ void FindHotPixelFromRaw::endJob() {
     hotPixels[i].printROCs(i+fedId0,cutROC);
   }
 
+  cout<<"test counter "<<countTest<<endl;
 }
 
 void FindHotPixelFromRaw::beginJob() {
   countEvents=0;
   countAllEvents=0;
+  countTest=0;
   sumPixels=0.;
   for(int i=0;i<FEDs;++i) sumFedPixels[i]=0;
   for(int i=0;i<48;++i) 
@@ -1027,6 +1030,8 @@ void FindHotPixelFromRaw::analyze(const  edm::Event& ev, const edm::EventSetup& 
     LogDebug("FindHotPixelFromRaw")<< " GET DATA FOR FED: " <<  fedId ;
     if(printHeaders) cout<<" For FED = "<<fedId<<endl;
 
+    if( (fedId-fedId0)>FEDs ) {cout<<" skip fed, id too big "<<fedId<<endl; continue;}
+
      PixelDataFormatter::Errors errors;
     
     //get event data for this fed
@@ -1060,6 +1065,7 @@ void FindHotPixelFromRaw::analyze(const  edm::Event& ev, const edm::EventSetup& 
       if(status>0) {
 	countPixels++;
 	countPixelsInFed++;
+	if(fedId==1248 && channel==9 && roc==2) countTest++;
         if(findHot) hotPixels[fedId-fedId0].update(channel,roc,dcol,pix);
 	else        analyzeHits(fedId,channel,layer,roc,dcol,pix,adc);
       } else if(status<0) countErrorsInFed++;
@@ -1070,6 +1076,7 @@ void FindHotPixelFromRaw::analyze(const  edm::Event& ev, const edm::EventSetup& 
       if(status>0) {
 	countPixels++;
 	countPixelsInFed++;
+	if(fedId==1248 && channel==9) countTest++;
         if(findHot) hotPixels[fedId-fedId0].update(channel,roc,dcol,pix);
 	else        analyzeHits(fedId,channel,layer,roc,dcol,pix,adc);
       } else if(status<0) countErrorsInFed++;
