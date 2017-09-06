@@ -278,12 +278,13 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 	 if (detIdObject.subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap))
 	   _TH1F_Pedestals_fpix->Fill(ped);
 
+	 // ADC = VCAL(LOW) * 1/gain + pedestal
 	 // vcal for adc=0
-	 float vcal = 0. * gain - ped;
+	 float vcal = -1. * ped * gain;
 	 // adc for vcal (Low) =40 (at threshold)
-	 //float adc = (40 + ped) / gain;
+	 float adc = (40/gain) + ped;
 	 // adc for vcal (Low) = 0
-	 float adc = (0 + ped) / gain;
+	 //float adc = ped;
 
 	 if(layer>0) { // BPIX
 	   _TH1F_Gains_bpix->Fill(gain);
@@ -316,11 +317,11 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     gains /=float(nchannelspermod);
     peds /=float(nchannelspermod);
     // vcal for adc=0
-    float vcal = 0. * gains - peds;
+    float vcal = -1.* gains * peds;
     // adc for vcal (Low) =40 (at threshold)
-    //float adc = (40 + ped) / gain;
+    //float adc = (40/gain) + ped;
     // adc for vcal (Low) = 0
-    float adc = (0 + peds) / gains;
+    float adc = peds;
     
     if(layer>0) { // BPIX
       if(layer==1)      { GainsSumL1->Fill(gains); PedsSumL1->Fill(peds);ADCSumL1->Fill(adc);VcalSumL1->Fill(vcal);}
