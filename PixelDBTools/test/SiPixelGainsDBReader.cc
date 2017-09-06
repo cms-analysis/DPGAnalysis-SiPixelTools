@@ -72,9 +72,9 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   edm::LogInfo("SiPixelGainsDBReader") <<" There are "<<tkgeom->dets().size() <<" detectors"<<std::endl;
 
   //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopo;
-  //iSetup.get<IdealGeometryRecord>().get(tTopo);
-  iSetup.get<TrackerTopologyRcd>().get(tTopo);
+  edm::ESHandle<TrackerTopology> tTopoH;
+  iSetup.get<TrackerTopologyRcd>().get(tTopoH);
+  const TrackerTopology *tTopo=tTopoH.product();
 
   // Get the list of DetId's
   std::vector<uint32_t> vdetId_ = SiPixelGainCalibrationService_->getDetIds();
@@ -86,12 +86,46 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   _TH1F_Noisy_all = fs->make<TH1F>("NoisyAll","Noisy pixel fraction (0=noisy, 1=alive)",50,0.,conf_.getUntrackedParameter<double>("maxRangeDeadPixHist",0.001));
   _TH1F_Gains_sum =  fs->make<TH1F>("Summary_Gain","Gain Summary", vdetId_.size()+1,0,vdetId_.size()+1);
   _TH1F_Pedestals_sum =  fs->make<TH1F>("Summary_Pedestal","Pedestal Summary", vdetId_.size()+1,0,vdetId_.size()+1);
-  _TH1F_Pedestals_all = fs->make<TH1F>("PedestalsAll","all Pedestals",350,-100,250);
-  _TH1F_Pedestals_bpix = fs->make<TH1F>("PedestalsBpix","bpix Pedestals",350,-100,250);
-  _TH1F_Pedestals_fpix = fs->make<TH1F>("PedestalsFpix","fpix Pedestals",350,-100,250);
+  _TH1F_Pedestals_all = fs->make<TH1F>("PedestalsAll","all Pedestals",500,-250,250);
+  _TH1F_Pedestals_bpix = fs->make<TH1F>("PedestalsBpix","bpix Pedestals",500,-250,250);
+  _TH1F_Pedestals_fpix = fs->make<TH1F>("PedestalsFpix","fpix Pedestals",500,-250,250);
   _TH1F_Gains_all = fs->make<TH1F>("GainsAll","all Gains",100,0,10);
   _TH1F_Gains_bpix = fs->make<TH1F>("GainsBpix", "bpix Gains", 100, 0, 10);
   _TH1F_Gains_fpix = fs->make<TH1F>("GainsFpix", "fpix Gains", 100, 0, 10);
+
+  GainsL1 = fs->make<TH1D>("GainsL1", "Gains L1", 100, 0, 10);
+  GainsL2 = fs->make<TH1D>("GainsL2", "Gains L2", 100, 0, 10);
+  GainsL3 = fs->make<TH1D>("GainsL3", "Gains L3", 100, 0, 10);
+  GainsL4 = fs->make<TH1D>("GainsL4", "Gains L4", 100, 0, 10);
+  PedsL1 = fs->make<TH1D>("PedsL1", "Pedestals L1", 500, -250, 250);
+  PedsL2 = fs->make<TH1D>("PedsL2", "Pedestals L2", 500, -250, 250);
+  PedsL3 = fs->make<TH1D>("PedsL3", "Pedestals L3", 500, -250, 250);
+  PedsL4 = fs->make<TH1D>("PedsL4", "Pedestals L4", 500, -250, 250);
+  ADCL1 = fs->make<TH1D>("ADCL1", "ADC L1", 500, -250, 250);
+  ADCL2 = fs->make<TH1D>("ADCL2", "ADC L2", 500, -250, 250);
+  ADCL3 = fs->make<TH1D>("ADCL3", "ADC L3", 500, -250, 250);
+  ADCL4 = fs->make<TH1D>("ADCL4", "ADC L4", 500, -250, 250);
+  VcalL1 = fs->make<TH1D>("VcalL1", "VCAL L1", 500, -250, 250);
+  VcalL2 = fs->make<TH1D>("VcalL2", "VCAL L2", 500, -250, 250);
+  VcalL3 = fs->make<TH1D>("VcalL3", "VCAL L3", 500, -250, 250);
+  VcalL4 = fs->make<TH1D>("VcalL4", "VCAL L4", 500, -250, 250);
+
+  GainsSumL1 = fs->make<TH1D>("GainsSumL1", "Gains av L1", 100, 0, 10);
+  GainsSumL2 = fs->make<TH1D>("GainsSumL2", "Gains av L2", 100, 0, 10);
+  GainsSumL3 = fs->make<TH1D>("GainsSumL3", "Gains av L3", 100, 0, 10);
+  GainsSumL4 = fs->make<TH1D>("GainsSumL4", "Gains av L4", 100, 0, 10);
+  PedsSumL1 = fs->make<TH1D>("PedsSumL1", "Pedestals av L1", 500, -250, 250);
+  PedsSumL2 = fs->make<TH1D>("PedsSumL2", "Pedestals av L2", 500, -250, 250);
+  PedsSumL3 = fs->make<TH1D>("PedsSumL3", "Pedestals av L3", 500, -250, 250);
+  PedsSumL4 = fs->make<TH1D>("PedsSumL4", "Pedestals av L4", 500, -250, 250);
+  ADCSumL1 = fs->make<TH1D>("ADCSumL1", "ADC av L1", 500, -250, 250);
+  ADCSumL2 = fs->make<TH1D>("ADCSumL2", "ADC av L2", 500, -250, 250);
+  ADCSumL3 = fs->make<TH1D>("ADCSumL3", "ADC av L3", 500, -250, 250);
+  ADCSumL4 = fs->make<TH1D>("ADCSumL4", "ADC av L4", 500, -250, 250);
+  VcalSumL1 = fs->make<TH1D>("VcalSumL1", "VCAL av L1", 500, -250, 250);
+  VcalSumL2 = fs->make<TH1D>("VcalSumL2", "VCAL av L2", 500, -250, 250);
+  VcalSumL3 = fs->make<TH1D>("VcalSumL3", "VCAL av L3", 500, -250, 250);
+  VcalSumL4 = fs->make<TH1D>("VcalSumL4", "VCAL av L4", 500, -250, 250);
 
   TTree *tree = new TTree("tree","tree");
   uint32_t detid;
@@ -104,6 +138,7 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 
   // Loop over DetId's
   const bool PRINT = true;
+  const bool phase1=true;
   int ibin = 1;
   for (std::vector<uint32_t>::const_iterator detid_iter=vdetId_.begin();detid_iter!=vdetId_.end();detid_iter++){
     bool select = false;
@@ -131,9 +166,8 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     const PixelGeomDetUnit * pixDet  = dynamic_cast<const PixelGeomDetUnit*>(geoUnit);
     const PixelTopology & topol = pixDet->specificTopology();       
 
-
-    if ( detIdObject.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel) ) {
-
+    int layer = -1;
+    if ( detIdObject.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel) ) { // BPIX
       // new indecies 
       // Barell layer = 1,2,3
       unsigned int layerC1 = tTopo->pxbLayer(detIdObject);
@@ -146,30 +180,28 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
       if(layerC1==2 && ladderC1==1 && zindex1==1) select=true;
       if(layerC1==3 && ladderC1==1 && zindex1==1) select=true;
       if(layerC1==4 && ladderC1==1 && zindex1==1) select=true;
-      if(PRINT&&select) cout<<" Barrel layer, ladder, module "
-		    <<layerC1<<" "<<ladderC1<<" "<<zindex1<<endl;
 
       // Online 
-      //PixelBarrelName pbn(detIdObject); // use det-id
-      //PixelBarrelName::Shell sh = pbn.shell(); //enum
-      //int sector = pbn.sectorName();
-      //int ladder = pbn.ladderName();
-      //int layer  = pbn.layerName();
-      //int module = pbn.moduleName();
+      PixelBarrelName pbn(detIdObject,tTopo,phase1); // use det-id
+      PixelBarrelName::Shell sh = pbn.shell(); //enum
+      int sector = pbn.sectorName();
+      int ladder = pbn.ladderName();
+      layer  = pbn.layerName();
+      int module = pbn.moduleName();
       //bool half  = pbn.isHalfModule();
-      //string name= pbn.name();
+      string name= pbn.name();
       //PixelModuleName::ModuleType moduleType = pbn.moduleType();
 
       // Shell { mO = 1, mI = 2 , pO =3 , pI =4 };
-      //int shell = int(sh);
+      int shell = int(sh);
       // change the module sign for z<0
-      //if(shell==1 || shell==2) module = -module;
+      if(shell==1 || shell==2) module = -module;
       // change ladeer sign for Outer )x<0)
-      //if(shell==1 || shell==3) ladder = -ladder;
+      if(shell==1 || shell==3) ladder = -ladder;
 
       //if(layer==1 && ladder==1 && module==1) select=true;
-      //if(PRINT&&select) cout<<" shell "<<sh<<"("<<shell<<") "<<sector<<" "<<layer<<" "<<ladder<<" "
-      //            <<module<<" "<<half<<" "<<name<<" "<<moduleType<<endl;
+      if(PRINT&&select) cout<<" shell "<<sh<<"("<<shell<<") "<<sector<<" "<<layer<<" "<<ladder<<" "
+			    <<module<<" "<<name<<endl;
 
     } else {  // endcaps
 
@@ -189,7 +221,7 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
  
 
       // Convert to online 
-      //PixelEndcapName pen(detIdObject); // use det-id
+      //PixelEndcapName pen(detIdObject,tTopo,phase1); // use det-id
       //string nameF = pen.name();
       //int diskName = pen.diskName();
       //int bladeName = pen.bladeName();
@@ -206,6 +238,7 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     int nrows = topol.nrows();      // rows in x
     int ncols = topol.ncolumns();   // cols in y
     float nchannelspermod=0;
+    float gains=0, peds=0;
 
     for(int col_iter=0; col_iter<ncols; col_iter++) {
        for(int row_iter=0; row_iter<nrows; row_iter++) {
@@ -228,6 +261,7 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 	 float gain  = SiPixelGainCalibrationService_->getGain(detid, col_iter, row_iter);
 	 _TH1F_Gains_m[detid]->Fill( gain );
 	 _TH1F_Gains_all->Fill(gain);
+	 gains += gain;
 
 	 if (detIdObject.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel))
     	    _TH1F_Gains_bpix->Fill(gain);
@@ -237,12 +271,31 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 	 float ped  = SiPixelGainCalibrationService_->getPedestal(detid, col_iter, row_iter);
 	 _TH1F_Pedestals_m[detid]->Fill( ped );
        	 _TH1F_Pedestals_all->Fill(ped);
+	 peds += ped;
 
          if (detIdObject.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel))
 	   _TH1F_Pedestals_bpix->Fill(ped);
 	 if (detIdObject.subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap))
 	   _TH1F_Pedestals_fpix->Fill(ped);
 
+	 // vcal for adc=0
+	 float vcal = 0. * gain - ped;
+	 // adc for vcal (Low) =40 (at threshold)
+	 //float adc = (40 + ped) / gain;
+	 // adc for vcal (Low) = 0
+	 float adc = (0 + ped) / gain;
+
+	 if(layer>0) { // BPIX
+	   _TH1F_Gains_bpix->Fill(gain);
+	   _TH1F_Pedestals_bpix->Fill(ped);
+	   if(layer==1)      { GainsL1->Fill(gain); PedsL1->Fill(ped);ADCL1->Fill(adc);VcalL1->Fill(vcal);}
+	   else if(layer==2) { GainsL2->Fill(gain); PedsL2->Fill(ped);ADCL2->Fill(adc);VcalL2->Fill(vcal);}
+	   else if(layer==3) { GainsL3->Fill(gain); PedsL3->Fill(ped);ADCL3->Fill(adc);VcalL3->Fill(vcal);}
+	   else if(layer==4) { GainsL4->Fill(gain); PedsL4->Fill(ped);ADCL4->Fill(adc);VcalL4->Fill(vcal);}
+	 } else {
+	   _TH1F_Gains_fpix->Fill(gain);
+	   _TH1F_Pedestals_fpix->Fill(ped);
+	 }
 	 if(PRINT && select && (col_iter%10==0) && (row_iter%20==0) ) 
 	    std::cout <<" DetId "<<detid<<" Col "<<col_iter<<" Row "<<row_iter
 	    <<" Ped "<<ped<<" Gain "<<gain<<std::endl;	 
@@ -260,10 +313,29 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     _TH1F_Pedestals_sum->SetBinContent(ibin,_TH1F_Pedestals_m[detid]->GetMean());
     _TH1F_Pedestals_sum->SetBinError(ibin,_TH1F_Pedestals_m[detid]->GetRMS());
 
+    gains /=float(nchannelspermod);
+    peds /=float(nchannelspermod);
+    // vcal for adc=0
+    float vcal = 0. * gains - peds;
+    // adc for vcal (Low) =40 (at threshold)
+    //float adc = (40 + ped) / gain;
+    // adc for vcal (Low) = 0
+    float adc = (0 + peds) / gains;
+    
+    if(layer>0) { // BPIX
+      if(layer==1)      { GainsSumL1->Fill(gains); PedsSumL1->Fill(peds);ADCSumL1->Fill(adc);VcalSumL1->Fill(vcal);}
+      else if(layer==2) { GainsSumL2->Fill(gains); PedsSumL2->Fill(peds);ADCSumL2->Fill(adc);VcalSumL2->Fill(vcal);}
+      else if(layer==3) { GainsSumL3->Fill(gains); PedsSumL3->Fill(peds);ADCSumL3->Fill(adc);VcalSumL3->Fill(vcal);}
+      else if(layer==4) { GainsSumL4->Fill(gains); PedsSumL4->Fill(peds);ADCSumL4->Fill(adc);VcalSumL4->Fill(vcal);}
+    }
+      
     gainmeanfortree = _TH1F_Gains_m[detid]->GetMean();
     gainrmsfortree  = _TH1F_Gains_m[detid]->GetRMS();
     pedmeanfortree  = _TH1F_Pedestals_m[detid]->GetMean();
     pedrmsfortree   = _TH1F_Pedestals_m[detid]->GetRMS();
+
+
+
     //std::cout<<"DetId "<<detid<<"       GainMean "<<gainmeanfortree<<" RMS "<<gainrmsfortree<<"      PedMean "<<pedmeanfortree<<" RMS "<<pedrmsfortree<<std::endl;
     tree->Fill();
 

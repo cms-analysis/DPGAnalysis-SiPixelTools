@@ -3,11 +3,9 @@ process = cms.Process("PixelGainsDBReader")
 process.load("FWCore.MessageService.MessageLogger_cfi")
 
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
-
 process.load("CondTools.SiPixel.SiPixelGainCalibrationService_cfi")
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-#from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 from Configuration.AlCa.GlobalTag import GlobalTag
 # works with condDB and condDBv2
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'MCRUN2_73_V7', '')
@@ -16,10 +14,12 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 # for phase1 
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '') #same
+process.GlobalTag.globaltag = '92X_dataRun2_Express_v7' # data 2017
+
 
 process.TFileService = cms.Service("TFileService",
                                    fileName = cms.string("histo.root")
@@ -34,10 +34,11 @@ process.source = cms.Source("EmptySource",
 # timetype = cms.string('runnumber'),
 #    numberEventsInRun = cms.untracked.uint32(10),
 #    select the IOV from the global tag
-    firstRun = cms.untracked.uint32(190000)  # iov1-2012
+#    firstRun = cms.untracked.uint32(190000)  # iov1-2012
 #    firstRun = cms.untracked.uint32(200000)  # iov2-2012
 #    firstRun = cms.untracked.uint32(208000)  # iov3-2012
 #    firstRun = cms.untracked.uint32(240000)  # iov1-2015
+    firstRun = cms.untracked.uint32(320000)  # iov2-2017
 )
 
 #process.Timing = cms.Service("Timing")
@@ -67,14 +68,13 @@ if useLocalDB:
 #       tag = cms.string('SiPixelGainCalib_2009CollRuns_offline')
 #       tag = cms.string('SiPixelGainCalibration_2016_v1_offline')
 #       tag = cms.string('SiPixelGainCalibration_2016_v1_HLT')  # HLT
-       tag = cms.string('SiPixelGainCalibration_2016_v2_offline')
+       tag = cms.string('SiPixelGainCalibration_2017_v4_offline')
 #       tag = cms.string('SiPixelGainCalibration_2016_v2_HLT')  # HLT
     )),
 #    connect = cms.string('frontier://FrontierProd/CMS_COND_31X_PIXEL')
 #    connect = cms.string('sqlite_file:../../../../../DB/Gains/SiPixelGainCalibration_2016_v1_offline.db')
 #    connect = cms.string('sqlite_file:../../../../../DB/Gains/SiPixelGainCalibration_2016_v2_offline.db')
-    connect = cms.string('sqlite_file:../../../../../DB/Gains/SiPixelGainCalibration_2016_v1_HLT.db')
-#    connect = cms.string('sqlite_file:../../../../../DB/Gains/SiPixelGainCalibration_2016_v2_HLT.db')
+    connect = cms.string('sqlite_file:/afs//cern.ch/work/d/dkotlins/public/DB/Gains/SiPixelGainCalibration_2017_v4_offline.db')
   ) # end process
   # process.prefer("PoolDBESSource")
   process.myprefer = cms.ESPrefer("PoolDBESSource","GainsReader")
