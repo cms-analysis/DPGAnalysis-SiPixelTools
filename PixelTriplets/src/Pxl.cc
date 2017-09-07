@@ -9344,14 +9344,14 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    h525_out->Fill(  zPXB1, abs(dz1)*1E4 );
 	    h514_out->Fill( zPXB1, dca1*1E4 );
 	    h515_out->Fill( zPXB1, dz1*1E4 );
-	    cout << "out modules at R" << sqrt(xPXB1*xPXB1+yPXB1*yPXB1)<<endl;
+	    //cout << "out modules at R" << sqrt(xPXB1*xPXB1+yPXB1*yPXB1)<<endl;
 	  }
 	  else{
 	    h524_in->Fill(  zPXB1, abs(dca1)*1E4);
 	    h525_in->Fill(  zPXB1, abs(dz1)*1E4 );
 	    h514_in->Fill( zPXB1, dca1*1E4 );
 	    h515_in->Fill( zPXB1, dz1*1E4 );
-	    cout << "in modules at R" << sqrt(xPXB1*xPXB1+yPXB1*yPXB1)<<endl;
+	    //cout << "in modules at R" << sqrt(xPXB1*xPXB1+yPXB1*yPXB1)<<endl;
        
 
 	  }
