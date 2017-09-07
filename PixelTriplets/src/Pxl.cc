@@ -148,7 +148,8 @@ struct Histos{
   TH1D                                               *h086, *h087, *h088, *h089;
   TH1D     *h090, *h091, *h092, *h093, *h094, *h095, *h096, *h097, *h098, *h099;
 
-  TH1D     *h100, *h101, *h102, *h103, *h104, *h105,               *h108;
+  TH1D     *h100, *h101, *h102,  *h103, *h104, *h105,               *h108;
+  TH2D  *h102_vs_z;
   TH2D                                               *h106, *h107,        *h109;
   TH1D     *h110,        *h112, *h113, *h114, *h115, *h116,        *h118, *h119;
   TH2D            *h111,                                    *h117;
@@ -326,6 +327,15 @@ struct Histos{
   TH1D     *h520_1, *h520_2, *h520_3, *h520_4, *h520_5;
   TH1D *h520_out,*h520_in;
   TH1D *h521_out,*h521_in;
+ 
+  TH1D     *h520_mod1, *h521_mod1, *h520_mod2, *h521_mod2, *h520_mod3, *h521_mod3, *h520_mod4, *h521_mod4, *h520_mod5, *h521_mod5,  *h520_mod6, *h521_mod6,  *h520_mod7, *h521_mod7,  *h520_mod8, *h521_mod8;
+  TH1D     *h520_centr_out, *h521_centr_out,*h520_centr_in, *h521_centr_in;
+  TH1D     *h520_fwd_out, *h521_fwd_out,*h520_fwd_in, *h521_fwd_in;
+
+
+  TProfile   *h524_in, *h525_in, *h524_out, *h525_out;
+  TProfile *h514_in, *h515_in,  *h514_out, *h515_out;
+
 
   TProfile               *h522, *h523, *h524, *h525, *h526, *h527, *h528, *h529;
   TH1D     *h530, *h531, *h532,                      *h536, *h537, *h538, *h539;
@@ -342,6 +352,24 @@ struct Histos{
   TProfile               *h582, *h583, *h584, *h585, *h586, *h587;
   TH1D     *h590, *h591;
   TProfile               *h592, *h593, *h594, *h595, *h596, *h597;
+
+  // Triplet 3+4->2:
+  TH1D     *hf500, *hf501, *hf502, *hf503, *hf504, *hf505, *hf506, *hf507, *hf508;
+  TProfile                                                                *hf509;
+  TH1D     *hf510, *hf511;
+  TProfile               *hf512, *hf513, *hf514, *hf515, *hf516, *hf517, *hf518, *hf519;
+  TH1D     *hf520, *hf521;
+  TH1D *hf520_out_zplus, *hf520_out_zminus, *hf520_in_zplus, *hf520_in_zminus, *hf521_out_zplus, *hf521_out_zminus, *hf521_in_zplus, *hf521_in_zminus;
+  TH1D     *hf520_1, *hf520_2, *hf520_3, *hf520_4, *hf520_5;
+  TH1D *hf520_out,*hf520_in;
+  TH1D *hf521_out,*hf521_in;
+
+  TProfile               *hf522, *hf523, *hf524, *hf525, *hf526, *hf527, *hf528, *hf529;
+  TH1D     *hf530, *hf531, *hf532,                      *hf536, *hf537, *hf538, *hf539;
+  TProfile                      *hf533, *hf534, *hf535;
+  TH1D     *hf540, *hf541, *hf542, *hf543, *hf544, *hf545, *hf546, *hf547, *hf548, *hf549;
+
+
 
   TH1D     *h600, *h601, *h602, *h603, *h604, *h605, *h606, *h607, *h608;
   TProfile                                                                *h609;
@@ -862,6 +890,7 @@ void Histos::init(TFileDirectory* fs)
 
   h101 = fs->make<TH1D>( "h101", "hits on tracks PXB1 ladder;ladder;hits", 22, -0.5, 21.5 );
   h102 = fs->make<TH1D>( "h102", "hits on tracks PXB1 module;module;hits", 10, -0.5, 9.5 );
+  h102_vs_z= fs->make<TH2D>( "h102_vs_z", "hits on tracks PXB1 module;global z [cm];module",200,-20,20, 10, -0.5, 9.5 );
   h103 = fs->make<TH1D>( "h103", "hits on tracks PXB1 R;R [cm];hits", 150, 0, 15 );
   h104 = fs->make<TH1D>( "h104", "hits on tracks PXB1 #phi;#phi [deg];hits", 180, -180, 180 );
   h105 = fs->make<TH1D>( "h105", "hits on tracks PXB1 z;z [cm];hits", 600, -30, 30 );
@@ -1028,7 +1057,7 @@ void Histos::init(TFileDirectory* fs)
   h306 = fs->make<TH2D>( "h306", "hits on tracks PXB3 #phi-z;#phi [deg];z [cm]", 180, -180, 180, 600, -30, 30 );
   h307 = fs->make<TH2D>( "h307", "hits local x-y PXB3;x [cm];y [cm]", 180, -0.9, 0.9, 440, -3.3, 3.3 );
 
-  h308 = fs->make<TH1D>( "h308", "PXB2 lever arm;extrapolation factor to PXB2;tracks", 100, 0, 1 );
+  h308 = fs->make<TH1D>( "h308", "PXB2 lever arm;extrapolation factor to PXB2;tracks", 1000, 0, 10 );
   hg308 = fs->make<TH1D>( "hg308", "PXB3 lever arm;extrapolation factor to PXB3;tracks", 1000, 0, 10 );
  
   // PXB4 hits:
@@ -1239,8 +1268,8 @@ void Histos::init(TFileDirectory* fs)
   h426 = fs->make<TProfile>( "h426", "PXB2 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB2 rms(#Deltax) [#mum]", 20, 0, 2, 0, 99 );
   h427 = fs->make<TProfile>( "h427", "PXB2 #sigma_{z} vs p_{t};log(p_{t} [GeV]);PXB2 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
 
-  h428 = fs->make<TProfile>( "h428", "PXB2 #sigma_{x} vs dip;dip [deg];PXB2 rms(#Deltax) [#mum]", 70, -70, 70, 0, 99 );
-  h429 = fs->make<TProfile>( "h429", "PXB2 #sigma_{z} vs dip;dip [deg];PXB2 rms(#Deltaz) [#mum]", 70, -70, 70, 0, 199 );
+  h428 = fs->make<TProfile>( "h428", "PXB2 #sigma_{x} vs dip;dip [deg];PXB2 rms(#Deltax) [#mum]", 80, -80, 80, 0, 99 );
+  h429 = fs->make<TProfile>( "h429", "PXB2 #sigma_{z} vs dip;dip [deg];PXB2 rms(#Deltaz) [#mum]", 80, -80, 80, 0, 199 );
   h429_eta = fs->make<TProfile>( "h429_eta", "PXB2 #sigma_{z} vs #eta;Track #eta;PXB2 rms(#Deltaz) [#mum]", 70, -1.5, 1.5, 0, 199 );
 
   h430 = fs->make<TH1D>( "h430", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
@@ -1318,8 +1347,8 @@ void Histos::init(TFileDirectory* fs)
   h476 = fs->make<TProfile>( "h476", "PXB2 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB2 rms(#Deltax) [#mum]", 20, 0, 2, 0, 99 );
   h477 = fs->make<TProfile>( "h477", "PXB2 #sigma_{z} vs p_{t};log(p_{t} [GeV]);PXB2 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
 
-  h478 = fs->make<TProfile>( "h478", "PXB2 #sigma_{x} vs dip;dip [deg];PXB2 rms(#Deltax) [#mum]", 70, -70, 70, 0, 99 );
-  h479 = fs->make<TProfile>( "h479", "PXB2 #sigma_{z} vs dip;dip [deg];PXB2 rms(#Deltaz) [#mum]", 70, -70, 70, 0, 199 );
+  h478 = fs->make<TProfile>( "h478", "PXB2 #sigma_{x} vs dip;dip [deg];PXB2 rms(#Deltax) [#mum]", 80, -80, 80, 0, 99 );
+  h479 = fs->make<TProfile>( "h479", "PXB2 #sigma_{z} vs dip;dip [deg];PXB2 rms(#Deltaz) [#mum]", 80, -80, 80, 0, 199 );
 
   h480 = fs->make<TH1D>( "h480", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h481 = fs->make<TH1D>( "h481", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
@@ -1478,8 +1507,8 @@ void Histos::init(TFileDirectory* fs)
   hf426 = fs->make<TProfile>( "hf426", "PXB2 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB2 rms(#Deltax) [#mum]", 20, 0, 2, 0, 99 );
   hf427 = fs->make<TProfile>( "hf427", "PXB2 #sigma_{z} vs p_{t};log(p_{t} [GeV]);PXB2 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
 
-  hf428 = fs->make<TProfile>( "hf428", "PXB2 #sigma_{x} vs dip;dip [deg];PXB2 rms(#Deltax) [#mum]", 70, -70, 70, 0, 99 );
-  hf429 = fs->make<TProfile>( "hf429", "PXB2 #sigma_{z} vs dip;dip [deg];PXB2 rms(#Deltaz) [#mum]", 70, -70, 70, 0, 199 );
+  hf428 = fs->make<TProfile>( "hf428", "PXB2 #sigma_{x} vs dip;dip [deg];PXB2 rms(#Deltax) [#mum]", 80, -80, 80, 0, 99 );
+  hf429 = fs->make<TProfile>( "hf429", "PXB2 #sigma_{z} vs dip;dip [deg];PXB2 rms(#Deltaz) [#mum]", 80, -80, 80, 0, 199 );
   hf429_eta = fs->make<TProfile>( "hf429_eta", "PXB2 #sigma_{z} vs #eta;Track #eta;PXB2 rms(#Deltaz) [#mum]", 70, -1.5, 1.5, 0, 199 );
 
   hf430 = fs->make<TH1D>( "hf430", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
@@ -1557,8 +1586,8 @@ void Histos::init(TFileDirectory* fs)
   hf476 = fs->make<TProfile>( "hf476", "PXB2 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB2 rms(#Deltax) [#mum]", 20, 0, 2, 0, 99 );
   hf477 = fs->make<TProfile>( "hf477", "PXB2 #sigma_{z} vs p_{t};log(p_{t} [GeV]);PXB2 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
 
-  hf478 = fs->make<TProfile>( "hf478", "PXB2 #sigma_{x} vs dip;dip [deg];PXB2 rms(#Deltax) [#mum]", 70, -70, 70, 0, 99 );
-  hf479 = fs->make<TProfile>( "hf479", "PXB2 #sigma_{z} vs dip;dip [deg];PXB2 rms(#Deltaz) [#mum]", 70, -70, 70, 0, 199 );
+  hf478 = fs->make<TProfile>( "hf478", "PXB2 #sigma_{x} vs dip;dip [deg];PXB2 rms(#Deltax) [#mum]", 80, -80, 80, 0, 99 );
+  hf479 = fs->make<TProfile>( "hf479", "PXB2 #sigma_{z} vs dip;dip [deg];PXB2 rms(#Deltaz) [#mum]", 80, -80, 80, 0, 199 );
 
   hf480 = fs->make<TH1D>( "hf480", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   hf481 = fs->make<TH1D>( "hf481", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
@@ -1722,8 +1751,8 @@ void Histos::init(TFileDirectory* fs)
   hg426 = fs->make<TProfile>( "hg426", "PXB3 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB3 rms(#Deltax) [#mum]", 20, 0, 2, 0, 99 );
   hg427 = fs->make<TProfile>( "hg427", "PXB3 #sigma_{z} vs p_{t};log(p_{t} [GeV]);PXB3 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
 
-  hg428 = fs->make<TProfile>( "hg428", "PXB3 #sigma_{x} vs dip;dip [deg];PXB3 rms(#Deltax) [#mum]", 70, -70, 70, 0, 99 );
-  hg429 = fs->make<TProfile>( "hg429", "PXB3 #sigma_{z} vs dip;dip [deg];PXB3 rms(#Deltaz) [#mum]", 70, -70, 70, 0, 199 );
+  hg428 = fs->make<TProfile>( "hg428", "PXB3 #sigma_{x} vs dip;dip [deg];PXB3 rms(#Deltax) [#mum]", 80, -80, 80, 0, 99 );
+  hg429 = fs->make<TProfile>( "hg429", "PXB3 #sigma_{z} vs dip;dip [deg];PXB3 rms(#Deltaz) [#mum]", 80, -80, 80, 0, 199 );
   hg429_eta = fs->make<TProfile>( "hg429_eta", "PXB3 #sigma_{z} vs #eta;Track #eta;PXB3 rms(#Deltaz) [#mum]", 70, -1.5, 1.5, 0, 199 );
 
   hg430 = fs->make<TH1D>( "hg430", "PXB3 residuals #Deltax;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
@@ -1801,8 +1830,8 @@ void Histos::init(TFileDirectory* fs)
   hg476 = fs->make<TProfile>( "hg476", "PXB3 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB3 rms(#Deltax) [#mum]", 20, 0, 2, 0, 99 );
   hg477 = fs->make<TProfile>( "hg477", "PXB3 #sigma_{z} vs p_{t};log(p_{t} [GeV]);PXB3 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
 
-  hg478 = fs->make<TProfile>( "hg478", "PXB3 #sigma_{x} vs dip;dip [deg];PXB3 rms(#Deltax) [#mum]", 70, -70, 70, 0, 99 );
-  hg479 = fs->make<TProfile>( "hg479", "PXB3 #sigma_{z} vs dip;dip [deg];PXB3 rms(#Deltaz) [#mum]", 70, -70, 70, 0, 199 );
+  hg478 = fs->make<TProfile>( "hg478", "PXB3 #sigma_{x} vs dip;dip [deg];PXB3 rms(#Deltax) [#mum]", 80, -80, 80, 0, 99 );
+  hg479 = fs->make<TProfile>( "hg479", "PXB3 #sigma_{z} vs dip;dip [deg];PXB3 rms(#Deltaz) [#mum]", 80, -80, 80, 0, 199 );
 
   hg480 = fs->make<TH1D>( "hg480", "PXB3 residuals #Deltax;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
   hg481 = fs->make<TH1D>( "hg481", "PXB3 residuals #Deltaz;PXB3 #Deltaz [#mum];hits", 100, -300, 300 );
@@ -1846,8 +1875,8 @@ void Histos::init(TFileDirectory* fs)
   h512 = fs->make<TProfile>( "h512", "PXB1 #Deltax vs #phi;PXB1 #phi [deg];PXB1 <#Deltax> [#mum]", 180, -180, 180, -199, 199 );
   h513 = fs->make<TProfile>( "h513", "PXB1 #Deltaz vs #phi;PXB1 #phi [deg];PXB1 <#Deltaz> [#mum]", 180, -180, 180, -199, 199 );
 
-  h514 = fs->make<TProfile>( "h514", "PXB1 #Deltax vs z;PXB1 z [cm];PXB1 <#Deltax> [#mum]", 80, -20, 20, -199, 199 );
-  h515 = fs->make<TProfile>( "h515", "PXB1 #Deltaz vs z;PXB1 z [cm];PXB1 <#Deltaz>  [#mum]", 80, -20, 20, -199, 199 );
+  h514 = fs->make<TProfile>( "h514", "PXB1 #Deltax vs z;PXB1 z [cm];PXB1 <#Deltax> [#mum]", 100, -25, 25, -199, 199 );
+  h515 = fs->make<TProfile>( "h515", "PXB1 #Deltaz vs z;PXB1 z [cm];PXB1 <#Deltaz>  [#mum]", 100, -25, 25, -199, 199 );
 
   h516 = fs->make<TProfile>( "h516", "PXB1 #Deltax vs p_{t};log(p_{t} [GeV]);PXB1 <#Deltax> [#mum]", 20, 0, 2, -199, 199 );
   h517 = fs->make<TProfile>( "h517", "PXB1 #Deltaz vs p_{t};log(p_{t} [GeV]);PXB1 <#Deltaz>  [#mum]", 20, 0, 2, -199, 199 );
@@ -1873,23 +1902,66 @@ void Histos::init(TFileDirectory* fs)
   h520_5 = fs->make<TH1D>( "h520_5", "PXB1 residuals #Deltax, p_{t} > 12, lever 5;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
  
   h520_out = fs->make<TH1D>( "h520_out", "PXB1 residuals #Deltax, p_{t} > 12, outward-facing modules;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
-  h520_in = fs->make<TH1D>( "h520_in", "PXB1 residuals #Deltax, p_{t} > 12, in-facing modules;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
+  h520_in = fs->make<TH1D>( "h520_in", "PXB1 residuals #Deltax, p_{t} > 12, inward-facing modules;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
   h521_out = fs->make<TH1D>( "h521_out", "PXB1 residuals #Deltaz, p_{t} > 12, outward-facing modules;PXB1 #Deltaz [#mum];hits", 300, -300, 300 );
   h521_in = fs->make<TH1D>( "h521_in", "PXB1 residuals #Deltaz, p_{t} > 12, inward-facing modules;PXB1 #Deltaz [#mum];hits", 300, -300, 300 );
+
+  h514_in = fs->make<TProfile>( "h514_in", "PXB1 #Deltax vs z inward-facing modules;PXB1 z [cm];PXB1 <#Deltax> [#mum]", 100, -25, 25, -199, 199 );
+  h515_in = fs->make<TProfile>( "h515_in", "PXB1 #Deltaz vs z inward-facing modules;PXB1 z [cm];PXB1 <#Deltaz>  [#mum]", 100, -25, 25, -199, 199 );
+  h514_out = fs->make<TProfile>( "h514_out", "PXB1 #Deltax vs z outward-facing modules;PXB1 z [cm];PXB1 <#Deltax> [#mum]", 100, -25, 25, -199, 199 );
+  h515_out = fs->make<TProfile>( "h515_out", "PXB1 #Deltaz vs z outward-facing modules;PXB1 z [cm];PXB1 <#Deltaz>  [#mum]", 100, -25, 25, -199, 199 );
+
+  h520_centr_out = fs->make<TH1D>( "h520_centr_out", "PXB1 residuals #Deltax, p_{t} > 12;central outward-facing modules;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
+  h520_centr_in = fs->make<TH1D>( "h520_centr_in", "PXB1 residuals #Deltax, p_{t} > 12,central inward-facing modules;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
+  h521_centr_out = fs->make<TH1D>( "h521_centr_out", "PXB1 residuals #Deltaz, p_{t} > 12,central outward-facing modules;PXB1 #Deltaz [#mum];hits", 300, -300, 300 );
+  h521_centr_in = fs->make<TH1D>( "h521_centr_in", "PXB1 residuals #Deltaz, p_{t} > 12,central inward-facing modules;PXB1 #Deltaz [#mum];hits", 300, -300, 300 );
+ 
+  h520_fwd_out = fs->make<TH1D>( "h520_fwd_out", "PXB1 residuals #Deltax, p_{t} > 12;forward outward-facing modules;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
+  h520_fwd_in = fs->make<TH1D>( "h520_fwd_in", "PXB1 residuals #Deltax, p_{t} > 12,forward inward-facing modules;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
+  h521_fwd_out = fs->make<TH1D>( "h521_fwd_out", "PXB1 residuals #Deltaz, p_{t} > 12,forward outward-facing modules;PXB1 #Deltaz [#mum];hits", 300, -300, 300 );
+  h521_fwd_in = fs->make<TH1D>( "h521_fwd_in", "PXB1 residuals #Deltaz, p_{t} > 12,forward inward-facing modules;PXB1 #Deltaz [#mum];hits", 300, -300, 300 );
+
+
+  h520_mod1 = fs->make<TH1D>( "h520_mod1", "PXB1 Module 1 residuals #Deltax, p_{t} > 12;PXB1 #Deltax [#mum];hits ", 100, -150, 150 );
+  h520_mod2 = fs->make<TH1D>( "h520_mod2", "PXB1 Module 2 residuals #Deltax, p_{t} > 12;PXB1 #Deltax [#mum];hits ", 100, -150, 150 );
+  h520_mod3 = fs->make<TH1D>( "h520_mod3", "PXB1 Module 3 residuals #Deltax, p_{t} > 12;PXB1 #Deltax [#mum];hits ", 100, -150, 150 );
+  h520_mod4 = fs->make<TH1D>( "h520_mod4", "PXB1 Module 4 residuals #Deltax, p_{t} > 12;PXB1 #Deltax [#mum];hits ", 100, -150, 150 );
+  h520_mod5 = fs->make<TH1D>( "h520_mod5", "PXB1 Module 5 residuals #Deltax, p_{t} > 12;PXB1 #Deltax [#mum];hits ", 100, -150, 150 );
+  h520_mod6 = fs->make<TH1D>( "h520_mod6", "PXB1 Module 6 residuals #Deltax, p_{t} > 12;PXB1 #Deltax [#mum];hits ", 100, -150, 150 );
+  h520_mod7 = fs->make<TH1D>( "h520_mod7", "PXB1 Module 7 residuals #Deltax, p_{t} > 12;PXB1 #Deltax [#mum];hits ", 100, -150, 150 );
+  h520_mod8 = fs->make<TH1D>( "h520_mod8", "PXB1 Module 8 residuals #Deltax, p_{t} > 12;PXB1 #Deltax [#mum];hits ", 100, -150, 150 );
+  
+  h521_mod1 = fs->make<TH1D>( "h521_mod1", "PXB1 Module 1  residuals #Deltaz, p_{t} > 12;PXB1 #Deltaz [#mum];hits", 100, -300, 300 );
+  h521_mod2 = fs->make<TH1D>( "h521_mod2", "PXB1 Module 2  residuals #Deltaz, p_{t} > 12;PXB1 #Deltaz [#mum];hits", 100, -300, 300 );
+  h521_mod3 = fs->make<TH1D>( "h521_mod3", "PXB1 Module 3  residuals #Deltaz, p_{t} > 12;PXB1 #Deltaz [#mum];hits", 100, -300, 300 );
+  h521_mod4 = fs->make<TH1D>( "h521_mod4", "PXB1 Module 4  residuals #Deltaz, p_{t} > 12;PXB1 #Deltaz [#mum];hits", 100, -300, 300 );
+  h521_mod5 = fs->make<TH1D>( "h521_mod5", "PXB1 Module 5  residuals #Deltaz, p_{t} > 12;PXB1 #Deltaz [#mum];hits", 100, -300, 300 );
+  h521_mod6 = fs->make<TH1D>( "h521_mod6", "PXB1 Module 6  residuals #Deltaz, p_{t} > 12;PXB1 #Deltaz [#mum];hits", 100, -300, 300 );
+  h521_mod7 = fs->make<TH1D>( "h521_mod7", "PXB1 Module 7  residuals #Deltaz, p_{t} > 12;PXB1 #Deltaz [#mum];hits", 100, -300, 300 );
+  h521_mod8 = fs->make<TH1D>( "h521_mod8", "PXB1 Module 8  residuals #Deltaz, p_{t} > 12;PXB1 #Deltaz [#mum];hits", 100, -300, 300 );
+
+
 
   // width profiles:
 
   h522 = fs->make<TProfile>( "h522", "PXB1 #sigma_{x} vs #phi;PXB1 #phi [deg];PXB1 rms(#Deltax) [#mum]", 360, -180, 180, 0, 199 );
   h523 = fs->make<TProfile>( "h523", "PXB1 #sigma_{z} vs #phi;PXB1 #phi [deg];PXB1 rms(#Deltaz)  [#mum]", 360, -180, 180, 0, 199 );
 
-  h524 = fs->make<TProfile>( "h524", "PXB1 #sigma_{x} vs z;PXB1 z [cm];PXB1 rms(#Deltax) [#mum]", 80, -20, 20, 0, 199 );
-  h525 = fs->make<TProfile>( "h525", "PXB1 #sigma_{z} vs z;PXB1 z [cm];PXB1 rms(#Deltaz) [#mum]", 80, -20, 20, 0, 199 );
+  h524 = fs->make<TProfile>( "h524", "PXB1 #sigma_{x} vs z;PXB1 z [cm];PXB1 rms(#Deltax) [#mum]", 100, -25, 25, 0, 199 );
+  h525 = fs->make<TProfile>( "h525", "PXB1 #sigma_{z} vs z;PXB1 z [cm];PXB1 rms(#Deltaz) [#mum]", 100, -25, 25, 0, 199 );
+
+  h524_in = fs->make<TProfile>( "h524_in", "PXB1 #sigma_{x} vs z inward facing modules;PXB1 z [cm];PXB1 rms(#Deltax) [#mum]", 100, -25, 25, 0, 199 );
+  h525_in = fs->make<TProfile>( "h525_in", "PXB1 #sigma_{z} vs z inward facing modules;;PXB1 z [cm];PXB1 rms(#Deltaz) [#mum]", 100, -25, 25, 0, 199 );
+  h524_out = fs->make<TProfile>( "h524_out", "PXB1 #sigma_{x} vs z outward facing modules;PXB1 z [cm];PXB1 rms(#Deltax) [#mum]", 100, -25, 25, 0, 199 );
+  h525_out = fs->make<TProfile>( "h525_out", "PXB1 #sigma_{z} vs z outward facing modules;;PXB1 z [cm];PXB1 rms(#Deltaz) [#mum]", 100, -25, 25, 0, 199 );
+
+
 
   h526 = fs->make<TProfile>( "h526", "PXB1 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB1 rms(#Deltax) [#mum]", 20, 0, 2, 0, 199 );
   h527 = fs->make<TProfile>( "h527", "PXB1 #sigma_{z} vs p_{t};log(p_{t} [GeV]);PXB1 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
 
-  h528 = fs->make<TProfile>( "h528", "PXB1 #sigma_{x} vs dip;dip [deg];PXB1 rms(#Deltax) [#mum]", 70, -70, 70, 0, 199 );
-  h529 = fs->make<TProfile>( "h529", "PXB1 #sigma_{z} vs dip;dip [deg];PXB1 rms(#Deltaz) [#mum]", 70, -70, 70, 0, 199 );
+  h528 = fs->make<TProfile>( "h528", "PXB1 #sigma_{x} vs dip;dip [deg];PXB1 rms(#Deltax) [#mum]", 80, -80, 80, 0, 199 );
+  h529 = fs->make<TProfile>( "h529", "PXB1 #sigma_{z} vs dip;dip [deg];PXB1 rms(#Deltaz) [#mum]", 80, -80, 80, 0, 199 );
 
   h530 = fs->make<TH1D>( "h530", "PXB1 residuals #Deltax;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
   h531 = fs->make<TH1D>( "h531", "PXB1 residuals #Deltaz;PXB1 #Deltaz [#mum];hits", 100, -300, 300 );
@@ -1909,6 +1981,96 @@ void Histos::init(TFileDirectory* fs)
   h544 = fs->make<TH1D>( "h544", "PXB1 residuals #Deltax;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
   h545 = fs->make<TH1D>( "h545", "PXB1 residuals #Deltax;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
   h546 = fs->make<TH1D>( "h546", "PXB1 residuals #Deltax;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
+
+
+
+
+  // 3+4 -> 2 triplets:
+
+  hf501 = fs->make<TH1D>( "hf501", "PXB2 triplets z1;PXB2 z [cm];hits", 600, -30, 30 );
+  hf502 = fs->make<TH1D>( "hf502", "PXB2 uphi-phi;#Delta#phi [rad];tracks", 100, -0.1, 0.1 );
+  hf503 = fs->make<TH1D>( "hf503", "PXB2 udca-dca;#Deltadca [cm];tracks", 100, -0.1, 0.1 );
+  hf504 = fs->make<TH1D>( "hf504", "PXB2 udip-dip;#Deltadip;tracks", 100, -0.1, 0.1 );
+  hf505 = fs->make<TH1D>( "hf505", "PXB2 uz0-z0;#Deltaz_{0};tracks", 100, -0.1, 0.1 );
+
+  hf508 = fs->make<TH1D>( "hf508", "PXB2 lever arm;extrapolation factor to PXB2;tracks", 1000, 0, 10 );
+
+  hf509 = fs->make<TProfile>( "hf509", "PXB2 angle of incidence;PXB2 #phi [deg];PXB2 #phi_{inc} [deg]", 180, -180, 180, -90, 90 );
+
+  hf510 = fs->make<TH1D>( "hf510", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf511 = fs->make<TH1D>( "hf511", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  // mean resid profiles:
+
+  hf512 = fs->make<TProfile>( "hf512", "PXB2 #Deltax vs #phi;PXB2 #phi [deg];PXB2 <#Deltax> [#mum]", 180, -180, 180, -199, 199 );
+  hf513 = fs->make<TProfile>( "hf513", "PXB2 #Deltaz vs #phi;PXB2 #phi [deg];PXB2 <#Deltaz> [#mum]", 180, -180, 180, -199, 199 );
+
+  hf514 = fs->make<TProfile>( "hf514", "PXB2 #Deltax vs z;PXB2 z [cm];PXB2 <#Deltax> [#mum]", 80, -20, 20, -199, 199 );
+  hf515 = fs->make<TProfile>( "hf515", "PXB2 #Deltaz vs z;PXB2 z [cm];PXB2 <#Deltaz>  [#mum]", 80, -20, 20, -199, 199 );
+
+  hf516 = fs->make<TProfile>( "hf516", "PXB2 #Deltax vs p_{t};log(p_{t} [GeV]);PXB2 <#Deltax> [#mum]", 20, 0, 2, -199, 199 );
+  hf517 = fs->make<TProfile>( "hf517", "PXB2 #Deltaz vs p_{t};log(p_{t} [GeV]);PXB2 <#Deltaz>  [#mum]", 20, 0, 2, -199, 199 );
+
+  hf518 = fs->make<TProfile>( "hf518", "PXB2 #Deltax vs p_{t} +;log(p_{t} [GeV]);PXB2 <#Deltax> [#mum]", 20, 0, 2, -199, 199 );
+  hf519 = fs->make<TProfile>( "hf519", "PXB2 #Deltax vs p_{t} -;log(p_{t} [GeV]);PXB2 <#Deltax> [#mum]", 20, 0, 2, -199, 199 );
+
+  hf520 = fs->make<TH1D>( "hf520", "PXB2 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf521 = fs->make<TH1D>( "hf521", "PXB2 residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  hf520_out_zplus = fs->make<TH1D>( "hf520_out_zplus", "PXB2 residuals #Deltax, p_{t} > 12, outward-facing modules, z+;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf520_out_zminus = fs->make<TH1D>( "hf520_out_zminus", "PXB2 residuals #Deltax, p_{t} > 12, outward-facing modules, z-;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf520_in_zplus = fs->make<TH1D>( "hf520_in_zplus", "PXB2 residuals #Deltax, p_{t} > 12, inward-facing modules, z+;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf520_in_zminus = fs->make<TH1D>( "hf520_in_zminus", "PXB2 residuals #Deltax, p_{t} > 12, inward-facing modules, z-;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf521_out_zplus = fs->make<TH1D>( "hf521_out_zplus", "PXB2 residuals #Deltaz, p_{t} > 12, outward-facing modules, z+;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+  hf521_out_zminus = fs->make<TH1D>( "hf521_out_zminus", "PXB2 residuals #Deltaz, p_{t} > 12, outward-facing modules, z-;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+  hf521_in_zplus = fs->make<TH1D>( "hf521_in_zplus", "PXB2 residuals #Deltaz, p_{t} > 12, inward-facing modules, z+;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+  hf521_in_zminus = fs->make<TH1D>( "hf521_in_zminus", "PXB2 residuals #Deltaz, p_{t} > 12, inward-facing modules, z-;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+ 
+  hf520_1 = fs->make<TH1D>( "hf520_1", "PXB2 residuals #Deltax, p_{t} > 12, lever 1;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf520_2 = fs->make<TH1D>( "hf520_2", "PXB2 residuals #Deltax, p_{t} > 12, lever 2;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf520_3 = fs->make<TH1D>( "hf520_3", "PXB2 residuals #Deltax, p_{t} > 12, lever 3;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf520_4 = fs->make<TH1D>( "hf520_4", "PXB2 residuals #Deltax, p_{t} > 12, lever 4;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf520_5 = fs->make<TH1D>( "hf520_5", "PXB2 residuals #Deltax, p_{t} > 12, lever 5;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+ 
+  hf520_out = fs->make<TH1D>( "hf520_out", "PXB2 residuals #Deltax, p_{t} > 12, outward-facing modules;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf520_in = fs->make<TH1D>( "hf520_in", "PXB2 residuals #Deltax, p_{t} > 12, in-facing modules;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf521_out = fs->make<TH1D>( "hf521_out", "PXB2 residuals #Deltaz, p_{t} > 12, outward-facing modules;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+  hf521_in = fs->make<TH1D>( "hf521_in", "PXB2 residuals #Deltaz, p_{t} > 12, inward-facing modules;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+
+  // width profiles:
+
+  hf522 = fs->make<TProfile>( "hf522", "PXB2 #sigma_{x} vs #phi;PXB2 #phi [deg];PXB2 rms(#Deltax) [#mum]", 360, -180, 180, 0, 199 );
+  hf523 = fs->make<TProfile>( "hf523", "PXB2 #sigma_{z} vs #phi;PXB2 #phi [deg];PXB2 rms(#Deltaz)  [#mum]", 360, -180, 180, 0, 199 );
+
+  hf524 = fs->make<TProfile>( "hf524", "PXB2 #sigma_{x} vs z;PXB2 z [cm];PXB2 rms(#Deltax) [#mum]", 80, -20, 20, 0, 199 );
+  hf525 = fs->make<TProfile>( "hf525", "PXB2 #sigma_{z} vs z;PXB2 z [cm];PXB2 rms(#Deltaz) [#mum]", 80, -20, 20, 0, 199 );
+
+  hf526 = fs->make<TProfile>( "hf526", "PXB2 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB2 rms(#Deltax) [#mum]", 20, 0, 2, 0, 199 );
+  hf527 = fs->make<TProfile>( "hf527", "PXB2 #sigma_{z} vs p_{t};log(p_{t} [GeV]);PXB2 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
+
+  hf528 = fs->make<TProfile>( "hf528", "PXB2 #sigma_{x} vs dip;dip [deg];PXB2 rms(#Deltax) [#mum]", 80, -80, 80, 0, 199 );
+  hf529 = fs->make<TProfile>( "hf529", "PXB2 #sigma_{z} vs dip;dip [deg];PXB2 rms(#Deltaz) [#mum]", 80, -80, 80, 0, 199 );
+
+  hf530 = fs->make<TH1D>( "hf530", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf531 = fs->make<TH1D>( "hf531", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  hf532 = fs->make<TH1D>( "hf532", "PXB2 residuals #Deltaz, 18 < |dip| < 50;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  hf533 = fs->make<TProfile>( "hf533", "PXB2 #sigma_{z} vs p_{t}, best dip;log(p_{t} [GeV]);PXB2 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
+
+  hf534 = fs->make<TProfile>( "hf534", "PXB2 #sigma_{x} vs inc;PXB2 #phi_{inc} [deg];PXB2 rms(#Deltax) [#mum]", 60, -15, 15, 0, 199 );
+
+  hf535 = fs->make<TProfile>( "hf535", "PXB2 #sigma_{x} vs #phi at 1 GeV;PXB2 #phi [deg];PXB2 rms(#Deltax) [#mum]", 360, -180, 180, 0, 499 );
+
+  hf540 = fs->make<TH1D>( "hf540", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf541 = fs->make<TH1D>( "hf541", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  hf542 = fs->make<TH1D>( "hf542", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf543 = fs->make<TH1D>( "hf543", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf544 = fs->make<TH1D>( "hf544", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf545 = fs->make<TH1D>( "hf545", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf546 = fs->make<TH1D>( "hf546", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+
+
+
 
   // pixel track Karimaki:
 
@@ -1998,7 +2160,7 @@ void Histos::init(TFileDirectory* fs)
 
   h626 = fs->make<TProfile>( "h626", "PXB1 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB1 rms(#Deltax) [#mum]", 20, 0, 2, 0, 99 );
 
-  h628 = fs->make<TProfile>( "h628", "PXB1 #sigma_{x} vs dip;dip [deg];PXB1 rms(#Deltax) [#mum]", 70, -70, 70, 0, 99 );
+  h628 = fs->make<TProfile>( "h628", "PXB1 #sigma_{x} vs dip;dip [deg];PXB1 rms(#Deltax) [#mum]", 80, -80, 80, 0, 99 );
 
   h630 = fs->make<TH1D>( "h630", "PXB1 residuals #Deltax;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
 
@@ -2061,7 +2223,7 @@ void Histos::init(TFileDirectory* fs)
 
   h726 = fs->make<TProfile>( "h726", "TIB2 #sigma_{x} vs p_{t};log(p_{t} [GeV]);TIB2 rms(#Deltax) [#mum]", 20, 0, 2, 0, 499 );
 
-  h728 = fs->make<TProfile>( "h728", "TIB2 #sigma_{x} vs dip;dip [deg];TIB2 rms(#Deltax) [#mum]", 70, -70, 70, 0, 499 );
+  h728 = fs->make<TProfile>( "h728", "TIB2 #sigma_{x} vs dip;dip [deg];TIB2 rms(#Deltax) [#mum]", 80, -80, 80, 0, 499 );
 
   h730 = fs->make<TH1D>( "h730", "TIB2 residuals #Deltax;TIB2 #Deltax [#mum];hits", 100, -250, 250 );
 
@@ -2103,7 +2265,7 @@ void Histos::init(TFileDirectory* fs)
 
   h776 = fs->make<TProfile>( "h776", "TIB3 #sigma_{x} vs p_{t};log(p_{t} [GeV]);TIB3 rms(#Deltax) [#mum]", 20, 0, 2, 0, 499 );
 
-  h778 = fs->make<TProfile>( "h778", "TIB3 #sigma_{x} vs dip;dip [deg];TIB3 rms(#Deltax) [#mum]", 70, -70, 70, 0, 499 );
+  h778 = fs->make<TProfile>( "h778", "TIB3 #sigma_{x} vs dip;dip [deg];TIB3 rms(#Deltax) [#mum]", 80, -80, 80, 0, 499 );
 
   h780 = fs->make<TH1D>( "h780", "residuals TIB3 #Deltax;TIB3 #Deltax [#mum];hits", 100, -250, 250 );
 
@@ -2146,7 +2308,7 @@ void Histos::init(TFileDirectory* fs)
 
   h826 = fs->make<TProfile>( "h826", "TOB4 #sigma_{x} vs p_{t};log(p_{t} [GeV]);TOB4 rms(#Deltax) [#mum]", 20, 0, 2, 0, 499 );
 
-  h828 = fs->make<TProfile>( "h828", "TOB4 #sigma_{x} vs dip;dip [deg];TOB4 rms(#Deltax) [#mum]", 70, -70, 70, 0, 499 );
+  h828 = fs->make<TProfile>( "h828", "TOB4 #sigma_{x} vs dip;dip [deg];TOB4 rms(#Deltax) [#mum]", 80, -80, 80, 0, 499 );
 
   h830 = fs->make<TH1D>( "h830", "TOB4 residuals #Deltax;TOB4 #Deltax [#mum];hits", 100, -400, 400 );
 
@@ -2188,7 +2350,7 @@ void Histos::init(TFileDirectory* fs)
 
   h876 = fs->make<TProfile>( "h876", "TOB5 #sigma_{x} vs p_{t};log(p_{t} [GeV]);TOB5 rms(#Deltax) [#mum]", 20, 0, 2, 0, 499 );
 
-  h878 = fs->make<TProfile>( "h878", "TOB5 #sigma_{x} vs dip;dip [deg];TOB5 rms(#Deltax) [#mum]", 70, -70, 70, 0, 499 );
+  h878 = fs->make<TProfile>( "h878", "TOB5 #sigma_{x} vs dip;dip [deg];TOB5 rms(#Deltax) [#mum]", 80, -80, 80, 0, 499 );
 
   h880 = fs->make<TH1D>( "h880", "residuals TOB5 #Deltax;TOB5 #Deltax [#mum];hits", 100, -250, 250 );
 
@@ -2308,8 +2470,8 @@ void Histos::init(TFileDirectory* fs)
   i526 = fs->make<TProfile>( "i526", "PXB3 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB3 rms(#Deltax) [#mum]", 20, 0, 2, 0, 199 );
   i527 = fs->make<TProfile>( "i527", "PXB3 #sigma_{z} vs p_{t};log(p_{t} [GeV]);PXB3 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
 
-  i528 = fs->make<TProfile>( "i528", "PXB3 #sigma_{x} vs dip;dip [deg];PXB3 rms(#Deltax) [#mum]", 70, -70, 70, 0, 199 );
-  i529 = fs->make<TProfile>( "i529", "PXB3 #sigma_{z} vs dip;dip [deg];PXB3 rms(#Deltaz) [#mum]", 70, -70, 70, 0, 199 );
+  i528 = fs->make<TProfile>( "i528", "PXB3 #sigma_{x} vs dip;dip [deg];PXB3 rms(#Deltax) [#mum]", 80, -80, 80, 0, 199 );
+  i529 = fs->make<TProfile>( "i529", "PXB3 #sigma_{z} vs dip;dip [deg];PXB3 rms(#Deltaz) [#mum]", 80, -80, 80, 0, 199 );
 
   i530 = fs->make<TH1D>( "i530", "PXB3 residuals #Deltax;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
   i531 = fs->make<TH1D>( "i531", "PXB3 residuals #Deltaz;PXB3 #Deltaz [#mum];hits", 100, -300, 300 );
@@ -2343,7 +2505,7 @@ void Histos::init(TFileDirectory* fs)
   g504 = fs->make<TH1D>( "g504", "PXB4 udip-dip;ddip;tracks", 100, -0.1, 0.1 );
   g505 = fs->make<TH1D>( "g505", "PXB4 uz0-z0;#Deltaz0;tracks", 100, -0.1, 0.1 );
 
-  g507 = fs->make<TH1D>( "g507", "PXB4 lever arm;extrapolation factor to PXB3;tracks", 100, 1, 2 );
+  g507 = fs->make<TH1D>( "g507", "PXB4 lever arm;extrapolation factor to PXB3;tracks", 1000, 0, 10 );
   g508 = fs->make<TProfile>( "g508", "PXB4 lever arm vs #phi;PXB4 #phi [deg];PXB4 extrapolation factor", 180, -180, 180, 0, 5 );
 
   g509 = fs->make<TProfile>( "g509", "PXB4 angle of incidence;PXB4 #phi [deg];PXB4 #phi_{inc} [deg]", 180, -180, 180, -90, 90 );
@@ -2402,8 +2564,8 @@ void Histos::init(TFileDirectory* fs)
   g526 = fs->make<TProfile>( "g526", "PXB4 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB4 rms(#Deltax) [#mum]", 20, 0, 2, 0, 199 );
   g527 = fs->make<TProfile>( "g527", "PXB4 #sigma_{z} vs p_{t};log(p_{t} [GeV]);PXB4 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
 
-  g528 = fs->make<TProfile>( "g528", "PXB4 #sigma_{x} vs dip;dip [deg];PXB4 rms(#Deltax) [#mum]", 70, -70, 70, 0, 199 );
-  g529 = fs->make<TProfile>( "g529", "PXB4 #sigma_{z} vs dip;dip [deg];PXB4 rms(#Deltaz) [#mum]", 70, -70, 70, 0, 199 );
+  g528 = fs->make<TProfile>( "g528", "PXB4 #sigma_{x} vs dip;dip [deg];PXB4 rms(#Deltax) [#mum]", 80, -80, 80, 0, 199 );
+  g529 = fs->make<TProfile>( "g529", "PXB4 #sigma_{z} vs dip;dip [deg];PXB4 rms(#Deltaz) [#mum]", 80, -80, 80, 0, 199 );
 
   g530 = fs->make<TH1D>( "g530", "PXB4 residuals #Deltax;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
   g531 = fs->make<TH1D>( "g531", "PXB4 residuals #Deltaz;PXB4 #Deltaz [#mum];hits", 100, -300, 300 );
@@ -2483,8 +2645,8 @@ void Histos::init(TFileDirectory* fs)
   f526 = fs->make<TProfile>( "f526", "PXB4 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB4 rms(#Deltax) [#mum]", 20, 0, 2, 0, 199 );
   f527 = fs->make<TProfile>( "f527", "PXB4 #sigma_{z} vs p_{t};log(p_{t} [GeV]);PXB4 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
 
-  f528 = fs->make<TProfile>( "f528", "PXB4 #sigma_{x} vs dip;dip [deg];PXB4 rms(#Deltax) [#mum]", 70, -70, 70, 0, 199 );
-  f529 = fs->make<TProfile>( "f529", "PXB4 #sigma_{z} vs dip;dip [deg];PXB4 rms(#Deltaz) [#mum]", 70, -70, 70, 0, 199 );
+  f528 = fs->make<TProfile>( "f528", "PXB4 #sigma_{x} vs dip;dip [deg];PXB4 rms(#Deltax) [#mum]", 80, -80, 80, 0, 199 );
+  f529 = fs->make<TProfile>( "f529", "PXB4 #sigma_{z} vs dip;dip [deg];PXB4 rms(#Deltaz) [#mum]", 80, -80, 80, 0, 199 );
 
   f530 = fs->make<TH1D>( "f530", "PXB4 residuals #Deltax;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
   f531 = fs->make<TH1D>( "f531", "PXB4 residuals #Deltaz;PXB4 #Deltaz [#mum];hits", 100, -300, 300 );
@@ -3847,6 +4009,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
     double rmin = 99.9;
     uint32_t innerDetId = 0;
+
+    int imod_lay1=0;
     double xPXB1 = 0;
     double yPXB1 = 0;
     double zPXB1 = 0;
@@ -4439,7 +4603,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	h100->Fill( ilay ); // 1,2,3, 4
 
 	if( ilay == 1 ) {
-
+	  // cout << "layer 1 imod " << imod <<  " gZ "<<  gZ << endl;
 	  n1++;
 	  xPXB1 = gX;
 	  yPXB1 = gY;
@@ -4454,9 +4618,13 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  nrow1 = nrow;
 	  //etaX1 = etaX;
 	  //cogp1 = cogp;
+	  imod_lay1=imod ;
+
+
 
 	  h101->Fill( ilad );// 1..20
 	  h102->Fill( imod );// 1..8
+	  h102_vs_z->Fill( gZ, imod );// 1..8
 
 	  h103->Fill( gR ); // <R1> = 4.36 cm
 	  h104->Fill( gF*wt );
@@ -4653,7 +4821,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  f301->Fill( ilad );//1..44
 	  f302->Fill( imod );//1..8
 
-	  f303->Fill( gR ); // <R3> = 10.18 cm
+	  f303->Fill( gR ); //  <R3> = 10.18 cm  ->phase 10.2 R4
 	  f304->Fill( gF*wt );
 	  f305->Fill( gZ );
 
@@ -6333,6 +6501,241 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 
       if (n3*n2*n4>0){
+
+	//------------------------------------------------------------------------
+	// triplet 3+4 -> 2:
+
+	{
+	  if( jdbg ) cout << "  triplet 3+4 -> 2\n";
+
+	  double f2 = atan2( yPXB2, xPXB2 );//position angle in layer 2
+
+	  double ax = xPXB4 - xPXB3;
+	  double ay = yPXB4 - yPXB3;
+	  double aa = sqrt( ax*ax + ay*ay ); // from 2 to 3
+
+	  double xmid = 0.5 * ( xPXB3 + xPXB4 );
+	  double ymid = 0.5 * ( yPXB3 + yPXB4 );
+	  double bx = xPXB2 - xmid;
+	  double by = yPXB2 - ymid;
+	  double bb = sqrt( bx*bx + by*by ); // from mid point to point 2
+
+	  // Calculate the centre of the helix in xy-projection that
+	  // transverses the two spacepoints. The points with the same
+	  // distance from the two points are lying on a line.
+	  // LAMBDA is the distance between the point in the middle of
+	  // the two spacepoints and the centre of the helix.
+
+	  // we already have kap and rho = 1/kap
+
+	  double lam = sqrt( -0.25 + 
+			     rho*rho / ( ( xPXB3 - xPXB4 )*( xPXB3 - xPXB4 ) + ( yPXB3 - yPXB4 )*( yPXB3 - yPXB4 ) ) );
+
+	  // There are two solutions, the sign of kap gives the information
+	  // which of them is correct:
+
+	  if( kap > 0 ) lam = -lam;
+
+	  // ( X0, Y0 ) is the centre of the circle
+	  // that describes the helix in xy-projection:
+
+	  double x0 =  0.5*( xPXB3 + xPXB4 ) + lam * ( -yPXB3 + yPXB4 );
+	  double y0 =  0.5*( yPXB3 + yPXB4 ) + lam * (  xPXB3 - xPXB4 );
+
+	  // Calculate theta:
+
+	  double num = ( yPXB4 - y0 ) * ( xPXB3 - x0 ) - ( xPXB4 - x0 ) * ( yPXB3 - y0 );
+	  double den = ( xPXB3 - x0 ) * ( xPXB4 - x0 ) + ( yPXB3 - y0 ) * ( yPXB4 - y0 );
+	  double tandip = kap * ( zPXB4 - zPXB3 ) / atan( num / den );
+	  double udip = atan(tandip);
+	  //double utet = pihalf - udip;
+
+	  // To get phi0 in the right interval one must distinguish
+	  // two cases with positve and negative kap:
+
+	  double uphi;
+	  if( kap > 0 ) uphi = atan2( -x0,  y0 );
+	  else          uphi = atan2(  x0, -y0 );
+
+	  // The distance of the closest approach DCA depends on the sign
+	  // of kappa:
+
+	  double udca;
+	  if( kap > 0 ) udca = rho - sqrt( x0*x0 + y0*y0 );
+	  else          udca = rho + sqrt( x0*x0 + y0*y0 );
+
+	  // angle from first hit to dca point:
+
+	  double dphi = atan( ( ( xPXB3 - x0 ) * y0 - ( yPXB3 - y0 ) * x0 )
+			      / ( ( xPXB3 - x0 ) * x0 + ( yPXB3 - y0 ) * y0 ) );
+
+	  double uz0 = zPXB3 + tandip * dphi * rho;
+
+	  hf501->Fill( zPXB2 );
+	  hf502->Fill( uphi - iTrack->phi() );
+	  hf503->Fill( udca - iTrack->d0() );
+	  hf504->Fill( udip - iTrack->lambda() );
+	  hf505->Fill( uz0  - iTrack->dz() );
+
+	  // extrapolate to inner hit:
+	  // cirmov
+	  // we already have rinv = -kap
+
+	  double cosphi = cos(uphi);
+	  double sinphi = sin(uphi);
+	  double dp = -xPXB2*sinphi + yPXB2*cosphi + udca;
+	  double dl = -xPXB2*cosphi - yPXB2*sinphi;
+	  double sa = 2*dp + rinv * ( dp*dp + dl*dl );
+	  double dca2 = sa / ( 1 + sqrt(1 + rinv*sa) );// distance to hit 1
+	  double ud = 1 + rinv*udca;
+	  double phi2 = atan2( -rinv*xPXB2 + ud*sinphi, rinv*yPXB2 + ud*cosphi );//direction
+
+	  double phiinc = phi2 - phiN2;//angle of incidence in rphi w.r.t. normal vector
+
+	  // phiN alternates inward/outward
+	  // reduce phiinc:
+
+	  if( phiinc > pihalf ) phiinc -= pi;
+	  else if( phiinc < -pihalf ) phiinc += pi;
+
+	  // arc length:
+
+	  double xx = xPXB2 + dca2 * sin(phi2); // point on track
+	  double yy = yPXB2 - dca2 * cos(phi2);
+
+	  double f0 = uphi;//
+	  double kx = kap*xx;
+	  double ky = kap*yy;
+	  double kd = kap*udca;
+
+	  // Solve track equation for s:
+
+	  double dx = kx - (kd-1)*sin(f0);
+	  double dy = ky + (kd-1)*cos(f0);
+	  double ks = atan2( dx, -dy ) - f0;// turn angle
+
+	  //---  Limit to half-turn:
+
+	  if(      ks >  pi ) ks = ks - twopi;
+	  else if( ks < -pi ) ks = ks + twopi;
+
+	  double s = ks*rho;// signed
+	  double uz2 = uz0 + s*tandip; //track z at R2
+	  double dz2 = zPXB2 - uz2;
+
+	  if( pt > 4 ) {
+	    hf508->Fill( bb/aa );//lever arm
+	    hf509->Fill( f2*wt, phiinc*wt );
+	    hf510->Fill( dca2*1E4 );
+	    hf511->Fill( dz2*1E4 );
+	  }
+
+	  if( pt > 12 ) {
+
+	    hf520->Fill( dca2*1E4 );
+	    hf521->Fill( dz2*1E4 );
+
+	    if( abs( phi2 - phiN2 ) < pihalf ) {
+	      hf520_out->Fill( dca2*1E4 );
+	      hf521_out->Fill( dz2*1E4 );
+	    }
+	    else{
+	      hf520_in->Fill( dca2*1E4 );
+	      hf521_in->Fill( dz2*1E4 );
+	    }
+
+
+	    if( abs( phi2 - phiN2 ) < pihalf ) // outward facing module
+	      if(zPXB2 > 0){
+		hf520_out_zplus->Fill( dca2*1E4 );  
+		hf521_out_zplus->Fill( dz2*1E4 );}
+	      else{
+		hf520_out_zminus->Fill( dca2*1E4 );
+		hf521_out_zminus->Fill( dz2*1E4 );}
+	    else
+	      if(zPXB2 > 0){
+		hf520_in_zplus->Fill( dca2*1E4 );
+		hf521_in_zplus->Fill( dz2*1E4 );}
+	      else{
+		hf520_in_zminus->Fill( dca2*1E4 );
+		hf521_in_zminus->Fill( dz2*1E4 );}
+
+	    if(bb/aa >= 1.10 && bb/aa < 1.27) hf520_1->Fill(dca2*1E4);
+	    else if(bb/aa >= 1.27 && bb/aa < 1.43) hf520_2->Fill(dca2*1E4);
+	    else if(bb/aa >= 1.43 && bb/aa < 1.57) hf520_3->Fill(dca2*1E4);
+	    else if(bb/aa >= 1.57 && bb/aa < 1.80) hf520_4->Fill(dca2*1E4);
+	    else if(bb/aa >= 1.80 && bb/aa < 2.00) hf520_5->Fill(dca2*1E4);
+
+	    if( hp.trackerLayersWithMeasurement() > 8 ) {
+	      hf530->Fill( dca2*1E4 );
+	      hf531->Fill( dz2*1E4 );
+	    }
+
+	    if( phiinc*wt > -1 && phiinc*wt < 7 ){
+	      hf540->Fill( dca2*1E4 );
+	      hf541->Fill( dz2*1E4 );
+	    }
+
+	    if( nrow2 == 1 ) hf542->Fill( dca2*1E4 );
+	    else {
+	      if( nrow2 == 2 ) hf543->Fill( dca2*1E4 );
+	      else {
+		if( nrow2 == 3 ) hf544->Fill( dca2*1E4 );
+		else hf545->Fill( dca2*1E4 );
+	      }
+	    }
+
+	    if( nrow2 == 2 && nrow2 == 2 && nrow3 == 2 ) hf546->Fill( dca2*1E4 );
+
+	  }//pt>12
+
+	  // residual profiles: alignment check
+
+	  if( pt > 4 ) {
+	    hf512->Fill( f2*wt, dca2*1E4 );
+	    hf513->Fill( f2*wt, dz2*1E4 );
+
+	    hf514->Fill( zPXB2, dca2*1E4 );
+	    hf515->Fill( zPXB2, dz2*1E4 );
+	  }
+	  hf516->Fill( logpt, dca2*1E4 );
+	  hf517->Fill( logpt, dz2*1E4 );
+	  if( iTrack->charge() > 0 ) hf518->Fill( logpt, dca2*1E4 );
+	  else hf519->Fill( logpt, dca2*1E4 );
+
+	  // profile of abs(dca) gives mean abs(dca):
+	  // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2) 
+	  // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
+	  // point resolution = 1/sqrt(3/2) * triplet middle residual width
+	  // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
+
+	  if( pt > 4 ) {
+
+	    hf522->Fill( f2*wt, abs(dca2)*1E4 );
+	    hf523->Fill( f2*wt, abs(dz2)*1E4 );
+
+	    hf524->Fill( zPXB2, abs(dca2)*1E4 );
+	    hf525->Fill( zPXB2, abs(dz2)*1E4 );
+
+	    hf528->Fill( udip*wt, abs(dca2)*1E4 );
+	    hf529->Fill( udip*wt, abs(dz2)*1E4 );
+	    if( abs(dip)*wt > 18 && abs(dip)*wt < 50 ) hf532->Fill( dz2*1E4 );
+
+	    hf534->Fill( phiinc*wt, abs(dca2)*1E4 );
+
+	  }//pt
+
+	  if( pt > 0.8 && pt < 1.2 ) { // low pt
+	    hf535->Fill( f2*wt, abs(dca2)*1E4 );
+	  }
+	  hf526->Fill( logpt, abs(dca2)*1E4 );
+	  hf527->Fill( logpt, abs(dz2)*1E4 );
+	  if( abs(dip)*wt > 18 && abs(dip)*wt < 50 ) hf533->Fill( logpt, abs(dz2)*1E4 );
+	}
+
+
+
+
 	{
 	  if( jdbg ) cout << "  triplet 2+3 -> 4\n";
 
@@ -6579,6 +6982,9 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 
       if( n3*n2*n4 > 0 ) {
+
+
+
 
       	{ // let's open a scope, so we can redefine the variables further down
 	  
@@ -8796,13 +9202,67 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  h520->Fill( dca1*1E4 );
 	  h521->Fill( dz1*1E4 );
 
+
+	  if(imod_lay1==1){
+	    h520_mod1->Fill( dca1*1E4 );
+	    h521_mod1->Fill( dz1*1E4 );
+	  }
+	  if(imod_lay1==2){
+	    h520_mod2->Fill( dca1*1E4 );
+	    h521_mod2->Fill( dz1*1E4 );
+	  }
+	  if(imod_lay1==3){
+	    h520_mod3->Fill( dca1*1E4 );
+	    h521_mod3->Fill( dz1*1E4 );
+	  }
+	  if(imod_lay1==4){
+	    h520_mod4->Fill( dca1*1E4 );
+	    h521_mod4->Fill( dz1*1E4 );
+	  }
+	  if(imod_lay1==5){
+	    h520_mod5->Fill( dca1*1E4 );
+	    h521_mod5->Fill( dz1*1E4 );
+	  }
+	  if(imod_lay1==6){
+	    h520_mod6->Fill( dca1*1E4 );
+	    h521_mod6->Fill( dz1*1E4 );
+	  }
+	  if(imod_lay1==7){
+	    h520_mod6->Fill( dca1*1E4 );
+	    h521_mod6->Fill( dz1*1E4 );
+	  }
+	  if(imod_lay1==8){
+	    h520_mod8->Fill( dca1*1E4 );
+	    h521_mod8->Fill( dz1*1E4 );
+	  }
+
 	  if( abs( phi1 - phiN1 ) < pihalf ) {
 	    h520_out->Fill( dca1*1E4 );
 	    h521_out->Fill( dz1*1E4 );
+	    
+	    if (imod_lay1 == 4 || imod_lay1 == 5){
+		h520_centr_out->Fill( dca1*1E4 );
+		h521_centr_out->Fill( dz1*1E4 );
+	      }else{
+		h520_fwd_out->Fill( dca1*1E4 );
+		h521_fwd_out->Fill( dz1*1E4 );
+	      }	
+
 	    }
 	    else{
 	      h520_in->Fill( dca1*1E4 );
 	      h521_in->Fill( dz1*1E4 );
+
+
+
+	      if (imod_lay1 == 4 || imod_lay1 == 5){
+		h520_centr_in->Fill( dca1*1E4 );
+		h521_centr_in->Fill( dz1*1E4 );
+	      }else{
+		h520_fwd_in->Fill( dca1*1E4 );
+		h521_fwd_in->Fill( dz1*1E4 );
+	      }	
+
 	    }
 
 
@@ -8878,6 +9338,26 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  h524->Fill( zPXB1, abs(dca1)*1E4 );
 	  h525->Fill( zPXB1, abs(dz1)*1E4 );
 
+
+	  if( abs( phi1 - phiN1 ) < pihalf ) {
+	    h524_out->Fill(  zPXB1, abs(dca1)*1E4  );
+	    h525_out->Fill(  zPXB1, abs(dz1)*1E4 );
+	    h514_out->Fill( zPXB1, dca1*1E4 );
+	    h515_out->Fill( zPXB1, dz1*1E4 );
+	    cout << "out modules at R" << sqrt(xPXB1*xPXB1+yPXB1*yPXB1)<<endl;
+	  }
+	  else{
+	    h524_in->Fill(  zPXB1, abs(dca1)*1E4);
+	    h525_in->Fill(  zPXB1, abs(dz1)*1E4 );
+	    h514_in->Fill( zPXB1, dca1*1E4 );
+	    h515_in->Fill( zPXB1, dz1*1E4 );
+	    cout << "in modules at R" << sqrt(xPXB1*xPXB1+yPXB1*yPXB1)<<endl;
+       
+
+	  }
+	  
+
+
 	  h528->Fill( udip*wt, abs(dca1)*1E4 );
 	  h529->Fill( udip*wt, abs(dz1)*1E4 );
 	  if( abs(dip)*wt > 18 && abs(dip)*wt < 50 ) h532->Fill( dz1*1E4 );
@@ -8894,6 +9374,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	if( abs(dip)*wt > 18 && abs(dip)*wt < 50 ) h533->Fill( logpt, abs(dz1)*1E4 );
       }
 
+
+   
       //------------------------------------------------------------------------
       // triplet 1+2 -> 3:
 
