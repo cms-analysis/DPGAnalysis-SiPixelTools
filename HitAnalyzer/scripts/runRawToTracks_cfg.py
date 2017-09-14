@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
-
-process = cms.Process("MyRawToTracks")
+from Configuration.StandardSequences.Eras import eras
+process = cms.Process("MyRawToTracks",eras.Run2_2017)
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
@@ -29,7 +29,10 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag.globaltag = 'GR_E_V48'
 #process.GlobalTag.globaltag = 'GR_P_V56' # works for 2469763
 #process.GlobalTag.globaltag = 'GR_P_V56' # for 247607
-process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v9' # for 251643
+#process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v9' # for 251643
+# 2017
+#process.GlobalTag.globaltag = '92X_dataRun2_Express_v2' # fpr 90W 
+process.GlobalTag.globaltag = '92X_dataRun2_Express_v7' # from CMSSW927
 
 import HLTrigger.HLTfilters.hltHighLevel_cfi as hlt
 # accept if 'path_1' succeeds
@@ -57,20 +60,24 @@ process.hltfilter = hlt.hltHighLevel.clone(
     throw = False
     )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10))
 
 process.source = cms.Source("PoolSource",
 # fileNames =  cms.untracked.vstring('file:rawdata.root')
 fileNames =  cms.untracked.vstring(
 #"root://eoscms//eos/cms/store/data/Run2015C/ZeroBias/RAW/v1/000/254/227/00000/FA244051-8141-E511-B22B-02163E014153.root",
 
-"/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/0E6E4ACA-4F5A-E611-97B5-FA163E1E4ACD.root",
+
+"/store/express/Run2017D/ExpressPhysics/FEVT/Express-v1/000/302/131/00000/000109B7-6C8E-E711-89D1-02163E019CD2.root",
+
+#"/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/0E6E4ACA-4F5A-E611-97B5-FA163E1E4ACD.root",
 
  )
 #   skipEvents = cms.untracked.uint32(5000)
 )
 
-process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('278193:77-278193:9999')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('278193:77-278193:9999')
+process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('302131:34-302131:943')
 
 # for Raw2digi for data
 process.siPixelDigis.InputLabel = 'rawDataCollector'
@@ -96,7 +103,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 # pixel local reco (RecHits) needs the GenError object,
 # not yet in GT, add here:
 # DB stuff 
-useLocalDBGain = True
+useLocalDBGain = False
 if useLocalDBGain :
     process.DBReaderGain = cms.ESSource("PoolDBESSource",
      DBParameters = cms.PSet(
@@ -160,8 +167,8 @@ process.out = cms.OutputModule("PoolOutputModule",
 
 
 process.d = cms.EDAnalyzer("PixClustersWithTracks",
-    Verbosity = cms.untracked.bool(False),
-    src = cms.InputTag("generalTracks"),
+    Verbosity = cms.untracked.bool(True),
+    src = cms.InputTag("generalTracks::MyRawToTracks"),
 #     PrimaryVertexLabel = cms.untracked.InputTag("offlinePrimaryVertices"),                             
 #     trajectoryInput = cms.string("TrackRefitterP5")
 #     trajectoryInput = cms.string('cosmictrackfinderP5')
@@ -215,20 +222,22 @@ process.reconstruction_step = cms.Path(process.reconstruction)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.RECOoutput_step = cms.EndPath(process.out)
 process.d_step = cms.Path(process.d)
+process.filter_step = cms.Path(process.hltfilter)
 
 # Schedule definition
 # producing root files with tracks
 #process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.endjob_step,process.RECOoutput_step)
 # producing track histos 
-process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.d_step)
+#process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.d_step)
+process.schedule = cms.Schedule(process.filter_step,process.raw2digi_step,process.reconstruction_step,process.d_step)
 
 # customisation of the process.
 
 # Automatic addition of the customisation function from SLHCUpgradeSimulations.Configuration.postLS1Customs
-from SLHCUpgradeSimulations.Configuration.postLS1Customs import customisePostLS1 
+#from SLHCUpgradeSimulations.Configuration.postLS1Customs import customisePostLS1 
 
 #call to customisation function customisePostLS1 imported from SLHCUpgradeSimulations.Configuration.postLS1Customs
-process = customisePostLS1(process)
+#process = customisePostLS1(process)
 
 
 #process.ep = cms.EndPath(process.out)

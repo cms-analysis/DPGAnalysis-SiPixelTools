@@ -62,23 +62,62 @@ process.hltfilter = hlt.hltHighLevel.clone(
     throw = False
     )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10))
 
 process.source = cms.Source("PoolSource",
  fileNames =  cms.untracked.vstring(
 
+#"/store/express/Run2017D/ExpressPhysics/FEVT/Express-v1/000/302/635/00000/00557625-B197-E711-BAA2-02163E01472C.root",
+
+"/store/express/Run2017D/ExpressPhysics/FEVT/Express-v1/000/302/131/00000/000109B7-6C8E-E711-89D1-02163E019CD2.root",
+#"/store/express/Run2017D/ExpressPhysics/FEVT/Express-v1/000/302/131/00000/00A7004D-7A8E-E711-BF2A-02163E01A3D2.root",
 
 
-"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/633/00000/0085677A-AC7B-E711-B37E-02163E01A1C6.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/301/142/00000/0008C605-0881-E711-84A2-02163E019C07.root",
 
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/301/046/00000/0A7942B4-FF7E-E711-AC5D-02163E019DBF.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/301/046/00000/0CD9AD7D-047F-E711-AA0B-02163E012933.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/301/046/00000/0E68A37C-067F-E711-9B9D-02163E019E0C.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/301/046/00000/105E523A-067F-E711-896E-02163E01A57C.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/301/046/00000/10D3C051-067F-E711-AD30-02163E01A5E0.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/301/046/00000/129BEE40-067F-E711-89B1-02163E01359A.root",
+
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/300/773/00000/02DBAD4C-AE7C-E711-B44F-02163E019DD0.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/300/773/00000/04985C0E-B17C-E711-8A86-02163E0146AC.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/300/773/00000/0A141D71-B17C-E711-991B-02163E019E22.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/300/773/00000/0E5A4992-B07C-E711-953F-02163E01A20D.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/300/773/00000/0E9C9D97-B07C-E711-851A-02163E01A5EB.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/300/773/00000/12A4804B-AE7C-E711-BB91-02163E014505.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/300/773/00000/1A38FCB6-B27C-E711-BC22-02163E01A2D8.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/300/773/00000/3079B880-B27C-E711-8917-02163E012510.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/300/773/00000/30CA51CC-B37C-E711-AE4A-02163E011DD4.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/300/773/00000/3E248E7C-AF7C-E711-BA93-02163E0134FB.root",
+
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/300/742/00000/00538B29-837C-E711-BCD7-02163E011F61.root",
+
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/633/00000/0085677A-AC7B-E711-B37E-02163E01A1C6.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/000EC621-B57A-E711-80D2-02163E0141D3.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/515/00000/0006E53E-F579-E711-B581-02163E0143DC.root",
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/233/00000/062F0768-5676-E711-B303-02163E014626.root",
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/226/00000/02BBC9F3-2F76-E711-B29A-02163E019C08.root",
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/155/00000/0052B596-8F75-E711-B704-02163E011C13.root",
-
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/122/00000/001BAA8B-BA74-E711-9564-02163E01A3CB.root",
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/122/00000/02F7A4F5-E074-E711-AAF3-02163E0133FC.root",
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/088/00000/003E6DDF-4974-E711-A723-02163E0133C2.root",
 
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/299/649/00000/FEF76138-1B70-E711-94DF-02163E011DDE.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/299/616/00000/001C4B9E-066F-E711-9ED0-02163E011EB4.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/299/594/00000/000BD417-7F6E-E711-8EB8-02163E019DC2.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/299/478/00000/0221EEC7-5C6D-E711-B39F-02163E014767.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/299/381/00000/02F106ED-456C-E711-9FC0-02163E011EB4.root",
+
+
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v2/000/298/678/00000/00A4CE1A-0B65-E711-8233-02163E013475.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v2/000/298/678/00000/02433A2E-0E65-E711-B34B-02163E01A5E2.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v2/000/298/678/00000/028A1E69-1165-E711-8007-02163E019CBC.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v2/000/298/678/00000/029792F3-0A65-E711-AA15-02163E01A5AC.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v2/000/298/678/00000/0647C47B-0B65-E711-A5EC-02163E019DE0.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v2/000/298/678/00000/06B69CAC-0B65-E711-BB99-02163E013475.root",
 
 # time 
 #"/store/express/Run2017A/ExpressPhysics/FEVT/Express-v2/000/296/902/00000/008557CF-BE51-E711-A29A-02163E01A4E0.root",
@@ -138,6 +177,12 @@ process.source = cms.Source("PoolSource",
  )
 )
 
+
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('124230:26-124230:9999','124030:2-124030:9999')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('301046:153-301046:9999')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('298678:43-298678:45')
+
+
 # for Raw2digi for data
 process.siPixelDigis.InputLabel = 'rawDataCollector'
 #process.siStripDigis.ProductLabel = 'rawDataCollector'
@@ -186,21 +231,22 @@ if useLocalDB :
      ),
      toGet = cms.VPSet(
        cms.PSet(
-        record = cms.string('SiPixelGainCalibrationOfflineRcd'),
-#        record = cms.string('SiPixelGainCalibrationRcd'),
-#        tag = cms.string('SiPixelGainCalibration_2017_v4')
-        tag = cms.string('SiPixelGainCalibration_2017_v2_offline')
+#        record = cms.string('SiPixelGainCalibrationOfflineRcd'),
+        record = cms.string('SiPixelGainCalibrationRcd'),
+        tag = cms.string('SiPixelGainCalibration_2017_v4')
+#        tag = cms.string('SiPixelGainCalibration_2017_v2_offline')
 #        tag = cms.string('SiPixelGainCalibration_2017_v3_offline')
 #        tag = cms.string('SiPixelGainCalibration_2017_v4_offline')
 #        tag = cms.string('SiPixelGainCalibration_2017_v4_1337_offline')
-        #tag = cms.string('SiPixelGainCalibration_phase1_ideal_v2')
+#        tag = cms.string('SiPixelGainCalibration_phase1_ideal_v2')
  	),
        ),
-#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v4_full.db')
+     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v4_full.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v4_1337_offline.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v4_offline.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v3_offline.db')
-     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v2_offline.db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v2_offline.db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_phase1_ideal_v2.db')
 #     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
 #     connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
     ) # end process
@@ -221,10 +267,12 @@ process.siPixelDigis.UsePhase1 = True
 #process.siPixelClustersPreSplitting.VCaltoElectronOffset = -60
 #process.siPixelClustersPreSplitting.VCaltoElectronGain_L1 = 47  # default
 #process.siPixelClustersPreSplitting.VCaltoElectronOffset_L1 = -60
+#process.siPixelClustersPreSplitting.SeedThreshold = 3
 process.siPixelClustersPreSplitting.SeedThreshold = 1000
 process.siPixelClustersPreSplitting.ChannelThreshold = 2 #must be bigger than 1
-process.siPixelClustersPreSplitting.ClusterThreshold = 1 # integer?
-process.siPixelClustersPreSplitting.ClusterThreshold_L1 = 1 # integer?
+process.siPixelClustersPreSplitting.ClusterThreshold = 1000    # integer?
+process.siPixelClustersPreSplitting.ClusterThreshold_L1 = 1000 # integer?
+#process.siPixelClustersPreSplitting.payloadType = cms.string('Full')
 
 
 process.a = cms.EDAnalyzer("PixDigisTest",

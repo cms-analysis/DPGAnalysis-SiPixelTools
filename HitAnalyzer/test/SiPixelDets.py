@@ -38,16 +38,18 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 # 
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
-process.GlobalTag.globaltag = '92X_dataRun2_Express_v2' # 
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')  # phase 0
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '') # phase 0
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '') # phase 1 WRONG in 92X
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '') # phase 1 OK
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '') # phase 1
+#process.GlobalTag.globaltag = '92X_dataRun2_Express_v7' # 
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) )
 
 
 process.source = cms.Source("EmptySource",
-   firstRun = cms.untracked.uint32(296000), #must be number from phase1 2017
+   firstRun = cms.untracked.uint32(302000), #must be number from phase1 2017
 )
  	      
 # FileService is mandatory, as the following analyzer module 

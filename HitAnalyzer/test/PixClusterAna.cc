@@ -86,6 +86,7 @@
 #include <TH2F.h>
 #include <TH1F.h>
 #include <TProfile.h>
+#include <TProfile2D.h>
 #include <TVector3.h>
 
 #define NEW_ID
@@ -104,8 +105,8 @@ using namespace std;
 //#define HLT
 #define PV
 #define BX_TESTS
-#define STUDY_LAY1
-//#define SINGLE_MODULES
+//#define STUDY_LAY1
+#define SINGLE_MODULES
 #define PHI_PROFILES
 //#define TEST_GEOM
 #define TEST_DCOLS
@@ -122,6 +123,8 @@ using namespace std;
 //#define BX_NEW
 
 //#define HF
+
+#define TESTING_ADC
 
 #ifdef HF
 #include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
@@ -583,7 +586,7 @@ edm::EDGetTokenT<HFRecHitCollection> HFHitsToken_;
     *hsizey1,*hsizey2,*hsizey3,*hsizey4;
 
   TH1D *hcharge11, *hcharge12, *hpixcharge11, *hpixcharge12;
-
+  TH1D *hcharge1_zoom, *hpixcharge1_zoom;
 
   TH1D *hcols11,*hcols12,*hrows11; 
   TH1D *hcols21,*hrows21; 
@@ -600,18 +603,25 @@ edm::EDGetTokenT<HFRecHitCollection> HFHitsToken_;
 
   TH1D *hpixDiskR1,*hpixDiskR2,*hpixDiskR3; // *hdetr, *hdetz;
 
-  TH2F *hDetsMap1, *hDetsMap2, *hDetsMap3,*hDetsMap4;    // all modules
-  TH2F *hDetMap1,  *hDetMap2,  *hDetMap3, *hDetMap4;     // all modules
-  TH2F *hpDetMap1, *hpDetMap2, *hpDetMap3,*hpDetMap4;    // all modules
-  //TH2F *hl1DetMap1, *hl1DetMap2, *hl1DetMap3; // link 1
-  //TH2F *hl2DetMap1, *hl2DetMap2, *hl2DetMap3; // link 2
-  TH2F *hsizeDetMap1, *hsizeDetMap2, *hsizeDetMap3, *hsizeDetMap4;
-  //TH2F *hpDetMapE1, *hpDetMapE2, *hpDetMapE3; // all modules
-  //TH2F *hsizeXDetMap1, *hsizeXDetMap2, *hsizeXDetMap3;
-  //TH2F *hsizeYDetMap1, *hsizeYDetMap2, *hsizeYDetMap3;
+  TH2F *hDets1, *hDets2, *hDets3,*hDets4;    // all modules
+  TH2F *hcluDets1,  *hcluDets2,  *hcluDets3, *hcluDets4;     // all modules
+  TH2F *hpixDets1, *hpixDets2, *hpixDets3,*hpixDets4;    // all modules
+  TH2F *hsizeDets1, *hsizeDets2, *hsizeDets3, *hsizeDets4;
 
-  TH2F *hpixDetMap1, *hpixDetMap2, *hpixDetMap3, *hpixDetMap4;  // in a  modules
-  TH2F *hcluDetMap1, *hcluDetMap2, *hcluDetMap3, *hcluDetMap4; // in a  modules 
+  TH2F *hpixDetMap1, *hpixDetMap2, *hpixDetMap3, *hpixDetMap4;  //in a  modules
+  TH2F *hcluDetMap1, *hcluDetMap2, *hcluDetMap3, *hcluDetMap4;  //in a  modules 
+
+
+#ifdef TESTING_ADC
+  TH2F *hpixDetsT1, *hpixDetsT2, *hpixDetsT3,*hpixDetsT4;    // all modules
+  TH2F *hpixDetMapT1, *hpixDetMapT2, *hpixDetMapT3, *hpixDetMapT4;  //in a  modules
+
+  TProfile2D *hsizeDetT1, *hsizeDetT2, *hsizeDetT3, *hsizeDetT4;
+  TProfile2D *hcluDetT1, *hcluDetT2, *hcluDetT3, *hcluDetT4;     
+  TH1D *hchargeT1, *hsizeT1 , *hchargeT12_1 , *hchargeT12_2; 
+
+  TH1D *hclusPerDetT1, *hpixPerDetT1;
+#endif
 
   TH1D *hevent, *hlumi, *hlumi0,*hlumi1,*hlumi10; //*hlumi11, *hlumi12, *hlumi13, *hlumi14;
   TH1D *hbx, *hbx0;
@@ -916,8 +926,12 @@ void PixClusterAna::beginJob() {
   hclusPerDet4 = fs->make<TH1D>( "hclusPerDet4", "Clus per det l4",
 			    sizeH, lowH, highH);
 
-  sizeH=1000;
+  sizeH=500;
+#ifdef HI
   highH = 1999.5;
+#else
+  highH = 999.5;
+#endif
   hpixPerDet1 = fs->make<TH1D>( "hpixPerDet1", "Pix per det l1",
 			    sizeH, lowH, highH);
   hpixPerDet2 = fs->make<TH1D>( "hpixPerDet2", "Pix per det l2",
@@ -960,14 +974,8 @@ void PixClusterAna::beginJob() {
   hpixPerDet44 = fs->make<TH1D>( "hpixPerDet44", "Pix per det l4 - ring 4",
 			    sizeH, lowH, highH);
 
-  sizeH=1000;
-  highH = 999.5;
-  //hpixPerLink1 = fs->make<TH1D>( "hpixPerLink1", "Pix per link l1",
-  //			    sizeH, lowH, highH);
-  //hpixPerLink2 = fs->make<TH1D>( "hpixPerLink2", "Pix per link l2",
-  //			    sizeH, lowH, highH);
-  //hpixPerLink3 = fs->make<TH1D>( "hpixPerLink3", "Pix per link l3",
-  //			    sizeH, lowH, highH);
+  //sizeH=1000;
+  //highH = 999.5;
 
   sizeH=10000;
 #ifdef HI
@@ -1085,6 +1093,7 @@ void PixClusterAna::beginJob() {
   lowH = 0.;
   highH = 400.0; // charge limit in kelec
   hcharge1 = fs->make<TH1D>( "hcharge1", "Clu charge l1", sizeH, 0.,highH); //in ke
+  hcharge1_zoom = fs->make<TH1D>( "hcharge1_zoom", "Clu charge l1", 500, 0.,10.); //in ke
   hcharge2 = fs->make<TH1D>( "hcharge2", "Clu charge l2", sizeH, 0.,highH);
   hcharge3 = fs->make<TH1D>( "hcharge3", "Clu charge l3", sizeH, 0.,highH);
   hcharge4 = fs->make<TH1D>( "hcharge4", "Clu charge l4", sizeH, 0.,highH);
@@ -1099,6 +1108,7 @@ void PixClusterAna::beginJob() {
   sizeH=  400; // 600
   highH = 100.0; // charge limit in kelec
   hpixcharge1 = fs->make<TH1D>( "hpixcharge1", "Pix charge l1",sizeH, 0.,highH);//in ke
+  hpixcharge1_zoom = fs->make<TH1D>( "hpixcharge1_zoom", "Pix charge l1",4000, 0.,4.);//in ke
   hpixcharge2 = fs->make<TH1D>( "hpixcharge2", "Pix charge l2",sizeH, 0.,highH);
   hpixcharge3 = fs->make<TH1D>( "hpixcharge3", "Pix charge l3",sizeH, 0.,highH);
   hpixcharge4 = fs->make<TH1D>( "hpixcharge4", "Pix charge l4",sizeH, 0.,highH);
@@ -1165,60 +1175,60 @@ void PixClusterAna::beginJob() {
 
 
   // dets hit per event
-  hDetsMap1 = fs->make<TH2F>("hDetsMap1"," hit modules per event",
+  hDets1 = fs->make<TH2F>("hDets1"," hit modules per event",
 			     9,-4.5,4.5,13,-6.5,6.5);
-  hDetsMap1->SetOption("colz");
-  hDetsMap2 = fs->make<TH2F>("hDetsMap2"," hit modules per event",
+  hDets1->SetOption("colz");
+  hDets2 = fs->make<TH2F>("hDets2"," hit modules per event",
 			     9,-4.5,4.5,29,-14.5,14.5);
-  hDetsMap2->SetOption("colz");
-  hDetsMap3 = fs->make<TH2F>("hDetsMap3"," hit modules per event",
+  hDets2->SetOption("colz");
+  hDets3 = fs->make<TH2F>("hDets3"," hit modules per event",
 			     9,-4.5,4.5,45,-22.5,22.5);
-  hDetsMap3->SetOption("colz");
-  hDetsMap4 = fs->make<TH2F>("hDetsMap4"," hit modules per event",
+  hDets3->SetOption("colz");
+  hDets4 = fs->make<TH2F>("hDets4"," hit modules per event",
 			     9,-4.5,4.5,65,-32.5,32.5);
-  hDetsMap4->SetOption("colz");
+  hDets4->SetOption("colz");
 
   // clus per det
-  hDetMap1 = fs->make<TH2F>("hDetMap1"," clusters per event",
+  hcluDets1 = fs->make<TH2F>("hcluDets1"," clusters per event",
 			    9,-4.5,4.5,13,-6.5,6.5);
-  hDetMap1->SetOption("colz");
-  hDetMap2 = fs->make<TH2F>("hDetMap2"," clusters per event",
+  hcluDets1->SetOption("colz");
+  hcluDets2 = fs->make<TH2F>("hcluDets2"," clusters per event",
 			    9,-4.5,4.5,29,-14.5,14.5);
-  hDetMap2->SetOption("colz");
-  hDetMap3 = fs->make<TH2F>("hDetMap3"," clusters per event",
+  hcluDets2->SetOption("colz");
+  hcluDets3 = fs->make<TH2F>("hcluDets3"," clusters per event",
 			    9,-4.5,4.5,45,-22.5,22.5);
-  hDetMap3->SetOption("colz");
-  hDetMap4 = fs->make<TH2F>("hDetMap4"," clusters per event",
+  hcluDets3->SetOption("colz");
+  hcluDets4 = fs->make<TH2F>("hcluDets4"," clusters per event",
 			    9,-4.5,4.5,65,-32.5,32.5);
-  hDetMap4->SetOption("colz");
+  hcluDets4->SetOption("colz");
 
   // pix per det
-  hpDetMap1 = fs->make<TH2F>("hpDetMap1"," pixels per event",
+  hpixDets1 = fs->make<TH2F>("hpixDets1"," pixels per event",
 			     9,-4.5,4.5,13,-6.5,6.5);
-  hpDetMap1->SetOption("colz");
-  hpDetMap2 = fs->make<TH2F>("hpDetMap2"," pixels per event",
+  hpixDets1->SetOption("colz");
+  hpixDets2 = fs->make<TH2F>("hpixDets2"," pixels per event",
 			     9,-4.5,4.5,29,-14.5,14.5);
-  hpDetMap2->SetOption("colz");
-  hpDetMap3 = fs->make<TH2F>("hpDetMap3"," pixels per event",
+  hpixDets2->SetOption("colz");
+  hpixDets3 = fs->make<TH2F>("hpixDets3"," pixels per event",
 			     9,-4.5,4.5,45,-22.5,22.5);
-  hpDetMap3->SetOption("colz");
-  hpDetMap4 = fs->make<TH2F>("hpDetMap4"," pixels per event",
+  hpixDets3->SetOption("colz");
+  hpixDets4 = fs->make<TH2F>("hpixDets4"," pixels per event",
 			     9,-4.5,4.5,65,-32.5,32.5);
-  hpDetMap4->SetOption("colz");
+  hpixDets4->SetOption("colz");
 
   // clu size per det
-  hsizeDetMap1 = fs->make<TH2F>("hsizeDetMap1"," cluster size",
+  hsizeDets1 = fs->make<TH2F>("hsizeDets1"," cluster size",
 				9,-4.5,4.5,13,-6.5,6.5);
-  hsizeDetMap1->SetOption("colz");
-  hsizeDetMap2 = fs->make<TH2F>("hsizeDetMap2"," cluster size",
+  hsizeDets1->SetOption("colz");
+  hsizeDets2 = fs->make<TH2F>("hsizeDets2"," cluster size",
 				9,-4.5,4.5,29,-14.5,14.5);
-  hsizeDetMap2->SetOption("colz");
-  hsizeDetMap3 = fs->make<TH2F>("hsizeDetMap3"," cluster size",
+  hsizeDets2->SetOption("colz");
+  hsizeDets3 = fs->make<TH2F>("hsizeDets3"," cluster size",
 				9,-4.5,4.5,45,-22.5,22.5);
-  hsizeDetMap3->SetOption("colz");
-  hsizeDetMap4 = fs->make<TH2F>("hsizeDetMap4"," cluster size",
+  hsizeDets3->SetOption("colz");
+  hsizeDets4 = fs->make<TH2F>("hsizeDets4"," cluster size",
 				9,-4.5,4.5,65,-32.5,32.5);
-  hsizeDetMap4->SetOption("colz");
+  hsizeDets4->SetOption("colz");
 
   // pix in all dets (superimposed)
   hpixDetMap1 = fs->make<TH2F>( "hpixDetMap1", "pix in det layer 1",
@@ -1233,6 +1243,7 @@ void PixClusterAna::beginJob() {
   hpixDetMap4 = fs->make<TH2F>( "hpixDetMap4", "pix in det layer 4",
 		      416,0.,416.,160,0.,160.);
   hpixDetMap4->SetOption("colz");
+
   // clus in all dets (superimposed)
   hcluDetMap1 = fs->make<TH2F>( "hcluDetMap1", "clu in det layer 1",
 				416,0.,416.,160,0.,160.);
@@ -1256,6 +1267,61 @@ void PixClusterAna::beginJob() {
 			     56,-28.,28.,14,0.5,14.5);
   hsizeyz4 = fs->make<TH2F>( "hsizeyz4", "sizy vs z for layer 4",
 			     56,-28.,28.,14,0.5,14.5);
+
+#ifdef TESTING_ADC
+
+  //TH1D *hclusPerDetT1, *hpixPerDetT1;
+  hclusPerDetT1 = fs->make<TH1D>( "hclusPerDetT1", "Clus per det l1",
+				 200, -0.5, 199.5);
+  hpixPerDetT1 = fs->make<TH1D>( "hpixPerDetT1", "Pix per det l1",
+				 500, -0.5,999.5);
+
+  // hchargeT1, hsizeT1 , hchargeT12_1 , hchargeT12_2  
+  sizeH= 400;
+  highH = 400.0; // charge limit in kelec
+  hchargeT1 = fs->make<TH1D>( "hchargeT1", "Clu charge l1", sizeH, 0.,highH); //in
+  sizeH=300;
+  highH = 299.5; // charge limit in kelec
+  hsizeT1 = fs->make<TH1D>( "hsizeT1", "layer 1 clu size",sizeH,-0.5,highH);
+
+  hchargeT12_1    = fs->make<TH1D>( "hchargeT12_1", "Clu charge l2_1", 400, 0.,400.);
+  hchargeT12_2    = fs->make<TH1D>( "hchargeT12_2", "Clu charge l2_1", 400, 0.,400.);
+
+  // pix per det
+  hpixDetsT1 = fs->make<TH2F>("hpixDetsT1"," pixels per event",
+			     9,-4.5,4.5,13,-6.5,6.5);
+  hpixDetsT1->SetOption("colz");
+  // hpixDetsT2 = fs->make<TH2F>("hpixDetsT2"," pixels per event",
+  // 			     9,-4.5,4.5,29,-14.5,14.5);
+  // hpixDetsT2->SetOption("colz");
+  // hpixDetsT3 = fs->make<TH2F>("hpixDetsT3"," pixels per event",
+  // 			     9,-4.5,4.5,45,-22.5,22.5);
+  // hpixDetsT3->SetOption("colz");
+  // hpixDetsT4 = fs->make<TH2F>("hpixDetsT4"," pixels per event",
+  // 			     9,-4.5,4.5,65,-32.5,32.5);
+  // hpixDetsT4->SetOption("colz");
+
+  // pixel in modules 
+  hpixDetMapT1 = fs->make<TH2F>( "hpixDetMapT1", "pix in det layer 1",
+		      416,0.,416.,160,0.,160.);
+  hpixDetMapT1->SetOption("colz");
+  // hpixDetMapT2 = fs->make<TH2F>( "hpixDetMapT2", "pix in det layer 2",
+  // 		      416,0.,416.,160,0.,160.);
+  // hpixDetMapT2->SetOption("colz");
+  // hpixDetMapT3 = fs->make<TH2F>( "hpixDetMapT3", "pix in det layer 3",
+  // 		      416,0.,416.,160,0.,160.);
+  // hpixDetMapT3->SetOption("colz");
+  // hpixDetMapT4 = fs->make<TH2F>( "hpixDetMapT4", "pix in det layer 4",
+  // 		      416,0.,416.,160,0.,160.);
+  // hpixDetMapT4->SetOption("colz");
+
+  hsizeDetT1 = fs->make<TProfile2D>("hsizeDetT", "clus size",
+				    9,-4.5,4.5,13,-6.5,6.5,0.,10000.);
+  hcluDetT1 = fs->make<TProfile2D>("hcluDetT", "clus char",
+				    9,-4.5,4.5,13,-6.5,6.5,0.,100000.);
+
+#endif
+
 
    hclumult1 = fs->make<TProfile>("hclumult1","cluster size layer 1",560,-28.,28.,0.0,100.);
    hclumult2 = fs->make<TProfile>("hclumult2","cluster size layer 2",560,-28.,28.,0.0,100.);
@@ -1735,10 +1801,10 @@ void PixClusterAna::endJob(){
   if(countEvents==0) return;
 
   //Divide the size histos
-  hsizeDetMap1->Divide(hsizeDetMap1,hDetMap1,1.,1.);
-  hsizeDetMap2->Divide(hsizeDetMap2,hDetMap2,1.,1.);
-  hsizeDetMap3->Divide(hsizeDetMap3,hDetMap3,1.,1.);
-  hsizeDetMap4->Divide(hsizeDetMap4,hDetMap4,1.,1.);
+  hsizeDets1->Divide(hsizeDets1,hcluDets1,1.,1.);
+  hsizeDets2->Divide(hsizeDets2,hcluDets2,1.,1.);
+  hsizeDets3->Divide(hsizeDets3,hcluDets3,1.,1.);
+  hsizeDets4->Divide(hsizeDets4,hcluDets4,1.,1.);
 
   // rescale if histos 
   hladder1id->Scale(norm);
@@ -1785,18 +1851,18 @@ void PixClusterAna::endJob(){
   hrows4->Scale(norm);
 
   // Rescale all 2D plots
-  hDetsMap1->Scale(norm);
-  hDetsMap2->Scale(norm);
-  hDetsMap3->Scale(norm);
-  hDetsMap4->Scale(norm);
-  hDetMap1->Scale(norm);
-  hDetMap2->Scale(norm);
-  hDetMap3->Scale(norm);
-  hDetMap4->Scale(norm);
-  hpDetMap1->Scale(norm);
-  hpDetMap2->Scale(norm);
-  hpDetMap3->Scale(norm);
-  hpDetMap4->Scale(norm);
+  hDets1->Scale(norm);
+  hDets2->Scale(norm);
+  hDets3->Scale(norm);
+  hDets4->Scale(norm);
+  hcluDets1->Scale(norm);
+  hcluDets2->Scale(norm);
+  hcluDets3->Scale(norm);
+  hcluDets4->Scale(norm);
+  hpixDets1->Scale(norm);
+  hpixDets2->Scale(norm);
+  hpixDets3->Scale(norm);
+  hpixDets4->Scale(norm);
   hpixDetMap1->Scale(norm);
   hpixDetMap2->Scale(norm);
   hpixDetMap3->Scale(norm);
@@ -1814,6 +1880,11 @@ void PixClusterAna::endJob(){
   hrocLadder1->Scale(norm);
   hrocZ11->Scale(norm);
   hrocZ12->Scale(norm);
+
+#ifdef TESTING_ADC
+  hpixDetsT1->Scale(norm);
+  hpixDetMap1->Scale(norm);
+#endif
 
 #ifdef ROC_EFF
   // Do this only if there is enough statistics
@@ -2463,6 +2534,9 @@ void PixClusterAna::analyze(const edm::Event& e,
     //int rows = theGeomDet->specificTopology().nrows();
     
     const PixelTopology * topol = &(theGeomDet->specificTopology());
+#ifdef TESTING_ADC            
+      bool detWithNegativeADC = false;
+#endif
 
     // barrel ids
     unsigned int layerC=0;
@@ -2606,7 +2680,9 @@ void PixClusterAna::analyze(const edm::Event& e,
 
       bool edgeHitX2 = false; // edge method moved 
       bool edgeHitY2 = false; // to topologu class
-            
+#ifdef TESTING_ADC            
+      bool cluWithNegativeADC = false;
+#endif
       if(PRINT || select) cout<<numberOfClusters<<" "<<ch<<" "<<size<<" "<<sizeX<<" "<<sizeY<<" "
 		    <<x<<" "<<y<<" "<<minPixelRow<<" "<<maxPixelRow<<" "<<minPixelCol<<" "
 		    <<maxPixelCol<<" "<<edgeHitX<<" "<<edgeHitY<<endl;
@@ -2649,7 +2725,13 @@ void PixClusterAna::analyze(const edm::Event& e,
 	numberOfPixels++;
 	float pixx = pixelsVec[i].x; // index as float=iteger, row index
 	float pixy = pixelsVec[i].y; // same, col index
-	float adc = (float(pixelsVec[i].adc)/1000.);
+	float intADC = pixelsVec[i].adc;
+	float adc = (float(intADC)/1000.);
+
+#ifdef TESTING_ADC
+	bool negativeADC = (intADC<=100); // signals that there was negative charge 
+	if(negativeADC) {cluWithNegativeADC= true; detWithNegativeADC= true;}
+#endif
 
 	int roc = rocId(int(pixy),int(pixx));  // 0-15, column, row
 	int link = int(roc/8); // link 0 & 1
@@ -2676,10 +2758,11 @@ void PixClusterAna::analyze(const edm::Event& e,
 	    numOfPixPerDet1++;
 	    numOfPixPerLay1++;     
 	    hpixcharge1->Fill(adc);
+	    hpixcharge1_zoom->Fill(adc);
  	    htest2->Fill(adc,float(size));
 
 	    hpixDetMap1->Fill(pixy,pixx);
-	    hpDetMap1->Fill(float(module),float(ladder));
+	    hpixDets1->Fill(float(module),float(ladder));
 	    hpladder1id->Fill(float(ladder));
 	    hpz1id->Fill(float(module));
 
@@ -2699,9 +2782,15 @@ void PixClusterAna::analyze(const edm::Event& e,
 	    else      {hpixcharge12->Fill(adc); hrocZ12->Fill(tmp1);}  
 
 #ifdef PHI_PROFILES
-	  hpixcharPhi1->Fill(gPhi,adc);
+	    hpixcharPhi1->Fill(gPhi,adc);
 #endif 
 
+#ifdef TESTING_ADC
+	    if(negativeADC)  {
+	      hpixDetsT1->Fill(float(module),float(ladder));
+	      hpixDetMapT1->Fill(pixy,pixx);
+	    }
+#endif
 
 #ifdef STUDY_LAY1
 	    if(size==1) {
@@ -2720,15 +2809,17 @@ void PixClusterAna::analyze(const edm::Event& e,
 	      }
 	    } // size=1/2
 #endif
+
 #ifdef SINGLE_MODULES
 	    float weight = 1.; // adc
-	    if     (eventFlag[0]&&ladder==3 && module==4) hpixDetMap10->Fill(pixy,pixx,weight); // 
-	    else if(eventFlag[1]&&ladder==1 && module==-2) hpixDetMap11->Fill(pixy,pixx,weight); // " 
-	    else if(eventFlag[2]&&ladder==5 && module==-3) hpixDetMap12->Fill(pixy,pixx,weight); // "
+	    if     (eventFlag[0]&&ladder==1 && module==1) hpixDetMap10->Fill(pixy,pixx,weight); // 
+	    else if(eventFlag[1]&&ladder==2 && module==3) hpixDetMap11->Fill(pixy,pixx,weight); // " 
 
-	    else if(eventFlag[3]&&ladder==4 && module==4) hpixDetMap13->Fill(pixy,pixx,weight); // 
-	    else if(eventFlag[4]&&ladder==5 && module==4) hpixDetMap14->Fill(pixy,pixx,weight); // 
-	    else if(eventFlag[5]&&ladder==6 && module==4) hpixDetMap15->Fill(pixy,pixx,weight); // 
+	    else if(eventFlag[2]&&ladder==3 && module==-1) hpixDetMap12->Fill(pixy,pixx,weight); // "
+	    else if(eventFlag[3]&&ladder==3 && module== 3) hpixDetMap13->Fill(pixy,pixx,weight); // 
+	    else if(eventFlag[4]&&ladder==5 && module==-4) hpixDetMap14->Fill(pixy,pixx,weight); // 
+	    else if(eventFlag[5]&&ladder==5 && module== 2) hpixDetMap15->Fill(pixy,pixx,weight); //
+ 
 	    else if(eventFlag[6]&&ladder==1 && module==-4) hpixDetMap16->Fill(pixy,pixx,weight); //
 	    else if(eventFlag[7]&&ladder==2 && module==-4) hpixDetMap17->Fill(pixy,pixx,weight); // 
 	    else if(eventFlag[8]&&ladder==1 && module== 4) hpixDetMap18->Fill(pixy,pixx,weight); // lowest thr 
@@ -2817,7 +2908,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 	    hprows2->Fill(pixx);
 	    hpixcharge2->Fill(adc);
 	    hpixDetMap2->Fill(pixy,pixx);
-	    hpDetMap2->Fill(float(module),float(ladder));
+	    hpixDets2->Fill(float(module),float(ladder));
 	    hpladder2id->Fill(float(ladder));
 	    hpz2id->Fill(float(module));
  
@@ -2826,7 +2917,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 	    //if(link==0)      hl1DetMap2->Fill(float(module),float(ladder));
 
 	    //else if(link==1) hl2DetMap2->Fill(float(module),float(ladder));
-	    //if(isBig) hpDetMapE2->Fill(float(module),float(ladder));
+	    //if(isBig) hpixDetsE2->Fill(float(module),float(ladder));
 	    //module2[int(pixx)][int(pixy)]++;
 	    float tmp1= float(module) - 0.5 + (0.125/2.) + (float(rocInCol) * 0.125); 
 	    float tmp2= float(ladder) - 0.5 + (0.5/2.)   + (float(link) * 0.5); 
@@ -2854,11 +2945,11 @@ void PixClusterAna::analyze(const edm::Event& e,
 #endif
 
 #ifdef SINGLE_MODULES
-	    if     (ladder== -1 && module==-2) hpixDetMap20->Fill(pixy,pixx); // noise  
-	    else if(ladder==  1 && module==-2) hpixDetMap21->Fill(pixy,pixx); // "
-	    else if(ladder== -2 && module== 2) hpixDetMap22->Fill(pixy,pixx); // "
-	    else if(ladder== 13 && module==-1) hpixDetMap23->Fill(pixy,pixx); // 
+	    if     (ladder==  3 && module== 1) hpixDetMap20->Fill(pixy,pixx); // noise  
+	    else if(ladder==  3 && module== 2) hpixDetMap21->Fill(pixy,pixx); // "
+	    else if(ladder==  3 && module== 3) hpixDetMap22->Fill(pixy,pixx); // "
 
+	    else if(ladder== 13 && module==-1) hpixDetMap23->Fill(pixy,pixx); // 
 	    else if(ladder==-14 && module== 1) hpixDetMap24->Fill(pixy,pixx); // 
 	    else if(ladder==-14 && module== 1) hpixDetMap25->Fill(pixy,pixx); // 
 	    else if(ladder== -4 && module== 1) hpixDetMap26->Fill(pixy,pixx); //  
@@ -2911,14 +3002,14 @@ void PixClusterAna::analyze(const edm::Event& e,
 	    numOfPixPerLay3++;
 	    hpixcharge3->Fill(adc);
 	    hpixDetMap3->Fill(pixy,pixx);
-	    hpDetMap3->Fill(float(module),float(ladder));
+	    hpixDets3->Fill(float(module),float(ladder));
 	    hpladder3id->Fill(float(ladder));
 	    hpz3id->Fill(float(module));
 
  	    htest4->Fill(adc,float(size));
 	    //if(link==0)      hl1DetMap3->Fill(float(module),float(ladder));
 	    //else if(link==1) hl2DetMap3->Fill(float(module),float(ladder));
-	    //if(isBig) hpDetMapE3->Fill(float(module),float(ladder));
+	    //if(isBig) hpixDetsE3->Fill(float(module),float(ladder));
 	    //module3[int(pixx)][int(pixy)]++;
 	    float tmp1= float(module) - 0.5 + (0.125/2.) + (float(rocInCol) * 0.125); 
 	    float tmp2= float(ladder) - 0.5 + (0.5/2.)   + (float(link) * 0.5); 
@@ -2999,7 +3090,7 @@ void PixClusterAna::analyze(const edm::Event& e,
  
 	    hpixcharge4->Fill(adc);
 	    hpixDetMap4->Fill(pixy,pixx);
-	    hpDetMap4->Fill(float(module),float(ladder));
+	    hpixDets4->Fill(float(module),float(ladder));
 	    hpladder4id->Fill(float(ladder));
 	    hpz4id->Fill(float(module));
 	    float tmp1= float(module) - 0.5 + (0.125/2.) + (float(rocInCol) * 0.125); 
@@ -3022,10 +3113,10 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 
 #ifdef SINGLE_MODULES
-	    if     (ladder== 16 && module==-3) hpixDetMap40->Fill(pixy,pixx); // noise 
-	    else if(ladder==  5 && module==-4) hpixDetMap41->Fill(pixy,pixx); // "
-	    else if(ladder==  8 && module== 3) hpixDetMap42->Fill(pixy,pixx); // "
-	    else if(ladder==-24 && module== 1) hpixDetMap43->Fill(pixy,pixx); // "
+	    if     (ladder==  6 && module== 1) hpixDetMap40->Fill(pixy,pixx); // noise 
+	    else if(ladder==  6 && module== 2) hpixDetMap41->Fill(pixy,pixx); // "
+	    else if(ladder==  6 && module== 3) hpixDetMap42->Fill(pixy,pixx); // "
+	    else if(ladder==  6 && module== 4) hpixDetMap43->Fill(pixy,pixx); // "
 	    else if(ladder==-27 && module== 1) hpixDetMap44->Fill(pixy,pixx); // " 
 	    else if(ladder==  3 && module==-4) hpixDetMap45->Fill(pixy,pixx); // " 
 	    else if(ladder== 31 && module==-1) hpixDetMap46->Fill(pixy,pixx); // "
@@ -3092,8 +3183,8 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 	if(layer==1) {  // layer 1
 	  
-	  hDetMap1->Fill(float(module),float(ladder));
-	  hsizeDetMap1->Fill(float(module),float(ladder),float(size));
+	  hcluDets1->Fill(float(module),float(ladder));
+	  hsizeDets1->Fill(float(module),float(ladder),float(size));
 	  hladder1id->Fill(float(ladder));
 	  hz1id->Fill(float(module));
 	  hcols1->Fill(y);
@@ -3105,6 +3196,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 	  hcluDetMap1->Fill(y,x);
 
 	  hcharge1->Fill(ch);
+	  hcharge1_zoom->Fill(ch);
 	  hsize1->Fill(float(size));
 	  hsizex1->Fill(float(sizeX));
 	  hsizey1->Fill(float(sizeY));
@@ -3116,6 +3208,25 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 	  if(inner) {hcharge11->Fill(ch);}  
 	  else      {hcharge12->Fill(ch);}  
+
+#ifdef TESTING_ADC
+	  if(cluWithNegativeADC) {
+	    hcluDetT1->Fill(float(module),float(ladder),ch);
+	    hsizeDetT1->Fill(float(module),float(ladder),float(size));
+
+	    hchargeT1->Fill(ch);
+	    hsizeT1->Fill(float(size));
+
+	    if((sizeX==2) && (sizeY==2)) {
+	      if( (minPixelCol%2)==0 ) hchargeT12_1->Fill(ch);  //1st pixel in 1st col of dcol  
+	      else                     hchargeT12_2->Fill(ch);  //1st pixel in 2nd col of dcol  
+	    } else if((sizeX==1) && (sizeY==2)) {
+	      if( (minPixelCol%2)==0 ) hchargeT12_1->Fill(ch);  //1st pixel in 1st col of dcol  
+	      else                     hchargeT12_2->Fill(ch);  //1st pixel in 2nd col of dcol  
+	    } // size=1/2
+
+	  }
+#endif
 
 #ifdef STUDY_LAY1
 	    if(size==1) {
@@ -3214,8 +3325,8 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 	} else if(layer==2) {
 
-	  hDetMap2->Fill(float(module),float(ladder));
-	  hsizeDetMap2->Fill(float(module),float(ladder),float(size));
+	  hcluDets2->Fill(float(module),float(ladder));
+	  hsizeDets2->Fill(float(module),float(ladder),float(size));
 	  hladder2id->Fill(float(ladder));
 	  hz2id->Fill(float(module));
 	  //hsizeXDetMap2->Fill(float(module),float(ladder),float(sizeX));
@@ -3309,8 +3420,8 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 	} else if(layer==3) {
 
-	  hDetMap3->Fill(float(module),float(ladder));
-	  hsizeDetMap3->Fill(float(module),float(ladder),float(size));
+	  hcluDets3->Fill(float(module),float(ladder));
+	  hsizeDets3->Fill(float(module),float(ladder),float(size));
 	  hladder3id->Fill(float(ladder));
 	  hz3id->Fill(float(module));
 	  hcols3->Fill(y);
@@ -3395,8 +3506,8 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 	  htest3->Fill(ch,float(size));
 
-	  hDetMap4->Fill(float(module),float(ladder));
-	  hsizeDetMap4->Fill(float(module),float(ladder),float(size));
+	  hcluDets4->Fill(float(module),float(ladder));
+	  hsizeDets4->Fill(float(module),float(ladder),float(size));
 	  hladder4id->Fill(float(ladder));
 	  hz4id->Fill(float(module));
 	  hcols4->Fill(y);
@@ -3509,13 +3620,19 @@ void PixClusterAna::analyze(const edm::Event& e,
 	hclusPerDet1->Fill(float(numOfClustersPerDet1));
 	hpixPerDet1->Fill(float(numOfPixPerDet1));
 	if(numOfPixPerDet1>maxPixPerDet) maxPixPerDet = numOfPixPerDet1;  
-	hDetsMap1->Fill(float(module),float(ladder));
+	hDets1->Fill(float(module),float(ladder));
 
 	if(abs(module)==1)      hpixPerDet11->Fill(float(numOfPixPerDet1));
 	else if(abs(module)==2) hpixPerDet12->Fill(float(numOfPixPerDet1));
 	else if(abs(module)==3) hpixPerDet13->Fill(float(numOfPixPerDet1));
 	else if(abs(module)==4) hpixPerDet14->Fill(float(numOfPixPerDet1));
 
+#ifdef TESTING_ADC
+	  if(detWithNegativeADC) {
+	    hclusPerDetT1->Fill(float(numOfClustersPerDet1));
+	    hpixPerDetT1->Fill(float(numOfPixPerDet1));
+	  }
+#endif
 	numOfClustersPerDet1=0;        
 	numOfPixPerDet1=0;
 
@@ -3525,7 +3642,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 	hclusPerDet2->Fill(float(numOfClustersPerDet2));
 	hpixPerDet2->Fill(float(numOfPixPerDet2));
 	if(numOfPixPerDet2>maxPixPerDet) maxPixPerDet = numOfPixPerDet2;  
-	hDetsMap2->Fill(float(module),float(ladder));
+	hDets2->Fill(float(module),float(ladder));
 
 	if(abs(module)==1)      hpixPerDet21->Fill(float(numOfPixPerDet2));
 	else if(abs(module)==2) hpixPerDet22->Fill(float(numOfPixPerDet2));
@@ -3541,7 +3658,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 	hclusPerDet3->Fill(float(numOfClustersPerDet3));
 	hpixPerDet3->Fill(float(numOfPixPerDet3));
 	if(numOfPixPerDet3>maxPixPerDet) maxPixPerDet = numOfPixPerDet3;  
-	hDetsMap3->Fill(float(module),float(ladder));
+	hDets3->Fill(float(module),float(ladder));
 
 	if(abs(module)==1)      hpixPerDet31->Fill(float(numOfPixPerDet3));
 	else if(abs(module)==2) hpixPerDet32->Fill(float(numOfPixPerDet3));
@@ -3557,7 +3674,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 	hclusPerDet4->Fill(float(numOfClustersPerDet4));
 	hpixPerDet4->Fill(float(numOfPixPerDet4));
 	if(numOfPixPerDet3>maxPixPerDet) maxPixPerDet = numOfPixPerDet4;  
-	hDetsMap4->Fill(float(module),float(ladder));
+	hDets4->Fill(float(module),float(ladder));
 
 	numOfClustersPerDet4=0;
 	numOfPixPerDet4=0;        

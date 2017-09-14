@@ -98,7 +98,7 @@
 #define HISTOS
 #define L1
 #define HLT
-//#define SINGLE_MODULES
+#define SINGLE_MODULES
 #define DCOLS
 
 using namespace std;
@@ -603,7 +603,7 @@ void PixDigisTest::beginJob() {
   hadc0bx = fs->make<TProfile>("hadc0bx","adc0 vs bx",4000,-0.5,3999.5,0.,255.);
 
 #ifdef DCOLS 
-  hDcolsCount = fs->make<TH1F>( "hDcolsCount", "Counts per dcol in all events",400,0.,4000.);
+  hDcolsCount = fs->make<TH1F>( "hDcolsCount", "Counts per dcol per event",500,0.,5.);
   hAllDcols   = fs->make<TH1F>( "hAllDcols", "hits per dcol",50000,0.,50000.);
 #endif
 
@@ -986,12 +986,12 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	   hadc1bx->Fill(float(bx),float(adc));
 
 #ifdef SINGLE_MODULES
-	    if     ( ladder==3 && module==4) hpixDetMap10->Fill(pixy,pixx,weight); // 
-	    else if( ladder==1 && module==-2) hpixDetMap11->Fill(pixy,pixx,weight); // " 
-	    else if( ladder==5 && module==-3) hpixDetMap12->Fill(pixy,pixx,weight); // "
-	    else if( ladder==4 && module==4) hpixDetMap13->Fill(pixy,pixx,weight); // 
-	    else if( ladder==5 && module==4) hpixDetMap14->Fill(pixy,pixx,weight); // 
-	    else if( ladder==6 && module==4) hpixDetMap15->Fill(pixy,pixx,weight); // 
+	    if     ( ladder==1 && module== 1) hpixDetMap10->Fill(pixy,pixx,weight); // 
+	    else if( ladder==2 && module== 3) hpixDetMap11->Fill(pixy,pixx,weight); // " 
+	    else if( ladder==3 && module==-1) hpixDetMap12->Fill(pixy,pixx,weight); // "
+	    else if( ladder==3 && module== 3) hpixDetMap13->Fill(pixy,pixx,weight); // 
+	    else if( ladder==5 && module==-4) hpixDetMap14->Fill(pixy,pixx,weight); // 
+	    else if( ladder==5 && module== 2) hpixDetMap15->Fill(pixy,pixx,weight); // 
 	    else if( ladder==1 && module==-4) hpixDetMap16->Fill(pixy,pixx,weight); //
 	    else if( ladder==2 && module==-4) hpixDetMap17->Fill(pixy,pixx,weight); // 
 	    else if( ladder==3 && module==-4) hpixDetMap18->Fill(pixy,pixx,weight); // 
@@ -1036,9 +1036,9 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	 } // noise 
 
 #ifdef SINGLE_MODULES
-	 if( ladder==-1 && module==-2) hpixDetMap20->Fill(pixy,pixx,weight); // 
-	 else if( ladder==1  && module==-2) hpixDetMap21->Fill(pixy,pixx,weight); // 
-	 else if( ladder==-2 && module== 2) hpixDetMap22->Fill(pixy,pixx,weight); // 
+	 if     ( ladder== 3 && module== 1) hpixDetMap20->Fill(pixy,pixx,weight); // 
+	 else if( ladder== 3 && module== 2) hpixDetMap21->Fill(pixy,pixx,weight); // 
+	 else if( ladder== 3 && module== 3) hpixDetMap22->Fill(pixy,pixx,weight); // 
 	 else if( ladder==13 && module==-1) hpixDetMap23->Fill(pixy,pixx,weight); //
 	 else if( ladder==-3 && module==4) hpixDetMap24->Fill(pixy,pixx,weight); //
 	 else if( ladder==-4 && module==4) hpixDetMap25->Fill(pixy,pixx,weight); // 
@@ -1085,10 +1085,10 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	   numOfDigisPerDet4++;
 	 } // noise
 #ifdef SINGLE_MODULES
-	 if     ( ladder==16 && module==-3) hpixDetMap40->Fill(pixy,pixx,weight); // 
-	 else if( ladder== 5 && module==-4) hpixDetMap41->Fill(pixy,pixx,weight); // 
-	 else if( ladder== 8 && module== 3) hpixDetMap42->Fill(pixy,pixx,weight); // 
-	 else if( ladder==-24&& module== 1) hpixDetMap43->Fill(pixy,pixx,weight); // 
+	 if     ( ladder== 6 && module== 1) hpixDetMap40->Fill(pixy,pixx,weight); // 
+	 else if( ladder== 6 && module== 2) hpixDetMap41->Fill(pixy,pixx,weight); // 
+	 else if( ladder== 6 && module== 3) hpixDetMap42->Fill(pixy,pixx,weight); // 
+	 else if( ladder== 6 && module== 4) hpixDetMap43->Fill(pixy,pixx,weight); // 
 	 else if( ladder==-27 && module==1) hpixDetMap44->Fill(pixy,pixx,weight); // 
 	 else if( ladder== 3 && module==-4) hpixDetMap45->Fill(pixy,pixx,weight); // 
 #endif
@@ -1377,13 +1377,13 @@ void PixDigisTest::endJob(){
 	  int count = dCols[ind][roc][dcol];
 	  rocCount += count;
 #ifdef DCOLS
-	  hDcolsCount->Fill(float(count));
+	  hDcolsCount->Fill(float(count)/float(count3));
 #endif
 	  if(count==0) {
 	    emptyCols++;
 	    //cout<<" empty dcol "<<dcol<<" "<<roc<<" "<<ind<<" "
 	    //	<<validIndex(ind,true)<<endl;
-	  } else if(count>2000) {
+	  } else if( (float(count)/float(count3)) >20) {
 	    cout<<" hot dcol "<<count<<" "<<dcol<<" "
 		<<roc<<" "<<ind<<endl;
 	    //} else {

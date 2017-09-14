@@ -30,18 +30,22 @@ using namespace std;
 SiPixelGainsDBReader::SiPixelGainsDBReader(const edm::ParameterSet& conf): conf_(conf) {
 
   std::string payloadType = conf_.getParameter<std::string>("payloadType");
-  cout<<" type = "<<payloadType<<" sim/reco = "<<  conf_.getParameter<bool>("useSimRcd") <<endl;
+  PRINT       = conf_.getParameter<bool>("verbose");
+  bool simRcd = conf_.getParameter<bool>("useSimRcd");
+  cout<<" type = "<<payloadType<<" sim/reco = "<< simRcd<<" PRINT = "<<PRINT <<endl;
 
   if (strcmp(payloadType.c_str(), "HLT") == 0) { // HLT
-    if( conf_.getParameter<bool>("useSimRcd") )  //Sim
+    if( simRcd )  //Sim
       SiPixelGainCalibrationService_ = new  SiPixelGainCalibrationForHLTSimService(conf_);
     else
       SiPixelGainCalibrationService_ = new SiPixelGainCalibrationForHLTService(conf_);
+
   } else if (strcmp(payloadType.c_str(), "Offline") == 0) {  // Offline 
-    if(conf_.getParameter<bool>("useSimRcd"))  //Sim
+    if(simRcd)  //Sim
       SiPixelGainCalibrationService_ = new SiPixelGainCalibrationOfflineSimService(conf_);
     else
       SiPixelGainCalibrationService_ = new SiPixelGainCalibrationOfflineService(conf_);
+
   } else if (strcmp(payloadType.c_str(), "Full") == 0) { //Full, not used at the moment
     SiPixelGainCalibrationService_ = new SiPixelGainCalibrationService(conf);
   }
@@ -51,6 +55,9 @@ SiPixelGainsDBReader::SiPixelGainsDBReader(const edm::ParameterSet& conf): conf_
 void
 SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   
+  //const bool PRINT = false;
+  const bool phase1=true;
+  cout<<PRINT<<endl;
 
   //Create Subdirectories
   edm::Service<TFileService> fs;
@@ -137,8 +144,6 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   tree->Branch("gain_rms",&gainrmsfortree,"gain_rms/D");
 
   // Loop over DetId's
-  const bool PRINT = true;
-  const bool phase1=true;
   int ibin = 1;
   for (std::vector<uint32_t>::const_iterator detid_iter=vdetId_.begin();detid_iter!=vdetId_.end();detid_iter++){
     bool select = false;
@@ -167,6 +172,7 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     const PixelTopology & topol = pixDet->specificTopology();       
 
     int layer = -1;
+    string name;
     if ( detIdObject.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel) ) { // BPIX
       // new indecies 
       // Barell layer = 1,2,3
@@ -189,7 +195,7 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
       layer  = pbn.layerName();
       int module = pbn.moduleName();
       //bool half  = pbn.isHalfModule();
-      string name= pbn.name();
+      name= pbn.name();
       //PixelModuleName::ModuleType moduleType = pbn.moduleType();
 
       // Shell { mO = 1, mI = 2 , pO =3 , pI =4 };
@@ -297,8 +303,14 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 	   _TH1F_Gains_fpix->Fill(gain);
 	   _TH1F_Pedestals_fpix->Fill(ped);
 	 }
+
 	 if(PRINT && select && (col_iter%10==0) && (row_iter%20==0) ) 
-	    std::cout <<" DetId "<<detid<<" Col "<<col_iter<<" Row "<<row_iter
+	   std::cout <<" DetId "<<detid<<" "<<name<<" Col "<<col_iter<<" Row "<<row_iter
+		     <<" Ped "<<ped<<" Gain "<<gain<<std::endl;	 
+	 if( (detid==303054856 && col_iter==109 && row_iter==49 ) || 
+	     (detid==303046684 && col_iter==150 && row_iter==65 ) ||
+	     (detid==303042580 && col_iter==94 && row_iter==137 ) ) 
+	   std::cout <<" DetId "<<detid<<" "<<name<<" Col "<<col_iter<<" Row "<<row_iter
 	    <<" Ped "<<ped<<" Gain "<<gain<<std::endl;	 
        }
     }

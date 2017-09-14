@@ -56,16 +56,31 @@ process.TFileService = cms.Service("TFileService",
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring( 
 
-"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/04BBD43B-0876-E711-8C3E-02163E0119F7.root",
-"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/04CC776E-0376-E711-850D-02163E0141D5.root",
-"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/0624BE8A-0A76-E711-9D53-02163E011825.root",
-"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/086C8B4F-0676-E711-8081-02163E01A20D.root",
-"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/1C743D35-1676-E711-B5A3-02163E013412.root",
-"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/1EF32E71-0376-E711-B413-02163E011B72.root",
-"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/206382F8-0676-E711-B222-02163E011D78.root",
-"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/22A3A271-0376-E711-9918-02163E013734.root",
-"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/24C3FE4A-0676-E711-8961-02163E01A5FB.root",
-"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/288C0969-0676-E711-A54D-02163E01384A.root",
+
+"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/301/465/00000/00D3F7BD-8A85-E711-918E-02163E01A37A.root",
+
+
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/300/773/00000/02DBAD4C-AE7C-E711-B44F-02163E019DD0.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/300/773/00000/04985C0E-B17C-E711-8A86-02163E0146AC.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/300/773/00000/0A141D71-B17C-E711-991B-02163E019E22.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/300/773/00000/0E5A4992-B07C-E711-953F-02163E01A20D.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/300/773/00000/0E9C9D97-B07C-E711-851A-02163E01A5EB.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/300/773/00000/12A4804B-AE7C-E711-BB91-02163E014505.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/300/773/00000/1A38FCB6-B27C-E711-BC22-02163E01A2D8.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/300/773/00000/3079B880-B27C-E711-8917-02163E012510.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/300/773/00000/30CA51CC-B37C-E711-AE4A-02163E011DD4.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/300/773/00000/3E248E7C-AF7C-E711-BA93-02163E0134FB.root",
+
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/04BBD43B-0876-E711-8C3E-02163E0119F7.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/04CC776E-0376-E711-850D-02163E0141D5.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/0624BE8A-0A76-E711-9D53-02163E011825.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/086C8B4F-0676-E711-8081-02163E01A20D.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/1C743D35-1676-E711-B5A3-02163E013412.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/1EF32E71-0376-E711-B413-02163E011B72.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/206382F8-0676-E711-B222-02163E011D78.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/22A3A271-0376-E711-9918-02163E013734.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/24C3FE4A-0676-E711-8961-02163E01A5FB.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v1/000/300/211/00000/288C0969-0676-E711-A54D-02163E01384A.root",
 
 # "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v2/000/296/702/00000/FED4EA05-D64F-E711-82F9-02163E012A6B.root",
 
@@ -101,7 +116,7 @@ process.d = cms.EDAnalyzer("FindHotPixelFromRaw",
 #    InputLabel = cms.untracked.string('siPixelRawData'),
     CheckPixelOrder = cms.untracked.bool(False),
 #   Fraction to define  noisy pixels 
-    Fraction = cms.untracked.double(0.02)
+    Fraction = cms.untracked.double(0.05)
 )
 
 process.p = cms.Path(process.hltfilter*process.d)

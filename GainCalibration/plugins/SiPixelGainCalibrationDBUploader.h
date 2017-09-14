@@ -71,7 +71,7 @@ class SiPixelGainCalibrationDBUploader : public edm::EDAnalyzer {
   bool appendMode_;
   SiPixelGainCalibration *theGainCalibrationDbInput_;
   SiPixelGainCalibrationOffline *theGainCalibrationDbInputOffline_;
-  SiPixelGainCalibrationOffline *theGainCalibrationDbInputOfflinePhase1_;
+  //SiPixelGainCalibrationPhase1Offline *theGainCalibrationDbInputPhase1Offline_;
   SiPixelGainCalibrationForHLT *theGainCalibrationDbInputHLT_;
   SiPixelGainCalibrationService theGainCalibrationDbInputService_;
   TH2F *defaultGain_;

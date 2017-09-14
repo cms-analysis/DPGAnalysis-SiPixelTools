@@ -3,10 +3,9 @@
 # 
 #
 ##############################################################################
-
 import FWCore.ParameterSet.Config as cms
-
-process = cms.Process("ClusTest")
+from Configuration.StandardSequences.Eras import eras
+process = cms.Process("ClusTest",eras.Run2_2017)
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 #process.load("Configuration.Geometry.GeometryIdeal_cff")
@@ -24,9 +23,9 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
 # 2017, cannot use this rag for dump files, picks up phase0 geom?
-#process.GlobalTag.globaltag = '92X_dataRun2_Express_v2' # 
+process.GlobalTag.globaltag = '92X_dataRun2_Express_v7' # 
 
 # clusterizer 
 process.load("RecoLocalTracker.Configuration.RecoLocalTracker_cff")
@@ -49,31 +48,29 @@ process.maxEvents = cms.untracked.PSet(
 )
 
 process.MessageLogger = cms.Service("MessageLogger",
-    debugModules = cms.untracked.vstring('SiPixelClusterizer'),
+    debugModules = cms.untracked.vstring('ClusTest'),
     destinations = cms.untracked.vstring('cout'),
 #    destinations = cms.untracked.vstring("log","cout"),
     cout = cms.untracked.PSet(
 #       threshold = cms.untracked.string('INFO')
 #       threshold = cms.untracked.string('ERROR')
         threshold = cms.untracked.string('WARNING')
-    )
+    ) # ,
 #    log = cms.untracked.PSet(
 #        threshold = cms.untracked.string('DEBUG')
 #    )
 )
 
+#process.load("DPGAnalysis-SiPixelTools/PixelDumpDataInputSource/PixelDumpDataInputSource_cfi")
+
 # read from dmp files 
 #process.source = cms.Source("PixelSLinkDataInputSource",
 process.source = cms.Source("PixelDumpDataInputSource",
     fedid = cms.untracked.int32(-1),
-    runNumber = cms.untracked.int32(-1),
-    #fileNames = cms.untracked.vstring('file:/afs/cern.ch/user/d/dkotlins/WORK/dmp/PixelAlive_1200_1298.dmp')
-#    fileNames = cms.untracked.vstring('file:/afs/cern.ch/user/d/dkotlins/WORK/dmp/PixelAlive_1200_1294.dmp')
-#    fileNames = cms.untracked.vstring('file:/afs/cern.ch/user/d/dkotlins/WORK/dmp/PixelAlive_1200_1295.dmp')
-    fileNames = cms.untracked.vstring('file:/afs/cern.ch/user/d/dkotlins/WORK/dmp/PixelAlive_1200_1293.dmp')
-    #fileNames = cms.untracked.vstring('file:/afs/cern.ch/user/d/dkotlins/WORK/dmp/PixelAlive_1200_1018.dmp')
+    runNumber = cms.untracked.int32(500000),  # force the run number, for GTs IOV
+#    fileNames = cms.untracked.vstring('file:/afs/cern.ch/user/d/dkotlins/WORK/dmp/PixelAlive_1203_1542.dmp')
     #fileNames = cms.untracked.vstring('file:/afs/cern.ch/user/d/dkotlins/WORK/dmp/SCurve_1200_1242.dmp')
-#    fileNames = cms.untracked.vstring('file:/afs/cern.ch/user/d/dkotlins/WORK/gain/GainCalibration_1200_1092.dmp')
+    fileNames = cms.untracked.vstring('file:/afs/cern.ch/user/d/dkotlins/WORK/dmp/GainCalibration_1203_1396.dmp')
     )
 
 
@@ -86,7 +83,7 @@ process.source = cms.Source("PixelDumpDataInputSource",
 #)
 
 # DB stuff 
-useLocalDB = True
+useLocalDB = False
 if useLocalDB :
 # Frontier 
     process.DBReaderFrontier = cms.ESSource("PoolDBESSource",
@@ -124,9 +121,9 @@ if useLocalDB :
 #     connect = cms.string('sqlite_file:siPixelGenErrors38T.db')
      connect = cms.string('sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_2017_v2_offline.db')
     ) # end process
+    process.myprefer = cms.ESPrefer("PoolDBESSource","DBReaderFrontier")
 # endif
  
-process.myprefer = cms.ESPrefer("PoolDBESSource","DBReaderFrontier")
 
 
 #process.PoolDBESSource = cms.ESSource("PoolDBESSource",
@@ -188,6 +185,31 @@ process.analysisDig = cms.EDAnalyzer("PixDigisTest",
     src = cms.InputTag("siPixelDigis"),
 )
 
+process.d = cms.EDAnalyzer("SiPixelRawDump", 
+    Timing = cms.untracked.bool(False),
+    IncludeErrors = cms.untracked.bool(True),
+#   In 2015 data, label = rawDataCollector, extension = _LHC                                
+#    InputLabel = cms.untracked.string('rawDataCollector'),
+# for MC
+#    InputLabel = cms.untracked.string('siPixelRawData'),
+#   For PixelLumi stream                           
+#    InputLabel = cms.untracked.string('hltFEDSelectorLumiPixels'),
+
+# for dump files 
+    InputLabel = cms.untracked.string('source'),
+# old
+#    InputLabel = cms.untracked.string('siPixelRawData'),
+#    InputLabel = cms.untracked.string('source'),
+#    InputLabel = cms.untracked.string("ALCARECOTkAlMinBias"), # does not work
+
+    CheckPixelOrder = cms.untracked.bool(False),
+# 0 - nothing, 1 - error , 2- data, 3-headers, 4-hex
+    Verbosity = cms.untracked.int32(3),
+# threshold, print fed/channel num of errors if tot_errors > events * PrintThreshold, default 0,001 
+    PrintThreshold = cms.untracked.double(0.01)
+)
+
+
 
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string('histo.root')
@@ -195,13 +217,13 @@ process.TFileService = cms.Service("TFileService",
 
 # My 
 # modify clusterie parameters
-#process.siPixelClustersPreSplitting.ClusterThreshold = 4000.0
-#process.siPixelClustersPreSplitting.SeedThreshold = 1000
-#process.siPixelClustersPreSplitting.ChannelThreshold = 2 #must be bigger than 1
-#process.siPixelClustersPreSplitting.ClusterThreshold = 1.0
 # this is to see the charge in units of vcalHigh
-process.siPixelClustersPreSplitting.VCaltoElectronGain = 125 #  47
-process.siPixelClustersPreSplitting.VCaltoElectronOffset = 0 # -60
+#process.siPixelClustersPreSplitting.VCaltoElectronGain = 125 #  47
+#process.siPixelClustersPreSplitting.VCaltoElectronOffset = 0 # -60
+process.siPixelClustersPreSplitting.SeedThreshold = 10 # to get 100
+process.siPixelClustersPreSplitting.ChannelThreshold = 2 #must be bigger than 1
+process.siPixelClustersPreSplitting.ClusterThreshold = 10    # integer?
+process.siPixelClustersPreSplitting.ClusterThreshold_L1 = 10 # integer?
 
 
 # RAW
@@ -216,8 +238,9 @@ process.siPixelDigis.UsePhase1 = cms.bool(True)
 #process.siPixelClusters.src = 'siPixelDigis'
 
 
+#process.p1 = cms.Path(process.d*process.siPixelDigis*process.analysisDig)
 #process.p1 = cms.Path(process.siPixelDigis*process.pixeltrackerlocalreco)
-process.p1 = cms.Path(process.siPixelDigis*process.analysisDig*process.pixeltrackerlocalreco*process.analysisCluTest)
+process.p1 = cms.Path(process.siPixelDigis*process.analysisDig*process.pixeltrackerlocalreco*process.analysisClu)
 #process.p1 = cms.Path(process.siPixelDigis*process.analysisDig*process.pixeltrackerlocalreco*process.analysisClu*process.analysisRH)
 
 #process.outpath = cms.EndPath(process.o1)

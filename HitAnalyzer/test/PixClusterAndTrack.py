@@ -17,7 +17,7 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag.globaltag = '90X_dataRun2_Express_v4' # 
 #process.GlobalTag.globaltag = '92X_dataRun2_Express_v2' # 
 #process.GlobalTag.globaltag = '92X_dataRun2_Express_v4' # for 926
-process.GlobalTag.globaltag = '92X_dataRun2_Express_v7' # for 927
+process.GlobalTag.globaltag = '92X_dataRun2_Express_v7' # for 927,9
 
 # 2016
 #process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v3' # for 266277
@@ -104,8 +104,19 @@ process.source = cms.Source("PoolSource",
 #"/store/relval/CMSSW_9_2_3/RelValNuGun/GEN-SIM-RECO/PUpmx25ns_92X_upgrade2017_realistic_v2_earlyBS2017-v1/10000/12995CE4-3851-E711-B4A6-0CC47A4D7602.root",
 # "/store/relval/CMSSW_9_2_3/RelValNuGun/GEN-SIM-DIGI-RAW-HLTDEBUG/PUpmx25ns_92X_upgrade2017_realistic_v2_earlyBS2017-v1/10000/1ECCAF11-2E51-E711-AE03-0025905B8594.root",
 
-#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/301/",
-"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/300/742/00000/00538B29-837C-E711-BCD7-02163E011F61.root",
+"/store/express/Run2017D/ExpressPhysics/FEVT/Express-v1/000/302/635/00000/00557625-B197-E711-BAA2-02163E01472C.root",
+#"/store/express/Run2017D/ExpressPhysics/FEVT/Express-v1/000/302/131/00000/000109B7-6C8E-E711-89D1-02163E019CD2.root",
+#"/store/express/Run2017D/ExpressPhysics/FEVT/Express-v1/000/302/131/00000/00A7004D-7A8E-E711-BF2A-02163E01A3D2.root",
+
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/301/142/00000/0008C605-0881-E711-84A2-02163E019C07.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/301/046/00000/0A7942B4-FF7E-E711-AC5D-02163E019DBF.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/301/046/00000/0CD9AD7D-047F-E711-AA0B-02163E012933.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/301/046/00000/0E68A37C-067F-E711-9B9D-02163E019E0C.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/301/046/00000/105E523A-067F-E711-896E-02163E01A57C.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/301/046/00000/10D3C051-067F-E711-AD30-02163E01A5E0.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/301/046/00000/129BEE40-067F-E711-89B1-02163E01359A.root",
+
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/300/742/00000/00538B29-837C-E711-BCD7-02163E011F61.root",
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/633/00000/0085677A-AC7B-E711-B37E-02163E01A1C6.root",
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/000EC621-B57A-E711-80D2-02163E0141D3.root",
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/515/00000/0006E53E-F579-E711-B581-02163E0143DC.root",
@@ -147,6 +158,7 @@ process.source = cms.Source("PoolSource",
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/299/478/00000/0221EEC7-5C6D-E711-B39F-02163E014767.root",
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/299/381/00000/02F106ED-456C-E711-9FC0-02163E011EB4.root",
 
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v2/000/298/678/00000/00A4CE1A-0B65-E711-8233-02163E013475.root",
 
 #"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/670/00000/A4AFA400-9E5C-E711-ABFB-02163E01A6AD.root",
 #"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/671/00000/1665877E-B15C-E711-8FC7-02163E0133E1.root",
@@ -297,7 +309,8 @@ process.source = cms.Source("PoolSource",
 )
 
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('124230:26-124230:9999','124030:2-124030:9999')
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('300122:44-300122:9999')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('301046:153-301046:9999')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('302131:34-302131:943')
 
 
 process.TFileService = cms.Service("TFileService",
@@ -379,6 +392,6 @@ process.c2 = cms.EDAnalyzer("PixClustersWithTracks",
 #process.p = cms.Path(process.hltfilter*process.d)
 process.p = cms.Path(process.hltfilter*process.d*process.c*process.c1*process.c2)
 
-#process.p = cms.Path(process.d*process.b*process.c)  # for mc 
+#process.p = cms.Path(process.d*process.c*process.c1*process.c2) # for mc
 #process.p = cms.Path(process.d) # for cosmics
 

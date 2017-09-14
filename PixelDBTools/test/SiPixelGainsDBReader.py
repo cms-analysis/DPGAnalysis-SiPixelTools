@@ -48,7 +48,7 @@ process.source = cms.Source("EmptySource",
 #)
 
 # DB stuff 
-useLocalDB = True
+useLocalDB = False
 if useLocalDB:
   process.GainsReader = cms.ESSource("PoolDBESSource",
   #    process.CondDBCommon,
@@ -59,8 +59,9 @@ if useLocalDB:
     ),
     toGet = cms.VPSet(
       cms.PSet(
-       record = cms.string('SiPixelGainCalibrationOfflineRcd'),
+#       record = cms.string('SiPixelGainCalibrationOfflineRcd'),
 #       record = cms.string('SiPixelGainCalibrationForHLTRcd'),
+       record = cms.string('SiPixelGainCalibrationRcd'),
        #SiPixelGainCalibrationForHLTSimRcd  
        #SiPixelGainCalibrationOfflineSimRcd 
 #       tag = cms.string('SiPixelGainCalibration_r203368_offline')
@@ -68,13 +69,18 @@ if useLocalDB:
 #       tag = cms.string('SiPixelGainCalib_2009CollRuns_offline')
 #       tag = cms.string('SiPixelGainCalibration_2016_v1_offline')
 #       tag = cms.string('SiPixelGainCalibration_2016_v1_HLT')  # HLT
-       tag = cms.string('SiPixelGainCalibration_2017_v4_offline')
+       tag = cms.string('SiPixelGainCalibration_2017_v4')
+#       tag = cms.string('SiPixelGainCalibration_2017_v4_offline')
+#        tag = cms.string('SiPixelGainCalibration_2017_v4_1337_offline')
 #       tag = cms.string('SiPixelGainCalibration_2016_v2_HLT')  # HLT
     )),
 #    connect = cms.string('frontier://FrontierProd/CMS_COND_31X_PIXEL')
 #    connect = cms.string('sqlite_file:../../../../../DB/Gains/SiPixelGainCalibration_2016_v1_offline.db')
 #    connect = cms.string('sqlite_file:../../../../../DB/Gains/SiPixelGainCalibration_2016_v2_offline.db')
-    connect = cms.string('sqlite_file:/afs//cern.ch/work/d/dkotlins/public/DB/Gains/SiPixelGainCalibration_2017_v4_offline.db')
+#    connect = cms.string('sqlite_file:/afs//cern.ch/work/d/dkotlins/public/DB/Gains/SiPixelGainCalibration_2017_v4_offline.db')
+     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v4_full.db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v4_1337_offline.db')
+
   ) # end process
   # process.prefer("PoolDBESSource")
   process.myprefer = cms.ESPrefer("PoolDBESSource","GainsReader")
@@ -83,9 +89,11 @@ if useLocalDB:
 process.SiPixelGainsDBReader = cms.EDAnalyzer("SiPixelGainsDBReader",
     process.SiPixelGainCalibrationServiceParameters,
 #    payloadType = cms.string('HLT'),
+#    payloadType = cms.string('Full'),
     payloadType = cms.string('Offline'),
     useSimRcd = cms.bool(False),
 #    useSimRcd = cms.bool(True),
+    verbose = cms.bool(False),
     maxRangeDeadPixHist = cms.untracked.double(0.001)
 
 )

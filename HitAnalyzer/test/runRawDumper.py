@@ -46,7 +46,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 #process.MessageLogger.cerr.threshold = 'Debug'
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(-1)
 )
 
 process.TFileService = cms.Service("TFileService",
@@ -62,8 +62,13 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(                          
 # 2017
 
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/300/742/00000/00538B29-837C-E711-BCD7-02163E011F61.root",
+
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/300/773/00000/02DBAD4C-AE7C-E711-B44F-02163E019DD0.root",
+#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/300/773/00000/04985C0E-B17C-E711-8A86-02163E0146AC.root",
+
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/233/00000/062F0768-5676-E711-B303-02163E014626.root",
-"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/226/00000/02BBC9F3-2F76-E711-B29A-02163E019C08.root",
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/226/00000/02BBC9F3-2F76-E711-B29A-02163E019C08.root",
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/155/00000/0052B596-8F75-E711-B704-02163E011C13.root",
 
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/122/00000/001BAA8B-BA74-E711-9564-02163E01A3CB.root",
@@ -96,6 +101,7 @@ process.source = cms.Source("PoolSource",
    )
 
 )
+
 
 
 # for dump files 
@@ -133,7 +139,7 @@ process.d = cms.EDAnalyzer("SiPixelRawDump",
 
     CheckPixelOrder = cms.untracked.bool(False),
 # 0 - nothing, 1 - error , 2- data, 3-headers, 4-hex
-    Verbosity = cms.untracked.int32(1),
+    Verbosity = cms.untracked.int32(0),
 # threshold, print fed/channel num of errors if tot_errors > events * PrintThreshold, default 0,001 
     PrintThreshold = cms.untracked.double(0.01)
 )

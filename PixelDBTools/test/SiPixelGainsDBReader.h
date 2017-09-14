@@ -50,6 +50,7 @@ private:
   edm::ParameterSet conf_;
   edm::ESHandle<TrackerGeometry> tkgeom;
   SiPixelGainCalibrationServiceBase *SiPixelGainCalibrationService_;
+  bool PRINT;
 
   std::map< uint32_t, TH1F* >  _TH1F_Pedestals_m;
   std::map< uint32_t, TH1F* >  _TH1F_Gains_m;
