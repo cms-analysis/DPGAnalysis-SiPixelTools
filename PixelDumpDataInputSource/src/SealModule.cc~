@@ -1,5 +1,0 @@
-#include "FWCore/Framework/interface/MakerMacros.h"
-
-#include "DPGAnalysis-SiPixelTools/PixelDumpInputSources/src/Pixe;DumpDataInputSource.h"
-
-DEFINE_FWK_INPUT_SOURCE(PixelDumpDataInputSource);
