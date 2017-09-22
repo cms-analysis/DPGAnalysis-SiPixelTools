@@ -62,7 +62,7 @@ process.hltfilter = hlt.hltHighLevel.clone(
     throw = False
     )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10))
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1))
 
 process.source = cms.Source("PoolSource",
  fileNames =  cms.untracked.vstring(
@@ -222,7 +222,7 @@ process.out = cms.OutputModule("PoolOutputModule",
 # pixel local reco (RecHits) needs the GenError object,
 # not yet in GT, add here:
 # DB stuff 
-useLocalDB = False
+useLocalDB = True
 if useLocalDB :
     process.DBReaderFrontier = cms.ESSource("PoolDBESSource",
      DBParameters = cms.PSet(
@@ -231,18 +231,26 @@ if useLocalDB :
      ),
      toGet = cms.VPSet(
        cms.PSet(
-#        record = cms.string('SiPixelGainCalibrationOfflineRcd'),
-        record = cms.string('SiPixelGainCalibrationRcd'),
-        tag = cms.string('SiPixelGainCalibration_2017_v4')
+        record = cms.string('SiPixelGainCalibrationOfflineRcd'),
+#        record = cms.string('SiPixelGainCalibrationRcd'),
 #        tag = cms.string('SiPixelGainCalibration_2017_v2_offline')
 #        tag = cms.string('SiPixelGainCalibration_2017_v3_offline')
 #        tag = cms.string('SiPixelGainCalibration_2017_v4_offline')
+        tag = cms.string('SiPixelGainCalibration_2017_v5_offline')
+#        tag = cms.string('SiPixelGainCalibration_2017_v6_offline')
+#        tag = cms.string('SiPixelGainCalibration_2017_v4')
+#        tag = cms.string('SiPixelGainCalibration_2017_v5')
 #        tag = cms.string('SiPixelGainCalibration_2017_v4_1337_offline')
 #        tag = cms.string('SiPixelGainCalibration_phase1_ideal_v2')
  	),
        ),
-     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v4_full.db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v5_full.db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v4_full.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v4_1337_offline.db')
+
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v6_offline_oldvcalHL.db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v6_offline.db')
+     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v5_offline.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v4_offline.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v3_offline.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v2_offline.db')
@@ -267,11 +275,10 @@ process.siPixelDigis.UsePhase1 = True
 #process.siPixelClustersPreSplitting.VCaltoElectronOffset = -60
 #process.siPixelClustersPreSplitting.VCaltoElectronGain_L1 = 47  # default
 #process.siPixelClustersPreSplitting.VCaltoElectronOffset_L1 = -60
-#process.siPixelClustersPreSplitting.SeedThreshold = 3
 process.siPixelClustersPreSplitting.SeedThreshold = 1000
-process.siPixelClustersPreSplitting.ChannelThreshold = 2 #must be bigger than 1
-process.siPixelClustersPreSplitting.ClusterThreshold = 1000    # integer?
-process.siPixelClustersPreSplitting.ClusterThreshold_L1 = 1000 # integer?
+process.siPixelClustersPreSplitting.ChannelThreshold = 10 #must be bigger than 1
+process.siPixelClustersPreSplitting.ClusterThreshold = 4000    # integer?
+process.siPixelClustersPreSplitting.ClusterThreshold_L1 = 2000 # integer?
 #process.siPixelClustersPreSplitting.payloadType = cms.string('Full')
 
 

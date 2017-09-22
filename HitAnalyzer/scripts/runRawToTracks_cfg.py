@@ -60,7 +60,7 @@ process.hltfilter = hlt.hltHighLevel.clone(
     throw = False
     )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10))
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1))
 
 process.source = cms.Source("PoolSource",
 # fileNames =  cms.untracked.vstring('file:rawdata.root')
@@ -82,6 +82,13 @@ process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('302131:34-3
 # for Raw2digi for data
 process.siPixelDigis.InputLabel = 'rawDataCollector'
 process.siStripDigis.ProductLabel = 'rawDataCollector'
+
+process.siPixelClustersPreSplitting.SeedThreshold = 1000
+process.siPixelClustersPreSplitting.ChannelThreshold = 2 #must be bigger than 1
+process.siPixelClustersPreSplitting.ClusterThreshold = 1000    # integer?
+process.siPixelClustersPreSplitting.ClusterThreshold_L1 = 1000 # integer?
+#process.siPixelClustersPreSplitting.payloadType = cms.string('Full')
+
 
 # for digi to clu
 #process.siPixelClusters.src = 'siPixelDigis'
@@ -166,13 +173,43 @@ process.out = cms.OutputModule("PoolOutputModule",
 )
 
 
-process.d = cms.EDAnalyzer("PixClustersWithTracks",
-    Verbosity = cms.untracked.bool(True),
+process.c = cms.EDAnalyzer("PixClustersWithTracks",
+    Verbosity = cms.untracked.bool(False),
     src = cms.InputTag("generalTracks::MyRawToTracks"),
 #     PrimaryVertexLabel = cms.untracked.InputTag("offlinePrimaryVertices"),                             
 #     trajectoryInput = cms.string("TrackRefitterP5")
 #     trajectoryInput = cms.string('cosmictrackfinderP5')
 )
+
+process.c1 = cms.EDAnalyzer("PixClustersWithTracks",
+    Verbosity = cms.untracked.bool(False),
+    phase1 = cms.untracked.bool(True),
+    src = cms.InputTag("generalTracks::MyRawToTracks"),
+# for cosmics 
+#    src = cms.InputTag("ctfWithMaterialTracksP5"),
+#     PrimaryVertexLabel = cms.untracked.InputTag("offlinePrimaryVertices"),
+#     trajectoryInput = cms.string("TrackRefitterP5")
+#     trajectoryInput = cms.string('cosmictrackfinderP5')
+# additional selections
+    Select1 = cms.untracked.int32(13),  # select the cut type, o no cut
+    Select2 = cms.untracked.int32(1),  # select the cut value   
+)
+process.c2 = cms.EDAnalyzer("PixClustersWithTracks",
+    Verbosity = cms.untracked.bool(False),
+    phase1 = cms.untracked.bool(True),
+    src = cms.InputTag("generalTracks::MyRawToTracks"),
+# for cosmics 
+#    src = cms.InputTag("ctfWithMaterialTracksP5"),
+#     PrimaryVertexLabel = cms.untracked.InputTag("offlinePrimaryVertices"),
+#     trajectoryInput = cms.string("TrackRefitterP5")
+#     trajectoryInput = cms.string('cosmictrackfinderP5')
+# additional selections
+    Select1 = cms.untracked.int32(14),  # select the cut type, o no cut
+    Select2 = cms.untracked.int32(1),  # select the cut value   
+)
+
+
+
 
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string('histo_tracks.root')
@@ -216,20 +253,22 @@ process.myTracking = cms.Sequence(process.InitialStep*
 
 
 # Path and EndPath definitions
-process.raw2digi_step = cms.Path(process.RawToDigi)
-process.L1Reco_step = cms.Path(process.L1Reco)
-process.reconstruction_step = cms.Path(process.reconstruction)
-process.endjob_step = cms.EndPath(process.endOfProcess)
-process.RECOoutput_step = cms.EndPath(process.out)
-process.d_step = cms.Path(process.d)
-process.filter_step = cms.Path(process.hltfilter)
+#process.raw2digi_step = cms.Path(process.RawToDigi)
+#process.L1Reco_step = cms.Path(process.L1Reco)
+#process.reconstruction_step = cms.Path(process.reconstruction)
+#process.endjob_step = cms.EndPath(process.endOfProcess)
+#process.RECOoutput_step = cms.EndPath(process.out)
+#process.d_step = cms.Path(process.d)
+#process.filter_step = cms.Path(process.hltfilter)
 
 # Schedule definition
 # producing root files with tracks
 #process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.endjob_step,process.RECOoutput_step)
 # producing track histos 
 #process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.d_step)
-process.schedule = cms.Schedule(process.filter_step,process.raw2digi_step,process.reconstruction_step,process.d_step)
+#process.schedule = cms.Schedule(process.filter_step,process.raw2digi_step,process.reconstruction_step,process.d_step)
+
+process.p = cms.Path(process.hltfilter*process.RawToDigi*process.reconstruction*process.c*process.c1*process.c2)
 
 # customisation of the process.
 
