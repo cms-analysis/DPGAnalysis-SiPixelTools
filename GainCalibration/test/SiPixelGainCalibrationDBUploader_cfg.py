@@ -12,7 +12,8 @@ elif phase==1:
     process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
     process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
     from Configuration.AlCa.GlobalTag import GlobalTag
-    process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
+    #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
+    process.GlobalTag.globaltag = '92X_dataRun2_Express_v7'
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1))
 process.TFileService = cms.Service("TFileService", fileName = cms.string('/tmp/rougny/histos.root') )
@@ -41,8 +42,8 @@ process.gainDBHLT = cms.EDAnalyzer("SiPixelGainCalibrationDBUploader",
 process.source = cms.Source("EmptyIOVSource",                            
     #lastRun = cms.untracked.uint32(1),
     timetype = cms.string('runnumber'),
-    firstValue = cms.uint64(1),
-    lastValue = cms.uint64(1),
+    firstValue = cms.uint64(500000),
+    lastValue = cms.uint64(500000),
     interval = cms.uint64(1)
     )
 

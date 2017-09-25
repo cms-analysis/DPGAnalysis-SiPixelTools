@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
+from Configuration.StandardSequences.Eras import eras
+process = cms.Process("PIXEL",eras.Run2_2017)
 
-process = cms.Process("PIXEL")
 # Services 
 process.load('Configuration.StandardSequences.Services_cff')
 process.TFileService = cms.Service("TFileService", fileName = cms.string('GainCalibration.root'))
@@ -17,13 +18,19 @@ process.MessageLogger = cms.Service("MessageLogger",
 #Phase1
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
+process.GlobalTag.globaltag = '92X_dataRun2_Express_v7'
+
+process.maxEvents = cms.untracked.PSet(
+    input = cms.untracked.int32(-1)
+)
 
 # SLink Data --> Digis
 process.load('Configuration.StandardSequences.RawToDigi_Data_cff')
-process.source = cms.Source("PixelSLinkDataInputSource",
+# process.source = cms.Source("PixelSLinkDataInputSource",
+process.source = cms.Source("PixelDumpDataInputSource",
     fedid = cms.untracked.int32(-1),
-    runNumber = cms.untracked.int32(-1),
+    runNumber = cms.untracked.int32(500000),
     fileNames = cms.untracked.vstring('FILENAME')
     )
 process.siPixelDigis.InputLabel = 'source'
