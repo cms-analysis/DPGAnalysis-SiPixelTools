@@ -245,17 +245,22 @@ status(){
 }
 
 hadd_files(){
-  /afs/cern.ch/project/eos/installation/cms/bin/eos.select -b fuse mount /tmp/`whoami`/eos
-  dir="/tmp/`whoami`/eos/cms$storedir"
-  rm -f $dir/GainCalibration.root
-  hadd -f $dir/GainCalibration.root $dir/*.root
-  /afs/cern.ch/project/eos/installation/cms/bin/eos.select -b fuse umount /tmp/`whoami`/eos
+  # /afs/cern.ch/project/eos/installation/cms/bin/eos.select -b fuse mount /tmp/`whoami`/eos
+  # dir="/tmp/`whoami`/eos/cms$storedir"
+  # rm -f $dir/GainCalibration.root
+  # hadd -f $dir/GainCalibration.root $dir/*.root
+  # /afs/cern.ch/project/eos/installation/cms/bin/eos.select -b fuse umount /tmp/`whoami`/eos
+
+    #EOS is now permanently mounted at /eos/cms
+    dir="/eos/cms$storedir"
+    rm -f $dir/GainCalibration.root
+    hadd -f $dir/GainCalibration.root $dir/*.root
 }
 
 submit_summary_new(){
 
   set_specifics ${storedir}
-  if [ `$T2_LS  $storedir/GainCalibration.root 2>&1|grep "No such"|wc -l` -eq 1 ]; then
+  if [ `$T2_LS$storedir/GainCalibration.root 2>&1|grep "No such"|wc -l` -eq 1 ]; then
     echo "File $storedir/GainCalibration.root is not present ..."; exit ; fi ;
   stage_list_of_files $storedir/GainCalibration.root
 

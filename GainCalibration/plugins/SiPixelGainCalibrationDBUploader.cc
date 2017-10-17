@@ -196,7 +196,7 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
       TString tempgainstring = bookkeeper_[detid]["gain_2d"];
       tempgain = (TH2F*)therootfile_->Get(tempgainstring);
       if(tempgain==0){
-	// std::cout <<"WARNING, gain histo " << bookkeeper_[detid]["gain_2d"] << " does not exist, using default instead" << std::endl;
+	std::cout <<"WARNING, gain histo " << bookkeeper_[detid]["gain_2d"] << " does not exist, using default instead" << std::endl;
 	tempgain=defaultGain_;  
 	useddefaultfortree=1;
       
@@ -204,7 +204,7 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
       TString temppedstring = bookkeeper_[detid]["ped_2d"];
       tempped = (TH2F*) therootfile_->Get(temppedstring);
       if(tempped==0){
-	// std::cout <<"WARNING, ped histo " << bookkeeper_[detid]["ped_2d"] << " for detid " << detid << " does not exist, using default instead" << std::endl;
+	std::cout <<"WARNING, ped histo " << bookkeeper_[detid]["ped_2d"] << " for detid " << detid << " does not exist, using default instead" << std::endl;
 	std::pair<TString,int> tempval(tempgainstring,0);
 	badresults[detid]=tempval;
 	tempped=defaultPed_;
@@ -753,7 +753,7 @@ void SiPixelGainCalibrationDBUploader::getHistograms() {
 	  tempstr.ReplaceAll(replacestring,"");
 	  bookkeeper_[detid]["gain_2d"]=tempstr;
 	}
-	if(keyname.BeginsWith("Pedestal2d")){
+	else if(keyname.BeginsWith("Pedestal2d")){
 	  std::map<std::string,TString> tempmap;
 	  TString tempstr =dirlist[idir];
 	  tempstr+="/";
@@ -763,6 +763,8 @@ void SiPixelGainCalibrationDBUploader::getHistograms() {
 	  tempstr.ReplaceAll(replacestring,"");
 	  bookkeeper_[detid]["ped_2d"]=tempstr;
 	}
+	else
+	  {std::cout << "Could not find histo: " << keyname << std::endl;}
       }
     }
     
