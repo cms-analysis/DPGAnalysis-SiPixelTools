@@ -106,7 +106,7 @@ using namespace std;
 #define PV
 #define BX_TESTS
 //#define STUDY_LAY1
-#define SINGLE_MODULES
+//#define SINGLE_MODULES
 #define PHI_PROFILES
 //#define TEST_GEOM
 #define TEST_DCOLS

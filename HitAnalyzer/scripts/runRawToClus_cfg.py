@@ -64,14 +64,25 @@ process.hltfilter = hlt.hltHighLevel.clone(
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1))
 
+myfilelist = cms.untracked.vstring()
+myfilelist.extend([
+"/store/express/Run2017E/Express/FEVT/Express-v1/000/303/795/00000/188ACE9B-69A0-E711-AD8C-02163E01194B.root",
+])
+
 process.source = cms.Source("PoolSource",
+# fileNames =  myfilelist
+#)
+
  fileNames =  cms.untracked.vstring(
+
+"/store/express/Run2017E/ExpressPhysics/FEVT/Express-v1/000/304/144/00000/00079894-0BA5-E711-84F0-02163E014569.root ",
+
+#"/store/express/Run2017E/ExpressPhysics/FEVT/Express-v1/000/303/824/00000/02000C18-EBA0-E711-B8FB-02163E01A29A.root",
 
 #"/store/express/Run2017D/ExpressPhysics/FEVT/Express-v1/000/302/635/00000/00557625-B197-E711-BAA2-02163E01472C.root",
 
-"/store/express/Run2017D/ExpressPhysics/FEVT/Express-v1/000/302/131/00000/000109B7-6C8E-E711-89D1-02163E019CD2.root",
+#"/store/express/Run2017D/ExpressPhysics/FEVT/Express-v1/000/302/131/00000/000109B7-6C8E-E711-89D1-02163E019CD2.root",
 #"/store/express/Run2017D/ExpressPhysics/FEVT/Express-v1/000/302/131/00000/00A7004D-7A8E-E711-BF2A-02163E01A3D2.root",
-
 
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/301/142/00000/0008C605-0881-E711-84A2-02163E019C07.root",
 
@@ -119,6 +130,17 @@ process.source = cms.Source("PoolSource",
 #"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v2/000/298/678/00000/0647C47B-0B65-E711-A5EC-02163E019DE0.root",
 #"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v2/000/298/678/00000/06B69CAC-0B65-E711-BB99-02163E013475.root",
 
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/670/00000/A4AFA400-9E5C-E711-ABFB-02163E01A6AD.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/671/00000/1665877E-B15C-E711-8FC7-02163E0133E1.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/672/00000/0645B604-AA5C-E711-8231-02163E013778.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/673/00000/08A31073-A95C-E711-90CA-02163E01A45A.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/674/00000/00090DB9-B85C-E711-9A6A-02163E0134D8.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/675/00000/0032C48B-C45C-E711-8408-02163E0137F9.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/675/00000/FEF30EFA-BE5C-E711-A66D-02163E01A553.root",
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/678/00000/488C603D-C55C-E711-9841-02163E013406.root",
+
+#"/store/express/Run2017B/ExpressPhysics/FEVT/Express-v1/000/297/474/00000/B02788E4-5A59-E711-9DDD-02163E019BB6.root",
+
 # time 
 #"/store/express/Run2017A/ExpressPhysics/FEVT/Express-v2/000/296/902/00000/008557CF-BE51-E711-A29A-02163E01A4E0.root",
 #"/store/express/Run2017A/ExpressPhysics/FEVT/Express-v2/000/296/901/00000/009184D1-BF51-E711-A86D-02163E0143CF.root",
@@ -149,31 +171,23 @@ process.source = cms.Source("PoolSource",
 # "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v2/000/296/869/00000/263C3C92-5351-E711-9FE6-02163E0142F9.root",
 # "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v2/000/296/868/00000/0607D84F-4F51-E711-9E94-02163E01338F.root",
 # "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v2/000/296/867/00000/02BC1FDC-4C51-E711-BE3E-02163E0128EB.root",
-
 #
 # "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v2/000/296/702/00000/FED4EA05-D64F-E711-82F9-02163E012A6B.root",
 # "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v2/000/296/664/00000/00F38C8D-A54F-E711-A312-02163E01472F.root",
 # "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v2/000/296/643/00000/08070285-5E4F-E711-BB56-02163E01476C.root",
 
-
 # "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v1/000/296/108/00000/22174A51-CB49-E711-8375-02163E01384C.root",
-
 # "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v1/000/296/075/00000/045D378C-9949-E711-A42A-02163E011F09.root",
-
 # "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v1/000/295/640/00000/029DD0A3-8645-E711-AE8C-02163E013978.root",
-
 # "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v1/000/295/636/00000/003BFB77-6E45-E711-AECD-02163E013407.root",
-
 # "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v1/000/295/439/00000/426B4782-FC43-E711-9328-02163E011A76.root",
 # "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v1/000/295/439/00000/F853E939-FF43-E711-A59D-02163E013479.root",
 
-
 # "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v1/000/294/929/00000/000E8FD5-1D40-E711-80C9-02163E01467E.root",
-
-#"/store/data/Commissioning2016/Cosmics/RAW/v1/000/266/277/00000/02643438-E2E5-E511-A9AA-02163E013432.root",
 
 #"root://eoscms//eos/cms/tier0/store/data/Commissioning2016/MinimumBias/RAW/v1/000/266/277/00000/0004807C-AFE5-E511-83C1-02163E011EAD.root",
 #  "rfio:/castor/cern.ch/cms/store/data/Run2012D/MinimumBias/RAW/v1/000/205/217/2EF61B7D-F216-E211-98C3-001D09F28D54.root",
+
  )
 )
 
@@ -181,6 +195,8 @@ process.source = cms.Source("PoolSource",
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('124230:26-124230:9999','124030:2-124030:9999')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('301046:153-301046:9999')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('298678:43-298678:45')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('303824:54-303824:999')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('303795:51-303795:61')
 
 
 # for Raw2digi for data
@@ -233,13 +249,16 @@ if useLocalDB :
        cms.PSet(
         record = cms.string('SiPixelGainCalibrationOfflineRcd'),
 #        record = cms.string('SiPixelGainCalibrationRcd'),
+#        tag = cms.string('SiPixelGainCalibration_2017_v2_bugfix') #in DB
+#        tag = cms.string('SiPixelGainCalibration_2017_v2_bugfix_offline')
 #        tag = cms.string('SiPixelGainCalibration_2017_v2_offline')
 #        tag = cms.string('SiPixelGainCalibration_2017_v3_offline')
 #        tag = cms.string('SiPixelGainCalibration_2017_v4_offline')
-        tag = cms.string('SiPixelGainCalibration_2017_v5_offline')
+#        tag = cms.string('SiPixelGainCalibration_2017_v5_offline') # v4 fixed
 #        tag = cms.string('SiPixelGainCalibration_2017_v6_offline')
 #        tag = cms.string('SiPixelGainCalibration_2017_v4')
 #        tag = cms.string('SiPixelGainCalibration_2017_v5')
+        tag = cms.string('SiPixelGainCalibration_2017_v6')
 #        tag = cms.string('SiPixelGainCalibration_2017_v4_1337_offline')
 #        tag = cms.string('SiPixelGainCalibration_phase1_ideal_v2')
  	),
@@ -250,12 +269,14 @@ if useLocalDB :
 
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v6_offline_oldvcalHL.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v6_offline.db')
-     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v5_offline.db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v5_offline.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v4_offline.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v3_offline.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v2_offline.db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v2_bugfix_offline.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_phase1_ideal_v2.db')
-#     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
+
+     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
 #     connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
     ) # end process
     process.myprefer = cms.ESPrefer("PoolDBESSource","DBReaderFrontier")

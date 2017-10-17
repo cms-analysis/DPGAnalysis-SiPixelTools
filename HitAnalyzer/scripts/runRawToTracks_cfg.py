@@ -60,15 +60,16 @@ process.hltfilter = hlt.hltHighLevel.clone(
     throw = False
     )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100))
 
 process.source = cms.Source("PoolSource",
 # fileNames =  cms.untracked.vstring('file:rawdata.root')
 fileNames =  cms.untracked.vstring(
 #"root://eoscms//eos/cms/store/data/Run2015C/ZeroBias/RAW/v1/000/254/227/00000/FA244051-8141-E511-B22B-02163E014153.root",
 
+ "/store/express/Run2017E/ExpressPhysics/FEVT/Express-v1/000/303/824/00000/02000C18-EBA0-E711-B8FB-02163E01A29A.root",
 
-"/store/express/Run2017D/ExpressPhysics/FEVT/Express-v1/000/302/131/00000/000109B7-6C8E-E711-89D1-02163E019CD2.root",
+#"/store/express/Run2017D/ExpressPhysics/FEVT/Express-v1/000/302/131/00000/000109B7-6C8E-E711-89D1-02163E019CD2.root",
 
 #"/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/0E6E4ACA-4F5A-E611-97B5-FA163E1E4ACD.root",
 
@@ -76,17 +77,18 @@ fileNames =  cms.untracked.vstring(
 #   skipEvents = cms.untracked.uint32(5000)
 )
 
+process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('303824:54-303824:999')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('278193:77-278193:9999')
-process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('302131:34-302131:943')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('302131:34-302131:943')
 
 # for Raw2digi for data
 process.siPixelDigis.InputLabel = 'rawDataCollector'
 process.siStripDigis.ProductLabel = 'rawDataCollector'
 
-process.siPixelClustersPreSplitting.SeedThreshold = 1000
-process.siPixelClustersPreSplitting.ChannelThreshold = 2 #must be bigger than 1
-process.siPixelClustersPreSplitting.ClusterThreshold = 1000    # integer?
-process.siPixelClustersPreSplitting.ClusterThreshold_L1 = 1000 # integer?
+#process.siPixelClustersPreSplitting.SeedThreshold = 1000
+#process.siPixelClustersPreSplitting.ChannelThreshold = 2 #must be bigger than 1
+#process.siPixelClustersPreSplitting.ClusterThreshold = 1000    # integer?
+#process.siPixelClustersPreSplitting.ClusterThreshold_L1 = 1000 # integer?
 #process.siPixelClustersPreSplitting.payloadType = cms.string('Full')
 
 
