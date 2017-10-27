@@ -96,10 +96,19 @@
 #include <TProfile.h>
 
 #define HISTOS
-#define L1
+//#define L1
 #define HLT
 //#define SINGLE_MODULES
 #define DCOLS
+
+#define USE_GAINS 
+#ifdef USE_GAINS
+// Database payloads
+#include "CalibTracker/SiPixelESProducers/interface/SiPixelGainCalibrationServiceBase.h"
+#include "CalibTracker/SiPixelESProducers/interface/SiPixelGainCalibrationService.h"
+#include "CalibTracker/SiPixelESProducers/interface/SiPixelGainCalibrationOfflineService.h"
+//#include "CalibTracker/SiPixelESProducers/interface/SiPixelGainCalibrationForHLTService.h"
+#endif
 
 using namespace std;
 
@@ -124,6 +133,9 @@ public:
   int moduleIndex(int ladder,int module); 
   bool validIndex(int index, bool print); 
   int rocId(int pixy,int pixx);  // 0-15, column, row
+#ifdef USE_GAINS
+  float calibrate(uint32_t detid, int adc, int col, int row);  
+#endif
 
 private:
   // ----------member data ---------------------------
@@ -182,17 +194,19 @@ private:
   TH2F *hpixDetMap41, *hpixDetMap42, *hpixDetMap43, *hpixDetMap44, *hpixDetMap45;
   TH2F *hpixDetMap46, *hpixDetMap47, *hpixDetMap48, *hpixDetMap49;
 #endif
-
-  TH1F *hevent, *hlumi, *horbit, *hbx0, *hlumi0, *hlumi1,*hbx1,*hbx2,*hbx3,*hbx4,*hbx5,*hbx6;
-  TH1F *hdets, *hdigis, *hdigis0, *hdigis1, *hdigis2,*hdigis3,*hdigis4,*hdigis5; 
-
 #ifdef DCOLS
   TH1F *hDcolsCount, *hAllDcols;
 #endif 
 
+  TH1F *hevent, *hlumi, *horbit, *hbx0, *hlumi0, *hlumi1,*hbx1,*hbx2,*hbx3,*hbx4,*hbx5,*hbx6;
+  TH1F *hdets, *hdigis, *hdigis0, *hdigis1, *hdigis2,*hdigis3,*hdigis4,*hdigis5; 
   TProfile *hadc1ls,*hadc2ls,*hadc3ls,*hadc4ls,*hadc0ls; 
   TProfile *hadc1bx,*hadc2bx,*hadc3bx,*hadc4bx,*hadc0bx; 
 
+
+#ifdef USE_GAINS
+  TH1F *helectrons1, *helectrons2, *helectrons3, *helectrons4, *helectronsf;
+#endif
 
 #endif
 
@@ -201,6 +215,10 @@ private:
   int countFullDcols;
   int oneModule[416][160];
   int dCols[120][16][26];
+
+#ifdef USE_GAINS
+  SiPixelGainCalibrationServiceBase * theSiPixelGainCalibration_;
+#endif
 
 };
 
@@ -228,6 +246,11 @@ PixDigisTest::PixDigisTest(const edm::ParameterSet& iConfig) {
   select2 = iConfig.getUntrackedParameter<int>("Select2",0);
 
   cout<<" Construct PixDigisTest "<<endl;
+
+#ifdef USE_GAINS
+  theSiPixelGainCalibration_ = new SiPixelGainCalibrationOfflineService(iConfig);
+#endif
+
 }
 
 
@@ -238,6 +261,34 @@ PixDigisTest::~PixDigisTest() {
   cout<<" Destroy PixDigisTest "<<endl;
 
 }
+
+
+#ifdef USE_GAINS
+float PixDigisTest::calibrate(uint32_t detid, int adc, int col, int row) {
+          
+  float DBgain     = theSiPixelGainCalibration_->getGain(detid, col, row);
+  float pedestal   = theSiPixelGainCalibration_->getPedestal(detid, col, row);
+  float DBpedestal = pedestal * DBgain;
+  //float DBpedestal = theSiPixelGainCalibration_->getPedestal(detid, col, row) * DBgain;
+          
+          
+  // Roc-6 average
+  //const float gain = 1./0.313; // 1 ADC = 3.19 VCALs 
+  //const float pedestal = -6.2 * gain; // -19.8
+  // 
+  float vcal = adc * DBgain - DBpedestal;
+  //int electrons=0;
+  //if (layer_==1) {
+  //electrons = int( vcal * theConversionFactor_L1 + theOffset_L1); 
+  //} else {
+  //electrons = int( vcal * theConversionFactor + theOffset); 
+  //}
+
+  return vcal;
+}
+#endif
+
+
 
 //
 // member functions
@@ -277,6 +328,9 @@ bool PixDigisTest::validIndex(int index, bool print = false) {
   return valid;
 }
 //
+
+
+
 // ------------ method called at the begining   ------------
 void PixDigisTest::beginJob() {
 
@@ -387,7 +441,7 @@ void PixDigisTest::beginJob() {
 
     hhitsPerDcol= fs->make<TH1F>( "hhitsPerDcol","Layer 1: hits per dcol",200,-1.5,198.5);
     hhitsPerHitDcol= fs->make<TH1F>( "hhitsPerHitDcol","Layer 1: hits per hit dcol",200,-1.5,198.5);
-    hhitDcolsPerModule= fs->make<TH1F>( "hhitDcolsPerModule","Layer 1: hit dcol per Hit Module",200,-1.5,198.5);
+    hhitDcolsPerModule= fs->make<TH1F>( "hhitDcolsPerModule","Layer 1: hit dcol per Hit Module",200,-0.5,399.5);
  
     hrows1 = fs->make<TH1F>( "hrows1", "Layer 1 rows", 200,-1.5,198.5);
     hrows2 = fs->make<TH1F>( "hrows2", "Layer 2 rows", 200,-1.5,198.5);
@@ -607,6 +661,14 @@ void PixDigisTest::beginJob() {
   hAllDcols   = fs->make<TH1F>( "hAllDcols", "hits per dcol",50000,0.,50000.);
 #endif
 
+#ifdef USE_GAINS
+  helectrons1 = fs->make<TH1F>("helectrons1","adc in electrons l1",  2400,-40.,80.);
+  helectrons2 = fs->make<TH1F>("helectrons2","adc in electrons l2",  2400,-40.,80.);
+  helectrons3 = fs->make<TH1F>("helectrons3","adc in electrons l3",  2400,-40.,80.);
+  helectrons4 = fs->make<TH1F>("helectrons4","adc in electrons l4",  2400,-40.,80.);
+  helectronsf = fs->make<TH1F>("helectronsf","adc in electrons fpix",2400,-40.,80.);
+#endif
+
 #endif
 
 }
@@ -620,6 +682,12 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
   edm::ESHandle<TrackerTopology> tTopo;
   iSetup.get<TrackerTopologyRcd>().get(tTopo);
   const TrackerTopology* tt = tTopo.product();
+
+#ifdef USE_GAINS
+  //Setup gain calibration service
+  theSiPixelGainCalibration_->setESObjects( iSetup );
+#endif
+
 
   using namespace edm;
   if(PRINT) cout<<" Analyze PixDigisTest for phase "<<phase1_<<endl;
@@ -727,7 +795,7 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
     unsigned int subid=detId.subdetId(); //subdetector type, barrel=1
     
     if(MY_DEBUG) 
-      cout<<"Det: "<<detId.rawId()<<" "<<detId.null()<<" "<<detType<<" "<<subid<<endl;
+      cout<<"Det: "<<detid<<" "<<detId.rawId()<<" "<<detId.null()<<" "<<detType<<" "<<subid<<endl;
     
 #ifdef HISTOS
     hdetunit->Fill(float(detid));
@@ -931,6 +999,18 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	if(PRINT || select) cout <<numberOfDigis<< " Col: " << col << " Row: " << row 
 		       << " ADC: " << adc <<" channel = "<<channel<<endl;
 	
+
+#ifdef USE_GAINS
+	// Apply the calibration 
+	float vcal = calibrate(detid, adc, col, row);
+	float electrons=0.;
+	const float conversionFactor_L1=50., conversionFactor=47., offset=-60., offset_L1=-670.; 
+	  //if (layer_==1) {
+	  //electrons = int( vcal * theConversionFactor_L1 + theOffset_L1); 
+          //} else {
+	  //electrons = int( vcal * theConversionFactor + theOffset); 
+          //}
+#endif
 	
 	// Accumuate dcols, do only for L1
 	if(layer==1) {
@@ -974,6 +1054,9 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
        float pixy = col; float pixx=row;
 #endif
        if(layer==1) {
+	 electrons = (vcal * conversionFactor_L1 + offset_L1)/1000.; // in kelec 
+	 helectrons1->Fill(electrons);
+
 	 //noise = (ladder==6) || (module==-2) || (col==364) || (row==1);
 	 if(!noise) {		     
 	   heloss1->Fill(float(adc));
@@ -1017,7 +1100,9 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 
 	 } // noise
        } else if(layer==2) {
-	 // look for the noisy pixel
+	 electrons = (vcal * conversionFactor + offset)/1000.; 
+	 helectrons2->Fill(electrons);
+        // look for the noisy pixel
 	 //noise = false; // (ladder==6) && (module==-2) && (col==364) && (row==1);
 	 if(noise) {
 	   //cout<<" noise pixel "<<layer<<" "<<sector<<" "<<shell<<endl;
@@ -1049,6 +1134,8 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 #endif
 
        } else if(layer==3) {
+	 electrons = (vcal * conversionFactor + offset)/1000.;
+	 helectrons3->Fill(electrons); 
 	 //noise = false; //(ladder==6) || (module==-2) || (col==364) || (row==1);
 	 if(!noise) {		     
 	   heloss3->Fill(float(adc));
@@ -1072,6 +1159,8 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	 else if( ladder==14 && module==-3) hpixDetMap35->Fill(pixy,pixx,weight); // 
 #endif
        } else if(layer==4) {
+	 electrons = (vcal * conversionFactor + offset)/1000.; 
+	 helectrons4->Fill(electrons);
 	 //noise = false; //(ladder==6) || (module==-2) || (col==364) || (row==1);
 	 if(!noise) {		     
 	   heloss4->Fill(float(adc));
@@ -1093,6 +1182,8 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	 else if( ladder== 3 && module==-4) hpixDetMap45->Fill(pixy,pixx,weight); // 
 #endif
        } else if(disk==1) {
+	 electrons = (vcal * conversionFactor + offset)/1000.; 
+	 helectronsf->Fill(electrons);
 	 //noise = false; //(ladder==6) || (module==-2) || (col==364) || (row==1);
 	 if(!noise) {		     
 	   helossF1->Fill(float(adc));
@@ -1105,6 +1196,8 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	 } // noise 
 
        } else if(disk==2) {
+	 electrons = (vcal * conversionFactor + offset)/1000.; 
+	 helectronsf->Fill(electrons);
 	 // noise = (ladder==6) || (module==-2) || (col==364) || (row==1);
 	 if(!noise) {		     
 	   helossF2->Fill(float(adc));
@@ -1116,6 +1209,8 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	   numOfDigisPerDetF2++;
 	 } // noise 
        } else if(disk==3) {
+	electrons = (vcal * conversionFactor + offset)/1000.; 
+	helectronsf->Fill(electrons);
 	 // noise = (ladder==6) || (module==-2) || (col==364) || (row==1);
 	 if(!noise) {		     
 	   helossF3->Fill(float(adc));

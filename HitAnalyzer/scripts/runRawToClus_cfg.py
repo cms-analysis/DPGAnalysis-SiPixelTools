@@ -75,17 +75,21 @@ process.source = cms.Source("PoolSource",
 
  fileNames =  cms.untracked.vstring(
 
-"/store/express/Run2017E/ExpressPhysics/FEVT/Express-v1/000/304/144/00000/00079894-0BA5-E711-84F0-02163E014569.root ",
+#"/store/express/Run2017F/ExpressPhysics/FEVT/Express-v1/000/305/758/00000/12AE1A27-B4BA-E711-A06E-02163E01A273.root",
+#"/store/express/Run2017F/ExpressPhysics/FEVT/Express-v1/000/305/758/00000/147CBC00-B4BA-E711-B8A1-02163E0143AD.root",
+#"/store/express/Run2017F/ExpressPhysics/FEVT/Express-v1/000/305/758/00000/2C6034AC-B7BA-E711-B416-02163E01A475.root",
+#"/store/express/Run2017F/ExpressPhysics/FEVT/Express-v1/000/305/758/00000/46175121-B4BA-E711-9A7E-02163E014445.root",
 
+#"/store/express/Run2017F/ExpressPhysics/FEVT/Express-v1/000/305/282/00000/0223A308-FFB4-E711-BA09-02163E019B96.root",
+#"/store/express/Run2017E/ExpressPhysics/FEVT/Express-v1/000/304/144/00000/00079894-0BA5-E711-84F0-02163E014569.root ",
 #"/store/express/Run2017E/ExpressPhysics/FEVT/Express-v1/000/303/824/00000/02000C18-EBA0-E711-B8FB-02163E01A29A.root",
 
 #"/store/express/Run2017D/ExpressPhysics/FEVT/Express-v1/000/302/635/00000/00557625-B197-E711-BAA2-02163E01472C.root",
-
 #"/store/express/Run2017D/ExpressPhysics/FEVT/Express-v1/000/302/131/00000/000109B7-6C8E-E711-89D1-02163E019CD2.root",
 #"/store/express/Run2017D/ExpressPhysics/FEVT/Express-v1/000/302/131/00000/00A7004D-7A8E-E711-BF2A-02163E01A3D2.root",
 
+#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/302/019/00000/0A3687F5-498D-E711-B9F5-02163E012546.root",
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/301/142/00000/0008C605-0881-E711-84A2-02163E019C07.root",
-
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/301/046/00000/0A7942B4-FF7E-E711-AC5D-02163E019DBF.root",
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/301/046/00000/0CD9AD7D-047F-E711-AA0B-02163E012933.root",
 #"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/301/046/00000/0E68A37C-067F-E711-9B9D-02163E019E0C.root",
@@ -197,6 +201,7 @@ process.source = cms.Source("PoolSource",
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('298678:43-298678:45')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('303824:54-303824:999')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('303795:51-303795:61')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('305282:75-305282:999')
 
 
 # for Raw2digi for data
@@ -238,7 +243,7 @@ process.out = cms.OutputModule("PoolOutputModule",
 # pixel local reco (RecHits) needs the GenError object,
 # not yet in GT, add here:
 # DB stuff 
-useLocalDB = True
+useLocalDB = False
 if useLocalDB :
     process.DBReaderFrontier = cms.ESSource("PoolDBESSource",
      DBParameters = cms.PSet(
@@ -247,8 +252,8 @@ if useLocalDB :
      ),
      toGet = cms.VPSet(
        cms.PSet(
-        record = cms.string('SiPixelGainCalibrationOfflineRcd'),
-#        record = cms.string('SiPixelGainCalibrationRcd'),
+#        record = cms.string('SiPixelGainCalibrationOfflineRcd'),
+        record = cms.string('SiPixelGainCalibrationRcd'),
 #        tag = cms.string('SiPixelGainCalibration_2017_v2_bugfix') #in DB
 #        tag = cms.string('SiPixelGainCalibration_2017_v2_bugfix_offline')
 #        tag = cms.string('SiPixelGainCalibration_2017_v2_offline')
@@ -258,11 +263,12 @@ if useLocalDB :
 #        tag = cms.string('SiPixelGainCalibration_2017_v6_offline')
 #        tag = cms.string('SiPixelGainCalibration_2017_v4')
 #        tag = cms.string('SiPixelGainCalibration_2017_v5')
-        tag = cms.string('SiPixelGainCalibration_2017_v6')
+        tag = cms.string('SiPixelGainCalibration_2017_v6') # full tag & in DB
 #        tag = cms.string('SiPixelGainCalibration_2017_v4_1337_offline')
 #        tag = cms.string('SiPixelGainCalibration_phase1_ideal_v2')
  	),
        ),
+     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v6_full.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v5_full.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v4_full.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v4_1337_offline.db')
@@ -276,7 +282,7 @@ if useLocalDB :
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v2_bugfix_offline.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_phase1_ideal_v2.db')
 
-     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
+#     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
 #     connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
     ) # end process
     process.myprefer = cms.ESPrefer("PoolDBESSource","DBReaderFrontier")
@@ -300,7 +306,9 @@ process.siPixelClustersPreSplitting.SeedThreshold = 1000
 process.siPixelClustersPreSplitting.ChannelThreshold = 10 #must be bigger than 1
 process.siPixelClustersPreSplitting.ClusterThreshold = 4000    # integer?
 process.siPixelClustersPreSplitting.ClusterThreshold_L1 = 2000 # integer?
-#process.siPixelClustersPreSplitting.payloadType = cms.string('Full')
+
+# To select full granularity gain calibration 
+# process.siPixelClustersPreSplitting.payloadType = cms.string('Full')
 
 
 process.a = cms.EDAnalyzer("PixDigisTest",

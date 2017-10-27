@@ -663,7 +663,8 @@ edm::EDGetTokenT<HFRecHitCollection> HFHitsToken_;
   TProfile *hpvls, *hclupv, *hpixpv;
   //TProfile *hcharCluls, *hcharPixls, *hsizeCluls, *hsizeXCluls;
   TProfile *hpixbx, *hclubx, *hpvbx, *hcharClubx, *hcharPixbx,*hsizeClubx, *hsizeYClubx;
-
+  TH1D *hcharMin1,*hcharMin2,*hcharMin3,*hcharMin4,*hcharMax1,*hcharMax2,*hcharMax3,*hcharMax4;
+ 
 #ifdef TEST_GEOM
   TH2F *hbpixXY;
 #endif
@@ -1435,6 +1436,16 @@ void PixClusterAna::beginJob() {
    hpixbx  = fs->make<TProfile>("hpixbx", "pix vs bx ",4000,-0.5,3999.5,0.0,1000000.);
    hclubx  = fs->make<TProfile>("hclubx", "clu vs bx ",4000,-0.5,3999.5,0.0,1000000.);
    hpvbx   = fs->make<TProfile>("hpvbx",  "pv vs bx ", 4000,-0.5,3999.5,0.0,1000000.);
+
+   hcharMin1 = fs->make<TH1D>("hcharMin1","min pix char in a cluster L1",600,0.,60.);
+   hcharMin2 = fs->make<TH1D>("hcharMin2","min pix char in a cluster L2",600,0.,60.);
+   hcharMin3 = fs->make<TH1D>("hcharMin3","min pix char in a cluster L3",600,0.,60.);
+   hcharMin4 = fs->make<TH1D>("hcharMin4","min pix char in a cluster L4",600,0.,60.);
+   hcharMax1 = fs->make<TH1D>("hcharMax1","max pix char in a cluster L1",600,0.,60.);
+   hcharMax2 = fs->make<TH1D>("hcharMax2","max pix char in a cluster L2",600,0.,60.);
+   hcharMax3 = fs->make<TH1D>("hcharMax3","max pix char in a cluster L3",600,0.,60.);
+   hcharMax4 = fs->make<TH1D>("hcharMax4","max pix char in a cluster L4",600,0.,60.);
+
 
 #ifdef NEW_MODULES
   hsize11 = fs->make<TH1D>( "hsize11", "layer 1 clu size new",sizeH,-0.5,highH);
@@ -2718,7 +2729,7 @@ void PixClusterAna::analyze(const edm::Event& e,
       //int noisy = 0;
 
       if(pixelsVec.size()>maxPixPerClu) maxPixPerClu = pixelsVec.size();
- 
+      float adcMin=9999., adcMax=0.;
       for (unsigned int i = 0;  i < pixelsVec.size(); ++i) { // loop over pixels
 	//bool isBig=false;
 	sumPixels++;
@@ -2732,6 +2743,8 @@ void PixClusterAna::analyze(const edm::Event& e,
 	bool negativeADC = (intADC<=100); // signals that there was negative charge 
 	if(negativeADC) {cluWithNegativeADC= true; detWithNegativeADC= true;}
 #endif
+	if(adc<adcMin) adcMin=adc;
+	if(adc>adcMax) adcMax=adc;
 
 	int roc = rocId(int(pixy),int(pixx));  // 0-15, column, row
 	int link = int(roc/8); // link 0 & 1
@@ -3205,7 +3218,10 @@ void PixClusterAna::analyze(const edm::Event& e,
 	  avCharge1 += ch;
 
 	  htest1->Fill(ch,float(size));
-
+	  if(size>1) {
+	    hcharMin1->Fill(adcMin);
+	    hcharMax1->Fill(adcMax);
+	  }
 	  if(inner) {hcharge11->Fill(ch);}  
 	  else      {hcharge12->Fill(ch);}  
 
@@ -3340,7 +3356,10 @@ void PixClusterAna::analyze(const edm::Event& e,
 	  hcharge2->Fill(ch);
 
 	  htest3->Fill(ch,float(size));
-
+	  if(size>1) {
+	    hcharMin2->Fill(adcMin);
+	    hcharMax2->Fill(adcMax);
+	  }
 #ifdef PHI_PROFILES
 	  hclumultxPhi2->Fill(gPhi,sizeX);
 	  hclumultyPhi2->Fill(gPhi,sizeY);
@@ -3435,6 +3454,10 @@ void PixClusterAna::analyze(const edm::Event& e,
 	  hsizey3->Fill(float(sizeY));
 	  htest3->Fill(ch,float(size));
 
+	  if(size>1) {
+	    hcharMin3->Fill(adcMin);
+	    hcharMax3->Fill(adcMax);
+	  }
 	  numOfClustersPerDet3++;
 	  numOfClustersPerLay3++;
 	  avCharge3 += ch;
@@ -3506,6 +3529,10 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 	  htest3->Fill(ch,float(size));
 
+	  if(size>1) {
+	    hcharMin4->Fill(adcMin);
+	    hcharMax4->Fill(adcMax);
+	  }
 	  hcluDets4->Fill(float(module),float(ladder));
 	  hsizeDets4->Fill(float(module),float(ladder),float(size));
 	  hladder4id->Fill(float(ladder));

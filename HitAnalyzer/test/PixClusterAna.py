@@ -82,7 +82,8 @@ process.source = cms.Source("PoolSource",
 
 # "/store/data/Run2017C/AlCaLumiPixels/ALCARECO/LumiPixels-PromptReco-v1/000/299/593/00000/64845BDE-1471-E711-9D54-02163E01A6E1.root",
 
-"file:/afs/cern.ch/user/a/arun/public/forChris/withERA2017/output_inALCARECO_LumiPixels_With_ERA2017.root"
+#"file:/afs/cern.ch/user/a/arun/public/forChris/withERA2017/output_inALCARECO_LumiPixels_With_ERA2017.root"
+
 
 # time 
 #"/store/express/Run2017A/ExpressPhysics/FEVT/Express-v2/000/296/902/00000/008557CF-BE51-E711-A29A-02163E01A4E0.root",
