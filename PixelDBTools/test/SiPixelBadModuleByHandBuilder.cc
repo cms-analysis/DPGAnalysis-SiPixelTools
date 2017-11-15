@@ -101,7 +101,7 @@ SiPixelQuality* SiPixelBadModuleByHandBuilder::getNewObject(){
       }
       std::map<uint32_t,uint32_t>::iterator it=disabledModules.find(detId);
       if (it==disabledModules.end()) it=disabledModules.insert(disabledModules.begin(), std::make_pair(detId,0));
-      it->second += 1 << roc;
+      it->second |= 1 << roc;
       //std::cout<<"New module read "<<name<<" "<<roc<<" --> "<<detId<<" "<<std::bitset<32>(it->second)<<std::endl;
     }
 
