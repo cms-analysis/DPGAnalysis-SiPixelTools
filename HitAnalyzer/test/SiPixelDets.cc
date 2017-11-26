@@ -32,7 +32,7 @@
 
 #define NEW_NAMES
 //#define OLD_NAMES
-#define CHECK_ORIENT
+//#define CHECK_ORIENT
 
 using namespace std;
 using namespace edm;
@@ -64,7 +64,7 @@ SiPixelDets::~SiPixelDets() {
 void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
   const bool PRINT = true;
   const bool PRINT_TABLE = true;
-  const bool doReversedTest = true;
+  const bool doReversedTest = false;
 
  
   edm::ESHandle<TrackerGeometry> tkgeom;
