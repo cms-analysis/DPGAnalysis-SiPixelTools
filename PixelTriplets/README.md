@@ -15,14 +15,15 @@ process.source = cms.Source("PoolSource",
 )
 ```
 
-Run using cmsRun
+Run with cmsRun
 
 ```
 cmsRun pxl.py
 ```
 
-Remember to set the appropriate Global Tag. This can be done from the command line
+Remember to set the appropriate Global Tag, for instance via the command line
 
 ```
-cmsRun pxl.py --GlobalTag auto:phase1_2017_realistic
+cmsRun pxl.py GlobalTag='auto:phase1_2017_realistic'
 ```
+
