@@ -40,7 +40,7 @@ opt.register('useTemplateReco',
              'Set if you want to use Template (True) or Generic Reco (False)')
 
 ### Events to process: 'maxEvents' is already registered by the framework
-opt.setDefault('maxEvents', 100)
+opt.setDefault('maxEvents', -1)
 
 # Proceed with settings from command line
 opt.parseArguments()
