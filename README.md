@@ -24,18 +24,18 @@ cd **myPackage**(see below)
 scram b -j 20
 ```
 
-**myPackage** can be any of the following repositories below, containing codes to calibrate & test pixels:
+**myPackage** can be any of the repositories below, containing code to calibrate & test pixels:
 
-PixelTriplets - measure hit resolution in bpix using the triplet method.
+- PixelTriplets - measure hit resolution in bpix using the triplet method.
 
-PixelTrees - make pixel trees used for testing and calibration of resonstructin
+- PixelTrees - make pixel trees used for testing and calibration of resonstructin
 
-PixelHitAsociator - a customised version of the SimHit-RecHit comparion, used for resolution testing.
+- PixelHitAsociator - a customised version of the SimHit-RecHit comparion, used for resolution testing.
 
-HitAnalyser - various codes to test pixel simHits, digis, clusters and recHits.
+- HitAnalyser - various codes to test pixel simHits, digis, clusters and recHits.
 
-LA-Calibration - code to calibrate the LA from data.
+- LA-Calibration - code to calibrate the LA from data.
 
-GainCalibration - code to run the gain calibartion to obtain pedestals and (offsets) gains (slopes) per pixel.
+- GainCalibration - code to run the gain calibartion to obtain pedestals and (offsets) gains (slopes) per pixel.
 
-PixelDBTools - various test programs to monitor the content of pixel DB payloads.
+- PixelDBTools - various test programs to monitor the content of pixel DB payloads.
