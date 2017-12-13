@@ -1,7 +1,30 @@
-DPGAnalysis-SiPixelTools
-========================
 
-These are various codes to calibrate & test pixels:
+# DPGAnalysis-SiPixelTools
+
+Prepare your working directory
+
+```
+mkdir PixelAnalysis
+cd PixelAnalysis
+cmsrel CMSSW_9_4_0
+cd CMSSW_9_4_0/src
+cmsenv
+```
+
+Fork DPGAnalysis-SiPixelTools from https://github.com/cms-analysis/DPGAnalysis-SiPixelTools and checkout the code
+
+```
+export GITUSER=`git config user.github`
+git clone https://github.com/${GITUSER}/DPGAnalysis-SiPixelTools PixelTools
+cd PixelTools
+git remote add cms-analysis https://github.com/cms-analysis/DPGAnalysis-SiPixelTools.git
+git fetch cms-analysis
+git checkout -b 9_4_0 cms-analysis/9_4_0
+cd **myPackage**(see below)
+scram b -j 20
+```
+
+**myPackage** can be any of the following repositories below, containing codes to calibrate & test pixels:
 
 PixelTriplets - measure hit resolution in bpix using the triplet method.
 
