@@ -268,7 +268,6 @@ if opt.useLocalDBTemplate :
 	process.myprefer3 = cms.ESPrefer("PoolDBESSource","DBReaderFrontier3")
 # endif
  
-
 process.Histos = cms.EDAnalyzer('Pxl',#PxlBPix,PxlFPix'
 # for official RECO
 #	triggerSource = cms.InputTag('TriggerResults::HLT'),
