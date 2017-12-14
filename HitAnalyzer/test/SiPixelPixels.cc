@@ -107,7 +107,8 @@ void SiPixelPixels::analyze(const edm::Event& e, const edm::EventSetup& es) {
   int offlineRow=65; 
   int offlineCol=150;
   int roc=-1, col=-1, row=-1;
-  for(TrackerGeometry::DetUnitContainer::const_iterator it = tkgeom->detUnits().begin(); 
+  //for(TrackerGeometry::DetUnitContainer::const_iterator it = tkgeom->detUnits().begin(); 
+  for(TrackerGeometry::DetContainer::const_iterator it = tkgeom->detUnits().begin(); 
        it != tkgeom->detUnits().end(); it++) {
 
     // Is it a pixel detetector

@@ -99,7 +99,8 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
   edm::ESHandle<MagneticField> magfield;
   es.get<IdealMagneticFieldRecord>().get(magfield);
 
-  for(TrackerGeometry::DetUnitContainer::const_iterator it = tkgeom->detUnits().begin(); 
+  //for(TrackerGeometry::DetUnitContainer::const_iterator it = tkgeom->detUnits().begin(); 
+  for(TrackerGeometry::DetContainer::const_iterator it = tkgeom->detUnits().begin(); 
       it != tkgeom->detUnits().end(); it++) {
 
     // Is it a pixel detetector
