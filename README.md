@@ -19,7 +19,7 @@ git clone https://github.com/${GITUSER}/DPGAnalysis-SiPixelTools PixelTools
 cd PixelTools
 git remote add cms-analysis https://github.com/cms-analysis/DPGAnalysis-SiPixelTools.git
 git fetch cms-analysis
-git checkout -b 9_4_0 cms-analysis/9_4_0
+git checkout -b DevelopmentBranch cms-analysis/master
 cd **myPackage**(see below)
 scram b -j 20
 ```
