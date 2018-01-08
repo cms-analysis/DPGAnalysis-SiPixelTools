@@ -1,11 +1,12 @@
 // File: PixClusterAna.cc
-// Description: T0 test the pixel clusters. 
+// Description: To test pixel clusters. 
 // Author: Danek Kotlinski 
 // Creation Date:  Initial version. 3/06
 // Modify to work with CMSSW354, 11/03/10 d.k.
 // Modify to work with CMSSW620, SLC6, CMSSW700, 10/10/13 d.k.
-// Change to ByToken (clusters only) so other data access does not work for the moment.
-// Make for 4 layers.
+// Change to ByToken.
+// Make for 4 layers. 1/17 
+// Add Normalise configurable. 1/18
 //--------------------------------------------
 #include <memory>
 #include <string>
@@ -544,6 +545,7 @@ class PixClusterAna : public edm::EDAnalyzer {
   edm::InputTag src_;
   //const static bool PRINT = false;
   bool PRINT;
+  bool Normalise;
   int select1, select2;
   int countEvents, countAllEvents;
   double sumClusters, sumPixels, countLumi;
@@ -578,9 +580,9 @@ edm::EDGetTokenT<HFRecHitCollection> HFHitsToken_;
     *hpz1id,*hpz2id,*hpz3id,*hpz4id;
 
   TH1D *hcharge1,*hcharge2, *hcharge3, *hcharge4, 
-    *hcharge5,*hcharge6,*hcharge7 ;
+    *hcharge5,*hcharge6,*hcharge7,*hcharge8 ;
   TH1D *hpixcharge1,*hpixcharge2, *hpixcharge3, *hpixcharge4, 
-    *hpixcharge5,*hpixcharge6,*hpixcharge7;
+    *hpixcharge5,*hpixcharge6,*hpixcharge7,*hpixcharge8;
   TH1D *hcols1,*hcols2,*hcols3,*hrows1,*hrows2,*hrows3,*hcols4,*hrows4;
   TH1D *hpcols1,*hpcols2,*hpcols3,*hprows1,*hprows2,*hprows3,*hpcols4,*hprows4;
   TH1D *hsize1,*hsize2,*hsize3,*hsize4,
@@ -794,12 +796,15 @@ edm::EDGetTokenT<HFRecHitCollection> HFHitsToken_;
 /////////////////////////////////////////////////////////////////
 // Contructor, empty.
 PixClusterAna::PixClusterAna(edm::ParameterSet const& conf) 
-  : conf_(conf), src_(conf.getParameter<edm::InputTag>( "src" )) { 
+  : conf_(conf), src_(conf.getParameter<edm::InputTag>( "src" )), Normalise(true) { 
+
   PRINT = conf.getUntrackedParameter<bool>("Verbosity",false);
+  Normalise = conf.getUntrackedParameter<bool>("Normalise",true);
   select1 = conf.getUntrackedParameter<int>("Select1",0);
   select2 = conf.getUntrackedParameter<int>("Select2",0);
   //src_ =  conf.getParameter<edm::InputTag>( "src" );
-  if(PRINT) cout<<" Construct "<<endl;
+  if(PRINT) cout<<" Construct, Normalise = "<<Normalise<<endl;
+
 
   // For the ByToken method
   myClus = consumes<edmNew::DetSetVector<SiPixelCluster> >(conf.getParameter<edm::InputTag>( "src" ));
@@ -1120,6 +1125,7 @@ void PixClusterAna::beginJob() {
   hcharge5 = fs->make<TH1D>( "hcharge5", "Clu charge d1", sizeH, 0.,highH);
   hcharge6 = fs->make<TH1D>( "hcharge6", "Clu charge d2", sizeH, 0.,highH);
   hcharge7 = fs->make<TH1D>( "hcharge7", "Clu charge d3", sizeH, 0.,highH);
+  hcharge8 = fs->make<TH1D>( "hcharge8", "Clu charge test", sizeH, 0.,highH);
 
   hcharge11 = fs->make<TH1D>( "hcharge11", "Clu charge l1-inner", sizeH, 0.,highH); //in ke
   hcharge12 = fs->make<TH1D>( "hcharge12", "Clu charge l1-outer", sizeH, 0.,highH); //in ke
@@ -1135,6 +1141,7 @@ void PixClusterAna::beginJob() {
   hpixcharge5 = fs->make<TH1D>( "hpixcharge5", "Pix charge d1",sizeH, 0.,highH);
   hpixcharge6 = fs->make<TH1D>( "hpixcharge6", "Pix charge d1",sizeH, 0.,highH);
   hpixcharge7 = fs->make<TH1D>( "hpixcharge7", "Pix charge d2",sizeH, 0.,highH);
+  hpixcharge8 = fs->make<TH1D>( "hpixcharge8", "Pix charge test",sizeH, 0.,highH);
 
   hpixcharge11 = fs->make<TH1D>( "hpixcharge11", "Pix charge l1-inner",sizeH, 0.,highH);//in ke
   hpixcharge12 = fs->make<TH1D>( "hpixcharge12", "Pix charge l1-outer",sizeH, 0.,highH);//in ke
@@ -1886,7 +1893,6 @@ void PixClusterAna::endJob(){
 
 
   cout <<" clus/pix per full event "<<sumClusters<<"/"<<sumPixels<<endl;
-  cout<<" 2D plots are rescaled by the number of full events "<<countEvents<<endl;
 
   //countLumi /= 1000.;
   //double c1=0, c2=0;
@@ -1894,8 +1900,9 @@ void PixClusterAna::endJob(){
   //if(c3>0.) {c1=sumClusters/c3; c2=sumPixels/c3;}
   //cout<<" Lumi = "<<countLumi<<" still the /10 bug? "<<"clu and pix per lumi unit"<<c1<<" "<<c2<<endl;
   
-  if(countEvents==0) return;
+  if(!Normalise || countEvents==0) return;
 
+  cout<<" 2D plots are rescaled by the number of full events "<<countEvents<<endl;
   //Divide the size histos
   hsizeDets1->Divide(hsizeDets1,hcluDets1,1.,1.);
   hsizeDets2->Divide(hsizeDets2,hcluDets2,1.,1.);
@@ -2950,7 +2957,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 #endif
 
 #ifdef SINGLE_MODULES
-	    if(select1>0) {
+	    //if(select1>0) {
 	      float weight = 1.; // adc
 	      if     (eventFlag[0]&&ladder==1 && module==1) hpixDetMap10->Fill(pixy,pixx,weight); // 
 	      else if(eventFlag[1]&&ladder==2 && module==1) hpixDetMap11->Fill(pixy,pixx,weight); // " 
@@ -2958,42 +2965,43 @@ void PixClusterAna::analyze(const edm::Event& e,
 	      else if(eventFlag[3]&&ladder==4 && module==1) hpixDetMap13->Fill(pixy,pixx,weight); // 
 	      else if(eventFlag[4]&&ladder==5 && module==1) hpixDetMap14->Fill(pixy,pixx,weight); // 
 	      else if(eventFlag[5]&&ladder==6 && module==1) hpixDetMap15->Fill(pixy,pixx,weight); //
-	      
+	
 	      else if(eventFlag[6]&&ladder==-1 && module==-1) hpixDetMap16->Fill(pixy,pixx,weight); //
 	      else if(eventFlag[7]&&ladder==-2 && module==-1) hpixDetMap17->Fill(pixy,pixx,weight); // 
 	      else if(eventFlag[8]&&ladder==-3 && module==-1) hpixDetMap18->Fill(pixy,pixx,weight); //  
 	      else if(eventFlag[9]&&ladder==-4 && module==-1) hpixDetMap19->Fill(pixy,pixx,weight); //
-	      else if(eventFlag[10]&&ladder==-5 && module==-1) hpixDetMap20->Fill(pixy,pixx,weight); // 
-	      else if(eventFlag[11]&&ladder==-6 && module==-1) hpixDetMap21->Fill(pixy,pixx,weight); //
+
+	      // else if(eventFlag[10]&&ladder==-5 && module==-1) hpixDetMap20->Fill(pixy,pixx,weight); // 
+	      // else if(eventFlag[11]&&ladder==-6 && module==-1) hpixDetMap21->Fill(pixy,pixx,weight); //
  
-	      else if(eventFlag[12]&&ladder==-1 && module==4) hpixDetMap22->Fill(pixy,pixx,weight); // 
-	      else if(eventFlag[13]&&ladder==-2 && module==4) hpixDetMap23->Fill(pixy,pixx,weight); //
-	      else if(eventFlag[14]&&ladder==-3 && module==4) hpixDetMap24->Fill(pixy,pixx,weight); //
-	      else if(eventFlag[15]&&ladder==-4 && module==4) hpixDetMap25->Fill(pixy,pixx,weight); // 
-	      else if(eventFlag[16]&&ladder==-5 && module==4) hpixDetMap26->Fill(pixy,pixx,weight); // 
-	      else if(eventFlag[17]&&ladder==-6 && module==4) hpixDetMap27->Fill(pixy,pixx,weight); // 
+	      // else if(eventFlag[12]&&ladder==-1 && module==4) hpixDetMap22->Fill(pixy,pixx,weight); // 
+	      // else if(eventFlag[13]&&ladder==-2 && module==4) hpixDetMap23->Fill(pixy,pixx,weight); //
+	      // else if(eventFlag[14]&&ladder==-3 && module==4) hpixDetMap24->Fill(pixy,pixx,weight); //
+	      // else if(eventFlag[15]&&ladder==-4 && module==4) hpixDetMap25->Fill(pixy,pixx,weight); // 
+	      // else if(eventFlag[16]&&ladder==-5 && module==4) hpixDetMap26->Fill(pixy,pixx,weight); // 
+	      // else if(eventFlag[17]&&ladder==-6 && module==4) hpixDetMap27->Fill(pixy,pixx,weight); // 
 
-	      else if(eventFlag[18]&&ladder==-1 && module==-4) hpixDetMap28->Fill(pixy,pixx,weight); //
-	      else if(eventFlag[19]&&ladder==-2 && module==-4) hpixDetMap29->Fill(pixy,pixx,weight); // 
-	      else if(eventFlag[20]&&ladder==-3 && module==-4) hpixDetMap30->Fill(pixy,pixx,weight); // 
-	      else if(eventFlag[21]&&ladder==-4 && module==-4) hpixDetMap31->Fill(pixy,pixx,weight); // 
-	      else if(eventFlag[22]&&ladder==-5 && module==-4) hpixDetMap32->Fill(pixy,pixx,weight); // 
-	      else if(eventFlag[23]&&ladder==-6 && module==-4) hpixDetMap33->Fill(pixy,pixx,weight); // 
+	      // else if(eventFlag[18]&&ladder==-1 && module==-4) hpixDetMap28->Fill(pixy,pixx,weight); //
+	      // else if(eventFlag[19]&&ladder==-2 && module==-4) hpixDetMap29->Fill(pixy,pixx,weight); // 
+	      // else if(eventFlag[20]&&ladder==-3 && module==-4) hpixDetMap30->Fill(pixy,pixx,weight); // 
+	      // else if(eventFlag[21]&&ladder==-4 && module==-4) hpixDetMap31->Fill(pixy,pixx,weight); // 
+	      // else if(eventFlag[22]&&ladder==-5 && module==-4) hpixDetMap32->Fill(pixy,pixx,weight); // 
+	      // else if(eventFlag[23]&&ladder==-6 && module==-4) hpixDetMap33->Fill(pixy,pixx,weight); // 
 
-	      else if(eventFlag[24]&&ladder==1 && module==-4) hpixDetMap34->Fill(pixy,pixx,weight); // 
-	      else if(eventFlag[25]&&ladder==2 && module==-4) hpixDetMap35->Fill(pixy,pixx,weight); // 
-	      else if(eventFlag[26]&&ladder==3 && module==-4) hpixDetMap36->Fill(pixy,pixx,weight); // 
-	      else if(eventFlag[27]&&ladder==4 && module==-4) hpixDetMap37->Fill(pixy,pixx,weight); // 
-	      else if(eventFlag[28]&&ladder==5 && module==-4) hpixDetMap38->Fill(pixy,pixx,weight); // 
-	      else if(eventFlag[29]&&ladder==6 && module==-4) hpixDetMap39->Fill(pixy,pixx,weight); // 
+	      // else if(eventFlag[24]&&ladder==1 && module==-4) hpixDetMap34->Fill(pixy,pixx,weight); // 
+	      // else if(eventFlag[25]&&ladder==2 && module==-4) hpixDetMap35->Fill(pixy,pixx,weight); // 
+	      // else if(eventFlag[26]&&ladder==3 && module==-4) hpixDetMap36->Fill(pixy,pixx,weight); // 
+	      // else if(eventFlag[27]&&ladder==4 && module==-4) hpixDetMap37->Fill(pixy,pixx,weight); // 
+	      // else if(eventFlag[28]&&ladder==5 && module==-4) hpixDetMap38->Fill(pixy,pixx,weight); // 
+	      // else if(eventFlag[29]&&ladder==6 && module==-4) hpixDetMap39->Fill(pixy,pixx,weight); // 
 
-	      else if(eventFlag[30]&&ladder==1 && module==4) hpixDetMap40->Fill(pixy,pixx,weight); // 
-	      else if(eventFlag[31]&&ladder==2 && module==4) hpixDetMap41->Fill(pixy,pixx,weight); // 
-	      else if(eventFlag[32]&&ladder==3 && module==4) hpixDetMap42->Fill(pixy,pixx,weight); // 
-	      else if(eventFlag[33]&&ladder==4 && module==4) hpixDetMap43->Fill(pixy,pixx,weight); // 
-	      else if(eventFlag[34]&&ladder==5 && module==4) hpixDetMap44->Fill(pixy,pixx,weight); // 
-	      else if(eventFlag[35]&&ladder==6 && module==4) hpixDetMap45->Fill(pixy,pixx,weight); // 
-	    } // if select 
+	      // else if(eventFlag[30]&&ladder==1 && module==4) hpixDetMap40->Fill(pixy,pixx,weight); // 
+	      // else if(eventFlag[31]&&ladder==2 && module==4) hpixDetMap41->Fill(pixy,pixx,weight); // 
+	      // else if(eventFlag[32]&&ladder==3 && module==4) hpixDetMap42->Fill(pixy,pixx,weight); // 
+	      // else if(eventFlag[33]&&ladder==4 && module==4) hpixDetMap43->Fill(pixy,pixx,weight); // 
+	      // else if(eventFlag[34]&&ladder==5 && module==4) hpixDetMap44->Fill(pixy,pixx,weight); // 
+	      // else if(eventFlag[35]&&ladder==6 && module==4) hpixDetMap45->Fill(pixy,pixx,weight); // 
+	      //} // if select 
 #endif
 
 #ifdef LS_TESTS
@@ -3060,6 +3068,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 	    hpcols2->Fill(pixy);
 	    hprows2->Fill(pixx);
 	    hpixcharge2->Fill(adc);
+	    if(ladder==1 && module>0) {hpixcharge8->Fill(adc);}
 	    hpixDetMap2->Fill(pixy,pixx);
 	    hpixDets2->Fill(float(module),float(ladder));
 	    hpladder2id->Fill(float(ladder));
@@ -3100,17 +3109,16 @@ void PixClusterAna::analyze(const edm::Event& e,
 #endif
 
 #ifdef SINGLE_MODULES
-	    // if     (ladder==  3 && module== 1) hpixDetMap20->Fill(pixy,pixx); // noise  
-	    // else if(ladder==  3 && module== 2) hpixDetMap21->Fill(pixy,pixx); // "
-	    // else if(ladder==  3 && module== 3) hpixDetMap22->Fill(pixy,pixx); // "
-
-	    // else if(ladder== 13 && module==-1) hpixDetMap23->Fill(pixy,pixx); // 
-	    // else if(ladder==-14 && module== 1) hpixDetMap24->Fill(pixy,pixx); // 
-	    // else if(ladder==-14 && module== 1) hpixDetMap25->Fill(pixy,pixx); // 
-	    // else if(ladder== -4 && module== 1) hpixDetMap26->Fill(pixy,pixx); //  
-	    // else if(ladder==  6 && module==-1) hpixDetMap27->Fill(pixy,pixx); // 
-	    // else if(ladder== -1 && module== 1) hpixDetMap28->Fill(pixy,pixx); // lowest thr  
-	    // else if(ladder== 10 && module==-3) hpixDetMap29->Fill(pixy,pixx); // highest
+	    if     (ladder==  1 && module== 1) hpixDetMap20->Fill(pixy,pixx); //   
+	    else if(ladder==  1 && module== 2) hpixDetMap21->Fill(pixy,pixx); // 
+	    else if(ladder==  1 && module== 3) hpixDetMap22->Fill(pixy,pixx); // 
+	    else if(ladder==  1 && module== 4) hpixDetMap23->Fill(pixy,pixx); // 
+	    else if(ladder==  2 && module== 1) hpixDetMap24->Fill(pixy,pixx); // 
+	    else if(ladder==  2 && module== 2) hpixDetMap25->Fill(pixy,pixx); // 
+	    else if(ladder==  2 && module== 3) hpixDetMap26->Fill(pixy,pixx); //  
+	    else if(ladder==  2 && module== 4) hpixDetMap27->Fill(pixy,pixx); // 
+	    else if(ladder==  3 && module== 1) hpixDetMap28->Fill(pixy,pixx); //   
+	    else if(ladder==  3 && module== 2) hpixDetMap29->Fill(pixy,pixx); // 
 #endif
 
 #if defined(BX) || defined(BX_NEW)
@@ -3537,6 +3545,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 	  hcluDetMap2->Fill(y,x);
 	  hcharge2->Fill(ch);
+	  if(ladder==1 && module>0) {hcharge8->Fill(ch);}
 
 	  htest3->Fill(ch,float(size));
 #ifdef MINMAX

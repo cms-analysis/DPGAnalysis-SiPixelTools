@@ -356,11 +356,12 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       int bladeName = pen.bladeName();
       int pannelName = pen.pannelName();
       int plaquetteName = pen.plaquetteName();
+      int ringName = pen.ringName();
       DetId det=pen.getDetId(tt);
       //PixelEndcapName::HalfCylinder part = pen.halfCylinder();
       PixelModuleName::ModuleType moduleType = pen.moduleType();
       if(PRINT) cout<<sh<<" "<<nameF<<" "<<diskName<<" "<<bladeName<<" "<<pannelName<<" "
-		    <<plaquetteName<<" "<<moduleType<<" "<<det.rawId()
+		    <<plaquetteName<<" "<<ringName<<" "<<moduleType<<" "<<det.rawId()
 		    <<endl;
 
       if(PRINT_TABLE) 

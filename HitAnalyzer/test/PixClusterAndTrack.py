@@ -3,9 +3,9 @@
 #
 #
 import FWCore.ParameterSet.Config as cms
-process = cms.Process("cluTest")
+from Configuration.StandardSequences.Eras import eras
+process = cms.Process("cluTest",eras.Run2_2017)
                    
-#process.load("Configuration.Geometry.GeometryIdeal_cff")
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 # process.load("Configuration.StandardSequences.Services_cff")
@@ -17,7 +17,8 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag.globaltag = '90X_dataRun2_Express_v4' # 
 #process.GlobalTag.globaltag = '92X_dataRun2_Express_v2' # 
 #process.GlobalTag.globaltag = '92X_dataRun2_Express_v4' # for 926
-process.GlobalTag.globaltag = '92X_dataRun2_Express_v7' # for 927,9
+#process.GlobalTag.globaltag = '92X_dataRun2_Express_v7' # for 927,9
+process.GlobalTag.globaltag = '94X_dataRun2_ReReco_EOY17_v2' # for 2017 rereco
 
 # 2016
 #process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v3' # for 266277
@@ -39,13 +40,15 @@ process.hltfilter = hlt.hltHighLevel.clone(
 # Min-Bias	
 #    HLTPaths = ['HLT_Physics*'],
 #    HLTPaths = ['HLT_Random*'],
-    HLTPaths = ['HLT_ZeroBias*'],
+#    HLTPaths = ['HLT_ZeroBias*'],
+    HLTPaths = ['HLT_ZeroBias_v*'],
 #    HLTPaths = ['HLT_ZeroBias_part*'],  # empty
 #    HLTPaths = ['HLT_ZeroBias_FirstCollisionInTrain_*'], # empty
 #    HLTPaths = ['HLT_ZeroBias_LastCollisionInTrain_*'],  # empty
 #    HLTPaths = ['HLT_ZeroBias_FirstBXAfterTrain_*'], # empty
 #    HLTPaths = ['HLT_ZeroBias_IsolatedBunches_*'], # empty
-#    HLTPaths = ['HLT_ZeroBias_FirstCollisionAfterAbortGap_*'],
+#    HLTPaths = ['HLT_ZeroBias_FirstCollisionAfterAbortGap_*'], # ok
+#    HLTPaths = ['HLT_ZeroBias_BeamSpot_*'],
 #    HLTPaths = ['HLT_L1SingleMuOpen_v*'],
 #    HLTPaths = ['HLT_PAZeroBias*'],
 #    HLTPaths = ['HLT_PARandom*'],
@@ -60,7 +63,6 @@ process.hltfilter = hlt.hltHighLevel.clone(
     andOr = True,  # False = and, True=or
     throw = False
     )
-
 
 process.MessageLogger = cms.Service("MessageLogger",
     debugModules = cms.untracked.vstring('siPixelClusters'),
@@ -96,12 +98,45 @@ process.source = cms.Source("PoolSource",
 #"/store/relval/CMSSW_9_2_3/RelValNuGun/GEN-SIM-RECO/PUpmx25ns_92X_upgrade2017_realistic_v2_earlyBS2017-v1/10000/12995CE4-3851-E711-B4A6-0CC47A4D7602.root",
 # "/store/relval/CMSSW_9_2_3/RelValNuGun/GEN-SIM-DIGI-RAW-HLTDEBUG/PUpmx25ns_92X_upgrade2017_realistic_v2_earlyBS2017-v1/10000/1ECCAF11-2E51-E711-AE03-0025905B8594.root",
 
+# low lumi
+
+#"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/307/042/00000/00A5758B-90D0-E711-97C1-02163E01A25F.root",
+#"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/307/042/00000/56F0EA59-A1D0-E711-B720-02163E0134AB.root",
+#"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/307/042/00000/A63F5929-A1D0-E711-AECD-02163E011B81.root",
+
+#"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/896/00000/00653B14-C0CE-E711-A49E-02163E01A2B5.root",
+#"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/896/00000/664AFBE7-BDCE-E711-A402-02163E01A6B0.root",
+#"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/896/00000/66EA7079-BCCE-E711-989D-02163E019BA1.root",
+#"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/896/00000/6A76D21A-C0CE-E711-BB83-02163E01A308.root",
+#"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/896/00000/6C5AAA16-C0CE-E711-AB6B-02163E01A5B7.root",
+#"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/896/00000/7246CC10-C6CE-E711-81FD-02163E01A5B8.root",
+
+#"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/929/00000/004B3B89-ECCE-E711-8DEC-02163E011AC9.root",
+
+
+#"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/936/00000/026F4F49-1FCF-E711-8652-02163E01A3EC.root",
+#"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/936/00000/5A0A69D1-57CF-E711-A09E-02163E011F3A.root",
+#"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/936/00000/5A189348-3ACF-E711-87DB-02163E01A59A.root",
+#"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/936/00000/AE2EBB8B-2DCF-E711-964A-02163E01A3EC.root",
+#"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/936/00000/AE826900-48CF-E711-AA91-02163E019C9A.root",
+
+# low energy 
+#"/store/express/Run2017G/ExpressPhysics/FEVT/Express-v1/000/306/550/00000/0226A9A0-6EC7-E711-A890-02163E013726.root",
+#"/store/express/Run2017G/ExpressPhysics/FEVT/Express-v1/000/306/550/00000/02780554-49C7-E711-BF8E-02163E019E2E.root",
+#"/store/express/Run2017G/ExpressPhysics/FEVT/Express-v1/000/306/550/00000/042CFF49-3FC7-E711-A2A6-02163E01A509.root",
+#"/store/express/Run2017G/ExpressPhysics/FEVT/Express-v1/000/306/550/00000/04DF4C72-66C7-E711-9964-02163E01350C.root",
+
+#"/store/express/Run2017F/ExpressPhysics/FEVT/Express-v1/000/306/091/00000/004A8893-09C0-E711-A7EA-02163E019B9E.root",
+#"/store/express/Run2017F/ExpressPhysics/FEVT/Express-v1/000/306/096/00000/06C993E5-80C0-E711-9E4D-02163E019BAC.root",
+
 #"/store/express/Run2017F/ExpressPhysics/FEVT/Express-v1/000/305/758/00000/12AE1A27-B4BA-E711-A06E-02163E01A273.root",
 #"/store/express/Run2017F/ExpressPhysics/FEVT/Express-v1/000/305/758/00000/147CBC00-B4BA-E711-B8A1-02163E0143AD.root",
 #"/store/express/Run2017F/ExpressPhysics/FEVT/Express-v1/000/305/758/00000/2C6034AC-B7BA-E711-B416-02163E01A475.root",
 #"/store/express/Run2017F/ExpressPhysics/FEVT/Express-v1/000/305/758/00000/46175121-B4BA-E711-9A7E-02163E014445.root",
 
-"/store/express/Run2017F/ExpressPhysics/FEVT/Express-v1/000/305/282/00000/0223A308-FFB4-E711-BA09-02163E019B96.root",
+#"/store/express/Run2017F/ExpressPhysics/FEVT/Express-v1/000/305/757/00000/00721BEB-C4BA-E711-9168-02163E01A4D6.root",
+
+#"/store/express/Run2017F/ExpressPhysics/FEVT/Express-v1/000/305/282/00000/0223A308-FFB4-E711-BA09-02163E019B96.root",
 
 #"/store/express/Run2017E/ExpressPhysics/FEVT/Express-v1/000/304/144/00000/00079894-0BA5-E711-84F0-02163E014569.root ",
 
@@ -325,6 +360,13 @@ process.source = cms.Source("PoolSource",
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('303824:54-303824:999')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('304144:76-304144:999')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('305282:75-305282:999')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('305757:56-305757:220')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('306091:45-306091:999')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('306896:38-306896:92')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('306929:7-306929:214')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('306936:109-306936:999')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('307042:75-307042:589')
+process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('307076:50-307076:90')
 
 
 process.TFileService = cms.Service("TFileService",

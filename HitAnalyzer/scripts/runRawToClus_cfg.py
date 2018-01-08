@@ -26,7 +26,9 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 # to use no All 
 # 2017
 #process.GlobalTag.globaltag = '92X_dataRun2_Express_v2' # fpr 90W 
-process.GlobalTag.globaltag = '92X_dataRun2_Express_v7' # from CMSSW927
+#process.GlobalTag.globaltag = '92X_dataRun2_Express_v7' # from CMSSW927
+#process.GlobalTag.globaltag = '92X_dataRun2_Prompt_v11' # Promot
+process.GlobalTag.globaltag = '94X_dataRun2_ReReco_EOY17_v2' # for RERECO
 # 2015
 #process.GlobalTag.globaltag = 'GR_E_V48'
 #process.GlobalTag.globaltag = 'GR_P_V56' # works for 2469763
@@ -76,7 +78,7 @@ process.source = cms.Source("PoolSource",
  fileNames =  cms.untracked.vstring(
 
 # low lumi
-"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/307/042/00000/00A5758B-90D0-E711-97C1-02163E01A25F.root",
+#"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/307/042/00000/00A5758B-90D0-E711-97C1-02163E01A25F.root",
 
 #"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/896/00000/00653B14-C0CE-E711-A49E-02163E01A2B5.root",
 #"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/896/00000/664AFBE7-BDCE-E711-A402-02163E01A6B0.root",
@@ -85,7 +87,7 @@ process.source = cms.Source("PoolSource",
 #"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/896/00000/6C5AAA16-C0CE-E711-AB6B-02163E01A5B7.root",
 #"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/896/00000/7246CC10-C6CE-E711-81FD-02163E01A5B8.root",
 
-#"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/929/00000/004B3B89-ECCE-E711-8DEC-02163E011AC9.root",
+"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/929/00000/004B3B89-ECCE-E711-8DEC-02163E011AC9.root",
 
 #"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/936/00000/026F4F49-1FCF-E711-8652-02163E01A3EC.root",
 #"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/936/00000/5A0A69D1-57CF-E711-A09E-02163E011F3A.root",
@@ -102,7 +104,6 @@ process.source = cms.Source("PoolSource",
 
 #"/store/express/Run2017F/ExpressPhysics/FEVT/Express-v1/000/306/091/00000/004A8893-09C0-E711-A7EA-02163E019B9E.root",
 #"/store/express/Run2017F/ExpressPhysics/FEVT/Express-v1/000/306/096/00000/06C993E5-80C0-E711-9E4D-02163E019BAC.root",
-
 
 
 #"/store/express/Run2017F/ExpressPhysics/FEVT/Express-v1/000/305/758/00000/12AE1A27-B4BA-E711-A06E-02163E01A273.root",
@@ -234,9 +235,9 @@ process.source = cms.Source("PoolSource",
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('305282:75-305282:999')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('306091:45-306091:999')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('306896:38-306896:92')
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('306929:7-306929:214')
+process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('306929:7-306929:214')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('306936:109-306936:999')
-process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('307042:75-307042:589')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('307042:75-307042:589')
 
 
 # for Raw2digi for data
