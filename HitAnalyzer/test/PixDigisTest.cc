@@ -424,13 +424,13 @@ void PixDigisTest::beginJob() {
     hdigisPerDetF32 = fs->make<TH1F>( "hdigisPerDetF32", "Digis per det d3, r2", 
 			      200, -0.5, 199.5);
     hdigisPerLayF1 = fs->make<TH1F>( "hdigisPerLayF1", "Digis per layer d1", 
-			      2000, -0.5, 1999.5);
+			      2000, -0.5, 19999.5);
     hdigisPerLayF2 = fs->make<TH1F>( "hdigisPerLayF2", "Digis per layer d2", 
-			      2000, -0.5, 1999.5);
+			      2000, -0.5, 19999.5);
     hdigisPerLayF3 = fs->make<TH1F>( "hdigisPerLayF3", "Digis per layer d3", 
-			      2000, -0.5, 1999.5);
+			      2000, -0.5, 19999.5);
     hdetsPerLayF1 = fs->make<TH1F>( "hdetsPerLayF1", "Full dets per layer d1", 
-			      161, -0.5, 160.5);
+			      257, -0.5, 256.5);
     hdetsPerLayF2 = fs->make<TH1F>( "hdetsPerLayF2", "Full dets per layer d2", 
 			      257, -0.5, 256.5);
     hdetsPerLayF3 = fs->make<TH1F>( "hdetsPerLayF3", "Full dets per layer d3", 

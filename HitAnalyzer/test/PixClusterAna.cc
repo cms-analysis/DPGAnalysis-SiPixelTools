@@ -3138,7 +3138,6 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 	   //index = lumiBlock/5;
 // 	    if     (ladder==10 && module== 2)  hmoduleHits2ls->Fill(float(lumiBlock),0); // many resyncs
-
 // 	   if     (ladder==-2 && module== 1 && roc==10)  hrocHits2ls->Fill(float(lumiBlock),0);
 // 	   else if(ladder== 1 && module== 1 && roc== 3)  hrocHits2ls->Fill(float(lumiBlock),1);
 // 	   else if(ladder== 1 && module== 2 && roc== 4)  hrocHits2ls->Fill(float(lumiBlock),2);
@@ -3185,17 +3184,16 @@ void PixClusterAna::analyze(const edm::Event& e,
 #endif
 
 #ifdef SINGLE_MODULES
-	    // if     (ladder== 13 && module==-4) hpixDetMap30->Fill(pixy,pixx); // nois 
-	    // else if(ladder== -1 && module==-1) hpixDetMap31->Fill(pixy,pixx); // "
-	    // else if(ladder== 14 && module== 1) hpixDetMap32->Fill(pixy,pixx); // "
-	    // else if(ladder== 12 && module== 4) hpixDetMap33->Fill(pixy,pixx); // "
-	    // else if(ladder== 19 && module==-4) hpixDetMap34->Fill(pixy,pixx); // " 
-	    // else if(ladder== 14 && module==-3) hpixDetMap35->Fill(pixy,pixx); // " 
-
-	    // else if(ladder==-13 && module==-3) hpixDetMap36->Fill(pixy,pixx); // 
-	    // else if(ladder==-13 && module==-4) hpixDetMap37->Fill(pixy,pixx); // 
-	    // else if(ladder==-21 && module== 2) hpixDetMap38->Fill(pixy,pixx); // lowest thr 
-	    // else if(ladder==  8 && module== 3) hpixDetMap39->Fill(pixy,pixx); // highest
+	    if     (ladder== -4 && module== 1) hpixDetMap30->Fill(pixy,pixx); // 
+	    else if(ladder== -4 && module== 2) hpixDetMap31->Fill(pixy,pixx); // "
+	    else if(ladder== -4 && module== 3) hpixDetMap32->Fill(pixy,pixx); // "
+	    else if(ladder== -4 && module== 4) hpixDetMap33->Fill(pixy,pixx); // "
+	    else if(ladder==-19 && module==-1) hpixDetMap34->Fill(pixy,pixx); // " 
+	    else if(ladder==-19 && module==-2) hpixDetMap35->Fill(pixy,pixx); // " 
+	    else if(ladder==-19 && module==-3) hpixDetMap36->Fill(pixy,pixx); // 
+	    else if(ladder==-19 && module==-4) hpixDetMap37->Fill(pixy,pixx); // 
+	    else if(ladder==-21 && module== 2) hpixDetMap38->Fill(pixy,pixx); //  
+	    else if(ladder==  8 && module== 3) hpixDetMap39->Fill(pixy,pixx); // 
 #endif
 	    hpixchar3->Fill(zPos,adc);
 	    //hcharPixbx->Fill(bx,adc);
@@ -3281,19 +3279,17 @@ void PixClusterAna::analyze(const edm::Event& e,
 	   hcharPix4bx->Fill(bx,adc);
 #endif
 
-
 #ifdef SINGLE_MODULES
-	    // if     (ladder==  6 && module== 1) hpixDetMap40->Fill(pixy,pixx); // noise 
-	    // else if(ladder==  6 && module== 2) hpixDetMap41->Fill(pixy,pixx); // "
-	    // else if(ladder==  6 && module== 3) hpixDetMap42->Fill(pixy,pixx); // "
-	    // else if(ladder==  6 && module== 4) hpixDetMap43->Fill(pixy,pixx); // "
-	    // else if(ladder==-27 && module== 1) hpixDetMap44->Fill(pixy,pixx); // " 
-	    // else if(ladder==  3 && module==-4) hpixDetMap45->Fill(pixy,pixx); // " 
-	    // else if(ladder== 31 && module==-1) hpixDetMap46->Fill(pixy,pixx); // "
-	    // else if(ladder== 15 && module== 1) hpixDetMap47->Fill(pixy,pixx); // "
-	    // else if(ladder==-22 && module== 2) hpixDetMap48->Fill(pixy,pixx); // lowest thr 
-	    // else if(ladder== 32 && module== 2) hpixDetMap49->Fill(pixy,pixx); //  highest
-
+	    if     (ladder==-29 && module== 1) hpixDetMap40->Fill(pixy,pixx); //  
+	    else if(ladder==-29 && module== 2) hpixDetMap41->Fill(pixy,pixx); // "
+	    else if(ladder==-29 && module== 3) hpixDetMap42->Fill(pixy,pixx); // "
+	    else if(ladder==-29 && module== 4) hpixDetMap43->Fill(pixy,pixx); // "
+	    else if(ladder==-27 && module== 1) hpixDetMap44->Fill(pixy,pixx); // " 
+	    else if(ladder==  3 && module==-4) hpixDetMap45->Fill(pixy,pixx); // " 
+	    else if(ladder== 31 && module==-1) hpixDetMap46->Fill(pixy,pixx); // "
+	    else if(ladder== 15 && module== 1) hpixDetMap47->Fill(pixy,pixx); // "
+	    else if(ladder==-22 && module== 2) hpixDetMap48->Fill(pixy,pixx); //  
+	    else if(ladder== 32 && module== 2) hpixDetMap49->Fill(pixy,pixx); //  
 #endif
 	  }  // if layer
 
