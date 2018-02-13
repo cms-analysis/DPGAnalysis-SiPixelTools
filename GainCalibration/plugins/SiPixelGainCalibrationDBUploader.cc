@@ -618,7 +618,7 @@ SiPixelGainCalibrationDBUploader::~SiPixelGainCalibrationDBUploader() {}
 void
 SiPixelGainCalibrationDBUploader::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 { 
-  getHistograms();
+  if (!getHistograms()) {return;}
   fillDatabase(iSetup);
   // empty but should not be called anyway
 }
@@ -632,9 +632,11 @@ void SiPixelGainCalibrationDBUploader::beginJob() {}
 // ------------ method called once each job just after ending the event loop  ------------
 void SiPixelGainCalibrationDBUploader::endJob() {}
 
-void SiPixelGainCalibrationDBUploader::getHistograms() {
+bool SiPixelGainCalibrationDBUploader::getHistograms() {
   std::cout <<"Parsing file " << rootfilestring_ << std::endl;
   therootfile_ = new TFile(rootfilestring_.c_str());
+  if ( !therootfile_ || therootfile_->IsZombie() )
+    {std::cout << "ERROR: Could not open the root file." << std::endl;return false;}
   therootfile_->cd();
   
   TDirectory *dir = therootfile_->GetDirectory("siPixelGainCalibrationAnalysis");
@@ -802,6 +804,7 @@ void SiPixelGainCalibrationDBUploader::getHistograms() {
       }
     }
   }// end of loop over dirlist
+  return true;
 }
 
 //define this as a plug-in

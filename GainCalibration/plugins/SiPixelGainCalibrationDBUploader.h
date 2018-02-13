@@ -61,7 +61,7 @@ class SiPixelGainCalibrationDBUploader : public edm::EDAnalyzer {
       virtual void endJob() ;
   // functions added by F.B.
   void fillDatabase(const edm::EventSetup& iSetup);
-  void getHistograms();
+  bool getHistograms();
       // ----------member data ---------------------------
   edm::ParameterSet conf_;
   std::map<uint32_t,std::map<std::string,TString> > bookkeeper_;
