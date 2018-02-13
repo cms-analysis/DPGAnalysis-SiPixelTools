@@ -2,9 +2,9 @@ import FWCore.ParameterSet.Config as cms
 import shlex, shutil, getpass
 import os.path
 
-db_file = "SiPixelDynamicInefficiency_L1_dcol0p8.db"
+db_file = "SiPixelDynamicInefficiency_PhaseI_v3.db"
 
-tag = 'SiPixelDynamicInefficiency_L1_dcol0p8'
+tag = 'SiPixelDynamicInefficiency_PhaseI_v3'
 
 Phase = 1 # If testing Phase 0, run this in 80X, There's no way I can configure this to work with Phase 0 in 81X
 
@@ -141,22 +141,6 @@ elif Phase == 1:
         theColGeomFactors = cms.untracked.VPSet(
             cms.PSet(
                 det = cms.string("bpix"),
-                layer = cms.uint32(1),
-                factor = cms.double(0.8)
-            ),
-            cms.PSet(
-                det = cms.string("bpix"),
-                layer = cms.uint32(2),
-                factor = cms.double(1)
-            ),
-            cms.PSet(
-                det = cms.string("bpix"),
-                layer = cms.uint32(3),
-                factor = cms.double(1)
-            ),
-            cms.PSet(
-                det = cms.string("bpix"),
-                layer = cms.uint32(4),
                 factor = cms.double(1)
             ),
             cms.PSet(
@@ -177,24 +161,108 @@ elif Phase == 1:
         thePUEfficiency = cms.untracked.VPSet(
             cms.PSet(
                 det = cms.string("bpix"),
-                factor = cms.vdouble(1),
+                layer = cms.uint32(1),
+                ladder = cms.uint32(1),
+                factor = cms.vdouble(1, -0.0167483, 0.00189512, -6.82403e-05)
+            ),
+            cms.PSet(
+                det = cms.string("bpix"),
+                layer = cms.uint32(1),
+                ladder = cms.uint32(2),
+                factor = cms.vdouble(1, -0.0227831, 0.00273391, -0.00010179)
+            ),
+            cms.PSet(
+                det = cms.string("bpix"),
+                layer = cms.uint32(1),
+                ladder = cms.uint32(3),
+                factor = cms.vdouble(1, -0.0167483, 0.00189512, -6.82403e-05)
+            ),
+            cms.PSet(
+                det = cms.string("bpix"),
+                layer = cms.uint32(1),
+                ladder = cms.uint32(4),
+                factor = cms.vdouble(1, -0.0227831, 0.00273391, -0.00010179)
+            ),
+            cms.PSet(
+                det = cms.string("bpix"),
+                layer = cms.uint32(1),
+                ladder = cms.uint32(5),
+                factor = cms.vdouble(1, -0.0167483, 0.00189512, -6.82403e-05)
+            ),
+            cms.PSet(
+                det = cms.string("bpix"),
+                layer = cms.uint32(1),
+                ladder = cms.uint32(6),
+                factor = cms.vdouble(1, -0.0227831, 0.00273391, -0.00010179)
+            ),
+            cms.PSet(
+                det = cms.string("bpix"),
+                layer = cms.uint32(1),
+                ladder = cms.uint32(7),
+                factor = cms.vdouble(1, -0.0167483, 0.00189512, -6.82403e-05)
+            ),
+            cms.PSet(
+                det = cms.string("bpix"),
+                layer = cms.uint32(1),
+                ladder = cms.uint32(8),
+                factor = cms.vdouble(1, -0.0227831, 0.00273391, -0.00010179)
+            ),
+            cms.PSet(
+                det = cms.string("bpix"),
+                layer = cms.uint32(1),
+                ladder = cms.uint32(9),
+                factor = cms.vdouble(1, -0.0167483, 0.00189512, -6.82403e-05)
+            ),
+            cms.PSet(
+                det = cms.string("bpix"),
+                layer = cms.uint32(1),
+                ladder = cms.uint32(10),
+                factor = cms.vdouble(1, -0.0227831, 0.00273391, -0.00010179)
+            ),
+            cms.PSet(
+                det = cms.string("bpix"),
+                layer = cms.uint32(1),
+                ladder = cms.uint32(11),
+                factor = cms.vdouble(1, -0.0167483, 0.00189512, -6.82403e-05)
+            ),
+            cms.PSet(
+                det = cms.string("bpix"),
+                layer = cms.uint32(1),
+                ladder = cms.uint32(12),
+                factor = cms.vdouble(1, -0.0227831, 0.00273391, -0.00010179)
+            ),
+            cms.PSet(
+                det = cms.string("bpix"),
+                layer = cms.uint32(2),
+                factor = cms.vdouble(1, 0.000111349, -0.00017323, 5.08346e-06)
+            ),
+            cms.PSet(
+                det = cms.string("bpix"),
+                layer = cms.uint32(3),
+                factor = cms.vdouble(1, -0.000542853)
+            ),
+            cms.PSet(
+                det = cms.string("bpix"),
+                layer = cms.uint32(4),
+                factor = cms.vdouble(1, -0.000289476)
             ),
             cms.PSet(
                 det = cms.string("fpix"),
-                factor = cms.vdouble(1),
+                factor = cms.vdouble(1)
             ),
         ),
-        theInstLumiScaleFactor = cms.untracked.double(0),
+        theInstLumiScaleFactor = cms.untracked.double(0.3663),
     )
 
 # InstLumiScaleFactor
-#mb_xsec = 71.3
-#l_lhc = 27
-#c = 300000
-#nbx = 2076
-#l_lhc / c
+#nbx = 2544
+#c = 299792.458 km/s
+#l_lhc = 26.658883 km
+#mb_xsec = 7.81e7 nb
+#nbx_lhc = 3564
 #-->
-#instlumi/<pile-up> [10e27 cm-2s-1/pu] = nbx * c /l_lhc / mb_xsec = 0.3235 [10e33 cm-2s-1/pile-up]
+#instlumi/<pile-up> [nb-1s-1/pu] = nbx * c / ( l_lhc * mb_xsec )
+#= 2544 * 299792.458 / ( 26.658883 * 7.81e7 ) = 0.3663 [nb-1s-1/pile-up OR 10e33 cm-2s-1/pile-up]
 
 process.p = cms.Path(
     process.SiPixelDynamicInefficiencyDBLoader
