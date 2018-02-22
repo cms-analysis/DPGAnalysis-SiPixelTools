@@ -18,7 +18,7 @@ cd DPGAnalysis-SiPixelTools/GainCalibration/test
 To run
 
 ```
-./Run.sh -create 1591 /store/group/dpg_tracker_pixel/comm_pixel/GainCalibrations/Phase1/Run_
+./Run.sh -create 1591 /store/group/dpg_tracker_pixel/comm_pixel/GainCalibrations/Phase1/Run_1591  /store/group/dpg_tracker_pixel/comm_pixel/thaarres/
 ```
 Creates a folder with a config file storing information about input/output folders and creates the job scripts for the submission (from the template)
 
