@@ -32,7 +32,7 @@
 
 #define NEW_NAMES
 //#define OLD_NAMES
-#define CHECK_ORIENT
+//#define CHECK_ORIENT
 
 using namespace std;
 using namespace edm;
@@ -64,7 +64,7 @@ SiPixelDets::~SiPixelDets() {
 void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
   const bool PRINT = true;
   const bool PRINT_TABLE = true;
-  const bool doReversedTest = true;
+  const bool doReversedTest = false;
 
  
   edm::ESHandle<TrackerGeometry> tkgeom;
@@ -99,7 +99,8 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
   edm::ESHandle<MagneticField> magfield;
   es.get<IdealMagneticFieldRecord>().get(magfield);
 
-  for(TrackerGeometry::DetUnitContainer::const_iterator it = tkgeom->detUnits().begin(); 
+  //for(TrackerGeometry::DetUnitContainer::const_iterator it = tkgeom->detUnits().begin(); 
+  for(TrackerGeometry::DetContainer::const_iterator it = tkgeom->detUnits().begin(); 
       it != tkgeom->detUnits().end(); it++) {
 
     // Is it a pixel detetector
@@ -355,11 +356,12 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       int bladeName = pen.bladeName();
       int pannelName = pen.pannelName();
       int plaquetteName = pen.plaquetteName();
+      int ringName = pen.ringName();
       DetId det=pen.getDetId(tt);
       //PixelEndcapName::HalfCylinder part = pen.halfCylinder();
       PixelModuleName::ModuleType moduleType = pen.moduleType();
       if(PRINT) cout<<sh<<" "<<nameF<<" "<<diskName<<" "<<bladeName<<" "<<pannelName<<" "
-		    <<plaquetteName<<" "<<moduleType<<" "<<det.rawId()
+		    <<plaquetteName<<" "<<ringName<<" "<<moduleType<<" "<<det.rawId()
 		    <<endl;
 
       if(PRINT_TABLE) 

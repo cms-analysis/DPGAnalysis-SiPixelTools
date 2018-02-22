@@ -31,6 +31,10 @@
 <use   name="DataFormats/FEDRawData"/>
 <use   name="EventFilter/SiPixelRawToDigi"/>
 #
+# for gain calib
+<use   name="CalibTracker/SiPixelESProducers"/>
+#
+
 <library   file="*.cc" name="testPixels">
  <flags   EDM_PLUGIN="1"/>
 </library>

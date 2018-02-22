@@ -1,14 +1,13 @@
 import FWCore.ParameterSet.Config as cms
-
-process = cms.Process("MyRawToTracks")
+from Configuration.StandardSequences.Eras import eras
+process = cms.Process("Analysis",eras.Run2_2017)
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
-process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
-#process.load("Configuration.StandardSequences.MagneticField_38T_cff")
-process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
 process.load("Configuration.StandardSequences.Services_cff")
-
 process.load('Configuration.EventContent.EventContent_cff')
+
+process.load("Configuration.Geometry.GeometryRecoDB_cff")
+process.load("Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff")
 
 process.load('Configuration.StandardSequences.RawToDigi_Data_cff')
 process.load('Configuration.StandardSequences.L1Reco_cff')
@@ -29,7 +28,8 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag.globaltag = 'GR_E_V48'
 #process.GlobalTag.globaltag = 'GR_P_V56' # works for 2469763
 #process.GlobalTag.globaltag = 'GR_P_V56' # for 247607
-process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v9' # for 251643
+process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v9'  # for 251643
+process.GlobalTag.globaltag = '92X_dataRun2_Express_v7' # from CMSSW927
 
 import HLTrigger.HLTfilters.hltHighLevel_cfi as hlt
 # accept if 'path_1' succeeds
@@ -62,22 +62,12 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1))
 process.source = cms.Source("PoolSource",
 # fileNames =  cms.untracked.vstring('file:rawdata.root')
 fileNames =  cms.untracked.vstring(
-#"root://eoscms//eos/cms/store/data/Run2015C/ZeroBias/RAW/v1/000/254/227/00000/FA244051-8141-E511-B22B-02163E014153.root",
-
-#"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/069/00000/04BF9517-F54D-E611-B42B-02163E0144D3.root"
-#"/store/express/Run2016E/ExpressPhysics/FEVT/Express-v2/000/277/087/00000/0014F268-DC4E-E611-AC39-02163E0141E7.root"
-
-"/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/0E6E4ACA-4F5A-E611-97B5-FA163E1E4ACD.root",
-"/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/106E5B0B-605A-E611-A5C2-FA163E664536.root",
-"/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/10E6864D-525A-E611-9181-FA163EF8E5AF.root",
-"/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/12222759-4F5A-E611-A38E-02163E011B22.root",
-"/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/12639720-455A-E611-A984-FA163EA2AA62.root",
+ "/store/express/Run2017E/ExpressPhysics/FEVT/Express-v1/000/303/824/00000/02000C18-EBA0-E711-B8FB-02163E01A29A.root",
 
  )
 #   skipEvents = cms.untracked.uint32(5000)
 )
-
-process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('278193:77-278193:9999')
+process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('303824:54-303824:999')
 
 # for Raw2digi for data
 process.siPixelDigis.InputLabel = 'rawDataCollector'
@@ -103,7 +93,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 # pixel local reco (RecHits) needs the GenError object,
 # not yet in GT, add here:
 # DB stuff 
-useLocalDBGain = False 
+useLocalDBGain = True 
 if useLocalDBGain:
     process.DBReaderGain = cms.ESSource("PoolDBESSource",
      DBParameters = cms.PSet(
@@ -113,15 +103,21 @@ if useLocalDBGain:
      toGet = cms.VPSet(
        cms.PSet(
         record = cms.string('SiPixelGainCalibrationOfflineRcd'),
+        #record = cms.string('SiPixelGainCalibrationRcd'),
+
         #tag = cms.string('SiPixelGainCalibration_2016_v1_offline')
-        tag = cms.string('SiPixelGainCalibration_2016_v2')
+        #tag = cms.string('SiPixelGainCalibration_2016_v2')
         #tag = cms.string('SiPixelGainCalibration_2016_v1_hltvalidation')
+        tag = cms.string('SiPixelGainCalibration_2017_v6_offline')
+        #tag = cms.string('SiPixelGainCalibration_2017_v1337') # full
+
  	),
        ),
-#     connect = cms.string('sqlite_file:../../../../../DB/Gains/SiPixelGainCalibration_2016_v1_offline.db')
-#     connect = cms.string('sqlite_file:../../../../../DB/Gains/SiPixelGainCalibration_2016_v2_offline.db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v6_full.db')
+     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v6_offline.db')
+
 #     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
-     connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
+#     connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
     ) # end process
     process.myprefer = cms.ESPrefer("PoolDBESSource","DBReaderGain")
 # end 
@@ -162,6 +158,8 @@ process.out = cms.OutputModule("PoolOutputModule",
     )
 )
 
+#process.siPixelClustersPreSplitting.payloadType = cms.string('Full')
+
 # copy the sequence below from  
 # RecoTracker/IterativeTracking/python/iterativeTk_cff.py  - 71_pre7
 process.myTracking = cms.Sequence(process.InitialStep*
@@ -179,7 +177,7 @@ process.myTracking = cms.Sequence(process.InitialStep*
                             process.conversionStepTracks
                             )
 
-process.histos = cms.EDAnalyzer('PxlBPix',
+process.histos = cms.EDAnalyzer('Pxl',
 # for official RECO
 #	triggerSource = cms.InputTag('TriggerResults::HLT'),
 # For MC or my rereco
@@ -193,46 +191,39 @@ process.histos = cms.EDAnalyzer('PxlBPix',
 process.TFileService = cms.Service('TFileService',
 	fileName = cms.string('triplets.root'),
 )
-#process.p = cms.Path(process.siPixelDigis)
-#process.p = cms.Path(process.siPixelDigis*process.siPixelClusters)
-#process.p = cms.Path(process.siPixelDigis*process.pixeltrackerlocalreco)
 
-#process.p1 = cms.Path(process.siPixelDigis*process.siStripDigis)
-# crash on strip clusters, calibration records missing? works with the 620 tag
-#process.p1 = cms.Path(process.siPixelDigis*process.siStripDigis*process.trackerlocalreco)
+process.c = cms.EDAnalyzer("PixClustersWithTracks",
+    Verbosity = cms.untracked.bool(False),
+    src = cms.InputTag("generalTracks::Analysis"),
+#     PrimaryVertexLabel = cms.untracked.InputTag("offlinePrimaryVertices"),                             
+#     trajectoryInput = cms.string("TrackRefitterP5")
+#     trajectoryInput = cms.string('cosmictrackfinderP5')
+)
 
-#process.p1 = cms.Path(process.siPixelDigis*process.siStripDigis*process.trackerlocalreco*process.offlineBeamSpot)
-#process.p1 = cms.Path(process.siPixelDigis*process.siStripDigis*process.trackerlocalreco*process.offlineBeamSpot*process.recopixelvertexing)
-#process.p1 = cms.Path(process.siPixelDigis*process.siStripDigis*process.trackerlocalreco*process.offlineBeamSpot*process.recopixelvertexing*process.MeasurementTrackerEvent)
-# trackingGlobalReco, ckftracks, iterTracking - 
-#process.p1 = cms.Path(process.siPixelDigis*process.siStripDigis*process.trackerlocalreco*process.offlineBeamSpot*process.recopixelvertexing*process.MeasurementTrackerEvent*process.myTracking)
-
-#process.p1 = cms.Path(process.hltfilter*process.siPixelDigis*process.siStripDigis*process.trackerlocalreco*process.offlineBeamSpot*process.siPixelClusterShapeCache*process.recopixelvertexing*process.MeasurementTrackerEvent*process.myTracking*process.vertexreco)
 
 #process.p1 = cms.Path(process.siPixelDigis*process.siStripDigis*process.trackerlocalreco*process.offlineBeamSpot*process.siPixelClusterShapeCache*process.recopixelvertexing*process.MeasurementTrackerEvent*process.myTracking*process.vertexreco)
 
+# do not save tracks, call triplets  
+process.p = cms.Path(process.hltfilter*process.RawToDigi*process.reconstruction*process.histos*process.c)
+
 
 # Path and EndPath definitions
-process.raw2digi_step = cms.Path(process.RawToDigi)
-process.L1Reco_step = cms.Path(process.L1Reco)
-process.reconstruction_step = cms.Path(process.reconstruction)
-process.histos_step = cms.Path(process.histos)
-process.endjob_step = cms.EndPath(process.endOfProcess)
-process.RECOoutput_step = cms.EndPath(process.out)
-
+#process.raw2digi_step = cms.Path(process.RawToDigi)
+#process.L1Reco_step = cms.Path(process.L1Reco)
+#process.reconstruction_step = cms.Path(process.reconstruction)
+#process.histos_step = cms.Path(process.histos)
+#process.endjob_step = cms.EndPath(process.endOfProcess)
+#process.RECOoutput_step = cms.EndPath(process.out)
 # Schedule definition
 # save tracks
 #process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.endjob_step,process.RECOoutput_step)
 # do not save tracks, call triplets  
-process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.histos_step)
+#process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.histos_step)
 
 # customisation of the process.
-
 # Automatic addition of the customisation function from SLHCUpgradeSimulations.Configuration.postLS1Customs
-from SLHCUpgradeSimulations.Configuration.postLS1Customs import customisePostLS1 
-
+#from SLHCUpgradeSimulations.Configuration.postLS1Customs import customisePostLS1 
 #call to customisation function customisePostLS1 imported from SLHCUpgradeSimulations.Configuration.postLS1Customs
-process = customisePostLS1(process)
-
+#process = customisePostLS1(process)
 
 #process.ep = cms.EndPath(process.out)

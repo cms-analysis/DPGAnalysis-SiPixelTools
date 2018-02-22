@@ -264,7 +264,7 @@ int MyDecode::data(int word, int &c, int &r, int &d, int &p, int &a, bool printF
     }
 
   } else if(roc==25) {  // ROC? 
-    unsigned int chan = ((word&chnlmsk)>>26);
+    //unsigned int chan = ((word&chnlmsk)>>26);
     //cout<<"Wrong roc 25 "<<" in chan "<<"/"<<chan<<endl;
     //status=error(word);
     status=-4;

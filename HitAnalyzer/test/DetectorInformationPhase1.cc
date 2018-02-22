@@ -235,7 +235,7 @@ void DetectorInformationPhase1::dumpDetIds(const edm::EventSetup& iSetup,
 
       if (detId.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel)) {
 
-	uint32_t id = detId();       
+	//uint32_t id = detId();       
 	//cout<<" bpix "<<detId.rawId()<<" "<<id<<endl;
 	// NEEDS TOPOLOGY
 	PixelBarrelName::Shell DBshell = PixelBarrelName(detId,tt,phase1_).shell();
