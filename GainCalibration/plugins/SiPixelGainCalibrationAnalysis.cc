@@ -71,7 +71,8 @@ SiPixelGainCalibrationAnalysis::SiPixelGainCalibrationAnalysis(const edm::Parame
   theGainCalibrationDbInputService_(iConfig),*/
   gainlow_(10.),gainhi_(0.),pedlow_(255.),pedhi_(0.),
   useVcalHigh_(conf_.getParameter<bool>("useVCALHIGH")),
-  scalarVcalHigh_VcalLow_(conf_.getParameter<double>("vcalHighToLowConversionFac"))
+  scalarVcalHigh_VcalLow_(conf_.getParameter<double>("vcalHighToLowConversionFac")),
+  vCalToEleConvFactors_(conf_.getParameter<std::string>("vCalToEleConvFactors"))
 {
   if(reject_single_entries_)
     min_nentries_=1;

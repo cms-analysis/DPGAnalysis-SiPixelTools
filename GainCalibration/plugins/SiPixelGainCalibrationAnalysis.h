@@ -108,8 +108,11 @@ private:
   bool filldb_;
   bool writeSummary_;
   
+ 
+  
   // parameters for database output  
   std::string  recordName_;
+  
   bool appendMode_;
   /*SiPixelGainCalibration *theGainCalibrationDbInput_;
   SiPixelGainCalibrationOffline *theGainCalibrationDbInputOffline_;
@@ -124,6 +127,9 @@ private:
   uint16_t min_nentries_;
   bool useVcalHigh_;
   double scalarVcalHigh_VcalLow_;
+  
+  // VCal to electrons conversion factor
+  std::string  vCalToEleConvFactors_;
   
   //Summary
   std::ofstream summary_;
