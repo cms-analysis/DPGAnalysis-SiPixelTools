@@ -19,7 +19,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
-process.GlobalTag.globaltag = '92X_dataRun2_Express_v7'
+process.GlobalTag.globaltag = '92X_dataRun2_Express_v7'#100X_dataRun2_Express_v2
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
@@ -41,6 +41,8 @@ process.load("DPGAnalysis-SiPixelTools.GainCalibration.SiPixelCalibDigiProducer_
 # Instead of the old calib.dat file, configure these factors here
 process.siPixelCalibDigis.Repeat = cms.int32(5)
 process.siPixelCalibDigis.CalibMode = cms.string('GainCalibration')
+
+#Vcal values 
 process.siPixelCalibDigis.vCalValues_Int =  cms.vint32(
      6,  8, 10, 12, 14, 15, 16,  17,  18,  21,  24,  28,  35,  42, 49,
     56, 63, 70, 77, 84, 91, 98, 105, 112, 119, 126, 133, 140, 160
@@ -78,7 +80,6 @@ process.siPixelCalibDigis.calibrows_Int = cms.vint32(
     70, -1, 71, -1, 72, -1, 73, -1, 74, -1, 75, -1, 76, -1, 77, -1, 78, -1, 79, -1,
     )
 
-# Camilla's New Analyzer
 process.load("DPGAnalysis-SiPixelTools.GainCalibration.SiPixelGainCalibrationAnalysis_cfi")
 #process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
@@ -90,6 +91,7 @@ process.siPixelGainCalibrationAnalysis.calibrows_Int = process.siPixelCalibDigis
 process.siPixelGainCalibrationAnalysis.Repeat = process.siPixelCalibDigis.Repeat
 process.siPixelGainCalibrationAnalysis.CalibMode = process.siPixelCalibDigis.CalibMode
 process.siPixelGainCalibrationAnalysis.phase1 = True
+process.siPixelGainCalibrationAnalysis.vCalToEleConvFactors = cms.string("vCalToEleConvFactors.txt")            
 
 # Path
 process.p = cms.Path(process.siPixelDigis * process.siPixelCalibDigis * process.siPixelGainCalibrationAnalysis )
