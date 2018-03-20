@@ -85,7 +85,11 @@ private:
   std::string fitfunction_;
   TF1 *func_;
   TGraphErrors *graph_;
-
+  
+  //VCal to ele conversion map
+  typedef  std::map<std::string, std::pair<double, double>> Maptype;
+  Maptype VcalToEleMap;
+  
   std::vector<uint32_t> listofdetids_;
   bool ignoreMode_;
   // flags

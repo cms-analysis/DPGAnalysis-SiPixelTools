@@ -26,6 +26,10 @@ Implementation:
 #include "TGraphErrors.h"
 #include "TMath.h"
 
+#include <iostream>
+#include <fstream>
+#include <string>
+
 using std::cout;
 using std::endl;
 //
@@ -89,6 +93,32 @@ SiPixelGainCalibrationAnalysis::SiPixelGainCalibrationAnalysis(const edm::Parame
   statusNumbers_ = new int[10];
   for(int ii=0;ii<10;ii++)
     statusNumbers_[ii]=0;
+  
+  std::ifstream fin;
+  fin.open(vCalToEleConvFactors_);
+  if(fin.is_open()){
+     std::cout << "File ./" << vCalToEleConvFactors_ << " is open.\n";
+     for(std::string line; std::getline(fin, line); ) {
+       std::istringstream in(line);      //make a stream for the line itself
+       std::string type;
+       double VCslope_, VCoffset_;
+       in >> type;
+       
+       in >> VCslope_ >> VCoffset_; 
+       VcalToEleMap[type] = std::make_pair(VCslope_,VCoffset_);
+     }
+     fin.close();
+   }
+   else
+    std::cout << "Error opening " << vCalToEleConvFactors_ << ". Are you sure you passed it correctly?\n";
+  
+   std::map<std::string, std::pair<double, double>>::iterator it = VcalToEleMap.begin();
+   while(it != VcalToEleMap.end()){
+     std::pair<double, double> val = it->second;
+     std::cout<<it->first<<" :: "<<val.first<<"::"<<val.second<<"::"<<std::endl;
+     it++;
+   } 
+      
 }
 
 SiPixelGainCalibrationAnalysis::~SiPixelGainCalibrationAnalysis()
@@ -201,6 +231,7 @@ bool
 SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibDigi>::const_iterator ipix)
 {
   std::string currentDir = GetPixelDirectory(detid);
+  std::cout<< "WORKING ON DET ID = " << detid << std::endl;
   float lowmeanval=255;
   float highmeanval=0;
   bool makehistopersistent = saveALLHistograms_;
