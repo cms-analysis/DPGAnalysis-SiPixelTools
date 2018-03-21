@@ -18,8 +18,9 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 # for phase1 
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '') #same
-process.GlobalTag.globaltag = '92X_dataRun2_Express_v7' # data 2017
-
+#process.GlobalTag.globaltag = '92X_dataRun2_Express_v7' # data 2017
+# 2018
+process.GlobalTag.globaltag = '100X_dataRun2_Express_v2' # data 2017
 
 process.TFileService = cms.Service("TFileService",
                                    fileName = cms.string("histo.root")
@@ -38,7 +39,8 @@ process.source = cms.Source("EmptySource",
 #    firstRun = cms.untracked.uint32(200000)  # iov2-2012
 #    firstRun = cms.untracked.uint32(208000)  # iov3-2012
 #    firstRun = cms.untracked.uint32(240000)  # iov1-2015
-    firstRun = cms.untracked.uint32(320000)  # iov2-2017
+#    firstRun = cms.untracked.uint32(320000)  # iov2-2017
+    firstRun = cms.untracked.uint32(310000)  # iov1-2018
 )
 
 #process.Timing = cms.Service("Timing")
@@ -59,8 +61,8 @@ if useLocalDB:
     ),
     toGet = cms.VPSet(
       cms.PSet(
-#       record = cms.string('SiPixelGainCalibrationOfflineRcd'),
-       record = cms.string('SiPixelGainCalibrationForHLTRcd'),
+       record = cms.string('SiPixelGainCalibrationOfflineRcd'),
+#       record = cms.string('SiPixelGainCalibrationForHLTRcd'),
 #       record = cms.string('SiPixelGainCalibrationRcd'),
        #SiPixelGainCalibrationForHLTSimRcd  
        #SiPixelGainCalibrationOfflineSimRcd 
@@ -69,20 +71,23 @@ if useLocalDB:
 #       tag = cms.string('SiPixelGainCalib_2009CollRuns_offline')
 #       tag = cms.string('SiPixelGainCalibration_2016_v1_offline')
 #       tag = cms.string('SiPixelGainCalibration_2016_v1_HLT')  # HLT
+#       tag = cms.string('SiPixelGainCalibration_2016_v2_HLT')  # HLT
 #       tag = cms.string('SiPixelGainCalibration_2017_v4')
+#       tag = cms.string('SiPixelGainCalibration_2017_v1_offline')
 #       tag = cms.string('SiPixelGainCalibration_2017_v4_offline')
 #        tag = cms.string('SiPixelGainCalibration_2017_v4_1337_offline')
-#       tag = cms.string('SiPixelGainCalibration_2016_v2_HLT')  # HLT
-       tag = cms.string('SiPixelGainCalibration_hlt_2017_v5')  # HLT
+#       tag = cms.string('SiPixelGainCalibration_hlt_2017_v5')  # HLT
 #       tag = cms.string('SiPixelGainCalibration_2017_v5') # for offline
+#       tag = cms.string('SiPixelGainCalibration_2018_v1_offline')
+       tag = cms.string('SiPixelGainCalibration_2018_v1')
     )),
-     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
-#     connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
+#     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
+     connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
 #    connect = cms.string('sqlite_file:../../../../../DB/Gains/SiPixelGainCalibration_2016_v1_offline.db')
 #    connect = cms.string('sqlite_file:../../../../../DB/Gains/SiPixelGainCalibration_2016_v2_offline.db')
 #    connect = cms.string('sqlite_file:/afs//cern.ch/work/d/dkotlins/public/DB/Gains/SiPixelGainCalibration_2017_v4_offline.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v4_full.db')
-#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v4_1337_offline.db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2018_v1_offline.db')
 
   ) # end process
   # process.prefer("PoolDBESSource")

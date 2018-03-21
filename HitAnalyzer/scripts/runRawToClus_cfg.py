@@ -28,7 +28,9 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag.globaltag = '92X_dataRun2_Express_v2' # fpr 90W 
 #process.GlobalTag.globaltag = '92X_dataRun2_Express_v7' # from CMSSW927
 #process.GlobalTag.globaltag = '92X_dataRun2_Prompt_v11' # Promot
-process.GlobalTag.globaltag = '94X_dataRun2_ReReco_EOY17_v2' # for RERECO
+#process.GlobalTag.globaltag = '94X_dataRun2_ReReco_EOY17_v2' # for RERECO
+# 2018
+process.GlobalTag.globaltag = '100X_dataRun2_Express_v2' # 
 # 2015
 #process.GlobalTag.globaltag = 'GR_E_V48'
 #process.GlobalTag.globaltag = 'GR_P_V56' # works for 2469763
@@ -48,8 +50,8 @@ process.hltfilter = hlt.hltHighLevel.clone(
 # Min-Bias	
 #    HLTPaths = ['HLT_Physics*'],
 #    HLTPaths = ['HLT_Random*'],
-    HLTPaths = ['HLT_ZeroBias*'],
-#    HLTPaths = ['HLT_L1SingleMuOpen_v*'],
+#    HLTPaths = ['HLT_ZeroBias*'],
+    HLTPaths = ['HLT_L1SingleMuOpen_v*'],
 #    HLTPaths = ['HLT_PAZeroBias*'],
 #    HLTPaths = ['HLT_PARandom*'],
 #    HLTPaths = ['HLT_PAMinBias*'],
@@ -77,6 +79,53 @@ process.source = cms.Source("PoolSource",
 
  fileNames =  cms.untracked.vstring(
 
+# 2018
+
+
+
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/00097234-762C-E811-9C01-FA163E376AE7.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/002FAD18-AE2C-E811-AE7F-FA163E595F01.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/0068E3AB-BF2C-E811-A765-FA163E49E4DD.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/00797185-882C-E811-A3AC-FA163ECCEC77.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/008A0155-8B2C-E811-BDAB-02163E0176B0.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/028FFAB8-862C-E811-BCFE-FA163E024A59.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/02BCB4EF-772C-E811-9F81-FA163EFD5681.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/041065A5-CF2C-E811-B1ED-FA163E95BBB1.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/0422A8DA-B82C-E811-9045-FA163E252608.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/0430A381-952C-E811-8467-FA163E468C72.root",
+
+
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/220/00000/001D171B-F02B-E811-AE35-FA163E9F7EA5.root",
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/220/00000/001FC020-D62B-E811-805F-FA163EF28A5C.root",
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/220/00000/003B013D-D52B-E811-86E1-FA163E121244.root",
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/220/00000/00824F23-F02B-E811-A35A-FA163E3EF566.root",
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/220/00000/0097FE3B-F02B-E811-B24C-02163E019F73.root",
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/220/00000/00C364A9-F02B-E811-B966-FA163EB108A8.root",
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/220/00000/023D38D4-DF2B-E811-87E6-FA163EBDF68C.root",
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/220/00000/0250DBFF-DA2B-E811-BE98-FA163E8CC404.root",
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/220/00000/0298AF23-F02B-E811-B785-FA163ED7B2EC.root",
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/220/00000/02B42FD0-FC2B-E811-8DA6-FA163EE7A704.root",
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/220/00000/02BE268B-D72B-E811-83D4-02163E01A000.root",
+
+
+
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/141/00000/004B757B-3B2B-E811-880A-FA163E5577DD.root",
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/141/00000/0063B2F0-252B-E811-982E-FA163E3CC334.root",
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/141/00000/00AE2312-202B-E811-AE91-FA163E6CDBB2.root",
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/141/00000/00C46971-322B-E811-AEF1-FA163EFD7515.root",
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/141/00000/00D62B56-3D2B-E811-ACAE-FA163EBF1F42.root",
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/141/00000/00DBDBE7-282B-E811-9A94-02163E014C0D.root",
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/141/00000/00E89BFA-252B-E811-957F-FA163EE347FC.root",
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/141/00000/0209221B-2A2B-E811-9807-FA163E83AA16.root",
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/141/00000/02159E91-3A2B-E811-A915-FA163E22408B.root",
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/141/00000/02370D59-282B-E811-8D77-FA163E3A5F0F.root",
+
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/311/787/00000/04304C4B-5F27-E811-BCA5-FA163E447F8E.root",
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/311/787/00000/0855D54E-5E27-E811-9622-FA163E2848B2.root",
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/311/787/00000/56FC28E0-6027-E811-9D59-FA163E447F8E.root",
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/311/787/00000/9C57EB28-5F27-E811-A0F3-02163E013C39.root",
+#"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/311/787/00000/A8469AB1-5E27-E811-B5AE-FA163E98F3FD.root",
+
 # low lumi
 #"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/307/042/00000/00A5758B-90D0-E711-97C1-02163E01A25F.root",
 
@@ -87,7 +136,7 @@ process.source = cms.Source("PoolSource",
 #"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/896/00000/6C5AAA16-C0CE-E711-AB6B-02163E01A5B7.root",
 #"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/896/00000/7246CC10-C6CE-E711-81FD-02163E01A5B8.root",
 
-"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/929/00000/004B3B89-ECCE-E711-8DEC-02163E011AC9.root",
+#"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/929/00000/004B3B89-ECCE-E711-8DEC-02163E011AC9.root",
 
 #"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/936/00000/026F4F49-1FCF-E711-8652-02163E01A3EC.root",
 #"/store/express/Run2017H/ExpressPhysics/FEVT/Express-v1/000/306/936/00000/5A0A69D1-57CF-E711-A09E-02163E011F3A.root",
@@ -235,7 +284,7 @@ process.source = cms.Source("PoolSource",
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('305282:75-305282:999')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('306091:45-306091:999')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('306896:38-306896:92')
-process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('306929:7-306929:214')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('306929:7-306929:214')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('306936:109-306936:999')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('307042:75-307042:589')
 
@@ -288,8 +337,9 @@ if useLocalDB :
      ),
      toGet = cms.VPSet(
        cms.PSet(
-#        record = cms.string('SiPixelGainCalibrationOfflineRcd'),
-        record = cms.string('SiPixelGainCalibrationRcd'),
+        record = cms.string('SiPixelGainCalibrationOfflineRcd'),
+#        record = cms.string('SiPixelGainCalibrationRcd'),
+        tag = cms.string('SiPixelGainCalibration_2018_v1_offline') 
 #        tag = cms.string('SiPixelGainCalibration_2017_v2_bugfix') #in DB
 #        tag = cms.string('SiPixelGainCalibration_2017_v2_bugfix_offline')
 #        tag = cms.string('SiPixelGainCalibration_2017_v2_offline')
@@ -299,16 +349,15 @@ if useLocalDB :
 #        tag = cms.string('SiPixelGainCalibration_2017_v6_offline')
 #        tag = cms.string('SiPixelGainCalibration_2017_v4')
 #        tag = cms.string('SiPixelGainCalibration_2017_v5')
-        tag = cms.string('SiPixelGainCalibration_2017_v6') # full tag & in DB
+#        tag = cms.string('SiPixelGainCalibration_2017_v6') # full tag & in DB
 #        tag = cms.string('SiPixelGainCalibration_2017_v4_1337_offline')
 #        tag = cms.string('SiPixelGainCalibration_phase1_ideal_v2')
  	),
        ),
-     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v6_full.db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v6_full.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v5_full.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v4_full.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v4_1337_offline.db')
-
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v6_offline_oldvcalHL.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v6_offline.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v5_offline.db')
@@ -317,7 +366,7 @@ if useLocalDB :
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v2_offline.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v2_bugfix_offline.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_phase1_ideal_v2.db')
-
+     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2018_v1_offline.db')
 #     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
 #     connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
     ) # end process
@@ -338,10 +387,10 @@ process.siPixelDigis.UsePhase1 = True
 #process.siPixelClustersPreSplitting.VCaltoElectronOffset = -60
 #process.siPixelClustersPreSplitting.VCaltoElectronGain_L1 = 47  # default
 #process.siPixelClustersPreSplitting.VCaltoElectronOffset_L1 = -60
-process.siPixelClustersPreSplitting.SeedThreshold = 1000
+process.siPixelClustersPreSplitting.SeedThreshold = 10 #  def=1000
 process.siPixelClustersPreSplitting.ChannelThreshold = 10 #must be bigger than 1
-process.siPixelClustersPreSplitting.ClusterThreshold = 4000    # integer?
-process.siPixelClustersPreSplitting.ClusterThreshold_L1 = 2000 # integer?
+process.siPixelClustersPreSplitting.ClusterThreshold = 10 # def =4000    # integer?
+process.siPixelClustersPreSplitting.ClusterThreshold_L1 = 10 # def=2000 # integer?
 
 # To select full granularity gain calibration 
 # process.siPixelClustersPreSplitting.payloadType = cms.string('Full')
@@ -376,7 +425,9 @@ process.TFileService = cms.Service("TFileService",
 #process.p = cms.Path(process.siPixelDigis*process.pixeltrackerlocalreco)
 #process.p = cms.Path(process.siPixelDigis*process.pixeltrackerlocalreco*process.d)
 #process.p = cms.Path(process.hltfilter*process.siPixelDigis*process.pixeltrackerlocalreco*process.d)
-process.p = cms.Path(process.hltfilter*process.siPixelDigis*process.pixeltrackerlocalreco*process.a*process.d)
+#process.p = cms.Path(process.hltfilter*process.siPixelDigis*process.pixeltrackerlocalreco*process.a*process.d)
+
+process.p = cms.Path(process.siPixelDigis*process.pixeltrackerlocalreco*process.a*process.d)
 
 # suppress output file or not
 #process.ep = cms.EndPath(process.out)

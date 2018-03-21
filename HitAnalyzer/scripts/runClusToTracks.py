@@ -36,9 +36,16 @@ process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 
+
+# 2018
+process.GlobalTag.globaltag = '100X_dataRun2_Express_v2' # 
+
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(-1)
 )
+
+
+
 
 process.MessageLogger = cms.Service("MessageLogger",
 #    debugModules = cms.untracked.vstring('SiPixelClusterizer'),
@@ -66,14 +73,8 @@ process.source = cms.Source("PoolSource",
     )
 )
 
-process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('208686:73-208686:463')
-# Choose the global tag here:
-# process.GlobalTag.globaltag = 'MC_71_V1::All'
-# process.GlobalTag.globaltag = 'POSTLS171_V1::All'
-# process.GlobalTag.globaltag = 'PRE_MC_71_V2::All'
-# data 
-#process.GlobalTag.globaltag = "GR_R_71_V1::All"
-process.GlobalTag.globaltag = "PRE_R_71_V3::All"
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('208686:73-208686:463')
+
 
 #process.PoolDBESSource = cms.ESSource("PoolDBESSource",
 #    BlobStreamerName = cms.untracked.string('TBufferBlobStreamingService'),

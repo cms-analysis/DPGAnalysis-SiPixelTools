@@ -108,31 +108,37 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   PedsL2 = fs->make<TH1D>("PedsL2", "Pedestals L2", 500, -250, 250);
   PedsL3 = fs->make<TH1D>("PedsL3", "Pedestals L3", 500, -250, 250);
   PedsL4 = fs->make<TH1D>("PedsL4", "Pedestals L4", 500, -250, 250);
-  ADCL1 = fs->make<TH1D>("ADCL1", "ADC L1", 500, -250, 250);
-  ADCL2 = fs->make<TH1D>("ADCL2", "ADC L2", 500, -250, 250);
-  ADCL3 = fs->make<TH1D>("ADCL3", "ADC L3", 500, -250, 250);
-  ADCL4 = fs->make<TH1D>("ADCL4", "ADC L4", 500, -250, 250);
-  VcalL1 = fs->make<TH1D>("VcalL1", "VCAL L1", 500, -250, 250);
-  VcalL2 = fs->make<TH1D>("VcalL2", "VCAL L2", 500, -250, 250);
-  VcalL3 = fs->make<TH1D>("VcalL3", "VCAL L3", 500, -250, 250);
-  VcalL4 = fs->make<TH1D>("VcalL4", "VCAL L4", 500, -250, 250);
+  ADCL1 = fs->make<TH1D>("ADCL1", "ADC@vcalL=40 L1", 500, -250, 250);
+  ADCL2 = fs->make<TH1D>("ADCL2", "ADC@vcalL=40 L2", 500, -250, 250);
+  ADCL3 = fs->make<TH1D>("ADCL3", "ADC@vcalL=40 L3", 500, -250, 250);
+  ADCL4 = fs->make<TH1D>("ADCL4", "ADC@vcalL=40 L4", 500, -250, 250);
+  ADCF  = fs->make<TH1D>("ADCF", "ADC@vcalL=40 FPix", 500, -250, 250);
+  VcalL1 = fs->make<TH1D>("VcalL1", "VCAL@adc=0 L1", 500, -250, 250);
+  VcalL2 = fs->make<TH1D>("VcalL2", "VCAL@adc=0 L2", 500, -250, 250);
+  VcalL3 = fs->make<TH1D>("VcalL3", "VCAL@adc=0 L3", 500, -250, 250);
+  VcalL4 = fs->make<TH1D>("VcalL4", "VCAL@adc=0 L4", 500, -250, 250);
+  VcalF  = fs->make<TH1D>("VcalF", "VCAL@adc=0 FPix", 500, -250, 250);
 
   GainsSumL1 = fs->make<TH1D>("GainsSumL1", "Gains av L1", 100, 0, 10);
   GainsSumL2 = fs->make<TH1D>("GainsSumL2", "Gains av L2", 100, 0, 10);
   GainsSumL3 = fs->make<TH1D>("GainsSumL3", "Gains av L3", 100, 0, 10);
   GainsSumL4 = fs->make<TH1D>("GainsSumL4", "Gains av L4", 100, 0, 10);
+  GainsSumF = fs->make<TH1D>("GainsSumF", "Gains av FPix", 100, 0, 10);
   PedsSumL1 = fs->make<TH1D>("PedsSumL1", "Pedestals av L1", 500, -250, 250);
   PedsSumL2 = fs->make<TH1D>("PedsSumL2", "Pedestals av L2", 500, -250, 250);
   PedsSumL3 = fs->make<TH1D>("PedsSumL3", "Pedestals av L3", 500, -250, 250);
   PedsSumL4 = fs->make<TH1D>("PedsSumL4", "Pedestals av L4", 500, -250, 250);
-  ADCSumL1 = fs->make<TH1D>("ADCSumL1", "ADC av L1", 500, -250, 250);
-  ADCSumL2 = fs->make<TH1D>("ADCSumL2", "ADC av L2", 500, -250, 250);
-  ADCSumL3 = fs->make<TH1D>("ADCSumL3", "ADC av L3", 500, -250, 250);
-  ADCSumL4 = fs->make<TH1D>("ADCSumL4", "ADC av L4", 500, -250, 250);
-  VcalSumL1 = fs->make<TH1D>("VcalSumL1", "VCAL av L1", 500, -250, 250);
-  VcalSumL2 = fs->make<TH1D>("VcalSumL2", "VCAL av L2", 500, -250, 250);
-  VcalSumL3 = fs->make<TH1D>("VcalSumL3", "VCAL av L3", 500, -250, 250);
-  VcalSumL4 = fs->make<TH1D>("VcalSumL4", "VCAL av L4", 500, -250, 250);
+  PedsSumF  = fs->make<TH1D>("PedsSumF", "Pedestals av FPix", 500, -250, 250);
+  ADCSumL1 = fs->make<TH1D>("ADCSumL1", "ADC@vcalL=40 av L1", 500, -250, 250);
+  ADCSumL2 = fs->make<TH1D>("ADCSumL2", "ADC@vcalL=40 av L2", 500, -250, 250);
+  ADCSumL3 = fs->make<TH1D>("ADCSumL3", "ADC@vcalL=40 av L3", 500, -250, 250);
+  ADCSumL4 = fs->make<TH1D>("ADCSumL4", "ADC@vcalL=40 av L4", 500, -250, 250);
+  ADCSumF = fs->make<TH1D>("ADCSumF", "ADC@vcalL=40 av FPix", 500, -250, 250);
+  VcalSumL1 = fs->make<TH1D>("VcalSumL1", "VCAL@adc=0 av L1", 500, -250, 250);
+  VcalSumL2 = fs->make<TH1D>("VcalSumL2", "VCAL@adc=0 av L2", 500, -250, 250);
+  VcalSumL3 = fs->make<TH1D>("VcalSumL3", "VCAL@adc=0 av L3", 500, -250, 250);
+  VcalSumL4 = fs->make<TH1D>("VcalSumL4", "VCAL@adc=0 av L4", 500, -250, 250);
+  VcalSumF = fs->make<TH1D>("VcalSumF", "VCAL@adc=0 av FPix", 500, -250, 250);
 
   TTree *tree = new TTree("tree","tree");
   uint32_t detid;
@@ -218,9 +224,9 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
       int side=tTopo->pxfSide(detIdObject); //size=1 for -z, 2 for +z
       int panel=tTopo->pxfPanel(detIdObject); //panel=1
 
-      if(disk==1 && blade==1 && side==1 && panel==1 && plaq==1 ) select=true;
-      if(disk==2 && blade==1 && side==1 && panel==1 && plaq==1 ) select=true;
-      if(disk==3 && blade==1 && side==1 && panel==1 && plaq==1 ) select=true;
+      //if(disk==1 && blade==1 && side==1 && panel==1 && plaq==1 ) select=true;
+      //if(disk==2 && blade==1 && side==1 && panel==1 && plaq==1 ) select=true;
+      //if(disk==3 && blade==1 && side==1 && panel==1 && plaq==1 ) select=true;
       if(PRINT&&select) cout<<"endcap, size "<<side<<" disk "<<disk<<", blade "
 		    <<blade<<", panel "
 		    <<panel<<", plaq "<<plaq<<endl;
@@ -300,18 +306,16 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 	   else if(layer==3) { GainsL3->Fill(gain); PedsL3->Fill(ped);ADCL3->Fill(adc);VcalL3->Fill(vcal);}
 	   else if(layer==4) { GainsL4->Fill(gain); PedsL4->Fill(ped);ADCL4->Fill(adc);VcalL4->Fill(vcal);}
 	 } else {
-	   _TH1F_Gains_fpix->Fill(gain);
-	   _TH1F_Pedestals_fpix->Fill(ped);
-	 }
+	   _TH1F_Gains_fpix->Fill(gain); _TH1F_Pedestals_fpix->Fill(ped); ADCF->Fill(adc); VcalF->Fill(vcal);}
 
 	 if(PRINT && select && (col_iter%10==0) && (row_iter%20==0) ) 
 	   std::cout <<" DetId "<<detid<<" "<<name<<" Col "<<col_iter<<" Row "<<row_iter
 		     <<" Ped "<<ped<<" Gain "<<gain<<std::endl;	 
-	 if( (detid==303054856 && col_iter==109 && row_iter==49 ) || 
-	     (detid==303046684 && col_iter==150 && row_iter==65 ) ||
-	     (detid==303042580 && col_iter==94 && row_iter==137 ) ) 
-	   std::cout <<" DetId "<<detid<<" "<<name<<" Col "<<col_iter<<" Row "<<row_iter
-	    <<" Ped "<<ped<<" Gain "<<gain<<std::endl;	 
+	 //if( (detid==303054856 && col_iter==109 && row_iter==49 ) || 
+	 //  (detid==303046684 && col_iter==150 && row_iter==65 ) ||
+	 //  (detid==303042580 && col_iter==94 && row_iter==137 ) ) 
+	 //std::cout <<" DetId "<<detid<<" "<<name<<" Col "<<col_iter<<" Row "<<row_iter
+	 // <<" Ped "<<ped<<" Gain "<<gain<<std::endl;	 
        }
     }
 
@@ -336,12 +340,20 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     float adc = peds;
     
     if(layer>0) { // BPIX
-      if(layer==1)      { GainsSumL1->Fill(gains); PedsSumL1->Fill(peds);ADCSumL1->Fill(adc);VcalSumL1->Fill(vcal);}
-      else if(layer==2) { GainsSumL2->Fill(gains); PedsSumL2->Fill(peds);ADCSumL2->Fill(adc);VcalSumL2->Fill(vcal);}
+      if(layer==1)      { GainsSumL1->Fill(gains); PedsSumL1->Fill(peds);ADCSumL1->Fill(adc);VcalSumL1->Fill(vcal);
+      }else if(layer==2) { GainsSumL2->Fill(gains); PedsSumL2->Fill(peds);ADCSumL2->Fill(adc);VcalSumL2->Fill(vcal);}
       else if(layer==3) { GainsSumL3->Fill(gains); PedsSumL3->Fill(peds);ADCSumL3->Fill(adc);VcalSumL3->Fill(vcal);}
       else if(layer==4) { GainsSumL4->Fill(gains); PedsSumL4->Fill(peds);ADCSumL4->Fill(adc);VcalSumL4->Fill(vcal);}
-    }
+    } else { GainsSumF->Fill(gains);  PedsSumF->Fill(peds); ADCSumF->Fill(adc); VcalSumF->Fill(vcal);}
       
+    if( ((layer==1) && (gains<3.4||gains>4.3||peds<45||peds>63)) ||
+        ((layer>1)  && (gains<2.3||gains>3.0||peds<3.||peds>23)) ) {
+
+      std::cout <<" DetId "<<detid<<" "<<name<<" Ped "<<peds<<" Gains "<<gains<<std::endl;	 
+
+    }
+ 
+
     gainmeanfortree = _TH1F_Gains_m[detid]->GetMean();
     gainrmsfortree  = _TH1F_Gains_m[detid]->GetRMS();
     pedmeanfortree  = _TH1F_Pedestals_m[detid]->GetMean();

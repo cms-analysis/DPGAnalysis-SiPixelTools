@@ -12,7 +12,6 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
-
 #include "DataFormats/Common/interface/Handle.h"
 
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
@@ -39,6 +38,10 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <string>
+#include <iomanip>
+
 
 using namespace std;
 
@@ -615,6 +618,9 @@ private:
   int fedErrorsENE[n_of_FEDs][n_of_Channels];
   int fedErrorsTime[n_of_FEDs][n_of_Channels];
   int fedErrorsOver[n_of_FEDs][n_of_Channels];
+  int fedErrorsPKAM[n_of_FEDs][n_of_Channels];
+  int fedErrorsMask[n_of_FEDs][n_of_Channels];
+  int fedErrorsAutoMask[n_of_FEDs][n_of_Channels];
   int decodeErrors[n_of_FEDs][n_of_Channels];
   int decodeErrors000[n_of_FEDs][n_of_Channels];  // pix 0 problem
   int decodeErrorsDouble[n_of_FEDs][n_of_Channels];  // double pix  problem
@@ -718,11 +724,13 @@ void SiPixelRawDump::endJob() {
   if(errorThreshold<10) errorThreshold=10;
 
   cout<<" Total number of errors "<<countTotErrors<<" print threshold "<< errorThreshold << " total errors per fed channel"<<endl;
-  cout<<" FED errors "<<endl<<"Fed Channel Tot-Errors ENE-Errors Time-Errors NOR-Errors"<<endl;
+  cout<<" FED errors "<<endl<<"Fed Channel Tot-Errors ENE-Errors TO-Errors NOR-Errors PKAM Auto/Mask"<<endl;
 
   for(int i = 0; i < n_of_FEDs; ++i) {
     for(int j=0;j<n_of_Channels;++j) if( (fedErrors[i][j]) > errorThreshold || (fedErrorsENE[i][j] > 0) ) {
-	cout<<" "<<(i+fedId0)<<"  -  "<<(j+1)<<" -  "<<fedErrors[i][j]<<" - "<<fedErrorsENE[i][j]<<" -  "<<fedErrorsTime[i][j]<<" - "<<fedErrorsOver[i][j]<<endl;
+	cout<<(i+fedId0)<<" - "<<setw(3)<<(j+1)<<" -  "<<setw(8)<<fedErrors[i][j]<<" - "<<setw(8)<<fedErrorsENE[i][j]
+	    <<" -  "<<setw(8)<<fedErrorsTime[i][j]<<" - "<<setw(8)<<fedErrorsOver[i][j]<<" - "<<setw(8)<<fedErrorsPKAM[i][j]
+	    <<" - "<<setw(8)<<fedErrorsAutoMask[i][j]<<"/"<<setw(8)<<fedErrorsMask[i][j]<<endl;
     }
   }
   cout<<" Decode errors "<<endl<<"Fed Channel Errors Pix_000 Double_Pix"<<endl;
@@ -775,7 +783,8 @@ void SiPixelRawDump::beginJob() {
   sumFedSize=0;
   for(int i = 0; i < n_of_FEDs; ++i) {
     sumFedPixels[i]=0;
-    for(int j=0;j<n_of_Channels;++j) {fedErrors[i][j]=0; fedErrorsENE[i][j]=0; fedErrorsTime[i][j]=0; fedErrorsOver[i][j]=0;}
+    for(int j=0;j<n_of_Channels;++j) {fedErrors[i][j]=0; fedErrorsENE[i][j]=0; fedErrorsTime[i][j]=0; 
+      fedErrorsOver[i][j]=0;fedErrorsPKAM[i][j]=0;fedErrorsMask[i][j]=0;fedErrorsAutoMask[i][j]=0;}
     for(int j=0;j<n_of_Channels;++j) {decodeErrors[i][j]=0; decodeErrors000[i][j]=0; decodeErrorsDouble[i][j]=0;}
   }
   for(int i=0;i<20;++i) errorType[i]=0;
@@ -1321,21 +1330,6 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 
 	    break; } 
 
-	  case(14) : {  // OVER
-
-	    hoverflowFed->Fill(float(fedId-fedId0));
-	    countErrors[14]++;
-	    //fedErrorsOver[fedId-fedId0][(fedChannel-1)]++;
-	    hfed2DErrors14->Fill(float(fedId-fedId0),float(fedChannel));
-	    //hfed2DErrors14ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
-
-	    herrorOverls->Fill(float(lumiBlock));
-	    if(layer==1)      herrorOverls1->Fill(float(lumiBlock));
-	    else if(layer==2) herrorOverls2->Fill(float(lumiBlock));
-	    else if(layer==3) herrorOverls3->Fill(float(lumiBlock));
-	    else if(layer==0) herrorOverls0->Fill(float(lumiBlock));
-	    break; }
-
 	  case(11) : {  // ENE
 
 	    heneFed->Fill(float(fedId-fedId0));
@@ -1343,13 +1337,6 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 	    hfed2DErrors11->Fill(float(fedId-fedId0),float(fedChannel));
 	    //hfed2DErrors11ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
 	    fedErrorsENE[fedId-fedId0][(fedChannel-1)]++;
-	    break; }
-
-	  case(16) : { //FIFO
-
-	    countErrors[16]++;
-	    hfed2DErrors16->Fill(float(fedId-fedId0),float(fedChannel));
-	    //hfed2DErrors16ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
 	    break; }
 
 	  case(12) : {  // NOR
@@ -1361,12 +1348,6 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 	    fedErrorsOver[fedId-fedId0][(fedChannel-1)]++;   // use oveflow to count NORs for phase1 
 	    break; }
 
-	  case(15) : {  // TBM Trailer
-
-	    countErrors[15]++;
-	    hfed2DErrors15->Fill(float(fedId-fedId0),float(fedChannel));
-	    //hfed2DErrors15ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
-	    break; }
 
 	  case(13) : {  // FSM
 
@@ -1374,6 +1355,48 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 	    hfed2DErrors13->Fill(float(fedId-fedId0),float(fedChannel));
 	    //hfed2DErrors13ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
 	    break; }
+
+	  case(14) : {  // OVER
+
+	    countErrors[14]++;
+	    //fedErrorsOver[fedId-fedId0][(fedChannel-1)]++;
+	    hfed2DErrors14->Fill(float(fedId-fedId0),float(fedChannel));
+	    //hfed2DErrors14ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
+	    hoverflowFed->Fill(float(fedId-fedId0));
+	    herrorOverls->Fill(float(lumiBlock));
+	    //if(layer==1)      herrorOverls1->Fill(float(lumiBlock));
+	    //else if(layer==2) herrorOverls2->Fill(float(lumiBlock));
+	    //else if(layer==3) herrorOverls3->Fill(float(lumiBlock));
+	    //else if(layer==0) herrorOverls0->Fill(float(lumiBlock));
+	    break; }
+
+	  case(15) : {  // TBM Trailer
+
+	    countErrors[15]++;
+	    hfed2DErrors15->Fill(float(fedId-fedId0),float(fedChannel));
+	    //hfed2DErrors15ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
+	    break; }
+
+	  case(16) : { // pkam
+
+	    countErrors[16]++;
+	    hfed2DErrors16->Fill(float(fedId-fedId0),float(fedChannel));
+	    fedErrorsPKAM[fedId-fedId0][(fedChannel-1)]++;
+	    break; }
+
+
+	  case(17) : { // 
+
+	    countErrors[17]++;
+	    fedErrorsMask[fedId-fedId0][(fedChannel-1)]++;
+	    break; }
+
+	  case(18) : { // 
+
+	    countErrors[18]++;
+	    fedErrorsAutoMask[fedId-fedId0][(fedChannel-1)]++;
+	    break; }
+
 
 	  case(3) : {  //  inv. pix-dcol
 	    hpixFed->Fill(float(fedId-fedId0));
@@ -1549,7 +1572,7 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
   //havsizels->Fill(float(lumiBlock),aveFedSize);
   havsizebx->Fill(float(bx),aveFedSize);
 
-  if(countErrorsPerEvent>0) {
+  if(printErrors && countErrorsPerEvent>0) {
     cout<<"EVENT: "<<countEvents<<" "<<eventId<<" pixels "<<countPixels<<" errors "<<countErrorsPerEvent<<endl;
   }
 

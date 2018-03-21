@@ -1,5 +1,5 @@
 // File: PixClusterAna.cc
-// Description: To test pixel clusters. 
+//eos/cms/store/group/dpg_tracker_pixel/comm_pixel/GainCalibrations/Phase0/ Description: To test pixel clusters. 
 // Author: Danek Kotlinski 
 // Creation Date:  Initial version. 3/06
 // Modify to work with CMSSW354, 11/03/10 d.k.
@@ -2959,8 +2959,8 @@ void PixClusterAna::analyze(const edm::Event& e,
 #ifdef SINGLE_MODULES
 	    //if(select1>0) {
 	      float weight = 1.; // adc
-	      if     (eventFlag[0]&&ladder==1 && module==1) hpixDetMap10->Fill(pixy,pixx,weight); // 
-	      else if(eventFlag[1]&&ladder==2 && module==1) hpixDetMap11->Fill(pixy,pixx,weight); // " 
+	      if     (eventFlag[0]&&ladder==-1 && module==1) hpixDetMap10->Fill(pixy,pixx,weight); // 
+	      else if(eventFlag[1]&&ladder==-5 && module==-4) hpixDetMap11->Fill(pixy,pixx,weight); // noisy 
 	      else if(eventFlag[2]&&ladder==3 && module==1) hpixDetMap12->Fill(pixy,pixx,weight); // "
 	      else if(eventFlag[3]&&ladder==4 && module==1) hpixDetMap13->Fill(pixy,pixx,weight); // 
 	      else if(eventFlag[4]&&ladder==5 && module==1) hpixDetMap14->Fill(pixy,pixx,weight); // 
@@ -3109,16 +3109,16 @@ void PixClusterAna::analyze(const edm::Event& e,
 #endif
 
 #ifdef SINGLE_MODULES
-	    if     (ladder==  1 && module== 1) hpixDetMap20->Fill(pixy,pixx); //   
-	    else if(ladder==  1 && module== 2) hpixDetMap21->Fill(pixy,pixx); // 
-	    else if(ladder==  1 && module== 3) hpixDetMap22->Fill(pixy,pixx); // 
-	    else if(ladder==  1 && module== 4) hpixDetMap23->Fill(pixy,pixx); // 
-	    else if(ladder==  2 && module== 1) hpixDetMap24->Fill(pixy,pixx); // 
-	    else if(ladder==  2 && module== 2) hpixDetMap25->Fill(pixy,pixx); // 
-	    else if(ladder==  2 && module== 3) hpixDetMap26->Fill(pixy,pixx); //  
-	    else if(ladder==  2 && module== 4) hpixDetMap27->Fill(pixy,pixx); // 
-	    else if(ladder==  3 && module== 1) hpixDetMap28->Fill(pixy,pixx); //   
-	    else if(ladder==  3 && module== 2) hpixDetMap29->Fill(pixy,pixx); // 
+	    if     (ladder== -1 && module== 2) hpixDetMap20->Fill(pixy,pixx); //   
+	    else if(ladder== -1 && module== 1) hpixDetMap21->Fill(pixy,pixx); // 
+	    else if(ladder== -1 && module== 3) hpixDetMap22->Fill(pixy,pixx); // 
+	    else if(ladder== -5 && module==-2) hpixDetMap23->Fill(pixy,pixx); // 
+	    else if(ladder== -5 && module==-3) hpixDetMap24->Fill(pixy,pixx); // 
+	    else if(ladder== 13 && module==-4) hpixDetMap25->Fill(pixy,pixx); // 
+	    else if(ladder== 12 && module==-1) hpixDetMap26->Fill(pixy,pixx); // 
+	    else if(ladder== 14 && module==-1) hpixDetMap27->Fill(pixy,pixx); // 
+	    else if(ladder== 11 && module==-4) hpixDetMap28->Fill(pixy,pixx); //  
+	    else if(ladder==  5 && module==-3) hpixDetMap29->Fill(pixy,pixx); // 
 #endif
 
 #if defined(BX) || defined(BX_NEW)
@@ -3184,8 +3184,8 @@ void PixClusterAna::analyze(const edm::Event& e,
 #endif
 
 #ifdef SINGLE_MODULES
-	    if     (ladder== -4 && module== 1) hpixDetMap30->Fill(pixy,pixx); // 
-	    else if(ladder== -4 && module== 2) hpixDetMap31->Fill(pixy,pixx); // "
+	    if     (ladder== -1 && module==-1) hpixDetMap30->Fill(pixy,pixx); // 
+	    else if(ladder==-10 && module== 3) hpixDetMap31->Fill(pixy,pixx); // "
 	    else if(ladder== -4 && module== 3) hpixDetMap32->Fill(pixy,pixx); // "
 	    else if(ladder== -4 && module== 4) hpixDetMap33->Fill(pixy,pixx); // "
 	    else if(ladder==-19 && module==-1) hpixDetMap34->Fill(pixy,pixx); // " 
@@ -3193,7 +3193,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 	    else if(ladder==-19 && module==-3) hpixDetMap36->Fill(pixy,pixx); // 
 	    else if(ladder==-19 && module==-4) hpixDetMap37->Fill(pixy,pixx); // 
 	    else if(ladder==-21 && module== 2) hpixDetMap38->Fill(pixy,pixx); //  
-	    else if(ladder==  8 && module== 3) hpixDetMap39->Fill(pixy,pixx); // 
+	    else if(ladder==-22 && module==-2) hpixDetMap39->Fill(pixy,pixx); // 
 #endif
 	    hpixchar3->Fill(zPos,adc);
 	    //hcharPixbx->Fill(bx,adc);
@@ -3280,7 +3280,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 #endif
 
 #ifdef SINGLE_MODULES
-	    if     (ladder==-29 && module== 1) hpixDetMap40->Fill(pixy,pixx); //  
+	    if     (ladder==  2 && module== 4) hpixDetMap40->Fill(pixy,pixx); //  
 	    else if(ladder==-29 && module== 2) hpixDetMap41->Fill(pixy,pixx); // "
 	    else if(ladder==-29 && module== 3) hpixDetMap42->Fill(pixy,pixx); // "
 	    else if(ladder==-29 && module== 4) hpixDetMap43->Fill(pixy,pixx); // "
