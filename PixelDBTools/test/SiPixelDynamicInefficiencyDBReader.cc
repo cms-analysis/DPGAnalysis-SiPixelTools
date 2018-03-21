@@ -260,7 +260,7 @@ void SiPixelDynamicInefficiencyDBReader::analyze( const edm::Event& e, const edm
   std::vector<int> pu_match(nBarrelLayers_+nForwardDisks_, 0);
   
   // Matching Geometry
-  for(TrackerGeometry::DetUnitContainer::const_iterator it = pDD->detUnits().begin(); it != pDD->detUnits().end(); it++) {
+  for(auto it = pDD->detUnits().begin(); it != pDD->detUnits().end(); it++) {
     if( dynamic_cast<PixelGeomDetUnit const*>((*it))==0) continue;
 
     // Geometry variables

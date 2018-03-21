@@ -1,4 +1,4 @@
-#include "CondTools/SiPixel/test/SiPixelBadModuleByHandBuilder.h"
+#include "SiPixelBadModuleByHandBuilder.h"
 #include "DataFormats/SiPixelDetId/interface/PixelBarrelName.h"
 #include "DataFormats/SiPixelDetId/interface/PixelEndcapName.h"
 

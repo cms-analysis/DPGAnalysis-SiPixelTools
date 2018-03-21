@@ -68,7 +68,8 @@ void SiPixelLorentzAngleDBLoader::analyze(const edm::Event& e, const edm::EventS
 	es.get<TrackerDigiGeometryRecord>().get( pDD );
 	std::cout<<" There are "<<pDD->detUnits().size() <<" detectors (old)"<<std::endl;
 	
-	for(TrackerGeometry::DetUnitContainer::const_iterator it = pDD->detUnits().begin(); 
+	//for(TrackerGeometry::DetContainer::const_iterator it = pDD->detUnits().begin(); 
+	for(auto it = pDD->detUnits().begin(); 
 	    it != pDD->detUnits().end(); it++){
 	  
 	  if( dynamic_cast<PixelGeomDetUnit const*>((*it))!=0){
