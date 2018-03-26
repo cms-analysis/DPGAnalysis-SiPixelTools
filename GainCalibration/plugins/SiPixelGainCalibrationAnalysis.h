@@ -54,7 +54,7 @@ public:
   ~SiPixelGainCalibrationAnalysis();
 
   void doSetup(const edm::ParameterSet&);
-  virtual bool doFits(uint32_t detid, std::vector<SiPixelCalibDigi>::const_iterator ipix);
+  virtual bool doFits(uint32_t detid, std::vector<SiPixelCalibDigi>::const_iterator ipix,std::string layerString);
 
   virtual bool checkCorrectCalibrationType();
 

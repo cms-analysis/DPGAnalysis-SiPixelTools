@@ -19,7 +19,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
-process.GlobalTag.globaltag = '92X_dataRun2_Express_v7'#100X_dataRun2_Express_v2
+process.GlobalTag.globaltag = '100X_dataRun2_Express_v2'
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)

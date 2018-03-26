@@ -32,6 +32,7 @@ Implementation:
 
 using std::cout;
 using std::endl;
+
 //
 // constructors and destructor
 //
@@ -94,6 +95,8 @@ SiPixelGainCalibrationAnalysis::SiPixelGainCalibrationAnalysis(const edm::Parame
   for(int ii=0;ii<10;ii++)
     statusNumbers_[ii]=0;
   
+  
+  //Define VCal to ele conversion factors
   std::ifstream fin;
   fin.open(vCalToEleConvFactors_);
   if(fin.is_open()){
@@ -113,6 +116,7 @@ SiPixelGainCalibrationAnalysis::SiPixelGainCalibrationAnalysis(const edm::Parame
     std::cout << "Error opening " << vCalToEleConvFactors_ << ". Are you sure you passed it correctly?\n";
   
    std::map<std::string, std::pair<double, double>>::iterator it = VcalToEleMap.begin();
+   std::cout << "Using the following VCal to electron conversion factors per layer/ring (Rp = ring plus, Rm = ring minus, L = Layer):\n";
    while(it != VcalToEleMap.end()){
      std::pair<double, double> val = it->second;
      std::cout<<it->first<<" :: "<<val.first<<"::"<<val.second<<"::"<<std::endl;
@@ -228,10 +232,22 @@ void SiPixelGainCalibrationAnalysis::fillDatabase(){
 }
 // ------------ method called to do fits to all objects available  ------------
 bool
-SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibDigi>::const_iterator ipix)
+SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibDigi>::const_iterator ipix,std::string layerString)
 {
+ 
+  double VcalToEle_slope  ;
+  double VcalToEle_offset ;
+  
+  if (!layerString.empty()){
+    VcalToEle_slope  = VcalToEleMap[layerString].first;
+    VcalToEle_offset = VcalToEleMap[layerString].second;
+  }
+  else{
+    VcalToEle_slope  = 1.;
+    VcalToEle_offset = 0.;
+  }
+
   std::string currentDir = GetPixelDirectory(detid);
-  std::cout<< "WORKING ON DET ID = " << detid << std::endl;
   float lowmeanval=255;
   float highmeanval=0;
   bool makehistopersistent = saveALLHistograms_;
@@ -250,12 +266,15 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
   bool use_point=true;
   int status=0;
   statusNumbers_[9]++;
-  
   bookkeeper_2D_[detid]["status_2d"]->SetBinContent(ipix->col()+1,ipix->row()+1,0);
   if(writeSummary_ && detid!=currentDetID_){
     currentDetID_ = detid;
     summary_<<endl<<"DetId_"<<currentDetID_<<endl;
   }
+
+
+
+  
   
   for(uint32_t ii=0; ii< ipix->getnpoints() && ii<200; ii++){
     //    std::cout << ipix->getsum(ii) << " " << ipix->getnentries(ii) << " " << ipix->getsumsquares(ii) << std::endl;
@@ -266,6 +285,8 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     }
     else
       xvalsall[ii]=vCalValues_[ii];
+     
+    xvalsall[ii]= xvalsall[ii]*VcalToEle_slope+VcalToEle_offset;
     yerrvalsall[ii]=yvalsall[ii]=0; 
   
     if(ipix->getnentries(ii)>min_nentries_){
