@@ -58,6 +58,6 @@ siPixelGainCalibrationAnalysis = cms.EDAnalyzer("SiPixelGainCalibrationAnalysis"
     # use this mode if you want to analyze S-Curve data with the Gain analysis
     ignoreMode = cms.untracked.bool(False),
     phase1 = cms.untracked.bool(False),
-    vCalToEleConvFactors = cms.string("vCalToEleConvFactors.txt")                                   
+    vCalToEleConvFactors = cms.string("vcal-irradiation-factors.txt")                                   
 )
 

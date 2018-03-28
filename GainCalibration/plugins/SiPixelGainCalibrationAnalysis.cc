@@ -119,7 +119,7 @@ SiPixelGainCalibrationAnalysis::SiPixelGainCalibrationAnalysis(const edm::Parame
    std::cout << "Using the following VCal to electron conversion factors per layer/ring (Rp = ring plus, Rm = ring minus, L = Layer):\n";
    while(it != VcalToEleMap.end()){
      std::pair<double, double> val = it->second;
-     std::cout<<it->first<<" :: "<<val.first<<"::"<<val.second<<"::"<<std::endl;
+     std::cout<<it->first<<" : Slope =  "<<val.first<<"  Offset = "<<val.second<<" "<<std::endl;
      it++;
    } 
       
@@ -246,7 +246,7 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     VcalToEle_slope  = 1.;
     VcalToEle_offset = 0.;
   }
-
+  
   std::string currentDir = GetPixelDirectory(detid);
   float lowmeanval=255;
   float highmeanval=0;
@@ -285,7 +285,7 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     }
     else
       xvalsall[ii]=vCalValues_[ii];
-     
+    
     xvalsall[ii]= xvalsall[ii]*VcalToEle_slope+VcalToEle_offset;
     yerrvalsall[ii]=yvalsall[ii]=0; 
   

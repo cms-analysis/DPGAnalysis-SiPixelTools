@@ -91,7 +91,7 @@ process.siPixelGainCalibrationAnalysis.calibrows_Int = process.siPixelCalibDigis
 process.siPixelGainCalibrationAnalysis.Repeat = process.siPixelCalibDigis.Repeat
 process.siPixelGainCalibrationAnalysis.CalibMode = process.siPixelCalibDigis.CalibMode
 process.siPixelGainCalibrationAnalysis.phase1 = True
-process.siPixelGainCalibrationAnalysis.vCalToEleConvFactors = cms.string("vCalToEleConvFactors.txt")            
+process.siPixelGainCalibrationAnalysis.vCalToEleConvFactors = cms.string("vcal-irradiation-factors.txt")            
 
 # Path
 process.p = cms.Path(process.siPixelDigis * process.siPixelCalibDigis * process.siPixelGainCalibrationAnalysis )
