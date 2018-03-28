@@ -23,8 +23,8 @@ echo "(T2_CP $indir/$file $file)"
 T2_CP T2_PREFIX$indir/$file $file
 
 convfile=vcal-irradiation-factors.txt
-echo "(T2_CP $mydir/$convfile $convfile)"
-T2_CP T2_PREFIX$mydir/$convfile $convfile
+echo "(cp $mydir/../$convfile $convfile)"
+cp $mydir/../$convfile $convfile
 echo -e "************************"
 echo -e "  => ls: \n`ls`"
 echo -e "************************\n\n"
