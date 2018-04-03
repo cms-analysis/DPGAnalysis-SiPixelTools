@@ -83,7 +83,7 @@ public:
   SiPixelOfflineCalibAnalysisBase();
   
   //pure virtual function, called after each DetID loaded
-  virtual bool doFits(uint32_t detid, std::vector<SiPixelCalibDigi>::const_iterator ipix);
+  virtual bool doFits(uint32_t detid, std::vector<SiPixelCalibDigi>::const_iterator ipix,std::string layerString);
   
   
   //translate DetID to human readable string
