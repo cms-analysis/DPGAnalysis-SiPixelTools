@@ -42,14 +42,14 @@ process.hltfilter = hlt.hltHighLevel.clone(
 # Min-Bias	
 #    HLTPaths = ['HLT_Physics*'],
 #    HLTPaths = ['HLT_Random*'],
-#    HLTPaths = ['HLT_ZeroBias*'],
+    HLTPaths = ['HLT_ZeroBias*'],
 #    HLTPaths = ['HLT_ZeroBias_part*'],  # empty
 #    HLTPaths = ['HLT_ZeroBias_FirstCollisionInTrain_*'], # empty
 #    HLTPaths = ['HLT_ZeroBias_LastCollisionInTrain_*'],  # empty
 #    HLTPaths = ['HLT_ZeroBias_FirstBXAfterTrain_*'], # empty
 #    HLTPaths = ['HLT_ZeroBias_IsolatedBunches_*'], # empty
 #    HLTPaths = ['HLT_ZeroBias_FirstCollisionAfterAbortGap_*'],
-    HLTPaths = ['HLT_L1SingleMuOpen_v*'],
+#    HLTPaths = ['HLT_L1SingleMuOpen_v*'],
 #    HLTPaths = ['HLT_PAZeroBias*'],
 #    HLTPaths = ['HLT_PARandom*'],
 #    HLTPaths = ['HLT_PAMinBias*'],
@@ -96,16 +96,6 @@ process.source = cms.Source("PoolSource",
 # "/store/relval/CMSSW_9_2_3/RelValNuGun/GEN-SIM-DIGI-RAW-HLTDEBUG/PUpmx25ns_92X_upgrade2017_realistic_v2_earlyBS2017-v1/10000/1ECCAF11-2E51-E711-AE03-0025905B8594.root",
 
 
-"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/00097234-762C-E811-9C01-FA163E376AE7.root",
-"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/002FAD18-AE2C-E811-AE7F-FA163E595F01.root",
-"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/0068E3AB-BF2C-E811-A765-FA163E49E4DD.root",
-"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/00797185-882C-E811-A3AC-FA163ECCEC77.root",
-"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/008A0155-8B2C-E811-BDAB-02163E0176B0.root",
-"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/028FFAB8-862C-E811-BCFE-FA163E024A59.root",
-"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/02BCB4EF-772C-E811-9F81-FA163EFD5681.root",
-"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/041065A5-CF2C-E811-B1ED-FA163E95BBB1.root",
-"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/0422A8DA-B82C-E811-9045-FA163E252608.root",
-"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/0430A381-952C-E811-8467-FA163E468C72.root",
 
 #"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/220/00000/001D171B-F02B-E811-AE35-FA163E9F7EA5.root",
 #"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/220/00000/001FC020-D62B-E811-805F-FA163EF28A5C.root",
@@ -260,6 +250,7 @@ process.clutest = cms.EDAnalyzer("PixClusterTest",
 
 process.c = cms.EDAnalyzer("PixClustersWithTracks",
     Verbosity = cms.untracked.bool(False),
+    Normalise = cms.untracked.bool(False),
     phase1 = cms.untracked.bool(True),
 # for collisions 
 #    src = cms.InputTag("generalTracks"),

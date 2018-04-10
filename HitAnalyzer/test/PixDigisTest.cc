@@ -152,7 +152,7 @@ private:
 
   //TFile* hFile;
   TH1F *hdetunit;
-  TH1F *heloss1,*heloss2, *heloss3, *heloss4;
+  TH1F *heloss1,*heloss2, *heloss3, *heloss4, *heloss1n;
   TH1F *hneloss1,*hneloss2, *hneloss3, *hneloss4;
   TH1F *helossF11,*helossF21,*helossF31,*helossF12,*helossF22,*helossF32;
   TH1F *hpixid,*hpixsubid,*hlayerid,*hshellid,*hsectorid,
@@ -209,7 +209,7 @@ private:
 
 
 #ifdef USE_GAINS
-  TH1F *helectrons1, *helectrons2, *helectrons3, *helectrons4, *helectronsf;
+  TH1F *helectrons1, *helectrons2, *helectrons3, *helectrons4, *helectronsf, *helectrons1n;
 #endif
 
   // FPix
@@ -437,6 +437,7 @@ void PixDigisTest::beginJob() {
 			      257, -0.5, 256.5);
 
     heloss1 = fs->make<TH1F>( "heloss1", "Pix charge l1", 256, 0., 256.);
+    heloss1n= fs->make<TH1F>( "heloss1n", "Pix charge l1", 256, 0., 256.);
     heloss2 = fs->make<TH1F>( "heloss2", "Pix charge l2", 256, 0., 256.);
     heloss3 = fs->make<TH1F>( "heloss3", "Pix charge l3", 256, 0., 256.);
     heloss4 = fs->make<TH1F>( "heloss4", "Pix charge l4", 256, 0., 256.);
@@ -697,6 +698,7 @@ void PixDigisTest::beginJob() {
 
 #ifdef USE_GAINS
   helectrons1 = fs->make<TH1F>("helectrons1","adc in electrons l1",  2400,-40.,80.);
+  helectrons1n = fs->make<TH1F>("helectrons1n","adc in electrons l1",  2400,-40.,80.);
   helectrons2 = fs->make<TH1F>("helectrons2","adc in electrons l2",  2400,-40.,80.);
   helectrons3 = fs->make<TH1F>("helectrons3","adc in electrons l3",  2400,-40.,80.);
   helectrons4 = fs->make<TH1F>("helectrons4","adc in electrons l4",  2400,-40.,80.);
@@ -727,6 +729,8 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 			   const edm::EventSetup& iSetup) {
 
   const bool MY_DEBUG = false;
+  const bool rescaleVcal = false; // to try escaling vcal to account for radiation
+
   //Retrieve tracker topology from geometry
   edm::ESHandle<TrackerTopology> tTopo;
   iSetup.get<TrackerTopologyRcd>().get(tTopo);
@@ -888,6 +892,8 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
     int layer  = 0; // 1-3
     int module = 0; // 1-4
     bool half  = false; // 
+    bool badL2Modules = false;
+    bool newL1Modules = false;
 
     unsigned int disk=0; //1,2,3
     unsigned int blade=0; //1-24
@@ -966,6 +972,32 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
       if(shell==1 || shell==2) module = -module;
       // change ladeer sign for Outer )x<0)
       if(shell==1 || shell==3) ladder = -ladder;
+      
+
+
+      if( (layer==2) && (select1==99) ) {
+	if( (ladder ==-1) && ( (module == 1) || (module == 2) || (module == 3)) ) badL2Modules=true;
+	else if( (ladder ==-5) &&( (module == -1) || (module == -2) || (module == -3)) ) badL2Modules=true;
+	else if( (ladder == 14) && (module == -1) ) badL2Modules=true;
+	else if( (ladder == 13) && (module == -4) ) badL2Modules=true;
+	else if( (ladder == 12) && (module == -1) ) badL2Modules=true;
+	else if( (ladder == 11) && (module == -4) ) badL2Modules=true;
+      }
+
+      // find inner and outer modules for layer 1 onl
+      if( (layer==1) ) {
+	//if( (ladder==2) || (ladder==4) || (ladder==6) ||
+	//  (ladder==-1) || (ladder==-3) || (ladder==-5) ) inner=true;
+	//else inner=false;
+
+	if     ( (ladder ==-1) && (module == 3) ) newL1Modules=true;
+	else if( (ladder ==-3) && (module == 3) ) newL1Modules=true;
+	else if( (ladder ==-1) && (module ==-3) ) newL1Modules=true;
+	else if( (ladder ==-1) && (module ==-1) ) newL1Modules=true;
+	else if( (ladder ==-3) && (module ==-1) ) newL1Modules=true;
+	else if( (ladder ==-5) && (module ==-1) ) newL1Modules=true;
+
+      }
       
 
       if(PRINT) { 
@@ -1109,9 +1141,15 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
        float pixy = col; float pixx=row;
 #endif
        if(layer==1) {
-	 electrons = (vcal * conversionFactor_L1 + offset_L1)/1000.; // in kelec 
-	 helectrons1->Fill(electrons);
-	 heloss1->Fill(float(adc));
+	 if(rescaleVcal) electrons = (vcal * 53.9 + offset_L1)/1000.; //L1 at 51.5fb-1 50->53.9
+	 else            electrons = (vcal * conversionFactor_L1 + offset_L1)/1000.; //default 
+	 if(newL1Modules) {
+	   helectrons1n->Fill(electrons);
+	   heloss1n->Fill(float(adc));
+	 } else {
+	   helectrons1->Fill(electrons);
+	   heloss1->Fill(float(adc));
+	 }
 	 hcols1->Fill(float(col));
 	 hrows1->Fill(float(row));
 	 hpixMap1->Fill(float(col),float(row));
@@ -1154,8 +1192,9 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 // 	     hcols1big->Fill(float(col));
 // 	   }
 
-       } else if(layer==2) {
-	 electrons = (vcal * conversionFactor + offset)/1000.; 
+       } else if(layer==2 && !badL2Modules) {
+	 if(rescaleVcal) electrons = (vcal * 47.8 + offset)/1000.; //L2 at 51.5fb-1 47->47.8
+	 else            electrons = (vcal * conversionFactor + offset)/1000.; //default 
 	 helectrons2->Fill(electrons);
         // look for the noisy pixel
 	 //noise = false; // (ladder==6) && (module==-2) && (col==364) && (row==1);
@@ -1184,7 +1223,8 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 #endif
 
        } else if(layer==3) {
-	 electrons = (vcal * conversionFactor + offset)/1000.;
+	 if(rescaleVcal) electrons = (vcal * 47.5 + offset)/1000.; //L3 at 51.5fb-1 47->47.5
+	 else            electrons = (vcal * conversionFactor + offset)/1000.; //default 
 	 helectrons3->Fill(electrons); 
 	 //noise = false; //(ladder==6) || (module==-2) || (col==364) || (row==1);	
 	 if(electrons<0) hneloss3->Fill(float(adc));
@@ -1208,7 +1248,8 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	 //else if( ladder==14 && module==-3) hpixDetMap35->Fill(pixy,pixx,weight); // 
 #endif
        } else if(layer==4) {
-	 electrons = (vcal * conversionFactor + offset)/1000.; 
+	 if(rescaleVcal) electrons = (vcal * 47.25 + offset)/1000.; //L4 at 51.5fb-1 47->47.25
+	 else            electrons = (vcal * conversionFactor + offset)/1000.; //default 
 	 helectrons4->Fill(electrons);
 	 //noise = false; //(ladder==6) || (module==-2) || (col==364) || (row==1);
 	 if(electrons<0) hneloss4->Fill(float(adc));
@@ -1372,7 +1413,7 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	    numOfDigisPerDet1=0;
 	    hphiz1->Fill(detZ,detPhi);
 	    
-	  } else if(layer==2) {
+	  } else if(layer==2 && !badL2Modules) {
 	    hladder2id->Fill(float(ladder));
 	    hz2id->Fill(float(module));
 	    hdetMap2->Fill(float(module),float(ladder));

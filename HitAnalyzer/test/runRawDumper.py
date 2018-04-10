@@ -61,34 +61,22 @@ process.source = cms.Source("PoolSource",
 # fileNames =  myfilelist
     fileNames = cms.untracked.vstring(                          
 
-"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/00097234-762C-E811-9C01-FA163E376AE7.root",
-"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/002FAD18-AE2C-E811-AE7F-FA163E595F01.root",
-"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/0068E3AB-BF2C-E811-A765-FA163E49E4DD.root",
-"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/00797185-882C-E811-A3AC-FA163ECCEC77.root",
-"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/008A0155-8B2C-E811-BDAB-02163E0176B0.root",
-"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/028FFAB8-862C-E811-BCFE-FA163E024A59.root",
-"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/02BCB4EF-772C-E811-9F81-FA163EFD5681.root",
-"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/041065A5-CF2C-E811-B1ED-FA163E95BBB1.root",
-"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/0422A8DA-B82C-E811-9045-FA163E252608.root",
-"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/301/00000/0430A381-952C-E811-8467-FA163E468C72.root",
-
-# 2017
-#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v3/000/300/742/00000/00538B29-837C-E711-BCD7-02163E011F61.root",
-#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/300/773/00000/02DBAD4C-AE7C-E711-B44F-02163E019DD0.root",
-#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/300/773/00000/04985C0E-B17C-E711-8A86-02163E0146AC.root",
-
-#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/233/00000/062F0768-5676-E711-B303-02163E014626.root",
-#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/226/00000/02BBC9F3-2F76-E711-B29A-02163E019C08.root",
-#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/155/00000/0052B596-8F75-E711-B704-02163E011C13.root",
-
-#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/122/00000/001BAA8B-BA74-E711-9564-02163E01A3CB.root",
-#"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/300/088/00000/003E6DDF-4974-E711-A723-02163E0133C2.root",
-
-# "/store/express/Run2017C/ExpressPhysics/FEVT/Express-v1/000/299/479/00000/000AE42E-696D-E711-AC50-02163E0142C8.root",
-
-# "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v2/000/296/702/00000/FED4EA05-D64F-E711-82F9-02163E012A6B.root",
-# "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v2/000/296/664/00000/00F38C8D-A54F-E711-A312-02163E01472F.root",
-# "/store/express/Run2017A/ExpressPhysics/FEVT/Express-v2/000/296/643/00000/08070285-5E4F-E711-BB56-02163E01476C.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/313/105/00000/62D40E91-CB32-E811-8231-FA163E2D0F8B.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/313/105/00000/38E3030F-CE32-E811-A369-FA163EAE8BE0.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/313/105/00000/980DD043-CF32-E811-9A2C-FA163E010862.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/313/105/00000/C4763265-CF32-E811-9D1C-FA163E6E568E.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/313/105/00000/0C817D37-CE32-E811-ADB6-FA163E5CE18A.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/313/105/00000/80D62C1A-D232-E811-9890-FA163E045E3F.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/313/105/00000/944600B7-D332-E811-BB49-FA163E3FA786.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/313/105/00000/92AD4812-D532-E811-BE0B-FA163E967705.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/313/105/00000/FC076D0A-D632-E811-B2A4-FA163EE782AD.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/313/105/00000/86E740C4-D432-E811-9B2E-FA163E5CE18A.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/313/105/00000/7A1516F8-D632-E811-9FFD-FA163EE92B1D.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/313/105/00000/3C5A8030-D832-E811-94FB-FA163EE92B1D.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/313/105/00000/56825D7D-DA32-E811-A6FC-02163E019FF9.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/313/105/00000/CC7E7385-DB32-E811-95A3-FA163E9A30FF.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/313/105/00000/DC065D53-DC32-E811-97F9-02163E01A01D.root",
+"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/313/105/00000/0CD8BFCA-DD32-E811-9563-FA163E014056.root",
 
    )
 

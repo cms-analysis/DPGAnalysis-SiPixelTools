@@ -108,6 +108,11 @@
 
 # 2018
 #/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/ExpressCosmics/Commissioning2018-Express-v1/FEVT run=312220' 
-/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/ExpressCosmics/Commissioning2018-Express-v1/FEVT run=313759'
- 
+#/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/ExpressCosmics/Commissioning2018-Express-v1/FEVT run=313130'
+
+# PHASE2 MC
+#dasgoclient -query="dataset=/RelVal*/CMSSW_1*2023D17PU200*/GEN-SIM-DIGI-RAW"
+#dasgoclient -query="file dataset=/RelVal*/CMSSW_1*2023D17PU200*/GEN-SIM-DIGI-RAW"
+
+dasgoclient -query="file dataset=/RelVal*/CMSSW_1*2023D17PU200*/GEN-SIM-RECO"
 

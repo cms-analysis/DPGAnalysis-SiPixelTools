@@ -780,6 +780,7 @@ private:
   HotPixels hotPixels[FEDs];
   double fraction_;
   int PixelsCount[48][8];
+  int MAXFED; // last fed
 
   TH1D *hsize0, *hsize1, *hsize2, *hsize3;
   TH2F *hchannelRoc, *hchannelRocs, *hchannelPixels, *hchannelPixPerRoc;
@@ -835,7 +836,9 @@ void FindHotPixelFromRaw::beginJob() {
 
   // Define the fraction for noisy pixels
   fraction_ = theConfig.getUntrackedParameter<double>("Fraction",0.001); 
-  cout<<" The noise fraction is "<<fraction_<<endl;
+  MAXFED = theConfig.getUntrackedParameter<int>("MAXFED",1293);
+  //MAXFED=1293;
+  cout<<" The noise fraction is "<<fraction_<<" FED range until "<<MAXFED<<endl;
 
   edm::Service<TFileService> fs;
   hsize0 = fs->make<TH1D>( "hsize0", "Noisy pixels", 10000, 0.0, 0.1);
@@ -1007,7 +1010,7 @@ void FindHotPixelFromRaw::analyze(const  edm::Event& ev, const edm::EventSetup& 
   ev.getByToken(rawData , buffers);  // the new bytoken 
 
   //std::pair<int,int> fedIds(FEDNumbering::MINSiPixelFEDID, FEDNumbering::MAXSiPixelFEDID);
-  std::pair<int,int> fedIds(1200, 1293);
+  std::pair<int,int> fedIds(1200, MAXFED);
   
   //PixelDataFormatter formatter(0); // to get digis
   //bool dummyErrorBool;

@@ -724,7 +724,7 @@ void SiPixelRawDump::endJob() {
   if(errorThreshold<10) errorThreshold=10;
 
   cout<<" Total number of errors "<<countTotErrors<<" print threshold "<< errorThreshold << " total errors per fed channel"<<endl;
-  cout<<" FED errors "<<endl<<"Fed Channel Tot-Errors ENE-Errors TO-Errors NOR-Errors PKAM Auto/Mask"<<endl;
+  cout<<" FED errors "<<endl<<"Fed  Channel Tot-Errors ENE-Errors  TO-Errors  NOR-Errors     PKAM    Auto/Mask"<<endl;
 
   for(int i = 0; i < n_of_FEDs; ++i) {
     for(int j=0;j<n_of_Channels;++j) if( (fedErrors[i][j]) > errorThreshold || (fedErrorsENE[i][j] > 0) ) {
