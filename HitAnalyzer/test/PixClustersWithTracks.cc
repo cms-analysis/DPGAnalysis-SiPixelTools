@@ -1997,13 +1997,13 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 
 	    if(pt>CLU_SIZE_PT_CUT) {
 	      if(newL1Modules) {
-		hsize1->Fill(float(size));
-		hsizex1->Fill(float(sizeX));
-		hsizey1->Fill(float(sizeY));
-	      } else {
 		hsize1n->Fill(float(size));
 		hsizex1n->Fill(float(sizeX));
 		hsizey1n->Fill(float(sizeY));
+	      } else {
+		hsize1->Fill(float(size));
+		hsizex1->Fill(float(sizeX));
+		hsizey1->Fill(float(sizeY));
 	      }
 #ifdef USE_PROFILES
 	      hclumult1->Fill(eta,float(size));
@@ -2415,8 +2415,8 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	      else if( ladder==2 && module==-1) hpixDetMap14->Fill(pixy,pixx,weight); // "
 	      else if( ladder==-5 && module==2) hpixDetMap19->Fill(pixy,pixx,weight); // "
 	      else if( ladder==-5 && module==1) hpixDetMap16->Fill(pixy,pixx,weight); // "
-	      else if( ladder==4 && module==-1) hpixDetMap17->Fill(pixy,pixx,weight); // "
-	      else if( ladder==-3 && module==-4) hpixDetMap18->Fill(pixy,pixx,weight); // " 
+	      else if( ladder==-1 && module==-4) hpixDetMap17->Fill(pixy,pixx,weight); // dcol ctructures
+	      else if( ladder== 6 && module== 1) hpixDetMap18->Fill(pixy,pixx,weight); // v. low threshold 
 	      else if( ladder==-6 && module==-1) hpixDetMap15->Fill(pixy,pixx,weight); // low occu
 #endif
 

@@ -1,25 +1,8 @@
 # dbs search --query='find file, file.numevents where run=172998 and site=caf.cern.ch and dataset=/MinimumBias/Run2011A-PromptReco-v6/RECO' > bla.txt
 
-#dbs search --query='find file where run=173236 and dataset=/MinimumBias/Run2011A-PromptReco-v6/RECO' >! bla.txt
-#dbs search --query='find file where run=173389 and dataset=/MinimumBias/Run2011A-PromptReco-v6/RECO' >! bla.txt
-#dbs search --query='find file where run=173406 and dataset=/MinimumBias/Run2011A-PromptReco-v6/RECO' >! bla.txt
-#dbs search --query='find file where run=173438 and dataset=/MinimumBias/Run2011A-PromptReco-v6/RECO' >! bla.txt
-#dbs search --query='find file where run=173439 and dataset=/MinimumBias/Run2011A-PromptReco-v6/RECO' >! bla.txt
-
-
-#dbs search --query='find file where run=173619 and dataset=/Interfill/Run2011A-v1/RAW' 
-#dbs search --query='find file where run=175260 and dataset=/Interfill/Run2011A-v1/RAW' 
-#dbs search --query='find file where run=208686 and dataset=/MinimumBias/Run2012D-v1/RAW' 
-
 # 2012
-#das_client.py --limit=0 --query='file dataset=/JetHT/Run2012D-22Jan2013-v1/RECO run=208686' # 
+#das_client.py --limit=10 --query='file dataset=/JetHT/Run2012D-22Jan2013-v1/RECO run=208686' # 
 #das_client.py --limit=0 --query='file dataset=/MuOnia/Run2012D-22Jan2013-v1/AOD run=208686' # 
-
-# COSMICS 
-#das_client.py --limit=0 --query='file dataset=/Cosmics/Commissioning2015-v1/RAW run=239342'
-#das_client.py --limit=0 --query='file dataset=/MinimumBias/Commissioning2015-v1/RAW run=239342'
-#das_client.py --limit=0 --query='file dataset=/Cosmics/Commissioning2015-PromptReco-v1/RECO run=237956'
-#das_client.py --limit=0 --query='file dataset=/MinimumBias/Commissioning2015-PromptReco-v1/RECO run=237956'
 
 # Cosmics 
 #das_client.py --limit=0 --query='file dataset=/MinimumBias/Run2015A-v1/RAW run=250381' # Y
@@ -108,6 +91,10 @@
 
 # 2018
 #/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/ExpressCosmics/Commissioning2018-Express-v1/FEVT run=312220' 
-/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/ExpressCosmics/Commissioning2018-Express-v1/FEVT run=313759'
+#/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/ExpressCosmics/Commissioning2018-Express-v1/FEVT run=313759'
  
+# 2018 data 
+#/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/ExpressPhysics/Commissioning2018-Express-v1/FEVT run=315188'
+/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/ExpressPhysics/Run2018A-Express-v1/FEVT run=316766'
+
 

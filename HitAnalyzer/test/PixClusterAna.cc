@@ -90,14 +90,8 @@
 #include <TProfile2D.h>
 #include <TVector3.h>
 
-#define NEW_ID
-#ifdef NEW_ID
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 #include "Geometry/Records/interface/IdealGeometryRecord.h"
-#else 
-#include "DataFormats/SiPixelDetId/interface/PXBDetId.h" 
-#include "DataFormats/SiPixelDetId/interface/PXFDetId.h" 
-#endif 
 
 using namespace std;
 
@@ -107,7 +101,7 @@ using namespace std;
 //#define PV
 #define BX_TESTS
 //#define STUDY_LAY1
-#define SINGLE_MODULES
+//#define SINGLE_MODULES
 #define PHI_PROFILES
 //#define TEST_GEOM
 #define TEST_DCOLS
@@ -126,7 +120,7 @@ using namespace std;
 //#define HF
 
 //#define TESTING_ADC
-#define LAY1_SPLIT
+//#define LAY1_SPLIT
 #define ROC_RATE
 
 #ifdef HF
@@ -1062,7 +1056,7 @@ void PixClusterAna::beginJob() {
 #ifdef HI
   highH = 9999.5;
 #else
-  highH = 4999.5;
+  highH = 9999.5;
 #endif
 
   hpixPerDisk1 = fs->make<TH1D>( "hpixPerDisk1", "Pix per disk1",
@@ -2503,12 +2497,13 @@ void PixClusterAna::analyze(const edm::Event& e,
     // select events only for a defined bx
     else if(select1==2) { if(bx != select2) return; } 
     else if(select1==3) { if(bx == select2) return; } 
-    else if(select1==4) { if(  !( (bx==39)||(bx==201)||(bx==443)||(bx==499)||(bx==1083)||(bx==1337)||(bx==1492)||(bx==1977)||(bx==2231)||(bx==2287)||(bx==2871)||(bx==3224)||(bx==3280) )   ) return; } 
-    else if(select1==5) { if( ( (bx==1)||(bx==39)||(bx==201)||(bx==443)||(bx==499)||(bx==1083)||(bx==1337)||(bx==1492)||(bx==1977)||(bx==2231)||(bx==2287)||(bx==2871)||(bx==3224)||(bx==3280) )   ) return; } 
-    else if(select1==6) { if(bx < select2) return; } 
-    else if(select1==7) { if(bx > select2) return; } 
+    //else if(select1==4) { if(  !( (bx==39)||(bx==201)||(bx==443)||(bx==499)||(bx==1083)||(bx==1337)||(bx==1492)||(bx==1977)||(bx==2231)||(bx==2287)||(bx==2871)||(bx==3224)||(bx==3280) )   ) return; } 
+    //else if(select1==5) { if( ( (bx==1)||(bx==39)||(bx==201)||(bx==443)||(bx==499)||(bx==1083)||(bx==1337)||(bx==1492)||(bx==1977)||(bx==2231)||(bx==2287)||(bx==2871)||(bx==3224)||(bx==3280) )   ) return; } 
+    //else if(select1==6) { if(bx < select2) return; } 
+    //else if(select1==7) { if(bx > select2) return; } 
     // select specific event
-    else if(select1==10) { if(event!=select2) return; } 
+    else if(select1==9999) { if(event!=select2) return; } 
+    else { if( !((bx>=select1) && (bx<=select2)) ) return; } // skip bx outside the select1-select2 region 
     //....
   }
 
@@ -2538,12 +2533,10 @@ void PixClusterAna::analyze(const edm::Event& e,
   // default: cout<<" too many runs "<<countRuns<<endl;
   // }
 
-#ifdef NEW_ID
   //Retrieve tracker topology from geometry
   edm::ESHandle<TrackerTopology> tTopoH;
   es.get<TrackerTopologyRcd>().get(tTopoH);
   const TrackerTopology *tTopo=tTopoH.product();
-#endif
 
   //---------------------------------------
   if(numOf>0) countEvents++; // count events with pixel hits 
@@ -2687,30 +2680,21 @@ void PixClusterAna::analyze(const edm::Event& e,
     unsigned int zindexF=0; //
     unsigned int side=0; //size=1 for -z, 2 for +z
     unsigned int panel=0; //panel=1
-
+#ifdef LAY1_SPLIT
     bool inner = false; // inner and outer ladders
     bool ring12=false; // rings 1&2
-
+#endif
     edmNew::DetSet<SiPixelCluster>::const_iterator clustIt;
 
     // Subdet id, pix barrel=1, forward=2
     if(subid==2) {  // forward
 
-#ifdef NEW_ID
       disk=tTopo->pxfDisk(detid); //1,2,3
       blade=tTopo->pxfBlade(detid); //1-24
       zindex=tTopo->pxfModule(detid); //
       side=tTopo->pxfSide(detid); //size=1 for -z, 2 for +z
       panel=tTopo->pxfPanel(detid); //panel=1
       PixelEndcapName pen(detid,tTopo,phase1_);
-#else 
-      PXFDetId pdetId = PXFDetId(detid);       
-      disk=pdetId.disk(); //1,2,3
-      blade=pdetId.blade(); //1-24
-      moduleF=pdetId.module(); // plaquette
-      side=pdetId.side(); //size=1 for -z, 2 for +z
-      panel=pdetId.panel(); //panel=1
-#endif
 
       if(PRINT) cout<<" forward det, disk "<<disk<<", blade "
  		    <<blade<<", module "<<zindexF<<", side "<<side<<", panel "
@@ -2723,25 +2707,11 @@ void PixClusterAna::analyze(const edm::Event& e,
       for(int i=0;i<160;++i) for(int j=0;j<416;++j) moduleArray[i][j]=0;
 #endif
 
-#ifdef NEW_ID
       layerC=tTopo->pxbLayer(detid);
       ladderC=tTopo->pxbLadder(detid);
       zindex=tTopo->pxbModule(detid);
       //PixelBarrelName pbn(detid);
       PixelBarrelName pbn(detid,tTopo,phase1_);
-#else      
-      PXBDetId pdetId = PXBDetId(detid);
-      //unsigned int detTypeP=pdetId.det();
-      //unsigned int subidP=pdetId.subdetId();
-      // Barell layer = 1,2,3
-      layerC=pdetId.layer();
-      // Barrel ladder id 1-20,32,44.
-      ladderC=pdetId.ladder();
-      // Barrel Z-index=1,8
-      zindex=pdetId.module();
-      // Convert to online 
-      PixelBarrelName pbn(pdetId);
-#endif
 
       // Shell { mO = 1, mI = 2 , pO =3 , pI =4 };
       PixelBarrelName::Shell sh = pbn.shell(); //enum
@@ -2767,10 +2737,11 @@ void PixClusterAna::analyze(const edm::Event& e,
 
       // find inner and outer modules for layer 1 onl
       if( (layer==1) ) {
+#ifdef LAY1_SPLIT
 	if( (ladder==2) || (ladder==4) || (ladder==6) ||
 	    (ladder==-1) || (ladder==-3) || (ladder==-5) ) inner=true;
 	else inner=false;
-
+#endif
 	if     ( (ladder ==-1) && (module == 3) ) newL1Modules=true;
 	else if( (ladder ==-3) && (module == 3) ) newL1Modules=true;
 	else if( (ladder ==-1) && (module ==-3) ) newL1Modules=true;
@@ -2781,8 +2752,9 @@ void PixClusterAna::analyze(const edm::Event& e,
       }
       
       // find rings 1-2 and 3-4
+#ifdef LAY1_SPLIT
       if(abs(module)<3) ring12=true; 
-
+#endif
       if(PRINT) { 
 	cout<<" Barrel layer, ladder, module "
 	    <<layerC<<" "<<ladderC<<" "<<zindex<<" "
@@ -2995,13 +2967,13 @@ void PixClusterAna::analyze(const edm::Event& e,
 	      float weight = 1.; // adc
 	      if     (eventFlag[0]&&ladder==-1 && module==1) hpixDetMap10->Fill(pixy,pixx,weight); //  BpOx/1/1/1 ?noise 
 	      else if(eventFlag[1]&&ladder==-5 && module==-4) hpixDetMap11->Fill(pixy,pixx,weight); // noisy, masked 0-3
-	      else if(eventFlag[2]&&ladder==2 && module==1) hpixDetMap12->Fill(pixy,pixx,weight); // fed errors 1205/7,8
-	      else if(eventFlag[3]&&ladder==6 && module==3) hpixDetMap13->Fill(pixy,pixx,weight); // noise 
-	      else if(eventFlag[4]&&ladder==2 && module==-1) hpixDetMap14->Fill(pixy,pixx,weight); // "
-	      else if(eventFlag[5]&&ladder==-5 && module==2) hpixDetMap19->Fill(pixy,pixx,weight); // "
-	      else if(eventFlag[6]&&ladder==-5 && module==1) hpixDetMap16->Fill(pixy,pixx,weight); // "
-	      else if(eventFlag[7]&&ladder==4 && module==-1) hpixDetMap17->Fill(pixy,pixx,weight); // "
-	      else if(eventFlag[8]&&ladder==-3 && module==-4) hpixDetMap18->Fill(pixy,pixx,weight); // " 
+	      else if(eventFlag[2]&&ladder== 2 && module== 1) hpixDetMap12->Fill(pixy,pixx,weight); //fed err 1205/7,8
+	      else if(eventFlag[3]&&ladder== 6 && module== 3) hpixDetMap13->Fill(pixy,pixx,weight); // noise 
+	      else if(eventFlag[4]&&ladder== 2 && module==-1) hpixDetMap14->Fill(pixy,pixx,weight); // "
+	      else if(eventFlag[5]&&ladder==-5 && module== 2) hpixDetMap19->Fill(pixy,pixx,weight); // "
+	      else if(eventFlag[6]&&ladder==-5 && module== 1) hpixDetMap16->Fill(pixy,pixx,weight); // "
+	      else if(eventFlag[7]&&ladder==-1 && module==-4) hpixDetMap17->Fill(pixy,pixx,weight); // dcol structures
+	      else if(eventFlag[8]&&ladder== 6 && module== 1) hpixDetMap18->Fill(pixy,pixx,weight); // v. low threshold 
 	      else if(eventFlag[9]&&ladder==-6 && module==-1) hpixDetMap15->Fill(pixy,pixx,weight); // low occu
 #endif
 
