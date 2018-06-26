@@ -4,6 +4,7 @@
 // Fails in V71 because of TrackingRecHit. <--- fix 
 // Move to getByToken, 80X, 4/16
 // Extend to phase1, 81X, 9/16 dk
+// Extend to phase2 6/18
 //--------------------------------------------
 #include <memory>
 #include <string>
@@ -135,11 +136,11 @@ const bool isData = true; // set false for MC
 
 using namespace std;
 
-class PixClustersWithTracks : public edm::EDAnalyzer {
+class PixClustersWithTracksPhase2 : public edm::EDAnalyzer {
  public:
   
-  explicit PixClustersWithTracks(const edm::ParameterSet& conf);  
-  virtual ~PixClustersWithTracks();
+  explicit PixClustersWithTracksPhase2(const edm::ParameterSet& conf);  
+  virtual ~PixClustersWithTracksPhase2();
   virtual void analyze(const edm::Event& e, const edm::EventSetup& c);
   virtual void beginRun(const edm::EventSetup& iSetup);
   virtual void beginJob();
@@ -346,7 +347,7 @@ class PixClustersWithTracks : public edm::EDAnalyzer {
 };
 /////////////////////////////////////////////////////////////////
 // Contructor,
-PixClustersWithTracks::PixClustersWithTracks(edm::ParameterSet const& conf) 
+PixClustersWithTracksPhase2::PixClustersWithTracksPhase2(edm::ParameterSet const& conf) 
 //  : conf_(conf), src_(conf.getParameter<edm::InputTag>( "src" )) { }
   : conf_(conf), Normalise(true) { 
 
@@ -375,15 +376,15 @@ PixClustersWithTracks::PixClustersWithTracks(edm::ParameterSet const& conf)
 }
 
 // Virtual destructor needed.
-PixClustersWithTracks::~PixClustersWithTracks() { }  
+PixClustersWithTracksPhase2::~PixClustersWithTracksPhase2() { }  
 
 // ------------ method called at the begining   ------------
-void PixClustersWithTracks::beginRun(const edm::EventSetup& iSetup) {
+void PixClustersWithTracksPhase2::beginRun(const edm::EventSetup& iSetup) {
   cout << "BeginRun, Verbosity =  " <<PRINT<<" Phase1 "<<phase1_<<endl;
 }
 
 // ------------ method called at the begining   ------------
-void PixClustersWithTracks::beginJob() {
+void PixClustersWithTracksPhase2::beginJob() {
   cout << "BeginJob, Verbosity " <<PRINT<<endl;
 
   countTracks=0.; countGoodTracks=0.; countTracksInPix=0.; countPVs=0.; countEvents=0.; countLumi=0.;  
@@ -1102,7 +1103,7 @@ void PixClustersWithTracks::beginJob() {
 }
 //-------------------------------------------------------------------------
 #if defined(CLU_SHAPE) || defined(CLU_SHAPE_L2) 
-void PixClustersWithTracks::histogramClus(float cha, int size, int sizex, int sizey, 
+void PixClustersWithTracksPhase2::histogramClus(float cha, int size, int sizex, int sizey, 
 					  bool same, int corner) {
 
   if(size==1) {
@@ -1160,7 +1161,7 @@ void PixClustersWithTracks::histogramClus(float cha, int size, int sizex, int si
     
   }
 }
-void PixClustersWithTracks::histogramPix(float cha, int size, int sizex, int sizey, 
+void PixClustersWithTracksPhase2::histogramPix(float cha, int size, int sizex, int sizey, 
 					 bool same, int corner) {
 
   if(size==1) {
@@ -1215,7 +1216,7 @@ void PixClustersWithTracks::histogramPix(float cha, int size, int sizex, int siz
 #endif
 
 // ------------ method called to at the end of the job  ------------
-void PixClustersWithTracks::endJob(){
+void PixClustersWithTracksPhase2::endJob(){
   cout << " End PixelTracksTest, events =  " << countEvents 
        << " tracks "<< countTracks 
        << " good tracks "<< countGoodTracks 
@@ -1306,7 +1307,7 @@ void PixClustersWithTracks::endJob(){
 }
 //////////////////////////////////////////////////////////////////
 // Functions that gets called by framework every event
-void PixClustersWithTracks::analyze(const edm::Event& e, 
+void PixClustersWithTracksPhase2::analyze(const edm::Event& e, 
 			    const edm::EventSetup& es) {
 
   using namespace edm;
@@ -2711,7 +2712,7 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 } // end 
     
 //define this as a plug-in
-DEFINE_FWK_MODULE(PixClustersWithTracks);
+DEFINE_FWK_MODULE(PixClustersWithTracksPhase2);
   
 
 

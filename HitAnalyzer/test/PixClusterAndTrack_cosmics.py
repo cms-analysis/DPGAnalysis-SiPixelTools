@@ -21,7 +21,8 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag.globaltag = '92X_dataRun2_Express_v4' # for 926
 #process.GlobalTag.globaltag = '92X_dataRun2_Express_v7' # for 927,929
 # 2018
-process.GlobalTag.globaltag = '100X_dataRun2_Express_v2' # 
+#process.GlobalTag.globaltag = '100X_dataRun2_Express_v2' # 
+process.GlobalTag.globaltag = '101X_dataRun2_Express_v7' 
 # 2016
 #process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v3' # for 266277
 #process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v9' # >=8010
@@ -41,8 +42,8 @@ import HLTrigger.HLTfilters.hltHighLevel_cfi as hlt
 process.hltfilter = hlt.hltHighLevel.clone(
 # Min-Bias	
 #    HLTPaths = ['HLT_Physics*'],
-#    HLTPaths = ['HLT_Random*'],
-    HLTPaths = ['HLT_ZeroBias*'],
+    HLTPaths = ['HLT_Random*'],
+#    HLTPaths = ['HLT_ZeroBias*'],
 #    HLTPaths = ['HLT_ZeroBias_part*'],  # empty
 #    HLTPaths = ['HLT_ZeroBias_FirstCollisionInTrain_*'], # empty
 #    HLTPaths = ['HLT_ZeroBias_LastCollisionInTrain_*'],  # empty
@@ -83,7 +84,6 @@ process.maxEvents = cms.untracked.PSet(
 
 myfilelist = cms.untracked.vstring()
 myfilelist.extend([
-#"/store/express/Run2017C/ExpressCosmics/FEVT/Express-v3/000/301/",
 ])
 
 process.source = cms.Source("PoolSource",
@@ -95,7 +95,16 @@ process.source = cms.Source("PoolSource",
 #"/store/relval/CMSSW_9_2_3/RelValNuGun/GEN-SIM-RECO/PUpmx25ns_92X_upgrade2017_realistic_v2_earlyBS2017-v1/10000/12995CE4-3851-E711-B4A6-0CC47A4D7602.root",
 # "/store/relval/CMSSW_9_2_3/RelValNuGun/GEN-SIM-DIGI-RAW-HLTDEBUG/PUpmx25ns_92X_upgrade2017_realistic_v2_earlyBS2017-v1/10000/1ECCAF11-2E51-E711-AE03-0025905B8594.root",
 
-
+"/store/express/Run2018B/ExpressCosmics/FEVT/Express-v1/000/317/687/00000/44D191BB-BD6D-E811-8DBD-02163E01A000.root",
+"/store/express/Run2018B/ExpressCosmics/FEVT/Express-v1/000/317/687/00000/205DC1C3-BE6D-E811-818A-FA163ED11D1B.root",
+"/store/express/Run2018B/ExpressCosmics/FEVT/Express-v1/000/317/687/00000/525E3ED6-BF6D-E811-A906-FA163E1E2BC2.root",
+"/store/express/Run2018B/ExpressCosmics/FEVT/Express-v1/000/317/687/00000/C8B92F09-C06D-E811-B426-FA163EAE8BE0.root",
+"/store/express/Run2018B/ExpressCosmics/FEVT/Express-v1/000/317/687/00000/026B6704-C06D-E811-81BD-FA163EE67851.root",
+"/store/express/Run2018B/ExpressCosmics/FEVT/Express-v1/000/317/687/00000/18F09008-C56D-E811-9B8F-FA163EB85DCA.root",
+"/store/express/Run2018B/ExpressCosmics/FEVT/Express-v1/000/317/687/00000/2EE1E466-C56D-E811-8A2D-FA163EFDB548.root",
+"/store/express/Run2018B/ExpressCosmics/FEVT/Express-v1/000/317/687/00000/3C7B8E7A-C96D-E811-8533-FA163E1B4187.root",
+"/store/express/Run2018B/ExpressCosmics/FEVT/Express-v1/000/317/687/00000/EE74FB7F-C96D-E811-8829-FA163E4B6F1D.root",
+"/store/express/Run2018B/ExpressCosmics/FEVT/Express-v1/000/317/687/00000/50D2737F-C96D-E811-83D2-02163E019F1A.root",
 
 #"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/220/00000/001D171B-F02B-E811-AE35-FA163E9F7EA5.root",
 #"/store/express/Commissioning2018/ExpressCosmics/FEVT/Express-v1/000/312/220/00000/001FC020-D62B-E811-805F-FA163EF28A5C.root",
@@ -224,6 +233,7 @@ process.d = cms.EDAnalyzer("PixClusterAna",
     src = cms.InputTag("siPixelClusters"),
     #src = cms.InputTag("siPixelClustersPreSplitting"),
     #src = cms.InputTag("ALCARECOTkAlMinBias"), # ALCARECO
+    Tracks = cms.InputTag("ctfWithMaterialTracksP5"),
     # additional selections, e.g. select bx=1 -> (2,1)
     Select1 = cms.untracked.int32(0),  # select the cut type, 0 no cut
     Select2 = cms.untracked.int32(0),  # select the cut value   
@@ -236,6 +246,7 @@ process.d2 = cms.EDAnalyzer("PixClusterAna",
     src = cms.InputTag("siPixelClusters"),
     #src = cms.InputTag("siPixelClustersPreSplitting"),
     #src = cms.InputTag("ALCARECOTkAlMinBias"), # ALCARECO
+    Tracks = cms.InputTag("ctfWithMaterialTracksP5"),
     # additional selections, e.g. select bx=1 -> (2,1)
     Select1 = cms.untracked.int32(2),  # select the cut type, 0 no cut
     Select2 = cms.untracked.int32(1),  # select the cut value   
@@ -293,9 +304,9 @@ process.c2 = cms.EDAnalyzer("PixClustersWithTracks",
 
 #process.p = cms.Path(process.hltfilter*process.c)
 #process.p = cms.Path(process.hltfilter*process.d)
-#process.p = cms.Path(process.hltfilter*process.d*process.c)
+process.p = cms.Path(process.hltfilter*process.d*process.c)
 #process.p = cms.Path(process.hltfilter*process.d*process.c*process.c1*process.c2)
-process.p = cms.Path(process.d*process.c)  # for mc 
+#process.p = cms.Path(process.d*process.c)  # for mc 
 #process.p = cms.Path(process.d) # for cosmics
 
 

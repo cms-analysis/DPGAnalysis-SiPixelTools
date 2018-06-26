@@ -72,6 +72,7 @@
 #include <TH1F.h>
 #include <TProfile.h>
 #include <TProfile2D.h>
+#include <TVector3.h>
 
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 #include "Geometry/Records/interface/IdealGeometryRecord.h"
@@ -133,6 +134,8 @@ class PixClusterTestPhase2 : public edm::EDAnalyzer {
   TH2F *hpixDetMap4,*hpixDetMap3,*hpixDetMap2,*hpixDetMap1; 
   TH2F *hpixMap1, *hpixMap2, *hpixMap3,*hpixMap4;  // pixels in a module 
    
+  TProfile *hsizeXZBPix1,*hsizeXPhiBPix1,*hsizeYZBPix1,*hsizeYPhiBPix1; 
+
   // FPix
   TH2F *hpixDetMapF1,*hpixDetMapF2; 
   TH2F *hcluDetMapF1,*hcluDetMapF2; 
@@ -149,7 +152,28 @@ class PixClusterTestPhase2 : public edm::EDAnalyzer {
 
   TH1F *hclusPerDisk1,*hclusPerDisk2,*hclusPerDisk3,*hclusPerDisk4;
 
-  TProfile2D *hcluDetFPix,*hcluDetEPix, *hpixDetFPix,*hpixDetEPix, *hsizeDetFPix,*hsizeDetEPix; 
+  TProfile2D *hcluChargeB1,*hcluChargeB2,*hcluChargeB3,*hcluChargeB4; 
+  TProfile2D *hpixChargeB1,*hpixChargeB2,*hpixChargeB3,*hpixChargeB4; 
+  TProfile2D *hcluSizeB1,*hcluSizeB2,*hcluSizeB3,*hcluSizeB4; 
+  TProfile2D *hcluSizeXB1,*hcluSizeXB2,*hcluSizeXB3,*hcluSizeXB4; 
+  TProfile2D *hcluSizeYB1,*hcluSizeYB2,*hcluSizeYB3,*hcluSizeYB4; 
+
+  TProfile2D *hcluDetFPix,*hcluDetEPix, *hpixDetFPix,*hpixDetEPix;
+  TProfile2D *hsizeDetFPix,*hsizeDetEPix; 
+  TProfile2D *hsizeXDetFPix,*hsizeXDetEPix; 
+  TProfile2D *hsizeYDetFPix,*hsizeYDetEPix; 
+  TProfile2D *hcluChargeFPix,*hcluChargeEPix; 
+  TProfile2D *hpixChargeFPix,*hpixChargeEPix; 
+  TProfile *hsizeXREPix1,*hsizeXREPix2,*hsizeXREPix3,*hsizeXREPix4; 
+  TProfile *hsizeXPhiEPix1,*hsizeXPhiEPix2,*hsizeXPhiEPix3,*hsizeXPhiEPix4,*hsizeXPhiEPix5; 
+  TProfile *hsizeXPhiEPix11,*hsizeXPhiEPix12,*hsizeXPhiEPix13,*hsizeXPhiEPix14,*hsizeXPhiEPix15; 
+  TProfile *hsizeXPhiEPix21,*hsizeXPhiEPix22,*hsizeXPhiEPix23,*hsizeXPhiEPix24,*hsizeXPhiEPix25; 
+  TProfile *hsizeXZEPix; 
+  TProfile *hsizeYREPix1,*hsizeYREPix2,*hsizeYREPix3,*hsizeYREPix4; 
+  TProfile *hsizeYPhiEPix1,*hsizeYPhiEPix2,*hsizeYPhiEPix3,*hsizeYPhiEPix4,*hsizeYPhiEPix5; 
+  TProfile *hsizeYPhiEPix11,*hsizeYPhiEPix12,*hsizeYPhiEPix13,*hsizeYPhiEPix14,*hsizeYPhiEPix15; 
+  TProfile *hsizeYPhiEPix21,*hsizeYPhiEPix22,*hsizeYPhiEPix23,*hsizeYPhiEPix24,*hsizeYPhiEPix25; 
+  TProfile *hsizeYZEPix; 
 
   TH2F *hxy, *hphiz1, *hphiz2, *hphiz3, *hphiz4; // bpix 
   TH2F *hzr, *hxy11, *hxy12, *hxy21, *hxy22, *hxy31, *hxy32;  // fpix 
@@ -241,12 +265,69 @@ void PixClusterTestPhase2::beginJob() {
   hpixPerDetF24 = fs->make<TH1F>("hpixPerDetF24","Pix det R4 Disk9-12",sizeH,lowH,highH);
   hpixPerDetF25 = fs->make<TH1F>("hpixPerDetF25","Pix det R5 Disk9-12",sizeH,lowH,highH);
 
-  hcluDetFPix = fs->make<TProfile2D>("hcluDetFPix","clu per det",8,1,9,4,1,5,0.,1000.);
-  hpixDetFPix = fs->make<TProfile2D>("hpixDetFPix","pix per det",8,1,9,4,1,5,0.,1000.);
-  hsizeDetFPix = fs->make<TProfile2D>("hsizeDetFPix","size per det",8,1,9,4,1,5,0.,1000.);
-  hcluDetEPix = fs->make<TProfile2D>("hcluDetEPix","clu per det",4,9,13,5,1,6,0.,1000.);
-  hpixDetEPix = fs->make<TProfile2D>("hpixDetEPix","pix per det",4,9,13,5,1,6,0.,1000.);
-  hsizeDetEPix = fs->make<TProfile2D>("hsizeDetEPix","size per det",4,9,13,5,1,6,0.,1000.);
+  hcluDetFPix = fs->make<TProfile2D>("hcluDetFPix","clu per det",     8,1,9,4,1,5,0.,1000.);
+  hpixDetFPix = fs->make<TProfile2D>("hpixDetFPix","pix per det",     8,1,9,4,1,5,0.,1000.);
+  hsizeDetFPix = fs->make<TProfile2D>("hsizeDetFPix","clu size",      8,1,9,4,1,5,0.,1000.);
+  hsizeXDetFPix = fs->make<TProfile2D>("hsizeXDetFPix","clu sizex",   8,1,9,4,1,5,0.,1000.);
+  hsizeYDetFPix = fs->make<TProfile2D>("hsizeYDetFPix","clu sizey",   8,1,9,4,1,5,0.,1000.);
+  hcluChargeFPix = fs->make<TProfile2D>("hcluChargeFPix","clu Charge",8,1,9,4,1,5,0.,1000.);
+  hpixChargeFPix = fs->make<TProfile2D>("hpixChargeFPix","pix charge",8,1,9,4,1,5,0.,1000.);
+
+  hcluDetEPix = fs->make<TProfile2D>("hcluDetEPix","clu per det",     4,9,13,5,1,6,0.,1000.);
+  hpixDetEPix = fs->make<TProfile2D>("hpixDetEPix","pix per det",     4,9,13,5,1,6,0.,1000.);
+  hsizeDetEPix = fs->make<TProfile2D>("hsizeDetEPix","clu size",      4,9,13,5,1,6,0.,1000.);
+  hsizeXDetEPix = fs->make<TProfile2D>("hsizeXDetEPix","clu sizex",   4,9,13,5,1,6,0.,1000.);
+  hsizeYDetEPix = fs->make<TProfile2D>("hsizeYDetEPix","clu sizey",   4,9,13,5,1,6,0.,1000.);
+  hcluChargeEPix = fs->make<TProfile2D>("hcluChargeEPix","clu charge",4,9,13,5,1,6,0.,1000.);
+  hpixChargeEPix = fs->make<TProfile2D>("hpixChargeEPix","pix charge",4,9,13,5,1,6,0.,1000.);
+
+  // in global coordinates
+  hsizeXREPix1 = fs->make<TProfile>("hsizeXREPix1","sizeX vs R, disk9", 50,5.,25.,0.,1000.);
+  hsizeXREPix2 = fs->make<TProfile>("hsizeXREPix2","sizeX vs R, disk10",50,5.,25.,0.,1000.);
+  hsizeXREPix3 = fs->make<TProfile>("hsizeXREPix3","sizeX vs R, disk11",50,5.,25.,0.,1000.);
+  hsizeXREPix4 = fs->make<TProfile>("hsizeXREPix4","sizeX vs R, disk12",50,5.,25.,0.,1000.);
+  hsizeYREPix1 = fs->make<TProfile>("hsizeYREPix1","sizeY vs R, disk9", 50,5.,25.,0.,1000.);
+  hsizeYREPix2 = fs->make<TProfile>("hsizeYREPix2","sizeY vs R, disk10",50,5.,25.,0.,1000.);
+  hsizeYREPix3 = fs->make<TProfile>("hsizeYREPix3","sizeY vs R, disk11",50,5.,25.,0.,1000.);
+  hsizeYREPix4 = fs->make<TProfile>("hsizeYREPix4","sizeY vs R, disk12",50,5.,25.,0.,1000.);
+
+  hsizeXPhiEPix1 = fs->make<TProfile>("hsizeXPhiEPix1","sizeX vs Phi, ring1",140,-3.5,3.5,0.,1000.);
+  hsizeXPhiEPix2 = fs->make<TProfile>("hsizeXPhiEPix2","sizeX vs Phi, ring2",140,-3.5,3.5,0.,1000.);
+  hsizeXPhiEPix3 = fs->make<TProfile>("hsizeXPhiEPix3","sizeX vs Phi, ring3",140,-3.5,3.5,0.,1000.);
+  hsizeXPhiEPix4 = fs->make<TProfile>("hsizeXPhiEPix4","sizeX vs Phi, ring4",140,-3.5,3.5,0.,1000.);
+  hsizeXPhiEPix5 = fs->make<TProfile>("hsizeXPhiEPix5","sizeX vs Phi, ring5",140,-3.5,3.5,0.,1000.);
+  hsizeYPhiEPix1 = fs->make<TProfile>("hsizeYPhiEPix1","sizeY vs Phi, ring1",140,-3.5,3.5,0.,1000.);
+  hsizeYPhiEPix2 = fs->make<TProfile>("hsizeYPhiEPix2","sizeY vs Phi, ring2",140,-3.5,3.5,0.,1000.);
+  hsizeYPhiEPix3 = fs->make<TProfile>("hsizeYPhiEPix3","sizeY vs Phi, ring3",140,-3.5,3.5,0.,1000.);
+  hsizeYPhiEPix4 = fs->make<TProfile>("hsizeYPhiEPix4","sizeY vs Phi, ring4",140,-3.5,3.5,0.,1000.);
+  hsizeYPhiEPix5 = fs->make<TProfile>("hsizeYPhiEPix5","sizeY vs Phi, ring5",140,-3.5,3.5,0.,1000.);
+
+  hsizeXPhiEPix11 = fs->make<TProfile>("hsizeXPhiEPix11","sizeX vs Phi, ring1",140,-3.5,3.5,0.,1000.);
+  hsizeXPhiEPix12 = fs->make<TProfile>("hsizeXPhiEPix12","sizeX vs Phi, ring2",140,-3.5,3.5,0.,1000.);
+  hsizeXPhiEPix13 = fs->make<TProfile>("hsizeXPhiEPix13","sizeX vs Phi, ring3",140,-3.5,3.5,0.,1000.);
+  hsizeXPhiEPix14 = fs->make<TProfile>("hsizeXPhiEPix14","sizeX vs Phi, ring4",140,-3.5,3.5,0.,1000.);
+  hsizeXPhiEPix15 = fs->make<TProfile>("hsizeXPhiEPix15","sizeX vs Phi, ring5",140,-3.5,3.5,0.,1000.);
+  hsizeYPhiEPix11 = fs->make<TProfile>("hsizeYPhiEPix11","sizeY vs Phi, ring1",140,-3.5,3.5,0.,1000.);
+  hsizeYPhiEPix12 = fs->make<TProfile>("hsizeYPhiEPix12","sizeY vs Phi, ring2",140,-3.5,3.5,0.,1000.);
+  hsizeYPhiEPix13 = fs->make<TProfile>("hsizeYPhiEPix13","sizeY vs Phi, ring3",140,-3.5,3.5,0.,1000.);
+  hsizeYPhiEPix14 = fs->make<TProfile>("hsizeYPhiEPix14","sizeY vs Phi, ring4",140,-3.5,3.5,0.,1000.);
+  hsizeYPhiEPix15 = fs->make<TProfile>("hsizeYPhiEPix15","sizeY vs Phi, ring5",140,-3.5,3.5,0.,1000.);
+
+  hsizeXPhiEPix21 = fs->make<TProfile>("hsizeXPhiEPix21","sizeX vs Phi, ring1",140,-3.5,3.5,0.,1000.);
+  hsizeXPhiEPix22 = fs->make<TProfile>("hsizeXPhiEPix22","sizeX vs Phi, ring2",140,-3.5,3.5,0.,1000.);
+  hsizeXPhiEPix23 = fs->make<TProfile>("hsizeXPhiEPix23","sizeX vs Phi, ring3",140,-3.5,3.5,0.,1000.);
+  hsizeXPhiEPix24 = fs->make<TProfile>("hsizeXPhiEPix24","sizeX vs Phi, ring4",140,-3.5,3.5,0.,1000.);
+  hsizeXPhiEPix25 = fs->make<TProfile>("hsizeXPhiEPix25","sizeX vs Phi, ring5",140,-3.5,3.5,0.,1000.);
+  hsizeYPhiEPix21 = fs->make<TProfile>("hsizeYPhiEPix21","sizeY vs Phi, ring1",140,-3.5,3.5,0.,1000.);
+  hsizeYPhiEPix22 = fs->make<TProfile>("hsizeYPhiEPix22","sizeY vs Phi, ring2",140,-3.5,3.5,0.,1000.);
+  hsizeYPhiEPix23 = fs->make<TProfile>("hsizeYPhiEPix23","sizeY vs Phi, ring3",140,-3.5,3.5,0.,1000.);
+  hsizeYPhiEPix24 = fs->make<TProfile>("hsizeYPhiEPix24","sizeY vs Phi, ring4",140,-3.5,3.5,0.,1000.);
+  hsizeYPhiEPix25 = fs->make<TProfile>("hsizeYPhiEPix25","sizeY vs Phi, ring5",140,-3.5,3.5,0.,1000.);
+
+
+
+  hsizeXZEPix = fs->make<TProfile>("hsizeXZEPix","sizeX vs Z",600,-300.,300.,0.,1000.);
+  hsizeYZEPix = fs->make<TProfile>("hsizeYZEPix","sizeY vs Z",600,-300.,300.,0.,1000.);
 
   sizeH=1000;
   highH = 1999.5;
@@ -263,16 +344,6 @@ void PixClusterTestPhase2::beginJob() {
   hpixPerDetF2 = fs->make<TH1F>( "hpixPerDetF2", "Pix per det disk9-12",
 			    sizeH, lowH, highH);
 
-  // sizeH=1000;
-  // highH = 999.5;
-  // hpixPerLink1 = fs->make<TH1F>( "hpixPerLink1", "Pix per link l1",
-  // 			    sizeH, lowH, highH);
-  // hpixPerLink2 = fs->make<TH1F>( "hpixPerLink2", "Pix per link l2",
-  // 			    sizeH, lowH, highH);
-  // hpixPerLink3 = fs->make<TH1F>( "hpixPerLink3", "Pix per link l3",
-  // 			    sizeH, lowH, highH);
-  // hpixPerLink4 = fs->make<TH1F>( "hpixPerLink4", "Pix per link l4",
-  // 			    sizeH, lowH, highH);
 
   sizeH=1000;
   highH = 59999.5;
@@ -459,7 +530,57 @@ void PixClusterTestPhase2::beginJob() {
   hcluDetMap3->SetOption("colz");
   hcluDetMap4 = fs->make<TH2F>("hcluDetMap4"," ",10,0,10,33,0,33);
   hcluDetMap4->SetOption("colz");
-  
+
+  hcluChargeB1 = fs->make<TProfile2D>("hcluChargeB1"," ",10,0,10,13,0,13,0.,1000.);
+  hcluChargeB1->SetOption("colz");
+  hcluChargeB2 = fs->make<TProfile2D>("hcluChargeB2"," ",10,0,10,29,0,29,0.,1000.);
+  hcluChargeB2->SetOption("colz");
+  hcluChargeB3 = fs->make<TProfile2D>("hcluChargeB3"," ",10,0,10,25,0,25,0.,1000.);
+  hcluChargeB3->SetOption("colz");
+  hcluChargeB4 = fs->make<TProfile2D>("hcluChargeB4"," ",10,0,10,33,0,33,0.,1000.);
+  hcluChargeB4->SetOption("colz");
+
+  hpixChargeB1 = fs->make<TProfile2D>("hpixChargeB1"," ",10,0,10,13,0,13,0.,1000.);
+  hpixChargeB1->SetOption("colz");
+  hpixChargeB2 = fs->make<TProfile2D>("hpixChargeB2"," ",10,0,10,29,0,29,0.,1000.);
+  hpixChargeB2->SetOption("colz");
+  hpixChargeB3 = fs->make<TProfile2D>("hpixChargeB3"," ",10,0,10,25,0,25,0.,1000.);
+  hpixChargeB3->SetOption("colz");
+  hpixChargeB4 = fs->make<TProfile2D>("hpxiChargeB4"," ",10,0,10,33,0,33,0.,1000.);
+  hpixChargeB4->SetOption("colz");
+
+  hcluSizeB1 = fs->make<TProfile2D>("hcluSizeB1"," ",10,0,10,13,0,13,0.,1000.);
+  hcluSizeB1->SetOption("colz");
+  hcluSizeB2 = fs->make<TProfile2D>("hcluSizeB2"," ",10,0,10,29,0,29,0.,1000.);
+  hcluSizeB2->SetOption("colz");
+  hcluSizeB3 = fs->make<TProfile2D>("hcluSizeB3"," ",10,0,10,25,0,25,0.,1000.);
+  hcluSizeB3->SetOption("colz");
+  hcluSizeB4 = fs->make<TProfile2D>("hcluSizeB4"," ",10,0,10,33,0,33,0.,1000.);
+  hcluSizeB4->SetOption("colz");
+
+  hcluSizeXB1 = fs->make<TProfile2D>("hcluSizeXB1"," ",10,0,10,13,0,13,0.,1000.);
+  hcluSizeXB1->SetOption("colz");
+  hcluSizeXB2 = fs->make<TProfile2D>("hcluSizeXB2"," ",10,0,10,29,0,29,0.,1000.);
+  hcluSizeXB2->SetOption("colz");
+  hcluSizeXB3 = fs->make<TProfile2D>("hcluSizeXB3"," ",10,0,10,25,0,25,0.,1000.);
+  hcluSizeXB3->SetOption("colz");
+  hcluSizeXB4 = fs->make<TProfile2D>("hcluSizeXB4"," ",10,0,10,33,0,33,0.,1000.);
+  hcluSizeXB4->SetOption("colz");
+
+  hcluSizeYB1 = fs->make<TProfile2D>("hcluSizeYB1"," ",10,0,10,13,0,13,0.,1000.);
+  hcluSizeYB1->SetOption("colz");
+  hcluSizeYB2 = fs->make<TProfile2D>("hcluSizeYB2"," ",10,0,10,29,0,29,0.,1000.);
+  hcluSizeYB2->SetOption("colz");
+  hcluSizeYB3 = fs->make<TProfile2D>("hcluSizeYB3"," ",10,0,10,25,0,25,0.,1000.);
+  hcluSizeYB3->SetOption("colz");
+  hcluSizeYB4 = fs->make<TProfile2D>("hcluSizeYB4"," ",10,0,10,33,0,33,0.,1000.);
+  hcluSizeYB4->SetOption("colz");
+
+  hsizeXZBPix1 = fs->make<TProfile>("hsizeXZBPix1","bpix1 sizx ",    50,-25.,25.,0.,1000.);
+  hsizeXPhiBPix1 = fs->make<TProfile>("hsizeXPhiBPix1","bpix1 sizex",700,-3.5,3.5,0.,1000.);
+  hsizeYZBPix1 = fs->make<TProfile>("hsizeYZBPix1","bpix sizey",     50,-25.,25.,0.,1000.);
+  hsizeYPhiBPix1 = fs->make<TProfile>("hsizeYPhiBPix1","bpix1 sizey",700,-3.5,3.5,0.,1000.);
+
   hpixMap1 = fs->make<TH2F>("hpixMap1"," ",442,0.,442.,1320,0.,1320.);
   hpixMap1->SetOption("colz");
   hpixMap2 = fs->make<TH2F>("hpixMap2"," ",442,0.,442.,1320,0.,1320.);
@@ -682,16 +803,16 @@ void PixClusterTestPhase2::analyze(const edm::Event& e,
     unsigned int blade=0; //1-24
     unsigned int ring=0; // plaquette 1,2,3,4
     unsigned int side=0; //size=1 for -z, 2 for +z
-    //unsigned int panel=0; //panel=1
+    unsigned int panel=0; //panel=1
 
     // Subdet id, pix barrel=1, forward=2
     if(subid==2) {  // forward
 
       disk=tTopo->pxfDisk(detid); //1-12
-      ring=tTopo->pxfBlade(detid); // returns ring 
+      ring=tTopo->pxfBlade(detid); // returns ring 1-4,5
       blade=tTopo->pxfModule(detid); // return blade 
       side=tTopo->pxfSide(detid); //size=1 for -z, 2 for +z
-      //panel=tTopo->pxfPanel(detid); //panel=1 always 
+      panel=(blade%2); // 0=even, 1==odd, // tTopo->pxfPanel(detid); //panel=1 always 
       //PixelEndcapName pen(detid,tTopo,phase1_);
 
       if(printLocal) cout<<" fpix (cmssw): disk "<<disk<<", blade "
@@ -770,6 +891,19 @@ void PixClusterTestPhase2::analyze(const edm::Event& e,
 		    <<maxPixelCol<<" "<<edgeHitX<<" "<<edgeHitY<<endl;
 
 
+      // get global z position of teh cluster
+      LocalPoint lp = topol->localPosition(MeasurementPoint(x,y));
+      float lx = lp.x(); // local cluster position in cm
+      float ly = lp.y();
+
+      GlobalPoint clustgp = theGeomDet->surface().toGlobal( lp );
+      double gZ = clustgp.z();  // global z
+      double gX = clustgp.x();
+      double gY = clustgp.y();      
+      TVector3 v(gX,gY,gZ);
+      float gPhi = v.Phi(); // phi of the hit
+      float gR = v.Perp(); // r of the hit
+
       //bool bigInX=false, bigInY=false;
       //bool edgeHitX2 = false; // edge method moved 
       //bool edgeHitY2 = false; // to topologu class
@@ -803,6 +937,7 @@ void PixClusterTestPhase2::analyze(const edm::Event& e,
 	    hpixcharge1->Fill(adc);
 	    hpixMap1->Fill(pixy,pixx);
 	    hpixDetMap1->Fill(float(module),float(ladder));
+	    hpixChargeB1->Fill(float(module),float(ladder),adc);
 	    
 	  } else if(layer==2) {
 
@@ -811,6 +946,7 @@ void PixClusterTestPhase2::analyze(const edm::Event& e,
 	    hpixcharge2->Fill(adc);
 	    hpixMap2->Fill(pixy,pixx);
 	    hpixDetMap2->Fill(float(module),float(ladder));
+	    hpixChargeB2->Fill(float(module),float(ladder),adc);
 
 	  } else if(layer==3) {
 
@@ -819,6 +955,7 @@ void PixClusterTestPhase2::analyze(const edm::Event& e,
 	    hpixcharge3->Fill(adc);
 	    hpixMap3->Fill(pixy,pixx);
 	    hpixDetMap3->Fill(float(module),float(ladder));
+	    hpixChargeB3->Fill(float(module),float(ladder),adc);
 
 	  } else if(layer==4) {
 
@@ -827,6 +964,7 @@ void PixClusterTestPhase2::analyze(const edm::Event& e,
 	    hpixcharge4->Fill(adc);
 	    hpixMap4->Fill(pixy,pixx);
 	    hpixDetMap4->Fill(float(module),float(ladder));
+	    hpixChargeB4->Fill(float(module),float(ladder),adc);
 
 	  }  // if layer
 
@@ -845,6 +983,8 @@ void PixClusterTestPhase2::analyze(const edm::Event& e,
 	    } else cout<<" unknown side "<<side<<endl;
 
 	    hpixcharge5->Fill(adc);
+	    hpixChargeFPix->Fill(float(disk),float(ring),float(adc));
+
 	    if(ring==1)      hpixMapF11->Fill(pixy,pixx);
 	    else if(ring==2) hpixMapF12->Fill(pixy,pixx);
 	    else if(ring==3) hpixMapF13->Fill(pixy,pixx);
@@ -863,6 +1003,7 @@ void PixClusterTestPhase2::analyze(const edm::Event& e,
 	    } else cout<<" unknown side "<<side<<endl;
 
 	    hpixcharge6->Fill(adc);
+	    hpixChargeEPix->Fill(float(disk),float(ring),float(adc));
 
 	    if(ring==1)      hpixMapF21->Fill(pixy,pixx);
 	    else if(ring==2) hpixMapF22->Fill(pixy,pixx);
@@ -894,6 +1035,10 @@ void PixClusterTestPhase2::analyze(const edm::Event& e,
 	if(layer==1) {  // layer
 	  
 	  hcluDetMap1->Fill(float(module),float(ladder));
+	  hcluChargeB1->Fill(float(module),float(ladder),ch);
+	  hcluSizeB1->Fill(float(module),float(ladder),float(size));
+	  hcluSizeXB1->Fill(float(module),float(ladder),float(sizeX));
+	  hcluSizeYB1->Fill(float(module),float(ladder),float(sizeY));
 	  hcharge1->Fill(ch);
 	  hy1->Fill(y);
 	  hx1->Fill(x);
@@ -903,12 +1048,22 @@ void PixClusterTestPhase2::analyze(const edm::Event& e,
 	  hladder1id->Fill(float(ladder));
 	  hz1id->Fill(float(module));
 
+	  hsizeXZBPix1->Fill(gZ,float(sizeX));
+	  hsizeYZBPix1->Fill(gZ,float(sizeY));
+	  if(module==5) { // central module only 
+	    hsizeXPhiBPix1->Fill(gPhi,float(sizeX));
+	    hsizeYPhiBPix1->Fill(gPhi,float(sizeY));
+	  }
 	  numOfClustersPerDet1++;
 	  numOfClustersPerLay1++;
 
 	} else if(layer==2) {
 
 	  hcluDetMap2->Fill(float(module),float(ladder));
+	  hcluChargeB2->Fill(float(module),float(ladder),ch);
+	  hcluSizeB2->Fill(float(module),float(ladder),float(size));
+	  hcluSizeXB2->Fill(float(module),float(ladder),float(sizeX));
+	  hcluSizeYB2->Fill(float(module),float(ladder),float(sizeY));
 	  hcharge2->Fill(ch);
 	  hy2->Fill(y);
 	  hx2->Fill(x);
@@ -918,13 +1073,17 @@ void PixClusterTestPhase2::analyze(const edm::Event& e,
 	  hladder2id->Fill(float(ladder));
 	  hz2id->Fill(float(module));
 
+
 	  numOfClustersPerDet2++;
 	  numOfClustersPerLay2++;
-
 
 	} else if(layer==3) {
 
 	  hcluDetMap3->Fill(float(module),float(ladder));
+	  hcluChargeB3->Fill(float(module),float(ladder),ch);
+	  hcluSizeB3->Fill(float(module),float(ladder),float(size));
+	  hcluSizeXB3->Fill(float(module),float(ladder),float(sizeX));
+	  hcluSizeYB3->Fill(float(module),float(ladder),float(sizeY));
 	  hcharge3->Fill(ch);
 	  hy3->Fill(y);
 	  hx3->Fill(x);
@@ -941,6 +1100,10 @@ void PixClusterTestPhase2::analyze(const edm::Event& e,
 	} else if(layer==4) {
 
 	  hcluDetMap4->Fill(float(module),float(ladder));
+	  hcluChargeB1->Fill(float(module),float(ladder),ch);
+	  hcluSizeB4->Fill(float(module),float(ladder),float(size));
+	  hcluSizeXB4->Fill(float(module),float(ladder),float(sizeX));
+	  hcluSizeYB4->Fill(float(module),float(ladder),float(sizeY));
 	  hcharge4->Fill(ch);
 	  hy4->Fill(y);
 	  hx4->Fill(x);
@@ -959,10 +1122,10 @@ void PixClusterTestPhase2::analyze(const edm::Event& e,
 
 	//cout<<disk<<" "<<side<<endl;
 
-	if( (disk>=1) && (disk<=8) ) { // disk 1-8 -+z
+	if( (disk>=1) && (disk<=8) ) { // FPix disks 1-8 
 	  numOfClustersPerDetF1++;
 	  if(side==1)  {
-	    numOfClustersPerDisk1++;      // d1,-z
+	    numOfClustersPerDisk1++;      //  d1, -z 
 	    float tmp = -float(blade);
 	    hcluDetMapF1->Fill(tmp,float(ring));
 	  } else if(side==2) {
@@ -977,8 +1140,11 @@ void PixClusterTestPhase2::analyze(const edm::Event& e,
 	  hy5->Fill(y);
 	  hx5->Fill(x);
 	  hsizeDetFPix->Fill(float(disk),float(ring),float(size));
+	  hsizeXDetFPix->Fill(float(disk),float(ring),float(sizeX));
+	  hsizeYDetFPix->Fill(float(disk),float(ring),float(sizeY));
+	  hcluChargeFPix->Fill(float(disk),float(ring),float(ch));
 
-	} else if( (disk>=9) && (disk<=12) ) { // disk2 -+z
+	} else if( (disk>=9) && (disk<=12) ) { // EPix disks 
 
 	  numOfClustersPerDetF2++;
 	  if(side==1) {
@@ -997,6 +1163,42 @@ void PixClusterTestPhase2::analyze(const edm::Event& e,
 	  hy6->Fill(y);
 	  hx6->Fill(x);
 	  hsizeDetEPix->Fill(float(disk),float(ring),float(size));
+	  hsizeXDetEPix->Fill(float(disk),float(ring),float(sizeX));
+	  hsizeYDetEPix->Fill(float(disk),float(ring),float(sizeY));
+	  hcluChargeEPix->Fill(float(disk),float(ring),float(ch));
+
+	  hsizeXZEPix->Fill(gZ,float(sizeX));
+	  hsizeYZEPix->Fill(gZ,float(sizeY));
+	  if(disk==9) {
+	    hsizeXREPix1->Fill(gR,float(sizeX));     hsizeYREPix1->Fill(gR,float(sizeY));
+	    if     (ring==1) {
+	      hsizeXPhiEPix1->Fill(gPhi,float(sizeX)); hsizeYPhiEPix1->Fill(gPhi,float(sizeY));
+	      if(panel==0) {hsizeXPhiEPix11->Fill(gPhi,float(sizeX)); hsizeYPhiEPix11->Fill(gPhi,float(sizeY));}
+	      else         {hsizeXPhiEPix21->Fill(gPhi,float(sizeX)); hsizeYPhiEPix21->Fill(gPhi,float(sizeY));}
+	    } else if(ring==2) {
+	      hsizeXPhiEPix2->Fill(gPhi,float(sizeX)); hsizeYPhiEPix2->Fill(gPhi,float(sizeY));
+	      if(panel==0) {hsizeXPhiEPix12->Fill(gPhi,float(sizeX)); hsizeYPhiEPix12->Fill(gPhi,float(sizeY));}
+	      else         {hsizeXPhiEPix22->Fill(gPhi,float(sizeX)); hsizeYPhiEPix22->Fill(gPhi,float(sizeY));}
+	    } else if(ring==3) {
+	      hsizeXPhiEPix3->Fill(gPhi,float(sizeX)); hsizeYPhiEPix3->Fill(gPhi,float(sizeY));
+	      if(panel==0) {hsizeXPhiEPix13->Fill(gPhi,float(sizeX)); hsizeYPhiEPix13->Fill(gPhi,float(sizeY));}
+	      else         {hsizeXPhiEPix23->Fill(gPhi,float(sizeX)); hsizeYPhiEPix23->Fill(gPhi,float(sizeY));}
+	    } else if(ring==4) {
+	      hsizeXPhiEPix4->Fill(gPhi,float(sizeX)); hsizeYPhiEPix4->Fill(gPhi,float(sizeY));
+	      if(panel==0) {hsizeXPhiEPix14->Fill(gPhi,float(sizeX)); hsizeYPhiEPix14->Fill(gPhi,float(sizeY));}
+	      else         {hsizeXPhiEPix24->Fill(gPhi,float(sizeX)); hsizeYPhiEPix24->Fill(gPhi,float(sizeY));}
+	    } else if(ring==5) {
+	      hsizeXPhiEPix5->Fill(gPhi,float(sizeX)); hsizeYPhiEPix5->Fill(gPhi,float(sizeY));
+	      if(panel==0) {hsizeXPhiEPix15->Fill(gPhi,float(sizeX)); hsizeYPhiEPix15->Fill(gPhi,float(sizeY));}
+	      else         {hsizeXPhiEPix25->Fill(gPhi,float(sizeX)); hsizeYPhiEPix25->Fill(gPhi,float(sizeY));}
+	    }
+	  } else if(disk==10) {
+	    hsizeXREPix2->Fill(gR,float(sizeX));     hsizeYREPix2->Fill(gR,float(sizeY));
+	  } else if(disk==11) {
+	    hsizeXREPix3->Fill(gR,float(sizeX));     hsizeYREPix3->Fill(gR,float(sizeY));
+	  } else if(disk==12) {
+	    hsizeXREPix4->Fill(gR,float(sizeX));     hsizeYREPix4->Fill(gR,float(sizeY));
+	  }
 
 	} else cout<<" (clusters) unknown disk "<<disk<<endl; // end fpix disk 
 

@@ -32,6 +32,8 @@ SiPixelLorentzAngleDBReader::SiPixelLorentzAngleDBReader( const edm::ParameterSe
   printdebug_(iConfig.getUntrackedParameter<bool>("printDebug",false)),
   useSimRcd_( iConfig.getParameter<bool>("useSimRcd") ),
   tagLabel_( iConfig.getUntrackedParameter<std::string>("label"," ")) {
+
+  cout<<" LA Reader "<<printdebug_<<endl;
   /*
 BPix_BpI_SEC1_LYR1_LDR2_MOD2 302056472
 BPix_BpI_SEC1_LYR1_LDR2_MOD3 302056476
@@ -111,20 +113,25 @@ BPix_BmI_SEC5_LYR3_LDR13_MOD2 302197516
     302188552, 302187280, 302186768, 302186764, 302186756, 302197516
   };
   for(int i=0; i<6; ++i) l3New.push_back(bmi3[i]);
-
+  cout<<" 2 "<<endl;
 }
 
 SiPixelLorentzAngleDBReader::~SiPixelLorentzAngleDBReader(){}
 
 void SiPixelLorentzAngleDBReader::analyze( const edm::Event& e, const edm::EventSetup& iSetup) {
 
+  cout<<" 3 "<<endl;
   //Retrieve tracker topology from geometry
   edm::ESHandle<TrackerTopology> tTopo;
   //iSetup.get<IdealGeometryRecord>().get(tTopo);
   iSetup.get<TrackerTopologyRcd>().get(tTopo);
   //const TrackerTopology* tt = tTopo.product()
 
+  cout<<" 4 "<<endl;
+
  edm::ESHandle<SiPixelLorentzAngle> SiPixelLorentzAngle_; 
+
+  cout<<" 5 "<<endl;
 
  if(useSimRcd_ == true) {
    iSetup.get<SiPixelLorentzAngleSimRcd>().get(SiPixelLorentzAngle_);

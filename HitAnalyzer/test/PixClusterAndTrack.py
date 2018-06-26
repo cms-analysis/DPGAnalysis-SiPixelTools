@@ -98,6 +98,28 @@ process.source = cms.Source("PoolSource",
 
   fileNames = cms.untracked.vstring(    
 
+#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/069A7418-F868-E811-858C-FA163E034210.root",
+#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/7E362915-FB68-E811-9D9B-FA163EA45FDA.root",
+#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/54C8942B-FD68-E811-95FD-FA163E9CBD30.root",
+#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/EA2AF28F-0169-E811-9E82-02163E01A085.root",
+#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/F6BB77BA-0469-E811-A44D-02163E019FB9.root",
+#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/EE3BDDB9-0469-E811-9527-FA163EB656C6.root",
+#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/5A95CAD9-0469-E811-AE6E-FA163E66B10C.root",
+#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/E2E60F38-0569-E811-92AF-FA163EB8310B.root",
+#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/FCDEAAF4-0469-E811-84A5-FA163E9641D4.root",
+#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/88A545FC-0569-E811-B81D-FA163E614A5A.root",
+
+"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/96A86B03-4B68-E811-8553-FA163EC07E76.root",
+"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/7084EDA1-4C68-E811-805D-FA163ED532A6.root",
+"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/D61B8C7B-5E68-E811-B7F8-FA163E3F84E6.root",
+"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/F20A6597-6368-E811-A460-FA163EA4290B.root",
+"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/76F3344D-6268-E811-BBA2-02163E018013.root",
+"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/7A0800F8-6468-E811-9B14-FA163E2AF1D2.root",
+"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/3E291922-6568-E811-9DA8-FA163ED62B5C.root",
+"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/A21FDAF7-6468-E811-8501-FA163ED1245E.root",
+"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/12B690A3-6568-E811-8C82-FA163EA9CF9F.root",
+"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/342A349A-6768-E811-935B-FA163E3F1A44.root",
+
 #"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/642/00000/C6A89B55-674E-E811-97C8-FA163EC3589F.root",
 #"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/642/00000/D804AFA5-6D4E-E811-A7C0-FA163E0422A8.root",
 #"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/642/00000/6C83C7E8-6D4E-E811-A1E2-FA163EFABB07.root",
@@ -109,16 +131,16 @@ process.source = cms.Source("PoolSource",
 #"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/642/00000/20094BF8-6E4E-E811-B36F-FA163EB8644D.root",
 #"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/642/00000/14D88AC9-6D4E-E811-841B-FA163EA2F461.root",
 
-"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/3EFD24FC-434D-E811-B07B-FA163E390CE2.root",
-"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/8AAB9738-454D-E811-876B-FA163ED26202.root",
-"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/58A83A0D-494D-E811-B5B6-FA163EB68CF3.root",
-"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/DA1BFC38-484D-E811-A5BE-02163E01A083.root",
-"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/68E10058-494D-E811-84E5-FA163E23B3D2.root",
-"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/8254EB82-4C4D-E811-AC43-FA163E6B94A5.root",
-"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/FAD64631-484D-E811-A732-FA163E03FB38.root",
-"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/CCCD2D53-494D-E811-9E32-FA163EC36191.root",
-"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/52B66769-494D-E811-B36C-FA163E7FE60F.root",
-"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/BA5BEAB1-484D-E811-9EF0-FA163ED5E288.root",
+#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/3EFD24FC-434D-E811-B07B-FA163E390CE2.root",
+#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/8AAB9738-454D-E811-876B-FA163ED26202.root",
+#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/58A83A0D-494D-E811-B5B6-FA163EB68CF3.root",
+#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/DA1BFC38-484D-E811-A5BE-02163E01A083.root",
+#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/68E10058-494D-E811-84E5-FA163E23B3D2.root",
+#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/8254EB82-4C4D-E811-AC43-FA163E6B94A5.root",
+#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/FAD64631-484D-E811-A732-FA163E03FB38.root",
+#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/CCCD2D53-494D-E811-9E32-FA163EC36191.root",
+#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/52B66769-494D-E811-B36C-FA163E7FE60F.root",
+#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/BA5BEAB1-484D-E811-9EF0-FA163ED5E288.root",
 
 #"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/488/00000/C290907E-AD4C-E811-A7D7-FA163E1A07C9.root",
 #"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/488/00000/EEABE79D-B34C-E811-808F-FA163E08198F.root",
@@ -223,7 +245,9 @@ process.source = cms.Source("PoolSource",
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('314472:55-314472:9999')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('315357:44-315357:872')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('315488:42-315488:1126')
-
+process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('317434:48-317434:271')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('317475:33-317475:89')
+#
 
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string('clus_ana.root')
@@ -236,11 +260,24 @@ process.d = cms.EDAnalyzer("PixClusterAna",
     src = cms.InputTag("siPixelClusters"),
     #src = cms.InputTag("siPixelClustersPreSplitting"),
     #src = cms.InputTag("ALCARECOTkAlMinBias"), # ALCARECO
+    Tracks = cms.InputTag("generalTracks"),
     # additional selections, e.g. select bx=1 -> (2,1)
     Select1 = cms.untracked.int32(0),  # select the cut type, 0 no cut
     Select2 = cms.untracked.int32(0),  # select the cut value   
 )
 
+process.d1 = cms.EDAnalyzer("PixClusterAna",
+    Verbosity = cms.untracked.bool(False),
+    phase1 = cms.untracked.bool(True),
+    #src = cms.InputTag("siPixelClustersForLumi"),   # from the lumi stream
+    src = cms.InputTag("siPixelClusters"),
+    #src = cms.InputTag("siPixelClustersPreSplitting"),
+    #src = cms.InputTag("ALCARECOTkAlMinBias"), # ALCARECO
+    Tracks = cms.InputTag("generalTracks"),
+    # additional selections, e.g. select bx=1 -> (2,1)
+    Select1 = cms.untracked.int32(103),  # select events with no pvs
+    Select2 = cms.untracked.int32(0),  # select the cut value   
+)
 process.d2 = cms.EDAnalyzer("PixClusterAna",
     Verbosity = cms.untracked.bool(False),
     phase1 = cms.untracked.bool(True),
@@ -248,9 +285,10 @@ process.d2 = cms.EDAnalyzer("PixClusterAna",
     src = cms.InputTag("siPixelClusters"),
     #src = cms.InputTag("siPixelClustersPreSplitting"),
     #src = cms.InputTag("ALCARECOTkAlMinBias"), # ALCARECO
+    Tracks = cms.InputTag("generalTracks"),
     # additional selections, e.g. select bx=1 -> (2,1)
-    Select1 = cms.untracked.int32(2),  # select the cut type, 0 no cut
-    Select2 = cms.untracked.int32(1),  # select the cut value   
+    Select1 = cms.untracked.int32(101),  # select events with no tracks
+    Select2 = cms.untracked.int32(0),  # select the cut value   
 )
 
 process.clutest = cms.EDAnalyzer("PixClusterTest",
@@ -304,6 +342,7 @@ process.c2 = cms.EDAnalyzer("PixClustersWithTracks",
 #process.p = cms.Path(process.hltfilter*process.d)
 #process.p = cms.Path(process.hltfilter*process.d*process.c)
 process.p = cms.Path(process.hltfilter*process.d*process.c*process.c1*process.c2)
+#process.p = cms.Path(process.hltfilter*process.d*process.c*process.d1*process.d2)
 
 #process.p = cms.Path(process.d*process.c*process.c1*process.c2) # for mc
 #process.p = cms.Path(process.d) # for cosmics

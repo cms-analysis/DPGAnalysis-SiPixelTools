@@ -40,7 +40,8 @@ process.source = cms.Source("EmptySource",
 #    firstRun = cms.untracked.uint32(208000)  # iov3-2012
 #    firstRun = cms.untracked.uint32(240000)  # iov1-2015
 #    firstRun = cms.untracked.uint32(320000)  # iov2-2017
-    firstRun = cms.untracked.uint32(310000)  # iov1-2018
+#    firstRun = cms.untracked.uint32(310000)  # iov1-2018
+    firstRun = cms.untracked.uint32(317000)  # iov1-2018
 )
 
 #process.Timing = cms.Service("Timing")
@@ -50,7 +51,7 @@ process.source = cms.Source("EmptySource",
 #)
 
 # DB stuff 
-useLocalDB = True
+useLocalDB = False
 if useLocalDB:
   process.GainsReader = cms.ESSource("PoolDBESSource",
   #    process.CondDBCommon,
@@ -80,17 +81,18 @@ if useLocalDB:
 #       tag = cms.string('SiPixelGainCalibration_2017_v5') # for offline
 #       tag = cms.string('SiPixelGainCalibration_2018_v1_offline')
        tag = cms.string('SiPixelGainCalibration_2018_v2_offline')
+#       tag = cms.string('SiPixelGainCalibration_2018_v3_offline') # the tag in sqlite is v1 for v3
+#       tag = cms.string('SiPixelGainCalibration_2018_v3') # v3 in db o
 #       tag = cms.string('SiPixelGainCalibration_2018_v1')
 #       tag = cms.string('SiPixelGainCalibration_2018_v2')
     )),
 #     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
 #     connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
-#    connect = cms.string('sqlite_file:../../../../../DB/Gains/SiPixelGainCalibration_2016_v1_offline.db')
-#    connect = cms.string('sqlite_file:../../../../../DB/Gains/SiPixelGainCalibration_2016_v2_offline.db')
-#    connect = cms.string('sqlite_file:/afs//cern.ch/work/d/dkotlins/public/DB/Gains/SiPixelGainCalibration_2017_v4_offline.db')
+#     connect = cms.string('sqlite_file:/afs//cern.ch/work/d/dkotlins/public/DB/Gains/SiPixelGainCalibration_2017_v4_offline.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v4_full.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2018_v1_offline.db')
      connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2018_v2_offline.db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2018_v3_offline.db')
 
   ) # end process
   # process.prefer("PoolDBESSource")

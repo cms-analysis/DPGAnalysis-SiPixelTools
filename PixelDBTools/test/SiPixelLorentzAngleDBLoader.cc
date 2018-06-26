@@ -73,8 +73,10 @@ void SiPixelLorentzAngleDBLoader::analyze(const edm::Event& e, const edm::EventS
 	  
 	  if( dynamic_cast<PixelGeomDetUnit const*>((*it))!=0){
 	    const DetId detid = (*it)->geographicalId();
+	    unsigned int detType=detid.det(); // det type, pixel=1
 	    int found = 0;
 	    
+	    //cout<<detType<<endl;
 	    // fill bpix values for LA 
 	    if(detid.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel)) {
 	      
@@ -179,7 +181,7 @@ void SiPixelLorentzAngleDBLoader::analyze(const edm::Event& e, const edm::EventS
 	
 	      } // if 	
 	    } else { // bpix/fpix 
-	      cout<<"detid is Pixel but neither bpix nor fpix"<<std::endl;
+	      cout<<"detid is Pixel but neither bpix nor fpix, det type  "<<detType<<" subdet "<<detid.subdetId()<<std::endl;
 	    } // bpix/fpix
 	    
 	  }

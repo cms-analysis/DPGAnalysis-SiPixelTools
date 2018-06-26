@@ -37,10 +37,7 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 
 // my includes
-//#include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
-
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h" 
-
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetType.h"
@@ -56,7 +53,6 @@
 // data formats
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/SiPixelDigi/interface/PixelDigi.h"
-//#include "DataFormats/SiPixelDigi/interface/PixelDigiCollection.h"
 #include "DataFormats/DetId/interface/DetId.h"
 
 #include "SimDataFormats/TrackerDigiSimLink/interface/PixelDigiSimLink.h"
@@ -170,7 +166,8 @@ private:
   TH1F *hdetsPerLayF1,*hdetsPerLayF2,*hdetsPerLayF3;
   TH1F *hdetr, *hdetz, *hdetrF, *hdetzF;
   TH1F *hcolsB,  *hrowsB,  *hcolsF,  *hrowsF;
-  TH1F *hcols1Many,*hhitsPerDcol, *hhitsPerHitDcol, *hhitDcolsPerModule;
+  TH1F *hcols1Many,*hhitsPerDcol, *hhitsPerHitDcol, *hhitDcolsPerModule, 
+    *hfullDcolsPerModule,*hfullDcolsPerROC,*hfullDcolsPerEvent;
   TProfile *hhitsPerHitDcolModule,*hhitsPerHitDcolLadder,*hDcolHitProbabilityModule,
     *hDcolHitProbabilityLadder;
 
@@ -451,7 +448,10 @@ void PixDigisTest::beginJob() {
     hcols3 = fs->make<TH1F>( "hcols3", "Layer 3 cols", 500,-1.5,498.5);
     hcols4 = fs->make<TH1F>( "hcols4", "Layer 4 cols", 500,-1.5,498.5);
     hcols1Many = fs->make<TH1F>( "hcols1Many", "Layer 1 cols with many hits", 500,-1.5,498.5);
-
+    hfullDcolsPerROC = fs->make<TH1F>( "hfullDcolsPerROC", "dcols with many hits per ROC",30,-1.5,28.5);
+    hfullDcolsPerModule = fs->make<TH1F>( "hfullDcolsPerModule", "dcols with many hits per module",100,-1.5,98.5);
+    hfullDcolsPerEvent = fs->make<TH1F>( "hfullDcolsPerEvent", "dcols with many hits per event", 
+					  500,-1.5,498.5);
     hhitsPerDcol= fs->make<TH1F>( "hhitsPerDcol","Layer 1: hits per dcol",200,-1.5,198.5);
     hhitsPerHitDcol= fs->make<TH1F>( "hhitsPerHitDcol","Layer 1: hits per hit dcol",200,-1.5,198.5);
     hhitDcolsPerModule= fs->make<TH1F>( "hhitDcolsPerModule","Layer 1: hit dcol per Hit Module",200,-0.5,399.5);
@@ -842,6 +842,7 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
   int numOfDigisPerDetF1 = 0;
   int numOfDigisPerDetF2 = 0;
   int numOfDigisPerDetF3 = 0;
+  int countFullDcolsInEvent = 0;
 
   count0++; // count events 
 
@@ -1463,11 +1464,21 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	  // DCOL code 
 	  if(layer==1) {
 	    const int dcolThr = 100;
-	    int countDcols=0;
+	    int countDcols=0;  // hit dcols in a module 
+	    int countFullDcolsInModule=0,
+	      countFullDcolsInROC1=0,countFullDcolsInROC2=0;
 	    // Analyse this module 
 	    for(int col=0;col<416;col+=2) {
 	      //cout<<col<<endl;
-	      int dcolCount=0;
+	      int dcolCount=0;  // hits in a dcol
+	      // ROC 
+	      if( (col>0)  && (col%52 == 0) ) { // 1 roc finished 
+		hfullDcolsPerROC->Fill(float(countFullDcolsInROC1));
+		hfullDcolsPerROC->Fill(float(countFullDcolsInROC2));
+		countFullDcolsInROC1=0;
+		countFullDcolsInROC2=0;
+	      }
+
 	      for(int row=0;row<80;++row) { 
 		if(oneModule[col][row]>0)   
 		  {dcolCount++;}
@@ -1491,6 +1502,9 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 		cout<<" full dcol (lower roc). count "<<dcolCount<<" col "
 		    <<col<<" mod "<<module<<" ladder "<<ladder<<endl;
 		countFullDcols++;
+		countFullDcolsInModule++;
+		countFullDcolsInROC1++;
+		countFullDcolsInEvent++;
 		hpdetMaps2->Fill(float(module),float(ladder));
 		hcols1Many->Fill(float(col));
 		hdcolFull1bx->Fill(float(bx));
@@ -1504,6 +1518,7 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 		//     {cout<<(col+1)<<" "<<row<<" "<<oneModule[col+1][row]<<endl;}
 		
 	      }
+
 
 	      dcolCount=0;
 	      for(int row=80;row<160;++row) 
@@ -1526,6 +1541,9 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 		cout<<" full dcol (upper roc). count "<<dcolCount<<" col "
 		    <<col<<" mod "<<module<<" ladder "<<ladder<<endl;
 		countFullDcols++;
+		countFullDcolsInModule++;
+		countFullDcolsInROC2++;
+		countFullDcolsInEvent++;
 		hpdetMaps2->Fill(float(module),float(ladder));
 		hcols1Many->Fill(float(col));
 		hdcolFull1bx->Fill(float(bx));
@@ -1540,9 +1558,13 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 		
 	      }
 	    } // loop over cols
+
+	    hfullDcolsPerROC->Fill(float(countFullDcolsInROC1));
+	    hfullDcolsPerROC->Fill(float(countFullDcolsInROC2));
 	    hhitDcolsPerModule->Fill(float(countDcols));
 	    hDcolHitProbabilityModule->Fill(float(module),float(countDcols)/416.);
 	    hDcolHitProbabilityLadder->Fill(float(ladder),float(countDcols)/416.);
+	    hfullDcolsPerModule->Fill(float(countFullDcolsInModule));
 
 	  } // if layer 1
 	  // End DCOL code 
@@ -1606,6 +1628,9 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
   hdetsPerLayF1 ->Fill(float(numberOfDetUnitsF1));
   hdetsPerLayF2 ->Fill(float(numberOfDetUnitsF2));
   hdetsPerLayF3 ->Fill(float(numberOfDetUnitsF3));
+
+  hfullDcolsPerEvent->Fill(float(countFullDcolsInEvent));
+
 #endif
 
 }
