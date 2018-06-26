@@ -81,6 +81,28 @@ process.source = cms.Source("PoolSource",
 fileNames =  cms.untracked.vstring(
 
 # 2018
+"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/069A7418-F868-E811-858C-FA163E034210.root",
+"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/7E362915-FB68-E811-9D9B-FA163EA45FDA.root",
+"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/54C8942B-FD68-E811-95FD-FA163E9CBD30.root",
+"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/EA2AF28F-0169-E811-9E82-02163E01A085.root",
+"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/F6BB77BA-0469-E811-A44D-02163E019FB9.root",
+"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/EE3BDDB9-0469-E811-9527-FA163EB656C6.root",
+"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/5A95CAD9-0469-E811-AE6E-FA163E66B10C.root",
+"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/E2E60F38-0569-E811-92AF-FA163EB8310B.root",
+"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/FCDEAAF4-0469-E811-84A5-FA163E9641D4.root",
+"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/88A545FC-0569-E811-B81D-FA163E614A5A.root",
+
+#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/96A86B03-4B68-E811-8553-FA163EC07E76.root",
+#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/7084EDA1-4C68-E811-805D-FA163ED532A6.root",
+#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/D61B8C7B-5E68-E811-B7F8-FA163E3F84E6.root",
+#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/F20A6597-6368-E811-A460-FA163EA4290B.root",
+#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/76F3344D-6268-E811-BBA2-02163E018013.root",
+#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/7A0800F8-6468-E811-9B14-FA163E2AF1D2.root",
+#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/3E291922-6568-E811-9DA8-FA163ED62B5C.root",
+#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/A21FDAF7-6468-E811-8501-FA163ED1245E.root",
+#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/12B690A3-6568-E811-8C82-FA163EA9CF9F.root",
+#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/342A349A-6768-E811-935B-FA163E3F1A44.root",
+
 #"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/642/00000/C6A89B55-674E-E811-97C8-FA163EC3589F.root",
 #"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/642/00000/D804AFA5-6D4E-E811-A7C0-FA163E0422A8.root",
 #"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/642/00000/6C83C7E8-6D4E-E811-A1E2-FA163EFABB07.root",
@@ -194,23 +216,23 @@ fileNames =  cms.untracked.vstring(
 #"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/507/00000/242A2654-5B42-E811-BE0F-FA163E3C297E.root",
 #"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/507/00000/92AEB812-5E42-E811-8403-FA163E2807E5.root",
 
-"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/560F5A99-5C42-E811-ACE6-FA163ED141EE.root",
-"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/5AFD0C2A-5942-E811-8A5B-FA163EA392AD.root",
-"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/D27D394B-5942-E811-AE87-FA163ED06402.root",
-"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/66421161-5942-E811-9325-FA163E2B0F48.root",
-"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/54B47F7E-5942-E811-9E7A-FA163E3EF566.root",
-"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/2A5DA723-5942-E811-9B5A-02163E01317C.root",
-"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/662A8960-5942-E811-B738-FA163E3E5302.root",
-"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/880FC835-6142-E811-90B2-02163E012DD8.root",
-"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/2A2EEB3B-5942-E811-8B87-FA163ED36C09.root",
-"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/D2125A27-5942-E811-BBA9-FA163E29DCBF.root",
-"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/FC6A1B7F-5942-E811-9833-FA163E81E25F.root",
-"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/BEA6FC36-5942-E811-B685-FA163E27F8CE.root",
-"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/28F90535-5942-E811-98BE-FA163E840CCB.root",
-"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/62B05F67-5942-E811-8FD2-FA163E6FAA82.root",
-"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/5875CC2B-5942-E811-9E6A-FA163E25A55A.root",
-"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/C4DB3045-5942-E811-80B7-02163E0147E8.root",
-"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/8EF42437-5942-E811-B5C6-FA163EFA1AD6.root",
+#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/560F5A99-5C42-E811-ACE6-FA163ED141EE.root",
+#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/5AFD0C2A-5942-E811-8A5B-FA163EA392AD.root",
+#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/D27D394B-5942-E811-AE87-FA163ED06402.root",
+#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/66421161-5942-E811-9325-FA163E2B0F48.root",
+#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/54B47F7E-5942-E811-9E7A-FA163E3EF566.root",
+#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/2A5DA723-5942-E811-9B5A-02163E01317C.root",
+#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/662A8960-5942-E811-B738-FA163E3E5302.root",
+#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/880FC835-6142-E811-90B2-02163E012DD8.root",
+#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/2A2EEB3B-5942-E811-8B87-FA163ED36C09.root",
+#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/D2125A27-5942-E811-BBA9-FA163E29DCBF.root",
+#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/FC6A1B7F-5942-E811-9833-FA163E81E25F.root",
+#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/BEA6FC36-5942-E811-B685-FA163E27F8CE.root",
+#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/28F90535-5942-E811-98BE-FA163E840CCB.root",
+#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/62B05F67-5942-E811-8FD2-FA163E6FAA82.root",
+#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/5875CC2B-5942-E811-9E6A-FA163E25A55A.root",
+#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/C4DB3045-5942-E811-80B7-02163E0147E8.root",
+#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/8EF42437-5942-E811-B5C6-FA163EFA1AD6.root",
 
 #"root://eoscms//eos/cms/tier0/store/data/Commissioning2016/MinimumBias/RAW/v1/000/266/277/00000/0004807C-AFE5-E511-83C1-02163E011EAD.root",
 #  "rfio:/castor/cern.ch/cms/store/data/Run2012D/MinimumBias/RAW/v1/000/205/217/2EF61B7D-F216-E211-98C3-001D09F28D54.root",
@@ -226,6 +248,8 @@ fileNames =  cms.untracked.vstring(
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('314890:1300-314890:1310')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('315357:44-315357:872')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('315488:42-315488:1126')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('317434:48-317434:271')
+process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('317475:33-317475:89')
 
 
 # for Raw2digi for data
@@ -267,7 +291,7 @@ process.out = cms.OutputModule("PoolOutputModule",
 # pixel local reco (RecHits) needs the GenError object,
 # not yet in GT, add here:
 # DB stuff 
-useLocalDB = False
+useLocalDB = True
 if useLocalDB :
     process.DBReaderFrontier = cms.ESSource("PoolDBESSource",
      DBParameters = cms.PSet(
@@ -278,18 +302,9 @@ if useLocalDB :
        cms.PSet(
         record = cms.string('SiPixelGainCalibrationOfflineRcd'),
 #        record = cms.string('SiPixelGainCalibrationRcd'),
+#        tag = cms.string('SiPixelGainCalibration_2018_v3') 
+#        tag = cms.string('SiPixelGainCalibration_2018_v2_offline') 
         tag = cms.string('SiPixelGainCalibration_2018_v1_offline') 
-#        tag = cms.string('SiPixelGainCalibration_2017_v2_bugfix') #in DB
-#        tag = cms.string('SiPixelGainCalibration_2017_v2_bugfix_offline')
-#        tag = cms.string('SiPixelGainCalibration_2017_v2_offline')
-#        tag = cms.string('SiPixelGainCalibration_2017_v3_offline')
-#        tag = cms.string('SiPixelGainCalibration_2017_v4_offline')
-#        tag = cms.string('SiPixelGainCalibration_2017_v5_offline') # v4 fixed
-#        tag = cms.string('SiPixelGainCalibration_2017_v6_offline')
-#        tag = cms.string('SiPixelGainCalibration_2017_v4')
-#        tag = cms.string('SiPixelGainCalibration_2017_v5')
-#        tag = cms.string('SiPixelGainCalibration_2017_v6') # full tag & in DB
-#        tag = cms.string('SiPixelGainCalibration_2017_v4_1337_offline')
 #        tag = cms.string('SiPixelGainCalibration_phase1_ideal_v2')
  	),
        ),
@@ -305,7 +320,9 @@ if useLocalDB :
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v2_offline.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v2_bugfix_offline.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_phase1_ideal_v2.db')
-     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2018_v1_offline.db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2018_v1_offline.db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2018_v2_offline.db')
+     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2018_v3_offline.db')
 #     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
 #     connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
     ) # end process
@@ -351,11 +368,12 @@ process.d = cms.EDAnalyzer("PixClusterAna",
     phase1 = cms.untracked.bool(True),
     #src = cms.InputTag("siPixelClusters"),
     src = cms.InputTag("siPixelClustersPreSplitting"),
+    Tracks = cms.InputTag("generalTracks"),
     Select1 = cms.untracked.int32(0),  # cut  
     Select2 = cms.untracked.int32(0),  # value     
 )
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('digis_clus_old.root')
+    fileName = cms.string('digis_clus.root')
 )
 
 #process.p = cms.Path(process.siPixelDigis)
