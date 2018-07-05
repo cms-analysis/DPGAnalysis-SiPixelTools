@@ -182,6 +182,8 @@ void SiPixelLorentzAngleDBLoader::analyze(const edm::Event& e, const edm::EventS
 	      } // if 	
 	    } else { // bpix/fpix 
 	      cout<<"detid is Pixel but neither bpix nor fpix, det type  "<<detType<<" subdet "<<detid.subdetId()<<std::endl;
+	      float defaultLA = 0.106;
+	      LorentzAngle->putLorentzAngle(detid.rawId(),defaultLA); // some default value 
 	    } // bpix/fpix
 	    
 	  }

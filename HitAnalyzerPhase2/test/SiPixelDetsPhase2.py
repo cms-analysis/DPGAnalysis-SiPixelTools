@@ -17,7 +17,9 @@ process.maxEvents = cms.untracked.PSet(
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
-process.load('Configuration.Geometry.GeometryExtended2023D17Reco_cff')
+#process.load('Configuration.Geometry.GeometryExtended2023D17Reco_cff')
+process.load('Configuration.Geometry.GeometryExtended2023D17_cff')
+
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
@@ -28,7 +30,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase2_realistic', '')
 # list of files
 
 process.source = cms.Source("EmptySource",
-   firstRun = cms.untracked.uint32(302000), #must be number from phase1 2017
+   firstRun = cms.untracked.uint32(302000), # 
 )
 
 #process.source = cms.Source("PoolSource",
