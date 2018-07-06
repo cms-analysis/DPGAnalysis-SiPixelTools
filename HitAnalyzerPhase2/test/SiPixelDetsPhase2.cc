@@ -30,8 +30,6 @@
 
 #include "SiPixelDetsPhase2.h"
 
-#define NEW_NAMES
-
 //#define CHECK_ORIENT
 
 using namespace std;
@@ -93,13 +91,14 @@ void SiPixelDetsPhase2::analyze(const edm::Event& e, const edm::EventSetup& es) 
   edm::ESHandle<TrackerTopology> tTopo;
   //es.get<IdealGeometryRecord>().get(tTopo);
   es.get<TrackerTopologyRcd>().get(tTopo);
-#ifdef NEW_NAMES
   const TrackerTopology* tt = tTopo.product();
-#endif
+
 
   // Mag field 
   edm::ESHandle<MagneticField> magfield;
   es.get<IdealMagneticFieldRecord>().get(magfield);
+
+  int countBPix=0, countEPix=0, countFPix=0;
 
   //for(TrackerGeometry::DetUnitContainer::const_iterator it = tkgeom->detUnits().begin(); 
   for(TrackerGeometry::DetContainer::const_iterator it = tkgeom->detUnits().begin(); 
@@ -124,8 +123,13 @@ void SiPixelDetsPhase2::analyze(const edm::Event& e, const edm::EventSetup& es) 
     //GlobalVector  normVect = pixDet->surface().normalVector();
     // add the module direction, so we know the E field 
 
-    if(PRINT) cout<<"Position r="<<detR<<" z="<<detZ<<" phi="<<detPhi<<" thick="
-		  <<detThick<<" rows="<<nrows<<" cols="<<ncols<<endl;
+    auto detType=detId.det(); // det type, pixel=1
+    if(detType != 1) cout<<"Something is wrong, not a pixel module "<<detType<<endl;
+
+    unsigned int rawId = detId.rawId();
+    if(PRINT) cout<<"Det raw: "<<rawId<<" "<<detId.null()<<" "<<detId.det()<<" "<<detId.subdetId()
+		  <<" "<<detType<<" Position r="<<detR<<" z="<<detZ<<" phi="<<detPhi<<" thick="
+		  <<detThick<<" rows="<<nrows<<" cols="<<ncols<<" "<<detType<<endl;
 
 #ifdef CHECK_ORIENT
     //const PixelGeomDetUnit * pixDet  = dynamic_cast<const PixelGeomDetUnit*>(geoUnit);
@@ -150,16 +154,12 @@ void SiPixelDetsPhase2::analyze(const edm::Event& e, const edm::EventSetup& es) 
 
 #endif // CHECK_ORIENT
 
+      
     // bpix  
     if(detId.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel)) {	
       //continue;
+      countBPix++;
 
-      unsigned int rawId = detId.rawId();
-      if(PRINT) 
-	cout<<"Det raw: "<<rawId<<" "<<detId.null()<<" "<<detId.det()<<" "<<detId.subdetId()<<endl;
-
-
-#ifdef NEW_NAMES 
       //cout<<" print det "<< tTopo->print(detId) <<endl; // does not seem to work in 752
 
      // Use new indecies 
@@ -246,8 +246,6 @@ void SiPixelDetsPhase2::analyze(const edm::Event& e, const edm::EventSetup& es) 
       }
 #endif // 
 
-#endif // NEW_ANMES
-	
 
 #ifdef CHECK_ORIENT
     cout<<"     0-0:  "<<lp1.x()<<" "<<lp1.y()<<" "
@@ -268,23 +266,18 @@ void SiPixelDetsPhase2::analyze(const edm::Event& e, const edm::EventSetup& es) 
       // Now the fpix values  
       //continue;
 
-      unsigned int rawId = detId.rawId();
-
-      if(PRINT) 
-	cout<<"Det: "<<rawId<<" "<<detId.null()<<" "<<detId.det()<<" "<<detId.subdetId()<<endl;
-
-
-#ifdef NEW_NAMES
-      // new ids 
-      int disk=tTopo->pxfDisk(detId);   //1,2,3
-      int blade=tTopo->pxfBlade(detId); //1-24
-      int plaq=tTopo->pxfModule(detId); //
-      int side=tTopo->pxfSide(detId);   //sizd=1 for -z, 2 for +z
+      // new ids (some names have a different meening)
+      int disk=tTopo->pxfDisk(detId);   //1,2,3...12
+      int blade=tTopo->pxfBlade(detId); // this is the ring in phase2 1-4(5)
+      int plaq=tTopo->pxfModule(detId); // this is the blade in phase2 1-56
+      int side=tTopo->pxfSide(detId);   //sizd=1 for -z, 2 for +z, still the sane
       int panel=tTopo->pxfPanel(detId); //panel=1
 
-      if(PRINT) cout<<"endcap, side="<<side<<" disk="<<disk<<", blade="<<blade
-		    <<", panel="<<panel<<", plaq="<<plaq<<endl;
+      if(PRINT) cout<<"endcap, side="<<side<<" disk="<<disk<<", ring="<<blade
+		    <<", blade="<<plaq<<", panel="<<panel<<endl;
  
+      if(disk<=8) countFPix++;
+      else        countEPix++;
 
 #ifdef USE_ONLINE_NAMES
       // Convert to online 
@@ -344,7 +337,6 @@ void SiPixelDetsPhase2::analyze(const edm::Event& e, const edm::EventSetup& es) 
 	if(det.rawId() != det2.rawId()) cout<<" wrong rawid "<<endl;
       }
 #endif //
-#endif // NEW_NAMES 
 
 #ifdef CHECK_ORIENT
       cout<<"     0-0:  "<<lp1.x()<<" "<<lp1.y()<<" "<<gp1.perp()<<" "<<gp1.phi()<<" "<<gp1.z()
@@ -358,12 +350,14 @@ void SiPixelDetsPhase2::analyze(const edm::Event& e, const edm::EventSetup& es) 
 
     } else { // b/fpix
 
-      cout<<"detid is Pixel but neither bpix nor fpix "<<endl;
+      cout<<"detid is Pixel but neither bpix nor fpix "<<rawId<<" "<<detType<<endl;
 
     } // b/fpix
       
   } // end for det loop     
     
+  cout<<"Found "<<countBPix<<" bpix "<<countFPix<<" fpix "<<countEPix<<" epix "<<endl;
+
 }
 
 
