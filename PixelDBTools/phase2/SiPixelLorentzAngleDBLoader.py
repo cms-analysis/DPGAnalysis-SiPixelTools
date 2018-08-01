@@ -29,32 +29,34 @@ process.maxEvents = cms.untracked.PSet(
 
 ##### DATABASE CONNNECTION AND INPUT TAGS ######
 process.PoolDBOutputService = cms.Service("PoolDBOutputService",
-                                          BlobStreamerName = cms.untracked.string('TBufferBlobStreamingService'),
-                                          DBParameters = cms.PSet(
-        authenticationPath = cms.untracked.string('.'),
-        connectionRetrialPeriod = cms.untracked.int32(10),
-        idleConnectionCleanupPeriod = cms.untracked.int32(10),
-        messageLevel = cms.untracked.int32(1),
-        enablePoolAutomaticCleanUp = cms.untracked.bool(False),
-        enableConnectionSharing = cms.untracked.bool(True),
-        connectionRetrialTimeOut = cms.untracked.int32(60),
-        connectionTimeOut = cms.untracked.int32(0),
-        enableReadOnlySessionOnUpdateConnection = cms.untracked.bool(False)
-        ),
-                                          timetype = cms.untracked.string('runnumber'),
-                                          connect = cms.string("sqlite_file:SiPixelLorentzAngle_phase2_v1.db"),
-#                                          connect = cms.string("sqlite_file:SiPixelLorentzAngleSim_phase2_v1.db"),
-                                          toPut = cms.VPSet(
-        cms.PSet(
-            record = cms.string('SiPixelLorentzAngleRcd'),
-            tag = cms.string('SiPixelLorentzAngle_phase2_v1')
-            ),
-        #        cms.PSet(
-        #            record = cms.string('SiPixelLorentzAngleSimRcd'),
-        #            tag = cms.string('SiPixelLorentzAngleSim_phase2_v1')
-        #        ),
-        )
-                                          )
+                  BlobStreamerName = cms.untracked.string('TBufferBlobStreamingService'),
+                  DBParameters = cms.PSet(
+                    authenticationPath = cms.untracked.string('.'),
+                    connectionRetrialPeriod = cms.untracked.int32(10),
+                    idleConnectionCleanupPeriod = cms.untracked.int32(10),
+                    messageLevel = cms.untracked.int32(1),
+                    enablePoolAutomaticCleanUp = cms.untracked.bool(False),
+                    enableConnectionSharing = cms.untracked.bool(True),
+                    connectionRetrialTimeOut = cms.untracked.int32(60),
+                    connectionTimeOut = cms.untracked.int32(0),
+                    enableReadOnlySessionOnUpdateConnection = cms.untracked.bool(False)
+                  ),
+                  timetype = cms.untracked.string('runnumber'),
+                  #connect = cms.string("sqlite_file:SiPixelLorentzAngle_phase2_v1.db"),
+                  #connect = cms.string("sqlite_file:SiPixelLorentzAngleSim_phase2_v1.db"),
+                  connect = cms.string("sqlite_file:SiPixelLorentzAngle_phase2_mc_v2.db"),
+                  #connect = cms.string("sqlite_file:SiPixelLorentzAngleSim_phase2_mc_v2.db"),
+                  toPut = cms.VPSet(
+                    cms.PSet(
+                     record = cms.string('SiPixelLorentzAngleRcd'),
+                     #tag = cms.string('SiPixelLorentzAngle_phase2_v1') 
+                     tag = cms.string('SiPixelLorentzAngle_phase2_mc_v2') 
+                     #record = cms.string('SiPixelLorentzAngleSimRcd'),
+                     #tag = cms.string('SiPixelLorentzAngleSim_phase2_v1')
+                     #tag = cms.string('SiPixelLorentzAngleSim_phase2_mc_v2')
+                    ),
+                 )
+ )
 
 #FPix_300V_RNG1_PNL1 = 0.0805
 #BPIX_LAYER1=0.0595
@@ -68,8 +70,8 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
 ###### LORENTZ ANGLE OBJECT ######
 process.SiPixelLorentzAngle = cms.EDAnalyzer("SiPixelLorentzAngleDBLoader",
                                              # common input for all bpix/fpix
-                                             bPixLorentzAnglePerTesla = cms.untracked.double(0.1),
-                                             fPixLorentzAnglePerTesla = cms.untracked.double(0.1),
+                                             bPixLorentzAnglePerTesla = cms.untracked.double(0.5),
+                                             fPixLorentzAnglePerTesla = cms.untracked.double(0.5),
                                              # enter -9999 if individual input
                                              #bPixLorentzAnglePerTesla = cms.untracked.double(-9999.),
                                              #fPixLorentzAnglePerTesla = cms.untracked.double(-9999.),
