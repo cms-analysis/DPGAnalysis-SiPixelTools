@@ -145,9 +145,13 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
     }
   }
   
-  theGainCalibrationDbInput_= new SiPixelGainCalibration(pedlow_*0.999,pedhi_*1.001,gainlow_*0.999,gainhi_*1.001);
-  theGainCalibrationDbInputHLT_ = new SiPixelGainCalibrationForHLT(pedlow_*0.999,pedhi_*1.001,gainlow_*0.999,gainhi_*1.001);
-  theGainCalibrationDbInputOffline_ = new SiPixelGainCalibrationOffline(pedlow_*0.999,pedhi_*1.001,gainlow_*0.999,gainhi_*1.001);
+  // theGainCalibrationDbInput_= new SiPixelGainCalibration(pedlow_*0.999,pedhi_*1.001,gainlow_*0.999,gainhi_*1.001);
+  // theGainCalibrationDbInputHLT_ = new SiPixelGainCalibrationForHLT(pedlow_*0.999,pedhi_*1.001,gainlow_*0.999,gainhi_*1.001);
+  // theGainCalibrationDbInputOffline_ = new SiPixelGainCalibrationOffline(pedlow_*0.999,pedhi_*1.001,gainlow_*0.999,gainhi_*1.001);
+  theGainCalibrationDbInput_= new SiPixelGainCalibration(pedlow_,pedhi_,gainlow_*0.999,gainhi_*1.001);
+  theGainCalibrationDbInputHLT_ = new SiPixelGainCalibrationForHLT(pedlow_,pedhi_,gainlow_*0.999,gainhi_*1.001);
+  theGainCalibrationDbInputOffline_ = new SiPixelGainCalibrationOffline(pedlow_,pedhi_,gainlow_*0.999,gainhi_*1.001);
+  
   //  theGainCalibrationDbInputPhase1Offline_ = new SiPixelGainCalibrationPhase1Offline(pedlow_*0.999,pedhi_*1.001,gainlow_*0.999,gainhi_*1.001);  
   
   uint32_t nchannels=0;
