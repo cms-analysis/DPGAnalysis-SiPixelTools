@@ -53,10 +53,11 @@
 // To convert detId to subdet/layer number:
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
-#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TECDetId.h"
-#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+//#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+//#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+//#include "DataFormats/SiStripDetId/interface/TECDetId.h"
+//#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/DetId/interface/DetId.h"
 #include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
 #include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
@@ -116,6 +117,7 @@ struct Histos{
   TProfile *h420f2_123_eta, *h421f2_123_eta, *h420f3_234_eta, *h421f3_234_eta, *h420f4_234_eta, *h421f4_234_eta;
   
   TH1D *h420f1_123, *h421f1_123, *h420f2_123, *h421f2_123, *h420f3_123, *h421f3_123;
+  TH1D *h420f2_123_r2, *h421f2_123_r2, *h420f2_123_r1, *h421f2_123_r1;
   TH1D *h077f1_123, *h078f1_123, *h079f1_123, *h069f1_123;
   TH1D *h077f2_123, *h078f2_123, *h079f2_123, *h069f2_123;
   TH1D *h077f3_123, *h078f3_123, *h079f3_123, *h069f3_123;
@@ -146,6 +148,8 @@ struct Histos{
   TH1D *h077b4_134, *h078b4_134, *h079b4_134, *h069b4_134;
 
   TH1D *h420f2_234, *h421f2_234, *h420f3_234, *h421f3_234, *h420f4_234, *h421f4_234;
+  TH1D *h421f3_234_r1, *h420f3_234_r1, *h421f4_234_r1, *h420f4_234_r1;
+  TH1D *h421f3_234_r2, *h420f3_234_r2, *h421f4_234_r2, *h420f4_234_r2;
   TH1D *h077f2_234, *h078f2_234, *h079f2_234, *h069f2_234;
   TH1D *h077f3_234, *h078f3_234, *h079f3_234, *h069f3_234;
   TH1D *h077f4_234, *h078f4_234, *h079f4_234, *h069f4_234;
@@ -178,6 +182,8 @@ private:
   HLTConfigProvider HLTConfig;
   bool doBPix;
   bool doFPix;
+  int _LS_beginning;
+  int _LS_end;
 
   edm::EDGetTokenT<reco::BeamSpot>  t_offlineBeamSpot_;
   edm::EDGetTokenT<reco::VertexCollection> t_offlinePrimaryVertices_ ;
@@ -209,6 +215,34 @@ private:
   double xpx4_l = -999;
   double xpy4_l = -999;
 
+  //**
+
+  double xpx1_l_r1 = -999;
+  double xpy1_l_r1 = -999;
+
+  double xpx2_l_r1 = -999;
+  double xpy2_l_r1 = -999;
+  
+  double xpx3_l_r1 = -999;
+  double xpy3_l_r1 = -999;
+
+  double xpx4_l_r1 = -999;
+  double xpy4_l_r1 = -999;
+
+  //**
+
+  double xpx1_l_r2 = -999;
+  double xpy1_l_r2 = -999;
+
+  double xpx2_l_r2 = -999;
+  double xpy2_l_r2 = -999;
+  
+  double xpx3_l_r2 = -999;
+  double xpy3_l_r2 = -999;
+
+  double xpx4_l_r2 = -999;
+  double xpy4_l_r2 = -999;
+
   // Estimated coordinates in local 
   double xl_ideal_1 = -999;
   double yl_ideal_1 = -999;
@@ -222,16 +256,48 @@ private:
   double xl_ideal_4 = -999;
   double yl_ideal_4 = -999;
 
+  double xl_ideal_2_r1 = -999;
+  double yl_ideal_2_r1 = -999;
+
+  double xl_ideal_3_r1 = -999;
+  double yl_ideal_3_r1 = -999;
+
+  double xl_ideal_4_r1 = -999;
+  double yl_ideal_4_r1 = -999;
+
+  double xl_ideal_2_r2 = -999;
+  double yl_ideal_2_r2 = -999;
+
+  double xl_ideal_3_r2 = -999;
+  double yl_ideal_3_r2 = -999;
+
+  double xl_ideal_4_r2 = -999;
+  double yl_ideal_4_r2 = -999;
+
   // Residuals
   double residual_x_1 = -999;
   double residual_x_2 = -999;
   double residual_x_3 = -999;
   double residual_x_4 = -999;
 
+  double residual_x_2_r1 = -999;
+  double residual_x_3_r1 = -999;
+  double residual_x_4_r1 = -999;
+  double residual_x_2_r2 = -999;
+  double residual_x_3_r2 = -999;
+  double residual_x_4_r2 = -999;
+
   double residual_y_1 = -999;
   double residual_y_2 = -999;
   double residual_y_3 = -999;
   double residual_y_4 = -999;
+
+  double residual_y_2_r1 = -999;
+  double residual_y_3_r1 = -999;
+  double residual_y_4_r1 = -999;
+  double residual_y_2_r2 = -999;
+  double residual_y_3_r2 = -999;
+  double residual_y_4_r2 = -999;
 
   // Errors on Rechit coordinates in local
   double x_local_error_1 = -999;
@@ -276,6 +342,8 @@ Pixel_phase1::Pixel_phase1(const edm::ParameterSet& iConfig)
   _ttrhBuilder = iConfig.getParameter<std::string>("ttrhBuilder");
   doBPix=iConfig.getParameter<bool>("doBPix");
   doFPix=iConfig.getParameter<bool>("doFPix");
+  _LS_beginning=iConfig.getParameter<int>("LS_beginning");
+  _LS_end=iConfig.getParameter<int>("LS_end");
   //std::cout<<_triggerSrc<<" "<<_triggerSrc.label()<<" "<<_triggerSrc.process()<<" "
   //	   <<_triggerSrc.instance()<<" "<<std::endl;
 
@@ -306,9 +374,13 @@ void Histos::InitFPix(TFileDirectory* fs)
 
   h420f1_123 = fs->make<TH1D>( "h420f1_123", "PXB1 residuals #Deltax, p_{t} > 4;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
   h420f2_123 = fs->make<TH1D>( "h420f2_123", "PXF1 residuals #Deltax, p_{t} > 4;PXF1 #Deltax [#mum];hits", 100, -150, 150 );
+  h420f2_123_r1 = fs->make<TH1D>( "h420f2_123_r1", "PXF1 residuals #Deltax, p_{t} > 4;PXF1 #Deltax [#mum];hits", 100, -150, 150 );
+  h420f2_123_r2 = fs->make<TH1D>( "h420f2_123_r2", "PXF1 residuals #Deltax, p_{t} > 4;PXF1 #Deltax [#mum];hits", 100, -150, 150 );
   h420f3_123 = fs->make<TH1D>( "h420f3_123", "PXF2 residuals #Deltax, p_{t} > 4;PXF2 #Deltax [#mum];hits", 100, -150, 150 );
 
   h421f1_123 = fs->make<TH1D>( "h421f1_123", "PXB1 residuals #Deltay, p_{t} > 4;PXB1 #Deltay [#mum];hits", 100, -300, 300 );
+  h421f2_123_r2 = fs->make<TH1D>( "h421f2_123_r2", "PXF1 residuals #Deltay, p_{t} > 4;PXF1 #Deltay [#mum];hits", 100, -300, 300 );
+  h421f2_123_r1 = fs->make<TH1D>( "h421f2_123_r1", "PXF1 residuals #Deltay, p_{t} > 4;PXF1 #Deltay [#mum];hits", 100, -300, 300 );
   h421f2_123 = fs->make<TH1D>( "h421f2_123", "PXF1 residuals #Deltay, p_{t} > 4;PXF1 #Deltay [#mum];hits", 100, -300, 300 );
   h421f3_123 = fs->make<TH1D>( "h421f3_123", "PXF2 residuals #Deltay, p_{t} > 4;PXF2 #Deltay [#mum];hits", 100, -300, 300 );
 
@@ -380,9 +452,21 @@ void Histos::InitFPix(TFileDirectory* fs)
   h420f3_234 = fs->make<TH1D>( "h420f3_234", "PXF2 residuals #Deltax, p_{t} > 4;PXF2 #Deltax [#mum];hits", 100, -150, 150 );
   h420f4_234 = fs->make<TH1D>( "h420f4_234", "PXF2 residuals #Deltax, p_{t} > 4;PXF2 #Deltax [#mum];hits", 100, -150, 150 );
 
+  h420f3_234_r1 = fs->make<TH1D>( "h420f3_234_r1", "PXF2 residuals #Deltax, p_{t} > 4;PXF2 #Deltax [#mum];hits", 100, -150, 150 );
+  h420f4_234_r1 = fs->make<TH1D>( "h420f4_234_r1", "PXF2 residuals #Deltax, p_{t} > 4;PXF2 #Deltax [#mum];hits", 100, -150, 150 );
+
+  h420f3_234_r2 = fs->make<TH1D>( "h420f3_234_r2", "PXF2 residuals #Deltax, p_{t} > 4;PXF2 #Deltax [#mum];hits", 100, -150, 150 );
+  h420f4_234_r2 = fs->make<TH1D>( "h420f4_234_r2", "PXF2 residuals #Deltax, p_{t} > 4;PXF2 #Deltax [#mum];hits", 100, -150, 150 );
+
   h421f2_234 = fs->make<TH1D>( "h421f2_234", "PXB2 residuals #Deltay, p_{t} > 4;PXB2 #Deltay [#mum];hits", 100, -300, 300 );
   h421f3_234 = fs->make<TH1D>( "h421f3_234", "PXF2 residuals #Deltay, p_{t} > 4;PXF2 #Deltay [#mum];hits", 100, -300, 300 );
   h421f4_234 = fs->make<TH1D>( "h421f4_234", "PXF2 residuals #Deltay, p_{t} > 4;PXF2 #Deltay [#mum];hits", 100, -300, 300 );
+
+  h421f3_234_r1 = fs->make<TH1D>( "h421f3_234_r1", "PXF2 residuals #Deltay, p_{t} > 4;PXF2 #Deltay [#mum];hits", 100, -300, 300 );
+  h421f4_234_r1 = fs->make<TH1D>( "h421f4_234_r1", "PXF2 residuals #Deltay, p_{t} > 4;PXF2 #Deltay [#mum];hits", 100, -300, 300 );
+
+  h421f3_234_r2 = fs->make<TH1D>( "h421f3_234_r2", "PXF2 residuals #Deltay, p_{t} > 4;PXF2 #Deltay [#mum];hits", 100, -300, 300 );
+  h421f4_234_r2 = fs->make<TH1D>( "h421f4_234_r2", "PXF2 residuals #Deltay, p_{t} > 4;PXF2 #Deltay [#mum];hits", 100, -300, 300 );
 
   h077f2_234 = fs->make<TH1D>( "h077f2_234", "PXB2 x error ", 100, 0., 100. );
   h077f3_234 = fs->make<TH1D>( "h077f3_234", "PXF2 x error ", 100, 0., 100. );
@@ -509,6 +593,7 @@ void Pixel_phase1::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
       std::stringstream runstr;
       runstr << "Run" << run;
       TFileDirectory subdir = fs->mkdir(runstr.str().c_str());
+
       if(doBPix){
 	runmap[run].InitBPix(&subdir);
       }
@@ -569,11 +654,12 @@ std::vector<double> Pixel_phase1::getIntersection(std::vector<double> point1, st
 void Pixel_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   /*  Run for either/both FPix or BPix residuals  */
 
-  if(doFPix){
+  if(doFPix && (int)iEvent.luminosityBlock() >= (int)_LS_beginning && (int)iEvent.luminosityBlock()<= (int)_LS_end ){
+
     std::string detTag = "fpix";
     Pixel_phase1::getResiduals(iEvent, iSetup, detTag);
   }
-  if(doBPix){
+  if(doBPix && (int) iEvent.luminosityBlock()>=(int) _LS_beginning && (int) iEvent.luminosityBlock()<= (int) _LS_end ){
     std::string detTag = "bpix";
     Pixel_phase1::getResiduals(iEvent, iSetup, detTag);
   }
@@ -837,6 +923,65 @@ void Pixel_phase1::getResiduals(const edm::Event & iEvent, const edm::EventSetup
     const GeomDet * det3 = NULL;
     const GeomDet * det4 = NULL;    
 
+    //**********
+
+    double xPX2_r1 = 0;
+    double yPX2_r1 = 0;
+    double zPX2_r1 = 0;
+    //double ePX2_r1 = 0;
+    //double fPX2_r1 = 0;
+    
+    double xPX3_r1 = 0;
+    double yPX3_r1 = 0;
+    double zPX3_r1 = 0;
+    //double ePX3_r1 = 0;
+    //double fPX3_r1 = 0;
+
+    double xPX4_r1 = 0;
+    double yPX4_r1 = 0;
+    double zPX4_r1 = 0;
+    //double ePX4_r1 = 0;
+    //double fPX4_r1 = 0;
+
+    //int n1_r1 = 0;
+    int n2_r1 = 0;
+    int n3_r1 = 0;
+    int n4_r1 = 0;
+    //const GeomDet * det1_r1 = NULL;  // Detector for first hit
+    const GeomDet * det2_r1 = NULL;
+    const GeomDet * det3_r1 = NULL;
+    const GeomDet * det4_r1 = NULL;    
+
+    //**********
+    
+    double xPX2_r2 = 0;
+    double yPX2_r2 = 0;
+    double zPX2_r2 = 0;
+    //double ePX2_r2 = 0;
+    //double fPX2_r2 = 0;
+    
+    double xPX3_r2 = 0;
+    double yPX3_r2 = 0;
+    double zPX3_r2 = 0;
+    //double ePX3_r2 = 0;
+    //double fPX3_r2 = 0;
+
+    double xPX4_r2 = 0;
+    double yPX4_r2 = 0;
+    double zPX4_r2 = 0;
+    //double ePX4_r2 = 0;
+    ///double fPX4_r2 = 0;
+
+    //int n1_r2 = 0;
+    int n2_r2 = 0;
+    int n3_r2 = 0;
+    int n4_r2 = 0;
+    //const GeomDet * det1_r2 = NULL;  // Detector for first hit
+    const GeomDet * det2_r2 = NULL;
+    const GeomDet * det3_r2 = NULL;
+    const GeomDet * det4_r2 = NULL;    
+
+
     edm::OwnVector<TrackingRecHit> recHitVector;                     // for seed
     std::vector<TransientTrackingRecHit::RecHitPointer> myTTRHvec;
     Trajectory::RecHitContainer coTTRHvec;                           // for fit, constant
@@ -995,7 +1140,7 @@ void Pixel_phase1::getResiduals(const edm::Event & iEvent, const edm::EventSetup
 	  int ilay=tTopo->pxbLayer(detId);
 	  
 	  if( ilay == 2 ) {
-	        
+	    
 	    n1++;
 	    xPX1 = gX;
 	    yPX1 = gY;
@@ -1006,7 +1151,7 @@ void Pixel_phase1::getResiduals(const edm::Event & iEvent, const edm::EventSetup
 	    fPX1 = sqrt( vyloc );
 
 	    det1 = transRecHit->det();
-	    
+
 	  }// BPIX1
 	  
 	}//PXB1
@@ -1015,6 +1160,8 @@ void Pixel_phase1::getResiduals(const edm::Event & iEvent, const edm::EventSetup
 	if( subDet == PixelSubdetector::PixelEndcap) {
 
 	  int idisk=tTopo->pxfDisk(detId); 
+	  int blade  = tTopo->pxfBlade(detId);     // Phase 1: Inner blades 1-22, Outer blades 23-56
+	  int ring = 1 + (blade>22);               // Phase 1: Inner: 1, Outer: 2
 
 	  if( idisk == 1 ){
 	    n2++;
@@ -1041,6 +1188,39 @@ void Pixel_phase1::getResiduals(const edm::Event & iEvent, const edm::EventSetup
 	      clusSize_X = clust->sizeX();
 	    }
 	    
+	    if( ring == 2 ){
+	      n2_r2++;
+	      xPX2_r2 = gX; // precise hit in CMS global coordinates
+	      yPX2_r2 = gY;
+	      zPX2_r2 = gZ;
+	      xpx2_l_r2 = xloc; // precise hit in local coordinates (w.r.t. sensor center)
+	      xpy2_l_r2 = yloc;
+	      //ePX2_r2 = sqrt( vxloc );
+	      //fPX2_r2 = sqrt( vyloc );
+	      
+	      det2_r2 = transRecHit->det();
+	      
+	      const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( &*(*irecHit) );
+	      edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster> const & clust = pixhit->cluster();
+	    }
+
+
+	    if( ring == 1 ){
+	      n2_r1++;
+	      xPX2_r1 = gX; // precise hit in CMS global coordinates
+	      yPX2_r1 = gY;
+	      zPX2_r1 = gZ;
+	      xpx2_l_r1 = xloc; // precise hit in local coordinates (w.r.t. sensor center)
+	      xpy2_l_r1 = yloc;
+	      //ePX2_r1 = sqrt( vxloc );
+	      //fPX2_r1 = sqrt( vyloc );
+	      
+	      det2_r1 = transRecHit->det();
+	      
+	      const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( &*(*irecHit) );
+	      edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster> const & clust = pixhit->cluster();
+	    }
+
 
 	  }//PXF1
 	    
@@ -1057,6 +1237,41 @@ void Pixel_phase1::getResiduals(const edm::Event & iEvent, const edm::EventSetup
 
 	    det3 = transRecHit->det();
 
+
+	    if( ring == 2 ){
+	      n3_r2++;
+	      xPX3_r2 = gX; // precise hit in CMS global coordinates
+	      yPX3_r2 = gY;
+	      zPX3_r2 = gZ;
+	      xpx3_l_r2 = xloc; // precise hit in local coordinates (w.r.t. sensor center)
+	      xpy3_l_r2 = yloc;
+	      //ePX3_r2 = sqrt( vxloc );
+	      //fPX3_r2 = sqrt( vyloc );
+	      
+	      det3_r2 = transRecHit->det();
+	      
+	      const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( &*(*irecHit) );
+	      edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster> const & clust = pixhit->cluster();
+	    }
+
+
+	    if( ring == 1 ){
+	      n3_r1++;
+	      xPX3_r1 = gX; // precise hit in CMS global coordinates
+	      yPX3_r1 = gY;
+	      zPX3_r1 = gZ;
+	      xpx3_l_r1 = xloc; // precise hit in local coordinates (w.r.t. sensor center)
+	      xpy3_l_r1 = yloc;
+	      //ePX3_r1 = sqrt( vxloc );
+	      //fPX3_r1 = sqrt( vyloc );
+	      
+	      det3_r1 = transRecHit->det();
+	      
+	      const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( &*(*irecHit) );
+	      edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster> const & clust = pixhit->cluster();
+	    }
+
+
 	  }//PXF2
 	  	  
 	  if( idisk == 3 ){
@@ -1072,8 +1287,43 @@ void Pixel_phase1::getResiduals(const edm::Event & iEvent, const edm::EventSetup
 
 	    det4 = transRecHit->det();
 
+	    if( ring == 2 ){
+	      n4_r2++;
+	      xPX4_r2 = gX; // precise hit in CMS global coordinates
+	      yPX4_r2 = gY;
+	      zPX4_r2 = gZ;
+	      xpx4_l_r2 = xloc; // precise hit in local coordinates (w.r.t. sensor center)
+	      xpy4_l_r2 = yloc;
+	      //ePX4_r2 = sqrt( vxloc );
+	      //fPX4_r2 = sqrt( vyloc );
+	      
+	      det4_r2 = transRecHit->det();
+	      
+	      const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( &*(*irecHit) );
+	      edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster> const & clust = pixhit->cluster();
+	    }
+
+
+	    if( ring == 1 ){
+	      n4_r1++;
+	      xPX4_r1 = gX; // precise hit in CMS global coordinates
+	      yPX4_r1 = gY;
+	      zPX4_r1 = gZ;
+	      xpx4_l_r1 = xloc; // precise hit in local coordinates (w.r.t. sensor center)
+	      xpy4_l_r1 = yloc;
+	      //ePX4_r1 = sqrt( vxloc );
+	      //fPX4_r1 = sqrt( vyloc );
+	      
+	      det4_r1 = transRecHit->det();
+	      
+	      const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( &*(*irecHit) );
+	      edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster> const & clust = pixhit->cluster();
+	    }
+
+
 	    }//PXF3
 	  
+
 	}//PXF
 	
       }//doFPix
@@ -1281,6 +1531,7 @@ void Pixel_phase1::getResiduals(const edm::Event & iEvent, const edm::EventSetup
 	// Modify FPIX Points with topology refit
 	// ================================================
 	else if(detTag =="fpix"){
+
 	  if( subDet == PixelSubdetector::PixelBarrel ) {
 
 	    int ilay=tTopo->pxbLayer(detId);
@@ -1298,6 +1549,8 @@ void Pixel_phase1::getResiduals(const edm::Event & iEvent, const edm::EventSetup
 	  else if( subDet == PixelSubdetector::PixelEndcap) {
 	    
 	    int idisk=tTopo->pxfDisk(detId);
+	    int blade  = tTopo->pxfBlade(detId);     // Phase 1: Inner blades 1-22, Outer blades 23-56
+	    int ring = 1 + (blade>22);               // Phase 1: Inner: 1, Outer: 2
 
 	    if( idisk == 1 ) {
 	      xPX2 = gX;
@@ -1307,6 +1560,29 @@ void Pixel_phase1::getResiduals(const edm::Event & iEvent, const edm::EventSetup
 	      xpx2_l=lX;
 	      xpy2_l=lY;
 	      det2 = iTM->recHit()->det();
+
+	    
+	      if( ring == 2 ){
+		//xPX2_r2 = gX; // precise hit in CMS global coordinates
+		//yPX2_r2 = gY;
+		//zPX2_r2 = gZ;
+		xpx2_l_r2 = lX; // precise hit in local coordinates (w.r.t. sensor center)
+		xpy2_l_r2 = lY;
+		
+		//det2_r2 = iTM->recHit()->det();
+	      }
+
+	      if( ring == 1 ){
+		//xPX2_r1 = gX; // precise hit in CMS global coordinates
+		//yPX2_r1 = gY;
+		//zPX2_r1 = gZ;
+		xpx2_l_r1 = lX; // precise hit in local coordinates (w.r.t. sensor center)
+		xpy2_l_r1 = lY;
+		
+		//det2_r1 = iTM->recHit()->det();
+	    }
+
+
 	    }// disk 1
 	    else if( idisk == 2 ) {
 	      xPX3 = gX;
@@ -1316,6 +1592,29 @@ void Pixel_phase1::getResiduals(const edm::Event & iEvent, const edm::EventSetup
 	      xpx3_l=lX;
 	      xpy3_l=lY;
 	      det3 = iTM->recHit()->det();
+
+
+	      if( ring == 2 ){
+		xPX3_r2 = gX; // precise hit in CMS global coordinates
+		yPX3_r2 = gY;
+		zPX3_r2 = gZ;
+		xpx3_l_r2 = lX; // precise hit in local coordinates (w.r.t. sensor center)
+		xpy3_l_r2 = lY;
+		
+		det3_r2 = iTM->recHit()->det();
+	      }
+
+	      if( ring == 1 ){
+		xPX3_r1 = gX; // precise hit in CMS global coordinates
+		yPX3_r1 = gY;
+		zPX3_r1 = gZ;
+		xpx3_l_r1 = lX; // precise hit in local coordinates (w.r.t. sensor center)
+		xpy3_l_r1 = lY;
+		
+		det3_r1 = iTM->recHit()->det(); 
+	    }
+
+
 	    }// disk 2
 	    else if( idisk == 3 ) {
 	      xPX4 = gX;
@@ -1325,6 +1624,28 @@ void Pixel_phase1::getResiduals(const edm::Event & iEvent, const edm::EventSetup
 	      xpx4_l=lX;
 	      xpy4_l=lY;
 	      det4 = iTM->recHit()->det();
+
+	      if( ring == 2 ){
+		xPX4_r2 = gX; // precise hit in CMS global coordinates
+		yPX4_r2 = gY;
+		zPX4_r2 = gZ;
+		xpx4_l_r2 = lX; // precise hit in local coordinates (w.r.t. sensor center)
+		xpy4_l_r2 = lY;
+		
+		det4_r2 = iTM->recHit()->det();
+	      }
+
+	      if( ring == 1 ){
+		xPX4_r1 = gX; // precise hit in CMS global coordinates
+		yPX4_r1 = gY;
+		zPX4_r1 = gZ;
+		xpx4_l_r1 = lX; // precise hit in local coordinates (w.r.t. sensor center)
+		xpy4_l_r1 = lY;
+		
+		det4_r1 = iTM->recHit()->det();
+	    }
+
+
 	      }// disk 3
 	    
 	  }// endcaps
@@ -1378,6 +1699,26 @@ void Pixel_phase1::getResiduals(const edm::Event & iEvent, const edm::EventSetup
 	residual_x_3= (xpx3_l - xl_ideal_3)*1E4;
 	residual_y_3= (xpy3_l - yl_ideal_3)*1E4;
 	
+	if(n2_r1>0){
+	  std::vector<double> p2_r1 = {xPX2_r1, yPX2_r1, zPX2_r1};
+	  std::vector<double> intersection2_r1 = {};
+	  std::vector<double> IntersectionPointLocal_2_r1 = Pixel_phase1::getIntersection(p1, p3, rho, det2_r1, intersection2_r1);
+          xl_ideal_2_r1 = IntersectionPointLocal_2_r1[0];
+          yl_ideal_2_r1 = IntersectionPointLocal_2_r1[1];
+          residual_x_2_r1= (xpx2_l_r1 - xl_ideal_2_r1)*1E4;
+          residual_y_2_r1= (xpy2_l_r1 - yl_ideal_2_r1)*1E4;
+        }
+	
+	if(n2_r2>0){
+	  std::vector<double> p2_r2 = {xPX2_r2, yPX2_r2, zPX2_r2};
+	  std::vector<double> intersection2_r2 = {};
+	  std::vector<double> IntersectionPointLocal_2_r2 = Pixel_phase1::getIntersection(p1, p3, rho, det2_r2, intersection2_r2);
+          xl_ideal_2_r2 = IntersectionPointLocal_2_r2[0];
+          yl_ideal_2_r2 = IntersectionPointLocal_2_r2[1];
+          residual_x_2_r2= (xpx2_l_r2 - xl_ideal_2_r2)*1E4;
+          residual_y_2_r2= (xpy2_l_r2 - yl_ideal_2_r2)*1E4;
+        }
+
 	// Local errors for rechit
 	x_local_error_1 = ePX1*1E4;
 	y_local_error_1 = fPX1*1E4;
@@ -1407,7 +1748,7 @@ void Pixel_phase1::getResiduals(const edm::Event & iEvent, const edm::EventSetup
 	if(detTag == "fpix"){
 	  
 	  if(pt>4){
-	    //cout << residual_x_2 << endl;
+
 	    hclusprob_fpix ->Fill(clusProb_FPix);
 	    h420f2_123_eta->Fill(iTrack->eta(), abs(residual_x_2));
 	    h421f2_123_eta->Fill(iTrack->eta(), abs(residual_y_2));
@@ -1421,6 +1762,16 @@ void Pixel_phase1::getResiduals(const edm::Event & iEvent, const edm::EventSetup
 	    h420f3_123->Fill( residual_x_3 );
 	    h421f3_123->Fill( residual_y_3 );
 	    
+	    if(n2_r1>0){
+	      h420f2_123_r1->Fill( residual_x_2_r1 );
+	      h421f2_123_r1->Fill( residual_y_2_r1 );
+	    }
+
+	    if(n2_r2>0){
+	      h420f2_123_r2->Fill( residual_x_2_r2 );
+	      h421f2_123_r2->Fill( residual_y_2_r2 );
+	    }
+
 	    // Fill errors
 	    h077f1_123->Fill( x_local_error_1 );
 	    h078f1_123->Fill( y_local_error_1 );
@@ -1483,8 +1834,8 @@ void Pixel_phase1::getResiduals(const edm::Event & iEvent, const edm::EventSetup
 
       }//triplet 
     }// three hits: 1-2-3
+
     // 1-2-4 pixel triplet:
-    //cout << "=====> " << "n1: " << n1 << " n2: " << n2 << " n3: " << n3 << " n1*n2*n4: " << n1*n2*n4 << endl;
     if( n1*n2*n4 > 0 ) {
 
       {// let's open a scope, so we can redefine the variables further down
@@ -1553,7 +1904,7 @@ void Pixel_phase1::getResiduals(const edm::Event & iEvent, const edm::EventSetup
 	if(detTag == "fpix"){
 	  
 	  if(pt>4){
-	    //cout << residual_x_2 << endl;
+
 	    hclusprob_fpix ->Fill(clusProb_FPix);
 	    
 	    h420f1_124->Fill( residual_x_1 ); 
@@ -1627,6 +1978,7 @@ void Pixel_phase1::getResiduals(const edm::Event & iEvent, const edm::EventSetup
 
       }//triplet 
       }// three hits: 1-3-4
+
     if( n1*n3*n4 > 0 ) {
 
       {// let's open a scope, so we can redefine the variables further down
@@ -1695,7 +2047,7 @@ void Pixel_phase1::getResiduals(const edm::Event & iEvent, const edm::EventSetup
 	if(detTag == "fpix"){
 	  
 	  if(pt>4){
-	    //cout << residual_x_3 << endl;
+
 	    hclusprob_fpix ->Fill(clusProb_FPix);
 	    
 	    h420f1_134->Fill( residual_x_1 ); 
@@ -1782,12 +2134,55 @@ void Pixel_phase1::getResiduals(const edm::Event & iEvent, const edm::EventSetup
 	std::vector<double> intersection2 = {};
 	std::vector<double> intersection3 = {};
 	std::vector<double> intersection4 = {};
+
 	
 	// Create helix from two points and curvature, return the intersection point in local coordinates
 	std::vector<double> IntersectionPointLocal_2 = Pixel_phase1::getIntersection(p3, p4, rho, det2, intersection2); 
 	std::vector<double> IntersectionPointLocal_3 = Pixel_phase1::getIntersection(p2, p4, rho, det3, intersection3);
 	std::vector<double> IntersectionPointLocal_4 = Pixel_phase1::getIntersection(p2, p3, rho, det4, intersection4);
-	
+
+
+	if(n3_r1>0){
+	  std::vector<double> p3_r1 = {xPX3_r1, yPX3_r1, zPX3_r1};
+	  std::vector<double> intersection3_r1 = {};	
+	  std::vector<double> IntersectionPointLocal_3_r1 = Pixel_phase1::getIntersection(p2, p4, rho, det3_r1, intersection3_r1);
+	  xl_ideal_3_r1 = IntersectionPointLocal_3_r1[0];
+	  yl_ideal_3_r1 = IntersectionPointLocal_3_r1[1];
+	  residual_x_3_r1= (xpx3_l_r1 - xl_ideal_3_r1)*1E4;
+	  residual_y_3_r1= (xpy3_l_r1 - yl_ideal_3_r1)*1E4;
+	}
+
+	if(n4_r1>0){
+	  std::vector<double> p4_r1 = {xPX4_r1, yPX4_r1, zPX4_r1};
+	  std::vector<double> intersection4_r1 = {};
+	  std::vector<double> IntersectionPointLocal_4_r1 = Pixel_phase1::getIntersection(p2, p3, rho, det4_r1, intersection4_r1);
+	  xl_ideal_4_r1 = IntersectionPointLocal_4_r1[0];
+	  yl_ideal_4_r1 = IntersectionPointLocal_4_r1[1];
+	  residual_x_4_r1= (xpx4_l_r1 - xl_ideal_4_r1)*1E4;
+	  residual_y_4_r1= (xpy4_l_r1 - yl_ideal_4_r1)*1E4;
+	}
+
+
+	if(n3_r2>0){
+	  std::vector<double> p3_r2 = {xPX3_r2, yPX3_r2, zPX3_r2};
+	  std::vector<double> intersection3_r2 = {};	
+	  std::vector<double> IntersectionPointLocal_3_r2 = Pixel_phase1::getIntersection(p2, p4, rho, det3_r2, intersection3_r2);
+	  xl_ideal_3_r2 = IntersectionPointLocal_3_r2[0];
+	  yl_ideal_3_r2 = IntersectionPointLocal_3_r2[1];
+	  residual_x_3_r2= (xpx3_l_r2 - xl_ideal_3_r2)*1E4;
+	  residual_y_3_r2= (xpy3_l_r2 - yl_ideal_3_r2)*1E4;
+	}
+
+	if(n4_r2>0){
+	  std::vector<double> p4_r2 = {xPX4_r2, yPX4_r2, zPX4_r2};
+	  std::vector<double> intersection4_r2 = {};
+	  std::vector<double> IntersectionPointLocal_4_r2 = Pixel_phase1::getIntersection(p2, p3, rho, det4_r2, intersection4_r2);
+	  xl_ideal_4_r2 = IntersectionPointLocal_4_r2[0];
+	  yl_ideal_4_r2 = IntersectionPointLocal_4_r2[1];
+	  residual_x_4_r2= (xpx4_l_r2 - xl_ideal_4_r2)*1E4;
+	  residual_y_4_r2= (xpy4_l_r2 - yl_ideal_4_r2)*1E4;
+	}
+
 	// Intersection point in local coordinates
 	xl_ideal_2 = IntersectionPointLocal_2[0];
 	yl_ideal_2 = IntersectionPointLocal_2[1];
@@ -1855,7 +2250,27 @@ void Pixel_phase1::getResiduals(const edm::Event & iEvent, const edm::EventSetup
 	    
 	    h420f4_234->Fill( residual_x_4 );
 	    h421f4_234->Fill( residual_y_4 );
+
+	    if(n3_r1>0){
+	      h420f3_234_r1->Fill( residual_x_3_r1 );
+	      h421f3_234_r1->Fill( residual_y_3_r1 );
+	    }
 	    
+	    if(n4_r1>0){
+	      h420f4_234_r1->Fill( residual_x_4_r1 );
+	      h421f4_234_r1->Fill( residual_y_4_r1 );
+	    }
+
+	    if(n3_r2>0){
+	      h420f3_234_r2->Fill( residual_x_3_r2 );
+	      h421f3_234_r2->Fill( residual_y_3_r2 );
+	    }
+
+	    if(n4_r2>0){
+	      h420f4_234_r2->Fill( residual_x_4_r2 );
+	      h421f4_234_r2->Fill( residual_y_4_r2 );
+	    }
+
 	    // Fill errors
 	    h077f2_234->Fill( x_local_error_2 );
 	    h078f2_234->Fill( y_local_error_2 );
