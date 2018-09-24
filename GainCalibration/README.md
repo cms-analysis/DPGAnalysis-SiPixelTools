@@ -52,12 +52,14 @@ Then create a tar file with the output and print some output to be posted at the
 
 The last step is to produce the payload (a database object)
 ```
-./Run.sh -payload 2381
+./Run.sh -payload 2381 YEAR VERSION
 ```
+
+where YEAR is the year the calibration was taken and VERSION is the number of payloads produced in that year.
+ 
 After this is done, please notify the following people of the location of the database object
 Currently (this list might change)
 Danek Kotlinksi <danek.kotlinski@psi.ch>
 Tamás Vámi <vami.tamas@wigner.mta.hu>
 Tanja Susa <Tatjana.Susa@cern.ch>
-(Janos Karancsi <Janos.Karancsi@cern.ch>)
 

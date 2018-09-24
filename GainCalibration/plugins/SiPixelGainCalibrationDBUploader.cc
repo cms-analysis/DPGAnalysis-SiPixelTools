@@ -74,7 +74,7 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
 
   TH1F *VCAL_endpoint = fs->make<TH1F>("VCAL_endpoint","value where response = 255 ( x = (255 - ped)/gain )",256,0,256);
   TH1F *goodgains = fs->make<TH1F>("goodgains","gain values",100,0,10);
-  TH1F *goodpeds = fs->make<TH1F>("goodpeds","pedestal values",356,-100,256);
+  TH1F *goodpeds = fs->make<TH1F>("goodpeds","pedestal values",356,-100,256); //512,-256,256 original value: 356,-100,256
   TH1F *totgains = fs->make<TH1F>("totgains","gain values",200,0,10);
   TH1F *totpeds = fs->make<TH1F>("totpeds","pedestal values",356,-100,256);
   TTree *tree = new TTree("tree","tree");
@@ -118,22 +118,22 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
     gainhi_=gainlow_;
     gainlow_=temp;
   }
-  if(pedlow_>pedhi_){  
-    float temp=pedhi_;
-    pedhi_=pedlow_;
-    pedlow_=temp;
-  }
+  // if(pedlow_>pedhi_){
+//     float temp=pedhi_;
+//     pedhi_=pedlow_;
+//     pedlow_=temp;
+//   }
   if(gainhi_>gainmax_)
     gainhi_=gainmax_;
-  if(pedhi_>pedmax_)
-    pedhi_=pedmax_;
+  // if(pedhi_>pedmax_)
+ //    pedhi_=pedmax_;
   float badpedval=pedlow_-200;
   float badgainval=gainlow_-200;
   float meangain= meanGainHist_->GetMean();
   float meanped = meanPedHist_->GetMean();
   std::cout << "pedestals low: " << pedlow_ << " high: " << pedhi_ << " gains low: " << gainlow_ << " high: " << gainhi_
 	    << ", and mean gain " << meangain<< ", ped " << meanped << std::endl;
-  
+  // exit (EXIT_FAILURE);
   // and fill the dummy histos:
   
   for(size_t icol=0; icol<nmaxcols;++icol){
@@ -145,9 +145,13 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
     }
   }
   
-  theGainCalibrationDbInput_= new SiPixelGainCalibration(pedlow_*0.999,pedhi_*1.001,gainlow_*0.999,gainhi_*1.001);
-  theGainCalibrationDbInputHLT_ = new SiPixelGainCalibrationForHLT(pedlow_*0.999,pedhi_*1.001,gainlow_*0.999,gainhi_*1.001);
-  theGainCalibrationDbInputOffline_ = new SiPixelGainCalibrationOffline(pedlow_*0.999,pedhi_*1.001,gainlow_*0.999,gainhi_*1.001);
+  // theGainCalibrationDbInput_= new SiPixelGainCalibration(pedlow_*0.999,pedhi_*1.001,gainlow_*0.999,gainhi_*1.001);
+  // theGainCalibrationDbInputHLT_ = new SiPixelGainCalibrationForHLT(pedlow_*0.999,pedhi_*1.001,gainlow_*0.999,gainhi_*1.001);
+  // theGainCalibrationDbInputOffline_ = new SiPixelGainCalibrationOffline(pedlow_*0.999,pedhi_*1.001,gainlow_*0.999,gainhi_*1.001);
+  theGainCalibrationDbInput_= new SiPixelGainCalibration(pedlow_,pedhi_,gainlow_*0.999,gainhi_*1.001);
+  theGainCalibrationDbInputHLT_ = new SiPixelGainCalibrationForHLT(pedlow_,pedhi_,gainlow_*0.999,gainhi_*1.001);
+  theGainCalibrationDbInputOffline_ = new SiPixelGainCalibrationOffline(pedlow_,pedhi_,gainlow_*0.999,gainhi_*1.001);
+  
   //  theGainCalibrationDbInputPhase1Offline_ = new SiPixelGainCalibrationPhase1Offline(pedlow_*0.999,pedhi_*1.001,gainlow_*0.999,gainhi_*1.001);  
   
   uint32_t nchannels=0;
@@ -587,12 +591,12 @@ SiPixelGainCalibrationDBUploader::SiPixelGainCalibrationDBUploader(const edm::Pa
   theGainCalibrationDbInputHLT_(0),
   theGainCalibrationDbInputService_(iConfig),
   record_(conf_.getUntrackedParameter<std::string>("record","SiPixelGainCalibrationOfflineRcd")),
-  gainlow_(10.),gainhi_(0.),pedlow_(255.),pedhi_(-256),
+  //gainlow_(10.),gainhi_(0.),pedlow_(255.),pedhi_(-256),
+  gainlow_(10.),gainhi_(0.),pedlow_(conf_.getUntrackedParameter<double>("pedlow")),pedhi_(conf_.getUntrackedParameter<double>("pedhigh")),
   usemeanwhenempty_(conf_.getUntrackedParameter<bool>("useMeanWhenEmpty",false)),
   rootfilestring_(conf_.getUntrackedParameter<std::string>("inputrootfile","inputfile.root")),
-  gainmax_(6),pedmax_(250),badchi2_(conf_.getUntrackedParameter<double>("badChi2Prob",0.01)),nmaxcols(10*52),nmaxrows(160)
-
-
+  // gainmax_(6),pedmax_(250),badchi2_(conf_.getUntrackedParameter<double>("badChi2Prob",0.01)),nmaxcols(10*52),nmaxrows(160)
+  gainmax_(6),pedmax_(conf_.getUntrackedParameter<double>("pedmax")),badchi2_(conf_.getUntrackedParameter<double>("badChi2Prob",0.01)),nmaxcols(10*52),nmaxrows(160)
 
 {
   //now do what ever initialization is needed
@@ -781,10 +785,10 @@ bool SiPixelGainCalibrationDBUploader::getHistograms() {
 	float val = temphistoped->GetBinContent(xbin,ybin);
 	if(val>pedmax_)
 	  continue;
-	if(pedlow_>val)
-	  pedlow_=val;
-	if(pedhi_<val)
-	  pedhi_=val;
+	// if(pedlow_>val)
+//     pedlow_=val;
+//   if(pedhi_<val)
+//     pedhi_=val;
 	meanPedHist_->Fill(val);
       }
     }
