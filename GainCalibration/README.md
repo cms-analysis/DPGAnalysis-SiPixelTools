@@ -62,5 +62,4 @@ Currently (this list might change)
 Danek Kotlinksi <danek.kotlinski@psi.ch>
 Tamás Vámi <vami.tamas@wigner.mta.hu>
 Tanja Susa <Tatjana.Susa@cern.ch>
-(Janos Karancsi <Janos.Karancsi@cern.ch>)
 
