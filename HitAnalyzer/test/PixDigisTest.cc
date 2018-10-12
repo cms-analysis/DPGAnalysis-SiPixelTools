@@ -95,7 +95,7 @@
 #define HISTOS
 //#define L1
 #define HLT
-#define SINGLE_MODULES
+//#define SINGLE_MODULES
 #define DCOLS
 
 #define USE_GAINS 

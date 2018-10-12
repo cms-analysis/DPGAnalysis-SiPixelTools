@@ -434,7 +434,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
        
      } else if(mode_ == "bpix") { // Barrel 
 
-       // Barell layer = 1,2,3
+       // Barell layer = 1,2,3, 4
        layerC=tTopo->pxbLayer(detid);
        // Barrel ladder id 1-20,32,44.
        ladderC=tTopo->pxbLadder(detid);

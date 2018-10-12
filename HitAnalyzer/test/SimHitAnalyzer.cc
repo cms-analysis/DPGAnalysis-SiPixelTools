@@ -45,7 +45,7 @@
 #include "SimDataFormats/Vertex/interface/SimVertexContainer.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
-#define HEPMC // look at generator output
+//#define HEPMC // look at generator output
 #ifdef HEPMC
 //#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
@@ -75,6 +75,12 @@ class SimHitAnalyzer : public edm::EDAnalyzer {
   std::string SimTkLabel;
   std::string SimVtxLabel;
   std::string SimHitLabel;
+
+  edm::EDGetTokenT<PSimHitContainer> tPixelSimHits;
+  edm::EDGetTokenT<SimTrackContainer> tSimTracks;
+  edm::EDGetTokenT<SimVertexContainer> tSimVertexs;
+  edm::EDGetTokenT<HepMCProduct> tHepMC;
+
 };
 
 //
@@ -95,6 +101,21 @@ SimHitAnalyzer::SimHitAnalyzer( const edm::ParameterSet& iConfig ):
   SimHitLabel(iConfig.getUntrackedParameter("moduleLabelHit",std::string("g4SimHits")))
 {
    //now do what ever initialization is needed
+  edm::InputTag tag("g4SimHits","TrackerHitsPixelBarrelLowTof");   // for the ByToken
+  //edm::InputTag tag("g4SimHits","TrackerHitsPixelBarrelHighTof");   // for the ByToken
+  //edm::InputTag tag("g4SimHits","TrackerHitsPixelEndcapLowTof");   // for the ByToken
+  //edm::InputTag tag("g4SimHits","TrackerHitsPixelEndcapHighTof");   // for the ByToken
+  tPixelSimHits = consumes <PSimHitContainer> (tag);
+
+  edm::InputTag tag1("g4SimHits","");   // for the ByToken
+  tSimTracks = consumes <SimTrackContainer> (tag1);
+  edm::InputTag tag2("g4SimHits","");   // for the ByToken
+  tSimVertexs = consumes <SimVertexContainer> (tag2);
+
+  edm::InputTag tag0("generatorSmeared","");   // for the ByToken
+  tHepMC = consumes <HepMCProduct> (tag0);
+
+
 }
 
 
@@ -122,63 +143,71 @@ SimHitAnalyzer::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup
    std::vector<SimTrack> theSimTracks;
    std::vector<SimVertex> theSimVertexes;
 
-   //   Handle<HepMCProduct> MCEvt;
-   Handle<SimTrackContainer> SimTk;
-   Handle<SimVertexContainer> SimVtx;
-   Handle<PSimHitContainer> PixelBarrelHitsLowTof;
-   Handle<PSimHitContainer> PixelBarrelHitsHighTof;
-   Handle<PSimHitContainer> PixelEndcapHitsLowTof;
-   Handle<PSimHitContainer> PixelEndcapHitsHighTof;
-   Handle<PSimHitContainer> TIBHitsLowTof;
-   Handle<PSimHitContainer> TIBHitsHighTof;
-   Handle<PSimHitContainer> TIDHitsLowTof;
-   Handle<PSimHitContainer> TIDHitsHighTof;
-   Handle<PSimHitContainer> TOBHitsLowTof;
-   Handle<PSimHitContainer> TOBHitsHighTof;
-   Handle<PSimHitContainer> TECHitsLowTof;
-   Handle<PSimHitContainer> TECHitsHighTof;
-
-
+   Handle<HepMCProduct> MCEvt;
    //   iEvent.getByLabel(HepMCLabel, MCEvt);
-   iEvent.getByLabel(SimTkLabel,SimTk);
-   iEvent.getByLabel(SimVtxLabel,SimVtx);
-   iEvent.getByLabel(SimHitLabel,"TrackerHitsPixelBarrelLowTof", PixelBarrelHitsLowTof);
-   iEvent.getByLabel(SimHitLabel,"TrackerHitsPixelBarrelHighTof", PixelBarrelHitsHighTof);
-   iEvent.getByLabel(SimHitLabel,"TrackerHitsPixelEndcapLowTof", PixelEndcapHitsLowTof);
-   iEvent.getByLabel(SimHitLabel,"TrackerHitsPixelEndcapHighTof", PixelEndcapHitsHighTof);
-   iEvent.getByLabel(SimHitLabel,"TrackerHitsTIBLowTof", TIBHitsLowTof);
-   iEvent.getByLabel(SimHitLabel,"TrackerHitsTIBHighTof", TIBHitsHighTof);
-   iEvent.getByLabel(SimHitLabel,"TrackerHitsTIDLowTof", TIDHitsLowTof);
-   iEvent.getByLabel(SimHitLabel,"TrackerHitsTIDHighTof", TIDHitsHighTof);
-   iEvent.getByLabel(SimHitLabel,"TrackerHitsTOBLowTof", TOBHitsLowTof);
-   iEvent.getByLabel(SimHitLabel,"TrackerHitsTOBHighTof", TOBHitsHighTof);
-   iEvent.getByLabel(SimHitLabel,"TrackerHitsTECLowTof", TECHitsLowTof);
-   iEvent.getByLabel(SimHitLabel,"TrackerHitsTECHighTof", TECHitsHighTof);
+   iEvent.getByToken(tHepMC, MCEvt);
 
-
+   Handle<SimTrackContainer> SimTk;
+   //iEvent.getByLabel(SimTkLabel,SimTk); // old way 
+   iEvent.getByToken( tSimTracks ,SimTk); // 
    theSimTracks.insert(theSimTracks.end(),SimTk->begin(),SimTk->end());
+
+   Handle<SimVertexContainer> SimVtx;
+   //iEvent.getByLabel(SimVtxLabel,SimVtx);
+   iEvent.getByToken( tSimVertexs ,SimVtx);
    theSimVertexes.insert(theSimVertexes.end(),SimVtx->begin(),SimVtx->end());
+
+   Handle<PSimHitContainer> PixelBarrelHitsLowTof;
+   //Handle<PSimHitContainer> PixelBarrelHitsHighTof;
+   //Handle<PSimHitContainer> PixelEndcapHitsLowTof;
+   //Handle<PSimHitContainer> PixelEndcapHitsHighTof;
+   //Handle<PSimHitContainer> TIBHitsLowTof;
+   //Handle<PSimHitContainer> TIBHitsHighTof;
+   //Handle<PSimHitContainer> TIDHitsLowTof;
+   //Handle<PSimHitContainer> TIDHitsHighTof;
+   //Handle<PSimHitContainer> TOBHitsLowTof;
+   //Handle<PSimHitContainer> TOBHitsHighTof;
+   //Handle<PSimHitContainer> TECHitsLowTof;
+   //Handle<PSimHitContainer> TECHitsHighTof;
+   iEvent.getByToken( tPixelSimHits ,PixelBarrelHitsLowTof);
+
+   //iEvent.getByLabel(SimHitLabel,"TrackerHitsPixelBarrelLowTof", PixelBarrelHitsLowTof);
+   //iEvent.getByLabel(SimHitLabel,"TrackerHitsPixelBarrelHighTof", PixelBarrelHitsHighTof);
+   //iEvent.getByLabel(SimHitLabel,"TrackerHitsPixelEndcapLowTof", PixelEndcapHitsLowTof);
+   //iEvent.getByLabel(SimHitLabel,"TrackerHitsPixelEndcapHighTof", PixelEndcapHitsHighTof);
+
+   //iEvent.getByLabel(SimHitLabel,"TrackerHitsTIBLowTof", TIBHitsLowTof);
+   //iEvent.getByLabel(SimHitLabel,"TrackerHitsTIBHighTof", TIBHitsHighTof);
+   //iEvent.getByLabel(SimHitLabel,"TrackerHitsTIDLowTof", TIDHitsLowTof);
+   //iEvent.getByLabel(SimHitLabel,"TrackerHitsTIDHighTof", TIDHitsHighTof);
+   //iEvent.getByLabel(SimHitLabel,"TrackerHitsTOBLowTof", TOBHitsLowTof);
+   //iEvent.getByLabel(SimHitLabel,"TrackerHitsTOBHighTof", TOBHitsHighTof);
+   //iEvent.getByLabel(SimHitLabel,"TrackerHitsTECLowTof", TECHitsLowTof);
+   //iEvent.getByLabel(SimHitLabel,"TrackerHitsTECHighTof", TECHitsHighTof);
+
    theTrackerHits.insert(theTrackerHits.end(), PixelBarrelHitsLowTof->begin(), PixelBarrelHitsLowTof->end()); 
-   theTrackerHits.insert(theTrackerHits.end(), PixelBarrelHitsHighTof->begin(), PixelBarrelHitsHighTof->end());
-   theTrackerHits.insert(theTrackerHits.end(), PixelEndcapHitsLowTof->begin(), PixelEndcapHitsLowTof->end()); 
-   theTrackerHits.insert(theTrackerHits.end(), PixelEndcapHitsHighTof->begin(), PixelEndcapHitsHighTof->end());
-   theTrackerHits.insert(theTrackerHits.end(), TIBHitsLowTof->begin(), TIBHitsLowTof->end()); 
-   theTrackerHits.insert(theTrackerHits.end(), TIBHitsHighTof->begin(), TIBHitsHighTof->end());
-   theTrackerHits.insert(theTrackerHits.end(), TIDHitsLowTof->begin(), TIDHitsLowTof->end()); 
-   theTrackerHits.insert(theTrackerHits.end(), TIDHitsHighTof->begin(), TIDHitsHighTof->end());
-   theTrackerHits.insert(theTrackerHits.end(), TOBHitsLowTof->begin(), TOBHitsLowTof->end()); 
-   theTrackerHits.insert(theTrackerHits.end(), TOBHitsHighTof->begin(), TOBHitsHighTof->end());
-   theTrackerHits.insert(theTrackerHits.end(), TECHitsLowTof->begin(), TECHitsLowTof->end()); 
-   theTrackerHits.insert(theTrackerHits.end(), TECHitsHighTof->begin(), TECHitsHighTof->end());
+   //theTrackerHits.insert(theTrackerHits.end(), PixelBarrelHitsHighTof->begin(), PixelBarrelHitsHighTof->end());
+   //theTrackerHits.insert(theTrackerHits.end(), PixelEndcapHitsLowTof->begin(), PixelEndcapHitsLowTof->end()); 
+   //theTrackerHits.insert(theTrackerHits.end(), PixelEndcapHitsHighTof->begin(), PixelEndcapHitsHighTof->end());
+
+   //theTrackerHits.insert(theTrackerHits.end(), TIBHitsLowTof->begin(), TIBHitsLowTof->end()); 
+   //theTrackerHits.insert(theTrackerHits.end(), TIBHitsHighTof->begin(), TIBHitsHighTof->end());
+   //theTrackerHits.insert(theTrackerHits.end(), TIDHitsLowTof->begin(), TIDHitsLowTof->end()); 
+   //theTrackerHits.insert(theTrackerHits.end(), TIDHitsHighTof->begin(), TIDHitsHighTof->end());
+   //theTrackerHits.insert(theTrackerHits.end(), TOBHitsLowTof->begin(), TOBHitsLowTof->end()); 
+   //theTrackerHits.insert(theTrackerHits.end(), TOBHitsHighTof->begin(), TOBHitsHighTof->end());
+   //theTrackerHits.insert(theTrackerHits.end(), TECHitsLowTof->begin(), TECHitsLowTof->end()); 
+   //theTrackerHits.insert(theTrackerHits.end(), TECHitsHighTof->begin(), TECHitsHighTof->end());
 
 
 #ifdef HEPMC
-   Handle< HepMCProduct > EvtHandle ;
-   iEvent.getByLabel( "generator", EvtHandle ) ;
-   const HepMC::GenEvent* myGenEvent = EvtHandle->GetEvent() ;
+   //Handle< HepMCProduct > EvtHandle ;
+   //iEvent.getByLabel( "generator", EvtHandle ) ;
+   const HepMC::GenEvent* myGenEvent = MCEvt->GetEvent() ;
    
    //Hepmc::GenEvent * myGenEvent = new  HepMC::GenEvent(*(MCEvt->GetEvent()));
    
+   cout<<" Print HepMC "<<endl;
    int i=0;
    for ( HepMC::GenEvent::particle_const_iterator p = myGenEvent->particles_begin();
 	 p != myGenEvent->particles_end(); ++p, ++i ) {
@@ -212,13 +241,15 @@ SimHitAnalyzer::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup
 
    const bool printsHits = true;
    if(printsHits) {
+     cout<<" SimHits "<<theTrackerHits.size()<<endl;
      std::map<unsigned int, std::vector<PSimHit>,std::less<unsigned int> > SimHitMap;
      for (std::vector<PSimHit>::iterator isim = theTrackerHits.begin();
 	  isim != theTrackerHits.end(); ++isim){
        SimHitMap[(*isim).detUnitId()].push_back((*isim));
 
        int detid = isim->detUnitId();
-       if(detid>=302000000 && detid<303000000) {  // only bpix
+       //if(detid>=302000000 && detid<303000000) {  // only bpix
+       if(1) {  // all
 	 // SimHit information 
 	 float eloss = (*isim).energyLoss() * 1000000/3.7;//convert GeV to ke 
 	 //float tof = (*isim).timeOfFlight();
@@ -233,8 +264,9 @@ SimHitAnalyzer::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup
 	 int pid = ((*isim).particleType()); 
 	 int tid = (*isim).trackId();
 	 int procType = (*isim).processType();
-	 if(pid==13) 
-	   cout<<"BPix mu Simhit id "<<pid<<" track "<<tid<<" proc "<<procType<<" de "
+	 cout<<pid<<endl;
+	 //if(pid==13) 
+	 cout<<"Pix mu Simhit id "<<pid<<" track "<<tid<<" proc "<<procType<<" de "
 	       <<eloss<<" p "<<p<<" theta "<<theta<<" beta "<<beta<<" eta "<<eta
 	       <<" position  x = "<<isim->localPosition().x() 
 	       <<" y = "<<isim->localPosition().y() <<" z = "<< isim->localPosition().z()<<endl;

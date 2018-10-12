@@ -98,26 +98,49 @@ process.source = cms.Source("PoolSource",
 
   fileNames = cms.untracked.vstring(    
 
-"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/320/712/00000/526C97FB-0096-E811-BCB8-FA163E8BA02A.root",
-"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/320/712/00000/80B971B5-0096-E811-8DA3-FA163E010862.root",
-"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/320/712/00000/94C35580-0196-E811-B71F-FA163EB33FD8.root",
-"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/320/712/00000/34899197-0296-E811-90DA-FA163E88A838.root",
-"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/320/712/00000/5C22EDED-0296-E811-B458-FA163E63AE40.root",
-"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/320/712/00000/D8480FA2-0796-E811-97B5-FA163E5469DB.root",
-"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/320/712/00000/C6717CD2-0C96-E811-A739-FA163EE96767.root",
-"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/320/712/00000/70F5A96A-0F96-E811-B71A-FA163EF21D25.root",
-"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/320/712/00000/A6272A60-0E96-E811-9E6A-FA163E086F03.root",
-"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/320/712/00000/5C10946F-0F96-E811-870A-FA163E0B2F68.root",
-"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/320/712/00000/FAFD318B-1096-E811-AB69-A4BF01277823.root",
-"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/320/712/00000/70B0CBCD-1096-E811-B4FC-FA163EB9878F.root",
-"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/320/712/00000/1EE27F67-1096-E811-9184-FA163ECFE6A5.root",
-"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/320/712/00000/02E19413-1296-E811-977B-FA163EB63606.root",
-"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/320/712/00000/C2F5CDE5-1396-E811-9053-FA163EE81CA0.root",
-"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/320/712/00000/AEF017AB-1396-E811-9C7F-FA163E11507C.root",
-"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/320/712/00000/1ED28904-0196-E811-9FDD-FA163E6A7294.root",
-"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/320/712/00000/BAC9E869-0396-E811-8560-02163E013B89.root",
-"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/320/712/00000/8AEA2C56-0596-E811-93AB-FA163EA692A9.root",
-"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/320/712/00000/F2E2E7F6-0796-E811-902E-FA163E6788A6.root",
+"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/323/470/00000/A942FEA1-0586-C441-A46E-19C5515F2498.root",
+"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/323/470/00000/E4421625-0AE4-5843-A581-4A56CC7778A9.root",
+"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/323/470/00000/F939DEE3-697C-9B40-901C-007CBFB47193.root",
+"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/323/470/00000/5A6E7AC8-20DA-CC4E-8E1C-A456C1B97B5E.root",
+"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/323/470/00000/78FE343D-51F7-8F44-9978-1D191BC6301A.root",
+"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/323/470/00000/26AE7D86-8A08-FB43-A490-A3995AA7F604.root",
+"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/323/470/00000/9AE20490-133E-BB44-A9C7-3E8525A4073D.root",
+"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/323/470/00000/65F84781-3A8E-D545-8E5E-CBC8BE987B89.root",
+"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/323/470/00000/04DFA5AA-290C-7744-ACA7-F7227C52D7D7.root",
+"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/323/470/00000/8008A581-F2D2-B343-ABBC-F85B1F670F19.root",
+"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/323/470/00000/BB0C09D9-79E4-1C40-9DCB-EC5ECCE66AEE.root",
+"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/323/470/00000/808C732E-0028-4F48-9396-E163DA9C4DA2.root",
+"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/323/470/00000/72B21936-8F0B-C44F-A39E-D63A57478DC1.root",
+"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/323/470/00000/A6AAA7F1-DB4F-B447-B43E-B9C269A5BC0F.root",
+"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/323/470/00000/C0923D62-B80D-3C4C-ADA4-D6C94A2A46A7.root",
+"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/323/470/00000/1F103BDD-9968-CE49-BD10-AB86A2F677C2.root",
+"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/323/470/00000/0C6A3C31-2358-C543-880F-82DBA7EBBFF4.root",
+"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/323/470/00000/DBFB486D-DF18-FE44-9872-A42D1E736F64.root",
+"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/323/470/00000/BD85231F-68FB-7F4F-806D-6E6847CE1A91.root",
+"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/323/470/00000/A3C6E028-DD24-8B4B-8D32-FB7B043B0380.root",
+"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/323/470/00000/F8AC92DC-F513-CF4D-9756-C65434F6C94A.root",
+
+#"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/322/605/00000/A49792CB-6CB4-E811-95C4-FA163EC32196.root",
+#"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/322/605/00000/AC5233CC-6CB4-E811-82B1-FA163ED229B7.root",
+#"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/322/605/00000/0ED3F305-6DB4-E811-8B73-FA163E7F4F04.root",
+#"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/322/605/00000/AC1537A0-6DB4-E811-8D41-FA163E533386.root",
+#"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/322/605/00000/A24C539C-6EB4-E811-80DA-FA163E7CEFDF.root",
+#"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/322/605/00000/B635FEE9-6EB4-E811-8C43-FA163EBB8D74.root",
+#"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/322/605/00000/349EA9FD-6EB4-E811-BB0B-FA163E4B6F1D.root",
+#"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/322/605/00000/2E3B975C-6DB4-E811-B2A8-FA163E6FA269.root",
+#"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/322/605/00000/96EC336E-6EB4-E811-A63A-FA163EB0AF7F.root",
+#"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/322/605/00000/2A2FADD7-6EB4-E811-8088-FA163E1409FE.root",
+
+#"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/322/602/00000/2EED2132-6AB4-E811-84C3-FA163EE3D13F.root",
+#"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/322/602/00000/303F0A46-6AB4-E811-81BA-FA163EC32196.root",
+#"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/322/602/00000/88910938-6AB4-E811-8945-FA163E337D5D.root",
+#"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/322/602/00000/A639ED6F-6AB4-E811-A584-FA163EBDB555.root",
+#"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/322/602/00000/121DBCA6-6AB4-E811-9285-FA163E7835F3.root",
+#"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/322/602/00000/56A4BAFF-6AB4-E811-95D4-FA163E45DA89.root",
+#"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/322/602/00000/CE8109B6-6AB4-E811-91E2-FA163EDAE846.root",
+#"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/322/602/00000/84B1FFCF-6AB4-E811-9D29-FA163E165244.root",
+#"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/322/602/00000/54207318-6BB4-E811-88DB-FA163E47C8BD.root",
+#"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/322/602/00000/9047E4D5-6AB4-E811-B3FE-FA163E49FA5E.root",
 
 #"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/320/569/00000/BC7B85EB-6E94-E811-94AD-02163E01A000.root",
 #"/store/express/Run2018D/ExpressPhysics/FEVT/Express-v1/000/320/569/00000/AA0376C1-6E94-E811-8513-FA163EC4E221.root",
@@ -178,56 +201,15 @@ process.source = cms.Source("PoolSource",
 #"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/319/104/00000/16DF60A8-DF7D-E811-A173-FA163E60CC95.root",
 #"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/319/104/00000/24E65732-E57D-E811-8F83-FA163E8FF902.root",
 
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/318/661/00000/14A74212-1979-E811-994B-FA163EDA67FA.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/318/661/00000/9677CD0C-1979-E811-B77E-FA163E068260.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/318/661/00000/64AF304F-1D79-E811-A8B4-FA163EC6DE18.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/318/661/00000/4291E67E-1D79-E811-898F-02163E019F2A.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/318/661/00000/00A6B11D-2279-E811-B39D-FA163EF29411.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/318/661/00000/10E7D42B-2279-E811-BBC2-FA163EE59C15.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/318/661/00000/306D0528-2279-E811-B9D0-FA163EFF0809.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/318/661/00000/74EFA06B-2279-E811-98D2-FA163E529D85.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/318/661/00000/42469B97-2279-E811-9D6A-FA163E2434A3.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/318/661/00000/986EEA41-2379-E811-8FF0-FA163ED05A75.root",
-
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/069A7418-F868-E811-858C-FA163E034210.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/7E362915-FB68-E811-9D9B-FA163EA45FDA.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/54C8942B-FD68-E811-95FD-FA163E9CBD30.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/EA2AF28F-0169-E811-9E82-02163E01A085.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/F6BB77BA-0469-E811-A44D-02163E019FB9.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/EE3BDDB9-0469-E811-9527-FA163EB656C6.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/5A95CAD9-0469-E811-AE6E-FA163E66B10C.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/E2E60F38-0569-E811-92AF-FA163EB8310B.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/FCDEAAF4-0469-E811-84A5-FA163E9641D4.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/88A545FC-0569-E811-B81D-FA163E614A5A.root",
-
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/96A86B03-4B68-E811-8553-FA163EC07E76.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/7084EDA1-4C68-E811-805D-FA163ED532A6.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/D61B8C7B-5E68-E811-B7F8-FA163E3F84E6.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/F20A6597-6368-E811-A460-FA163EA4290B.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/76F3344D-6268-E811-BBA2-02163E018013.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/7A0800F8-6468-E811-9B14-FA163E2AF1D2.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/3E291922-6568-E811-9DA8-FA163ED62B5C.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/A21FDAF7-6468-E811-8501-FA163ED1245E.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/12B690A3-6568-E811-8C82-FA163EA9CF9F.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/342A349A-6768-E811-935B-FA163E3F1A44.root",
-
-# mc
-#"/store/relval/CMSSW_9_2_3/RelValNuGun/GEN-SIM-RECO/PUpmx25ns_92X_upgrade2017_realistic_v2_earlyBS2017-v1/10000/12995CE4-3851-E711-B4A6-0CC47A4D7602.root",
-# "/store/relval/CMSSW_9_2_3/RelValNuGun/GEN-SIM-DIGI-RAW-HLTDEBUG/PUpmx25ns_92X_upgrade2017_realistic_v2_earlyBS2017-v1/10000/1ECCAF11-2E51-E711-AE03-0025905B8594.root",
-
   )   # end the list "by-hand"
 )
 
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('124230:26-124230:9999','124030:2-124030:9999')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('319104:24-319104:185')
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('314472:55-314472:9999')
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('315357:44-315357:872')
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('315488:42-315488:1126')
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('317434:48-317434:271')
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('317475:33-317475:89')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('318661:1-318661:999')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('320569:57-320569:308')
-process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('320712:54-320712:242')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('320712:54-320712:242')
+process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('323470:38-323470:270')
 #
 
 process.TFileService = cms.Service("TFileService",
@@ -321,10 +303,10 @@ process.c2 = cms.EDAnalyzer("PixClustersWithTracks",
 
 
 #process.p = cms.Path(process.hltfilter*process.d)
-#process.p = cms.Path(process.hltfilter*process.d*process.c)
+process.p = cms.Path(process.hltfilter*process.d*process.c)
 #process.p = cms.Path(process.hltfilter*process.d*process.c*process.c1*process.c2)
 #process.p = cms.Path(process.hltfilter*process.d*process.c*process.d1*process.d2)
 
-process.p = cms.Path(process.d*process.c*process.c1*process.c2) # for mc
+#process.p = cms.Path(process.d*process.c*process.c1*process.c2) # for mc
 #process.p = cms.Path(process.d) # for cosmics
 

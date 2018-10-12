@@ -1,11 +1,7 @@
-# Auto generated configuration file
-# using: 
-# Revision: 1.19 
-# Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
-# with command line options: step2 --conditions auto:run2_mc -n 9000 --eventcontent FEVTDEBUGHLT --filein file:./SingleMuPt100_cfi_GEN_SIM.root -s DIGI:pdigi_valid,L1,DIGI2RAW,HLT:@frozen25ns,RAW2DIGI,L1Reco --datatier GEN-SIM-DIGI-RAW-HLTDEBUG --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1 --magField 38T_PostLS1 --no_exec --python_filename=step2_DIGI_L1_DIGI2RAW_RAW2DIGI_L1Reco_NOPU.py
+#
 import FWCore.ParameterSet.Config as cms
-
-process = cms.Process('HLT')
+from Configuration.StandardSequences.Eras import eras
+process = cms.Process("MyRaw",eras.Run2_2017)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -14,26 +10,31 @@ process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
-process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
+process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Digi_cff')
 process.load('Configuration.StandardSequences.SimL1Emulator_cff')
 process.load('Configuration.StandardSequences.DigiToRaw_cff')
-process.load('HLTrigger.Configuration.HLT_25ns14e33_v1_cff')
+#process.load('HLTrigger.Configuration.HLT_25ns14e33_v1_cff')
+process.load('HLTrigger.Configuration.HLT_2018v10_cff')
 process.load('Configuration.StandardSequences.RawToDigi_cff')
 process.load('Configuration.StandardSequences.L1Reco_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
-process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+from Configuration.AlCa.GlobalTag import GlobalTag
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '') # no misalignment 
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '') # with misalignment 
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10)
+    input = cms.untracked.int32(-1)
 )
 
 # Input source
 process.source = cms.Source("PoolSource",
     dropDescendantsOfDroppedBranches = cms.untracked.bool(False),
     fileNames = cms.untracked.vstring(
-        #'file:simHits1.root'
-        '/store/user/kotlinski/mu100_v74/simhits/simHits4.root'
+        'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits1.root'
+        #'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits2.root'
+        #'/store/user/kotlinski/mu100_v74/simhits/simHits4.root'
         ),
     inputCommands = cms.untracked.vstring('keep *', 
         'drop *_genParticles_*_*', 
@@ -75,7 +76,9 @@ process.output = cms.OutputModule("PoolOutputModule",
         filterName = cms.untracked.string('')
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(1048576),
-    fileName = cms.untracked.string('digis4.root'),
+    #fileName = cms.untracked.string('digis4.root'),
+    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw1.root'),
+    #fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw2.root'),
     #outputCommands = process.FEVTDEBUGHLTEventContent.outputCommands,
     outputCommands = process.FEVTDEBUGEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
@@ -85,10 +88,6 @@ process.output = cms.OutputModule("PoolOutputModule",
 
 # Other statements
 process.mix.digitizers = cms.PSet(process.theDigitizersValid)
-
-from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
 
 # Path and EndPath definitions
 process.digitisation_step = cms.Path(process.pdigi_valid)
@@ -110,10 +109,10 @@ process.schedule.extend([process.endjob_step,process.output_step])
 # customisation of the process.
 
 # Automatic addition of the customisation function from SLHCUpgradeSimulations.Configuration.postLS1Customs
-from SLHCUpgradeSimulations.Configuration.postLS1Customs import customisePostLS1 
+#from SLHCUpgradeSimulations.Configuration.postLS1Customs import customisePostLS1 
 
 #call to customisation function customisePostLS1 imported from SLHCUpgradeSimulations.Configuration.postLS1Customs
-process = customisePostLS1(process)
+#process = customisePostLS1(process)
 
 # Automatic addition of the customisation function from HLTrigger.Configuration.customizeHLTforMC
 #from HLTrigger.Configuration.customizeHLTforMC import customizeHLTforFullSim 

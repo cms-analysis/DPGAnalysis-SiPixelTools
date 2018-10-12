@@ -30,7 +30,7 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag.globaltag = '92X_dataRun2_Prompt_v11' # Promot
 #process.GlobalTag.globaltag = '94X_dataRun2_ReReco_EOY17_v2' # for RERECO
 # 2018
-process.GlobalTag.globaltag = '101X_dataRun2_Express_v7' # 
+process.GlobalTag.globaltag = '101X_dataRun2_Express_v8' # 
 # AUTO conditions 
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
@@ -43,9 +43,9 @@ import HLTrigger.HLTfilters.hltHighLevel_cfi as hlt
 process.hltfilter = hlt.hltHighLevel.clone(
 # Min-Bias	
 #    HLTPaths = ['HLT_Physics*'],
-#    HLTPaths = ['HLT_Random*'],
+    HLTPaths = ['HLT_Random*'],
 #    HLTPaths = ['HLT_ZeroBias*'],
-    HLTPaths = ['HLT_ZeroBias_v*'],  # simple democratic ZB
+#    HLTPaths = ['HLT_ZeroBias_v*'],  # simple democratic ZB
 #    HLTPaths = ['HLT_ZeroBias_part*'],  # empty
 #    HLTPaths = ['HLT_ZeroBias_FirstCollisionInTrain_*'], # empty
 #    HLTPaths = ['HLT_ZeroBias_LastCollisionInTrain_*'],  # empty
@@ -80,162 +80,30 @@ process.source = cms.Source("PoolSource",
 #)
 fileNames =  cms.untracked.vstring(
 
-# 2018
-"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/069A7418-F868-E811-858C-FA163E034210.root",
-"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/7E362915-FB68-E811-9D9B-FA163EA45FDA.root",
-"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/54C8942B-FD68-E811-95FD-FA163E9CBD30.root",
-"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/EA2AF28F-0169-E811-9E82-02163E01A085.root",
-"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/F6BB77BA-0469-E811-A44D-02163E019FB9.root",
-"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/EE3BDDB9-0469-E811-9527-FA163EB656C6.root",
-"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/5A95CAD9-0469-E811-AE6E-FA163E66B10C.root",
-"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/E2E60F38-0569-E811-92AF-FA163EB8310B.root",
-"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/FCDEAAF4-0469-E811-84A5-FA163E9641D4.root",
-"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/475/00000/88A545FC-0569-E811-B81D-FA163E614A5A.root",
-
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/96A86B03-4B68-E811-8553-FA163EC07E76.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/7084EDA1-4C68-E811-805D-FA163ED532A6.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/D61B8C7B-5E68-E811-B7F8-FA163E3F84E6.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/F20A6597-6368-E811-A460-FA163EA4290B.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/76F3344D-6268-E811-BBA2-02163E018013.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/7A0800F8-6468-E811-9B14-FA163E2AF1D2.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/3E291922-6568-E811-9DA8-FA163ED62B5C.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/A21FDAF7-6468-E811-8501-FA163ED1245E.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/12B690A3-6568-E811-8C82-FA163EA9CF9F.root",
-#"/store/express/Run2018B/ExpressPhysics/FEVT/Express-v1/000/317/434/00000/342A349A-6768-E811-935B-FA163E3F1A44.root",
-
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/642/00000/C6A89B55-674E-E811-97C8-FA163EC3589F.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/642/00000/D804AFA5-6D4E-E811-A7C0-FA163E0422A8.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/642/00000/6C83C7E8-6D4E-E811-A1E2-FA163EFABB07.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/642/00000/FAB3BEA6-6D4E-E811-9C4D-FA163E0D9E97.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/642/00000/B64D8002-6E4E-E811-8945-FA163EAE6D6D.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/642/00000/24429B99-6D4E-E811-8A95-FA163E73E806.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/642/00000/AC118FF3-6D4E-E811-827E-FA163E9ECA9A.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/642/00000/56439E1E-714E-E811-9B66-FA163E0972CE.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/642/00000/20094BF8-6E4E-E811-B36F-FA163EB8644D.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/642/00000/14D88AC9-6D4E-E811-841B-FA163EA2F461.root",
-
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/3EFD24FC-434D-E811-B07B-FA163E390CE2.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/8AAB9738-454D-E811-876B-FA163ED26202.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/58A83A0D-494D-E811-B5B6-FA163EB68CF3.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/DA1BFC38-484D-E811-A5BE-02163E01A083.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/68E10058-494D-E811-84E5-FA163E23B3D2.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/8254EB82-4C4D-E811-AC43-FA163E6B94A5.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/FAD64631-484D-E811-A732-FA163E03FB38.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/CCCD2D53-494D-E811-9E32-FA163EC36191.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/52B66769-494D-E811-B36C-FA163E7FE60F.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/509/00000/BA5BEAB1-484D-E811-9EF0-FA163ED5E288.root",
-
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/488/00000/C290907E-AD4C-E811-A7D7-FA163E1A07C9.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/488/00000/EEABE79D-B34C-E811-808F-FA163E08198F.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/488/00000/784E7F34-B84C-E811-9669-FA163E9626F3.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/488/00000/72EA65A4-BC4C-E811-85B2-02163E01A012.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/488/00000/86BE40D5-BE4C-E811-BE36-FA163E34040E.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/488/00000/10D85837-BF4C-E811-A164-FA163EF96190.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/488/00000/288F333D-BF4C-E811-8E68-FA163E5B522C.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/488/00000/A49C6A34-C14C-E811-BAFC-FA163EF76148.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/488/00000/3ECF472B-C14C-E811-84A3-FA163E456877.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/488/00000/CEE2F834-C24C-E811-8E63-FA163E04EEFE.root",
-
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/357/00000/5AEB971A-1E4B-E811-B71A-FA163EA3B75E.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/357/00000/82DDE0C5-1E4B-E811-B501-FA163E015631.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/357/00000/A843137B-284B-E811-98BC-FA163E721D55.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/357/00000/92FF6C71-2D4B-E811-8085-FA163EDCB9C5.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/357/00000/E8BD76F2-334B-E811-9004-FA163E395E49.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/357/00000/DEAF63E2-324B-E811-9F22-FA163E478CA6.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/357/00000/34C683CD-334B-E811-AB5B-FA163E924F37.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/357/00000/62EB56CA-334B-E811-9B56-FA163EC861A6.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/357/00000/5EF0C235-334B-E811-9CD6-FA163E147082.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/357/00000/B2996EE1-334B-E811-BF87-FA163E9AAC67.root",
-
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/265/00000/68404DFF-E049-E811-A97E-FA163ED782E1.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/265/00000/D0F9505F-DE49-E811-9D3A-FA163E893DB0.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/265/00000/A2FCF3CB-E049-E811-BFE6-FA163EE0AD35.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/265/00000/EE71594E-E249-E811-A85B-FA163EB7A2BD.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/265/00000/F4F2BE3F-E149-E811-AD70-02163E017FEC.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/265/00000/1E136F95-E649-E811-ABD4-FA163ED213E0.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/265/00000/A849BA9B-DE49-E811-BC6B-FA163E47E71E.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/265/00000/26BE65AD-DE49-E811-A10E-02163E01A08D.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/265/00000/926C6898-E049-E811-87B5-FA163EB7A2BD.root",
-#"/store/express/Run2018A/ExpressPhysics/FEVT/Express-v1/000/315/265/00000/8237B3D8-E049-E811-AF4A-FA163E956980.root",
-
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/315/188/00000/88C50189-FE48-E811-B7DA-FA163E421A08.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/315/188/00000/78E66B76-FF48-E811-A31B-02163E01A029.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/315/188/00000/AEBD1870-0049-E811-8CE6-FA163ECDEF72.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/315/188/00000/6434CB95-0049-E811-9D0E-FA163E76C639.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/315/188/00000/1A3046D7-0049-E811-BD68-FA163ED479D8.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/315/188/00000/103C337A-0049-E811-AACF-FA163EE9EDC1.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/315/188/00000/C8FD2BC1-0049-E811-93A5-FA163E3EE95B.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/315/188/00000/06384292-0049-E811-B465-FA163EDF7DB7.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/315/188/00000/E6E15116-0149-E811-8D61-FA163E7F5F92.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/315/188/00000/7C794AE3-0349-E811-92F8-FA163E39C0DF.root",
-
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/657/00000/A82B59D1-8343-E811-9CA4-FA163E58A668.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/657/00000/A0D6A094-8043-E811-A12E-FA163E5C47D8.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/657/00000/66401921-8343-E811-AB6E-02163E0150B6.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/657/00000/3E2EBEEC-8343-E811-8E31-FA163E87271F.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/657/00000/2AAE793E-8343-E811-9A54-02163E016545.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/657/00000/E82B8DDA-8343-E811-B360-FA163E48FFBD.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/657/00000/CE92FB27-8043-E811-9D67-FA163E9D9A43.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/657/00000/CA3C8246-8043-E811-BBFB-02163E01A099.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/657/00000/E050CADD-8043-E811-B34D-FA163E81FC4F.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/657/00000/18966911-8143-E811-9EB7-FA163E785EB9.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/657/00000/10ABC636-8343-E811-9982-FA163E7F17BA.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/657/00000/72A65D83-8343-E811-8731-02163E014A2B.root",
-
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/656/00000/5868F906-7B43-E811-88C3-FA163E0EE1E4.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/656/00000/EA5BE871-8243-E811-96BE-FA163E21820E.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/656/00000/28D22B6F-8343-E811-8A67-02163E00BFE8.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/656/00000/2ADD3C14-8443-E811-BCED-FA163E21820E.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/656/00000/EA751AC7-8143-E811-8AF7-FA163E37BDDC.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/656/00000/2881BA1D-7E43-E811-920D-FA163E9D9A43.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/656/00000/B0E2D00A-8243-E811-9906-FA163E87271F.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/656/00000/C83BAD63-8143-E811-8777-FA163E78EE04.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/656/00000/50B1D96E-8343-E811-9558-02163E00B12E.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/656/00000/5406C58B-8143-E811-B27E-FA163EA5B62B.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/656/00000/1AABEE29-8143-E811-9AFF-FA163EF45B09.root",
-
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/515/00000/001885E8-6142-E811-BBE6-FA163EFCFF2C.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/515/00000/502F5F29-6242-E811-851A-FA163E5043E5.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/515/00000/C81CB4EC-6142-E811-9ED7-FA163EE8287C.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/515/00000/DA54BA5A-6242-E811-A95B-FA163E2FECF2.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/515/00000/E6E11EB7-6242-E811-B44F-FA163E464EF2.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/515/00000/BC3CF299-6242-E811-8402-FA163E621846.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/515/00000/76DB3D1D-6342-E811-883F-FA163E95EB41.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/515/00000/C04A0D3C-6642-E811-93DE-FA163ECD65AF.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/515/00000/F4592DC4-6642-E811-B10D-FA163E71CF10.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/515/00000/40A0026B-6742-E811-A5D0-02163E01762E.root",
-
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/507/00000/DA67BAAF-5942-E811-B3F8-FA163E3A5F0F.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/507/00000/847EA9C3-5942-E811-A7EF-FA163EF52681.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/507/00000/E4E11920-5B42-E811-BC0B-FA163E3E5302.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/507/00000/9206B125-5A42-E811-8710-02163E014B85.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/507/00000/521EF1BE-5842-E811-AACF-02163E01600A.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/507/00000/241ECF20-5B42-E811-9A3E-FA163EECD9DC.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/507/00000/4EB2E456-5B42-E811-87D8-FA163EA6B7A8.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/507/00000/DA69211D-5B42-E811-B89C-02163E01A097.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/507/00000/242A2654-5B42-E811-BE0F-FA163E3C297E.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/507/00000/92AEB812-5E42-E811-8403-FA163E2807E5.root",
-
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/560F5A99-5C42-E811-ACE6-FA163ED141EE.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/5AFD0C2A-5942-E811-8A5B-FA163EA392AD.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/D27D394B-5942-E811-AE87-FA163ED06402.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/66421161-5942-E811-9325-FA163E2B0F48.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/54B47F7E-5942-E811-9E7A-FA163E3EF566.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/2A5DA723-5942-E811-9B5A-02163E01317C.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/662A8960-5942-E811-B738-FA163E3E5302.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/880FC835-6142-E811-90B2-02163E012DD8.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/2A2EEB3B-5942-E811-8B87-FA163ED36C09.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/D2125A27-5942-E811-BBA9-FA163E29DCBF.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/FC6A1B7F-5942-E811-9833-FA163E81E25F.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/BEA6FC36-5942-E811-B685-FA163E27F8CE.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/28F90535-5942-E811-98BE-FA163E840CCB.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/62B05F67-5942-E811-8FD2-FA163E6FAA82.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/5875CC2B-5942-E811-9E6A-FA163E25A55A.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/C4DB3045-5942-E811-80B7-02163E0147E8.root",
-#"/store/express/Commissioning2018/ExpressPhysics/FEVT/Express-v1/000/314/506/00000/8EF42437-5942-E811-B5C6-FA163EFA1AD6.root",
-
-#"root://eoscms//eos/cms/tier0/store/data/Commissioning2016/MinimumBias/RAW/v1/000/266/277/00000/0004807C-AFE5-E511-83C1-02163E011EAD.root",
-#  "rfio:/castor/cern.ch/cms/store/data/Run2012D/MinimumBias/RAW/v1/000/205/217/2EF61B7D-F216-E211-98C3-001D09F28D54.root",
+"/store/express/Run2018D/ExpressCosmics/FEVT/Express-v1/000/324/344/00000/6DC681B8-12C2-534B-922C-568CAFEFBA23.root",
+"/store/express/Run2018D/ExpressCosmics/FEVT/Express-v1/000/324/344/00000/44ED9E8D-F71B-4540-9DA9-A476E705CADE.root",
+"/store/express/Run2018D/ExpressCosmics/FEVT/Express-v1/000/324/344/00000/ED612143-02C5-C742-A268-D003C747F9C2.root",
+"/store/express/Run2018D/ExpressCosmics/FEVT/Express-v1/000/324/344/00000/350D164E-3069-F04E-9F19-C0A454843DCB.root",
+"/store/express/Run2018D/ExpressCosmics/FEVT/Express-v1/000/324/344/00000/AAB64A7D-0F39-FC45-BA97-45D28FC8E3CC.root",
+"/store/express/Run2018D/ExpressCosmics/FEVT/Express-v1/000/324/344/00000/302034FE-E606-904A-A8E0-4CCA4A251C8A.root",
+"/store/express/Run2018D/ExpressCosmics/FEVT/Express-v1/000/324/344/00000/3ACA86EB-0D8D-4244-A5A2-39884AB523A9.root",
+"/store/express/Run2018D/ExpressCosmics/FEVT/Express-v1/000/324/344/00000/E14E1734-7B44-0249-A375-E2439155D574.root",
+"/store/express/Run2018D/ExpressCosmics/FEVT/Express-v1/000/324/344/00000/F086480A-5AB6-A14C-908A-91CD5C255C24.root",
+"/store/express/Run2018D/ExpressCosmics/FEVT/Express-v1/000/324/344/00000/2027DE44-C425-F24B-A84B-3F0F95C270FC.root",
+"/store/express/Run2018D/ExpressCosmics/FEVT/Express-v1/000/324/344/00000/E059BE35-1B40-9A40-8CC0-EF9F64B0216C.root",
+"/store/express/Run2018D/ExpressCosmics/FEVT/Express-v1/000/324/344/00000/A5AA5CEA-D219-3B49-997E-E0E8409E123E.root",
+"/store/express/Run2018D/ExpressCosmics/FEVT/Express-v1/000/324/344/00000/CCD4B54B-7D9D-854E-9AF0-9609F3919316.root",
+"/store/express/Run2018D/ExpressCosmics/FEVT/Express-v1/000/324/344/00000/A852B0F3-5435-9341-9023-B0FEE829EDF2.root",
+"/store/express/Run2018D/ExpressCosmics/FEVT/Express-v1/000/324/344/00000/617D0DC5-580F-8141-94B5-C5CA46A8C7E9.root",
+"/store/express/Run2018D/ExpressCosmics/FEVT/Express-v1/000/324/344/00000/2BAED97D-1E7E-A847-A927-639A481D0F3A.root",
+"/store/express/Run2018D/ExpressCosmics/FEVT/Express-v1/000/324/344/00000/B6B7D160-B11A-F948-8D58-74F9D0064E4F.root",
+"/store/express/Run2018D/ExpressCosmics/FEVT/Express-v1/000/324/344/00000/FDD637D3-29CA-BD4A-A2B0-9C76145D89F4.root",
+"/store/express/Run2018D/ExpressCosmics/FEVT/Express-v1/000/324/344/00000/79CB1294-16A9-BA4A-A4BC-B53DD52A2C4F.root",
+"/store/express/Run2018D/ExpressCosmics/FEVT/Express-v1/000/324/344/00000/0282F21A-F0AF-F04E-B9E1-B8D07E81269C.root",
+"/store/express/Run2018D/ExpressCosmics/FEVT/Express-v1/000/324/344/00000/90C23117-F8C0-7041-98E2-2830101292E9.root",
+"/store/express/Run2018D/ExpressCosmics/FEVT/Express-v1/000/324/344/00000/EC806BEB-271F-B84A-9AE0-D940E9B9DB8E.root",
+"/store/express/Run2018D/ExpressCosmics/FEVT/Express-v1/000/324/344/00000/7BDAE626-99D5-6449-8155-DF4B9F4B61DF.root",
+"/store/express/Run2018D/ExpressCosmics/FEVT/Express-v1/000/324/344/00000/E65A59C7-C58B-7E4B-8EEA-30F39C4E1B8E.root",
 
  )
 )
@@ -249,7 +117,7 @@ fileNames =  cms.untracked.vstring(
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('315357:44-315357:872')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('315488:42-315488:1126')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('317434:48-317434:271')
-process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('317475:33-317475:89')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('317475:33-317475:89')
 
 
 # for Raw2digi for data
@@ -291,7 +159,7 @@ process.out = cms.OutputModule("PoolOutputModule",
 # pixel local reco (RecHits) needs the GenError object,
 # not yet in GT, add here:
 # DB stuff 
-useLocalDB = True
+useLocalDB = False
 if useLocalDB :
     process.DBReaderFrontier = cms.ESSource("PoolDBESSource",
      DBParameters = cms.PSet(
@@ -372,6 +240,16 @@ process.d = cms.EDAnalyzer("PixClusterAna",
     Select1 = cms.untracked.int32(0),  # cut  
     Select2 = cms.untracked.int32(0),  # value     
 )
+process.d_cosm = cms.EDAnalyzer("PixClusterAna",
+#process.d = cms.EDAnalyzer("PixClusterTest",
+    Verbosity = cms.untracked.bool(False),
+    phase1 = cms.untracked.bool(True),
+    #src = cms.InputTag("siPixelClusters"),
+    src = cms.InputTag("siPixelClustersPreSplitting"),
+    Tracks = cms.InputTag(""),
+    Select1 = cms.untracked.int32(0),  # cut  
+    Select2 = cms.untracked.int32(0),  # value     
+)
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string('digis_clus.root')
 )
@@ -383,6 +261,9 @@ process.TFileService = cms.Service("TFileService",
 #process.p = cms.Path(process.siPixelDigis*process.pixeltrackerlocalreco*process.d)
 #process.p = cms.Path(process.hltfilter*process.siPixelDigis*process.pixeltrackerlocalreco*process.d)
 process.p = cms.Path(process.hltfilter*process.siPixelDigis*process.pixeltrackerlocalreco*process.a*process.d)
+
+# for random cosmics 
+#process.p = cms.Path(process.hltfilter*process.siPixelDigis*process.pixeltrackerlocalreco*process.a*process.d_cosm)
 
 #process.p = cms.Path(process.siPixelDigis*process.pixeltrackerlocalreco*process.a*process.d)
 

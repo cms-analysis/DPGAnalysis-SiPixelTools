@@ -101,7 +101,7 @@ using namespace std;
 #define PV
 #define BX_TESTS
 //#define STUDY_LAY1
-#define SINGLE_MODULES
+//#define SINGLE_MODULES
 #define PHI_PROFILES
 //#define TEST_GEOM
 #define TEST_DCOLS
@@ -114,14 +114,13 @@ using namespace std;
 // special hitos with parameters normalized to intlumi (usually disabled)
 #define LS_TESTS
 //#define VDM_STUDIES
-
 //#define BX_NEW
-
 //#define HF
 
 //#define TESTING_ADC
 //#define LAY1_SPLIT
 #define ROC_RATE
+#define STUDY_ONEMOD
 
 #ifdef HF
 #include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
@@ -494,6 +493,7 @@ class PixClusterAna : public edm::EDAnalyzer {
   //float moduleHits[3][10]; // layer, ids, store hits in 30 modules
   bool phase1_;
   int selectLayer, selectLadder, selectModule;
+  bool useTracks;
 #ifdef SINGLE_MODULES
   bool eventFlag[40];
 #endif
@@ -522,12 +522,13 @@ edm::EDGetTokenT<HFRecHitCollection> HFHitsToken_;
   TH1D *hpladder1id,*hpladder2id,*hpladder3id,*hpladder4id,
     *hpz1id,*hpz2id,*hpz3id,*hpz4id;
 
+  TH1D *hcols1,*hcols2,*hcols3,*hrows1,*hrows2,*hrows3,*hcols4,*hrows4;
+  TH1D *hpcols1,*hpcols2,*hpcols3,*hprows1,*hprows2,*hprows3,*hpcols4,*hprows4;
+
   TH1D *hcharge1,*hcharge2, *hcharge3, *hcharge4, 
     *hcharge5,*hcharge6,*hcharge7,*hcharge8 ;
   TH1D *hpixcharge1,*hpixcharge2, *hpixcharge3, *hpixcharge4, 
     *hpixcharge5,*hpixcharge6,*hpixcharge7,*hpixcharge8;
-  TH1D *hcols1,*hcols2,*hcols3,*hrows1,*hrows2,*hrows3,*hcols4,*hrows4;
-  TH1D *hpcols1,*hpcols2,*hpcols3,*hprows1,*hprows2,*hprows3,*hpcols4,*hprows4;
   TH1D *hsize1,*hsize2,*hsize3,*hsize4,
     *hsizex1,*hsizex2,*hsizex3,*hsizex4,
     *hsizey1,*hsizey2,*hsizey3,*hsizey4;
@@ -563,7 +564,6 @@ edm::EDGetTokenT<HFRecHitCollection> HFHitsToken_;
 
   TH2F *hpixDetMap1, *hpixDetMap2, *hpixDetMap3, *hpixDetMap4;  //in a  modules
   TH2F *hcluDetMap1, *hcluDetMap2, *hcluDetMap3, *hcluDetMap4;  //in a  modules 
-
 
 #ifdef TESTING_ADC
   TH2F *hpixDetsT1, *hpixDetsT2, *hpixDetsT3,*hpixDetsT4;    // all modules
@@ -731,6 +731,10 @@ edm::EDGetTokenT<HFRecHitCollection> HFHitsToken_;
   TH1D *hsizey1InR12,*hsizey1InR34,*hsizey1OutR12,*hsizey1OutR34; 
 #endif
 
+#ifdef STUDY_ONEMOD
+  TProfile2D *hsizeMap1, *hsizeXMap1, *hsizeYMap1,*hclucharMap1,*hpixcharMap1;
+#endif
+
 #ifdef BX
   getBX * getbx;
 #endif
@@ -753,6 +757,7 @@ PixClusterAna::PixClusterAna(edm::ParameterSet const& conf)
   select2 = conf.getUntrackedParameter<int>("Select2",0);
   //src_ =  conf.getParameter<edm::InputTag>( "src" );
   cout<<" Construct, Normalise = "<<Normalise<<" Select "<<select1<<"/"<<select2<<endl;
+  // +-LDDM L layer DD ladder M module e.g. 1065 for BmI8/1/6/1  
   if(select1==201) { //select specifix module 
     int sign  = select2/abs(select2); // negative sign for outer O ladders
     selectLayer = abs(select2)/1000; // layer
@@ -761,6 +766,13 @@ PixClusterAna::PixClusterAna(edm::ParameterSet const& conf)
     selectLadder *= sign;
     if(selectModule>4) selectModule = -(selectModule-4); // 8 7 6 5 - 1 2 3 4
   }
+
+  cout<<(conf.getParameter<edm::InputTag>("Tracks")).label()<<endl;
+  string tracksTag = (conf.getParameter<edm::InputTag>("Tracks")).label();
+
+  if(tracksTag=="") useTracks = false;
+  else useTracks=true;
+
   // For the ByToken method
   myClus = consumes<edmNew::DetSetVector<SiPixelCluster> >(conf.getParameter<edm::InputTag>( "src" ));
   LumiToken                  = consumes <LumiSummary>(edm::InputTag("lumiProducer"));
@@ -768,8 +780,10 @@ PixClusterAna::PixClusterAna(edm::ParameterSet const& conf)
   L1TrigReadoutToken         = consumes <L1GlobalTriggerReadoutRecord>(edm::InputTag("gtDigis"));
   TrigResultsToken           = consumes <edm::TriggerResults>(edm::InputTag("TriggerResults","","HLT"));
 #ifdef PV
-  VertexCollectionToken      = consumes <reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
-  TrackToken                 = consumes <std::vector<reco::Track>>(conf.getParameter<edm::InputTag>("Tracks"));
+  if(useTracks) {
+    VertexCollectionToken      = consumes <reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
+    TrackToken                 = consumes <std::vector<reco::Track>>(conf.getParameter<edm::InputTag>("Tracks"));
+  }
 #endif
   phase1_ = conf.getUntrackedParameter<bool>("phase1",false);
 
@@ -895,6 +909,7 @@ void PixClusterAna::beginJob() {
   hprows2 = fs->make<TH1D>( "hprows2", "Layer 2 pix per rows", 200,-0.5,199.5);
   hprows3 = fs->make<TH1D>( "hprows3", "layer 3 pix per rows", 200,-0.5,199.5);
   hprows4 = fs->make<TH1D>( "hprows4", "layer 4 pix per rows", 200,-0.5,199.5);
+
 
   int sizeH=200;
   float lowH = -0.5;
@@ -1282,9 +1297,6 @@ void PixClusterAna::beginJob() {
   hcluDetMap4 = fs->make<TH2F>( "hcluDetMap4", "clu in det layer 3",
 				416,0.,416.,160,0.,160.);
   hcluDetMap4->SetOption("colz");
-
-
-
   hsizeyz1 = fs->make<TH2F>( "hsizeyz1", "sizy vs z for layer 1",
 			     56,-28.,28.,20,0.5,20.5);
   hsizeyz2 = fs->make<TH2F>( "hsizeyz2", "sizy vs z for layer 2",
@@ -1461,7 +1473,7 @@ void PixClusterAna::beginJob() {
    //hpixbx  = fs->make<TProfile>("hpixbx", "pix vs bx ",4000,-0.5,3999.5,0.0,1000000.);
    //hclubx  = fs->make<TProfile>("hclubx", "clu vs bx ",4000,-0.5,3999.5,0.0,1000000.);
    hpvbx   = fs->make<TProfile>("hpvbx",  "pv vs bx ", 4000,-0.5,3999.5,0.0,1000000.);
-   htracks   = fs->make<TH1D>("htracks",  "tracks ", 1000,-0.5,999.5);
+   htracks   = fs->make<TH1D>("htracks",  "tracks ", 1000,-0.5,4999.5);
 #endif // PV
 
    //hcharCluls = fs->make<TProfile>("hcharCluls","clu char vs ls",sizeH,0.,highH,0.0,500.);
@@ -1631,8 +1643,8 @@ void PixClusterAna::beginJob() {
 #endif
 
 #ifdef LS_TESTS
-   sizeH = 100;
-   highH =  1000.; 
+   sizeH = 210;
+   highH =  2100.; 
    hcharClu1ls = fs->make<TProfile>("hcharClu1ls","clu char 1 vs ls",sizeH,0.,highH,0.0,400.);
    hcharPix1ls = fs->make<TProfile>("hcharPix1ls","pix char 1 vs ls",sizeH,0.,highH,0.0,400.);
    hsizeClu1ls = fs->make<TProfile>("hsizeClu1ls","clu size 1 vs ls",sizeH,0.,highH,0.0,400.);
@@ -1845,6 +1857,23 @@ void PixClusterAna::beginJob() {
   hsizey1OutR34 = fs->make<TH1D>( "hsizey1OutR34", "layer 1 clu sizey out R34",100,-0.5,99.5);
 #endif
 
+#ifdef STUDY_ONEMOD
+  hsizeMap1 = fs->make<TProfile2D>("hsizeMap1", "clus size, module in L1",
+                                    416,0.,416.,160,0.,160.,0.,10000.);
+  hsizeMap1->SetOption("colz");
+  hsizeXMap1 = fs->make<TProfile2D>("hsizeXMap1", "clus sizeX, module in L1",
+                                    416,0.,416.,160,0.,160.,0.,10000.);
+  hsizeXMap1->SetOption("colz");
+  hsizeYMap1 = fs->make<TProfile2D>("hsizeYMap1", "clus sizeY, module in L1",
+                                    416,0.,416.,160,0.,160.,0.,10000.);
+  hsizeYMap1->SetOption("colz");
+  hclucharMap1 = fs->make<TProfile2D>("hclucharMap1", "clus char, module in L1",
+                                    416,0.,416.,160,0.,160.,0.,10000.);
+  hclucharMap1->SetOption("colz");
+  hpixcharMap1 = fs->make<TProfile2D>("hpixcharMap1", "pix char, module in L1",
+                                    416,0.,416.,160,0.,160.,0.,10000.);
+  hpixcharMap1->SetOption("colz");
+#endif
 
   countEvents=0;
   countAllEvents=0;
@@ -2249,7 +2278,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 #ifdef PV
   // PVs
   int numPVsGood = 0;
-  if(run>165000) { // skip for earlier runs, crashes
+  if(useTracks && run>165000) { // skip for earlier runs, crashes
     edm::Handle<reco::VertexCollection> vertices;
     //e.getByLabel( "offlinePrimaryVertices", vertices );
     e.getByToken(VertexCollectionToken, vertices);
@@ -2285,12 +2314,13 @@ void PixClusterAna::analyze(const edm::Event& e,
 
   // Tracks
   int numOfTracks=0;
-  Handle<reco::TrackCollection> recTracks;
-  e.getByToken(TrackToken, recTracks);
-  numOfTracks = recTracks->size();
-  htracks->Fill(float(numOfTracks));
-  if(PRINT) cout<<" Tracks "<<numOfTracks<<endl;
-
+  if(useTracks) {
+    Handle<reco::TrackCollection> recTracks;
+    e.getByToken(TrackToken, recTracks);
+    numOfTracks = recTracks->size();
+    htracks->Fill(float(numOfTracks));
+    if(PRINT) cout<<" Tracks "<<numOfTracks<<endl;
+  }
 #endif // PV 
     
 
@@ -2933,6 +2963,9 @@ void PixClusterAna::analyze(const edm::Event& e,
 	    hpixchar1->Fill(zPos,adc);
 	    //hcharPixbx->Fill(bx,adc);
 	    //hcharPixls->Fill(lumiBlock,adc);
+#ifdef STUDY_ONEMOD
+	    hpixcharMap1->Fill(pixy,pixx,adc);
+#endif
 	
 #ifdef LAY1_SPLIT    
 	    if(inner) {
@@ -2980,12 +3013,12 @@ void PixClusterAna::analyze(const edm::Event& e,
 	      float weight = 1.; // adc
 	      if     (eventFlag[0]&&ladder==-1 && module==-1) hpixDetMap10->Fill(pixy,pixx,weight); //  BmO1,2
 	      else if(eventFlag[1]&&ladder==-1 && module==-2) hpixDetMap11->Fill(pixy,pixx,weight); // 
-	      else if(eventFlag[2]&&ladder==-1 && module==-3) hpixDetMap12->Fill(pixy,pixx,weight); // 
-	      else if(eventFlag[3]&&ladder==-1 && module==-4) hpixDetMap13->Fill(pixy,pixx,weight); //  
-	      else if(eventFlag[4]&&ladder==-2 && module==-1) hpixDetMap14->Fill(pixy,pixx,weight); // "
-	      else if(eventFlag[5]&&ladder==-2 && module==-2) hpixDetMap19->Fill(pixy,pixx,weight); // "
-	      else if(eventFlag[6]&&ladder==-2 && module==-3) hpixDetMap16->Fill(pixy,pixx,weight); // "
-	      else if(eventFlag[7]&&ladder==-2 && module==-4) hpixDetMap17->Fill(pixy,pixx,weight); // 
+	      else if(eventFlag[2]&&ladder==6  && module==-1) hpixDetMap12->Fill(pixy,pixx,weight); // 
+	      else if(eventFlag[3]&&ladder==4  && module==-2) hpixDetMap13->Fill(pixy,pixx,weight); //  
+	      else if(eventFlag[4]&&ladder==4  && module== 1) hpixDetMap14->Fill(pixy,pixx,weight); // "
+	      else if(eventFlag[5]&&ladder==-1 && module== 2) hpixDetMap19->Fill(pixy,pixx,weight); // "
+	      else if(eventFlag[6]&&ladder==-2 && module==-1) hpixDetMap16->Fill(pixy,pixx,weight); // "
+	      else if(eventFlag[7]&&ladder==-2 && module==-2) hpixDetMap17->Fill(pixy,pixx,weight); // 
 	      else if(eventFlag[8]&&ladder== 1 && module==-1) hpixDetMap18->Fill(pixy,pixx,weight); //  
 	      else if(eventFlag[9]&&ladder== 1 && module==-2) hpixDetMap15->Fill(pixy,pixx,weight); // 
 #endif
@@ -3098,14 +3131,14 @@ void PixClusterAna::analyze(const edm::Event& e,
 #ifdef SINGLE_MODULES
 	    if     (ladder== -1 && module== 2) hpixDetMap20->Fill(pixy,pixx); // dcdc 
 	    else if(ladder== -1 && module== 1) hpixDetMap21->Fill(pixy,pixx); //  "
-	    else if(ladder== -1 && module== 3) hpixDetMap22->Fill(pixy,pixx); //  "
+	    else if(ladder==  1 && module== 2) hpixDetMap22->Fill(pixy,pixx); //  "
 	    else if(ladder== -5 && module==-2) hpixDetMap23->Fill(pixy,pixx); //  "
-	    else if(ladder== -5 && module==-3) hpixDetMap24->Fill(pixy,pixx); //  "
-	    else if(ladder==  5 && module==-3) hpixDetMap25->Fill(pixy,pixx); // noisy 34/64
+	    else if(ladder==  9 && module== 4) hpixDetMap24->Fill(pixy,pixx); //  "
+	    else if(ladder==-10 && module== 3) hpixDetMap25->Fill(pixy,pixx); // noisy 34/64
 	    else if(ladder== 13 && module==-4) hpixDetMap26->Fill(pixy,pixx); // dcdc
 	    else if(ladder== 12 && module==-1) hpixDetMap27->Fill(pixy,pixx); // dcdc
 	    else if(ladder== 14 && module==-1) hpixDetMap28->Fill(pixy,pixx); // dcdc
-	    else if(ladder==  7 && module== 1) hpixDetMap29->Fill(pixy,pixx); // noisy
+	    else if(ladder==  6 && module== 4) hpixDetMap29->Fill(pixy,pixx); // noisy
 #endif
 
 #if defined(BX) || defined(BX_NEW)
@@ -3179,9 +3212,9 @@ void PixClusterAna::analyze(const edm::Event& e,
 	    else if(ladder==-5  && module==-2) hpixDetMap34->Fill(pixy,pixx); // noisy
 	    else if(ladder==-10 && module== 3) hpixDetMap35->Fill(pixy,pixx); // " 
 	    else if(ladder==3   && module==-3) hpixDetMap36->Fill(pixy,pixx); // "   
-	    else if(ladder==-19 && module==-4) hpixDetMap37->Fill(pixy,pixx); // fed errors 
-	    else if(ladder== 9  && module==-2) hpixDetMap38->Fill(pixy,pixx); // noisy  
-	    else if(ladder==-22 && module==-2) hpixDetMap39->Fill(pixy,pixx); // fed errors, masked 1/2
+	    else if(ladder== 19 && module==-3) hpixDetMap37->Fill(pixy,pixx); // noisy 
+	    else if(ladder== 8  && module==-4) hpixDetMap38->Fill(pixy,pixx); // noisy  
+	    else if(ladder==-11 && module== 1) hpixDetMap39->Fill(pixy,pixx); // noisy
 #endif
 	    hpixchar3->Fill(zPos,adc);
 	    //hcharPixbx->Fill(bx,adc);
@@ -3269,14 +3302,14 @@ void PixClusterAna::analyze(const edm::Event& e,
 #endif
 
 #ifdef SINGLE_MODULES
-	    if     (ladder==  2 && module==-2) hpixDetMap40->Fill(pixy,pixx); // fed errors 
-	    else if(ladder== 22 && module== 3) hpixDetMap41->Fill(pixy,pixx); // noise
-	    else if(ladder==  2 && module== 4) hpixDetMap42->Fill(pixy,pixx); //  "
-	    else if(ladder==-26 && module==-2) hpixDetMap43->Fill(pixy,pixx); //  "
-	    else if(ladder==-20 && module==-1) hpixDetMap44->Fill(pixy,pixx); //  " 
-	    //else if(ladder==  3 && module==-4) hpixDetMap45->Fill(pixy,pixx); // " 
-	    // else if(ladder== 31 && module==-1) hpixDetMap46->Fill(pixy,pixx); // "
-	    //else if(ladder== 15 && module== 1) hpixDetMap47->Fill(pixy,pixx); // "
+	    if     (ladder==-17 && module==-2) hpixDetMap40->Fill(pixy,pixx); // noisy 
+	    else if(ladder== 13 && module== 4) hpixDetMap41->Fill(pixy,pixx); // noise
+	    else if(ladder==-14 && module== 2) hpixDetMap42->Fill(pixy,pixx); //  "
+	    else if(ladder== 13 && module== 3) hpixDetMap43->Fill(pixy,pixx); //  "
+	    else if(ladder== 32 && module== 1) hpixDetMap44->Fill(pixy,pixx); //  " 
+	    else if(ladder== 25 && module== 4) hpixDetMap45->Fill(pixy,pixx); // " 
+	    else if(ladder== -1 && module==-1) hpixDetMap46->Fill(pixy,pixx); // "
+	    else if(ladder==-30 && module==-2) hpixDetMap47->Fill(pixy,pixx); // "
 	    //else if(ladder==-22 && module== 2) hpixDetMap48->Fill(pixy,pixx); //  
 	    //else if(ladder== 32 && module== 2) hpixDetMap49->Fill(pixy,pixx); //  
 #endif
@@ -3350,6 +3383,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 	  hcluDetMap1->Fill(y,x);
 
+
 	  if(newL1Modules) {
 	    hcharge1n->Fill(ch);
 	    hsize1n->Fill(float(size));
@@ -3368,6 +3402,13 @@ void PixClusterAna::analyze(const edm::Event& e,
 	  avCharge1 += ch;
 
 	  htest1->Fill(ch,float(size));
+
+#ifdef STUDY_ONEMOD
+	    hsizeMap1->Fill(y,x,size);
+	    hsizeXMap1->Fill(y,x,sizeX);
+	    hsizeYMap1->Fill(y,x,sizeY);
+	    hclucharMap1->Fill(y,x,ch);
+#endif
 
 #ifdef MINMAX
 	  if(size>1) {
@@ -3542,6 +3583,8 @@ void PixClusterAna::analyze(const edm::Event& e,
 	  hcharge2->Fill(ch);
 	  if(ladder==1 && module>0) {hcharge8->Fill(ch);}
 
+
+
 	  htest3->Fill(ch,float(size));
 #ifdef MINMAX
 	  if(size>1) {
@@ -3648,6 +3691,9 @@ void PixClusterAna::analyze(const edm::Event& e,
 	  hsizex3->Fill(float(sizeX));
 	  hsizey3->Fill(float(sizeY));
 	  htest3->Fill(ch,float(size));
+
+
+
 #ifdef MINMAX
 	  if(size>1) {
 	    hcharMin3->Fill(adcMin);
@@ -3743,6 +3789,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 	  hrows4->Fill(x);
 
 	  hcluDetMap4->Fill(y,x);
+
 
 	  //hcharClubx->Fill(bx,ch);
 	  //hsizeClubx->Fill(bx,size);

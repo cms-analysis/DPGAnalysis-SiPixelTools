@@ -122,14 +122,36 @@
 //#define HLT
 //#define LUMI
 
-//#define VDM_STUDIES
+#define LS_STUDIES
 //#define ALIGN_STUDIES
 //#define OVERLAP_STUDIES
 //#define STUDY_LAY1
-#define SINGLE_MODULES
+//#define SINGLE_MODULES
 //#define CLU_SHAPE    // L1, use one or the other but not both
 //#define CLU_SHAPE_L2  // same for L2 
 #define PHI_PROFILES
+//#define STUDY_ONEMOD
+
+//#define TRAJECTORY // needs a track refit
+
+#ifdef TRAJECTORY
+#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "TrackingTools/Records/interface/TransientTrackRecord.h"
+#include "TrackingTools/Records/interface/TransientRecHitRecord.h"
+//#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+//#include "TrackingTools/TransientTrackingRecHit/interface/TransientTrackingRecHit.h"
+#include "TrackingTools/TransientTrackingRecHit/interface/TransientTrackingRecHitBuilder.h"
+#include "RecoTracker/TransientTrackingRecHit/interface/TkTransientTrackingRecHitBuilder.h"
+//#include "TrackingTools/PatternTools/interface/Trajectory.h"
+//#include "TrackingTools/PatternTools/interface/TrajectoryBuilder.h"
+//#include "TrackingTools/TrackFitters/interface/TrajectoryFitter.h"
+//#include "TrackingTools/TrackFitters/interface/TrajectoryStateCombiner.h"
+//#include <TrackingTools/TrajectoryState/interface/FreeTrajectoryState.h>
+//#include "TrackingTools/Records/interface/TrackingComponentsRecord.h"
+//#include "TrackingTools/TrajectoryState/interface/TrajectoryStateTransform.h"
+//#include "DataFormats/TrackerRecHit2D/interface/TkCloner.h"
+#endif
+
 
 const bool isData = true; // set false for MC
 
@@ -161,6 +183,7 @@ class PixClustersWithTracks : public edm::EDAnalyzer {
   float count1, count2, count3, count4;
   float countTracks1, countTracks2, countTracks3, countTracks4, countTracks5;
   int select1, select2;
+  int selectLayer, selectLadder, selectModule;
 
   // Needed for the ByToken method
   //edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster> > myClus;
@@ -328,7 +351,7 @@ class PixClustersWithTracks : public edm::EDAnalyzer {
   TProfile *hAErrorXB,*hAErrorYB,*hAErrorXF,*hAErrorYF; 
 #endif
 
-#ifdef VDM_STUDIES
+#ifdef LS_STUDIES
   TProfile *hcharCluls, *hcharPixls, *hsizeCluls, *hsizeXCluls;
   TProfile *hcharCluls1, *hcharPixls1, *hsizeCluls1, *hsizeXCluls1;
   TProfile *hcharCluls2, *hcharPixls2, *hsizeCluls2, *hsizeXCluls2;
@@ -340,6 +363,13 @@ class PixClustersWithTracks : public edm::EDAnalyzer {
 
 #ifdef OVERLAP_STUDIES
   TH1D *hcluphi1,*hcluphi2,*hcluphi3,*hcluphi4 ;
+#endif
+
+  TH1D *hbpixHits, *hbpixLayers, *htrackLayers;
+  TProfile *hbpixLayersPt, *htrackLayersPt, *hbpixLayersEta, *htrackLayersEta;
+
+#ifdef STUDY_ONEMOD
+  TProfile2D *hsizeMap1, *hsizeXMap1, *hsizeYMap1,*hclucharMap1,*hpixcharMap1;
 #endif
 
 
@@ -359,6 +389,15 @@ PixClustersWithTracks::PixClustersWithTracks(edm::ParameterSet const& conf)
 
   if(PRINT) cout<<" Construct: Normalise = "<<Normalise<<endl;
 
+  // +-LDDM L layer DD ladder M module e.g. 1065 for BmI8/1/6/1  
+  if(select1==201) { //select specifix module 
+    int sign  = select2/abs(select2); // negative sign for outer O ladders
+    selectLayer = abs(select2)/1000; // layer
+    selectLadder = (abs(select2)%1000)/10; // ladder
+    selectModule = (abs(select2)%10); // module
+    selectLadder *= sign;
+    if(selectModule>4) selectModule = -(selectModule-4); // 8 7 6 5 - 1 2 3 4
+  }
   // Consumes 
   // For the ByToken method
   //myClus = consumes<edmNew::DetSetVector<SiPixelCluster> >(conf.getParameter<edm::InputTag>( "src" ));
@@ -1011,30 +1050,30 @@ void PixClustersWithTracks::beginJob() {
 
 #endif
 
-#ifdef VDM_STUDIES
+#ifdef LS_STUDIES
    highH = 3000.; 
    sizeH = 1000;
 
    hclusls = fs->make<TProfile>("hclusls","clus vs ls",sizeH,0.,highH,0.0,30000.);
    //hpixls  = fs->make<TProfile>("hpixls", "pix vs ls ",sizeH,0.,highH,0.0,100000.);
 
-   hcharCluls = fs->make<TProfile>("hcharCluls","clu char vs ls",sizeH,0.,highH,0.0,100.);
+   hcharCluls = fs->make<TProfile>("hcharCluls","clu char vs ls",sizeH,0.,highH,0.0,1000.);
    //hcharPixls = fs->make<TProfile>("hcharPixls","pix char vs ls",sizeH,0.,highH,0.0,100.);
    hsizeCluls = fs->make<TProfile>("hsizeCluls","clu size vs ls",sizeH,0.,highH,0.0,1000.);
-   hsizeXCluls= fs->make<TProfile>("hsizeXCluls","clu size-x vs ls",sizeH,0.,highH,0.0,100.);
+   hsizeXCluls= fs->make<TProfile>("hsizeXCluls","clu size-x vs ls",sizeH,0.,highH,0.0,1000.);
 
-   hcharCluls1 = fs->make<TProfile>("hcharCluls1","clu char vs ls",sizeH,0.,highH,0.0,100.);
+   hcharCluls1 = fs->make<TProfile>("hcharCluls1","clu char vs ls",sizeH,0.,highH,0.0,1000.);
    //hcharPixls1 = fs->make<TProfile>("hcharPixls1","pix char vs ls",sizeH,0.,highH,0.0,100.);
    hsizeCluls1 = fs->make<TProfile>("hsizeCluls1","clu size vs ls",sizeH,0.,highH,0.0,1000.);
-   hsizeXCluls1= fs->make<TProfile>("hsizeXCluls1","clu size-x vs ls",sizeH,0.,highH,0.0,100.);
-   hcharCluls2 = fs->make<TProfile>("hcharCluls2","clu char vs ls",sizeH,0.,highH,0.0,100.);
+   hsizeXCluls1= fs->make<TProfile>("hsizeXCluls1","clu size-x vs ls",sizeH,0.,highH,0.0,1000.);
+   hcharCluls2 = fs->make<TProfile>("hcharCluls2","clu char vs ls",sizeH,0.,highH,0.0,1000.);
    //hcharPixls2 = fs->make<TProfile>("hcharPixls2","pix char vs ls",sizeH,0.,highH,0.0,100.);
    hsizeCluls2 = fs->make<TProfile>("hsizeCluls2","clu size vs ls",sizeH,0.,highH,0.0,1000.);
    hsizeXCluls2= fs->make<TProfile>("hsizeXCluls2","clu size-x vs ls",sizeH,0.,highH,0.0,100.);
-   hcharCluls3 = fs->make<TProfile>("hcharCluls3","clu char vs ls",sizeH,0.,highH,0.0,100.);
+   hcharCluls3 = fs->make<TProfile>("hcharCluls3","clu char vs ls",sizeH,0.,highH,0.0,1000.);
    //hcharPixls3 = fs->make<TProfile>("hcharPixls3","pix char vs ls",sizeH,0.,highH,0.0,100.);
    hsizeCluls3 = fs->make<TProfile>("hsizeCluls3","clu size vs ls",sizeH,0.,highH,0.0,1000.);
-   hsizeXCluls3= fs->make<TProfile>("hsizeXCluls3","clu size-x vs ls",sizeH,0.,highH,0.0,100.);
+   hsizeXCluls3= fs->make<TProfile>("hsizeXCluls3","clu size-x vs ls",sizeH,0.,highH,0.0,1000.);
    hclusls1 = fs->make<TProfile>("hclusls1","clus vs ls",sizeH,0.,highH,0.0,30000.);
    //hpixls1  = fs->make<TProfile>("hpixls1", "pix vs ls ",sizeH,0.,highH,0.0,100000.);
    hclusls2 = fs->make<TProfile>("hclusls2","clus vs ls",sizeH,0.,highH,0.0,30000.);
@@ -1097,6 +1136,34 @@ void PixClustersWithTracks::beginJob() {
   hpixDetMap4 = fs->make<TH2F>( "hpixMap4", "pix in det layer 4",
 		      416,0.,416.,160,0.,160.);
   hpixDetMap4->SetOption("colz");
+
+
+  hbpixHits   = fs->make<TH1D>("hpixHits","bpix hits per track",10,-0.5,9.5); 
+  hbpixLayers = fs->make<TH1D>("hpixLayers",  "bpix hit layers per track",10,-0.5,9.5); 
+  htrackLayers= fs->make<TH1D>("htrackLayers","tracker layers per track",30,-0.5,29.5);
+
+  hbpixLayersPt = fs->make<TProfile>("hbpixLayersPt", "BPix Layers per track vs Pt",100,0.,100.,0.,100.);
+  htrackLayersPt= fs->make<TProfile>("htrackLayersPt","Tracking Layers per track vs Pt",100,0.,100.,0.,100.);
+  hbpixLayersEta = fs->make<TProfile>("hbpixLayersEta", "BPix Layers per track vs Eta",70,-3.5,3.5,0.,100.);
+  htrackLayersEta= fs->make<TProfile>("htrackLayersEta","Tracking Layers per track vs Eta",70,-3.5,3.5,0.,100.);
+
+#ifdef STUDY_ONEMOD
+  hsizeMap1 = fs->make<TProfile2D>("hsizeMap1", "clus size, module in L1",
+                                    416,0.,416.,160,0.,160.,0.,10000.);
+  hsizeMap1->SetOption("colz");
+  hsizeXMap1 = fs->make<TProfile2D>("hsizeXMap1", "clus sizeX, module in L1",
+                                    416,0.,416.,160,0.,160.,0.,10000.);
+  hsizeXMap1->SetOption("colz");
+  hsizeYMap1 = fs->make<TProfile2D>("hsizeYMap1", "clus sizeY, module in L1",
+                                    416,0.,416.,160,0.,160.,0.,10000.);
+  hsizeYMap1->SetOption("colz");
+  hclucharMap1 = fs->make<TProfile2D>("hclucharMap1", "clus char, module in L1",
+                                    416,0.,416.,160,0.,160.,0.,10000.);
+  hclucharMap1->SetOption("colz");
+  hpixcharMap1 = fs->make<TProfile2D>("hpixcharMap1", "pix char, module in L1",
+                                    416,0.,416.,160,0.,160.,0.,10000.);
+  hpixcharMap1->SetOption("colz");
+#endif
 
 
 }
@@ -1485,6 +1552,33 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
   es.get<TrackerTopologyRcd>().get(tTopoH);
   const TrackerTopology *tTopo=tTopoH.product();
 
+#ifdef TRAJECTORY
+  //string _ttrhBuilder = "WithAngleAndTemplate"; // in construct
+  string _ttrhBuilder = "WithTrackAngle"; // in construct
+  //----------------------------------------------------------------------------
+  // Transient Rechit Builders
+  edm::ESHandle<TransientTrackBuilder> theB;
+  es.get<TransientTrackRecord>().get( "TransientTrackBuilder", theB ); // needs a refitter?
+  
+  // Transient rec hits:
+  ESHandle<TransientTrackingRecHitBuilder> hitBuilder;
+  es.get<TransientRecHitRecord>().get( _ttrhBuilder, hitBuilder );
+  
+  // Cloner:
+  const TkTransientTrackingRecHitBuilder * builder =
+    static_cast<TkTransientTrackingRecHitBuilder const *>(hitBuilder.product());
+  auto hitCloner = builder->cloner();
+
+  //theFitter->setHitCloner(&hitCloner);
+
+  // TrackPropagator:
+  //edm::ESHandle<Propagator> prop;
+  //es.get<TrackingComponentsRecord>().get( "PropagatorWithMaterial", prop );
+  //const Propagator* thePropagator = prop.product();
+
+#endif
+
+
   // -- Primary vertices
   // ----------------------------------------------------------------------
   edm::Handle<reco::VertexCollection> vertices;
@@ -1608,6 +1702,7 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
     //float tkvx = t->vx();  // unused 
     //float tkvy = t->vy();
     //float tkvz = t->vz();
+
     
     if(PRINT) cout<<"Track "<<trackNumber<<" Pt "<<pt<<" Eta "<<eta<<" d0/dz "<<d0<<" "<<dz
 		  <<" Hits "<<size<<" cuts "<<etaCut<<" "<<ptCut<<endl;
@@ -1652,6 +1747,8 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
     int pa = hp.numberOfValidPixelHits();
     int pb = hp.numberOfValidPixelBarrelHits();
     int pf = hp.numberOfValidPixelEndcapHits();
+    int numTrackLayers  = hp.trackerLayersWithMeasurement();
+    int numBPixLayers   = hp.pixelBarrelLayersWithMeasurement();
     int pm1 = hp.numberOfLostPixelHits(HitPattern::HitCategory::TRACK_HITS);
     int pm2 = hp.numberOfLostPixelHits(HitPattern::HitCategory::MISSING_INNER_HITS);
     int pbm1 = hp.numberOfLostPixelBarrelHits(HitPattern::HitCategory::TRACK_HITS);
@@ -1675,6 +1772,14 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
     if(pbm2>0) {hstatus->Fill(6.); missingHitB=true;}
     if(missingHitB) {hPhi0->Fill(phi);hEta0->Fill(eta);}
 
+    hbpixHits->Fill(float(pb));
+    hbpixLayers->Fill(float(numBPixLayers));
+    htrackLayers->Fill(float(numTrackLayers));
+    hbpixLayersPt->Fill( pt,float(numBPixLayers));
+    htrackLayersPt->Fill(pt,float(numTrackLayers));
+    hbpixLayersEta->Fill( eta,float(numBPixLayers));
+    htrackLayersEta->Fill(eta,float(numTrackLayers));
+
     bool goodTrack = false; 
     float zpv=-999., tmp0=999.;
     for(vector<float>::iterator m=pvzVector.begin(); m!=pvzVector.end();++m) {
@@ -1696,6 +1801,21 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
         
     //cout<<" rechits : " <<endl;
 
+
+#ifdef TRAJECTORY
+    // transient track:
+    TransientTrack tTrack = theB->build(*t);
+
+    TrajectoryStateOnSurface initialTSOS = tTrack.innermostMeasurementState();
+
+    double kap = tTrack.initialFreeState().transverseCurvature();
+    const Surface::GlobalPoint origin = Surface::GlobalPoint(0,0,0);
+    TrajectoryStateClosestToPoint tscp = tTrack.trajectoryStateClosestToPoint( origin );
+
+    if( tscp.isValid() ) {
+      cout<<" trajectory ok"<<endl;
+    }
+#endif
     // Loop over rechits
     for ( trackingRecHit_iterator recHit = t->recHitsBegin();
 	  recHit != t->recHitsEnd(); ++recHit ) {
@@ -1710,6 +1830,19 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
       //cout<<IntSubDetID<<endl;
       // Select valid rechits	
       if(IntSubDetID == 0 ) continue;  // Select ??
+
+#ifdef TRAJECTORY
+      auto tmprh =
+	(*recHit)->cloneForFit(*builder->geometry()->idToDet((**recHit).geographicalId()));
+      auto transRecHit = hitCloner.makeShared(tmprh, initialTSOS);
+
+      //myTTRHvec.push_back( transRecHit );
+      //coTTRHvec.push_back( transRecHit );
+
+      double xloc = transRecHit->localPosition().x();// 1st meas coord
+      double yloc = transRecHit->localPosition().y();// 2nd meas coord or zero
+#endif
+
 
 
       int layer=0, ladderIndex=0, zindex=0, ladderOn=0, module=0, shell=0;
@@ -1748,33 +1881,31 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	// change ladeer sign for Outer )x<0)
 	if(shell==1 || shell==3) ladderOn = -ladderOn;
 	
-
-      if( layer==2) {
-	if( (ladderOn ==-1) && ( (module == 1) || (module == 2) || (module == 3)) ) badL2Modules=true;
-	else if( (ladderOn ==-5) &&( (module == -1) || (module == -2) || (module == -3)) ) badL2Modules=true;
-	else if( (ladderOn == 14) && (module == -1) ) badL2Modules=true;
-	else if( (ladderOn == 13) && (module == -4) ) badL2Modules=true;
-	else if( (ladderOn == 12) && (module == -1) ) badL2Modules=true;
-	else if( (ladderOn == 11) && (module == -4) ) badL2Modules=true;
-      }
-
-      // find inner and outer modules for layer 1 onl
-      if( (layer==1) ) {
-	if( (ladderOn==2) || (ladderOn==4) || (ladderOn==6) ||
-	    (ladderOn==-1) || (ladderOn==-3) || (ladderOn==-5) ) inner=true;
-	else inner=false;
-
-	if     ( (ladderOn ==-1) && (module == 3) ) newL1Modules=true;
-	else if( (ladderOn ==-3) && (module == 3) ) newL1Modules=true;
-	else if( (ladderOn ==-1) && (module ==-3) ) newL1Modules=true;
-	else if( (ladderOn ==-1) && (module ==-1) ) newL1Modules=true;
-	else if( (ladderOn ==-3) && (module ==-1) ) newL1Modules=true;
-	else if( (ladderOn ==-5) && (module ==-1) ) newL1Modules=true;
-
-      }
+	if( layer==2) {
+	  if( (ladderOn ==-1) && ( (module == 1) || (module == 2) || (module == 3)) ) badL2Modules=true;
+	  else if( (ladderOn ==-5) &&( (module == -1) || (module == -2) || (module == -3)) ) badL2Modules=true;
+	  else if( (ladderOn == 14) && (module == -1) ) badL2Modules=true;
+	  else if( (ladderOn == 13) && (module == -4) ) badL2Modules=true;
+	  else if( (ladderOn == 12) && (module == -1) ) badL2Modules=true;
+	  else if( (ladderOn == 11) && (module == -4) ) badL2Modules=true;
+	}
+	
+	// find inner and outer modules for layer 1 onl
+	if( (layer==1) ) {
+	  if( (ladderOn==2) || (ladderOn==4) || (ladderOn==6) ||
+	      (ladderOn==-1) || (ladderOn==-3) || (ladderOn==-5) ) inner=true;
+	  else inner=false;
+	  
+	  if     ( (ladderOn ==-1) && (module == 3) ) newL1Modules=true;
+	  else if( (ladderOn ==-3) && (module == 3) ) newL1Modules=true;
+	  else if( (ladderOn ==-1) && (module ==-3) ) newL1Modules=true;
+	  else if( (ladderOn ==-1) && (module ==-1) ) newL1Modules=true;
+	  else if( (ladderOn ==-3) && (module ==-1) ) newL1Modules=true;
+	  else if( (ladderOn ==-5) && (module ==-1) ) newL1Modules=true;
+	  
+	}
       
-
-      if(PRINT) cout<<"barrel layer/ladder/module: "<<layer<<"/"<<ladderIndex<<"/"<<zindex<<endl;
+	if(PRINT) cout<<"barrel layer/ladder/module: "<<layer<<"/"<<ladderIndex<<"/"<<zindex<<endl;
 	
       } else if(IntSubDetID == PixelSubdetector::PixelEndcap) {  // fpix
 
@@ -1801,6 +1932,11 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 
       } else { // nothings
 	continue; // skip non pixel hits 
+      }
+
+
+      if(select1==201) { // select a specific module 
+	if( (layer!=selectLayer) || (ladderOn!=selectLadder) || (module!=selectModule) ) continue; // skip module 
       }
 
       hstatus->Fill(8.);
@@ -2052,6 +2188,14 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 		hsizex1->Fill(float(sizeX));
 		hsizey1->Fill(float(sizeY));
 	      }
+
+#ifdef STUDY_ONEMOD
+	    hsizeMap1->Fill(col,row,size);
+	    hsizeXMap1->Fill(col,row,sizeX);
+	    hsizeYMap1->Fill(col,row,sizeY);
+	    hclucharMap1->Fill(col,row,charge);
+#endif
+
 #ifdef USE_PROFILES
 	      hclumult1->Fill(eta,float(size));
 	      hclumultx1->Fill(eta,float(sizeX));
@@ -2124,7 +2268,7 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    hcluphi1->Fill(gPhi);
 #endif
 
-#ifdef VDM_STUDIES
+#ifdef LS_STUDIES
 	    hcharCluls->Fill(lumiBlock,charge);
 	    hsizeCluls->Fill(lumiBlock,size);
 	    hsizeXCluls->Fill(lumiBlock,sizeX);
@@ -2218,7 +2362,7 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 #endif
 	      }
 	      
-#ifdef VDM_STUDIES
+#ifdef LS_STUDIES
 	      hcharCluls->Fill(lumiBlock,charge);
 	      hsizeCluls->Fill(lumiBlock,size);
 	      hsizeXCluls->Fill(lumiBlock,sizeX);
@@ -2283,7 +2427,7 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 #endif
 	    }
 
-#ifdef VDM_STUDIES
+#ifdef LS_STUDIES
 	    hcharCluls->Fill(lumiBlock,charge);
 	    hsizeCluls->Fill(lumiBlock,size);
 	    hsizeXCluls->Fill(lumiBlock,sizeX);
@@ -2462,16 +2606,16 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 
 #ifdef SINGLE_MODULES
 	    float weight=1.;
-	      if     ( ladder==-1 && module==1) hpixDetMap10->Fill(pixy,pixx,weight); //  BpOx/1/1/1 ?noise 
-	      else if( ladder==-5 && module==-4) hpixDetMap11->Fill(pixy,pixx,weight); // noisy, masked 0-3
-	      else if( ladder==2 && module==1) hpixDetMap12->Fill(pixy,pixx,weight); // fed errors 1205/7,8
-	      else if( ladder==6 && module==3) hpixDetMap13->Fill(pixy,pixx,weight); // noise 
-	      else if( ladder==2 && module==-1) hpixDetMap14->Fill(pixy,pixx,weight); // "
-	      else if( ladder==-5 && module==2) hpixDetMap19->Fill(pixy,pixx,weight); // "
-	      else if( ladder==-5 && module==1) hpixDetMap16->Fill(pixy,pixx,weight); // "
-	      else if( ladder==-1 && module==-4) hpixDetMap17->Fill(pixy,pixx,weight); // dcol ctructures
-	      else if( ladder== 6 && module== 1) hpixDetMap18->Fill(pixy,pixx,weight); // v. low threshold 
-	      else if( ladder==-6 && module==-1) hpixDetMap15->Fill(pixy,pixx,weight); // low occu
+	    if     (ladder==-1 && module==-1) hpixDetMap10->Fill(pixy,pixx,weight); //  BmO1,2
+	    else if(ladder==-1 && module==-2) hpixDetMap11->Fill(pixy,pixx,weight); // 
+	    else if(ladder==6  && module==-1) hpixDetMap12->Fill(pixy,pixx,weight); // 
+	    else if(ladder==4  && module==-2) hpixDetMap13->Fill(pixy,pixx,weight); //  
+	    else if(ladder==4  && module== 1) hpixDetMap14->Fill(pixy,pixx,weight); // "
+	    else if(ladder==-1 && module== 2) hpixDetMap19->Fill(pixy,pixx,weight); // "
+	    else if(ladder==-2 && module==-1) hpixDetMap16->Fill(pixy,pixx,weight); // "
+	    else if(ladder==-2 && module==-2) hpixDetMap17->Fill(pixy,pixx,weight); // 
+	    else if(ladder== 1 && module==-1) hpixDetMap18->Fill(pixy,pixx,weight); //  
+	    else if(ladder== 1 && module==-2) hpixDetMap15->Fill(pixy,pixx,weight); // 
 #endif
 
 	  } else if(layer==2) {
@@ -2667,7 +2811,7 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
   }
 #endif
 
-#ifdef VDM_STUDIES
+#ifdef LS_STUDIES
 
   hclusls->Fill(float(lumiBlock),float(numberOfClusters)); // clusters fpix+bpix
   //hpixls->Fill(float(lumiBlock),float(numberOfPixels)); // pixels fpix+bpix

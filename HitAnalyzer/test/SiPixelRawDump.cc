@@ -656,7 +656,8 @@ private:
 #endif
 
   TH1D *hlumi, *horbit, *hbx, *hlumi0, *hbx0, *hbx1, *hbx2;
-  TProfile *htotPixelsls, *hsizels, *herrorType1ls, *herrorType2ls, *htotPixelsbx, 
+  TProfile *htotPixelsls,*hbpixPixelsls,*hfpixPixelsls;  
+  TProfile *hsizels, *herrorType1ls, *herrorType2ls, *htotPixelsbx, 
     *herrorType1bx,*herrorType2bx,*havsizebx,*hsizep;
   TProfile *herror1ls,*herror2ls,*herror3ls,*herror4ls,*herror5ls,*herror6ls,*herror7ls,*herror8ls,
     *herror9ls,*herror10ls,*herror11ls,*herror12ls,*herror13ls,*herror14ls,*herror15ls,*herror16ls; 
@@ -1022,7 +1023,8 @@ void SiPixelRawDump::beginJob() {
 
   hsizels = fs->make<TProfile>("hsizels"," bpix fed size vs ls",300,0,3000,0,200000.);
   htotPixelsls = fs->make<TProfile>("htotPixelsls"," tot pixels vs ls",300,0,3000,0,300000.);
-  //havsizels = fs->make<TProfile>("havsizels","av. bpix fed size vs ls",300,0,3000,0,300000.);
+  hbpixPixelsls = fs->make<TProfile>("hbpixPixelsls"," bpix pixels vs ls",300,0,3000,0,300000.);
+  hfpixPixelsls = fs->make<TProfile>("hfpixPixelsls"," fpix pixels vs ls",300,0,3000,0,300000.);
 
   herror1ls = fs->make<TProfile>("herror1ls","error 1 vs ls",300,0,3000,0,1000.);
   //herror2ls = fs->make<TProfile>("herror2ls","error 2 vs ls",300,0,3000,0,1000.);
@@ -1179,6 +1181,8 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
   typedef uint64_t Word64;
   int status=0;
   int countPixels=0;
+  int countPixelsBPix=0;
+  int countPixelsFPix=0;
   int eventId = -1;
   int countErrorsPerEvent=0;
   int countErrorsPerEvent1=0;
@@ -1271,9 +1275,9 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 
 	//status = MyDecode::data(w,fedChannel, fedId, stat1, stat2, printData);
 	status = decode.data(w,fedChannel, fedId, stat1, stat2, printData);
-	int layer = MyDecode::checkLayerLink(fedId, fedChannel); // get bpix layer, works only for phase0 
-	if(phase1) layer=0;
-	if(layer>10) layer = layer-10; // ignore 1/2 modules 
+	int layer = 1; //MyDecode::checkLayerLink(fedId, fedChannel); // get bpix layer, works only for phase0 
+	if(fedId>=1296) layer=0; // fpix
+	//if(layer>10) layer = layer-10; // ignore 1/2 modules 
 	if(status>0) {  // data
 	  countPixels++;
 	  countPixelsInFed++;
@@ -1281,13 +1285,13 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 	  
 	  int adc = decode.get_adc();
 	  if(layer==1)      
-	    {hadc1->Fill(float(adc));hadc1ls->Fill(float(lumiBlock),float(adc));hadc1bx->Fill(float(bx),float(adc));}
+	    {countPixelsBPix++;hadc1->Fill(float(adc));hadc1ls->Fill(float(lumiBlock),float(adc));hadc1bx->Fill(float(bx),float(adc));}
 	  else if(layer==2) 
 	    {hadc2->Fill(float(adc));hadc2ls->Fill(float(lumiBlock),float(adc));hadc2bx->Fill(float(bx),float(adc));}
 	  else if(layer==3) 
 	    {hadc3->Fill(float(adc));hadc3ls->Fill(float(lumiBlock),float(adc));hadc3bx->Fill(float(bx),float(adc));}
 	  else if(layer==0) 
-	    {hadc0->Fill(float(adc));hadc0ls->Fill(float(lumiBlock),float(adc));hadc0bx->Fill(float(bx),float(adc));}
+	    {countPixelsFPix++;hadc0->Fill(float(adc));hadc0ls->Fill(float(lumiBlock),float(adc));hadc0bx->Fill(float(bx),float(adc));}
 	  //cout<<adc<<endl;
 
 	} else if(status<0) {  // error word
@@ -1543,6 +1547,8 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
   htotErrors->Fill(float(countErrorsPerEvent));
 
   htotPixelsls->Fill(float(lumiBlock),float(countPixels));
+  hbpixPixelsls->Fill(float(lumiBlock),float(countPixelsBPix));
+  hfpixPixelsls->Fill(float(lumiBlock),float(countPixelsFPix));
   htotPixelsbx->Fill(float(bx),float(countPixels));
 
   herrorType1ls->Fill(float(lumiBlock),float(countErrorsPerEvent1));

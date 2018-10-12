@@ -408,7 +408,8 @@ public:
   void update(int channel, int roc, int dcol, int pix); 
   int code(int channel, int roc, int dcol, int pix); 
   void decode(int index, int &channel, int &roc, int &dcol, int &pix); 
-  void print(int, int, double);
+  //void print(int, int, double);
+  void print(int, int, double, TH2F*);
   void printROCs(int, int);
   int get_counts(int i) {if(i<count) return data[i]; else return -1;}
   int get_countsROC(int i) {if(i<NumROCs) return rocs[i]; else return -1;}
@@ -470,7 +471,7 @@ void HotPixels::update(int channel, int roc, int dcol, int pix) {
   }
 
 }
-void HotPixels::print(int events, int fed_id, double fraction) {
+void HotPixels::print(int events, int fed_id, double fraction, TH2F* hfedchannelp) {
   // for layer-1
   const unsigned int rowmsk = 0x7f00; 
   const unsigned int colmsk = 0x1f8000;
@@ -506,6 +507,7 @@ void HotPixels::print(int events, int fed_id, double fraction) {
 
     decode(index, channel, roc, dcol, pix);
 
+    hfedchannelp->Fill(float(fed_id-1200),float(channel),float(data[i]));
     //if(fed_id==1253 && channel==44) cout<<roc<<" "<<dcol<<" "<<pix<<" "<<data[i]<<endl;
 
     if(data[i]>cut) {
@@ -521,7 +523,7 @@ void HotPixels::print(int events, int fed_id, double fraction) {
       int colROC = -1;
       int rowROC = -1;
       int layer =-1;
-      string::size_type id;
+      //string::size_type id;
       if     ( modName.find("_LYR1_") != string::npos ) layer=1;  
       else if( modName.find("_LYR2_") != string::npos ) layer=2;  
       else if( modName.find("_LYR3_") != string::npos ) layer=3;  
@@ -680,7 +682,7 @@ void HotPixels::printROCs(int fed_id, int cut) {
         } else { // bpix 
 
 	  int layer=-1;
-	  string::size_type id;
+	  //string::size_type id;
 	  if     ( modName.find("_LYR1_") != string::npos ) layer=1;  
 	  else if( modName.find("_LYR2_") != string::npos ) layer=2;  
 	  else if( modName.find("_LYR3_") != string::npos ) layer=3;  
@@ -787,6 +789,8 @@ private:
   TH1D *hrocs, *hpixels, *hpixPerRoc;
   TH1D *hrow1, *hrow2,*hcol1, *hcol2,*hadc1, *hadc2; 
   TH1D *hcol11, *hadc11; 
+  TH2F *hfedchannelp, *hfedchannel;
+
 };
 
 void FindHotPixelFromRaw::endJob() {
@@ -798,12 +802,14 @@ void FindHotPixelFromRaw::endJob() {
   cout<<" Total/non-empty events " <<countAllEvents<<" / "<<countEvents<<" average number of pixels "<<sumPixels<<endl;
 
   for(int i=0;i<FEDs;++i) {
-    hotPixels[i].print(countAllEvents,i+fedId0,fraction_);
+    //hotPixels[i].print(countAllEvents,i+fedId0,fraction_);
+    hotPixels[i].print(countAllEvents,i+fedId0,fraction_,hfedchannelp);
     for(int n=0; n<1000000;++n) {
       float counts= float(hotPixels[i].get_counts(n));
       float tmp = counts/float(countAllEvents);
-      if(counts>-1) hsize0->Fill(tmp);
-      else break;
+      if(counts>0) hsize0->Fill(tmp);
+      //if(counts>-1) hsize0->Fill(tmp);
+      //else break;
       // if(counts>10) cout<<i<<" "<<n<<" "<<counts<<" "<<tmp<<endl;
     }
   }
@@ -841,8 +847,9 @@ void FindHotPixelFromRaw::beginJob() {
   cout<<" The noise fraction is "<<fraction_<<" FED range until "<<MAXFED<<endl;
 
   edm::Service<TFileService> fs;
-  hsize0 = fs->make<TH1D>( "hsize0", "Noisy pixels", 10000, 0.0, 0.1);
+  hsize0 = fs->make<TH1D>( "hsize0", "Noisy pixel rate", 10000, 0.0, 1.0);
   hsize1 = fs->make<TH1D>( "hsize1", "Noisy pixels per roc", 1000, -0.5, 999.5);
+  hsize2 = fs->make<TH1D>( "hsize2", "Noisy pixels per event", 1000, -0.5, 999.5);
 
   hrocs = fs->make<TH1D>( "hrocs", "rocs per channel", 10, -0.5, 9.5);
   hpixels = fs->make<TH1D>( "hpixels", "pixels per channel", 200, -0.5, 199.5);
@@ -853,6 +860,17 @@ void FindHotPixelFromRaw::beginJob() {
   hchannelRocs = fs->make<TH2F>("hchannelRocs", "num of rocs in a channel",48,0.,48.,9, -0.5,8.5);
   hchannelPixels = fs->make<TH2F>("hchannelPixels", "pixels in a channel",48,0.,48.,200, -0.5,199.5);
   hchannelPixPerRoc = fs->make<TH2F>("hchannelPixPerRoc", "pixels in a roc",48,0.,48.,100, -0.5,199.5);
+
+  const int n_of_FEDs = 139;
+  const int n_of_Channels = 48+1;
+  const float maxChan = static_cast<float>(n_of_Channels) - 0.5 + 1.0;
+  hfedchannel  = fs->make<TH2F>("hfedchannel", "pixels per fed&channel",
+				n_of_FEDs,-0.5,static_cast<float>(n_of_FEDs) - 0.5,
+				n_of_Channels, -0.5,maxChan);  
+  hfedchannelp  = fs->make<TH2F>("hfedchannelp", "pixels per fed&channel",
+                                          n_of_FEDs,-0.5,static_cast<float>(n_of_FEDs) - 0.5,
+                                          n_of_Channels, -0.5,maxChan);  
+
 
   hrow1 = fs->make<TH1D>( "hrow1", "pixel rows, l1",   101, -1.5, 99.5);
   hrow2 = fs->make<TH1D>( "hrow2", "pixel rows, l2-4", 101, -1.5, 99.5);
@@ -1071,7 +1089,8 @@ void FindHotPixelFromRaw::analyze(const  edm::Event& ev, const edm::EventSetup& 
 	//if(fedId==1253 && channel==44) cout<<roc<<" "<<dcol<<" "<<pix<<endl;
 	countPixels++;
 	countPixelsInFed++;
-	if(fedId==1253 && channel==44 && roc==3) countTest++;
+	if(fedId==1207 && channel==47 && roc==3) countTest++;
+	hfedchannel->Fill(fedId-1200,channel);
         if(findHot) hotPixels[fedId-fedId0].update(channel,roc,dcol,pix);
 	else        analyzeHits(fedId,channel,layer,roc,dcol,pix,adc);
       } else if(status<0) countErrorsInFed++;
@@ -1083,7 +1102,8 @@ void FindHotPixelFromRaw::analyze(const  edm::Event& ev, const edm::EventSetup& 
 	//if(fedId==1253 && channel==44) cout<<roc<<" "<<dcol<<" "<<pix<<endl;
 	countPixels++;
 	countPixelsInFed++;
-	if(fedId==1253 && channel==44 && roc==3) countTest++;
+	if(fedId==1207 && channel==47 && roc==3) countTest++;
+	hfedchannel->Fill(fedId-1200,channel);
         if(findHot) hotPixels[fedId-fedId0].update(channel,roc,dcol,pix);
 	else        analyzeHits(fedId,channel,layer,roc,dcol,pix,adc);
       } else if(status<0) countErrorsInFed++;
@@ -1108,6 +1128,9 @@ void FindHotPixelFromRaw::analyze(const  edm::Event& ev, const edm::EventSetup& 
     //cout<<"EVENT: "<<countEvents<<" "<<eventId<<" pixels "<<countPixels<<" errors "<<countErrors<<endl;
     sumPixels += countPixels;
     countEvents++;
+
+    hsize2->Fill(float(countPixels));
+
     //int dummy=0;
     //cout<<" : ";
     //cin>>dummy;

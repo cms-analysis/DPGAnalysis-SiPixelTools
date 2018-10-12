@@ -10,12 +10,12 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
-#process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
-#from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '') # no misalignment 
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '') # with misalignment 
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
 #process.GlobalTag.globaltag = '80X_dataRun2_Express_v10' # >8010
 
 
@@ -37,9 +37,8 @@ process.MessageLogger = cms.Service("MessageLogger",
 
 process.source = cms.Source("PoolSource",
     fileNames =  cms.untracked.vstring(
-    'file:../scripts/digis4.root'
-#    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_74/digis/digis1.root'
-#    'file:/afs/cern.ch/work/d/dkotlins/public/data/digis/digi_zb_248025.root'
+#    'file:../scripts/digis4.root'
+    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw2.root'
 #    '/store/user/kotlinski/mu100_v74/digis/digis1.root'
 
 # there are no digis in express
@@ -55,7 +54,7 @@ process.TFileService = cms.Service("TFileService",
 
   
 process.a = cms.EDAnalyzer("PixDigisTest",
-    Verbosity = cms.untracked.bool(False),
+    Verbosity = cms.untracked.bool(True),
     phase1 = cms.untracked.bool(False),
 # sim in V7
 #    src = cms.InputTag("mix"),
