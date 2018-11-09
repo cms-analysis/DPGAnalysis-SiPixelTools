@@ -3,17 +3,30 @@
  *  for pixel subdetector
  * Works for CMSSW7X (bytoken)d.k.
  */
+#include "FWCore/Framework/interface/ESHandle.h"
+#include "FWCore/Framework/interface/EventSetup.h"
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
+//#include "DataFormats/Common/interface/Handle.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "FWCore/Utilities/interface/InputTag.h"
+//#include "FWCore/Utilities/interface/EDGetToken.h"  // not needed
 
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/Framework/interface/ESHandle.h"
+#include "FWCore/Framework/interface/EventSetup.h"
 
 #include "DataFormats/Common/interface/Handle.h"
 
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "DataFormats/FEDRawData/interface/FEDRawDataCollection.h"
 #include "DataFormats/FEDRawData/interface/FEDRawData.h"
-
 #include "DataFormats/FEDRawData/interface/FEDNumbering.h"
 
 #include "EventFilter/SiPixelRawToDigi/interface/PixelDataFormatter.h"
@@ -24,6 +37,12 @@
 #include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
 #include "DataFormats/SiPixelDetId/interface/PixelBarrelName.h"
 #include "DataFormats/SiPixelDetId/interface/PixelEndcapName.h"
+#include "DataFormats/SiPixelDetId/interface/PixelFEDChannel.h"
+#include "DataFormats/DetId/interface/DetId.h"
+
+//#include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
+#include "DataFormats/Common/interface/DetSetVector.h"
+#include "DataFormats/Common/interface/Ref.h"
 #include "DataFormats/DetId/interface/DetId.h"
 
 // geometry and topology
@@ -47,11 +66,13 @@
 #include <TF1.h>
 #include <TH2F.h>
 #include <TH1F.h>
+#include <TProfile.h>
+#include <TProfile2D.h>
 
+#define USE_RECO_ERRORS
 
 #include <iostream>
 using namespace std;
-
 
 // Include the helper decoding class
 /////////////////////////////////////////////////////////////////////////////
@@ -400,6 +421,11 @@ public:
 private:
   edm::ParameterSet theConfig;
   edm::EDGetTokenT<edm::DetSetVector<SiPixelRawDataError> > fedErrorContainer;
+
+  //edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster>>tPixelCluster;
+
+  edm::EDGetTokenT<edmNew::DetSetVector<PixelFEDChannel>> tPixelDigiErrors;
+
   bool PRINT;
   //int countEvents, countAllEvents;
   int fedErrors, moduleErrors, spareCounts;
@@ -411,12 +437,13 @@ private:
   bool phase1_;
 
   TH1F *hfeds, *hfedsF, *hfedsSlink, *hfedsCRC, *hfedsUnknown;
-  TH1F *herrors, *herrorsF, *htype;
+  TH1F *herrors, *herrorsF, *htype, *herrors0, *herrors1;
   TH1F *hmode;
   TH1F *htbm;
   TH2F *hfedErrors0,*hfedErrors1,*hfedErrors2,*hfedErrors3,*hfedErrors4,*hfedErrors5,
     *hfedErrors6,*hfedErrors7,*hfedErrors8,*hfedErrors9;
   TH2F *hfedErrors0F, *hfed2d,*hfed2d0;
+  TProfile *herror0ls,*herror1ls, *herror2ls,*herror3ls;
 
   TH1F *hlumi, *hbx;
 
@@ -429,6 +456,13 @@ PixelFedErrorDumper::PixelFedErrorDumper( const edm::ParameterSet& cfg) : theCon
 
   // For the ByToken method
   fedErrorContainer = consumes<edm::DetSetVector<SiPixelRawDataError> >(src);
+
+  //static std::string instance = "UserErrorModules"; //theConfig.getUntrackedParameter<std::string>("InputInstance",""); 
+  //#static std::string instance = ""; //theConfig.getUntrackedParameter<std::string>("InputInstance",""); 
+  //edm::InputTag src_ = theConfig.getParameter<edm::InputTag>("src");
+  //tPixelDigiErrors = consumes<edm::DetSetVector<PixelDigi>> (edm::InputTag(src,instance,""));
+  tPixelDigiErrors = consumes<edmNew::DetSetVector<PixelFEDChannel>> (src);
+
   phase1_ = true;
 } 
 
@@ -451,6 +485,7 @@ void PixelFedErrorDumper::beginJob() {
   //sumFedSize=0;  
 
   PRINT = theConfig.getUntrackedParameter<bool>("Verbosity",false);
+
   for(int i=0;i<40;++i) {
     countErrors[i]=0;
     countErrors2[i]=0;
@@ -502,7 +537,14 @@ void PixelFedErrorDumper::beginJob() {
   hfed2d = fs->make<TH2F>( "hfed2d", "errors", num_feds,minFed,maxFed,20, 19.5, 39.5); // ALL
   hfed2d0 = fs->make<TH2F>("hfed2d0","errors", num_feds,minFed,maxFed,20, 19.5, 39.5); // ALL
 
-  hlumi  = fs->make<TH1F>("hlumi", "lumi", 4000,0,4000.);
+  herror0ls = fs->make<TProfile>("herror0ls","bpix masked channels vs ls",300,0.,300.,0,10000.);
+  herror1ls = fs->make<TProfile>("herror1ls","bpix masked rocs vs ls",300,0.,300.,0,10000.);
+  herror2ls = fs->make<TProfile>("herror2ls","fpix masked channels vs ls",300,0.,300.,0,10000.);
+  herror3ls = fs->make<TProfile>("herror3ls","fpix masked rocs vs ls",300,0.,300.,0,10000.);
+  herrors0 =  fs->make<TH1F>( "herrors0", "masked channels ", 500, -0.5, 499.5);
+  herrors1 =  fs->make<TH1F>( "herrors1", "masked rocs ", 2000, -0.5, 1999.5);
+
+  hlumi  = fs->make<TH1F>("hlumi", "lumi", 1000,0,1000.);
   hbx    = fs->make<TH1F>("hbx",   "bx",   4000,0,4000.);  
   
 }
@@ -663,11 +705,6 @@ int PixelFedErrorDumper::analyzeFedErrors(int errorType, int FedId, int fedChann
 void PixelFedErrorDumper::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
   //const bool PRINT = false;
 
-  // Get event setup 
-  //edm::ESHandle<TrackerGeometry> geom;
-  //es.get<TrackerDigiGeometryRecord>().get( geom );
-  //const TrackerGeometry& theTracker(*geom);
-
   //Retrieve tracker topology from geometry
   edm::ESHandle<TrackerTopology> tTopoH;
   es.get<TrackerTopologyRcd>().get(tTopoH);
@@ -684,28 +721,59 @@ void PixelFedErrorDumper::analyze(const  edm::Event& ev, const edm::EventSetup& 
   hbx->Fill(float(bx));
 
   edm::Handle< edm::DetSetVector<SiPixelRawDataError> >  input;
+  edm::Handle< edmNew::DetSetVector<PixelFEDChannel> > pixelDigisErrors;
+
+#ifdef USE_RECO_ERRORS
+  // Get digi errors
+  ev.getByToken( tPixelDigiErrors , pixelDigisErrors);
+  if (!pixelDigisErrors.isValid()) {cout<<" Error Container not found "<<endl; return;}
+  if(PRINT) cout<<" Container found "<<pixelDigisErrors->size()<<" "<<run<<" "<<event<<" "<<lumiBlock<<" "<<bx<<endl;
+#else
   //static std::string src_ = theConfig.getUntrackedParameter<std::string>("InputLabel","source");
   //static std::string src_ = theConfig.getUntrackedParameter<std::string>("InputLabel","siPixelDigis");
   //static std::string instance = theConfig.getUntrackedParameter<std::string>("InputInstance","");  
   ev.getByToken(fedErrorContainer , input);  // the new bytoken
-
   if (!input.isValid()) {cout<<" Container not found "<<endl; return;}
+  if(PRINT) cout<<" Container found "<<input->size()<<" "<<run<<" "<<event<<" "<<lumiBlock<<" "<<bx<<endl;
+#endif
 
-  if(PRINT) cout<<" Container found "<<run<<" "<<event<<" "<<lumiBlock<<" "<<bx<<endl;
+  int countB=0, countRocsB=0, countF=0, countRocsF=0;
 
+#ifdef USE_RECO_ERRORS
   // Iterate on detector units
+  edmNew::DetSetVector<PixelFEDChannel>::const_iterator DSViter;
+  edmNew::DetSet<PixelFEDChannel>::const_iterator  di;
+  for(DSViter = pixelDigisErrors->begin(); DSViter != pixelDigisErrors->end(); DSViter++) {
+    //count++;
+#else
   edm::DetSetVector<SiPixelRawDataError>::const_iterator DSViter;
+  edm::DetSet<SiPixelRawDataError>::const_iterator  di;
   for(DSViter = input->begin(); DSViter != input->end(); DSViter++) {
+#endif
+
     //bool valid = false;
-    unsigned int detid = DSViter->id; // = rawid
-    //cout<<hex<<detid<<dec<<endl;
+    unsigned int detid = DSViter->detId(); // = rawid
+    if(PRINT) cout<<" detid "<<detid<<" "<<DSViter->size()<<endl;
+
+#ifdef USE_RECO_ERRORS
+
+    for(di = DSViter->begin(); di != DSViter->end(); di++) {
+      auto fedid = di->fed;
+      auto fedchannel = di->link;
+      hfedErrors0->Fill(float(fedid),float(fedchannel));
+      int rocs = di->roc_last - di->roc_first + 1;
+      if(fedid<1296) {countB++;countRocsB +=rocs;}
+      else           {countF++;countRocsF +=rocs;}      
+      if(PRINT) cout<<" "<<di->fed<<" "<<di->link<<" "<<di->roc_first<<" "<<di->roc_last<<endl;  
+    }
+
+#else
 
     if(detid==0xffffffff) { // whole fed
 
       if(PRINT) cout<<" FED errors "<<DSViter->data.size()<<endl;
-      // Look at FED errors now	
-      edm::DetSet<SiPixelRawDataError>::const_iterator  di;
 
+      // Look at FED errors now	
       //   iterate over errors 
       for(di = DSViter->data.begin(); di != DSViter->data.end(); di++) {
 	int FedId = di->getFedId();                  // FED the error came from
@@ -714,7 +782,8 @@ void PixelFedErrorDumper::analyze(const  edm::Event& ev, const edm::EventSetup& 
 	uint64_t word64 = di->getWord64();
 
 	fedErrors++;
-
+	count++;
+	
  	herrors->Fill(float(errorType));
 	//herrorsF->Fill(float(errorType));
 	hfeds->Fill(float(FedId));
@@ -823,7 +892,21 @@ void PixelFedErrorDumper::analyze(const  edm::Event& ev, const edm::EventSetup& 
 
     } // if fed/module 
 
+#endif // USE_RECO_ERRORS
+
   } // end det loop 
+
+  fedErrors += countB;
+  if(PRINT) cout<<lumiBlock<<" "<<countB<<" "<<countRocsB<<endl;
+
+  herror0ls->Fill(float(lumiBlock),float(countB));
+  herror1ls->Fill(float(lumiBlock),float(countRocsB));
+  herror2ls->Fill(float(lumiBlock),float(countF));
+  herror3ls->Fill(float(lumiBlock),float(countRocsF));
+  herrors0->Fill(float(countB));
+  herrors1->Fill(float(countRocsB));
+  herrors0->Fill(float(countF));
+  herrors1->Fill(float(countRocsF));
 
 }
 

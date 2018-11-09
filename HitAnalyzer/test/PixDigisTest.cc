@@ -95,8 +95,9 @@
 #define HISTOS
 //#define L1
 #define HLT
-//#define SINGLE_MODULES
+#define SINGLE_MODULES
 #define DCOLS
+#define DO_THR // use the threshold histo
 
 #define USE_GAINS 
 #ifdef USE_GAINS
@@ -148,9 +149,9 @@ private:
 
   //TFile* hFile;
   TH1F *hdetunit;
-  TH1F *heloss1,*heloss2, *heloss3, *heloss4, *heloss1n;
-  TH1F *hneloss1,*hneloss2, *hneloss3, *hneloss4;  
-  TH1F *helossF11,*helossF21,*helossF31,*helossF12,*helossF22,*helossF32;
+  TH1F *hadc1,*hadc2, *hadc3, *hadc4, *hadc1n;
+  TH1F *hnadc1,*hnadc2, *hnadc3, *hnadc4;  
+  TH1F *hadcF11,*hadcF21,*hadcF31,*hadcF12,*hadcF22,*hadcF32;
   TH1F *hpixid,*hpixsubid,*hlayerid,*hshellid,*hsectorid,
     *hladder1id,*hladder2id,*hladder3id,*hladder4id,
     *hz1id,*hz2id,*hz3id,*hz4id;
@@ -177,7 +178,8 @@ private:
   TH2F *hpdetMap4,*hpdetMap3,*hpdetMap2,*hpdetMap1; 
   TH2F *hdetMap4,*hdetMap3,*hdetMap2,*hdetMap1; 
   TH2F *hpixMap1, *hpixMap2, *hpixMap3,*hpixMap4;
-  TH2F *hpdetMaps4,*hpdetMaps3,*hpdetMaps2,*hpdetMaps1; 
+  TH2F *hpdetMaps1_4,*hpdetMaps1_3,*hpdetMaps1_2,*hpdetMaps1_1; 
+  TH2F *hrocMap1_4,*hrocMap1_3,*hrocMap1_2,*hrocMap1_1; 
 
   //* hpixMapNoise; 
   TH2F *hxy, *hphiz1, *hphiz2, *hphiz3, *hphiz4; // bpix 
@@ -207,11 +209,15 @@ private:
 
 #ifdef USE_GAINS
   TH1F *helectrons1, *helectrons2, *helectrons3, *helectrons4, *helectronsf, *helectrons1n;
+  TH1F *hvcal1,*hvcal2, *hvcal3, *hvcal4, *hvcalf, *hvcal1n;
 #endif
 
   // FPix
   TH2F *hpixMapFPix11, *hpixMapFPix21, *hpixMapFPix31, 
     *hpixMapFPix12, *hpixMapFPix22, *hpixMapFPix32;
+#ifdef DO_THR
+  TH2F *hthr;
+#endif
 
 #endif
 
@@ -433,15 +439,15 @@ void PixDigisTest::beginJob() {
     hdetsPerLayF3 = fs->make<TH1F>( "hdetsPerLayF3", "Full dets per layer d3", 
 			      257, -0.5, 256.5);
 
-    heloss1 = fs->make<TH1F>( "heloss1", "Pix charge l1", 256, 0., 256.);
-    heloss1n= fs->make<TH1F>( "heloss1n", "Pix charge l1", 256, 0., 256.);
-    heloss2 = fs->make<TH1F>( "heloss2", "Pix charge l2", 256, 0., 256.);
-    heloss3 = fs->make<TH1F>( "heloss3", "Pix charge l3", 256, 0., 256.);
-    heloss4 = fs->make<TH1F>( "heloss4", "Pix charge l4", 256, 0., 256.);
-    hneloss1 = fs->make<TH1F>( "hneloss1", "Pix adc elec<0 l1", 256, 0., 256.);
-    hneloss2 = fs->make<TH1F>( "hneloss2", "Pix adc elec<0 l2", 256, 0., 256.);
-    hneloss3 = fs->make<TH1F>( "hneloss3", "Pix adc elec<0 l3", 256, 0., 256.);
-    hneloss4 = fs->make<TH1F>( "hneloss4", "Pix adc elec<0 l4", 256, 0., 256.);
+    hadc1 = fs->make<TH1F>( "hadc1", "Pix charge l1", 256, 0., 256.);
+    hadc1n= fs->make<TH1F>( "hadc1n", "Pix charge l1", 256, 0., 256.);
+    hadc2 = fs->make<TH1F>( "hadc2", "Pix charge l2", 256, 0., 256.);
+    hadc3 = fs->make<TH1F>( "hadc3", "Pix charge l3", 256, 0., 256.);
+    hadc4 = fs->make<TH1F>( "hadc4", "Pix charge l4", 256, 0., 256.);
+    hnadc1 = fs->make<TH1F>( "hnadc1", "Pix adc elec<0 l1", 256, 0., 256.);
+    hnadc2 = fs->make<TH1F>( "hnadc2", "Pix adc elec<0 l2", 256, 0., 256.);
+    hnadc3 = fs->make<TH1F>( "hnadc3", "Pix adc elec<0 l3", 256, 0., 256.);
+    hnadc4 = fs->make<TH1F>( "hnadc4", "Pix adc elec<0 l4", 256, 0., 256.);
 
     hcols1 = fs->make<TH1F>( "hcols1", "Layer 1 cols", 500,-1.5,498.5);
     hcols2 = fs->make<TH1F>( "hcols2", "Layer 2 cols", 500,-1.5,498.5);
@@ -477,12 +483,12 @@ void PixDigisTest::beginJob() {
     hblade22 = fs->make<TH1F>( "hblade22", "blade num, disk2", 60, 0., 60.);
     hblade32 = fs->make<TH1F>( "hblade32", "blade num, disk3", 60, 0., 60.);
 
-    helossF11 = fs->make<TH1F>( "helossF11", "Pix charge d1", 100, 0., 300.);
-    helossF21 = fs->make<TH1F>( "helossF21", "Pix charge d2", 100, 0., 300.);
-    helossF31 = fs->make<TH1F>( "helossF31", "Pix charge d3", 100, 0., 300.);
-    helossF12 = fs->make<TH1F>( "helossF12", "Pix charge d1", 100, 0., 300.);
-    helossF22 = fs->make<TH1F>( "helossF22", "Pix charge d2", 100, 0., 300.);
-    helossF32 = fs->make<TH1F>( "helossF32", "Pix charge d3", 100, 0., 300.);
+    hadcF11 = fs->make<TH1F>( "hadcF11", "Pix charge d1", 100, 0., 300.);
+    hadcF21 = fs->make<TH1F>( "hadcF21", "Pix charge d2", 100, 0., 300.);
+    hadcF31 = fs->make<TH1F>( "hadcF31", "Pix charge d3", 100, 0., 300.);
+    hadcF12 = fs->make<TH1F>( "hadcF12", "Pix charge d1", 100, 0., 300.);
+    hadcF22 = fs->make<TH1F>( "hadcF22", "Pix charge d2", 100, 0., 300.);
+    hadcF32 = fs->make<TH1F>( "hadcF32", "Pix charge d3", 100, 0., 300.);
     hcolsF11 = fs->make<TH1F>( "hcolsF11", "Disk 1 cols", 500,-1.5,498.5);
     hcolsF21 = fs->make<TH1F>( "hcolsF21", "Disk 2 cols", 500,-1.5,498.5);
     hcolsF31 = fs->make<TH1F>( "hcolsF31", "Disk 3 cols", 500,-1.5,498.5);
@@ -536,12 +542,23 @@ void PixDigisTest::beginJob() {
     hpixMap4 = fs->make<TH2F>("hpixMap4"," ",416,0.,416.,160,0.,160.);
     hpixMap4->SetOption("colz");
 
-    hpdetMaps1 = fs->make<TH2F>("hpdetMaps1","hits in l1 with adc=0",9,-4.5,4.5,13,-6.5,6.5);
-    hpdetMaps1->SetOption("colz");
-    hpdetMaps2 = fs->make<TH2F>("hpdetMaps2","l1 with many hits per col",9,-4.5,4.5,13,-6.5,6.5);
-    hpdetMaps2->SetOption("colz");
-    hpdetMaps3 = fs->make<TH2F>("hpdetMaps3","l1 with elec<0",9,-4.5,4.5,13,-6.5,6.5);
-    hpdetMaps3->SetOption("colz");
+    hpdetMaps1_1 = fs->make<TH2F>("hpdetMaps1_1","hits in l1 with adc=0",9,-4.5,4.5,13,-6.5,6.5);
+    hpdetMaps1_1->SetOption("colz");
+    hpdetMaps1_2 = fs->make<TH2F>("hpdetMaps1_2","l1 with many hits per col",9,-4.5,4.5,13,-6.5,6.5);
+    hpdetMaps1_2->SetOption("colz");
+    hpdetMaps1_3 = fs->make<TH2F>("hpdetMaps1_3","l1 with elec<0",9,-4.5,4.5,13,-6.5,6.5);
+    hpdetMaps1_3->SetOption("colz");
+    //hpdetMaps4 = fs->make<TH2F>("hpdetMaps1_4","l1 with elec<0",9,-4.5,4.5,13,-6.5,6.5);
+    //hpdetMaps4->SetOption("colz");
+
+    hrocMap1_1 = fs->make<TH2F>("hrocMap1_1","adc=0",     8*9,-4.5,4.5,2*13,-6.5,6.5);
+    hrocMap1_1->SetOption("colz");
+    hrocMap1_2 = fs->make<TH2F>("hrocMap1_2","busy dcols",8*9,-4.5,4.5,2*13,-6.5,6.5);
+    hrocMap1_2->SetOption("colz");
+    hrocMap1_3 = fs->make<TH2F>("hrocMap1_3","elec<0",    8*9,-4.5,4.5,2*13,-6.5,6.5);
+    hrocMap1_3->SetOption("colz");
+    hrocMap1_4 = fs->make<TH2F>("hrocMap1_4","occupancy", 8*9,-4.5,4.5,2*13,-6.5,6.5);
+    hrocMap1_4->SetOption("colz");
 
 
     //hpixMapNoise = fs->make<TH2F>("hpixMapNoise"," ",416,0.,416.,160,0.,160.);
@@ -711,6 +728,12 @@ void PixDigisTest::beginJob() {
   helectrons3 = fs->make<TH1F>("helectrons3","adc in electrons l3",  2400,-40.,80.);
   helectrons4 = fs->make<TH1F>("helectrons4","adc in electrons l4",  2400,-40.,80.);
   helectronsf = fs->make<TH1F>("helectronsf","adc in electrons fpix",2400,-40.,80.);
+  hvcal1  = fs->make<TH1F>("hvcal1","adc in vcals l1",  600,-100.,500.);
+  hvcal1n = fs->make<TH1F>("hvcal1n","adc in vcals l1", 600,-100.,500.);
+  hvcal2  = fs->make<TH1F>("hvcal2","adc in vcals l2",  600,-100.,500.);
+  hvcal3  = fs->make<TH1F>("hvcal3","adc in vcals l3",  600,-100.,500.);
+  hvcal4  = fs->make<TH1F>("hvcal4","adc in vcals l4",  600,-100.,500.);
+  hvcalf  = fs->make<TH1F>("hvcalf","adc in vcals fpix",600,-100.,500.);
 #endif
 
   // FPix
@@ -726,8 +749,11 @@ void PixDigisTest::beginJob() {
   hpixMapFPix22->SetOption("colz");
   hpixMapFPix32 = fs->make<TH2F>("hpixMapFPix32"," disk 3, ring 2",416,0.,416.,160,0.,160.);
   hpixMapFPix32->SetOption("colz");
-
-
+#ifdef DO_THR
+  hthr = fs->make<TH2F>( "hthr", "threshold in vcal",
+				  13000,0.,13000,50,0.,100.);
+#endif
+  
 #endif
 
 }
@@ -1095,6 +1121,14 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	int channel = PixelChannelIdentifier::pixelToChannel(row,col);
 	if(PRINT || select) cout <<numberOfDigis<< " Col: " << col << " Row: " << row 
 		       << " ADC: " << adc <<" channel = "<<channel<<endl;
+
+        int roc = rocId(col,row);  // 0-15, column, row
+        int link = int(roc/8); // link 0 & 1
+        int rocInCol = roc%8; // 0-7
+	float rocZ=0;
+        if(module>0) rocZ = float(module) + (0.125/2.) - (float(rocInCol) * 0.125); //z
+        else         rocZ = float(module) + 1.0 + (0.125/2.) - (float(rocInCol) * 0.125); //z
+        float rocPhi = float(ladder) - 0.5 + (0.5/2.)   + (float(link) * 0.5); 
 	
 
 #ifdef USE_GAINS
@@ -1155,38 +1189,50 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	 else            electrons = (vcal * conversionFactor_L1 + offset_L1)/1000.; //default 
 	 if(newL1Modules) {
 	   helectrons1n->Fill(electrons);
-	   heloss1n->Fill(float(adc));
+	   hvcal1n->Fill(vcal);
+	   hadc1n->Fill(float(adc));
 	 } else {
 	   helectrons1->Fill(electrons);
-	   heloss1->Fill(float(adc));
+	   hvcal1->Fill(vcal);
+	   hadc1->Fill(float(adc));
 	 }
+#ifdef DO_THR
+	 int rindex = (ladder+6)*1000 + (module+4)*100 + roc;
+	 hthr->Fill(rindex,vcal);
+#endif
 	 hcols1->Fill(float(col));
 	 hrows1->Fill(float(row));
 	 hpixMap1->Fill(float(col),float(row));
+	 hrocMap1_4->Fill(rocZ,rocPhi);
 	 hpdetMap1->Fill(float(module),float(ladder));
-	 if(adc<1) {hpdetMaps1->Fill(float(module),float(ladder));hadc01bx->Fill(float(bx));}
+	 if(adc<1) {
+	   hpdetMaps1_1->Fill(float(module),float(ladder));
+	   hrocMap1_1->Fill(rocZ,rocPhi);
+	   hadc01bx->Fill(float(bx));
+	 }
 	 if(electrons<0) { 
-	   hpdetMaps3->Fill(float(module),float(ladder));
-	   hneloss1->Fill(float(adc));
+	   hpdetMaps1_3->Fill(float(module),float(ladder));
+	   hnadc1->Fill(float(adc));
 	   helec01bx->Fill(float(bx));
+	   hrocMap1_3->Fill(rocZ,rocPhi);
 	 }
 	 hadc1ls->Fill(float(lumiBlock),float(adc));
 	 hadc1bx->Fill(float(bx),float(adc));
 
 #ifdef SINGLE_MODULES
-	    if     ( ladder==-5 && module==-4) hpixDetMap10->Fill(pixy,pixx,weight); // 
-	    //else if( ladder== 3 && module==-1) hpixDetMap11->Fill(pixy,pixx,weight); // "
-	    //else if( ladder== 3 && module==-1) hpixDetMap12->Fill(pixy,pixx,weight); // "
-	    // else if( ladder==3 && module== 3) hpixDetMap13->Fill(pixy,pixx,weight); // 
-	    // else if( ladder==5 && module==-4) hpixDetMap14->Fill(pixy,pixx,weight); // 
-	    // else if( ladder==5 && module== 2) hpixDetMap15->Fill(pixy,pixx,weight); // 
-	    // else if( ladder==1 && module==-4) hpixDetMap16->Fill(pixy,pixx,weight); //
-	    else if( ladder==-1 && module==-4) hpixDetMap17->Fill(pixy,pixx,weight); // 
-	    else if( ladder== 6 && module== 1) hpixDetMap18->Fill(pixy,pixx,weight); // 
-	    // else if( ladder==4 && module==-4) hpixDetMap19->Fill(pixy,pixx,weight); // 
+	    if     ( ladder==-6 && module==-1) hpixDetMap10->Fill(pixy,pixx,weight); // 
+	    else if( ladder==-1 && module==-1) hpixDetMap11->Fill(pixy,pixx,weight); // "
+	    else if( ladder==-1 && module==-2) hpixDetMap12->Fill(pixy,pixx,weight); // "
+	    else if( ladder==-3 && module==-4) hpixDetMap13->Fill(pixy,pixx,weight); // 
+	    else if( ladder== 4 && module==-2) hpixDetMap14->Fill(pixy,pixx,weight); // 
+	    else if( ladder== 6 && module==-1) hpixDetMap15->Fill(pixy,pixx,weight); // 
+	    else if( ladder== 4 && module== 1) hpixDetMap16->Fill(pixy,pixx,weight); //
+	    else if( ladder== 2 && module== 1) hpixDetMap17->Fill(pixy,pixx,weight); // 
+	    else if( ladder==-4 && module== 2) hpixDetMap18->Fill(pixy,pixx,weight); // 
+	    else if( ladder==-1 && module== 2) hpixDetMap19->Fill(pixy,pixx,weight); // 
 
-	    if     ( ladder==-1 && module==-4) hpixDetMap11->Fill(pixy,pixx,1.); // "
-	    else if( ladder== 6 && module== 1) hpixDetMap12->Fill(pixy,pixx,1.); // 
+	    //if     ( ladder==-1 && module==-4) hpixDetMap11->Fill(pixy,pixx,1.); // "
+	    //else if( ladder== 6 && module== 1) hpixDetMap12->Fill(pixy,pixx,1.); // 
 
 #endif
 
@@ -1197,13 +1243,13 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 //old 	   if(RectangularPixelTopology::isItBigPixelInX(row)) {
 //new	   if(topology.isItBigPixelInX(row)) { 
 // 	     //cout<<" big in X "<<row<<endl;
-// 	     heloss1bigx->Fill(float(adc));
+// 	     hadc1bigx->Fill(float(adc));
 // 	     hrows1big->Fill(float(row));
 // 	   }
 //old	   if(RectangularPixelTopology::isItBigPixelInY(col)) {
 //new	   if(topology.isItBigPixelInY(col)) {
 // 	     //cout<<" big in Y "<<col<<endl;
-// 	     heloss1bigy->Fill(float(adc));
+// 	     hadc1bigy->Fill(float(adc));
 // 	     hcols1big->Fill(float(col));
 // 	   }
 
@@ -1211,14 +1257,15 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	 if(rescaleVcal) electrons = (vcal * 47.8 + offset)/1000.; //L2 at 51.5fb-1 47->47.8
 	 else            electrons = (vcal * conversionFactor + offset)/1000.; //default 
 	 helectrons2->Fill(electrons);
+	 hvcal2->Fill(vcal);
         // look for the noisy pixel
 	 //noise = false; // (ladder==6) && (module==-2) && (col==364) && (row==1);
 	 if(adc<1) hadc02bx->Fill(float(bx));
 	 if(electrons<0) {
-	   hneloss2->Fill(float(adc));
+	   hnadc2->Fill(float(adc));
 	   helec02bx->Fill(float(bx));
 	 }
-	 heloss2->Fill(float(adc));
+	 hadc2->Fill(float(adc));
 	 hcols2->Fill(float(col));
 	 hrows2->Fill(float(row));
 	 hpixMap2->Fill(float(col),float(row));
@@ -1229,8 +1276,8 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	 numOfDigisPerDet2++;
 
 #ifdef SINGLE_MODULES
-	 if     ( ladder== 5 && module==-3) hpixDetMap20->Fill(pixy,pixx,weight); // 
-	 if( ladder== 5 && module==-3) hpixDetMap21->Fill(pixy,pixx,1.); // special case
+	 //if     ( ladder== 5 && module==-3) hpixDetMap20->Fill(pixy,pixx,weight); // 
+	 //if( ladder== 5 && module==-3) hpixDetMap21->Fill(pixy,pixx,1.); // special case
 	 // else if( ladder== 3 && module== 3) hpixDetMap22->Fill(pixy,pixx,weight); // 
 	 // else if( ladder==13 && module==-1) hpixDetMap23->Fill(pixy,pixx,weight); //
 	 // else if( ladder==-3 && module==4) hpixDetMap24->Fill(pixy,pixx,weight); //
@@ -1245,9 +1292,10 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	 if(rescaleVcal) electrons = (vcal * 47.5 + offset)/1000.; //L3 at 51.5fb-1 47->47.5
 	 else            electrons = (vcal * conversionFactor + offset)/1000.; //default 
 	 helectrons3->Fill(electrons); 
+	 hvcal3->Fill(vcal);
 	 //noise = false; //(ladder==6) || (module==-2) || (col==364) || (row==1);	
-	 if(electrons<0) hneloss3->Fill(float(adc));
-	 heloss3->Fill(float(adc));
+	 if(electrons<0) hnadc3->Fill(float(adc));
+	 hadc3->Fill(float(adc));
 	 hcols3->Fill(float(col));
 	 hrows3->Fill(float(row));
 	 //if(ladder==-13 && module==-4) 
@@ -1259,20 +1307,21 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	 numOfDigisPerDet3++;
 
 #ifdef SINGLE_MODULES
-	 if     ( ladder==-22 && module==-2) hpixDetMap30->Fill(pixy,pixx,weight); // 
-	 if( ladder==-22 && module==-2) hpixDetMap31->Fill(pixy,pixx,1.); // special case
-	 //else if( ladder==15 && module== 1) hpixDetMap32->Fill(pixy,pixx,weight); // 
-	 //else if( ladder==12 && module== 4) hpixDetMap33->Fill(pixy,pixx,weight); // 
-	 //else if( ladder==19 && module==-4) hpixDetMap34->Fill(pixy,pixx,weight); // 
-	 //else if( ladder==14 && module==-3) hpixDetMap35->Fill(pixy,pixx,weight); // 
+	 if     ( ladder== 20 && module== 2) hpixDetMap30->Fill(pixy,pixx,weight); // 
+	 //if( ladder==-22 && module==-2) hpixDetMap31->Fill(pixy,pixx,1.); // special case
+	 else if( ladder== 5 && module== -1) hpixDetMap31->Fill(pixy,pixx,weight); // 
+	 //else if( ladder==12 && module== 4) hpixDetMap32->Fill(pixy,pixx,weight); // 
+	 //else if( ladder==19 && module==-4) hpixDetMap33->Fill(pixy,pixx,weight); // 
+	 //else if( ladder==14 && module==-3) hpixDetMap34->Fill(pixy,pixx,weight); // 
 #endif
        } else if(layer==4) {
 	 if(rescaleVcal) electrons = (vcal * 47.25 + offset)/1000.; //L4 at 51.5fb-1 47->47.25
 	 else            electrons = (vcal * conversionFactor + offset)/1000.; //default 
 	 helectrons4->Fill(electrons);
+	 hvcal4->Fill(vcal);
 	 //noise = false; //(ladder==6) || (module==-2) || (col==364) || (row==1);
-	 if(electrons<0) hneloss4->Fill(float(adc));
-	 heloss4->Fill(float(adc));
+	 if(electrons<0) hnadc4->Fill(float(adc));
+	 hadc4->Fill(float(adc));
 	 hcols4->Fill(float(col));
 	 hrows4->Fill(float(row));
 	 hpdetMap4->Fill(float(module),float(ladder));
@@ -1283,8 +1332,8 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	 numOfDigisPerDet4++;
 
 #ifdef SINGLE_MODULES
-	 if     ( ladder== 6 && module== 1) hpixDetMap40->Fill(pixy,pixx,weight); // 
-	 if( ladder== 6 && module== 1) hpixDetMap41->Fill(pixy,pixx,1.); //  special case  
+	 //if     ( ladder== 6 && module== 1) hpixDetMap40->Fill(pixy,pixx,weight); // 
+	 //if( ladder== 6 && module== 1) hpixDetMap41->Fill(pixy,pixx,1.); //  special case  
 	 //else if( ladder== 6 && module== 3) hpixDetMap42->Fill(pixy,pixx,weight); // 
 	 //else if( ladder== 6 && module== 4) hpixDetMap43->Fill(pixy,pixx,weight); // 
 	 //else if( ladder==-27 && module==1) hpixDetMap44->Fill(pixy,pixx,weight); // 
@@ -1299,13 +1348,13 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	   hadc0bx->Fill(float(bx),float(adc));
 	   if(ring==1)      {
 	     hpixMapFPix11->Fill(float(col),float(row));
-	     helossF11->Fill(float(adc));
+	     hadcF11->Fill(float(adc));
 	     hcolsF11->Fill(float(col));
 	     hrowsF11->Fill(float(row));
 	     hblade11->Fill(float(blade));
 	   } else if(ring==2) {
 	     hpixMapFPix12->Fill(float(col),float(row));
-	     helossF12->Fill(float(adc));
+	     hadcF12->Fill(float(adc));
 	     hcolsF12->Fill(float(col));
 	     hrowsF12->Fill(float(row));
 	     hblade12->Fill(float(blade));
@@ -1323,13 +1372,13 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	   hadc0bx->Fill(float(bx),float(adc));
 	   if(ring==1)      {
 	     hpixMapFPix21->Fill(float(col),float(row));
-	     helossF21->Fill(float(adc));
+	     hadcF21->Fill(float(adc));
 	     hcolsF21->Fill(float(col));
 	     hrowsF21->Fill(float(row));
 	     hblade21->Fill(float(blade));
 	   } else if(ring==2) {
 	     hpixMapFPix22->Fill(float(col),float(row));
-	     helossF22->Fill(float(adc));
+	     hadcF22->Fill(float(adc));
 	     hcolsF22->Fill(float(col));
 	     hrowsF22->Fill(float(row));
 	     hblade22->Fill(float(blade));
@@ -1346,13 +1395,13 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	   hadc0bx->Fill(float(bx),float(adc));
 	   if(ring==1) {
 	     hpixMapFPix31->Fill(float(col),float(row));
-	     helossF31->Fill(float(adc));
+	     hadcF31->Fill(float(adc));
 	     hcolsF31->Fill(float(col));
 	     hrowsF31->Fill(float(row));
 	     hblade31->Fill(float(blade));
 	   } else if(ring==2) {
 	     hpixMapFPix32->Fill(float(col),float(row));
-	     helossF32->Fill(float(adc));
+	     hadcF32->Fill(float(adc));
 	     hcolsF32->Fill(float(col));
 	     hrowsF32->Fill(float(row));
 	     hblade32->Fill(float(blade));
@@ -1426,7 +1475,6 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	    hladder1id->Fill(float(ladder));
 	    hz1id->Fill(float(module));
 	    hdetMap1->Fill(float(module),float(ladder));
-	    //if(numOfDigisPerDet1>200 ) hpdetMaps2->Fill(float(module),float(ladder));
 	    ++numberOfDetUnits1;
 	    hdigisPerDet1->Fill(float(numOfDigisPerDet1));
 	    numOfDigisPerDet1=0;
@@ -1471,6 +1519,9 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	    for(int col=0;col<416;col+=2) {
 	      //cout<<col<<endl;
 	      int dcolCount=0;  // hits in a dcol
+
+
+
 	      // ROC 
 	      if( (col>0)  && (col%52 == 0) ) { // 1 roc finished 
 		hfullDcolsPerROC->Fill(float(countFullDcolsInROC1));
@@ -1499,13 +1550,23 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	      }
 
 	      if(dcolCount>dcolThr) {
-		cout<<" full dcol (lower roc). count "<<dcolCount<<" col "
-		    <<col<<" mod "<<module<<" ladder "<<ladder<<endl;
+		//cout<<" full dcol (lower roc). count "<<dcolCount<<" col "
+		//  <<col<<" mod "<<module<<" ladder "<<ladder<<endl;
+
+		int roc = rocId(col,0);  // 0-15, column, row
+		int link = int(roc/8); // link 0 & 1
+		int rocInCol = roc%8; // 0-7
+		float rocZ=0;
+		if(module>0) rocZ = float(module) + (0.125/2.) - (float(rocInCol) * 0.125); //z
+		else         rocZ = float(module) + 1.0 + (0.125/2.) - (float(rocInCol) * 0.125); //z
+		float rocPhi = float(ladder) - 0.5 + (0.5/2.)   + (float(link) * 0.5); 
+		hrocMap1_2->Fill(rocZ,rocPhi);
+
 		countFullDcols++;
 		countFullDcolsInModule++;
 		countFullDcolsInROC1++;
 		countFullDcolsInEvent++;
-		hpdetMaps2->Fill(float(module),float(ladder));
+		hpdetMaps1_2->Fill(float(module),float(ladder));
 		hcols1Many->Fill(float(col));
 		hdcolFull1bx->Fill(float(bx));
 		hdcolFull1ls->Fill(float(lumiBlock));
@@ -1538,13 +1599,23 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	      }
 
 	      if(dcolCount>dcolThr) {
-		cout<<" full dcol (upper roc). count "<<dcolCount<<" col "
-		    <<col<<" mod "<<module<<" ladder "<<ladder<<endl;
+		//cout<<" full dcol (upper roc). count "<<dcolCount<<" col "
+		//  <<col<<" mod "<<module<<" ladder "<<ladder<<endl;
+		int roc = rocId(col,80);  // 0-15, column, row
+		int link = int(roc/8); // link 0 & 1
+		int rocInCol = roc%8; // 0-7
+	        float rocZ=0;
+		if(module>0) rocZ = float(module) + (0.125/2.) - (float(rocInCol) * 0.125); //z
+		else         rocZ = float(module) + 1.0 + (0.125/2.) - (float(rocInCol) * 0.125); //z
+		float rocPhi = float(ladder) - 0.5 + (0.5/2.)   + (float(link) * 0.5); 
+		hrocMap1_2->Fill(rocZ,rocPhi);
+
 		countFullDcols++;
 		countFullDcolsInModule++;
 		countFullDcolsInROC2++;
 		countFullDcolsInEvent++;
-		hpdetMaps2->Fill(float(module),float(ladder));
+		hpdetMaps1_2->Fill(float(module),float(ladder));
+		hrocMap1_2->Fill(rocZ,rocPhi);
 		hcols1Many->Fill(float(col));
 		hdcolFull1bx->Fill(float(bx));
 		hdcolFull1ls->Fill(float(lumiBlock));
@@ -1699,8 +1770,10 @@ void PixDigisTest::endJob(){
   hpdetMap2->Scale(norm);
   hpdetMap3->Scale(norm);
   hpdetMap4->Scale(norm);
-  hpdetMaps1->Scale(norm);
-  hpdetMaps2->Scale(norm);
+  hpdetMaps1_1->Scale(norm);
+  hpdetMaps1_2->Scale(norm);
+  hpdetMaps1_3->Scale(norm);
+  //hpdetMaps1_4->Scale(norm);
 
   hpixMapFPix11->Scale(norm);
   hpixMapFPix12->Scale(norm);
