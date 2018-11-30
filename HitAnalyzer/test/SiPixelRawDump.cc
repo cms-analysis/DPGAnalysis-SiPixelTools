@@ -675,17 +675,21 @@ private:
   edm::EDGetTokenT<FEDRawDataCollection> rawData;
 
   int printLocal;
+  int selectedFED, selectedType;
   double printThreshold;
   int countEvents, countAllEvents;
   int countTotErrors;
+  int lastLS, firstLS;
   float sumPixels, sumFedSize, sumFedPixels[n_of_FEDs];
+  std::vector< std::pair<int,int> > maskedChannels, maskedChannels0;
   int fedErrors[n_of_FEDs][n_of_Channels];
   int fedErrorsENE[n_of_FEDs][n_of_Channels];
   int fedErrorsTime[n_of_FEDs][n_of_Channels];
   int fedErrorsOver[n_of_FEDs][n_of_Channels];
   int fedErrorsPKAM[n_of_FEDs][n_of_Channels];
-  int fedErrorsMask[n_of_FEDs][n_of_Channels];
+  int fedErrorsAutoReset[n_of_FEDs][n_of_Channels];
   int fedErrorsAutoMask[n_of_FEDs][n_of_Channels];
+  int fedErrorsMask[n_of_FEDs][n_of_Channels];
   int decodeErrors[n_of_FEDs][n_of_Channels];
   int decodeErrors000[n_of_FEDs][n_of_Channels];  // pix 0 problem
   int decodeErrorsDouble[n_of_FEDs][n_of_Channels];  // double pix  problem
@@ -747,6 +751,9 @@ private:
     *herror17ls,*herror18ls,*herror19ls; 
   TH1D *herrorTimels, *herrorPkamls;
 
+  TH2F *herrorVsLs10, *herrorVsLs11, *herrorVsLs12, *herrorVsLs13, *herrorVsLs15, *herrorVsLs16, 
+    *herrorVsLs17, *herrorVsLs18;
+
 #ifdef IND_FEDS
   TH2F *hfed2DErrors1ls,*hfed2DErrors2ls,*hfed2DErrors3ls,*hfed2DErrors4ls,*hfed2DErrors5ls,
     *hfed2DErrors6ls,*hfed2DErrors7ls,*hfed2DErrors8ls,*hfed2DErrors9ls,*hfed2DErrors10ls,*hfed2DErrors11ls,*hfed2DErrors12ls,
@@ -807,13 +814,14 @@ void SiPixelRawDump::endJob() {
   if(errorThreshold<10) errorThreshold=10;
 
   cout<<" Total number of errors "<<countTotErrors<<" print threshold "<< errorThreshold << " total errors per fed channel"<<endl;
-  cout<<" FED errors "<<endl<<"Fed  Channel Tot-Errors ENE-Errors  TO-Errors  NOR-Errors      PKAM         Auto/Mask"<<endl;
+  cout<<" FED errors "<<endl<<"Fed  Channel Tot-Errors ENE-Errors  TO-Errors  NOR-Errors      PKAM      AutoMask/Masked  AutoReset"
+      <<endl;
 
   for(int i = 0; i < n_of_FEDs; ++i) {
-    for(int j=0;j<n_of_Channels;++j) if( (fedErrors[i][j]) > errorThreshold || (fedErrorsENE[i][j] > 0) ) {
+    for(int j=0;j<n_of_Channels;++j) if( (fedErrors[i][j] > errorThreshold) ) {
 	cout<<(i+fedId0)<<" - "<<setw(3)<<(j+1)<<" -  "<<setw(8)<<fedErrors[i][j]<<" - "<<setw(8)<<fedErrorsENE[i][j]
 	    <<" -  "<<setw(8)<<fedErrorsTime[i][j]<<" - "<<setw(8)<<fedErrorsOver[i][j]<<" - "<<setw(8)<<fedErrorsPKAM[i][j]
-	    <<" - "<<setw(8)<<fedErrorsAutoMask[i][j]<<"/"<<setw(8)<<fedErrorsMask[i][j]<<endl;
+	    <<" - "<<setw(8)<<fedErrorsAutoMask[i][j]<<"/"<<setw(8)<<fedErrorsMask[i][j]<<" - "<<setw(8)<<fedErrorsAutoReset[i][j]<<endl;
     }
   }
   cout<<" Decode errors "<<endl<<"Fed Channel Errors Pix_000 Double_Pix"<<endl;
@@ -836,6 +844,26 @@ void SiPixelRawDump::endJob() {
   cout<<" Test decode errors "<<countDecodeErrors1<<" "<<countDecodeErrors2<<endl;
   cout<<" max "<<max1<<" "<<max2<<" "<<max3<<" "<<max4<<" "<<max0<<endl;;
 
+  int oldFed=-1;
+  cout<<" Masked channels at LS "<<firstLS<<" size = "<<maskedChannels0.size()<<endl;
+  for(unsigned int i=0; i<maskedChannels0.size(); ++i) {
+    if(maskedChannels0[i].first == oldFed) cout<<" "<<maskedChannels0[i].second;
+    else {
+      oldFed=maskedChannels0[i].first;
+      cout<<endl<<maskedChannels0[i].first<<" "<<maskedChannels0[i].second;
+    }
+  }
+  cout<<endl;
+  oldFed=-1;
+  cout<<" Masked channels at LS "<<lastLS<<" size = "<<maskedChannels.size()<<endl;
+  for(unsigned int i=0; i<maskedChannels.size(); ++i) {
+    if(maskedChannels[i].first == oldFed) cout<<" "<<maskedChannels[i].second;
+    else {
+      oldFed=maskedChannels[i].first;
+      cout<<endl<<maskedChannels[i].first<<" "<<maskedChannels[i].second;
+    }
+  }
+  cout<<endl;
 
 #ifdef OUTFILE
   outfile.close();
@@ -849,7 +877,9 @@ void SiPixelRawDump::beginJob() {
 
   printLocal = theConfig.getUntrackedParameter<int>("Verbosity",1);
   printThreshold = theConfig.getUntrackedParameter<double>("PrintThreshold",0.001); // threshold per event for printing errors
-  cout<<" beginjob "<<printLocal<<" "<<printThreshold<<endl;  
+  selectedFED  = theConfig.getUntrackedParameter<int>("selectedFED",-1);
+  selectedType = theConfig.getUntrackedParameter<int>("selectedType",-1);  // not used 
+  cout<<" beginjob "<<printLocal<<" "<<printThreshold<<" select FED "<<selectedFED<<" select Type "<<selectedType<<endl;  
 
   if(printLocal>0) printErrors  = true;
   else printErrors = false;
@@ -872,6 +902,9 @@ void SiPixelRawDump::beginJob() {
   countTotErrors=0;
   sumPixels=0.;
   sumFedSize=0;
+  lastLS=0; firstLS=9999;
+  maskedChannels.clear();
+  maskedChannels0.clear();
   string tbm=" ";
   int roc=-1;
   for(int i = 0; i < n_of_FEDs; ++i) {
@@ -879,7 +912,8 @@ void SiPixelRawDump::beginJob() {
     for(int j=0;j<n_of_Channels;++j) {
       decodeErrors[i][j]=0; decodeErrors000[i][j]=0; decodeErrorsDouble[i][j]=0;
       fedErrors[i][j]=0; fedErrorsENE[i][j]=0; fedErrorsTime[i][j]=0; 
-      fedErrorsOver[i][j]=0;fedErrorsPKAM[i][j]=0;fedErrorsMask[i][j]=0;fedErrorsAutoMask[i][j]=0;
+      fedErrorsOver[i][j]=0;fedErrorsPKAM[i][j]=0;fedErrorsAutoReset[i][j]=0;
+      fedErrorsAutoMask[i][j]=0;fedErrorsMask[i][j]=0;
 
       layerIndex[i][j]=-1;
       if( i > fedIdBpixMax ) layerIndex[i][j]=0; // signal fpix
@@ -1153,8 +1187,18 @@ void SiPixelRawDump::beginJob() {
   hfed2DErrors14 = fs->make<TH2F>("hfed2DErrors14", "errors type 14 per FED", n_of_FEDs,-0.5,static_cast<float>(n_of_FEDs) - 0.5, n_of_Channels, -0.5,maxChan);
   hfed2DErrors15 = fs->make<TH2F>("hfed2DErrors15", "errors type 15 per FED", n_of_FEDs,-0.5,static_cast<float>(n_of_FEDs) - 0.5, n_of_Channels, -0.5,maxChan);
   hfed2DErrors16 = fs->make<TH2F>("hfed2DErrors16", "errors type 16 per FED", n_of_FEDs,-0.5,static_cast<float>(n_of_FEDs) - 0.5, n_of_Channels, -0.5,maxChan);
-  hfed2DErrors17 = fs->make<TH2F>("hfed2DErrors17", "errors type 17 per FED", n_of_FEDs,-0.5,static_cast<float>(n_of_FEDs) - 0.5, n_of_Channels, -0.5,maxChan);
+  hfed2DErrors17 = fs->make<TH2F>("hfed2DErrors17", "errors type 17 per FED", n_of_FEDs,-0.5,static_cast<float>(n_of_FEDs) - 0.5, n_of_Channels, -0.5,maxChan);  
   hfed2DErrors18 = fs->make<TH2F>("hfed2DErrors18", "errors type 18 per FED", n_of_FEDs,-0.5,static_cast<float>(n_of_FEDs) - 0.5, n_of_Channels, -0.5,maxChan);
+
+  herrorVsLs10 = fs->make<TH2F>("herrorVsLs10", "TO versus ls",100,0.,100., n_of_Channels, -0.5,maxChan);
+  herrorVsLs11 = fs->make<TH2F>("herrorVsLs11", "ENE versus ls",100,0.,100., n_of_Channels, -0.5,maxChan);
+  herrorVsLs12 = fs->make<TH2F>("herrorVsLs12", "NOR versus ls",100,0.,100., n_of_Channels, -0.5,maxChan);
+  herrorVsLs13 = fs->make<TH2F>("herrorVsLs13", "AR versus ls",100,0.,100., n_of_Channels, -0.5,maxChan);
+  herrorVsLs15 = fs->make<TH2F>("herrorVsLs15", "Trailer versus ls",100,0.,100., n_of_Channels, -0.5,maxChan);
+  herrorVsLs16 = fs->make<TH2F>("herrorVsLs16", "PKAM versus ls",100,0.,100., n_of_Channels, -0.5,maxChan);
+  herrorVsLs17 = fs->make<TH2F>("herrorVsLs17", "Masked versus ls",100,0.,100., n_of_Channels, -0.5,maxChan);
+  herrorVsLs18 = fs->make<TH2F>("herrorVsLs18", "AM versus ls",100,0.,100., n_of_Channels, -0.5,maxChan);
+
 
 #ifdef IND_FEDS
   hfed2DErrors1ls  = fs->make<TH2F>("hfed2DErrors1ls", "errors type 6 vs lumi",300,0,300, n_of_FEDs,-0.5,static_cast<float>(n_of_FEDs) - 0.5); //
@@ -1215,6 +1259,19 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
   hlumi0->Fill(float(lumiBlock));
   hbx0->Fill(float(bx));
   //horbit->Fill(float(orbit));
+
+  bool saveLast=false, saveFirst=false;
+  if(lumiBlock>lastLS) {
+    lastLS=lumiBlock;
+    saveLast=true;
+    if(maskedChannels.size()>0) maskedChannels.clear();
+  }
+  if(lumiBlock<firstLS) {
+    firstLS=lumiBlock;
+    saveFirst=true;
+    if(maskedChannels0.size()>0) maskedChannels0.clear();
+  }
+
 
   if(printEventInfo) {
     // if(countAllEvents<100 || (countAllEvents&1000)==0 )
@@ -1431,11 +1488,7 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 	    fedErrorsTime[fedId-fedId0][(fedChannel-1)]++;
 	    hfed2DErrors10->Fill(float(fedId-fedId0),float(fedChannel));
 	    herrorTimels->Fill(float(lumiBlock));
-	    //if(layer==1)      herrorTimels1->Fill(float(lumiBlock));
-	    //else if(layer==2) herrorTimels2->Fill(float(lumiBlock));
-	    //else if(layer==3) herrorTimels3->Fill(float(lumiBlock));
-	    //else if(layer==0) herrorTimels0->Fill(float(lumiBlock));
-
+	    if(fedId==selectedFED) herrorVsLs10->Fill(lumiBlock,fedChannel);
 	    break; } 
 
 	  case(11) : {  // ENE
@@ -1443,8 +1496,8 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 	    heneFed->Fill(float(fedId-fedId0));
 	    countErrors[11]++;
 	    hfed2DErrors11->Fill(float(fedId-fedId0),float(fedChannel));
-	    //hfed2DErrors11ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
 	    fedErrorsENE[fedId-fedId0][(fedChannel-1)]++;
+	    if(fedId==selectedFED) herrorVsLs11->Fill(lumiBlock,fedChannel);
 	    break; }
 
 	  case(12) : {  // NOR
@@ -1454,6 +1507,7 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 	    hfed2DErrors12->Fill(float(fedId-fedId0),float(fedChannel));
 	    //hfed2DErrors12ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
 	    fedErrorsOver[fedId-fedId0][(fedChannel-1)]++;   // use oveflow to count NORs for phase1 
+	    if(fedId==selectedFED) herrorVsLs12->Fill(lumiBlock,fedChannel);
 	    break; }
 
 
@@ -1461,6 +1515,8 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 
 	    countErrors[13]++;
 	    hfed2DErrors13->Fill(float(fedId-fedId0),float(fedChannel));
+	    fedErrorsAutoReset[fedId-fedId0][(fedChannel-1)]++;
+	    if(fedId==selectedFED) herrorVsLs13->Fill(lumiBlock,fedChannel);
 	    //hfed2DErrors13ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
 	    break; }
 
@@ -1470,10 +1526,7 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 	    //fedErrorsOver[fedId-fedId0][(fedChannel-1)]++;
 	    hfed2DErrors14->Fill(float(fedId-fedId0),float(fedChannel));
 	    //hfed2DErrors14ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
-	    //if(layer==1)      herrorOverls1->Fill(float(lumiBlock));
-	    //else if(layer==2) herrorOverls2->Fill(float(lumiBlock));
-	    //else if(layer==3) herrorOverls3->Fill(float(lumiBlock));
-	    //else if(layer==0) herrorOverls0->Fill(float(lumiBlock));
+	    //if(fedId==selectedFED) herrorVsLs14->Fill(lumiBlock,fedChannel);
 	    break; }
 
 	  case(15) : {  // TBM Trailer
@@ -1481,6 +1534,7 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 	    countErrors[15]++;
 	    hfed2DErrors15->Fill(float(fedId-fedId0),float(fedChannel));
 	    //hfed2DErrors15ls->Fill(float(lumiBlock),float(fedId-fedId0)); //errors
+	    if(fedId==selectedFED) herrorVsLs15->Fill(lumiBlock,fedChannel);
 	    break; }
 
 	  case(16) : { // pkam
@@ -1490,15 +1544,21 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 	    herrorPkamls->Fill(float(lumiBlock));
 	    hpkamFed->Fill(float(fedId-fedId0));
 	    fedErrorsPKAM[fedId-fedId0][(fedChannel-1)]++;
+	    if(fedId==selectedFED) herrorVsLs16->Fill(lumiBlock,fedChannel);
 	    break; }
 
 
 	  case(17) : { // masked 
 
 	    countErrors[17]++;
-	    fedErrorsMask[fedId-fedId0][(fedChannel-1)]++;
 	    hfed2DErrors17->Fill(float(fedId-fedId0),float(fedChannel));
+	    fedErrorsMask[fedId-fedId0][(fedChannel-1)]++;
+	    if(fedId==selectedFED) herrorVsLs17->Fill(lumiBlock,fedChannel);
+	    if( (countAllEvents>1) && (fedErrorsMask[fedId-fedId0][(fedChannel-1)]==1) )
+	      cout<<" new masked channel "<<countAllEvents<<" ls "<<lumiBlock<<" fed "<<fedId<<" ch "<<fedChannel<<endl;
 
+	    if(saveLast) maskedChannels.push_back(make_pair(fedId,fedChannel));
+	    if(saveFirst) maskedChannels0.push_back(make_pair(fedId,fedChannel));
 
 	    break; }
 
@@ -1506,17 +1566,20 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 
 	    countErrors[18]++;
 	    hautomaskedFed->Fill(float(fedId-fedId0));
-	    hfed2DErrors18->Fill(float(fedId-fedId0),float(fedChannel));
 	    fedErrorsAutoMask[fedId-fedId0][(fedChannel-1)]++;
+	    hfed2DErrors18->Fill(float(fedId-fedId0),float(fedChannel));
+	    //cout<<lumiBlock<<" "<<fedId<<" "<<fedChannel<<endl;
+	    if(fedId==selectedFED) herrorVsLs18->Fill(lumiBlock,fedChannel);
 	    break; }
 
 	  case(19) : { // tbm reset  
 
 	    countErrors[19]++;
 	    //hfed2DErrors19->Fill(float(fedId-fedId0),float(fedChannel));
+	    //if(fedId==selectedFED) herrorVsLs19->Fill(lumiBlock,fedChannel);
 	    break; }
 
-	  case(9) : { // NTP 
+	  case(9) : { // 
 
 	    countErrors[9]++;
 	    hfed2DErrors9->Fill(float(fedId-fedId0),float(fedChannel));
@@ -1577,16 +1640,15 @@ void SiPixelRawDump::analyze(const  edm::Event& ev, const edm::EventSetup& es) {
 	  
 	  if(status>=8) {  // hard errors
 	    // Type - 1 Errors
-
-	    countErrorsInFed1++;
-	    hfedErrorType1ls->Fill(float(lumiBlock),float(fedId-fedId0)); // hard errors
-	    hfed2DErrorsType1->Fill(float(fedId-fedId0),float(fedChannel));
-
 	    herrorType1->Fill(float(status));
-	    herrorType1Fed->Fill(float(fedId-fedId0));
-	    herrorType1Chan->Fill(float(fedChannel));
-
-	    fedErrors[fedId-fedId0][(fedChannel-1)]++;
+	    if(status!=17) {
+	      countErrorsInFed1++;
+	      herrorType1Fed->Fill(float(fedId-fedId0));
+	      herrorType1Chan->Fill(float(fedChannel));
+	      hfedErrorType1ls->Fill(float(lumiBlock),float(fedId-fedId0)); // hard errors
+	      hfed2DErrorsType1->Fill(float(fedId-fedId0),float(fedChannel));
+	      fedErrors[fedId-fedId0][(fedChannel-1)]++; // skip masked 
+	    }
 
 	  } else if(status>0) {  // decode errors
 	    // Type 2 errors

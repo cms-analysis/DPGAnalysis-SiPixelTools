@@ -257,10 +257,10 @@ process.source = cms.Source("PoolSource",
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('325159:62-325159:9999')
 
 
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('325097:1-325097:28') # no hv  no collisions 
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('325097:29-325097:38') # no hv collisions  
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('325097:39-325097:57') # hv on 
-process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('325097:58-325097:9999') # stable lumi 
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('325097:1-325097:27') # no hv  no collisions 
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('325097:28-325097:36') # no hv collisions  
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('325097:37-325097:58') # hv on 
+process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('325097:59-325097:9999') # stable lumi 
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('325097:1-325097:100') # overview
 
 
@@ -316,7 +316,11 @@ if useLocalDB :
 #        record = cms.string('SiPixelGainCalibrationRcd'),
 #        tag = cms.string('SiPixelGainCalibration_2018_v3') 
 #        tag = cms.string('SiPixelGainCalibration_2018_v2_offline') 
-        tag = cms.string('SiPixelGainCalibration_2018_v1_offline') 
+#        tag = cms.string('SiPixelGainCalibration_2018_v1_offline') 
+#        tag = cms.string('SiPixelGainCalibration_2018_v7') 
+        tag = cms.string('SiPixelGainCalibration_2018_v8') 
+#        tag = cms.string('SiPixelGainCalibration_2018_v9') 
+#        tag = cms.string('SiPixelGainCalibration_2018_v9_offline') 
 #        tag = cms.string('SiPixelGainCalibration_phase1_ideal_v2')
  	),
        ),
@@ -333,9 +337,10 @@ if useLocalDB :
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v2_bugfix_offline.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_phase1_ideal_v2.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2018_v1_offline.db')
-#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2018_v2_offline.db')
-     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2018_v3_offline.db')
-#     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2018_v2_offline. db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2018_v3_offline.db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2018_v9_offline.db')
+     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
 #     connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
     ) # end process
     process.myprefer = cms.ESPrefer("PoolDBESSource","DBReaderFrontier")

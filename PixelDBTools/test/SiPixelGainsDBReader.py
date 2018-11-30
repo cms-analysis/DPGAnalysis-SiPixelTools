@@ -44,7 +44,10 @@ process.source = cms.Source("EmptySource",
 #    firstRun = cms.untracked.uint32(313000)  # iov1-2018 v1
 #    firstRun = cms.untracked.uint32(319000)  # 2018 V2
 #    firstRun = cms.untracked.uint32(319940)  # 2018 V3 (short)
-    firstRun = cms.untracked.uint32(325000)  # 2018 V4
+#    firstRun = cms.untracked.uint32(320000)  # 2018 V4
+#    firstRun = cms.untracked.uint32(323000)  # 2018 V6
+#    firstRun = cms.untracked.uint32(324000)  # 2018 V7
+    firstRun = cms.untracked.uint32(327000)  # 2018 V9
 )
 
 #process.Timing = cms.Service("Timing")
@@ -79,7 +82,7 @@ if useLocalDB:
 #       tag = cms.string('SiPixelGainCalibration_2017_v4')
 #       tag = cms.string('SiPixelGainCalibration_2017_v1_offline')
 #       tag = cms.string('SiPixelGainCalibration_2017_v4_offline')
-#        tag = cms.string('SiPixelGainCalibration_2017_v4_1337_offline')
+#       tag = cms.string('SiPixelGainCalibration_2017_v4_1337_offline')
 #       tag = cms.string('SiPixelGainCalibration_hlt_2017_v5')  # HLT
 #       tag = cms.string('SiPixelGainCalibration_2017_v5') # for offline
 #       tag = cms.string('SiPixelGainCalibration_2018_v1_offline')
@@ -92,14 +95,18 @@ if useLocalDB:
 #       tag = cms.string('SiPixelGainCalibration_2018_v4_fine_offline') #  
 #       tag = cms.string('SiPixelGainCalibration_2018_v4full_offline') # tag for v6 
 #       tag = cms.string('SiPixelGainCalibration_2018_v7_offline') # tag for v7
-       tag = cms.string('SiPixelGainCalibration_2018_v8_offline') # tag for v8 
+       tag = cms.string('SiPixelGainCalibration_2018_v7') # tag for v7 in dev and prod
+#       tag = cms.string('SiPixelGainCalibration_2018_v8_offline') # tag for v8 
+#       tag = cms.string('SiPixelGainCalibration_2018_v8') # tag for v8 
+#       tag = cms.string('SiPixelGainCalibration_2018_v9_offline') # tag for v9 
+#       tag = cms.string('SiPixelGainCalibration_2018_v9') # tag for v9 
 #       tag = cms.string('SiPixelGainCalibration_2018_v1')
 #       tag = cms.string('SiPixelGainCalibration_2018_v2')
 #       tag = cms.string('SiPixelGainCalibration_2018_v3') # v3 in db 
 #       tag = cms.string('SiPixelGainCalibration_2018_v4')
 #       tag = cms.string('SiPixelGainCalibration_2018_v5')
     )),
-#     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
+     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
 #     connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
 #     connect = cms.string('sqlite_file:/afs//cern.ch/work/d/dkotlins/public/DB/Gains/SiPixelGainCalibration_2017_v4_offline.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2017_v4_full.db')
@@ -114,9 +121,10 @@ if useLocalDB:
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2018_v4_fine_offline.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2018_v6_offline.db')
 #     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2018_v7_offline.db')
-     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2018_v8_offline.db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2018_v8_offline.db')
 
 #     connect = cms.string('sqlite_file:/eos/cms/store/group/dpg_tracker_pixel/comm_pixel/GainCalibrations/Phase1/Run_2815552613/GainRun_2815552613/SiPixelGainCalibration_2018_v4fineRes_offline.db')
+#     connect = cms.string('sqlite_file:/eos/cms/store/group/dpg_tracker_pixel/comm_pixel/GainCalibrations/Phase1/Run_325585/GainRun_325585/SiPixelGainCalibration_2018_v9_offline.db')
 
   ) # end process
   # process.prefer("PoolDBESSource")

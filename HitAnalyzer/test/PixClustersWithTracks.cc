@@ -1881,7 +1881,7 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	// change ladeer sign for Outer )x<0)
 	if(shell==1 || shell==3) ladderOn = -ladderOn;
 	
-	if( layer==2) {
+	if( layer==2 && select1!=9998) {
 	  if( (ladderOn ==-1) && ( (module == 1) || (module == 2) || (module == 3)) ) badL2Modules=true;
 	  else if( (ladderOn ==-5) &&( (module == -1) || (module == -2) || (module == -3)) ) badL2Modules=true;
 	  else if( (ladderOn == 14) && (module == -1) ) badL2Modules=true;
@@ -1891,7 +1891,7 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	}
 	
 	// find inner and outer modules for layer 1 onl
-	if( (layer==1) ) {
+	if( (layer==1) && select1!=9998 ) {
 	  if( (ladderOn==2) || (ladderOn==4) || (ladderOn==6) ||
 	      (ladderOn==-1) || (ladderOn==-3) || (ladderOn==-5) ) inner=true;
 	  else inner=false;

@@ -102,9 +102,9 @@ using namespace std;
 #define BX_TESTS
 //#define STUDY_LAY1
 //#define SINGLE_MODULES
-#define PHI_PROFILES
+//#define PHI_PROFILES
 //#define TEST_GEOM
-#define TEST_DCOLS
+//#define TEST_DCOLS
 
 //#define HI
 //#define ROC_EFF
@@ -120,7 +120,7 @@ using namespace std;
 //#define TESTING_ADC
 //#define LAY1_SPLIT
 #define ROC_RATE
-#define STUDY_ONEMOD
+//#define STUDY_ONEMOD
 
 #ifdef HF
 #include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
@@ -681,6 +681,11 @@ edm::EDGetTokenT<HFRecHitCollection> HFHitsToken_;
 
 #ifdef ROC_RATE
   TH2F *hrocMap1,*hrocMap2,*hrocMap3,*hrocMap4;
+  TProfile2D *hrocSizeXMap1, *hrocSizeYMap1,*hrocClucharMap1,*hrocPixcharMap1;
+  TProfile2D *hrocSizeXMap2, *hrocSizeYMap2,*hrocClucharMap2,*hrocPixcharMap2;
+  TProfile2D *hrocSizeXMap3, *hrocSizeYMap3,*hrocClucharMap3,*hrocPixcharMap3;
+  TProfile2D *hrocSizeXMap4, *hrocSizeYMap4,*hrocClucharMap4,*hrocPixcharMap4;
+
   TH1D *hrocLadder1, *hrocZ11, *hrocZ12;
   TH1D *hpixRocRate1,*hpixRocRate2,*hpixRocRate3,*hpixRocRate4, 
     *hcluRocRate1,*hcluRocRate2,*hcluRocRate3,*hcluRocRate4;
@@ -1444,6 +1449,42 @@ void PixClusterAna::beginJob() {
    hrocMap3->SetOption("colz");
    hrocMap4 = fs->make<TH2F>("hrocMap4"," ",8*9,-4.5,4.5,2*65,-32.5,32.5);
    hrocMap4->SetOption("colz");
+
+   hrocSizeXMap1 = fs->make<TProfile2D>("hrocSizeXMap1"," ",8*9,-4.5,4.5,2*13,-6.5,6.5,0.,1000.);
+   hrocSizeXMap1->SetOption("colz");
+   hrocSizeXMap2 = fs->make<TProfile2D>("hrocSizeXMap2"," ",8*9,-4.5,4.5,2*29,-14.5,14.5,0.,1000.);
+   hrocSizeXMap2->SetOption("colz");
+   hrocSizeXMap3 = fs->make<TProfile2D>("hrocSizeXMap3"," ",8*9,-4.5,4.5,2*45,-22.5,22.5,0.,1000.);
+   hrocSizeXMap3->SetOption("colz");
+   hrocSizeXMap4 = fs->make<TProfile2D>("hrocSizeXMap4"," ",8*9,-4.5,4.5,2*65,-32.5,32.5,0.,1000.);
+   hrocSizeXMap4->SetOption("colz");
+
+   hrocSizeYMap1 = fs->make<TProfile2D>("hrocSizeYMap1"," ",8*9,-4.5,4.5,2*13,-6.5,6.5,0.,1000.);
+   hrocSizeYMap1->SetOption("colz");
+   hrocSizeYMap2 = fs->make<TProfile2D>("hrocSizeYMap2"," ",8*9,-4.5,4.5,2*29,-14.5,14.5,0.,1000.);
+   hrocSizeYMap2->SetOption("colz");
+   hrocSizeYMap3 = fs->make<TProfile2D>("hrocSizeYMap3"," ",8*9,-4.5,4.5,2*45,-22.5,22.5,0.,1000.);
+   hrocSizeYMap3->SetOption("colz");
+   hrocSizeYMap4 = fs->make<TProfile2D>("hrocSizeYMap4"," ",8*9,-4.5,4.5,2*65,-32.5,32.5,0.,1000.);
+   hrocSizeYMap4->SetOption("colz");
+
+   hrocClucharMap1 = fs->make<TProfile2D>("hrocClucharMap1"," ",8*9,-4.5,4.5,2*13,-6.5,6.5,0.,1000.);
+   hrocClucharMap1->SetOption("colz");
+   hrocClucharMap2 = fs->make<TProfile2D>("hrocClucharMap2"," ",8*9,-4.5,4.5,2*29,-14.5,14.5,0.,1000.);
+   hrocClucharMap2->SetOption("colz");
+   hrocClucharMap3 = fs->make<TProfile2D>("hrocClucharMap3"," ",8*9,-4.5,4.5,2*45,-22.5,22.5,0.,1000.);
+   hrocClucharMap3->SetOption("colz");
+   hrocClucharMap4 = fs->make<TProfile2D>("hrocClucharMap4"," ",8*9,-4.5,4.5,2*65,-32.5,32.5,0.,1000.);
+   hrocClucharMap4->SetOption("colz");
+
+   hrocPixcharMap1 = fs->make<TProfile2D>("hrocPixcharMap1"," ",8*9,-4.5,4.5,2*13,-6.5,6.5,0.,1000.);
+   hrocPixcharMap1->SetOption("colz");
+   hrocPixcharMap2 = fs->make<TProfile2D>("hrocPixcharMap2"," ",8*9,-4.5,4.5,2*29,-14.5,14.5,0.,1000.);
+   hrocPixcharMap2->SetOption("colz");
+   hrocPixcharMap3 = fs->make<TProfile2D>("hrocPixcharMap3"," ",8*9,-4.5,4.5,2*45,-22.5,22.5,0.,1000.);
+   hrocPixcharMap3->SetOption("colz");
+   hrocPixcharMap4 = fs->make<TProfile2D>("hrocPixcharMap4"," ",8*9,-4.5,4.5,2*65,-32.5,32.5,0.,1000.);
+   hrocPixcharMap4->SetOption("colz");
    
    hrocLadder1 = fs->make<TH1D>("hrocLadder1"," ",2*13,-6.5,6.5);
    hrocZ11 = fs->make<TH1D>("hrocZ11","roc pix occ. l1 inner",8*9,-4.5,4.5);
@@ -2539,8 +2580,11 @@ void PixClusterAna::analyze(const edm::Event& e,
 #endif
     else if(select1== 201) {goto label1;} // select specific module 
     else if(select1==9999) { if(event!=select2) return; } 
-    else { if( !((bx>=select1) && (bx<=select2)) ) return; } // skip bx outside the select1-select2 region 
+    else { 
+    // skip bx outside the select1-select2 region 
     //....
+      //if( !((bx>=select1) && (bx<=select2)) ) return; 
+    } 
   }
 
  label1:
@@ -2763,7 +2807,7 @@ void PixClusterAna::analyze(const edm::Event& e,
       // change ladeer sign for Outer )x<0)
       if(shell==1 || shell==3) ladder = -ladder;
 
-      if( layer==2) {
+      if( layer==2 && select1!=9998 ) {
 	if( (ladder ==-1) && ( (module == 1) || (module == 2) || (module == 3)) ) badL2Modules=true;
 	else if( (ladder ==-5) &&( (module == -1) || (module == -2) || (module == -3)) ) badL2Modules=true;
 	else if( (ladder == 14) && (module == -1) ) badL2Modules=true;
@@ -2773,7 +2817,7 @@ void PixClusterAna::analyze(const edm::Event& e,
       }
 
       // find inner and outer modules for layer 1 onl
-      if( (layer==1) ) {
+      if( (layer==1) && (select1!=9998)) {
 #ifdef LAY1_SPLIT
 	if( (ladder==2) || (ladder==4) || (ladder==6) ||
 	    (ladder==-1) || (ladder==-3) || (ladder==-5) ) inner=true;
@@ -2862,7 +2906,9 @@ void PixClusterAna::analyze(const edm::Event& e,
       double gX = clustgp.x();
       double gY = clustgp.y();      
       TVector3 v(gX,gY,gZ);
+#ifdef PHI_PROFILES
       float gPhi = v.Phi(); // phi of the hit
+#endif
       float gR = v.Perp(); // r of the hit
 
       //float zPos = detZ - ly;
@@ -2954,6 +3000,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 #ifdef ROC_RATE
 	    hrocMap1->Fill(rocZ,rocPhi);
+	    hrocPixcharMap1->Fill(rocZ,rocPhi,adc);
 	    hrocLadder1->Fill(rocPhi);
 	    hpixRocRate1->Fill(rocZ);
 #endif
@@ -3009,18 +3056,17 @@ void PixClusterAna::analyze(const edm::Event& e,
 #endif
 
 #ifdef SINGLE_MODULES
-	    //if(select1>0) {
-	      float weight = 1.; // adc
-	      if     (eventFlag[0]&&ladder==-6 && module==-1) hpixDetMap10->Fill(pixy,pixx,weight); //  BmO1,2
-	      else if(eventFlag[1]&&ladder==-6 && module==-2) hpixDetMap11->Fill(pixy,pixx,weight); // 
-	      else if(eventFlag[2]&&ladder==-6 && module==-3) hpixDetMap12->Fill(pixy,pixx,weight); // 
-	      else if(eventFlag[3]&&ladder==-6 && module==-4) hpixDetMap13->Fill(pixy,pixx,weight); //  
-	      else if(eventFlag[4]&&ladder==-2 && module== 3) hpixDetMap14->Fill(pixy,pixx,weight); // "
-	      else if(eventFlag[5]&&ladder==-3 && module== 3) hpixDetMap15->Fill(pixy,pixx,weight); // "
-	      else if(eventFlag[6]&&ladder==-4 && module== 3) hpixDetMap16->Fill(pixy,pixx,weight); // "
-	      else if(eventFlag[7]&&ladder==-5 && module== 3) hpixDetMap17->Fill(pixy,pixx,weight); // 
-	      else if(eventFlag[8]&&ladder== 2 && module== 3) hpixDetMap18->Fill(pixy,pixx,weight); //  
-	      else if(eventFlag[9]&&ladder== 3 && module== 3) hpixDetMap19->Fill(pixy,pixx,weight); // 
+	    float weight = 1.; // adc
+	    if     ( ladder==-6 && module==-1) hpixDetMap10->Fill(pixy,pixx,weight); // 
+	    else if( ladder==-1 && module==-1) hpixDetMap11->Fill(pixy,pixx,weight); // "
+	    else if( ladder==-1 && module==-2) hpixDetMap12->Fill(pixy,pixx,weight); // "
+	    else if( ladder==-3 && module==-4) hpixDetMap13->Fill(pixy,pixx,weight); // 
+	    else if( ladder== 4 && module==-2) hpixDetMap14->Fill(pixy,pixx,weight); // 
+	    else if( ladder== 6 && module==-1) hpixDetMap15->Fill(pixy,pixx,weight); // 
+	    else if( ladder== 4 && module== 1) hpixDetMap16->Fill(pixy,pixx,weight); //
+	    else if( ladder== 2 && module== 1) hpixDetMap17->Fill(pixy,pixx,weight); // 
+	    else if( ladder==-4 && module== 2) hpixDetMap18->Fill(pixy,pixx,weight); // 
+	    else if( ladder==-1 && module== 2) hpixDetMap19->Fill(pixy,pixx,weight); // 
 #endif
 
 #ifdef LS_TESTS
@@ -3108,6 +3154,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 #ifdef ROC_RATE
 	    hrocMap2->Fill(rocZ,rocPhi);
+	    hrocPixcharMap2->Fill(rocZ,rocPhi,adc);
 	    hpixRocRate2->Fill(rocZ);
 #endif
 
@@ -3201,6 +3248,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 #ifdef ROC_RATE
 	    hrocMap3->Fill(rocZ,rocPhi);
+	    hrocPixcharMap3->Fill(rocZ,rocPhi,adc);
 	    hpixRocRate3->Fill(rocZ);
 #endif
 
@@ -3290,6 +3338,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 #ifdef ROC_RATE
 	    hrocMap4->Fill(rocZ,rocPhi);
+	    hrocPixcharMap4->Fill(rocZ,rocPhi,adc);
 	    hpixRocRate4->Fill(rocZ);
 #endif
 
@@ -3419,6 +3468,9 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 #ifdef ROC_RATE
 	    hcluRocRate1->Fill(rocZ);
+	    hrocClucharMap1->Fill(rocZ,rocPhi,ch);
+	    hrocSizeXMap1->Fill(rocZ,rocPhi,sizeX);
+	    hrocSizeYMap1->Fill(rocZ,rocPhi,sizeY);
 #endif
 
 #ifdef LAY1_SPLIT
@@ -3595,6 +3647,9 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 #ifdef ROC_RATE
 	  hcluRocRate2->Fill(rocZ);
+	  hrocClucharMap2->Fill(rocZ,rocPhi,ch);
+	  hrocSizeXMap2->Fill(rocZ,rocPhi,sizeX);
+	  hrocSizeYMap2->Fill(rocZ,rocPhi,sizeY);
 #endif
 
 #ifdef PHI_PROFILES
@@ -3712,6 +3767,9 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 #ifdef ROC_RATE
 	  hcluRocRate3->Fill(rocZ);
+	  hrocClucharMap3->Fill(rocZ,rocPhi,ch);
+	  hrocSizeXMap3->Fill(rocZ,rocPhi,sizeX);
+	  hrocSizeYMap3->Fill(rocZ,rocPhi,sizeY);
 #endif
 
 #ifdef TEST_GEOM
@@ -3801,6 +3859,9 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 #ifdef ROC_RATE
 	  hcluRocRate4->Fill(rocZ);
+	  hrocClucharMap4->Fill(rocZ,rocPhi,ch);
+	  hrocSizeXMap4->Fill(rocZ,rocPhi,sizeX);
+	  hrocSizeYMap4->Fill(rocZ,rocPhi,sizeY);
 #endif
 
 #ifdef TEST_GEOM

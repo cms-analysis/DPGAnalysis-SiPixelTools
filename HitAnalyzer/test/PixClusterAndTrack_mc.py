@@ -12,7 +12,8 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
 # 
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '') # no misalignment 
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '') # no misalignment 
+process.GlobalTag = GlobalTag(process.GlobalTag, '102X_upgrade2018_realistic_v10', '') # no misalignment 
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '') # with misalignment 
 # AUTO conditions 
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
@@ -69,7 +70,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 # ----------------------------------------------------------------------
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10)
+    input = cms.untracked.int32(-1)
 )
 
 myfilelist = cms.untracked.vstring()
@@ -81,14 +82,16 @@ process.source = cms.Source("PoolSource",
 #)
 
   fileNames = cms.untracked.vstring(    
-     'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/reco/reco2.root',
+#     'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/reco/reco2.root',
+
+"/store/relval/CMSSW_10_2_0_pre6//RelValQCD_Pt-20toInf_MuEnrichedPt15_13TeV/GEN-SIM-RECO/PU25ns_102X_upgrade2018_realistic_v10_HS-v1/10000/005CD7BF-7192-E811-9DD2-D067E5F914D3.root",
 
   )   # end the list "by-hand"
 )
 
 
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('clus_ana.root')
+    fileName = cms.string('clus_ana_mc.root')
 )
 
 process.d = cms.EDAnalyzer("PixClusterAna",
@@ -182,7 +185,7 @@ process.c2 = cms.EDAnalyzer("PixClustersWithTracks",
 #process.p = cms.Path(process.hltfilter*process.d*process.c*process.c1*process.c2)
 #process.p = cms.Path(process.hltfilter*process.d*process.c*process.d1*process.d2)
 
-#process.p = cms.Path(process.d*process.c) # for mc
-process.p = cms.Path(process.c) # for mc
+process.p = cms.Path(process.d*process.c) # for mc
+#process.p = cms.Path(process.c) # for mc
 #process.p = cms.Path(process.d) # for cosmics
 

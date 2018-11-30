@@ -1181,7 +1181,7 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
        bool noise = false;
 
 #ifdef SINGLE_MODULES
-       float weight=adc; 
+       float weight=1.; // adc; 
        float pixy = col; float pixx=row;
 #endif
        if(layer==1) {

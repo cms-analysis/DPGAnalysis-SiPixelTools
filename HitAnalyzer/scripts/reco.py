@@ -29,8 +29,12 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
         #'file:digis4.root'
-       'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw2.root'
-        #'/store/user/kotlinski/mu100_v74/digis/digis1.root'
+       'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw1_thr1k.root'
+#       'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw1.root'
+#       'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw2.root'
+#       'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw3.root'
+#       'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw4.root'
+#       'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw5.root'
         ),
     secondaryFileNames = cms.untracked.vstring()
 )
@@ -55,33 +59,83 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
     fileName = cms.untracked.string(
-        '/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/reco/reco2.root'
+        '/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/reco/reco1_thr1kclu10.root'
+#        '/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/reco/reco1_clu10.root'
+#        '/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/reco/reco1.root'
+#        '/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/reco/reco2.root'
+#        '/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/reco/reco3.root'
+#        '/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/reco/reco4.root'
+#        '/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/reco/reco5.root'
     ),
     outputCommands = process.RECOSIMEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
 )
 
-# Additional output definition
+# Parameter changes 
+#process.siPixelClustersPreSplitting.VCaltoElectronGain = 47  # default
+#process.siPixelClustersPreSplitting.VCaltoElectronOffset = -60
+#process.siPixelClustersPreSplitting.VCaltoElectronGain_L1 = 47  # default
+#process.siPixelClustersPreSplitting.VCaltoElectronOffset_L1 = -60
+process.siPixelClustersPreSplitting.SeedThreshold = 10 #  def=1000
+process.siPixelClustersPreSplitting.ChannelThreshold = 2 # must be bigger than 1, def=10
+process.siPixelClustersPreSplitting.ClusterThreshold = 10 # def =4000    # integer?
+process.siPixelClustersPreSplitting.ClusterThreshold_L1 = 10 # def=2000 # integer?
+
+process.a = cms.EDAnalyzer("PixDigisTest",
+    Verbosity = cms.untracked.bool(False),
+    phase1 = cms.untracked.bool(True),
+# sim in V7
+#    src = cms.InputTag("mix"),
+# old default
+    src = cms.InputTag("siPixelDigis"),
+)
+
+process.d = cms.EDAnalyzer("PixClusterAna",
+#process.d = cms.EDAnalyzer("PixClusterTest",
+    Verbosity = cms.untracked.bool(False),
+    phase1 = cms.untracked.bool(True),
+    #src = cms.InputTag("siPixelClusters"),
+    src = cms.InputTag("siPixelClustersPreSplitting"),
+    Tracks = cms.InputTag("generalTracks"),
+    Select1 = cms.untracked.int32(0),  # cut  
+    Select2 = cms.untracked.int32(0),  # value     
+)
+process.d_cosm = cms.EDAnalyzer("PixClusterAna",
+#process.d = cms.EDAnalyzer("PixClusterTest",
+    Verbosity = cms.untracked.bool(False),
+    phase1 = cms.untracked.bool(True),
+    #src = cms.InputTag("siPixelClusters"),
+    src = cms.InputTag("siPixelClustersPreSplitting"),
+    Tracks = cms.InputTag(""),
+    Select1 = cms.untracked.int32(0),  # cut  
+    Select2 = cms.untracked.int32(0),  # value     
+)
+
+process.TFileService = cms.Service("TFileService",
+    fileName = cms.string('digis_clus.root')
+)
 
 # Path and EndPath definitions
 process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
 process.reconstruction_step = cms.Path(process.reconstruction)
+process.a_step = cms.Path(process.a)
+process.d_step = cms.Path(process.d)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
 
 # Schedule definition
 #process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.endjob_step,process.RECOSIMoutput_step)
-process.schedule = cms.Schedule(process.raw2digi_step,process.reconstruction_step,process.endjob_step,process.RECOSIMoutput_step)
+
+#process.schedule = cms.Schedule(process.raw2digi_step,process.reconstruction_step,process.endjob_step,process.RECOSIMoutput_step)
+process.schedule = cms.Schedule(process.raw2digi_step,process.reconstruction_step,process.endjob_step,process.RECOSIMoutput_step,process.a_step,process.d_step)
+
 #process.schedule = cms.Schedule(process.reconstruction_step,process.endjob_step,process.RECOSIMoutput_step)
 
 # customisation of the process.
-
 # Automatic addition of the customisation function from SLHCUpgradeSimulations.Configuration.postLS1Customs
 #from SLHCUpgradeSimulations.Configuration.postLS1Customs import customisePostLS1 
-
 #call to customisation function customisePostLS1 imported from SLHCUpgradeSimulations.Configuration.postLS1Customs
 #process = customisePostLS1(process)
-
 # End of customisation functions
 

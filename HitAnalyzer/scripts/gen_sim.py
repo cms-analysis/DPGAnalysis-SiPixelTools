@@ -48,10 +48,11 @@ process.FEVTDEBUGoutput = cms.OutputModule("PoolOutputModule",
         filterName = cms.untracked.string('')
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits2.root'),
-#    fileName = cms.untracked.string('simHits2.root'),
-#    fileName = cms.untracked.string('simHits3.root'),
-#    fileName = cms.untracked.string('simHits4.root'),
+    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits1.root'),
+#    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits2.root'),
+#    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits3.root'),
+#    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits4.root'),
+#    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits5.root'),
 #    fileName = cms.untracked.string('sim.root'),
     outputCommands = process.FEVTDEBUGEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
@@ -83,9 +84,9 @@ process.generator = cms.EDProducer("FlatRandomPtGunProducer",
 #process.Realistic25ns13TeVEarly2017CollisionSmearingParameters.SigmaZ = 0.0
 
 # Init random numbers - 1st file    
-#process.RandomNumberGeneratorService.generator.initialSeed = 1
+process.RandomNumberGeneratorService.generator.initialSeed = 1
 # next files 
-process.RandomNumberGeneratorService.generator.initialSeed = 2
+#process.RandomNumberGeneratorService.generator.initialSeed = 2
 #process.RandomNumberGeneratorService.generator.initialSeed = 3
 #process.RandomNumberGeneratorService.generator.initialSeed = 4
 #process.RandomNumberGeneratorService.generator.initialSeed = 5
@@ -116,8 +117,5 @@ process = customiseEarlyDelete(process)
 #
 #call to customisation function customisePostLS1 imported from SLHCUpgradeSimulations.Configuration.postLS1Customs
 #process = customisePostLS1(process)
-
-
-
 # End of customisation functions
 

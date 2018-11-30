@@ -62,6 +62,10 @@
 #/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/ZeroBias/Run2017F-*/RECO'  # works
 
 # 2018
+# MC
+/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/RelValQCD_Pt-20toInf_MuEnrichedPt15_13TeV/CMSSW_10_2_0_pre6-PU25ns_102X_upgrade2018_realistic_v10_HS-v1/GEN-SIM-RECO'
+
+
 #/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/ExpressCosmics/Commissioning2018-Express-v1/FEVT run=312220' 
 #/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/ExpressCosmics/Commissioning2018-Express-v1/FEVT run=313759'
  
@@ -70,6 +74,7 @@
 #/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/ExpressCosmics/Run2018B-Express-v1/FEVT run=317687'
 #/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/ExpressCosmics/Run2018B-Express-v1/FEVT run=318370'
 #/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/ExpressCosmics/Run2018D-Express-v1/FEVT run=324847'
+#/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/ExpressCosmics/Run2018D-Express-v1/FEVT run=325088'
 #
 #/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/ExpressPhysics/Commissioning2018-Express-v1/FEVT run=315188'
 #/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/ExpressPhysics/Run2018A-Express-v1/FEVT run=316505'
@@ -78,6 +83,6 @@
 #/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/ExpressPhysics/Run2018D-Express-v1/FEVT run=325097'
 #/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/ExpressPhysics/Run2018E-Express-v1/FEVT run=325308'
 
-/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/HIExpressPhysics/HIRun2018A-Express-v1/FEVT run=326384'
+#/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/HIExpressPhysics/HIRun2018A-Express-v1/FEVT run=326384'
 
 

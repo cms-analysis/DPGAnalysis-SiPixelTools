@@ -34,7 +34,9 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
         'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits1.root'
         #'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits2.root'
-        #'/store/user/kotlinski/mu100_v74/simhits/simHits4.root'
+#        'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits3.root'
+#        'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits4.root'
+#        'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits5.root'
         ),
     inputCommands = cms.untracked.vstring('keep *', 
         'drop *_genParticles_*_*', 
@@ -77,8 +79,12 @@ process.output = cms.OutputModule("PoolOutputModule",
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(1048576),
     #fileName = cms.untracked.string('digis4.root'),
-    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw1.root'),
+    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw1_thr1k.root'),
+#    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw1.root'),
     #fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw2.root'),
+#    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw3.root'),
+#    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw4.root'),
+#    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw5.root'),
     #outputCommands = process.FEVTDEBUGHLTEventContent.outputCommands,
     outputCommands = process.FEVTDEBUGEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
@@ -87,7 +93,17 @@ process.output = cms.OutputModule("PoolOutputModule",
 # Additional output definition
 
 # Other statements
-process.mix.digitizers = cms.PSet(process.theDigitizersValid)
+#process.mix.digitizers = cms.PSet(process.theDigitizersValid)
+
+# modify digitizer parameters
+process.simSiPixelDigis.ThresholdInElectrons_BPix = 1000.0  # 3500.
+process.simSiPixelDigis.ThresholdInElectrons_BPix_L1 = 1000.0  # 3500.
+process.simSiPixelDigis.ThresholdInElectrons_BPix_L2 = 1000.0  # 3500.
+process.simSiPixelDigis.ThresholdInElectrons_FPix = 1000.0  # 3500.
+#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix = 1000.0  # 3500.
+#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix_L1 = 1000.0  # 3500.
+#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix_L2 = 1000.0  # 3500.
+#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_FPix = 1000.0  # 3500.
 
 # Path and EndPath definitions
 process.digitisation_step = cms.Path(process.pdigi_valid)
