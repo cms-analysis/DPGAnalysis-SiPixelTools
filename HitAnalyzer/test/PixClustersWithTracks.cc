@@ -460,7 +460,7 @@ void PixClustersWithTracks::beginJob() {
 			    sizeH, lowH, highH);
 
   sizeH=2000;
-  highH = 1999.5;
+  highH = 3999.5;
   hclusPerLay1 = fs->make<TH1D>( "hclusPerLay1", "Clus per layer l1",
 			    sizeH, lowH, highH);
   hclusPerLay2 = fs->make<TH1D>( "hclusPerLay2", "Clus per layer l2",
@@ -1917,18 +1917,19 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	}
 	
 	// find inner and outer modules for layer 1 onl
-	if( (layer==1) && select1!=9998 ) {
+	if( (layer==1)  ) {
 	  if( (ladderOn==2) || (ladderOn==4) || (ladderOn==6) ||
 	      (ladderOn==-1) || (ladderOn==-3) || (ladderOn==-5) ) inner=true;
 	  else inner=false;
 	  
-	  if     ( (ladderOn ==-1) && (module == 3) ) newL1Modules=true;
-	  else if( (ladderOn ==-3) && (module == 3) ) newL1Modules=true;
-	  else if( (ladderOn ==-1) && (module ==-3) ) newL1Modules=true;
-	  else if( (ladderOn ==-1) && (module ==-1) ) newL1Modules=true;
-	  else if( (ladderOn ==-3) && (module ==-1) ) newL1Modules=true;
-	  else if( (ladderOn ==-5) && (module ==-1) ) newL1Modules=true;
-	  
+	  if( select1!=9998 ) {
+	    if     ( (ladderOn ==-1) && (module == 3) ) newL1Modules=true;
+	    else if( (ladderOn ==-3) && (module == 3) ) newL1Modules=true;
+	    else if( (ladderOn ==-1) && (module ==-3) ) newL1Modules=true;
+	    else if( (ladderOn ==-1) && (module ==-1) ) newL1Modules=true;
+	    else if( (ladderOn ==-3) && (module ==-1) ) newL1Modules=true;
+	    else if( (ladderOn ==-5) && (module ==-1) ) newL1Modules=true;
+	  }
 	}
       
 	if(PRINT) cout<<"barrel layer/ladder/module: "<<layer<<"/"<<ladderIndex<<"/"<<zindex<<endl;

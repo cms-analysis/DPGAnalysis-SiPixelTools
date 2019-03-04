@@ -76,15 +76,15 @@ class StudyRecHitResolution : public edm::EDAnalyzer {
 	TrackerHitAssociator::Config trackerHitAssociatorConfig_;
 
 	void fillBarrel(const TrackingRecHit*,const PSimHit &, DetId, const PixelGeomDetUnit *,	
-			 const TrackerTopology *);
+			 const TrackerTopology *,double,double,double);
 	void fillForward(const TrackingRecHit*, const PSimHit &, DetId, const PixelGeomDetUnit *,
-			 const TrackerTopology *);
+			 const TrackerTopology *,double,double,double);
 #ifdef PIXEL_ASSOCIATOR
         void matchToSimHits(const PixelHitAssociator&, const TrackingRecHit *,
-			    DetId, const PixelGeomDetUnit*, const TrackerTopology *);
+			    DetId, const PixelGeomDetUnit*, const TrackerTopology *,double,double,double);
 #else
         void matchToSimHits(const TrackerHitAssociator&, const TrackingRecHit *, 
-			    DetId, const PixelGeomDetUnit*, const TrackerTopology *);
+			    DetId, const PixelGeomDetUnit*, const TrackerTopology *,double,double,double);
 #endif
         int PhaseIBladeOfflineToOnline(const int&);
 
@@ -140,6 +140,11 @@ class StudyRecHitResolution : public edm::EDAnalyzer {
 	MonitorElement* recHitYResLayersP3[4];
 	MonitorElement* recHitYResLayersP4[4];
 
+	MonitorElement* recHitXResVsPhiP[4];
+	MonitorElement* recHitXResVsPhiP1[4];
+	MonitorElement* recHitXResVsPhiP2[4];
+	MonitorElement* recHitXResVsPhiP3[4];
+
 	MonitorElement* recHitXResLayer1Eta[25];
 	MonitorElement* recHitXResLayer2Eta[25];
 	MonitorElement* recHitXResLayer3Eta[25];
@@ -151,9 +156,9 @@ class StudyRecHitResolution : public edm::EDAnalyzer {
 
   	MonitorElement *htheta1,*hbeta1,*hphi1;
   	MonitorElement *htheta2,*hbeta2,*hphi2;
-	MonitorElement* heta1, *heta2, *heta3, *heta4;
-	MonitorElement* htest1, *htest2;
-	MonitorElement *recHitX11, *recHitX12, *recHitX21, *recHitX22;
+	MonitorElement *heta1, *heta2, *heta3, *heta4;
+	MonitorElement *htest1, *htest2;
+	MonitorElement *recHitX11, *recHitX12; // *recHitX21, *recHitX22;
 	MonitorElement *hptTrack, *hphiTrack, *hetaTrack;
 
 	//RecHits FPIX
@@ -213,13 +218,31 @@ class StudyRecHitResolution : public edm::EDAnalyzer {
 	MonitorElement *recHitYAlignError1, *recHitYAlignError2, *recHitYAlignError3;
 	MonitorElement *recHitYAlignError4, *recHitYAlignError5, *recHitYAlignError6, *recHitYAlignError7;
 
+	// cluster size vs phi
+	MonitorElement* clusizeXVsPhi[4];
+	MonitorElement* clusizeX1VsPhi[4];
+	MonitorElement* clusizeX2VsPhi[4];
+	MonitorElement* clusizeX3VsPhi[4];
+
+	MonitorElement *clusizeX21VsPhi,*clusizeX22VsPhi,*clusizeX23VsPhi,*clusizeX24VsPhi ;
+	MonitorElement *size1_mz_f,*size1_mz_nf,*size1_pz_f,*size1_pz_nf;
+	MonitorElement *size2_mz_f,*size2_mz_nf,*size2_pz_f,*size2_pz_nf;
+	MonitorElement *size3_mz_f,*size3_mz_nf,*size3_pz_f,*size3_pz_nf;
+
+
 	MonitorElement* test;
+
+
+
+
 
         edm::InputTag src_;
         bool useTracks_;
         edm::InputTag tracks_;
         bool phase_;
 	bool quick_;
+	bool muOnly_;
+	double ptCut_;
 };
 
 #endif

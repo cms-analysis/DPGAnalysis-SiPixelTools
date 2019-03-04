@@ -7,7 +7,7 @@ process = cms.Process("simTest",eras.Run2_2017)
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
 process.load('Configuration.StandardSequences.MagneticField_cff')
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
 
 process.MessageLogger = cms.Service("MessageLogger",
     debugModules = cms.untracked.vstring('PixSimHitsTest'),
@@ -24,15 +24,14 @@ process.MessageLogger = cms.Service("MessageLogger",
 process.source = cms.Source("PoolSource",
     fileNames =  cms.untracked.vstring(
 #    '/store/user/kotlinski/mu100_v74/simhits/simHits1.root',
-    'file:../scripts/sim.root'
-#    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_72/simhits/simHits1.root'
-#    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_71_pre5/simhits/simHits2.root'
-#    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_71_pre5/simhits/simHits3.root'
-#    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_71_pre5/simhits/simHits4.root'
-#    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_71_pre5/simhits/simHits5.root'
-#    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu/pt100_71_pre5/simhits/simHits6.root'
-#    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mb/13tev/simhits/simHits1.root'
-#    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mb/8tev/simhits/simHits1.root'
+#    'file:../scripts/sim.root'
+#    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu_phase1/pt100/simhits/simHits1.root'
+#"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_upgrade2018_design_v4-v1/20000/193FB1CE-333D-E540-995E-1BA38BA1CE3C.root"
+
+#"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_upgrade2018_realistic_v8-v1/20000/0D388168-67C8-A544-8A75-8A96D40C396B.root"
+
+"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_mc2017_realistic_v2-v1/20000/222AF93E-CE66-6342-A266-E78F6FCDD8EC.root"
+
     )
 )
 
@@ -57,7 +56,7 @@ process.analysis =  cms.EDAnalyzer("PixSimHitsTest",
 #        mode = cms.untracked.string("fpix"),
 #	list = cms.string("TrackerHitsPixelEndcapLowTof"),
 #	list = cms.string("TrackerHitsPixelEndcapHighTof"),
-        Verbosity = cms.untracked.bool(True),
+        Verbosity = cms.untracked.bool(False),
         phase1 = cms.untracked.bool(True),
 )
 

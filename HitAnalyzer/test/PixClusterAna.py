@@ -17,7 +17,7 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag.globaltag = '74X_dataRun2_Prompt_v0' # for 254227
 # 2017
 #process.GlobalTag.globaltag = '90X_dataRun2_Express_v4' # 
-process.GlobalTag.globaltag = '92X_dataRun2_Express_v7' # 
+#process.GlobalTag.globaltag = '92X_dataRun2_Express_v7' # 
 # 2016
 #process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v3' # for 266277
 #process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v9' # >=8010
@@ -29,7 +29,7 @@ process.GlobalTag.globaltag = '92X_dataRun2_Express_v7' #
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
 
 
 import HLTrigger.HLTfilters.hltHighLevel_cfi as hlt
@@ -68,7 +68,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 )
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(1)
 )
 
 myfilelist = cms.untracked.vstring()
@@ -79,6 +79,8 @@ process.source = cms.Source("PoolSource",
 #fileNames =  myfilelist
 
   fileNames = cms.untracked.vstring(    
+
+  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/reco/reco1.root',
 
 # "/store/data/Run2017C/AlCaLumiPixels/ALCARECO/LumiPixels-PromptReco-v1/000/299/593/00000/64845BDE-1471-E711-9D54-02163E01A6E1.root",
 
@@ -180,13 +182,14 @@ process.TFileService = cms.Service("TFileService",
 )
 
 process.d = cms.EDAnalyzer("PixClusterAna",
-    Verbosity = cms.untracked.bool(False),
+    Verbosity = cms.untracked.bool(True),
     phase1 = cms.untracked.bool(True),
-    src = cms.InputTag("siPixelClustersForLumi"),   # from the lumi stream
-    #src = cms.InputTag("siPixelClusters"),
+    #src = cms.InputTag("siPixelClustersForLumi"),   # from the lumi stream
+    src = cms.InputTag("siPixelClusters"),
     #src = cms.InputTag("siPixelClustersPreSplitting"),
     #src = cms.InputTag("ALCARECOTkAlMinBias"), # ALCARECO
     # additional selections, e.g. select bx=1 -> (2,1)
+    Tracks = cms.InputTag("generalTracks"),
     Select1 = cms.untracked.int32(0),  # select the cut type, 0 no cut
     Select2 = cms.untracked.int32(0),  # select the cut value   
 )

@@ -1,5 +1,6 @@
 ##############################################################################
 # start from simhits, do trackerlocal, compare sim and rec-hits
+# only pixel hits 
 import FWCore.ParameterSet.Config as cms
 process = cms.Process("Test")
 

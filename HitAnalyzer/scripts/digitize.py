@@ -14,8 +14,7 @@ process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Digi_cff')
 process.load('Configuration.StandardSequences.SimL1Emulator_cff')
 process.load('Configuration.StandardSequences.DigiToRaw_cff')
-#process.load('HLTrigger.Configuration.HLT_25ns14e33_v1_cff')
-process.load('HLTrigger.Configuration.HLT_2018v10_cff')
+process.load('HLTrigger.Configuration.HLT_FULL_cff')
 process.load('Configuration.StandardSequences.RawToDigi_cff')
 process.load('Configuration.StandardSequences.L1Reco_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
@@ -79,7 +78,8 @@ process.output = cms.OutputModule("PoolOutputModule",
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(1048576),
     #fileName = cms.untracked.string('digis4.root'),
-    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw1_thr1k.root'),
+    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/tmp.root'),
+#    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw1_thr1k.root'),
 #    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw1.root'),
     #fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw2.root'),
 #    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw3.root'),
@@ -91,19 +91,17 @@ process.output = cms.OutputModule("PoolOutputModule",
 )
 
 # Additional output definition
-
-# Other statements
-#process.mix.digitizers = cms.PSet(process.theDigitizersValid)
-
 # modify digitizer parameters
-process.simSiPixelDigis.ThresholdInElectrons_BPix = 1000.0  # 3500.
-process.simSiPixelDigis.ThresholdInElectrons_BPix_L1 = 1000.0  # 3500.
-process.simSiPixelDigis.ThresholdInElectrons_BPix_L2 = 1000.0  # 3500.
-process.simSiPixelDigis.ThresholdInElectrons_FPix = 1000.0  # 3500.
-#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix = 1000.0  # 3500.
-#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix_L1 = 1000.0  # 3500.
-#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix_L2 = 1000.0  # 3500.
-#process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_FPix = 1000.0  # 3500.
+#process.mix.digitizers.pixel.ThresholdInElectrons_FPix    = cms.double(600.0)
+#process.mix.digitizers.pixel.ThresholdInElectrons_BPix    = cms.double(600.0)
+#process.mix.digitizers.pixel.ThresholdInElectrons_BPix_L1 = cms.double(600.0)
+#process.mix.digitizers.pixel.ThresholdInElectrons_BPix_L2 = cms.double(600.0)
+#process.mix.digitizers.pixel.ThresholdSmearing_FPix    = cms.double(1.0)
+#process.mix.digitizers.pixel.ThresholdSmearing_BPix    = cms.double(1.0)
+#process.mix.digitizers.pixel.ThresholdSmearing_BPix_L1 = cms.double(1.0)
+#process.mix.digitizers.pixel.ThresholdSmearing_BPix_L2 = cms.double(1.0)
+
+
 
 # Path and EndPath definitions
 process.digitisation_step = cms.Path(process.pdigi_valid)

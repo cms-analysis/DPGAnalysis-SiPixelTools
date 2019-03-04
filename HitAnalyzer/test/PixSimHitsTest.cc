@@ -172,7 +172,7 @@ void PixSimHitsTest::beginJob() {
    hdetunit = fs->make<TH1F>( "hdetunit", "Det unit", 1000,
                               302000000.,302300000.);
     hpabs = fs->make<TH1F>( "hpabs", "Pabs", 100, 0., 110.);
-    htof = fs->make<TH1F>( "htof", "TOF", 50, -25., 25.);
+    htof = fs->make<TH1F>( "htof", "TOF", 400, -50., 150.);
     hpid = fs->make<TH1F>( "hpid", "PID", 1000, 0., 1000.);
     htid = fs->make<TH1F>( "htid", "Track id", 100, 0., 100.);
  

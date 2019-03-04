@@ -2828,19 +2828,20 @@ void PixClusterAna::analyze(const edm::Event& e,
       }
       
       // find inner and outer modules for layer 1 onl
-      if( (layer==1) && (select1!=9998)) {
+      if( (layer==1) ) {
 #ifdef LAY1_SPLIT
 	if( (ladder==2) || (ladder==4) || (ladder==6) ||
 	    (ladder==-1) || (ladder==-3) || (ladder==-5) ) inner=true;
 	else inner=false;
 #endif
-	if     ( (ladder ==-1) && (module == 3) ) newL1Modules=true;
-	else if( (ladder ==-3) && (module == 3) ) newL1Modules=true;
-	else if( (ladder ==-1) && (module ==-3) ) newL1Modules=true;
-	else if( (ladder ==-1) && (module ==-1) ) newL1Modules=true;
-	else if( (ladder ==-3) && (module ==-1) ) newL1Modules=true;
-	else if( (ladder ==-5) && (module ==-1) ) newL1Modules=true;
-
+	if( (select1!=9998) ) {
+	  if     ( (ladder ==-1) && (module == 3) ) newL1Modules=true;
+	  else if( (ladder ==-3) && (module == 3) ) newL1Modules=true;
+	  else if( (ladder ==-1) && (module ==-3) ) newL1Modules=true;
+	  else if( (ladder ==-1) && (module ==-1) ) newL1Modules=true;
+	  else if( (ladder ==-3) && (module ==-1) ) newL1Modules=true;
+	  else if( (ladder ==-5) && (module ==-1) ) newL1Modules=true;
+	} // seperate new modules 
       }
       
       // find rings 1-2 and 3-4

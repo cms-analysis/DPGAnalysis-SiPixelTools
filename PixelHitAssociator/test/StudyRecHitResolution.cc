@@ -45,6 +45,8 @@ StudyRecHitResolution::StudyRecHitResolution(const ParameterSet& ps):
 
   outputFile_ = ps.getUntrackedParameter<string>("outputFile", "pixelrechitshisto.root");
   verbose_ = ps.getUntrackedParameter<bool>("verbose", false);
+  muOnly_ = ps.getUntrackedParameter<bool>("muOnly", false);
+  ptCut_ = ps.getUntrackedParameter<double>("ptCut", 1.0);
 
 #ifdef PIXEL_ASSOCIATOR
   cout<<" Compare Sim-Rec pixel hits, using pixel hit associator "<<endl;
@@ -57,7 +59,7 @@ StudyRecHitResolution::StudyRecHitResolution(const ParameterSet& ps):
   //dbe_->showDirStructure();
   //dbe_->setCurrentFolder("TrackerRecHitsV/TrackerRecHits/Pixel/clustBPIX");  
   dbe_->setCurrentFolder("recHitBPIX");
-  Char_t histo[200];
+  Char_t histo[200], title[200];
   //quick_=true;
   quick_=false;
 
@@ -74,7 +76,7 @@ StudyRecHitResolution::StudyRecHitResolution(const ParameterSet& ps):
     hptTrack  = dbe_->book1D("hptTrack","track pt",150,0.0,150.);
 
     hphi1 = dbe_->book1D("hphi1","phi1",70,-3.5,3.5);
-    htheta1 = dbe_->book1D("htheta1","theta1",70,s-3.5,3.5);
+    htheta1 = dbe_->book1D("htheta1","theta1",70,-3.5,3.5);
     hbeta1  = dbe_->book1D("beta1","beta1",70,-3.5,3.5);
 
     hphi2 = dbe_->book1D("hphi2","phi2",70,-3.5,3.5);
@@ -125,15 +127,6 @@ StudyRecHitResolution::StudyRecHitResolution(const ParameterSet& ps):
       recHitYAlignError4 = 
 	dbe_->book1D("RecHitYAlignError4","RecHit Y  Alignment errors bpix 4", 100, 0., 100.);
 
-      //RecHit X Resolution all barrel hits
-      //recHitXResAllB = dbe_->book1D("RecHit_xres_b_All","RecHit X Res All Modules in Barrel", 100, -200., 200.);
-      
-      //RecHit Y Resolution all barrel hits
-      //recHitYResAllB = dbe_->book1D("RecHit_yres_b_All","RecHit Y Res All Modules in Barrel", 100, -200., 200.);
-      
-      //RecHit Y distribution all modules for barrel
-      //recHitYAllModules = dbe_->book1D("RecHit_y_AllModules", "RecHit Y distribution for all modules", 100, -4., 4.);
-      
       // eta plots
       for (int j=0; j<25; j++) {
 	//RecHit X resolution per layer
@@ -155,92 +148,165 @@ StudyRecHitResolution::StudyRecHitResolution(const ParameterSet& ps):
 	recHitYResLayer3Eta[j] = dbe_->book1D(histo, "RecHit YRes Layer3, eta", 100, -200., 200.);
 	sprintf(histo, "RecHit_YRes_Layer4_Eta%d", j+1);
 	recHitYResLayer4Eta[j] = dbe_->book1D(histo, "RecHit YRes Layer4, eta", 100, -200., 200.);
-      }
+      }  // j, eta
       
-      
-      
-      
-      
+     
       // For each layer 
       for (int i=0; i<NumLayers; i++) {
 	//RecHit X resolution per layer
 	sprintf(histo, "RecHit_XRes_Layer%d", i+1);
-	recHitXResLayers[i] = dbe_->book1D(histo, "RecHit XRes by Layer", 100, -200., 200.);
+	sprintf(title, "RecHit XRes Layer %d", i+1);
+	recHitXResLayers[i] = dbe_->book1D(histo,title, 100, -200., 200.);
 	
 	//RecHit Y resolution per layer
 	sprintf(histo, "RecHit_YRes_Layer%d", i+1);
-	recHitYResLayers[i] = dbe_->book1D(histo, "RecHit YRes by Layer", 100, -200., 200.);
+	sprintf(title, "RecHit YRes Layer %d", i+1);
+	recHitYResLayers[i] = dbe_->book1D(histo,title, 100, -200., 200.);
 	
 	
-	//RecHit X resolution per layer Profile 
+	//RecHit X resolution per layer Profile vs eta
 	sprintf(histo, "RecHit_XRes_LayerP%d", i+1);
-	recHitXResLayersP[i] = dbe_->bookProfile(histo, "RecHit XRes by Layer", 25, 0., 2.5,0.,1000.," ");
+	sprintf(title, "RecHit XRes Layer %d", i+1);
+	recHitXResLayersP[i] = dbe_->bookProfile(histo,title, 25, 0., 2.5,0.,1000.," ");
 	sprintf(histo, "RecHit_XRes_LayerP1%d", i+1);
-	recHitXResLayersP1[i] = dbe_->bookProfile(histo, "RecHit XRes by Layer, size 1", 25, 0., 2.5,0.,1000.," ");
+	sprintf(title, "RecHit XRes Layer %d, size 1", i+1);
+	recHitXResLayersP1[i] = dbe_->bookProfile(histo,title, 25, 0., 2.5,0.,1000.," ");
 	sprintf(histo, "RecHit_XRes_LayerP2%d", i+1);
-	recHitXResLayersP2[i] = dbe_->bookProfile(histo, "RecHit XRes by Layer, size 2", 25, 0., 2.5,0.,1000.," ");
+	sprintf(title, "RecHit XRes Layer %d, size 2", i+1);
+	recHitXResLayersP2[i] = dbe_->bookProfile(histo,title, 25, 0., 2.5,0.,1000.," ");
+	sprintf(title, "RecHit XRes Layer %d, size 3", i+1);
 	sprintf(histo, "RecHit_XRes_LayerP3%d", i+1);
-	recHitXResLayersP3[i] = dbe_->bookProfile(histo, "RecHit XRes by Layer, size 3", 25, 0., 2.5,0.,1000.," ");
+	recHitXResLayersP3[i] = dbe_->bookProfile(histo,title, 25, 0., 2.5,0.,1000.," ");
 	
-	//RecHit Y resolution per layer Profile 
+	//RecHit Y resolution per layer Profile vs eta
 	sprintf(histo, "RecHit_YRes_LayerP%d", i+1);
-	recHitYResLayersP[i] = dbe_->bookProfile(histo, "RecHit YRes by Layer", 25, 0., 2.5,0.,1000.," ");
+	sprintf(title, "RecHit YRes Layer %d", i+1);
+	recHitYResLayersP[i] = dbe_->bookProfile(histo,title, 25, 0., 2.5,0.,1000.," ");
 	sprintf(histo, "RecHit_YRes_LayerP1%d", i+1);
-	recHitYResLayersP1[i] = dbe_->bookProfile(histo, "RecHit YRes by Layer, size 1", 25, 0., 2.5,0.,1000.," ");
+	sprintf(title, "RecHit YRes Layer %d, size 1", i+1);
+	recHitYResLayersP1[i] = dbe_->bookProfile(histo,title, 25, 0., 2.5,0.,1000.," ");
 	sprintf(histo, "RecHit_YRes_LayerP2%d", i+1);
-	recHitYResLayersP2[i] = dbe_->bookProfile(histo, "RecHit YRes by Layer, size 2", 25, 0., 2.5,0.,1000.," ");
+	sprintf(title, "RecHit YRes Layer %d, size 2", i+1);
+	recHitYResLayersP2[i] = dbe_->bookProfile(histo,title, 25, 0., 2.5,0.,1000.," ");
 	sprintf(histo, "RecHit_YRes_LayerP3%d", i+1);
-	recHitYResLayersP3[i] = dbe_->bookProfile(histo, "RecHit YRes by Layer, size 3", 25, 0., 2.5,0.,1000.," ");
+	sprintf(title, "RecHit YRes Layer %d, size 3", i+1);
+	recHitYResLayersP3[i] = dbe_->bookProfile(histo,title, 25, 0., 2.5,0.,1000.," ");
 	sprintf(histo, "RecHit_YRes_LayerP4%d", i+1);
-	recHitYResLayersP4[i] = dbe_->bookProfile(histo, "RecHit YRes by Layer, size 4", 25, 0., 2.5,0.,1000.," ");
+	sprintf(title, "RecHit YRes Layer %d, size 4", i+1);
+	recHitYResLayersP4[i] = dbe_->bookProfile(histo,title, 25, 0., 2.5,0.,1000.," ");
 	
-	recHitX11 = dbe_->bookProfile("recHitX11", "RecHit", 100, 0.5, 2.5,0.,100.," ");
-	recHitX12 = dbe_->bookProfile("recHitX12", "RecHit", 100, 0.5, 2.5,0.,100.," ");
-	recHitX21 = dbe_->bookProfile("recHitX21", "RecHit", 100, 0.5, 2.5,0.,100.," ");
-	recHitX22 = dbe_->bookProfile("recHitX22", "RecHit", 100, 0.5, 2.5,0.,100.," ");
+	//RecHit X resolution per layer Profile vs phi 
+	sprintf(histo, "RecHit_XRes_VsPhi_%dP", i+1);
+	sprintf(title, "RecHit XRes Vs Phi Layer %d", i+1);
+	recHitXResVsPhiP[i] = dbe_->bookProfile(histo,title, 100, -0.4,0.4,0.,100.," ");
+	sprintf(histo, "RecHit_XRes_VsPhi_%dP1", i+1);
+	sprintf(title, "RecHit XRes Vs Phi Layer %d size 1", i+1);
+	recHitXResVsPhiP1[i] = dbe_->bookProfile(histo,title, 100, -0.4,0.4,0.,100.," ");
+	sprintf(histo, "RecHit_XRes_VsPhi_%dP2", i+1);
+	sprintf(title, "RecHit XRes Vs Phi Layer %d size 2", i+1);
+	recHitXResVsPhiP2[i] = dbe_->bookProfile(histo,title, 100, -0.4,0.4,0.,100.," ");
+	sprintf(histo, "RecHit_XRes_VsPhi_%dP3", i+1);
+	sprintf(title, "RecHit XRes Vs Phi Layer %d size 3", i+1);
+	recHitXResVsPhiP3[i] = dbe_->bookProfile(histo,title, 100, -0.4,0.4,0.,100.," ");
+
+
+
+
+
+	recHitX11 = dbe_->bookProfile("recHitX11", "RecHit", 100, -0.4,0.4,0.,100.," ");
+	recHitX12 = dbe_->bookProfile("recHitX12", "RecHit", 100, -0.4,0.4,0.,100.," ");
+	//recHitX21 = dbe_->bookProfile("recHitX21", "RecHit", 100, -0.4,0.4,0.,100.," ");
+	//recHitX22 = dbe_->bookProfile("recHitX22", "RecHit", 100, -0.4,0.4,0.,100.," ");
 	
 	//RecHit X resolution for flipped ladders by layer
 	sprintf(histo, "RecHit_XRes_FlippedLadder_Layer%d", i+1);
-	recHitXResFlippedLadderLayers[i] = dbe_->book1D(histo, "RecHit XRes Flipped Ladders by Layer", 100, -200., 200.);
+	sprintf(title, "RecHit XRes FlippedLadder Layer%d", i+1);
+	recHitXResFlippedLadderLayers[i] = dbe_->book1D(histo,title, 100, -200., 200.);
 	
 	//RecHit X resolution for unflipped ladders by layer
 	sprintf(histo, "RecHit_XRes_NonFlippedLadder_Layer%d", i+1);
-	recHitXResNonFlippedLadderLayers[i] = dbe_->book1D(histo, "RecHit XRes NonFlipped Ladders by Layer", 100, -200., 200.);
-	
+	sprintf(title, "RecHit XRes NonFlippedLadder Layer%d", i+1);
+	recHitXResNonFlippedLadderLayers[i] = dbe_->book1D(histo,title, 100, -200., 200.);
 	// Same plots for -Z/+Z
 	sprintf(histo, "RecHit_XRes_FlippedLadder_Layer%d_mZ", i+1);
-	recHitXResFlippedLadderLayersSide[i][0] = dbe_->book1D(histo, "RecHit XRes Flipped Ladders by Layer, -Z", 100, -200., 200.);
+	sprintf(title, "RecHit XRes FlippedLadder Layer%d -Z", i+1);
+	recHitXResFlippedLadderLayersSide[i][0] = dbe_->book1D(histo,title, 100, -200., 200.);
 	sprintf(histo, "RecHit_XRes_NonFlippedLadder_Layer%d_mZ", i+1);
-	recHitXResNonFlippedLadderLayersSide[i][0] = dbe_->book1D(histo, "RecHit XRes NonFlipped Ladders by Layer, -Z", 100, -200., 200.);
+	sprintf(title, "RecHit XRes NonFlippedLadder Layer%d -Z", i+1);
+	recHitXResNonFlippedLadderLayersSide[i][0] = dbe_->book1D(histo,title, 100, -200., 200.);
 	sprintf(histo, "RecHit_XRes_FlippedLadder_Layer%d_pZ", i+1);
-	recHitXResFlippedLadderLayersSide[i][1] = dbe_->book1D(histo, "RecHit XRes Flipped Ladders by Layer, +Z", 100, -200., 200.);
+	sprintf(title, "RecHit XRes FlippedLadder Layer%d +Z", i+1);
+	recHitXResFlippedLadderLayersSide[i][1] = dbe_->book1D(histo,title, 100, -200., 200.);
 	sprintf(histo, "RecHit_XRes_NonFlippedLadder_Layer%d_pZ", i+1);
-	recHitXResNonFlippedLadderLayersSide[i][1] = dbe_->book1D(histo, "RecHit XRes NonFlipped Ladders by Layer, +Z", 100, -200., 200.);
+	sprintf(title, "RecHit XRes NonFlippedLadder Layer%d +Z", i+1);
+	recHitXResNonFlippedLadderLayersSide[i][1] = dbe_->book1D(histo,title, 100, -200., 200.);
 	
-	
-	//RecHit Y resolutions for layers by module for barrel
-	for (int i=0; i<8; i++) {
-	  //Rec Hit Y resolution by module for Layer1
-	  sprintf(histo, "RecHit_YRes_Layer1_Module%d", i+1);
-	  recHitYResLayer1Modules[i] = dbe_->book1D(histo, "RecHit YRes Layer1 by z-module", 100, -200., 200.);
-	  
-	  //RecHit Y resolution by module for Layer2
-	  sprintf(histo, "RecHit_YRes_Layer2_Module%d", i+1);
-	  recHitYResLayer2Modules[i] = dbe_->book1D(histo, "RecHit YRes Layer2 by z-module", 100, -200., 200.);
-	  
-	  //RecHit Y resolution by module for Layer3
-	  sprintf(histo, "RecHit_YRes_Layer3_Module%d", i+1);
-	  recHitYResLayer3Modules[i] = dbe_->book1D(histo, "RecHit YRes Layer3 by z-module", 100, -200., 200.); 
-	  
-	  //RecHit Y resolution by module for Layer4
-	  sprintf(histo, "RecHit_YRes_Layer4_Module%d", i+1);
-	  recHitYResLayer4Modules[i] = dbe_->book1D(histo, "RecHit YRes Layer4 by z-module", 100, -200., 200.); 
-	} // end for
-	
-      } // end if quick
-    } // end for layers 
-    
 
+
+
+
+
+	//RecHit Y resolutions for layers by module for barrel
+	for (int ii=0; ii<8; ii++) {
+	  //Rec Hit Y resolution by module for Layer1
+	  sprintf(histo, "RecHit_YRes_Layer%d_Module%d",i+1, ii+1);
+	  sprintf(title, "RecHit YRes Layer%d z-Module%d",i+1, ii+1);
+	  if     (i==0) recHitYResLayer1Modules[ii] = dbe_->book1D(histo,title, 100, -200., 200.);
+	  else if(i==1) recHitYResLayer2Modules[ii] = dbe_->book1D(histo,title, 100, -200., 200.);
+	  else if(i==2) recHitYResLayer3Modules[ii] = dbe_->book1D(histo,title, 100, -200., 200.);
+	  else if(i==3) recHitYResLayer4Modules[ii] = dbe_->book1D(histo,title, 100, -200., 200.);	  
+	} // end for ii, modules 
+	
+	// size versus phi
+	sprintf(histo, "clusizeXVsPhi_%d", i+1);
+	sprintf(title, "Clu sizeX Vs Phi Layer %d", i+1);
+	clusizeXVsPhi[i] = dbe_->bookProfile(histo,title, 200, -0.4,0.4,0.,100.," ");
+	sprintf(histo, "clusizeX1_VsPhi_%d", i+1);
+	sprintf(title, "clu sizeX Vs Phi Layer %d size 1", i+1);
+	clusizeX1VsPhi[i] = dbe_->book1D(histo,title, 200, -0.4,0.4);
+	sprintf(histo, "clusizeX2_VsPhi_%d", i+1);
+	sprintf(title, "clu sizeX Vs Phi Layer %d size 2", i+1);
+	clusizeX2VsPhi[i] = dbe_->book1D(histo,title, 200, -0.4,0.4);
+	sprintf(histo, "clusizeX3_VsPhi_%d", i+1);
+	sprintf(title, "clu sizeX Vs Phi Layer %d size 3", i+1);
+	clusizeX3VsPhi[i] = dbe_->book1D(histo,title, 200, -0.4,0.4);
+
+
+	if(i==1) {
+	  sprintf(histo, "clusizeX21_VsPhi");
+	  sprintf(title, "clu sizeX Vs Phi Layer %d size 2, -z, flip", i+1);
+	  clusizeX21VsPhi = dbe_->bookProfile(histo,title, 200, -0.4,0.4,0.,100.," ");
+	  sprintf(histo, "clusizeX22_VsPhi");
+	  sprintf(title, "clu sizeX Vs Phi Layer %d size 2, -z, nflip", i+1);
+	  clusizeX22VsPhi = dbe_->bookProfile(histo,title, 200, -0.4,0.4,0.,100.," ");
+	  sprintf(histo, "clusizeX23_VsPhi");
+	  sprintf(title, "clu sizeX Vs Phi Layer %d size 2, +z, flip", i+1);
+	  clusizeX23VsPhi = dbe_->bookProfile(histo,title, 200, -0.4,0.4,0.,100.," ");
+	  sprintf(histo, "clusizeX24_VsPhi");
+	  sprintf(title, "clu sizeX Vs Phi Layer %d size 2, +z, fnlip", i+1);
+	  clusizeX24VsPhi = dbe_->bookProfile(histo,title, 200, -0.4,0.4,0.,100.," ");
+	} else if(i==0) {
+	  size1_mz_f = dbe_->book1D("size1_mz_f", "size1 -z flip",200,-0.4,0.4);
+	  size1_mz_nf= dbe_->book1D("size1_mz_nf","size1 -z nfli",200,-0.4,0.4);
+	  size1_pz_f = dbe_->book1D("size1_pz_f", "size1 +z flip",200,-0.4,0.4);
+	  size1_pz_nf= dbe_->book1D("size1_pz_nf","size1 +z nfli",200,-0.4,0.4);
+	  size2_mz_f = dbe_->book1D("size2_mz_f", "size2 -z flip",200,-0.4,0.4);
+	  size2_mz_nf= dbe_->book1D("size2_mz_nf","size2 -z nfli",200,-0.4,0.4);
+	  size2_pz_f = dbe_->book1D("size2_pz_f", "size2 +z flip",200,-0.4,0.4);
+	  size2_pz_nf= dbe_->book1D("size2_pz_nf","size2 +z nfli",200,-0.4,0.4);
+	  size3_mz_f = dbe_->book1D("size3_mz_f", "size3 -z flip",200,-0.4,0.4);
+	  size3_mz_nf= dbe_->book1D("size3_mz_nf","size3 -z nfli",200,-0.4,0.4);
+	  size3_pz_f = dbe_->book1D("size3_pz_f", "size3 +z flip",200,-0.4,0.4);
+	  size3_pz_nf= dbe_->book1D("size3_pz_nf","size3 +z nfli",200,-0.4,0.4);
+	}
+
+
+
+      } // end i, layers
+ 
+    } // end if quick
+    
+    // FPix 
     dbe_->setCurrentFolder("recHitFPIX");
     //RecHit X resolution all plaquettes
     recHitXResAllF = dbe_->book1D("RecHit_xres_f_All", "RecHit X Res All in Forward", 100, -200., 200.);
@@ -476,6 +542,9 @@ void StudyRecHitResolution::analyze(const edm::Event& e, const edm::EventSetup& 
   TrackerHitAssociator associate( e, trackerHitAssociatorConfig_); 
 #endif
 
+
+  //cout << " Run = " << e.id().run() << " Event = " << e.id().event() << " "<<geom->dets().size()<<" "<<hTTAC->size()<<endl;
+
   //iterate over detunits
   for (TrackerGeometry::DetContainer::const_iterator it = geom->dets().begin(); it != geom->dets().end(); it++) {
     DetId detId = ((*it)->geographicalId());
@@ -504,7 +573,8 @@ void StudyRecHitResolution::analyze(const edm::Event& e, const edm::EventSetup& 
 	  auto eta = trackref->eta();
 	  auto phi = trackref->phi();
 
-	  if (verbose_) cout<<" track "<<pt<<" "<<eta<<endl;
+	  if (verbose_) cout<<" track "<<pt<<" "<<eta<<" "<<trackref->d0()<<" "<<trackref->dz()<<" "
+			    <<trackref->vx()<<" "<<trackref->vy()<<" "<<trackref->vz() <<endl;
 	  	  
         // fTkQuality[fTkN]= trackref->qualityMask(); // see: CMSSW/DataFormats/TrackReco/interface/TrackBase.h
         // fTkCharge[fTkN] = trackref->charge();
@@ -529,17 +599,20 @@ void StudyRecHitResolution::analyze(const edm::Event& e, const edm::EventSetup& 
 	  hetaTrack->Fill(eta);
 	  hphiTrack->Fill(phi);
 
-	  if(pt<ptMin || abs(eta)>etaMax) continue; // skip tracks 
+	  if(pt<ptCut_ || abs(eta)>etaMax) continue; // skip tracks 
  
-	  for(trackingRecHit_iterator irecHit = trackref->recHitsBegin();
+	  for(trackingRecHit_iterator irecHit = trackref->recHitsBegin(); // loop over rechits 
 	      irecHit != trackref->recHitsEnd(); ++irecHit) {
 
 	    //cout<<(*irecHit)->type()<<endl;
 	    if( (*irecHit)->type() != 0 ) continue; // skip non valid hits 
 
-	    if (detId == (*irecHit)->geographicalId())
-	      matchToSimHits(associate, (*irecHit), detId, theGeomDet,tTopo);
-	  
+	    if (detId == (*irecHit)->geographicalId()) {  // match to simhit if same detunit
+	      if (verbose_) cout<<" track "<<pt<<" "<<eta<<" "<<trackref->d0()<<" "<<trackref->dz()<<" "
+				     <<trackref->vx()<<" "<<trackref->vy()<<" "<<trackref->vz() <<endl;
+	      matchToSimHits(associate, (*irecHit), detId, theGeomDet,tTopo,pt,eta,phi);
+	    }
+
 	    //const edm::Ref<std::vector<Trajectory> > refTraj = it->key;
 	    //std::vector<TrajectoryMeasurement> tmeasColl =refTraj->measurements();
 	    //for (std::vector<TrajectoryMeasurement>::const_iterator tmeasIt = refTraj->measurements().begin(); 
@@ -551,24 +624,28 @@ void StudyRecHitResolution::analyze(const edm::Event& e, const edm::EventSetup& 
 	  }
 	}
       }
-    } else {
+
+    } else {  // no tracks used 
       
       SiPixelRecHitCollection::const_iterator pixeldet = recHitColl->find(detId);
       if (pixeldet == recHitColl->end()) continue;
       if(verbose_) cout<<" pixel det "<<pixeldet->size()<<endl;
       //----Loop over rechits for this detId
       SiPixelRecHitCollection::DetSet::const_iterator pixeliter = pixeldet->begin();
-      for (; pixeliter != pixeldet->end(); pixeliter++) matchToSimHits(associate, &(*pixeliter), detId, theGeomDet,tTopo);
+      for (; pixeliter != pixeldet->end(); pixeliter++) 
+	matchToSimHits(associate, &(*pixeliter), detId, theGeomDet,tTopo,-1.,-1.,-1.);
     }
   } // <------ end detunit loop
 }
 
 #ifdef PIXEL_ASSOCIATOR
 void StudyRecHitResolution::matchToSimHits(const PixelHitAssociator& associate, const TrackingRecHit* hit, 
-					     DetId detId, const PixelGeomDetUnit* theGeomDet, const TrackerTopology *tTopo) {
+					   DetId detId, const PixelGeomDetUnit* theGeomDet, 
+					   const TrackerTopology *tTopo,double pt, double eta, double phi) {
 #else
 void StudyRecHitResolution::matchToSimHits(const TrackerHitAssociator& associate, const TrackingRecHit* hit, 
-					     DetId detId, const PixelGeomDetUnit* theGeomDet, const TrackerTopology *tTopo) {
+					   DetId detId, const PixelGeomDetUnit* theGeomDet, 
+					   const TrackerTopology *tTopo,double pt, double eta, double phi) {
 #endif
 
 
@@ -612,7 +689,8 @@ void StudyRecHitResolution::matchToSimHits(const TrackerHitAssociator& associate
 		   <<(*m).phiAtEntry()<<" "
 		   <<(*m).particleType()<<" "
 		   <<(*m).trackId()<<" "
-		   <<(*m).momentumAtEntry()
+		   <<(*m).momentumAtEntry()<<" "
+		   <<pt<<" "<<eta<<" "<<phi
 		   <<std::endl;
 	
       }
@@ -621,30 +699,35 @@ void StudyRecHitResolution::matchToSimHits(const TrackerHitAssociator& associate
     if(verbose_) cout<<" closest "<<closest<<" "<<detId.subdetId()<<endl;
     
     if (detId.subdetId() == PixelSubdetector::PixelBarrel)
-      fillBarrel(hit, *closestit, detId, theGeomDet,tTopo);
+      fillBarrel(hit, *closestit, detId, theGeomDet,tTopo,pt,eta,phi);
     else if (detId.subdetId() == PixelSubdetector::PixelEndcap)
-      fillForward(hit, *closestit, detId, theGeomDet,tTopo);
+      fillForward(hit, *closestit, detId, theGeomDet,tTopo,pt,eta,phi);
   } // end matched emtpy
 }
 
 
 void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimHit& simHit, 
 				     DetId detId, const PixelGeomDetUnit* theGeomDet,
-				     const TrackerTopology *tTopo) {
+				       const TrackerTopology *tTopo, double ptT, double etaT, double phiT) {
   const float cmtomicron = 10000.0; 
-  const bool muOnly = true;
+  //const bool muOnly = true;
   const float PI = 3.1416;
   const int NumLayers = 4;
   bool PRINT = verbose_;
 
-  float phi = simHit.phiAtEntry();
+  float phiH = simHit.phiAtEntry();
   float theta = simHit.thetaAtEntry(); // theta with respect to module coordinates 
   float beta = 0;  // beta is roughly like real theta
   if(theta<PI/2.) beta=(PI/2.) - theta; //  
   else            beta=theta - (PI/2.);
-  float eta = -log(tan(beta/2.));  // this is an approximation to the tracks eta, only positive
+  float etaH = -log(tan(beta/2.));  // this is an approximation to the tracks eta, only positive
 
-  //float phiLocal = simHit.localDirection().phi(); // same as phi
+  // use track eta for histos
+  float eta = abs(etaT);
+
+
+  float phi = abs(simHit.localDirection().phi()); // same as phi, use this 
+
   //float thetaLocal = simHit.localDirection().theta(); // same as theta
 
   //float pt  = simHit.momentumAtEntry().perp(); // crap, not real pt
@@ -652,10 +735,14 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
   int pid = simHit.particleType();
 
   // skip secondaries
-  if(muOnly && ( abs(pid) != 13 || p<10.) ) {if(PRINT) cout<<" skip "<<p<<" "<<pid<<endl; return;}
+  if(muOnly_ && ( abs(pid) != 13 || p<10.) ) 
+    {if(PRINT||abs(pid)==13 ) cout<<" skip "<<p<<" "<<pid<<endl; return;}
+
 
   unsigned int layer = tTopo->pxbLayer(detId);
   unsigned int module = tTopo->pxbModule(detId);
+  bool negZ = false;
+  if(module<5) negZ=true;
   // The inner ladder (in the smaller radius) are flipped
   // unsigned int ladder = tTopo->pxbLadder(detId);
   // bool odd_lad = ladder % 2;
@@ -664,6 +751,9 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
   float tmp1 = theGeomDet->surface().toGlobal(Local3DPoint(0.,0.,0.)).perp();
   float tmp2 = theGeomDet->surface().toGlobal(Local3DPoint(0.,0.,1.)).perp();
   bool flipped = (tmp2<tmp1);
+  if(flipped) phi = phi - (PI/2.);
+  else        phi = (PI/2.) - phi;
+
   //std::cout<<"Flipped (Surface): "<<(tmp2<tmp1)<<" Flipped (Inner): "<<inner<<std::endl;
   if(PRINT) cout<<" layer "<<layer<<" eta "<<eta<<" phi "<<phi<<endl;
 
@@ -673,13 +763,14 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
   //if( abs(phi)<1.3 || abs(phi)>1.9) return;  // limit to l2 acceptance
 
   if(PRINT) std::cout<<" simhit "
-		     <<p<<" "
-		     <<pid<<" "
-		     <<phi<<" "
-		     <<theta<<" "
-		     <<simHit.trackId()<<" lay "
-		     <<layer<<" mod "
-		     <<module<<std::endl;
+			<<p<<" "
+			<<pid<<" "
+			<<phi<<" "
+			<<theta<<" "<<" "<<eta<<","
+			<<simHit.trackId()
+			<<" lay "<<layer<<" mod "<<module
+			<<" track pt/eta/phi "<<ptT<<"/"<<etaT<<"/"<<phiT
+			<<std::endl;
 
   if(!quick_) {
 
@@ -722,9 +813,10 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
   float sim_ypos = 0.5*(sim_y1 + sim_y2);
   float res_y = (lp.y() - sim_ypos)*cmtomicron;
   
-  if(PRINT) // dk 
+  if(PRINT)  
     cout<<detId.rawId()<<" "<<lp_x<<" "<<lp_y<<" "<<lerr_x<<" "<<lerr_y<<" "
 	<<sim_xpos<<" "<<sim_ypos<<" "<<res_x<<" "<<res_y
+	<<" "<<sim_x1<<" "<<sim_x2
 	<<endl;
 
   
@@ -740,10 +832,9 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
     
     if( layer == 1) {
       recHitXError1B->Fill(lerr_x); recHitYError1B->Fill(lerr_y);
-      if(phi<0.) recHitX11->Fill(abs(phi),res_x); else recHitX12->Fill(abs(phi),res_x);
-    } else if( layer == 2) { 
-      recHitXError2B->Fill(lerr_x); recHitYError2B->Fill(lerr_y);
-      if(phi<0.) recHitX21->Fill(abs(phi),res_x); else recHitX22->Fill(abs(phi),res_x);
+      if(phi<0.) recHitX11->Fill((phi),res_x); else recHitX12->Fill((phi),res_x);
+    } else if( layer == 2) {recHitXError2B->Fill(lerr_x); recHitYError2B->Fill(lerr_y);
+      //if(phi<0.) recHitX21->Fill((phi),res_x); else recHitX22->Fill((phi),res_x);
     } else if( layer == 3) {recHitXError3B->Fill(lerr_x); recHitYError3B->Fill(lerr_y);
     } else if( layer == 4) {recHitXError4B->Fill(lerr_x); recHitYError4B->Fill(lerr_y);}
 
@@ -792,8 +883,36 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
 
   //get cluster
   SiPixelRecHit::ClusterRef const& clust = ((SiPixelRecHit*)recHit)->cluster();
+  int sizeX = (*clust).sizeX();
 
   if(!quick_) {
+    recHitXResVsPhiP[layer-1]->Fill((phi),std::abs(res_x)); // all size 
+    clusizeXVsPhi[layer-1]->Fill((phi),float(sizeX)); // all size 
+    if(layer==1) {
+      if       (sizeX==1) {
+	if     (negZ && flipped) size1_mz_f->Fill((phi)); 
+	else if(negZ &&!flipped) size1_mz_nf->Fill((phi));
+	else if(!negZ&& flipped) size1_pz_f->Fill((phi)); 
+	else if(!negZ&&!flipped) size1_pz_nf->Fill((phi)); 
+      } else if(sizeX==2) {
+	if     (negZ && flipped) size2_mz_f->Fill((phi)); 
+	else if(negZ &&!flipped) size2_mz_nf->Fill((phi));
+	else if(!negZ&& flipped) size2_pz_f->Fill((phi)); 
+	else if(!negZ&&!flipped) size2_pz_nf->Fill((phi)); 
+      } else if(sizeX==3) {
+	if     (negZ && flipped) size3_mz_f->Fill((phi)); 
+	else if(negZ &&!flipped) size3_mz_nf->Fill((phi));
+	else if(!negZ&& flipped) size3_pz_f->Fill((phi)); 
+	else if(!negZ&&!flipped) size3_pz_nf->Fill((phi)); 
+      }
+      if     (negZ && flipped) clusizeX21VsPhi->Fill((phi),float(sizeX)); // all size 
+      else if(negZ &&!flipped) clusizeX22VsPhi->Fill((phi),float(sizeX)); // all size 
+      else if(!negZ&& flipped) clusizeX23VsPhi->Fill((phi),float(sizeX)); // all size 
+      else if(!negZ&&!flipped) clusizeX24VsPhi->Fill((phi),float(sizeX)); // all size 
+
+    } else if(layer==2) {
+    }
+
     recHitXResLayersP[layer-1]->Fill(eta,std::abs(res_x)); // all size 
     recHitYResLayersP[layer-1]->Fill(eta,std::abs(res_y));
   } // end if quick
@@ -803,22 +922,27 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
     if (layer == i+1)  { // select layer
 
       if(!quick_) {
-	int sizeX = (*clust).sizeX();
-	if(sizeX==1) {
-	  recHitXResLayersP1[i]->Fill(eta,std::abs(res_x));  // size 1
-	  if(i==0) recHitL1XResSize1->Fill(res_x);  // layer 1
+	if(sizeX==1) {   // size 1
+	  recHitXResLayersP1[i]->Fill(eta,std::abs(res_x)); 
+	  recHitXResVsPhiP1[i]->Fill((phi),std::abs(res_x));  
+	  clusizeX1VsPhi[i]->Fill((phi),float(sizeX));  
+	  if     (i==0) recHitL1XResSize1->Fill(res_x);  // layer 1
 	  else if(i==1) recHitL2XResSize1->Fill(res_x);
 	  else if(i==2) recHitL3XResSize1->Fill(res_x);
 	  else if(i==3) recHitL4XResSize1->Fill(res_x);
 	} else if(sizeX==2) {
 	  recHitXResLayersP2[i]->Fill(eta,std::abs(res_x));
-	  if(i==0) recHitL1XResSize2->Fill(res_x);
+	  recHitXResVsPhiP2[i]->Fill((phi),std::abs(res_x));  
+	  clusizeX2VsPhi[i]->Fill((phi),float(sizeX));  
+	  if     (i==0) recHitL1XResSize2->Fill(res_x);
 	  else if(i==1) recHitL2XResSize2->Fill(res_x);
 	  else if(i==2) recHitL3XResSize2->Fill(res_x);
 	  else if(i==3) recHitL4XResSize2->Fill(res_x);
 	} else if(sizeX>=3) {
 	  recHitXResLayersP3[i]->Fill(eta,std::abs(res_x));
-	  if(i==0) recHitL1XResSize3->Fill(res_x);
+	  recHitXResVsPhiP3[i]->Fill((phi),std::abs(res_x));  
+	  clusizeX3VsPhi[i]->Fill((phi),float(sizeX));  
+	  if     (i==0) recHitL1XResSize3->Fill(res_x);
 	  else if(i==1) recHitL2XResSize3->Fill(res_x);
 	  else if(i==2) recHitL3XResSize3->Fill(res_x);
 	  else if(i==3) recHitL4XResSize3->Fill(res_x);
@@ -905,7 +1029,7 @@ int StudyRecHitResolution::PhaseIBladeOfflineToOnline(const int& blade)
 // ------------------------------------------------------------------------------
 void StudyRecHitResolution::fillForward(const TrackingRecHit* recHit, const PSimHit & simHit, 
 				      DetId detId,const PixelGeomDetUnit * theGeomDet,
-				      const TrackerTopology *tTopo) {
+				      const TrackerTopology *tTopo, double ptT, double etaT, double phiT) {
   const float cmtomicron = 10000.0;
 
   //int rows = theGeomDet->specificTopology().nrows();
@@ -949,8 +1073,8 @@ void StudyRecHitResolution::fillForward(const TrackingRecHit* recHit, const PSim
   //int phase1_online_blade = PhaseIBladeOfflineToOnline(blade); // Phase 1: Ring1 +-1-11, Ring2 +-1-17
   //int xside = 1 + (phase1_online_blade>0); // Phase 1: -X 1, +X 2
 
-  int iii=0;
-  ///cout<<(iii++)<<endl;
+  //int iii=0;
+  //cout<<(iii++)<<endl;
 
   if (!quick_) {
     recHitXResRingSidePanel[ring-1][side-1][panel-1]->Fill(res_x);
@@ -972,8 +1096,8 @@ void StudyRecHitResolution::fillForward(const TrackingRecHit* recHit, const PSim
   //cout<<(iii++)<<endl;
 
   // get cluster
-  SiPixelRecHit::ClusterRef const& clust = ((SiPixelRecHit*)recHit)->cluster();
-  int sizeX = (*clust).sizeX(), sizeY = (*clust).sizeY();
+  //SiPixelRecHit::ClusterRef const& clust = ((SiPixelRecHit*)recHit)->cluster();
+  //int sizeX = (*clust).sizeX(), sizeY = (*clust).sizeY();
   //float charge = (*clust).charge();
   // if(disk==1) {
   //   if(!quick_) {
