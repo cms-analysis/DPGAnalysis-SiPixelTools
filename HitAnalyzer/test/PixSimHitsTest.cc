@@ -513,8 +513,8 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
        if(pt>0.1)       cout<<" simhit: ";
        else if(pid==11) cout<<" delta: ";
        else             cout<<" low pt (sec?): ";
-       cout<<" id "<<pid<<" "<<tid<<" proc "<<procType<<" tof "<<tof<<" de "
-	   <<eloss<<" pt "<<pt<<" entry "<<x<<"/"<<y<<"/"<<z<<" lenz "<<dz<<" "
+       cout<<" id "<<pid<<" trackid  "<<tid<<" proc "<<procType<<" tof "<<tof<<" de "
+	   <<eloss<<" pt "<<pt<<" entry "<<x<<"/"<<y<<"/"<<z<<" lenz "<<(z-z2)<<" "
 	   <<moduleDirectionUp<<endl;
      }
      if(DEBUG) {

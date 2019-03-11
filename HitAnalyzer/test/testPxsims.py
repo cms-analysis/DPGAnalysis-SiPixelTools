@@ -23,14 +23,16 @@ process.MessageLogger = cms.Service("MessageLogger",
 
 process.source = cms.Source("PoolSource",
     fileNames =  cms.untracked.vstring(
-#    '/store/user/kotlinski/mu100_v74/simhits/simHits1.root',
 #    'file:../scripts/sim.root'
 #    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu_phase1/pt100/simhits/simHits1.root'
+#    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu_phase1/pt100/simhits/simHits1_neutron1gev.root'
+    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu_phase1/pt100/simhits/simHits1_neutron10mev.root'
+
 #"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_upgrade2018_design_v4-v1/20000/193FB1CE-333D-E540-995E-1BA38BA1CE3C.root"
 
 #"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_upgrade2018_realistic_v8-v1/20000/0D388168-67C8-A544-8A75-8A96D40C396B.root"
 
-"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_mc2017_realistic_v2-v1/20000/222AF93E-CE66-6342-A266-E78F6FCDD8EC.root"
+#"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_mc2017_realistic_v2-v1/20000/222AF93E-CE66-6342-A266-E78F6FCDD8EC.root"
 
     )
 )
@@ -56,7 +58,7 @@ process.analysis =  cms.EDAnalyzer("PixSimHitsTest",
 #        mode = cms.untracked.string("fpix"),
 #	list = cms.string("TrackerHitsPixelEndcapLowTof"),
 #	list = cms.string("TrackerHitsPixelEndcapHighTof"),
-        Verbosity = cms.untracked.bool(False),
+        Verbosity = cms.untracked.bool(True),
         phase1 = cms.untracked.bool(True),
 )
 

@@ -20,10 +20,10 @@ process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_design', '') # crashes 
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_realistic', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_realistic', '')
 
 #process.GlobalTag = GlobalTag(process.GlobalTag, '104X_mc2017_realistic_Candv1', '')
 
@@ -38,13 +38,13 @@ process.maxEvents = cms.untracked.PSet(
 
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
 #  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw1_thr1k.root',
-#  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw1.root',
+  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw1.root',
 #  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw2.root',
 #  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw3.root',
 #  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw4.root',
 #  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw5.root',
 
-"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_upgrade2018_design_v4-v1/20000/193FB1CE-333D-E540-995E-1BA38BA1CE3C.root"
+#"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_upgrade2018_design_v4-v1/20000/193FB1CE-333D-E540-995E-1BA38BA1CE3C.root"
 
 #"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_upgrade2018_realistic_v8-v1/20000/0D388168-67C8-A544-8A75-8A96D40C396B.root"
 
@@ -227,7 +227,7 @@ process.load("DPGAnalysis-SiPixelTools.PixelHitAssociator.StudyRecHitResolution_
 #process.pixRecHitsValid.outputFile="pixelrechitshisto.root"
 process.pixRecHitsValid.verbose=False 
 process.pixRecHitsValid.muOnly=False 
-process.pixRecHitsValid.ptCut=10. # 10.
+process.pixRecHitsValid.ptCut=1. # 10.
 #process.pixRecHitsValid.src="siPixelRecHitsPreSplitting"
 process.pixRecHitsValid.src="siPixelRecHits"
 #process.pixRecHitsValid.associatePixel = True
@@ -251,7 +251,7 @@ process.d = cms.EDAnalyzer("PixClusterAna",
     #src = cms.InputTag("ALCARECOTkAlMinBias"), # ALCARECO
     Tracks = cms.InputTag("generalTracks"),
     # additional selections, e.g. select bx=1 -> (2,1)
-    Select1 = cms.untracked.int32(0),  # select the cut type, 0 no cut
+    Select1 = cms.untracked.int32(9998),  # select the cut type, 0 no cut
     Select2 = cms.untracked.int32(0),  # select the cut value   
 )
 
@@ -265,12 +265,44 @@ process.c = cms.EDAnalyzer("PixClustersWithTracks",
 #     trajectoryInput = cms.string("TrackRefitterP5")
 #     trajectoryInput = cms.string('cosmictrackfinderP5')
 # additional selections
-    Select1 = cms.untracked.int32(0),  # select the cut type, o no cut
+    Select1 = cms.untracked.int32(9998),  # select the cut type, o no cut
     Select2 = cms.untracked.int32(0),  # select the cut value   
 )
 
+process.r = cms.EDAnalyzer("SiPixelRawDump", 
+    Timing = cms.untracked.bool(False),
+    IncludeErrors = cms.untracked.bool(True),
+#   In 2015 data, label = rawDataCollector, extension = _LHC                                
+    InputLabel = cms.untracked.string('rawDataCollector'),
+# for MC
+#    InputLabel = cms.untracked.string('siPixelRawData'),
+#   For PixelLumi stream                           
+#    InputLabel = cms.untracked.string('hltFEDSelectorLumiPixels'),
+# for dump files 
+#    InputLabel = cms.untracked.string('source'),
+# old
+#    InputLabel = cms.untracked.string('siPixelRawData'),
+#    InputLabel = cms.untracked.string('source'),
+#    InputLabel = cms.untracked.string("ALCARECOTkAlMinBias"), # does not work
+    CheckPixelOrder = cms.untracked.bool(False),
+# 0 - nothing, 1 - error , 2- data, 3-headers, 4-hex
+    Verbosity = cms.untracked.int32(0),
+# threshold, print fed/channel num of errors if tot_errors > events * PrintThreshold, default 0,001 
+    PrintThreshold = cms.untracked.double(0.001)
+)
+
+process.a = cms.EDAnalyzer("PixDigisTest",
+    Verbosity = cms.untracked.bool(False),
+    phase1 = cms.untracked.bool(True),
+# after the digitizer 
+#    src = cms.InputTag("mix"),
+# after raw
+    src = cms.InputTag("siPixelDigis"),
+)
+
+
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('ana.root')
+    fileName = cms.string('rawtorec.root')
 )
 
 
@@ -284,7 +316,7 @@ process.TFileService = cms.Service("TFileService",
 
 # on track 
 ####process.p1 = cms.Path(process.RawToDigi*process.reconstruction*process.MeasurementTrackerEvent*process.TrackRefitter*process.pixRecHitsValid)
-process.p1 = cms.Path(process.RawToDigi*process.reconstruction*process.TrackRefitter*process.pixRecHitsValid)
+process.p1 = cms.Path(process.RawToDigi*process.a*process.reconstruction*process.TrackRefitter*process.d*process.c*process.pixRecHitsValid)
 #process.p1 = cms.Path(process.RawToDigi*process.reconstruction*process.TrackRefitter*process.pixRecHitsValid*process.c)
 # all rechits 
 #process.p1 = cms.Path(process.RawToDigi*process.reconstruction*process.pixRecHitsValid)  # works from raw with presplitted & normal rechits

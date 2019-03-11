@@ -80,10 +80,10 @@ class StudyRecHitResolution : public edm::EDAnalyzer {
 	void fillForward(const TrackingRecHit*, const PSimHit &, DetId, const PixelGeomDetUnit *,
 			 const TrackerTopology *,double,double,double);
 #ifdef PIXEL_ASSOCIATOR
-        void matchToSimHits(const PixelHitAssociator&, const TrackingRecHit *,
+        float matchToSims(const PixelHitAssociator&, const TrackingRecHit *,
 			    DetId, const PixelGeomDetUnit*, const TrackerTopology *,double,double,double);
 #else
-        void matchToSimHits(const TrackerHitAssociator&, const TrackingRecHit *, 
+        float matchToSims(const TrackerHitAssociator&, const TrackingRecHit *, 
 			    DetId, const PixelGeomDetUnit*, const TrackerTopology *,double,double,double);
 #endif
         int PhaseIBladeOfflineToOnline(const int&);
@@ -230,6 +230,8 @@ class StudyRecHitResolution : public edm::EDAnalyzer {
 	MonitorElement *size3_mz_f,*size3_mz_nf,*size3_pz_f,*size3_pz_nf;
 
 
+	MonitorElement *hdist1, *hdist2, *hdist3, *hdist4;
+	MonitorElement *hcount1, *hcount2, *hcount3, *hcount4, *hcount5, *hcount6;
 	MonitorElement* test;
 
 
@@ -243,6 +245,8 @@ class StudyRecHitResolution : public edm::EDAnalyzer {
 	bool quick_;
 	bool muOnly_;
 	double ptCut_;
+	int count1, count2, count3, count4, count5, count6;
+
 };
 
 #endif

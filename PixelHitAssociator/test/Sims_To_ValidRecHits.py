@@ -31,9 +31,6 @@ process.load("Configuration.StandardSequences.Reconstruction_cff")
 # Refitter
 process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
 
-
-
-
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(1000)
 )
@@ -57,10 +54,10 @@ process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
 
 # mb
 #"/store/relval/CMSSW_10_4_0/RelValMinBias_13/GEN-SIM/103X_mc2017_realistic_v2-v1/20000/F0FF4DFA-613B-4749-BBC3-FB29AD691FA5.root"
-"/store/relval/CMSSW_10_4_0/RelValMinBias_13/GEN-SIM/103X_upgrade2018_design_v4-v1/20000/C9CE0381-F732-4A4F-A263-D445DF99148C.root"
+#"/store/relval/CMSSW_10_4_0/RelValMinBias_13/GEN-SIM/103X_upgrade2018_design_v4-v1/20000/C9CE0381-F732-4A4F-A263-D445DF99148C.root"
 #"/store/relval/CMSSW_10_4_0/RelValMinBias_13/GEN-SIM/103X_upgrade2018_realistic_v8-v1/20000/E0E79FD8-5A76-6145-9816-B7BBC5E79AB1.root" 
 
-#"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_upgrade2018_design_v4-v1/20000/193FB1CE-333D-E540-995E-1BA38BA1CE3C.root"
+"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_upgrade2018_design_v4-v1/20000/193FB1CE-333D-E540-995E-1BA38BA1CE3C.root"
 
 #"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_upgrade2018_realistic_v8-v1/20000/0D388168-67C8-A544-8A75-8A96D40C396B.root"
 
@@ -162,8 +159,8 @@ process.load("DPGAnalysis-SiPixelTools.PixelHitAssociator.StudyRecHitResolution_
 # not on track 
 #process.pixRecHitsValid.outputFile="pixelrechits_fromsim_crab.root"
 process.pixRecHitsValid.verbose=False
-process.pixRecHitsValid.muOnly=True
-process.pixRecHitsValid.ptCut=10.
+process.pixRecHitsValid.muOnly=False
+process.pixRecHitsValid.ptCut=1.
 process.pixRecHitsValid.src="siPixelRecHitsPreSplitting"
 #process.pixRecHitsValid.src="siPixelRecHits"
 #process.pixRecHitsValid.associatePixel = True

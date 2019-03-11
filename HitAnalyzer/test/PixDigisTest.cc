@@ -91,11 +91,12 @@
 #include <TH2F.h>
 #include <TH1F.h>
 #include <TProfile.h>
+#include <TProfile2D.h>
 
 #define HISTOS
 //#define L1
 #define HLT
-#define SINGLE_MODULES
+//#define SINGLE_MODULES
 #define DCOLS
 #define DO_THR // use the threshold histo
 
@@ -110,6 +111,10 @@
 
 using namespace std;
 
+namespace {
+  const bool useNewL1 = false;
+  const bool useBadL2 = false;
+}
 // Enable this to look at simlinks (link simhit->digis)
 // Can be used only with simulated data.
 //#define USE_SIM_LINKS
@@ -180,13 +185,15 @@ private:
   TH2F *hpixMap1, *hpixMap2, *hpixMap3,*hpixMap4;
   TH2F *hpdetMaps1_4,*hpdetMaps1_3,*hpdetMaps1_2,*hpdetMaps1_1; 
   TH2F *hrocMap1_4,*hrocMap1_3,*hrocMap1_2,*hrocMap1_1; 
-
+  TH2F *hrocMapS1,*hrocMapS2,*hrocMapS3,*hrocMapS4; 
+  TH1D *hrocEne1,*hrocEne2,*hrocEne3,*hrocEne4; 
+   
   //* hpixMapNoise; 
   TH2F *hxy, *hphiz1, *hphiz2, *hphiz3, *hphiz4; // bpix 
   TH2F *hzr, *hxy11, *hxy12, *hxy21, *hxy22, *hxy31, *hxy32;  // fpix 
 
 #ifdef SINGLE_MODULES
-  // single mosules 
+  // single modules 
   TH2F *hpixDetMap10, *hpixDetMap20, *hpixDetMap30, *hpixDetMap40;
   TH2F *hpixDetMap11, *hpixDetMap12, *hpixDetMap13, *hpixDetMap14, *hpixDetMap15;
   TH2F *hpixDetMap16, *hpixDetMap17, *hpixDetMap18, *hpixDetMap19;
@@ -339,9 +346,6 @@ bool PixDigisTest::validIndex(int index, bool print = false) {
   return valid;
 }
 //
-
-
-
 // ------------ method called at the begining   ------------
 void PixDigisTest::beginJob() {
 
@@ -560,6 +564,19 @@ void PixDigisTest::beginJob() {
     hrocMap1_4 = fs->make<TH2F>("hrocMap1_4","occupancy", 8*9,-4.5,4.5,2*13,-6.5,6.5);
     hrocMap1_4->SetOption("colz");
 
+    hrocMapS1 = fs->make<TH2F>("hrocMapS1","energy deposited L1", 8*9,-4.5,4.5,2*13,-6.5,6.5);
+    hrocMapS2 = fs->make<TH2F>("hrocMapS2","energy deposited L2", 8*9,-4.5,4.5,2*29,-14.5,14.5);
+    hrocMapS3 = fs->make<TH2F>("hrocMapS3","energy deposited L3", 8*9,-4.5,4.5,2*45,-22.5,22.5);
+    hrocMapS4 = fs->make<TH2F>("hrocMapS4","energy deposited L4", 8*9,-4.5,4.5,2*65,-32.5,32.5);
+    hrocMapS1->SetOption("colz");
+    hrocMapS2->SetOption("colz");
+    hrocMapS3->SetOption("colz");
+    hrocMapS4->SetOption("colz");
+
+    hrocEne1 = fs->make<TH1D>("hrocEne1","energy deposited L1", 8*9,-4.5,4.5);
+    hrocEne2 = fs->make<TH1D>("hrocEne2","energy deposited L2", 8*9,-4.5,4.5);
+    hrocEne3 = fs->make<TH1D>("hrocEne3","energy deposited L3", 8*9,-4.5,4.5);
+    hrocEne4 = fs->make<TH1D>("hrocEne4","energy deposited L4", 8*9,-4.5,4.5);
 
     //hpixMapNoise = fs->make<TH2F>("hpixMapNoise"," ",416,0.,416.,160,0.,160.);
     //hpixMapNoise->SetOption("colz");
@@ -1011,7 +1028,7 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
       
 
 
-      if( (layer==2) && (select1==99) ) {
+      if( (layer==2) && (select1==99) && useBadL2 ) {
 	if( (ladder ==-1) && ( (module == 1) || (module == 2) || (module == 3)) ) badL2Modules=true;
 	else if( (ladder ==-5) &&( (module == -1) || (module == -2) || (module == -3)) ) badL2Modules=true;
 	else if( (ladder == 14) && (module == -1) ) badL2Modules=true;
@@ -1021,7 +1038,7 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
       }
 
       // find inner and outer modules for layer 1 onl
-      if( (layer==1) ) {
+      if( (layer==1 && useNewL1 ) ) {
 	//if( (ladder==2) || (ladder==4) || (ladder==6) ||
 	//  (ladder==-1) || (ladder==-3) || (ladder==-5) ) inner=true;
 	//else inner=false;
@@ -1184,7 +1201,7 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
        float weight=1.; // adc; 
        float pixy = col; float pixx=row;
 #endif
-       if(layer==1) {
+       if(layer==1) { // convert adc to kelec
 	 if(rescaleVcal) electrons = (vcal * 53.9 + offset_L1)/1000.; //L1 at 51.5fb-1 50->53.9
 	 else            electrons = (vcal * conversionFactor_L1 + offset_L1)/1000.; //default 
 	 if(newL1Modules) {
@@ -1204,6 +1221,9 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	 hrows1->Fill(float(row));
 	 hpixMap1->Fill(float(col),float(row));
 	 hrocMap1_4->Fill(rocZ,rocPhi);
+	 float energy = electrons * 3.61; // convert electrons to keV
+	 hrocMapS1->Fill(rocZ,rocPhi,energy);
+	 hrocEne1->Fill(rocZ,energy);
 	 hpdetMap1->Fill(float(module),float(ladder));
 	 if(adc<1) {
 	   hpdetMaps1_1->Fill(float(module),float(ladder));
@@ -1220,16 +1240,17 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	 hadc1bx->Fill(float(bx),float(adc));
 
 #ifdef SINGLE_MODULES
-	    if     ( ladder==-6 && module==-1) hpixDetMap10->Fill(pixy,pixx,weight); // 
-	    else if( ladder==-1 && module==-1) hpixDetMap11->Fill(pixy,pixx,weight); // "
-	    else if( ladder==-1 && module==-2) hpixDetMap12->Fill(pixy,pixx,weight); // "
-	    else if( ladder==-3 && module==-4) hpixDetMap13->Fill(pixy,pixx,weight); // 
-	    else if( ladder== 4 && module==-2) hpixDetMap14->Fill(pixy,pixx,weight); // 
-	    else if( ladder== 6 && module==-1) hpixDetMap15->Fill(pixy,pixx,weight); // 
-	    else if( ladder== 4 && module== 1) hpixDetMap16->Fill(pixy,pixx,weight); //
-	    else if( ladder== 2 && module== 1) hpixDetMap17->Fill(pixy,pixx,weight); // 
-	    else if( ladder==-4 && module== 2) hpixDetMap18->Fill(pixy,pixx,weight); // 
-	    else if( ladder==-1 && module== 2) hpixDetMap19->Fill(pixy,pixx,weight); // 
+	    if     ( ladder==-1 && module== 1) hpixDetMap10->Fill(pixy,pixx,weight); // 
+	    else if( ladder==-2 && module== 1) hpixDetMap11->Fill(pixy,pixx,weight); // "
+	    else if( ladder==-3 && module== 1) hpixDetMap12->Fill(pixy,pixx,weight); // "
+	    else if( ladder== 1 && module== 1) hpixDetMap13->Fill(pixy,pixx,weight); // 
+	    else if( ladder== 1 && module==-1) hpixDetMap14->Fill(pixy,pixx,weight); // 
+	    float weight1=electrons;
+	    if     ( ladder==-1 && module== 1) hpixDetMap15->Fill(pixy,pixx,weight1); // 
+	    else if( ladder==-2 && module== 1) hpixDetMap16->Fill(pixy,pixx,weight1); //
+	    else if( ladder==-3 && module== 1) hpixDetMap17->Fill(pixy,pixx,weight1); // 
+	    else if( ladder== 1 && module== 1) hpixDetMap18->Fill(pixy,pixx,weight1); // 
+	    else if( ladder== 1 && module==-1) hpixDetMap19->Fill(pixy,pixx,weight1); // 
 
 	    //if     ( ladder==-1 && module==-4) hpixDetMap11->Fill(pixy,pixx,1.); // "
 	    //else if( ladder== 6 && module== 1) hpixDetMap12->Fill(pixy,pixx,1.); // 
@@ -1258,6 +1279,10 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	 else            electrons = (vcal * conversionFactor + offset)/1000.; //default 
 	 helectrons2->Fill(electrons);
 	 hvcal2->Fill(vcal);
+	 float energy = electrons * 3.61; // convert electrons to keV
+	 hrocMapS2->Fill(rocZ,rocPhi,energy);
+	 hrocEne2->Fill(rocZ,energy);
+
         // look for the noisy pixel
 	 //noise = false; // (ladder==6) && (module==-2) && (col==364) && (row==1);
 	 if(adc<1) hadc02bx->Fill(float(bx));
@@ -1291,6 +1316,9 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
        } else if(layer==3) {
 	 if(rescaleVcal) electrons = (vcal * 47.5 + offset)/1000.; //L3 at 51.5fb-1 47->47.5
 	 else            electrons = (vcal * conversionFactor + offset)/1000.; //default 
+	 float energy = electrons * 3.61; // convert electrons to keV
+	 hrocMapS3->Fill(rocZ,rocPhi,energy);
+	 hrocEne3->Fill(rocZ,energy);
 	 helectrons3->Fill(electrons); 
 	 hvcal3->Fill(vcal);
 	 //noise = false; //(ladder==6) || (module==-2) || (col==364) || (row==1);	
@@ -1318,6 +1346,9 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 	 if(rescaleVcal) electrons = (vcal * 47.25 + offset)/1000.; //L4 at 51.5fb-1 47->47.25
 	 else            electrons = (vcal * conversionFactor + offset)/1000.; //default 
 	 helectrons4->Fill(electrons);
+	 float energy = electrons * 3.61; // convert electrons to keV
+	 hrocMapS4->Fill(rocZ,rocPhi,energy);
+	 hrocEne4->Fill(rocZ,energy);
 	 hvcal4->Fill(vcal);
 	 //noise = false; //(ladder==6) || (module==-2) || (col==364) || (row==1);
 	 if(electrons<0) hnadc4->Fill(float(adc));
@@ -1615,7 +1646,7 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 		countFullDcolsInROC2++;
 		countFullDcolsInEvent++;
 		hpdetMaps1_2->Fill(float(module),float(ladder));
-		hrocMap1_2->Fill(rocZ,rocPhi);
+		//hrocMap1_2->Fill(rocZ,rocPhi);
 		hcols1Many->Fill(float(col));
 		hdcolFull1bx->Fill(float(bx));
 		hdcolFull1ls->Fill(float(lumiBlock));
@@ -1781,6 +1812,16 @@ void PixDigisTest::endJob(){
   hpixMapFPix22->Scale(norm);
   hpixMapFPix31->Scale(norm);
   hpixMapFPix32->Scale(norm);
+
+  float normPixel = norm/4096.;
+  hrocMapS1->Scale(normPixel);
+  hrocMapS2->Scale(normPixel);
+  hrocMapS3->Scale(normPixel);
+  hrocMapS4->Scale(normPixel);
+  hrocEne1->Scale(normPixel/(12.*2.));
+  hrocEne2->Scale(normPixel/(28.*2.));
+  hrocEne3->Scale(normPixel/(44.*2.));
+  hrocEne4->Scale(normPixel/(64.*2.));
 
 #ifdef DCOLS
   hAllDcols->Scale(norm);

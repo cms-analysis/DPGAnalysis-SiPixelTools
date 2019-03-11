@@ -92,7 +92,19 @@ StudyRecHitResolution::StudyRecHitResolution(const ParameterSet& ps):
     htest2 = dbe_->book2D("htest2","test2",50,0.0,2.5,70,-3.5,3.5);
     //} // end if quick
     
-     
+
+    hcount1 = dbe_->book1D("hcount1","count1",2000,0.,2000.);
+    hcount2 = dbe_->book1D("hcount2","count2",2000,0.,2000.);
+    hcount3 = dbe_->book1D("hcount3","count3",2000,0.,2000.);
+    hcount4 = dbe_->book1D("hcount4","count4",2000,0.,2000.);
+    hcount5 = dbe_->book1D("hcount5","count5",2000,0.,2000.);
+    hcount6 = dbe_->book1D("hcount6","count6",2000,0.,2000.);
+
+    hdist1 = dbe_->book1D("hdist1","dist1",100,0.,1.);
+    hdist2 = dbe_->book1D("hdist2","dist2",100,0.,1.);
+    hdist3 = dbe_->book1D("hdist3","dist3",100,0.,1.);
+    hdist4 = dbe_->book1D("hdist4","dist4",100,0.,1.);
+
     if(!quick_) {
       
       // special histos for layer 1
@@ -545,107 +557,141 @@ void StudyRecHitResolution::analyze(const edm::Event& e, const edm::EventSetup& 
 
   //cout << " Run = " << e.id().run() << " Event = " << e.id().event() << " "<<geom->dets().size()<<" "<<hTTAC->size()<<endl;
 
-  //iterate over detunits
-  for (TrackerGeometry::DetContainer::const_iterator it = geom->dets().begin(); it != geom->dets().end(); it++) {
-    DetId detId = ((*it)->geographicalId());
+  count1=count2=count3=count4=count5=count6=0;
+
+  if( useTracks_ && hTTAC.isValid()) { // rechits on tracks only
+
+    const TrajTrackAssociationCollection ttac = *(hTTAC.product());
+    if (verbose_) cout << "   hTTAC.isValid() " << ttac.size()<< endl;
     
-    if (!( (detId.subdetId() == PixelSubdetector::PixelBarrel)||
-	   (detId.subdetId() == PixelSubdetector::PixelEndcap) )) continue;
-    
-    const PixelGeomDetUnit * theGeomDet = dynamic_cast<const PixelGeomDetUnit*>(theTracker.idToDet(detId) );
-    //if(verbose_) cout<<" pixel det "<<endl;
-    
-    if (useTracks_) {
+    // Loop on traj-track pairs
+    for (TrajTrackAssociationCollection::const_iterator it = ttac.begin(); it !=  ttac.end(); ++it) {
+      count1++;
 
-      //if(verbose_) cout<<" use tracks "<<endl;
+      if (verbose_) cout << "      TracjTrackAssociationCollection iterating" << endl;
+      reco::TrackRef trackref = it->val;
+      auto pt = trackref->pt();
+      auto eta = trackref->eta();
+      auto phi = trackref->phi();
+      
+      if (verbose_) cout<<" track "<<pt<<" "<<eta<<" "<<trackref->d0()<<" "<<trackref->dz()<<" "
+			<<trackref->vx()<<" "<<trackref->vy()<<" "<<trackref->vz() <<endl;
+      
+      // fTkQuality[fTkN]= trackref->qualityMask(); // see: CMSSW/DataFormats/TrackReco/interface/TrackBase.h
+      // fTkCharge[fTkN] = trackref->charge();
+      // fTkChi2[fTkN]   = trackref->chi2();
+      // fTkNdof[fTkN]   = trackref->ndof();
+      // fTkPt[fTkN]     = trackref->pt();
+      // fTkTheta[fTkN]  = trackref->theta();
+      // fTkEta[fTkN]    = trackref->eta();
+      // fTkPhi[fTkN]    = trackref->phi();
+      // fTkD0[fTkN]     = trackref->d0();
+      // fTkDz[fTkN]     = trackref->dz();
+      // fTkVx[fTkN]     = trackref->vx();
+      // fTkVy[fTkN]     = trackref->vy();
+      // fTkVz[fTkN]     = trackref->vz();
+      // fTkNHits[fTkN]  = trackref->hitPattern().numberOfValidHits();
+      // fTkLHits[fTkN]  = trackref->hitPattern().numberOfLostHits(reco::HitPattern::TRACK_HITS);
+      // fTkLHitsI[fTkN] = trackref->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS);  
+      // fTkLHitsO[fTkN] = trackref->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_OUTER_HITS); 
+      
+      // look at pt & eta 
+      hptTrack->Fill(pt);
+      hetaTrack->Fill(eta);
+      hphiTrack->Fill(phi);
+      
+      if(pt<ptCut_ || abs(eta)>etaMax) continue; // skip tracks 
+      count2++;
+      for(trackingRecHit_iterator irecHit = trackref->recHitsBegin(); // loop over rechits 
+	  irecHit != trackref->recHitsEnd(); ++irecHit) {
+	
+	//cout<<(*irecHit)->type()<<endl;
+	if( (*irecHit)->type() != 0 ) continue; // skip non valid hits 
+	
+	DetId detId = (*irecHit)->geographicalId();
+	
+	if (!( (detId.subdetId() == PixelSubdetector::PixelBarrel)||  // skip non-pixel hits
+	       (detId.subdetId() == PixelSubdetector::PixelEndcap) )) continue;
+	
+	const PixelGeomDetUnit * theGeomDet = dynamic_cast<const PixelGeomDetUnit*>(theTracker.idToDet(detId) );
+	count3++;
+	
+	if (verbose_) cout<<" track "<<pt<<" "<<eta<<" "<<trackref->d0()<<" "<<trackref->dz()<<" "
+			  <<trackref->vx()<<" "<<trackref->vy()<<" "<<trackref->vz() <<endl;
+	float distance = matchToSims(associate, (*irecHit), detId, theGeomDet,tTopo,pt,eta,phi);
+	hdist1->Fill(distance);
+	if(distance<1.) count4++;
+	
+	//const edm::Ref<std::vector<Trajectory> > refTraj = it->key;
+	//std::vector<TrajectoryMeasurement> tmeasColl =refTraj->measurements();
+	//for (std::vector<TrajectoryMeasurement>::const_iterator tmeasIt = refTraj->measurements().begin(); 
+	//     tmeasIt!=refTraj->measurements().end(); tmeasIt++) {   
+	//  if (!tmeasIt->updatedState().isValid()) continue; 
+	//  TransientTrackingRecHit::ConstRecHitPointer hit = tmeasIt->recHit();
+	//  if (detId == hit->geographicalId()) matchToSims(associate, &(*hit), detId, theGeomDet,tTopo);
+	//}
+      } // loop rechits
+    }  // loop trajectories
 
-      if (hTTAC.isValid()) {
+  } else { // all rechits 
 
-	const TrajTrackAssociationCollection ttac = *(hTTAC.product());
-	if (verbose_) cout << "   hTTAC.isValid() " << ttac.size()<< endl;
+    float distance=9999.;
+    //cout<<distance<<endl;
+    //iterate over detunits
+    for (TrackerGeometry::DetContainer::const_iterator it = geom->dets().begin(); 
+     	 it != geom->dets().end(); it++) {
 
-	// Loop on traj-track pairs
-	for (TrajTrackAssociationCollection::const_iterator it = ttac.begin(); it !=  ttac.end(); ++it) {
-	  
-	  if (verbose_) cout << "      TracjTrackAssociationCollection iterating" << endl;
-	  reco::TrackRef trackref = it->val;
-	  auto pt = trackref->pt();
-	  auto eta = trackref->eta();
-	  auto phi = trackref->phi();
-
-	  if (verbose_) cout<<" track "<<pt<<" "<<eta<<" "<<trackref->d0()<<" "<<trackref->dz()<<" "
-			    <<trackref->vx()<<" "<<trackref->vy()<<" "<<trackref->vz() <<endl;
-	  	  
-        // fTkQuality[fTkN]= trackref->qualityMask(); // see: CMSSW/DataFormats/TrackReco/interface/TrackBase.h
-        // fTkCharge[fTkN] = trackref->charge();
-        // fTkChi2[fTkN]   = trackref->chi2();
-        // fTkNdof[fTkN]   = trackref->ndof();
-        // fTkPt[fTkN]     = trackref->pt();
-        // fTkTheta[fTkN]  = trackref->theta();
-        // fTkEta[fTkN]    = trackref->eta();
-        // fTkPhi[fTkN]    = trackref->phi();
-        // fTkD0[fTkN]     = trackref->d0();
-        // fTkDz[fTkN]     = trackref->dz();
-        // fTkVx[fTkN]     = trackref->vx();
-        // fTkVy[fTkN]     = trackref->vy();
-        // fTkVz[fTkN]     = trackref->vz();
-        // fTkNHits[fTkN]  = trackref->hitPattern().numberOfValidHits();
-        // fTkLHits[fTkN]  = trackref->hitPattern().numberOfLostHits(reco::HitPattern::TRACK_HITS);
-        // fTkLHitsI[fTkN] = trackref->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS);  
-        // fTkLHitsO[fTkN] = trackref->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_OUTER_HITS); 
-
-	  // look at pt & eta 
-	  hptTrack->Fill(pt);
-	  hetaTrack->Fill(eta);
-	  hphiTrack->Fill(phi);
-
-	  if(pt<ptCut_ || abs(eta)>etaMax) continue; // skip tracks 
- 
-	  for(trackingRecHit_iterator irecHit = trackref->recHitsBegin(); // loop over rechits 
-	      irecHit != trackref->recHitsEnd(); ++irecHit) {
-
-	    //cout<<(*irecHit)->type()<<endl;
-	    if( (*irecHit)->type() != 0 ) continue; // skip non valid hits 
-
-	    if (detId == (*irecHit)->geographicalId()) {  // match to simhit if same detunit
-	      if (verbose_) cout<<" track "<<pt<<" "<<eta<<" "<<trackref->d0()<<" "<<trackref->dz()<<" "
-				     <<trackref->vx()<<" "<<trackref->vy()<<" "<<trackref->vz() <<endl;
-	      matchToSimHits(associate, (*irecHit), detId, theGeomDet,tTopo,pt,eta,phi);
-	    }
-
-	    //const edm::Ref<std::vector<Trajectory> > refTraj = it->key;
-	    //std::vector<TrajectoryMeasurement> tmeasColl =refTraj->measurements();
-	    //for (std::vector<TrajectoryMeasurement>::const_iterator tmeasIt = refTraj->measurements().begin(); 
-	    //     tmeasIt!=refTraj->measurements().end(); tmeasIt++) {   
-	    //  if (!tmeasIt->updatedState().isValid()) continue; 
-	    //  TransientTrackingRecHit::ConstRecHitPointer hit = tmeasIt->recHit();
-	    //  if (detId == hit->geographicalId()) matchToSimHits(associate, &(*hit), detId, theGeomDet,tTopo);
-	    //}
-	  }
-	}
-      }
-
-    } else {  // no tracks used 
+      DetId detId = ((*it)->geographicalId());
+      count1++;
+      
+      if (!( (detId.subdetId() == PixelSubdetector::PixelBarrel)||
+       	     (detId.subdetId() == PixelSubdetector::PixelEndcap) )) continue;
+      
+      const PixelGeomDetUnit * theGeomDet = dynamic_cast<const PixelGeomDetUnit*>(theTracker.idToDet(detId) ); 
+      //if(verbose_) cout<<" pixel det "<<endl;
       
       SiPixelRecHitCollection::const_iterator pixeldet = recHitColl->find(detId);
       if (pixeldet == recHitColl->end()) continue;
+      count2++;
       if(verbose_) cout<<" pixel det "<<pixeldet->size()<<endl;
+      distance=9999.;
+      //cout<<distance<<endl;
       //----Loop over rechits for this detId
+
       SiPixelRecHitCollection::DetSet::const_iterator pixeliter = pixeldet->begin();
-      for (; pixeliter != pixeldet->end(); pixeliter++) 
-	matchToSimHits(associate, &(*pixeliter), detId, theGeomDet,tTopo,-1.,-1.,-1.);
-    }
-  } // <------ end detunit loop
+      for (; pixeliter != pixeldet->end(); pixeliter++) { 
+	count3++;
+       	distance = matchToSims(associate, &(*pixeliter), detId, theGeomDet,tTopo,-1.,-1.,-1.);
+	if(distance<1.) count4++;
+	hdist1->Fill(distance);
+       	//cout<<distance<<endl;
+      }
+
+    } // <------ end detunit loop
+    
+  }  // use track?
+
+  hcount1->Fill(count1);
+  hcount2->Fill(count2);
+  hcount3->Fill(count3);
+  hcount4->Fill(count4);
+  hcount5->Fill(count5);
+  hcount6->Fill(count6);
+
 }
 
 #ifdef PIXEL_ASSOCIATOR
-void StudyRecHitResolution::matchToSimHits(const PixelHitAssociator& associate, const TrackingRecHit* hit, 
+
+float StudyRecHitResolution::matchToSims(const PixelHitAssociator& associate, const TrackingRecHit* hit, 
 					   DetId detId, const PixelGeomDetUnit* theGeomDet, 
 					   const TrackerTopology *tTopo,double pt, double eta, double phi) {
+
 #else
-void StudyRecHitResolution::matchToSimHits(const TrackerHitAssociator& associate, const TrackingRecHit* hit, 
+
+float StudyRecHitResolution::matchToSims(const TrackerHitAssociator& associate, const TrackingRecHit* hit, 
 					   DetId detId, const PixelGeomDetUnit* theGeomDet, 
 					   const TrackerTopology *tTopo,double pt, double eta, double phi) {
+
 #endif
 
 
@@ -653,9 +699,9 @@ void StudyRecHitResolution::matchToSimHits(const TrackerHitAssociator& associate
   
   if(verbose_) 
     cout<<" rechit "<<hit->localPosition().x()<<" "<<matched.size()<<endl;
+  float closest = 9999.;
   
   if ( !matched.empty() ) {
-    float closest = 9999.9;
     std::vector<PSimHit>::const_iterator closestit = matched.begin();
     LocalPoint lp = hit->localPosition();
     float rechit_x = lp.x();
@@ -676,7 +722,8 @@ void StudyRecHitResolution::matchToSimHits(const TrackerHitAssociator& associate
       float y_res = fabs(sim_ypos - rechit_y);
       
       float dist = sqrt(x_res*x_res + y_res*y_res); // in cm
-      
+      count5++;
+      if(dist<1.) count6++;
       if ( dist < closest ) {
 	//closest = x_res;
 	closest = dist;
@@ -703,6 +750,8 @@ void StudyRecHitResolution::matchToSimHits(const TrackerHitAssociator& associate
     else if (detId.subdetId() == PixelSubdetector::PixelEndcap)
       fillForward(hit, *closestit, detId, theGeomDet,tTopo,pt,eta,phi);
   } // end matched emtpy
+
+  return closest;
 }
 
 
@@ -734,6 +783,7 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
   float p  = simHit.pabs();
   int pid = simHit.particleType();
 
+  hdist2->Fill(1.);
   // skip secondaries
   if(muOnly_ && ( abs(pid) != 13 || p<10.) ) 
     {if(PRINT||abs(pid)==13 ) cout<<" skip "<<p<<" "<<pid<<endl; return;}
@@ -792,6 +842,7 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
       heta4->Fill(eta);
     }
   }
+
   LocalPoint lp = recHit->localPosition();
   float lp_y = lp.y();  
   float lp_x = lp.x();
@@ -813,13 +864,16 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
   float sim_ypos = 0.5*(sim_y1 + sim_y2);
   float res_y = (lp.y() - sim_ypos)*cmtomicron;
   
+  float distance = sqrt(res_x*res_x + res_y*res_y)/cmtomicron;
+  hdist3->Fill(distance);
+  if(distance<1.) hdist4->Fill(distance);  // matched
+
   if(PRINT)  
     cout<<detId.rawId()<<" "<<lp_x<<" "<<lp_y<<" "<<lerr_x<<" "<<lerr_y<<" "
 	<<sim_xpos<<" "<<sim_ypos<<" "<<res_x<<" "<<res_y
 	<<" "<<sim_x1<<" "<<sim_x2
 	<<endl;
 
-  
   float pull_x = ( lp_x - sim_xpos ) / lerr_x;
   float pull_y = ( lp_y - sim_ypos ) / lerr_y;
 
