@@ -63,7 +63,8 @@ class PixelHitAssociator {
   virtual ~PixelHitAssociator(){}
   
   std::vector<PSimHit> associateHit(const TrackingRecHit & thit);
-  void associatePixelRecHit(const SiPixelRecHit * pixelrechit, std::vector<SimHitIdpr> & simhitid
+  //std::vector<PSimHit> associateHit(const SiPixelRecHit & thit);
+  void associatePixelRecHit(const SiPixelRecHit * pixelrechit, std::vector<SimHitIdpr> & simhitid);
 
   /*  std::vector<unsigned int> associateHitId(const TrackingRecHit & thit);
       std::vector<unsigned int> associateSimpleRecHit(const SiStripRecHit2D * simplerechit);
@@ -92,8 +93,6 @@ class PixelHitAssociator {
   //std::vector<SimHitIdpr> associateMatchedRecHit(const SiStripMatchedRecHit2D * matchedrechit);
   //std::vector<SimHitIdpr> associateProjectedRecHit(const ProjectedSiStripRecHit2D * projectedrechit);
   //  std::vector<SimHitIdpr> associatePixelRecHit(const SiPixelRecHit * pixelrechit);
-
-);
 
   //std::vector<SimHitIdpr> associateGSRecHit(const SiTrackerGSRecHit2D * gsrechit);
   //std::vector<SimHitIdpr> associateMultiRecHitId(const SiTrackerMultiRecHit * multirechit);

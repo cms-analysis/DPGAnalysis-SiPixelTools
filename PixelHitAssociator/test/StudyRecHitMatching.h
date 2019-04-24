@@ -1,5 +1,5 @@
-#ifndef StudyRecHitResolution_h
-#define StudyRecHitResolution_h
+#ifndef StudyRecHitMatching_h
+#define StudyRecHitMatching_h
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
@@ -16,13 +16,13 @@
 
 //Simhit stuff
 #include "SimDataFormats/TrackingHit/interface/PSimHit.h"
-#include "SimTracker/TrackerHitAssociation/interface/TrackerHitAssociator.h"
 
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHitCollection.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "TrackingTools/PatternTools/interface/TrajTrackAssociation.h"
 #include "DataFormats/DetId/interface/DetId.h"
+#include "SimDataFormats/TrackingHit/interface/PSimHitContainer.h"
 
 #include "Geometry/CommonTopologies/interface/PixelTopology.h"
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
@@ -38,26 +38,28 @@
 #include "DQMServices/Core/interface/MonitorElement.h"
 
 #include <string>
+#include <vector>
 
 // Hit Associator
-//#define PIXEL_ASSOCIATOR // use my special pixel associator
+#define PIXEL_ASSOCIATOR // use my special pixel associator
 
 #ifdef PIXEL_ASSOCIATOR
 #include "DPGAnalysis-SiPixelTools/PixelHitAssociator/interface/PixelHitAssociator.h"
 #else 
 #include "SimTracker/TrackerHitAssociation/interface/TrackerHitAssociator.h"
+//#include "SimTracker/TrackerHitAssociation/interface/TrackerHitAssociator.h"
 #endif
 
 class TrackerTopology;
 
-class StudyRecHitResolution : public edm::EDAnalyzer {
+class StudyRecHitMatching : public edm::EDAnalyzer {
 
    public:
 	//Constructor
-	StudyRecHitResolution(const edm::ParameterSet& conf);
+	StudyRecHitMatching(const edm::ParameterSet& conf);
 
 	//Destructor
-	~StudyRecHitResolution();
+	~StudyRecHitMatching();
 
    protected:
 
@@ -71,18 +73,24 @@ class StudyRecHitResolution : public edm::EDAnalyzer {
 	bool verbose_;
 	edm::EDGetTokenT<edmNew::DetSetVector<SiPixelRecHit>> tPixelRecHit;
         edm::EDGetTokenT<TrajTrackAssociationCollection> tTracks;
+	edm::EDGetTokenT<edm::PSimHitContainer> tPixelSimHits;
+
 	edm::ParameterSet conf_;
 
-	TrackerHitAssociator::Config trackerHitAssociatorConfig_;
 
 	void fillBarrel(const TrackingRecHit*,const PSimHit &, DetId, const PixelGeomDetUnit *,	
-			 const TrackerTopology *,double,double,double);
+			const TrackerTopology *,double,double,double,int);
 	void fillForward(const TrackingRecHit*, const PSimHit &, DetId, const PixelGeomDetUnit *,
-			 const TrackerTopology *,double,double,double);
+			 const TrackerTopology *,double,double,double,int);
 #ifdef PIXEL_ASSOCIATOR
-        float matchToSims(const PixelHitAssociator&, const TrackingRecHit *,
+	std::vector<PSimHit> associateHit(const std::vector<PSimHit>&,DetId);
+	//PixelHitAssociator::Config trackerHitAssociatorConfig_;
+        //float matchToSims(PixelHitAssociator&, const TrackingRecHit *,
+	//		    DetId, const PixelGeomDetUnit*, const TrackerTopology *,double,double,double);
+        float matchToSims(const std::vector<PSimHit>&,const TrackingRecHit *,
 			    DetId, const PixelGeomDetUnit*, const TrackerTopology *,double,double,double);
 #else
+	TrackerHitAssociator::Config trackerHitAssociatorConfig_;
         float matchToSims(const TrackerHitAssociator&, const TrackingRecHit *, 
 			    DetId, const PixelGeomDetUnit*, const TrackerTopology *,double,double,double);
 #endif
@@ -159,6 +167,8 @@ class StudyRecHitResolution : public edm::EDAnalyzer {
 	MonitorElement *heta1, *heta2, *heta3, *heta4;
 	MonitorElement *hz1, *hz1_1, *hz1_2, *hz1_3, *hz1_4, *hz1_5;
 	MonitorElement *hz1_11, *hz1_12, *hz1_13,*hz1_14,*hz1_15,*hz1_16,*hz1_17;	
+	MonitorElement *hz1_21, *hz1_22, *hz1_23,*hz1_24,*hz1_25,*hz1_26;	
+	MonitorElement *recHitXResB1,*recHitXResB2,*recHitXResB3,*recHitXResB4,*recHitXResB5,*recHitXResB6;
 
 	//MonitorElement *recHitX11, *recHitX12; // *recHitX21, *recHitX22;
 	MonitorElement *hptTrack, *hphiTrack, *hetaTrack;
@@ -232,10 +242,10 @@ class StudyRecHitResolution : public edm::EDAnalyzer {
 	MonitorElement *size2_mz_f,*size2_mz_nf,*size2_pz_f,*size2_pz_nf;
 	MonitorElement *size3_mz_f,*size3_mz_nf,*size3_pz_f,*size3_pz_nf;
 
-	MonitorElement *hdist1, *hdist2, *hdist3, *hdist4;
+	MonitorElement *hdist1,*hdist2,*hdist3,*hdist4,*hdist5;
 	MonitorElement *hcount1,*hcount2,*hcount3,*hcount4,*hcount5,*hcount6,*hcount7,*hcount8,*hcount9;
 	MonitorElement *test;
-	MonitorElement *htest1, *htest2, *htest3, *htest4, *htest5;
+	MonitorElement *htest1, *htest2, *htest3, *htest4, *htest5, *htest6;
 	MonitorElement *hParticleType1,*hTrackId1,*hProcessType1,
 	  *hParticleType2,*hTrackId2,*hProcessType2,
 	  *hParticleType3,*hTrackId3,*hProcessType3,
@@ -248,16 +258,13 @@ class StudyRecHitResolution : public edm::EDAnalyzer {
 	//MonitorElement *simsXPerDet1,*simsXPerDet2,*simsXPerDet3,*simsXPerDet4;
 	//MonitorElement *simsYPerDet1,*simsYPerDet2,*simsYPerDet3,*simsYPerDet4;
 
-
-
-
-
         edm::InputTag src_;
         bool useTracks_;
         edm::InputTag tracks_;
         bool phase_;
 	bool quick_;
 	bool muOnly_;
+	bool useSimHits_;
 	double ptCut_;
 	int count1, count2, count3, count4, count5, count6, count9;
 

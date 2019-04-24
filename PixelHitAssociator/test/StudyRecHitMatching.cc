@@ -1,13 +1,13 @@
 //
-// StudyRecHitResolution.cc
+// StudyRecHitMatching.cc
 // Created 6/7/06
 // Make standalone, independent from the validation code. dk 3/14
 // Add option for on-track hits 29/Oct/2016 Janos Karancsi
 //--------------------------------
 
-#include "StudyRecHitResolution.h"
+#include "StudyRecHitMatching.h"
 
-#include "SimDataFormats/TrackingHit/interface/PSimHitContainer.h"
+//#include "SimDataFormats/TrackingHit/interface/PSimHitContainer.h"
 #include "DataFormats/GeometryVector/interface/LocalPoint.h"
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
@@ -30,19 +30,30 @@ using namespace std;
 using namespace edm;
 
 //#define DO_SIMHITS
+namespace {
+  const float CloseMatch=0.0075; // 75um
+  const float Matched   =0.0175; // 175um
 
-StudyRecHitResolution::StudyRecHitResolution(const ParameterSet& ps): 
+}
+StudyRecHitMatching::StudyRecHitMatching(const ParameterSet& ps): 
   dbe_(0), 
   conf_(ps),
+#ifdef PIXEL_ASSOCIATOR
+#else
   trackerHitAssociatorConfig_(ps, consumesCollector() ),
+#endif
   src_( ps.getParameter<edm::InputTag>( "src" ) ),
   useTracks_( ps.getUntrackedParameter<bool>( "useTracks", false ) ),
   tracks_( ps.getUntrackedParameter<edm::InputTag>( "tracks", edm::InputTag("generalTracks") ) )  {
+
   if (useTracks_) {
     tTracks = consumes<TrajTrackAssociationCollection>( tracks_ );
   } else {
     tPixelRecHit = consumes<edmNew::DetSetVector<SiPixelRecHit>>( src_ );
   }
+
+  tPixelSimHits = 
+    consumes <PSimHitContainer> (edm::InputTag("g4SimHits","TrackerHitsPixelBarrelLowTof"));
 
   outputFile_ = ps.getUntrackedParameter<string>("outputFile", "pixelrechitshisto.root");
   verbose_ = ps.getUntrackedParameter<bool>("verbose", false);
@@ -65,6 +76,7 @@ StudyRecHitResolution::StudyRecHitResolution(const ParameterSet& ps):
   Char_t histo[200], title[200];
   //quick_=true;
   quick_=false;
+  useSimHits_=false;
 
   // ---------------------------------------------------------------
   // All histograms that depend on plaquette number have 7 indexes.
@@ -106,29 +118,38 @@ StudyRecHitResolution::StudyRecHitResolution(const ParameterSet& ps):
   hz1_15 = dbe_->book1D("hz1_15","gz process group5",26,0.,26.);
   hz1_16 = dbe_->book1D("hz1_16","gz process group6",26,0.,26.);
   hz1_17 = dbe_->book1D("hz1_17","gz process group7",26,0.,26.);
+
+  hz1_21 = dbe_->book1D("hz1_21","gz process0 ",26,0.,26.);
+  hz1_22 = dbe_->book1D("hz1_22","gz process1",26,0.,26.);
+  hz1_23 = dbe_->book1D("hz1_23","gz process2",26,0.,26.);
+  hz1_24 = dbe_->book1D("hz1_24","gz process3",26,0.,26.);
+  hz1_25 = dbe_->book1D("hz1_25","gz process4",26,0.,26.);
+  hz1_26 = dbe_->book1D("hz1_26","gz process3",26,0.,26.);
   
   htest1 = dbe_->book2D("htest1","test1",50,0.0,2.5,70,-3.5,3.5);
   htest2 = dbe_->book2D("htest2","test2",50,0.0,2.5,70,-3.5,3.5);
   htest3 = dbe_->book2D("htest3","test3",120,-0.3,0.3,162,-0.81,0.81);
   htest4 = dbe_->book2D("htest4","eta T vs eta H",50,-2.5,2.5,50,-2.5,2.5);
   htest5 = dbe_->book2D("htest5","phi T vs phi H",70,-3.5,3.5,70,-3.5,3.5);
+  htest6 = dbe_->book2D("htest6","test6",10,0.0,10.0,10,0.,10.);
   //} // end if quick
   
   
-  hcount1 = dbe_->book1D("hcount1","tracks (or detunits)",2000,-0.5,1999.5);
-  hcount2 = dbe_->book1D("hcount2","selected tracks",2000,-0.5,1999.5);
-  hcount3 = dbe_->book1D("hcount3","rechits",2000,-0.5,1999.5);
-  hcount4 = dbe_->book1D("hcount4","rechits <100um",2000,-0.5,1999.5);
-  hcount5 = dbe_->book1D("hcount5","simhits compared",2000,-0.5,1999.5);
-  hcount6 = dbe_->book1D("hcount6","simhits <100um",2000,-0.5,1999.5);
-  hcount7 = dbe_->book1D("hcount7","close simhits per rechit",20,-0.5,19.5);
-  hcount8 = dbe_->book1D("hcount8","matched simhits per rechit",20,-0.5,19.5);
+  hcount1 = dbe_->book1D("hcount1","tracks or detunits",1000,-0.5,4999.5);
+  hcount2 = dbe_->book1D("hcount2","rechits",2000,-0.5,1999.5);
+  hcount3 = dbe_->book1D("hcount3","simhits <75um",2000,-0.5,1999.5);
+  hcount4 = dbe_->book1D("hcount4","simhits <175um",2000,-0.5,1999.5);
+  hcount5 = dbe_->book1D("hcount5","num simhits in the same det",2000,-0.5,1999.5);
+  hcount6 = dbe_->book1D("hcount6","simhits <175um from rechits",2000,-0.5,1999.5);
+  hcount7 = dbe_->book1D("hcount7","num simhits <75um",20,-0.5,19.5);
+  hcount8 = dbe_->book1D("hcount8","num simhits <175um",20,-0.5,19.5);
   hcount9 = dbe_->book1D("hcount9","all simhits",2000,-0.5,1995.5);
   
   hdist1 = dbe_->book1D("hdist1","matched",100,0.,0.1);
   hdist2 = dbe_->book1D("hdist2","number of bpix matched rechits",100,0.,0.1);
   hdist3 = dbe_->book1D("hdist3","selected matched",100,0.,0.1);
   hdist4 = dbe_->book1D("hdist4","selected match, close",100,0.,0.1);
+  hdist5 = dbe_->book1D("hdist5","all simhits in the same det",100,0.,0.1);
 
   hParticleType1 = dbe_->book1D("hParticleType1","partcile type close",2500,0.,2500.);
   hTrackId1 = dbe_->book1D("hTrackId1","trackid close",1000,0.,1000.);
@@ -345,6 +366,14 @@ StudyRecHitResolution::StudyRecHitResolution(const ParameterSet& ps):
     //simsXPerDet1 = dbe_->book1D("simsXPerDet1","sims vs x-det1",162,-0.81,0.81);
     //simsYPerDet1 = dbe_->book1D("simsYPerDet1","sims vs y-det1",100,-3.2,3.2);
     
+    recHitXResB1 = dbe_->book1D("recHitXResB1","resX, L1, simStatus0", 100, -200., 200.);
+    recHitXResB2 = dbe_->book1D("recHitXResB2","resX, L1, simStatus1", 100, -200., 200.);
+    recHitXResB3 = dbe_->book1D("recHitXResB3","resX, L1, simStatus2", 100, -200., 200.);
+    recHitXResB4 = dbe_->book1D("recHitXResB4","resX, L1, simStatus3", 100, -200., 200.);
+    recHitXResB5 = dbe_->book1D("recHitXResB5","resX, L1, simStatus4", 100, -200., 200.);
+    recHitXResB6 = dbe_->book1D("recHitXResB6","resX, L1, simStatus5", 100, -200., 200.);
+
+
     // FPix 
     dbe_->setCurrentFolder("recHitFPIX");
 
@@ -491,6 +520,7 @@ StudyRecHitResolution::StudyRecHitResolution(const ParameterSet& ps):
       sprintf(histo, "RecHit_YPull_Layer4_Module%d", i+1);
       recHitYPullLayer4Modules[i] = dbe_->book1D(histo, "RecHit YPull Layer4 by module", 100, -10.0, 10.0); 
     }
+
     
     /// 
     dbe_->setCurrentFolder("recHitPullsFPIX");
@@ -520,14 +550,14 @@ StudyRecHitResolution::StudyRecHitResolution(const ParameterSet& ps):
   
 }
 
-StudyRecHitResolution::~StudyRecHitResolution() {
+StudyRecHitMatching::~StudyRecHitMatching() {
 }
 
-void StudyRecHitResolution::beginJob() {
+void StudyRecHitMatching::beginJob() {
   
 }
 
-void StudyRecHitResolution::endJob() {
+void StudyRecHitMatching::endJob() {
   if ( outputFile_.size() != 0 && dbe_ ) {
     cout<<" Save file "<<endl;
     dbe_->save(outputFile_);
@@ -536,8 +566,10 @@ void StudyRecHitResolution::endJob() {
   }
 }
 
-void StudyRecHitResolution::analyze(const edm::Event& e, const edm::EventSetup& es) {
+//---------------------------------------------------------------
+void StudyRecHitMatching::analyze(const edm::Event& e, const edm::EventSetup& es) {
   double etaMax=2.5;
+  const bool selectL1= true;
 
   //Retrieve tracker topology from geometry
   edm::ESHandle<TrackerTopology> tTopoHand;
@@ -567,6 +599,13 @@ void StudyRecHitResolution::analyze(const edm::Event& e, const edm::EventSetup& 
     e.getByToken(tPixelRecHit , recHitColl);
   }
   
+  // Get simhits 
+  Handle<PSimHitContainer> PixelSimHits;
+  //Handle<PSimHitContainer> PixelHitsLowTof;
+  //Handle<PSimHitContainer> PixelHitsHighTof;
+  e.getByToken( tPixelSimHits ,PixelSimHits);
+  const vector<PSimHit>& ism(*PixelSimHits); 
+
   //Get event setup
   edm::ESHandle<TrackerGeometry> geom;
   es.get<TrackerDigiGeometryRecord>().get(geom); 
@@ -574,8 +613,8 @@ void StudyRecHitResolution::analyze(const edm::Event& e, const edm::EventSetup& 
   
   if(verbose_) cout<<" Call associator "<<endl;
 #ifdef PIXEL_ASSOCIATOR
-  PixelHitAssociator associate( e); 
-  //PixelHitAssociator associate( e, conf_ ); 
+  //PixelHitAssociator associate( e); 
+  ////PixelHitAssociator associate( e, conf_ ); 
 #else
   //TrackerHitAssociator associate( e);
   TrackerHitAssociator associate( e, trackerHitAssociatorConfig_); 
@@ -585,15 +624,127 @@ void StudyRecHitResolution::analyze(const edm::Event& e, const edm::EventSetup& 
   //cout << " Run = " << e.id().run() << " Event = " << e.id().event() << " "<<geom->dets().size()<<" "<<hTTAC->size()<<endl;
 
   count1=count2=count3=count4=count5=count6=count9=0;
+ 
+  if(useSimHits_) {
 
-  if( useTracks_ && hTTAC.isValid()) { // rechits on tracks only
+    for(vector<PSimHit>::const_iterator isim = PixelSimHits->begin();
+	isim != PixelSimHits->end(); ++isim) {
+      
+
+      // Det id
+      DetId detId=DetId((*isim).detUnitId());
+      unsigned int dettype=detId.det(); // for tracker=1
+      unsigned int subid=detId.subdetId();// pixel=1
+      unsigned int detid=detId.rawId(); // raw det id
+      if(dettype!=1 && subid!=1) cout<<" error in det id "<<dettype<<" "<<subid<<endl;
+
+      // Global variables 
+      const PixelGeomDetUnit * theGeomDet = 
+	dynamic_cast<const PixelGeomDetUnit*> ( theTracker.idToDet(detId) );
+      //double detZ = theGeomDet->surface().position().z();    // module z position 
+      //double detR = theGeomDet->surface().position().perp(); //        r
+      //double detPhi = theGeomDet->surface().position().phi();//        phi	
+
+      if(selectL1) {
+	unsigned layerC=tTopo->pxbLayer(detid);
+	if(layerC!=1) continue; // keep only bpix layer 1
+      }
+      count1++;
+
+     // SimHit information 
+     float eloss = (*isim).energyLoss() * 1000000/3.7;//convert GeV to ke 
+     float tof = (*isim).timeOfFlight();
+     float p = (*isim).pabs();
+     float pt= (*isim).momentumAtEntry().perp();
+     float theta = (*isim).thetaAtEntry();
+     float phi = (*isim).phiAtEntry();
+     int pid = ((*isim).particleType()); 
+     int tid = (*isim).trackId();
+     int procType = (*isim).processType();
+     
+     float x = (*isim).entryPoint().x(); // width (row index, in col direction)
+     float y = (*isim).entryPoint().y(); // length (col index, in row direction)
+     float z = (*isim).entryPoint().z(); // thickness, + or -142.5um
+     
+     float x2 = (*isim).exitPoint().x();
+     float y2 = (*isim).exitPoint().y();
+     float z2 = (*isim).exitPoint().z();  //+- 142.5
+
+     //float dz = abs(z-z2); // should be the sensor thickness 285um
+     //bool moduleDirectionUp = ( z < z2 ); // for positive direction z2>z
+
+     float xpos = (x+x2)/2.;
+     float ypos = (y+y2)/2.;
+     float zpos = (z+z2)/2.; // should be z=0
+
+     cout<<" a layer 1 module "<<detid<<" with simhit eloss= "<<eloss<<" tof "<<tof<<" p "
+	 <<p<<" pid "<<pid<<" "<<pt<<" "<<phi<<" "<<theta<<", track/process "
+	 <<tid<<"/"<<procType<<" pos "<<xpos<<" "<<ypos<<" "<<zpos
+	 <<std::endl;
+
+
+     // get rechits for this module 
+     SiPixelRecHitCollection::const_iterator pixeldet = recHitColl->find(detId);
+     if (pixeldet == recHitColl->end()) continue;
+     if(verbose_) cout<<" pixel det "<<pixeldet->size()<<endl;
+
+     float distance=9999.;
+
+     SiPixelRecHitCollection::DetSet::const_iterator pixeliter = pixeldet->begin();
+     for (; pixeliter != pixeldet->end(); pixeliter++) { 
+
+       if ( !((pixeliter)->isValid()) ) continue;
+     
+       count2++;
+       LocalPoint lp = pixeliter->localPosition();
+       float rechit_x = lp.x();
+       float rechit_y = lp.y();
+
+       const DetId & rhdetId = (pixeliter)->geographicalId();
+       unsigned int rhdetid = (rhdetId.rawId());
+       
+      if( detid != rhdetid ) {cout<<" dets do not agree "<<endl; continue;} 
+      
+       // Get cluster 
+       edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster> const& clust = 
+	 pixeliter->cluster();
+        
+       float ch = (clust->charge())/1000.; // convert ke to electrons
+       int size = clust->size();
+       int sizeX = clust->sizeX();
+       int sizeY = clust->sizeY();
+       //float xClu = clust->x();
+       //float yClu = clust->y();
+
+       if(verbose_) 
+	 cout<<" rechit "<<rhdetid<<" "<<rechit_x<<" "<<rechit_y<<" "<<ch<<" "<<size<<" "<<sizeX<<" "<<sizeY<<endl;
+
+       float resX = (rechit_x - xpos);
+       float resY = (rechit_y - ypos);
+       distance = sqrt(resX*resX + resY*resY);
+       cout<<distance<<endl;
+#ifdef PIXEL_ASSOCIATOR
+       distance = matchToSims(ism, &(*pixeliter), detId, theGeomDet,tTopo,-1.,-1.,-1.);
+#else
+       distance = matchToSims(associate, &(*pixeliter), detId, theGeomDet,tTopo,-1.,-1.,-1.);
+#endif
+
+       if(verbose_) cout<<distance<<endl;
+       if(distance<CloseMatch) count3++;
+       if(distance<Matched) count4++;
+       hdist1->Fill(distance);
+       //cout<<distance<<endl;
+     }
+    } // loop over simhits 
+
+  } else if( useTracks_ && hTTAC.isValid()) { // rechits on tracks only
 
     const TrajTrackAssociationCollection ttac = *(hTTAC.product());
     if (verbose_) cout << "   hTTAC.isValid() " << ttac.size()<< endl;
     
     // Loop on traj-track pairs
     for (TrajTrackAssociationCollection::const_iterator it = ttac.begin(); it !=  ttac.end(); ++it) {
-      count1++;
+      //count1++;
 
       if (verbose_) cout << "      TracjTrackAssociationCollection iterating" << endl;
       reco::TrackRef trackref = it->val;
@@ -626,7 +777,8 @@ void StudyRecHitResolution::analyze(const edm::Event& e, const edm::EventSetup& 
       hphiTrack->Fill(phi);
       
       if(pt<ptCut_ || abs(eta)>etaMax) continue; // skip tracks 
-      count2++;
+      count1++;
+
       if (verbose_) cout<<" track "<<pt<<" "<<eta<<" "<<trackref->d0()<<" "<<trackref->dz()<<" "
 			<<trackref->vx()<<" "<<trackref->vy()<<" "<<trackref->vz() <<endl;
 
@@ -641,12 +793,31 @@ void StudyRecHitResolution::analyze(const edm::Event& e, const edm::EventSetup& 
 	if (!( (detId.subdetId() == PixelSubdetector::PixelBarrel)||  // skip non-pixel hits
 	       (detId.subdetId() == PixelSubdetector::PixelEndcap) )) continue;
 	
+	// select only layer 1
+	if(selectL1) {
+	  unsigned int detid=detId.rawId(); // raw det id
+	  unsigned layerC=tTopo->pxbLayer(detid);
+	  if(layerC!=1) continue; // keep only bpix layer 1
+	}
+
 	const PixelGeomDetUnit * theGeomDet = dynamic_cast<const PixelGeomDetUnit*>(theTracker.idToDet(detId) );
-	count3++;
+	count2++;
 	
-	float distance = matchToSims(associate, (*irecHit), detId, theGeomDet,tTopo,pt,eta,phi);
+	float distance =9999.;
+#ifdef PIXEL_ASSOCIATOR
+	// the way I access simhits works only for bpix so skip fpix
+	if( (detId .subdetId() != PixelSubdetector::PixelBarrel) ) continue;
+
+	distance = matchToSims(ism, (*irecHit), detId, theGeomDet,tTopo,pt,eta,phi);
+	//float distance = matchToSims((*irecHit), detId, theGeomDet,tTopo,pt,eta,phi);
+#else
+       distance = matchToSims(associate, (*irecHit), detId, theGeomDet,tTopo,pt,eta,phi);
+	//float distance = matchToSims(associate, (*irecHit), detId, theGeomDet,tTopo,pt,eta,phi);
+#endif
+
 	hdist1->Fill(distance);
-	if(distance<0.01) count4++;
+	if(distance<CloseMatch) count3++;
+	if(distance<Matched) count4++;
 	
 	//const edm::Ref<std::vector<Trajectory> > refTraj = it->key;
 	//std::vector<TrajectoryMeasurement> tmeasColl =refTraj->measurements();
@@ -661,10 +832,6 @@ void StudyRecHitResolution::analyze(const edm::Event& e, const edm::EventSetup& 
 
   } else { // all rechits 
 
-#ifdef DO_SIMHITS
-
-
-#else
 
     float distance=9999.;
     //cout<<distance<<endl;
@@ -673,33 +840,47 @@ void StudyRecHitResolution::analyze(const edm::Event& e, const edm::EventSetup& 
      	 it != geom->dets().end(); it++) {
 
       DetId detId = ((*it)->geographicalId());
-      count1++;
       
-      if (!( (detId.subdetId() == PixelSubdetector::PixelBarrel)||
+      if (!( (detId.subdetId() == PixelSubdetector::PixelBarrel)||   // select pixels
        	     (detId.subdetId() == PixelSubdetector::PixelEndcap) )) continue;
       
       const PixelGeomDetUnit * theGeomDet = dynamic_cast<const PixelGeomDetUnit*>(theTracker.idToDet(detId) ); 
       //if(verbose_) cout<<" pixel det "<<endl;
       
       SiPixelRecHitCollection::const_iterator pixeldet = recHitColl->find(detId);
-      if (pixeldet == recHitColl->end()) continue;
-      count2++;
-      if(verbose_) cout<<" pixel det "<<pixeldet->size()<<endl;
+      if (pixeldet == recHitColl->end()) continue;  // detunit has pixel rechits 
+      if(verbose_) cout<<" pixel det "<<detId.rawId()<<" "<<pixeldet->size()<<endl;
+
+      // select only layer 1
+      if(selectL1) {
+	unsigned int detid=detId.rawId(); // raw det id
+	unsigned layerC=tTopo->pxbLayer(detid);
+	if(layerC!=1) continue; // keep only bpix layer 1
+      }
+
+      count1++;
       distance=9999.;
       //cout<<distance<<endl;
       //----Loop over rechits for this detId
 
       SiPixelRecHitCollection::DetSet::const_iterator pixeliter = pixeldet->begin();
       for (; pixeliter != pixeldet->end(); pixeliter++) { 
-	count3++;
-       	distance = matchToSims(associate, &(*pixeliter), detId, theGeomDet,tTopo,-1.,-1.,-1.);
-	if(distance<0.01) count4++;
+	count2++;
+#ifdef PIXEL_ASSOCIATOR
+	// the way I access simhits works only for bpix so skip fpix
+	if( (detId .subdetId() != PixelSubdetector::PixelBarrel) ) continue;
+       distance = matchToSims(ism, &(*pixeliter), detId, theGeomDet,tTopo,-1.,-1.,-1.);
+       	//distance = matchToSims(&(*pixeliter), detId, theGeomDet,tTopo,-1.,-1.,-1.);
+#else
+       	distance = matchToSims(associate,&(*pixeliter), detId, theGeomDet,tTopo,-1.,-1.,-1.);
+#endif
+	if(distance<CloseMatch) count3++;
+	if(distance<Matched)    count4++;
 	hdist1->Fill(distance);
        	//cout<<distance<<endl;
       }
 
     } // <------ end detunit loop
-#endif
     
   }  // use track?
 
@@ -712,26 +893,153 @@ void StudyRecHitResolution::analyze(const edm::Event& e, const edm::EventSetup& 
   hcount9->Fill(count9);
 
 }
-
+//---------------------------------------------------------------------------------------------------------
+// make a list of simhits from the same detunit as the rechit 
 #ifdef PIXEL_ASSOCIATOR
+std::vector<PSimHit> StudyRecHitMatching::associateHit(const std::vector<PSimHit>& ism,
+						       //const TrackingRecHit* hit,
+						       DetId detId //, const PixelGeomDetUnit* theGeomDet, 
+						       //const TrackerTopology *tTopo
+						       ) {
+  std::vector<PSimHit> result; 
 
-float StudyRecHitResolution::matchToSims(const PixelHitAssociator& associate, const TrackingRecHit* hit, 
+  for(vector<PSimHit>::const_iterator isim = ism.begin(); isim != ism.end(); ++isim) {    
+    // Det id
+    DetId smdetId=DetId((*isim).detUnitId());
+    unsigned int smdetid=smdetId.rawId(); // raw det id
+    if(smdetid == detId.rawId() ) result.push_back(*isim);  // select the right detunit 
+  }
+
+  return result;
+}
+// select the best matching simhit from the list
+float StudyRecHitMatching::matchToSims(const  vector<PSimHit>& ism, const TrackingRecHit* hit, 
 					   DetId detId, const PixelGeomDetUnit* theGeomDet, 
 					   const TrackerTopology *tTopo,double pt, double eta, double phi) {
+
+  float closest=9999., closest2=9999.;
+  std::vector<PSimHit>::const_iterator closestit, closest2it;
+
+  LocalPoint lp = hit->localPosition();
+  float rechit_x = lp.x();
+  float rechit_y = lp.y();
+  //int countClose=0;
+
+  // Get cluster 
+  SiPixelRecHit::ClusterRef const& clust = ((SiPixelRecHit*)hit)->cluster();
+  float ch  = (*clust).charge()/1000.; // in kelec
+
+  if(verbose_) cout<<" rechit "<<ch<<" "<<rechit_x<<" "<<rechit_y<<endl;
+
+  // get simhits for this detunit 
+  std::vector<PSimHit> matched = associateHit(ism,detId); // get the matched simhits
+  if(verbose_) cout<<" simhits from this unit "<<matched.size()<<endl;
+
+  if ( matched.empty() ) {
+    cout<<" no match "<<detId.rawId()<<" "<<ch<<" "<<rechit_x<<" "<<rechit_y<<endl; 
+    return closest;}
+
+  count5 = matched.size();
+  int count7=0;
+  int count8=0;
+  int majorProcess=-1., majorPid=-1, majorTrack=-1;
+
+  //loop over sim hits and find closet
+  for (std::vector<PSimHit>::const_iterator isim = matched.begin(); isim!=matched.end(); ++isim) {
+    //cout<<(m->energyLoss())*1000000/3.7<<" ";
+    //}
+    //cout<<endl;
+    //}
+    //for(vector<PSimHit>::const_iterator isim = ism.begin(); isim != ism.end(); ++isim) {
+    
+    // Det id
+    DetId smdetId=DetId(isim->detUnitId());
+    unsigned int smdetid=smdetId.rawId(); // raw det id
+    if(smdetid != detId.rawId() ) continue;  // select the right detunit 
+    
+    float sim_x1 = isim->entryPoint().x();
+    float sim_x2 = isim->exitPoint().x();
+    float sim_xpos = 0.5*(sim_x1+sim_x2);
+    
+    float sim_y1 = isim->entryPoint().y();
+    float sim_y2 = isim->exitPoint().y();
+    float sim_ypos = 0.5*(sim_y1+sim_y2);
+    
+    float x_res = fabs(sim_xpos - rechit_x);
+    float y_res = fabs(sim_ypos - rechit_y);
+      
+    float dist = sqrt(x_res*x_res + y_res*y_res); // in cm
+    hdist5->Fill(dist);
+
+    if(verbose_) cout<<" simhit "<<dist<<" "<<(isim->energyLoss()*1000000/3.7)<<" "
+	<<isim->particleType()<<" "<<isim->processType()<<" "
+	<<isim->trackId()
+	<<endl;
+
+    if(dist<CloseMatch) count7++; // good fit, within 75um
+    if(dist<Matched) { // matched, within 175um 
+	count6++;
+	count8++;
+	// This is just to check if among several matching simhits there is one from the org.gen.
+	if( isim->processType() == 0 ) {
+	  majorProcess=0; majorPid=abs(isim->particleType()); majorTrack=isim->trackId();
+	}
+	hParticleType1->Fill(float(abs(isim->particleType())));
+	hTrackId1->Fill(float(isim->trackId()));
+	hProcessType1->Fill(float(isim->processType()));
+    }
+
+    if ( dist < closest ) {
+      if(dist<Matched) {closest2 = closest;closest2it = closestit;} // 2nd best
+      closest = dist;
+      closestit = isim;
+      if(majorProcess==-1) 
+       	{majorProcess=isim->processType();majorPid=abs(isim->particleType()); majorTrack=isim->trackId();}
+    } else if (dist<closest2) {      
+      if(dist<Matched) {closest2 = dist;closest2it = isim;} // 2nd best
+    }
+    
+  }
+
+  
+  if(verbose_) cout<<" closest "<<closest<<" "<<detId.rawId()<<endl;
+  hcount7->Fill(float(count7));
+  hcount8->Fill(float(count8));
+
+  hParticleType3->Fill(float(majorPid));
+  hTrackId3->Fill(float(majorTrack));
+  hProcessType3->Fill(float(majorProcess));
+
+  int status=0;  // only one simhit
+  if(closest2<Matched) {
+    int proc1 = closestit->processType();
+    int proc2 = closest2it->processType();
+    
+    if(proc1==0 && proc2==0) status=1;  // both come from primary gen particles 
+    else if( (proc1==0 && proc2==2) || (proc1==2 && proc2==0) ) status=2; // one is a delta ray
+    else if( (proc1==0 && proc2>0)  || (proc1>0 && proc2==0)  ) status=3;  // one is something else 
+    else if( (proc1>0 && proc2>0) ) {status=4;}  // both are secondaries 
+    else status=5;
+  }
+  
+  if (detId.subdetId() == PixelSubdetector::PixelBarrel)
+    fillBarrel(hit, *closestit, detId, theGeomDet,tTopo,pt,eta,phi,status);
+  else if (detId.subdetId() == PixelSubdetector::PixelEndcap)
+    fillForward(hit, *closestit, detId, theGeomDet,tTopo,pt,eta,phi,status);
+  
+  return closest;
+}
 
 #else
 
-float StudyRecHitResolution::matchToSims(const TrackerHitAssociator& associate, const TrackingRecHit* hit, 
+float StudyRecHitMatching::matchToSims(const TrackerHitAssociator& associate, const TrackingRecHit* hit, 
 					   DetId detId, const PixelGeomDetUnit* theGeomDet, 
 					   const TrackerTopology *tTopo,double pt, double eta, double phi) {
-
-#endif
-
 
   std::vector<PSimHit> matched = associate.associateHit(*hit); // get the matched simhits
   
   if(verbose_) 
-    cout<<" rechit "<<hit->localPosition().x()<<" "<<matched.size()<<endl;
+    cout<<" rechit det= "<<detId.rawId() <<" matched size "<<matched.size()<<endl;
   float closest = 9999.;
   
   //if(matched.size()>1) cout<<" matched size greater than 1 "<<matched.size()<<endl;
@@ -761,7 +1069,9 @@ float StudyRecHitResolution::matchToSims(const TrackerHitAssociator& associate, 
       
       float dist = sqrt(x_res*x_res + y_res*y_res); // in cm
       count5++;
-      if(dist<0.01) {
+      hdist5->Fill(dist);
+
+      if(dist<Matched) {
 	count6++;
 	countClose++;
 	// This is just to check if among several matching simhits there is one from the org.gen.
@@ -780,8 +1090,8 @@ float StudyRecHitResolution::matchToSims(const TrackerHitAssociator& associate, 
 	if(majorProcess==-1) 
 	  {majorProcess=(*m).processType();majorPid=abs((*m).particleType()); majorTrack=(*m).trackId();}
 	if(verbose_) 
-	  std::cout<<" simhit "
-		   <<(*m).pabs()<<" "
+	  std::cout<<" simhit pos= "<<sim_xpos<<" "<<sim_ypos
+		   <<" p "<<(*m).pabs()<<" e "<<(*m).energyLoss()*1000000/3.7<<" "
 		   <<(*m).thetaAtEntry()<<" "
 		   <<(*m).phiAtEntry()<<" "
 		   <<(*m).particleType()<<" "<<(*m).processType()<<" "
@@ -793,29 +1103,30 @@ float StudyRecHitResolution::matchToSims(const TrackerHitAssociator& associate, 
       }
     } // end sim hit loop
     
-    if(verbose_) cout<<" closest "<<closest<<" "<<detId.subdetId()<<endl;
+    if(verbose_) cout<<" closest "<<closest<<" "<<detId.rawId()<<endl;
     hcount7->Fill(float(countClose));
     hParticleType3->Fill(float(majorPid));
     hTrackId3->Fill(float(majorTrack));
     hProcessType3->Fill(float(majorProcess));
 
     if (detId.subdetId() == PixelSubdetector::PixelBarrel)
-      fillBarrel(hit, *closestit, detId, theGeomDet,tTopo,pt,eta,phi);
+      fillBarrel(hit, *closestit, detId, theGeomDet,tTopo,pt,eta,phi,0);
     else if (detId.subdetId() == PixelSubdetector::PixelEndcap)
-      fillForward(hit, *closestit, detId, theGeomDet,tTopo,pt,eta,phi);
+      fillForward(hit, *closestit, detId, theGeomDet,tTopo,pt,eta,phi,0);
   } // end matched emtpy
 
   return closest;
 }
+#endif
 
 
-void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimHit& simHit, 
+void StudyRecHitMatching::fillBarrel(const TrackingRecHit* recHit, const PSimHit& simHit, 
 				     DetId detId, const PixelGeomDetUnit* theGeomDet,
-				       const TrackerTopology *tTopo, double ptT, double etaT, double phiT) {
+				     const TrackerTopology *tTopo, double ptT, double etaT, double phiT,int simStatus) {
   const float cmtomicron = 10000.0; 
   //const bool muOnly = true;
   const float PI = 3.1416;
-  const int NumLayers = 4;
+  //const int NumLayers = 4;
   bool PRINT = verbose_;
 
   float phiH = simHit.phiAtEntry();
@@ -833,7 +1144,7 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
 
   //float thetaLocal = simHit.localDirection().theta(); // same as theta
 
-  if( (phi) != abs(phiH)) cout<<" phi not same "<<phi<<" "<<phiH<<endl; 
+  //if( (phi) != abs(phiH)) cout<<" phi not same "<<phi<<" "<<phiH<<endl; 
 
   //float pt  = simHit.momentumAtEntry().perp(); // crap, not real pt
   float p  = simHit.pabs();
@@ -868,17 +1179,17 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
   else        phi = (PI/2.) - phi;
 
   //std::cout<<"Flipped (Surface): "<<(tmp2<tmp1)<<" Flipped (Inner): "<<inner<<std::endl;
-  if(PRINT) cout<<" layer "<<layer<<" eta "<<eta<<" phi "<<phi<<endl;
+  if(PRINT) cout<<" layer "<<layer<<" eta "<<eta<<" phi "<<phi<<" "<<p<<endl;
 
 
   // skip, for tests only
   //if( abs(eta)<0.1 || abs(eta)>1.0) return; // limit 
   //if( abs(phi)<1.3 || abs(phi)>1.9) return;  // limit to l2 acceptance
 
-  if(PRINT) std::cout<<" closest simhit "
+  if(PRINT) std::cout<<" closest simhit p= "
 		     <<p<<" pid "
-		     <<pid<<" "
-		     <<phi<<" "<<theta<<" "<<eta<<", track/process "
+		     <<pid<<" eloss "<<simHit.energyLoss()*1000000/3.7
+		     <<", track/process "
 		     <<simHit.trackId()<<"/"<<simHit.processType()
 		     <<" lay "<<layer<<" mod "<<module
 		     <<" track pt/eta/phi "<<ptT<<"/"<<etaT<<"/"<<phiT
@@ -941,7 +1252,7 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
   
   float distance = sqrt(res_x*res_x + res_y*res_y)/cmtomicron; // in cm
   hdist3->Fill(distance);
-  if(distance<0.01) hdist4->Fill(distance);  // matched within 100um
+  if(distance<Matched) hdist4->Fill(distance);  // matched within 100um
 
   if(PRINT)  
     cout<<" det "<<detId.rawId()<<" "<<lp_x<<" "<<lp_y<<" "<<lerr_x<<" "<<lerr_y<<" "
@@ -958,20 +1269,32 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
 
   if(layer==1) {
 
+    float r1=0, r2=0;
     hz1->Fill(gp_z);
-    if( (pid==2212)||(pid==321)||(pid==211)||(pid==13)) hz1_1->Fill(gp_z);
-    else if( (pid==11) ) hz1_2->Fill(gp_z);
-    else if( (pid==22) ) hz1_3->Fill(gp_z);
-    else if( (pid==2112) ) hz1_4->Fill(gp_z);
-    else hz1_5->Fill(gp_z);
+    if( (pid==2212)||(pid==321)||(pid==211)||(pid==13)) {hz1_1->Fill(gp_z);r1=1.;}
+    else if( (pid==11) ) {hz1_2->Fill(gp_z);r1=2.;}
+    else if( (pid==22) ) {hz1_3->Fill(gp_z);r1=3.;}
+    else if( (pid==2112)){hz1_4->Fill(gp_z);r1=4.;}
+    else {hz1_5->Fill(gp_z); r1=5.;}
     
-    if( (process==0) ) hz1_11->Fill(gp_z);
-    else if( (process==201) ) hz1_12->Fill(gp_z);
-    else if( (process==2) ) hz1_13->Fill(gp_z);
-    else if( (process==121) ) hz1_14->Fill(gp_z);
-    else if( (process==201) ) hz1_15->Fill(gp_z);
-    else if( (process==4)||(process==3)||(process==12)||(process==13)||(process==14)) hz1_16->Fill(gp_z);
-    else  hz1_17->Fill(gp_z);
+    if( (process==0) ) {hz1_11->Fill(gp_z); r2=1;}
+    else if( (process==201) ) {hz1_12->Fill(gp_z); r2=2.;}
+    else if( (process==2) )   {hz1_13->Fill(gp_z); r2=3.;}
+    else if( (process==121) ) {hz1_14->Fill(gp_z); r2=4.;}
+    else if( (process==151) || (process==111)) {hz1_15->Fill(gp_z); r2=5.;}
+    else if( (process==4)||(process==3)||(process==12)||(process==13)||(process==14)) 
+      {hz1_16->Fill(gp_z); r2=6.;}
+    else  {hz1_17->Fill(gp_z); r2=7.;}
+
+    htest6->Fill(r1,r2);
+
+    if     ( (simStatus==0) ) hz1_21->Fill(gp_z);
+    else if( (simStatus==1) ) hz1_22->Fill(gp_z);
+    else if( (simStatus==2) ) hz1_23->Fill(gp_z);
+    else if( (simStatus==3) ) hz1_24->Fill(gp_z);
+    else if( (simStatus==4) ) hz1_25->Fill(gp_z);
+    else                      hz1_26->Fill(gp_z);
+
   }
 
   if(!quick_) {
@@ -1043,9 +1366,21 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
   // as a function of layer
   recHitXResLayers[layer-1]->Fill(res_x);  //QUICK
   recHitYResLayers[layer-1]->Fill(res_y);  //QUICK
-  //
 
-  //get cluster
+  if(layer==1) {
+
+    if     ( (simStatus==0) ) recHitXResB1->Fill(res_x);
+    else if( (simStatus==1) ) recHitXResB2->Fill(res_x);
+    else if( (simStatus==2) ) recHitXResB3->Fill(res_x);
+    else if( (simStatus==3) ) recHitXResB4->Fill(res_x);
+    else if( (simStatus==4) ) recHitXResB5->Fill(res_x);
+    else                      recHitXResB6->Fill(res_x);
+
+  }
+
+  ///
+
+  //get cluste
   SiPixelRecHit::ClusterRef const& clust = ((SiPixelRecHit*)recHit)->cluster();
   int sizeX = (*clust).sizeX();
 
@@ -1178,7 +1513,7 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
 
 }
 
-int StudyRecHitResolution::PhaseIBladeOfflineToOnline(const int& blade)
+int StudyRecHitMatching::PhaseIBladeOfflineToOnline(const int& blade)
 {
   int blade_online = -999;
   if(1  <= blade && blade < 6)  blade_online = 6  - blade; // 5 on 1st quarter
@@ -1191,9 +1526,9 @@ int StudyRecHitResolution::PhaseIBladeOfflineToOnline(const int& blade)
 }
 
 // ------------------------------------------------------------------------------
-void StudyRecHitResolution::fillForward(const TrackingRecHit* recHit, const PSimHit & simHit, 
+void StudyRecHitMatching::fillForward(const TrackingRecHit* recHit, const PSimHit & simHit, 
 				      DetId detId,const PixelGeomDetUnit * theGeomDet,
-				      const TrackerTopology *tTopo, double ptT, double etaT, double phiT) {
+				      const TrackerTopology *tTopo, double ptT, double etaT, double phiT, int simStatus) {
   const float cmtomicron = 10000.0;
 
   //int rows = theGeomDet->specificTopology().nrows();
@@ -1466,4 +1801,4 @@ void StudyRecHitResolution::fillForward(const TrackingRecHit* recHit, const PSim
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(StudyRecHitResolution);
+DEFINE_FWK_MODULE(StudyRecHitMatching);

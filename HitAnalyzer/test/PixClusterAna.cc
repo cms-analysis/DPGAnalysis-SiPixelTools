@@ -4064,9 +4064,10 @@ void PixClusterAna::analyze(const edm::Event& e,
     hdigis->Fill(float(numberOfPixels));  // all pix 
     hdigis2->Fill(float(numberOfPixels));  // same zoomed 
 
-    int pixb = numOfPixPerLay1+numOfPixPerLay2+numOfPixPerLay3;
+    int pixb = numOfPixPerLay1+numOfPixPerLay2+numOfPixPerLay3+numOfPixPerLay4;
     hdigisB->Fill(float(pixb));  // pix in bpix
-    int pixf = numOfPixPerDisk1 + numOfPixPerDisk2 + numOfPixPerDisk3 + numOfPixPerDisk4; 
+    int pixf = numOfPixPerDisk1 + numOfPixPerDisk2 + numOfPixPerDisk3 + numOfPixPerDisk4+ 
+      numOfPixPerDisk5+ numOfPixPerDisk6; 
     hdigisF->Fill(float(pixf));   // pix in fpix
     
     hclus->Fill(float(numberOfClusters)); // clusters fpix+bpix

@@ -20,10 +20,10 @@ process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '') # def for mu
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_design', '') # crashes 
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_realistic', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_design', '') # 
+##process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_realistic', '')
 
 #process.GlobalTag = GlobalTag(process.GlobalTag, '104X_mc2017_realistic_Candv1', '')
 
@@ -33,18 +33,17 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
 #process.GlobalTag.globaltag = '103X_upgrade2018_realistic_v8' # mc 2018
 #
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(-1)
 )
 
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
+#      '/store/user/kotlinski/MC/mu_pt100/raw/raw1.root'
+#      '/store/user/kotlinski/MC/mu_pt100/raw/raw1_thr1k.root'
+#      '/store/user/kotlinski/MC/mu_pt100/raw/raw1_thr1k_la0p1.root'
 #  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw1_thr1k.root',
-  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw1.root',
-#  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw2.root',
-#  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw3.root',
-#  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw4.root',
-#  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw5.root',
+#  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw1.root',
 
-#"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_upgrade2018_design_v4-v1/20000/193FB1CE-333D-E540-995E-1BA38BA1CE3C.root"
+"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_upgrade2018_design_v4-v1/20000/193FB1CE-333D-E540-995E-1BA38BA1CE3C.root"
 
 #"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_upgrade2018_realistic_v8-v1/20000/0D388168-67C8-A544-8A75-8A96D40C396B.root"
 
@@ -224,10 +223,10 @@ if useLocalGenErr :
 process.load("DPGAnalysis-SiPixelTools.PixelHitAssociator.StudyRecHitResolution_cff")
 
 # not on track 
-#process.pixRecHitsValid.outputFile="pixelrechitshisto.root"
-process.pixRecHitsValid.verbose=False 
-process.pixRecHitsValid.muOnly=False 
-process.pixRecHitsValid.ptCut=1. # 10.
+process.pixRecHitsValid.outputFile="pixelrechitshisto.root"
+process.pixRecHitsValid.verbose=False
+process.pixRecHitsValid.muOnly=False
+process.pixRecHitsValid.ptCut=1. # 
 #process.pixRecHitsValid.src="siPixelRecHitsPreSplitting"
 process.pixRecHitsValid.src="siPixelRecHits"
 #process.pixRecHitsValid.associatePixel = True
@@ -236,11 +235,12 @@ process.pixRecHitsValid.src="siPixelRecHits"
 
 # on track 
 process.pixRecHitsValid.useTracks = True
+#process.pixRecHitsValid.useTracks = False
 process.pixRecHitsValid.tracks = 'TrackRefitter'
 
 process.TrackRefitter.src = "generalTracks"
-process.TrackRefitter.TTRHBuilder = 'WithAngleAndTemplate'
-#process.TrackRefitter.TTRHBuilder = 'WithTrackAngle'
+process.TrackRefitter.TTRHBuilder = 'WithAngleAndTemplate' # templates 
+#process.TrackRefitter.TTRHBuilder = 'WithTrackAngle'  # genric 
 
 process.d = cms.EDAnalyzer("PixClusterAna",
     Verbosity = cms.untracked.bool(False),
@@ -305,19 +305,20 @@ process.TFileService = cms.Service("TFileService",
     fileName = cms.string('rawtorec.root')
 )
 
-
-#This process is to run the digitizer:
-#process.p1 = cms.Path(process.simSiPixelDigis)
-#process.p1 = cms.Path(process.simSiPixelDigis*process.pixeltrackerlocalreco)
-#process.p1 = cms.Path(process.simSiPixelDigis*process.pixeltrackerlocalreco*process.pixRecHitsValid)
-
 # does not work with my digis
 #process.myAnalyzer_step = cms.Path(process.pixRecHitsValid)
 
 # on track 
-####process.p1 = cms.Path(process.RawToDigi*process.reconstruction*process.MeasurementTrackerEvent*process.TrackRefitter*process.pixRecHitsValid)
+# old
+#process.p1 = cms.Path(process.RawToDigi*process.reconstruction*process.MeasurementTrackerEvent*process.TrackRefitter*process.pixRecHitsValid)
+# this works - use it
+#process.p1 = cms.Path(process.RawToDigi*process.reconstruction*process.TrackRefitter*process.pixRecHitsValid)
+
+# with dumps
 process.p1 = cms.Path(process.RawToDigi*process.a*process.reconstruction*process.TrackRefitter*process.d*process.c*process.pixRecHitsValid)
-#process.p1 = cms.Path(process.RawToDigi*process.reconstruction*process.TrackRefitter*process.pixRecHitsValid*process.c)
+# just dumps only 
+#process.p1 = cms.Path(process.RawToDigi*process.a*process.reconstruction*process.TrackRefitter*process.d*process.c)
+
 # all rechits 
 #process.p1 = cms.Path(process.RawToDigi*process.reconstruction*process.pixRecHitsValid)  # works from raw with presplitted & normal rechits
 

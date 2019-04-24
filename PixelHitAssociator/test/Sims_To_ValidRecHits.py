@@ -32,7 +32,7 @@ process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(1)
 )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
@@ -43,21 +43,21 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
 
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_design', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_realistic', '')
 
 
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
-#  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits1.root',
+ '/store/user/kotlinski/MC/mu_pt100/simhits/simHits1.root'
 
 # mb
 #"/store/relval/CMSSW_10_4_0/RelValMinBias_13/GEN-SIM/103X_mc2017_realistic_v2-v1/20000/F0FF4DFA-613B-4749-BBC3-FB29AD691FA5.root"
 #"/store/relval/CMSSW_10_4_0/RelValMinBias_13/GEN-SIM/103X_upgrade2018_design_v4-v1/20000/C9CE0381-F732-4A4F-A263-D445DF99148C.root"
 #"/store/relval/CMSSW_10_4_0/RelValMinBias_13/GEN-SIM/103X_upgrade2018_realistic_v8-v1/20000/E0E79FD8-5A76-6145-9816-B7BBC5E79AB1.root" 
 
-"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_upgrade2018_design_v4-v1/20000/193FB1CE-333D-E540-995E-1BA38BA1CE3C.root"
+#"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_upgrade2018_design_v4-v1/20000/193FB1CE-333D-E540-995E-1BA38BA1CE3C.root"
 
 #"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_upgrade2018_realistic_v8-v1/20000/0D388168-67C8-A544-8A75-8A96D40C396B.root"
 
@@ -157,7 +157,7 @@ process.g4SimHits.Generator.HepMCProductLabel = 'source'
 process.load("DPGAnalysis-SiPixelTools.PixelHitAssociator.StudyRecHitResolution_cff")
 
 # not on track 
-#process.pixRecHitsValid.outputFile="pixelrechits_fromsim_crab.root"
+process.pixRecHitsValid.outputFile="pixelrechits.root"
 process.pixRecHitsValid.verbose=False
 process.pixRecHitsValid.muOnly=False
 process.pixRecHitsValid.ptCut=1.
@@ -168,12 +168,13 @@ process.pixRecHitsValid.src="siPixelRecHitsPreSplitting"
 #process.pixRecHitsValid.associateRecoTracks = False
 
 # on track 
-process.pixRecHitsValid.useTracks = True
+#process.pixRecHitsValid.useTracks = True
+process.pixRecHitsValid.useTracks = False
 process.pixRecHitsValid.tracks = 'TrackRefitter'
 
 process.TrackRefitter.src = "generalTracks"
-process.TrackRefitter.TTRHBuilder = 'WithAngleAndTemplate'
-#process.TrackRefitter.TTRHBuilder = 'WithTrackAngle'
+#process.TrackRefitter.TTRHBuilder = 'WithAngleAndTemplate'
+process.TrackRefitter.TTRHBuilder = 'WithTrackAngle'
 
 
 process.d = cms.EDAnalyzer("PixClusterAna",
@@ -235,6 +236,18 @@ process.b =  cms.EDAnalyzer("PixSimHitsTest",
         Verbosity = cms.untracked.bool(False),
         phase1 = cms.untracked.bool(True),
 )
+# use the test from SiTracker
+process.bf =  cms.EDAnalyzer("PixSimHitsTest",
+                             src = cms.string("g4SimHits"),
+                             #mode = cms.untracked.string("bpix"),
+                             #list = cms.string("TrackerHitsPixelBarrelLowTof"),
+                             #list = cms.string("TrackerHitsPixelBarrelHighTof"),
+                             mode = cms.untracked.string("fpix"),
+                             list = cms.string("TrackerHitsPixelEndcapLowTof"),
+                             #list = cms.string("TrackerHitsPixelEndcapHighTof"),
+                             Verbosity = cms.untracked.bool(False),
+                             phase1 = cms.untracked.bool(True),
+)
 
 
 process.r = cms.EDAnalyzer("SiPixelRawDump", 
@@ -268,7 +281,7 @@ process.TFileService = cms.Service("TFileService",
 
 # go through raw
 #process.p1 = cms.Path(process.pdigi_valid*process.SimL1Emulator*process.DigiToRaw*process.RawToDigi*process.reconstruction*process.TrackRefitter*process.pixRecHitsValid)
-process.p1 = cms.Path(process.b*process.pdigi_valid*process.a0*process.SimL1Emulator*process.DigiToRaw*process.RawToDigi*process.a*process.reconstruction*process.TrackRefitter*process.d*process.c*process.pixRecHitsValid)
+process.p1 = cms.Path(process.b*process.bf*process.pdigi_valid*process.a0*process.SimL1Emulator*process.DigiToRaw*process.RawToDigi*process.a*process.reconstruction*process.TrackRefitter*process.d*process.c*process.pixRecHitsValid)
 #process.p1 = cms.Path(process.pdigi_valid*process.a)
 
 # go directly - fails for muons 

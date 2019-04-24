@@ -1696,9 +1696,9 @@ void PixDigisTest::analyze(const edm::Event& iEvent,
 
     hdigis1->Fill(float(totalNumOfDigis));
     float tmp = float(totalNumOfDigis1) + float(totalNumOfDigis2) 
-      + float(totalNumOfDigis3); 
+      + float(totalNumOfDigis3+totalNumOfDigis4); 
     hdigis2->Fill(tmp);
-    tmp = float(totalNumOfDigisF1) + float(totalNumOfDigisF2);  
+    tmp = float(totalNumOfDigisF1) + float(totalNumOfDigisF2+totalNumOfDigisF3);  
     hdigis3->Fill(tmp);
 
     if(bunch) hdigis4->Fill(float(totalNumOfDigis));
