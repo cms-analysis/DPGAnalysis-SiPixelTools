@@ -45,7 +45,10 @@ set_eos_specifics(){
   # alias eos='/afs/cern.ch/project/eos/installation/cms/bin/eos.select' # This doesn't work (eos cmd missing in bash?)
   T2_LS='/afs/cern.ch/project/eos/installation/cms/bin/eos.select ls'
   T2_RM='/afs/cern.ch/project/eos/installation/cms/bin/eos.select rm -r /eos/cms' # Do not add space before next argument when using this cmd
-  T2_CP='cmsStage'
+  #T2_CP='cmsStage'
+  #T2_CP='/afs/cern.ch/project/eos/installation/cms/bin/eos.select cp'
+  T2_CP='xrdcp'
+  T2_PREFIX='root://eoscms.cern.ch//eos/cms/'
   T2_MKDIR='/afs/cern.ch/project/eos/installation/cms/bin/eos.select mkdir -p /eos/cms' # Do not add space before next argument when using this cmd
   T2_CHMOD='/afs/cern.ch/project/eos/installation/cms/bin/eos.select chmod 2777 /eos/cms' # Do not add space before next argument when using this cmd
   T2_FSYS='root://eoscms//eos/cms' # Can check what needs to be added with cmsPfn /store/...
@@ -91,6 +94,11 @@ is_on_eos(){
     if [ `echo $1 | grep -e "/store/" | wc -l` -eq 1 ];then echo 1
     else echo 0
     fi
+    # echo "bla"
+    # if [[ `echo $1` == store/* ]] || [[ `echo $1` == /store/* ]]; 
+    # then echo 1
+    # else echo 0
+    # fi
 }
 
 file_loc(){
@@ -109,9 +117,10 @@ file_loc(){
 }
 
 is_file_present(){
-  if [ `$T2_LS $1 2>&1|grep "No such"|wc -l` -eq 1 ];then echo 0;
-  else echo 1;
-  fi
+    if eval $T2_LS $1 >/dev/null 2>&1; then echo 1;else echo 0;fi
+  # if [ `$T2_LS $1 2>&1|grep "No such"|wc -l` -eq 1 ];then echo 0;
+  # else echo 1;
+  # fi
 }
 
 working_on_lxplus(){

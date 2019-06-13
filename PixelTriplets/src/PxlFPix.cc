@@ -55,10 +55,11 @@
 // To convert detId to subdet/layer number:
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
-#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TECDetId.h"
-#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/DetId/interface/DetId.h"
+//#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+//#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+//#include "DataFormats/SiStripDetId/interface/TECDetId.h"
+//#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
 #include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
 #include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
@@ -68,7 +69,7 @@
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 
 #include "FWCore/Framework/interface/ESHandle.h"
-#include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
+#include "Geometry/CommonDetUnit/interface/GlobalTrackingGeometry.h" //GeomDetUnit.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "Geometry/CommonTopologies/interface/Topology.h"
@@ -619,7 +620,7 @@ void PxlFPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
       cout << ", dxyv " << iTrack->dxy(vtxP)*1E4 << " um";
       cout << ", dzv "  << iTrack->dz(vtxP)*1E1 << " mm";
       cout << setprecision(4);
-      cout << ", hits " << hp.numberOfHits(HitPattern::TRACK_HITS); 
+      //cout << ", hits " << hp.numberOfHits(HitPattern::TRACK_HITS); 
       cout << ", valid "<< hp.numberOfValidTrackerHits();
       cout << endl;
     }

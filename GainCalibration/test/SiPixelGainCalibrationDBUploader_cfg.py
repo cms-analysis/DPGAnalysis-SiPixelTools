@@ -1,10 +1,18 @@
 import FWCore.ParameterSet.Config as cms
 
+phase=1
+
 process = cms.Process("PixelGainDB")
-process.load("Configuration.StandardSequences.GeometryDB_cff")
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
-from Configuration.AlCa.autoCond_condDBv2 import autoCond
-process.GlobalTag.globaltag = autoCond['run2_design']
+if phase==0:
+    process.load("Configuration.StandardSequences.GeometryDB_cff")
+    process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
+    from Configuration.AlCa.autoCond_condDBv2 import autoCond
+    process.GlobalTag.globaltag = autoCond['run2_design']
+elif phase==1:
+    process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
+    process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+    from Configuration.AlCa.GlobalTag import GlobalTag
+    process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1))
 process.TFileService = cms.Service("TFileService", fileName = cms.string('/tmp/rougny/histos.root') )

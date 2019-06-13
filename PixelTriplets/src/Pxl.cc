@@ -29,10 +29,10 @@
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 
 #include "FWCore/Framework/interface/Event.h"
-//#include <FWCore/Framework/interface/EventSetup.h>
+#include <FWCore/Framework/interface/EventSetup.h>
 #include "FWCore/Framework/interface/MakerMacros.h"
-
 #include <DataFormats/BeamSpot/interface/BeamSpot.h>
+
 
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
@@ -51,10 +51,11 @@
 // To convert detId to subdet/layer number:
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
-#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TECDetId.h"
-#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+//#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+//#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+//#include "DataFormats/SiStripDetId/interface/TECDetId.h"
+//#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/DetId/interface/DetId.h"
 #include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
 #include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
 
@@ -65,7 +66,7 @@
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 
 #include "FWCore/Framework/interface/ESHandle.h"
-#include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
+#include "Geometry/CommonDetUnit/interface/GlobalTrackingGeometry.h" //GeomDetUnit.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "Geometry/CommonTopologies/interface/Topology.h"
@@ -148,7 +149,8 @@ struct Histos{
   TH1D                                               *h086, *h087, *h088, *h089;
   TH1D     *h090, *h091, *h092, *h093, *h094, *h095, *h096, *h097, *h098, *h099;
 
-  TH1D     *h100, *h101, *h102, *h103, *h104, *h105,               *h108;
+  TH1D     *h100, *h101, *h102,  *h103, *h104, *h105,               *h108;
+  TH2D  *h102_vs_z;
   TH2D                                               *h106, *h107,        *h109;
   TH1D     *h110,        *h112, *h113, *h114, *h115, *h116,        *h118, *h119;
   TH2D            *h111,                                    *h117;
@@ -176,6 +178,7 @@ struct Histos{
   TH1D     *h290, *h291, *h292, *h293, *h294, *h295, *h296, *h297, *h298, *h299;
 
   TH1D     *h300, *h301, *h302, *h303, *h304, *h305,               *h308;
+  TH1D *hg308;
   TH2D                                               *h306, *h307,        *h309;
   TH1D     *h310, *h311, *h312, *h313, *h314, *h315, *h316, *h317, *h318;
   TProfile                                                                *h319;
@@ -186,6 +189,11 @@ struct Histos{
   TProfile                             *h334;
   TProfile                      *h343;
 
+  TH1D     *f300, *f301, *f302, *f303, *f304, *f305,               *f308;
+  TH2D                                               *f306, *f307,        *f309;
+
+
+
   TH1D                                 *h374, *h375, *h376, *h377,        *h379;
   TH1D     *h380, *h381, *h382, *h383, *h384, *h385, *h386, *h387, *h388, *h389;
   TH1D     *h390, *h391, *h392, *h393, *h394, *h395, *h396, *h397, *h398, *h399;
@@ -193,15 +201,50 @@ struct Histos{
   TH1D     *h400, *h401, *h402, *h403, *h404, *h405, *h406, *h407, *h408;
   TProfile                                                                *h409;
   TH1D     *h410, *h411;
+
+  TH1D     *h510_bmo2, *h410_bpi6, *hg410_bpo3, *g510_bmi3;
+  TH1D     *h510_bmo2_in, *h410_bpi6_in, *hg410_bpo3_in, *g510_bmi3_in;
+  TH1D     *h510_bmo2_out, *h410_bpi6_out, *hg410_bpo3_out, *g510_bmi3_out;
+  TH1D     *h511_bmo2, *h411_bpi6, *hg411_bpo3, *g511_bmi3;
+  TH1D     *h511_bmo2_in, *h411_bpi6_in, *hg411_bpo3_in, *g511_bmi3_in;
+  TH1D     *h511_bmo2_out, *h411_bpi6_out, *hg411_bpo3_out, *g511_bmi3_out;
+
   TProfile               *h412, *h412_out_zplus, *h412_out_zminus, *h412_in_zplus, *h412_in_zminus, *h413, *h414, *h415, *h416, *h417, *h418, *h419;
-  TH1D     *h420, *h420_out_zplus, *h420_out_zminus, *h420_in_zplus, *h420_in_zminus, *h421; 
-  TH1D     *h420_mod1, *h420_mod2, *h420_mod3, *h420_mod4, *h420_mod5, *h420_mod6, *h420_mod7, *h420_mod8; 
+  TH1D     *h420, *h420_out_zplus, *h420_out_zminus, *h420_in_zplus, *h420_in_zminus, *h421,*h421_out_zplus, *h421_out_zminus, *h421_in_zplus, *h421_in_zminus ;
+  TH1D     *h420_mod1, *h420_mod2, *h420_mod3, *h420_mod4, *h420_mod5, *h420_mod6, *h420_mod7, *h420_mod8;
   TH1D     *h421_mod1, *h421_mod2, *h421_mod3, *h421_mod4, *h421_mod5, *h421_mod6, *h421_mod7, *h421_mod8;
+
+  TH1D     *h520_bmo2, *h420_bpi6, *hg420_bpo3, *g520_bmi3;
+  TH1D     *h520_bmo2_in, *h420_bpi6_in, *hg420_bpo3_in, *g520_bmi3_in;
+  TH1D     *h520_bmo2_out, *h420_bpi6_out, *hg420_bpo3_out, *g520_bmi3_out;
+  TH1D     *h521_bmo2, *h421_bpi6, *hg421_bpo3, *g521_bmi3;
+  TH1D     *h521_bmo2_in, *h421_bpi6_in, *hg421_bpo3_in, *g521_bmi3_in;
+  TH1D     *h521_bmo2_out, *h421_bpi6_out, *hg421_bpo3_out, *g521_bmi3_out;
+
+  TH1D     *h520_new_mods, *h521_new_mods;
+  TH1D     *h510_new_mods, *h511_new_mods;
+
+  TH1D     *h520_303054876, *h521_303054876;
+  TH1D     *h520_303063068, *h521_303063068;
+  TH1D     *h520_303054864, *h521_303054864;
+  TH1D     *h520_303054856, *h521_303054856;
+  TH1D     *h520_303063056, *h521_303063056;
+  TH1D     *h520_303071248, *h521_303071248;
+
+  TH1D     *h510_303054876, *h511_303054876;
+  TH1D     *h510_303063068, *h511_303063068;
+  TH1D     *h510_303054864, *h511_303054864;
+  TH1D     *h510_303054856, *h511_303054856;
+  TH1D     *h510_303063056, *h511_303063056;
+  TH1D     *h510_303071248, *h511_303071248;
+
   TH1D     *h420_x_plus,*h420_x_minus, *h421_x_plus,*h421_x_minus;
   TH1D     *h420_out_xplus_zplus,*h420_out_xminus_zplus, *h420_out_xplus_zminus,*h420_out_xminus_zminus;
+  TH1D     *h420_out,*h420_in ;
   TH1D     *h420_in_xplus_zplus,*h420_in_xminus_zplus, *h420_in_xplus_zminus,*h420_in_xminus_zminus;
   TH1D     *h421_out_xplus_zplus,*h421_out_xminus_zplus, *h421_out_xplus_zminus,*h421_out_xminus_zminus;
   TH1D     *h421_in_xplus_zplus,*h421_in_xminus_zplus, *h421_in_xplus_zminus,*h421_in_xminus_zminus;
+  TH1D     *h421_out,*h421_in;
   TH1D     *h_cluster_prob;
   TH1D     *h420_cluster_prob_0_010,    *h420_cluster_prob_010_075,    *h420_cluster_prob_075_090, *h420_cluster_prob_090_101;
   TH1D     *h421_cluster_prob_0_010,    *h421_cluster_prob_010_075,    *h421_cluster_prob_075_090, *h421_cluster_prob_090_101;
@@ -227,12 +270,110 @@ struct Histos{
   TProfile                      *h483, *h484, *h485;
   TH1D     *h490, *h491, *h492, *h493, *h494, *h495, *h496, *h497, *h498, *h499;
 
+
+  ///fourth layer
+
+  TH1D     *hf400, *hf401, *hf402, *hf403, *hf404, *hf405, *hf406, *hf407, *hf408;
+  TProfile                                                                *hf409;
+  TH1D     *hf410, *hf411;
+  TProfile               *hf412, *hf412_out_zplus, *hf412_out_zminus, *hf412_in_zplus, *hf412_in_zminus, *hf413, *hf414, *hf415, *hf416, *hf417, *hf418, *hf419;
+  TH1D     *hf420, *hf420_out_zplus, *hf420_out_zminus, *hf420_in_zplus, *hf420_in_zminus, *hf421, *hf421_out_zplus, *hf421_out_zminus, *hf421_in_zplus, *hf421_in_zminus;
+  TH1D     *hf420_mod1, *hf420_mod2, *hf420_mod3, *hf420_mod4, *hf420_mod5, *hf420_mod6, *hf420_mod7, *hf420_mod8;
+  TH1D     *hf421_mod1, *hf421_mod2, *hf421_mod3, *hf421_mod4, *hf421_mod5, *hf421_mod6, *hf421_mod7, *hf421_mod8;
+  TH1D     *hf420_x_plus,*hf420_x_minus, *hf421_x_plus,*hf421_x_minus;
+  TH1D     *hf420_out_xplus_zplus,*hf420_out_xminus_zplus, *hf420_out_xplus_zminus,*hf420_out_xminus_zminus;
+  TH1D     *hf420_in_xplus_zplus,*hf420_in_xminus_zplus, *hf420_in_xplus_zminus,*hf420_in_xminus_zminus;
+  TH1D     *hf421_out_xplus_zplus,*hf421_out_xminus_zplus, *hf421_out_xplus_zminus,*hf421_out_xminus_zminus;
+  TH1D     *hf421_in_xplus_zplus,*hf421_in_xminus_zplus, *hf421_in_xplus_zminus,*hf421_in_xminus_zminus;
+
+  TH1D     *hf420_cluster_prob_0_010,    *hf420_cluster_prob_010_075,    *hf420_cluster_prob_075_090, *hf420_cluster_prob_090_101;
+  TH1D     *hf421_cluster_prob_0_010,    *hf421_cluster_prob_010_075,    *hf421_cluster_prob_075_090, *hf421_cluster_prob_090_101;
+  TH1D     *hf420_cluster_prob_0_010_etaM0p8,    *hf420_cluster_prob_010_075_etaM0p8,    *hf420_cluster_prob_075_090_etaM0p8, *hf420_cluster_prob_090_101_etaM0p8;
+  TH1D     *hf421_cluster_prob_0_010_etaM0p8,    *hf421_cluster_prob_010_075_etaM0p8,    *hf421_cluster_prob_075_090_etaM0p8, *hf421_cluster_prob_090_101_etaM0p8;
+  TH1D     *hf420_cluster_prob_0_010_etaL0p8,    *hf420_cluster_prob_010_075_etaL0p8,    *hf420_cluster_prob_075_090_etaL0p8, *hf420_cluster_prob_090_101_etaL0p8;
+  TH1D     *hf421_cluster_prob_0_010_etaL0p8,    *hf421_cluster_prob_010_075_etaL0p8,    *hf421_cluster_prob_075_090_etaL0p8, *hf421_cluster_prob_090_101_etaL0p8;
+
+  TH1D     *hf420_1, *hf420_2, *hf420_3;
+  TProfile               *hf422, *hf423, *hf424, *hf425, *hf426, *hf427, *hf428, *hf429, *hf429_eta;
+  TH1D     *hf430, *hf431, *hf432,                      *hf436,        *hf438, *hf439;
+  TProfile                      *hf433, *hf434, *hf435,        *hf437;
+  TH1D     *hf440, *hf441, *hf442, *hf443, *hf444, *hf445, *hf446, *hf447, *hf448, *hf449;
+
+  TH1D     *hf450, *hf451, *hf452, *hf453, *hf454, *hf455, *hf456, *hf457, *hf458;
+  TProfile                                                                *hf459;
+  TH1D     *hf460, *hf461;
+  TProfile               *hf462, *hf463, *hf464, *hf465, *hf466, *hf467, *hf468, *hf469;
+  TH1D     *hf470, *hf471;
+  TH1D     *hf470_1, *hf470_2, *hf470_3;
+  TProfile               *hf472, *hf473, *hf474, *hf475, *hf476, *hf477, *hf478, *hf479;
+  TH1D     *hf480, *hf481, *hf482,                      *hf486, *hf487, *hf488, *hf489;
+  TProfile                      *hf483, *hf484, *hf485;
+  TH1D     *hf490, *hf491, *hf492, *hf493, *hf494, *hf495, *hf496, *hf497, *hf498, *hf499;
+  TH1D     *hg400, *hg401, *hg402, *hg403, *hg404, *hg405, *hg406, *hg407, *hg408;
+  TProfile                                                                *hg409;
+  TH1D     *hg410, *hg411;
+  TProfile               *hg412, *hg412_out_zplus, *hg412_out_zminus, *hg412_in_zplus, *hg412_in_zminus, *hg413, *hg414, *hg415, *hg416, *hg417, *hg418, *hg419;
+  TH1D     *hg420, *hg420_out_zplus, *hg420_out_zminus, *hg420_in_zplus, *hg420_in_zminus, *hg421, *hg421_out_zplus, *hg421_out_zminus, *hg421_in_zplus, *hg421_in_zminus;
+  TH1D     *hg420_mod1, *hg420_mod2, *hg420_mod3, *hg420_mod4, *hg420_mod5, *hg420_mod6, *hg420_mod7, *hg420_mod8;
+  TH1D     *hg421_mod1, *hg421_mod2, *hg421_mod3, *hg421_mod4, *hg421_mod5, *hg421_mod6, *hg421_mod7, *hg421_mod8;
+  TH1D     *hg420_x_plus,*hg420_x_minus, *hg421_x_plus,*hg421_x_minus;
+  TH1D     *hg420_out_xplus_zplus,*hg420_out_xminus_zplus, *hg420_out_xplus_zminus,*hg420_out_xminus_zminus;
+  TH1D     *hg420_in_xplus_zplus,*hg420_in_xminus_zplus, *hg420_in_xplus_zminus,*hg420_in_xminus_zminus;
+  TH1D     *hg421_out_xplus_zplus,*hg421_out_xminus_zplus, *hg421_out_xplus_zminus,*hg421_out_xminus_zminus;
+  TH1D     *hg421_in_xplus_zplus,*hg421_in_xminus_zplus, *hg421_in_xplus_zminus,*hg421_in_xminus_zminus;
+
+  TH1D     *hg420_out,*hg420_in ;
+  TH1D     *hg421_out,*hg421_in ;
+
+
+  TH1D     *hg420_cluster_prob_0_010,    *hg420_cluster_prob_010_075,    *hg420_cluster_prob_075_090, *hg420_cluster_prob_090_101;
+  TH1D     *hg421_cluster_prob_0_010,    *hg421_cluster_prob_010_075,    *hg421_cluster_prob_075_090, *hg421_cluster_prob_090_101;
+  TH1D     *hg420_cluster_prob_0_010_etaM0p8,    *hg420_cluster_prob_010_075_etaM0p8,    *hg420_cluster_prob_075_090_etaM0p8, *hg420_cluster_prob_090_101_etaM0p8;
+  TH1D     *hg421_cluster_prob_0_010_etaM0p8,    *hg421_cluster_prob_010_075_etaM0p8,    *hg421_cluster_prob_075_090_etaM0p8, *hg421_cluster_prob_090_101_etaM0p8;
+  TH1D     *hg420_cluster_prob_0_010_etaL0p8,    *hg420_cluster_prob_010_075_etaL0p8,    *hg420_cluster_prob_075_090_etaL0p8, *hg420_cluster_prob_090_101_etaL0p8;
+  TH1D     *hg421_cluster_prob_0_010_etaL0p8,    *hg421_cluster_prob_010_075_etaL0p8,    *hg421_cluster_prob_075_090_etaL0p8, *hg421_cluster_prob_090_101_etaL0p8;
+
+  TH1D     *hg420_1, *hg420_2, *hg420_3;
+  TProfile               *hg422, *hg423, *hg424, *hg425, *hg426, *hg427, *hg428, *hg429, *hg429_eta;
+  TH1D     *hg430, *hg431, *hg432,                      *hg436,        *hg438, *hg439;
+  TProfile                      *hg433, *hg434, *hg435,        *hg437;
+  TH1D     *hg440, *hg441, *hg442, *hg443, *hg444, *hg445, *hg446, *hg447, *hg448, *hg449;
+
+  TH1D     *hg450, *hg451, *hg452, *hg453, *hg454, *hg455, *hg456, *hg457, *hg458;
+  TProfile                                                                *hg459;
+  TH1D     *hg460, *hg461;
+  TProfile               *hg462, *hg463, *hg464, *hg465, *hg466, *hg467, *hg468, *hg469;
+  TH1D     *hg470, *hg471;
+  TH1D     *hg470_1, *hg470_2, *hg470_3;
+  TProfile               *hg472, *hg473, *hg474, *hg475, *hg476, *hg477, *hg478, *hg479;
+  TH1D     *hg480, *hg481, *hg482,                      *hg486, *hg487, *hg488, *hg489;
+  TProfile                      *hg483, *hg484, *hg485;
+  TH1D     *hg490, *hg491, *hg492, *hg493, *hg494, *hg495, *hg496, *hg497, *hg498, *hg499;
+
+  /// end fourth layer
+
   TH1D     *h500, *h501, *h502, *h503, *h504, *h505, *h506, *h507, *h508;
   TProfile                                                                *h509;
   TH1D     *h510, *h511;
+
   TProfile               *h512, *h513, *h514, *h515, *h516, *h517, *h518, *h519;
+  TProfile *h514_out_bmo2, *h515_out_bmo2, *h524_out_bmo2, *h525_out_bmo2, *h514_in_bmo2, *h515_in_bmo2, *h524_in_bmo2, *h525_in_bmo2;
+
   TH1D     *h520, *h521;
+  TH1D *h520_out_zplus, *h520_out_zminus, *h520_in_zplus, *h520_in_zminus, *h521_out_zplus, *h521_out_zminus, *h521_in_zplus, *h521_in_zminus;
   TH1D     *h520_1, *h520_2, *h520_3, *h520_4, *h520_5;
+  TH1D *h520_out,*h520_in;
+  TH1D *h521_out,*h521_in;
+
+  TH1D     *h520_mod1, *h521_mod1, *h520_mod2, *h521_mod2, *h520_mod3, *h521_mod3, *h520_mod4, *h521_mod4, *h520_mod5, *h521_mod5,  *h520_mod6, *h521_mod6,  *h520_mod7, *h521_mod7,  *h520_mod8, *h521_mod8;
+  TH1D     *h520_centr_out, *h521_centr_out,*h520_centr_in, *h521_centr_in;
+  TH1D     *h520_fwd_out, *h521_fwd_out,*h520_fwd_in, *h521_fwd_in;
+
+
+  TProfile   *h524_in, *h525_in, *h524_out, *h525_out;
+  TProfile *h514_in, *h515_in,  *h514_out, *h515_out;
+
+
   TProfile               *h522, *h523, *h524, *h525, *h526, *h527, *h528, *h529;
   TH1D     *h530, *h531, *h532,                      *h536, *h537, *h538, *h539;
   TProfile                      *h533, *h534, *h535;
@@ -249,11 +390,29 @@ struct Histos{
   TH1D     *h590, *h591;
   TProfile               *h592, *h593, *h594, *h595, *h596, *h597;
 
+  // Triplet 3+4->2:
+  TH1D     *hf500, *hf501, *hf502, *hf503, *hf504, *hf505, *hf506, *hf507, *hf508;
+  TProfile                                                                *hf509;
+  TH1D     *hf510, *hf511;
+  TProfile               *hf512, *hf513, *hf514, *hf515, *hf516, *hf517, *hf518, *hf519;
+  TH1D     *hf520, *hf521;
+  TH1D *hf520_out_zplus, *hf520_out_zminus, *hf520_in_zplus, *hf520_in_zminus, *hf521_out_zplus, *hf521_out_zminus, *hf521_in_zplus, *hf521_in_zminus;
+  TH1D     *hf520_1, *hf520_2, *hf520_3, *hf520_4, *hf520_5;
+  TH1D *hf520_out,*hf520_in;
+  TH1D *hf521_out,*hf521_in;
+
+  TProfile               *hf522, *hf523, *hf524, *hf525, *hf526, *hf527, *hf528, *hf529;
+  TH1D     *hf530, *hf531, *hf532,                      *hf536, *hf537, *hf538, *hf539;
+  TProfile                      *hf533, *hf534, *hf535;
+  TH1D     *hf540, *hf541, *hf542, *hf543, *hf544, *hf545, *hf546, *hf547, *hf548, *hf549;
+
+
+
   TH1D     *h600, *h601, *h602, *h603, *h604, *h605, *h606, *h607, *h608;
   TProfile                                                                *h609;
   TH1D     *h610, *h611;
   TProfile               *h612, *h612_out_zplus, *h612_out_zminus, *h612_in_zplus, *h612_in_zminus, *h613, *h614, *h615, *h616, *h617, *h618, *h619;
-  TH1D     *h620, *h620_out_zplus, *h620_out_zminus, *h620_in_zplus, *h620_in_zminus, *h621;
+  TH1D     *h620, *h620_out_zplus, *h620_out_zminus, *h620_in_zplus, *h620_in_zminus, *h621,*h621_out_zplus, *h621_out_zminus, *h621_in_zplus, *h621_in_zminus;
   TProfile               *h622, *h623, *h624, *h625, *h626, *h627, *h628, *h629;
   TH1D     *h630, *h631, *h632,                      *h636, *h637, *h638, *h639;
   TProfile                      *h633, *h634, *h635;
@@ -328,6 +487,39 @@ struct Histos{
   TH1D     *i530, *i531, *i532,                      *i536, *i537, *i538, *i539;
   TProfile                      *i533, *i534, *i535;
   TH1D     *i540, *i541, *i542, *i543, *i544, *i545, *i546, *i547, *i548, *i549;
+
+  //fourth layer
+  TH1D     *g500, *g501, *g502, *g503, *g504, *g505, *g506, *g507;
+  TProfile                                                         *g508, *g509;
+  TH1D     *g510, *g511;
+  TProfile               *g512, *g512_out_zplus, *g512_out_zminus, *g512_in_zplus, *g512_in_zminus, *g513, *g514, *g515, *g516, *g517, *g518, *g519;
+  TH1D     *g520, *g520_out_zplus, *g520_out_zminus, *g520_in_zplus, *g520_in_zminus, *g521, *g521_out_zplus, *g521_out_zminus, *g521_in_zplus, *g521_in_zminus;
+
+  TH1D     *g520_out,*g520_in ;
+  TH1D     *g521_out,*g521_in ;
+
+
+  TH1D     *g520_1, *g520_2, *g520_3, *g520_4, *g520_5;
+  TProfile               *g522, *g523, *g524, *g525, *g526, *g527, *g528, *g529;
+  TH1D     *g530, *g531, *g532,                      *g536, *g537, *g538, *g539;
+  TProfile                      *g533, *g534, *g535;
+  TH1D     *g540, *g541, *g542, *g543, *g544, *g545, *g546, *g547, *g548, *g549;
+
+
+
+  //fourth layer
+
+  TH1D     *f500, *f501, *f502, *f503, *f504, *f505, *f506, *f507;
+  TProfile                                                         *f508, *f509;
+  TH1D     *f510, *f511;
+  TProfile               *f512, *f512_out_zplus, *f512_out_zminus, *f512_in_zplus, *f512_in_zminus, *f513, *f514, *f515, *f516, *f517, *f518, *f519;
+  TH1D     *f520, *f520_out_zplus, *f520_out_zminus, *f520_in_zplus, *f520_in_zminus, *f521;
+  TH1D     *f520_1, *f520_2, *f520_3, *f520_4, *f520_5;
+  TProfile               *f522, *f523, *f524, *f525, *f526, *f527, *f528, *f529;
+  TH1D     *f530, *f531, *f532,                      *f536, *f537, *f538, *f539;
+  TProfile                      *f533, *f534, *f535;
+  TH1D     *f540, *f541, *f542, *f543, *f544, *f545, *f546, *f547, *f548, *f549;
+
 
   // unbiased resids:
 
@@ -555,7 +747,7 @@ struct Histos{
 };
 
 class Pxl : public edm::EDAnalyzer, public Histos {
-  
+
 public:
   explicit Pxl(const edm::ParameterSet& // ,edm::ConsumesCollector&&
 	       );
@@ -572,12 +764,13 @@ private:
   std::string _ttrhBuilder;
   HLTConfigProvider HLTConfig;
   bool singleParticleMC;
-
+  int _OC_beginning;
+  int _OC_end;
   edm::EDGetTokenT<reco::BeamSpot>  t_offlineBeamSpot_;
   edm::EDGetTokenT<reco::VertexCollection> t_offlinePrimaryVertices_ ;
-  edm::EDGetTokenT <edm::TriggerResults> t_triggerSrc_ ;
-  edm::EDGetTokenT <reco::TrackCollection>  t_generalTracks_;
-  edm::EDGetTokenT< edm::View<reco::PFMET>> t_pfMet_;
+  edm::EDGetTokenT<edm::TriggerResults> t_triggerSrc_ ;
+  edm::EDGetTokenT<reco::TrackCollection>  t_generalTracks_;
+  edm::EDGetTokenT<edm::View<reco::PFMET>> t_pfMet_;
   // ----------member data:
   std::map<int, Histos> runmap;
 };
@@ -605,13 +798,14 @@ Pxl::Pxl(const edm::ParameterSet& iConfig// , edm::ConsumesCollector && ic
 
 
 
-  //Definition of parameters 
+  //Definition of parameters
   t_triggerSrc_ = consumes<edm::TriggerResults> (iConfig.getParameter<edm::InputTag>("triggerSource"));
   t_offlineBeamSpot_ =    consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
   t_offlinePrimaryVertices_ =   consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
   t_generalTracks_= consumes<reco::TrackCollection> (edm::InputTag("generalTracks"));//"generalTracks"));
   t_pfMet_= consumes< edm::View<reco::PFMET>>(edm::InputTag("pfMet"));
-
+  _OC_beginning=iConfig.getParameter<int>("orbit_beginning");
+  _OC_end=iConfig.getParameter<int>("orbit_end");
   // tok_caloHH_ = consumes<edm::PCaloHitContainer>(edm::InputTag("g4SimHits", "HcalHits"));
 }
 //
@@ -625,6 +819,7 @@ Pxl::~Pxl()
 
 void Histos::init(TFileDirectory* fs)
 {
+  //int N_bins = 5000;
   h000 = fs->make<TH1D>( "h000", "#beta star;#beta star [cm]", 100, 0, 500 );
   h001 = fs->make<TH1D>( "h001", "emittance;emittance_{x} [cm]", 100, 0, 1e-5 );
   h002 = fs->make<TH1D>( "h002", "beam width x;beam width x [#mum]", 100, 0, 200 );
@@ -735,6 +930,7 @@ void Histos::init(TFileDirectory* fs)
 
   h101 = fs->make<TH1D>( "h101", "hits on tracks PXB1 ladder;ladder;hits", 22, -0.5, 21.5 );
   h102 = fs->make<TH1D>( "h102", "hits on tracks PXB1 module;module;hits", 10, -0.5, 9.5 );
+  h102_vs_z= fs->make<TH2D>( "h102_vs_z", "hits on tracks PXB1 module;global z [cm];module",200,-20,20, 10, -0.5, 9.5 );
   h103 = fs->make<TH1D>( "h103", "hits on tracks PXB1 R;R [cm];hits", 150, 0, 15 );
   h104 = fs->make<TH1D>( "h104", "hits on tracks PXB1 #phi;#phi [deg];hits", 180, -180, 180 );
   h105 = fs->make<TH1D>( "h105", "hits on tracks PXB1 z;z [cm];hits", 600, -30, 30 );
@@ -901,7 +1097,20 @@ void Histos::init(TFileDirectory* fs)
   h306 = fs->make<TH2D>( "h306", "hits on tracks PXB3 #phi-z;#phi [deg];z [cm]", 180, -180, 180, 600, -30, 30 );
   h307 = fs->make<TH2D>( "h307", "hits local x-y PXB3;x [cm];y [cm]", 180, -0.9, 0.9, 440, -3.3, 3.3 );
 
-  h308 = fs->make<TH1D>( "h308", "PXB2 lever arm;extrapolation factor to PXB2;tracks", 100, 0, 1 );
+  h308 = fs->make<TH1D>( "h308", "PXB2 lever arm;extrapolation factor to PXB2;tracks", 1000, 0, 10 );
+  hg308 = fs->make<TH1D>( "hg308", "PXB3 lever arm;extrapolation factor to PXB3;tracks", 1000, 0, 10 );
+
+  // PXB4 hits:
+
+  f301 = fs->make<TH1D>( "f301", "hits on tracks PXB4 ladder;ladder;hits", 46, -0.5, 45.5 );
+  f302 = fs->make<TH1D>( "f302", "hits on tracks PXB4 module;module;hits", 10, -0.5, 9.5 );
+  f303 = fs->make<TH1D>( "f303", "hits on tracks PXB4 R;R [cm];hits", 200, 0, 20 );
+  f304 = fs->make<TH1D>( "f304", "hits on tracks PXB4 #phi;#phi [deg];hits", 180, -180, 180 );
+  f305 = fs->make<TH1D>( "f305", "hits on tracks PXB4 z;z [cm];hits", 600, -30, 30 );
+  f306 = fs->make<TH2D>( "f306", "hits on tracks PXB4 #phi-z;#phi [deg];z [cm]", 180, -180, 180, 600, -30, 30 );
+  f307 = fs->make<TH2D>( "f307", "hits local x-y PXB4;x [cm];y [cm]", 180, -0.9, 0.9, 440, -3.3, 3.3 );
+
+  f308 = fs->make<TH1D>( "f308", "PXB2 lever arm;extrapolation factor to PXB2;tracks", 100, 0, 1 );
 
   // pile up study:
 
@@ -957,6 +1166,7 @@ void Histos::init(TFileDirectory* fs)
   h398 = fs->make<TH1D>( "h398", "PXB2 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h399 = fs->make<TH1D>( "h399", "PXB2 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
 
+
   // triplets 3+1 -> 2:
 
   h401 = fs->make<TH1D>( "h401", "PXB2 triplets z2;z [cm];hits", 600, -30, 30 );
@@ -971,7 +1181,7 @@ void Histos::init(TFileDirectory* fs)
 
   h409 = fs->make<TProfile>( "h409", "PXB2 angle of incidence;PXB2 #phi [deg];PXB2 #phi_{inc} [deg]", 180, -180, 180, -90, 90 );
 
-  h410 = fs->make<TH1D>( "h410", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  h410 = fs->make<TH1D>( "h410", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 5000, -150, 150 );
   h411 = fs->make<TH1D>( "h411", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
 
   // mean resid profiles:
@@ -992,13 +1202,22 @@ void Histos::init(TFileDirectory* fs)
   h418 = fs->make<TProfile>( "h418", "PXB2 #Deltax vs p_{t} +;log(p_{t} [GeV]);PXB2 <#Deltax> [#mum]", 20, 0, 2, -99, 99 );
   h419 = fs->make<TProfile>( "h419", "PXB2 #Deltax vs p_{t} -;log(p_{t} [GeV]);PXB2 <#Deltax> [#mum]", 20, 0, 2, -99, 99 );
 
-  h420 = fs->make<TH1D>( "h420", "PXB2 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  h420 = fs->make<TH1D>( "h420", "PXB2 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits", 5000, -150, 150 );
   h420_out_zplus = fs->make<TH1D>( "h420_out_zplus", "PXB2 residuals #Deltax, p_{t} > 12, outward-facing modules, z+;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h420_out_zminus = fs->make<TH1D>( "h420_out_zminus", "PXB2 residuals #Deltax, p_{t} > 12, outward-facing modules, z-;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h420_in_zplus = fs->make<TH1D>( "h420_in_zplus", "PXB2 residuals #Deltax, p_{t} > 12, inward-facing modules, z+;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h420_in_zminus = fs->make<TH1D>( "h420_in_zminus", "PXB2 residuals #Deltax, p_{t} > 12, inward-facing modules, z-;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
-  h421 = fs->make<TH1D>( "h421", "PXB2 residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
- 
+  h421_out_zplus = fs->make<TH1D>( "h421_out_zplus", "PXB2 residuals #Deltaz, p_{t} > 12, outward-facing modules, z+;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+  h421_out_zminus = fs->make<TH1D>( "h421_out_zminus", "PXB2 residuals #Deltaz, p_{t} > 12, outward-facing modules, z-;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+  h421_in_zplus = fs->make<TH1D>( "h421_in_zplus", "PXB2 residuals #Deltaz, p_{t} > 12, inward-facing modules, z+;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+  h421_in_zminus = fs->make<TH1D>( "h421_in_zminus", "PXB2 residuals #Deltaz, p_{t} > 12, inward-facing modules, z-;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+  h421 = fs->make<TH1D>( "h421", "PXB2 residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 5000, -300, 300 );
+
+  h420_out = fs->make<TH1D>( "h420_out", "PXB2 residuals #Deltax, p_{t} > 12, outward-facing modules;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  h420_in = fs->make<TH1D>( "h420_in", "PXB2 residuals #Deltax, p_{t} > 12, in-facing modules;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  h421_out = fs->make<TH1D>( "h421_out", "PXB2 residuals #Deltaz, p_{t} > 12, outward-facing modules;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+  h421_in = fs->make<TH1D>( "h421_in", "PXB2 residuals #Deltaz, p_{t} > 12, inward-facing modules;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+
   h420_x_plus = fs->make<TH1D>( "h420_x_plus", "PXB2 residuals #Deltax, p_{t} > 12, local x>0 ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h420_x_minus = fs->make<TH1D>( "h420_x_minus", "PXB2 residuals #Deltax, p_{t} > 12, local x<0 ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h421_x_plus = fs->make<TH1D>( "h421_x_plus", "PXB2 residuals #Deltaz, p_{t} > 12, local x>0 ;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
@@ -1022,9 +1241,9 @@ void Histos::init(TFileDirectory* fs)
   h421_in_xplus_zminus = fs->make<TH1D>( "h421_in_xplus_zminus", "PXB2 residuals #Deltaz, p_{t} > 12, local x>0 z-minus in facing modules ;PXB2 #Deltaz [#mum];hits", 100,-300, 300);
   h421_in_xminus_zminus = fs->make<TH1D>( "h421_in_xminus_zminus", "PXB2 residuals #Deltaz, p_{t} > 12, local x<0 z-minus in facing modules ;PXB2 #Deltaz [#mum];hits", 100,-300, 300);
 
- 
+
   h_cluster_prob =fs->make<TH1D>( "h_cluster_prob", "cluster probability", 150,0, 1.5);
-  
+
   h420_cluster_prob_0_010= fs->make<TH1D>( "h420_cluster_prob_0_010", "PXB2 residuals #Deltax, p_{t} > 12, prob 0-0.010;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h420_cluster_prob_010_075= fs->make<TH1D>( "h420_cluster_prob_010_075", "PXB2 residuals #Deltax, p_{t} > 12, prob 0.10-0.75;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h420_cluster_prob_075_090= fs->make<TH1D>( "h420_cluster_prob_075_090", "PXB2 residuals #Deltax, p_{t} > 12, prob 0.75-0.90;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
@@ -1034,7 +1253,7 @@ void Histos::init(TFileDirectory* fs)
   h421_cluster_prob_010_075= fs->make<TH1D>( "h421_cluster_prob_010_075", "PXB2 residuals #Deltaz, p_{t} > 12, prob 0.10-0.75;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
   h421_cluster_prob_075_090= fs->make<TH1D>( "h421_cluster_prob_075_090", "PXB2 residuals #Deltaz, p_{t} > 12, prob 0.75-0.90;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
   h421_cluster_prob_090_101= fs->make<TH1D>( "h421_cluster_prob_090_101", "PXB2 residuals #Deltaz, p_{t} > 12, prob 0.90-1.01;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
- 
+
 
   h420_cluster_prob_0_010_etaL0p8= fs->make<TH1D>( "h420_cluster_prob_0_010_etaL0p8", "PXB2 residuals #Deltax, p_{t} > 12, prob 0-0.010 etaL0p8 ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h420_cluster_prob_010_075_etaL0p8= fs->make<TH1D>( "h420_cluster_prob_010_075_etaL0p8", "PXB2 residuals #Deltax, p_{t} > 12, prob 0.10-0.75 etaL0p8 ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
@@ -1055,11 +1274,11 @@ void Histos::init(TFileDirectory* fs)
   h421_cluster_prob_010_075_etaM0p8= fs->make<TH1D>( "h421_cluster_prob_010_075_etaM0p8", "PXB2 residuals #Deltaz, p_{t} > 12, prob 0.10-0.75 etaM0p8 ;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
   h421_cluster_prob_075_090_etaM0p8= fs->make<TH1D>( "h421_cluster_prob_075_090_etaM0p8", "PXB2 residuals #Deltaz, p_{t} > 12, prob 0.75-0.90 etaM0p8 ;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
   h421_cluster_prob_090_101_etaM0p8= fs->make<TH1D>( "h421_cluster_prob_090_101_etaM0p8", "PXB2 residuals #Deltaz, p_{t} > 12, prob 0.90-1.01 etaM0p8 ;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
- 
- 
-  h420_1 = fs->make<TH1D>( "h420_1", "PXB2 residuals #Deltax, p_{t} > 12, lever 1;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
-  h420_2 = fs->make<TH1D>( "h420_2", "PXB2 residuals #Deltax, p_{t} > 12, lever 2;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
-  h420_3 = fs->make<TH1D>( "h420_3", "PXB2 residuals #Deltax, p_{t} > 12, lever 3;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+
+
+  h420_1 = fs->make<TH1D>( "h420_1", "PXB2 residuals #Deltax, p_{t} > 12, lever 1;PXB2 #Deltax [#mum];hits", 5000, -150, 150 );
+  h420_2 = fs->make<TH1D>( "h420_2", "PXB2 residuals #Deltax, p_{t} > 12, lever 2;PXB2 #Deltax [#mum];hits", 5000, -150, 150 );
+  h420_3 = fs->make<TH1D>( "h420_3", "PXB2 residuals #Deltax, p_{t} > 12, lever 3;PXB2 #Deltax [#mum];hits", 5000, -150, 150 );
 
   h420_mod1 = fs->make<TH1D>( "h420_mod1", "PXB2 Module 1 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
   h420_mod2 = fs->make<TH1D>( "h420_mod2", "PXB2 Module 2 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
@@ -1069,7 +1288,7 @@ void Histos::init(TFileDirectory* fs)
   h420_mod6 = fs->make<TH1D>( "h420_mod6", "PXB2 Module 6 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
   h420_mod7 = fs->make<TH1D>( "h420_mod7", "PXB2 Module 7 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
   h420_mod8 = fs->make<TH1D>( "h420_mod8", "PXB2 Module 8 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
-  
+
   h421_mod1 = fs->make<TH1D>( "h421_mod1", "PXB2 Module 1  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
   h421_mod2 = fs->make<TH1D>( "h421_mod2", "PXB2 Module 2  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
   h421_mod3 = fs->make<TH1D>( "h421_mod3", "PXB2 Module 3  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
@@ -1080,6 +1299,56 @@ void Histos::init(TFileDirectory* fs)
   h421_mod8 = fs->make<TH1D>( "h421_mod8", "PXB2 Module 8  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
   // width profiles:
 
+  h510_bmo2      = fs->make<TH1D>("h510_bmo2",      "PXB1 BmO 2 residuals #Deltax , p_{t} > 4;  PXB1 #Deltax [#mum];hits", 5000, -150, 150);
+  h410_bpi6      = fs->make<TH1D>("h410_bpi6",      "PXB2 BpI 6 residuals #Deltax , p_{t} > 4;  PXB2 #Deltax [#mum];hits", 5000, -150, 150);
+  hg410_bpo3     = fs->make<TH1D>("hg410_bpo3",     "PXB3 BpO 3 residuals #Deltax , p_{t} > 4;  PXB3 #Deltax [#mum];hits", 5000, -150, 150);
+  g510_bmi3      = fs->make<TH1D>("g510_bmi3",      "PXB4 BmI 3 residuals #Deltax , p_{t} > 4;  PXB4 #Deltax [#mum];hits", 5000, -150, 150);
+  h510_bmo2_in   = fs->make<TH1D>("h510_bmo2_in",   "PXB1 BmO 2 residuals #Deltax , p_{t} > 4, inward-facing modules;  PXB1 #Deltax [#mum];hits", 5000, -150, 150);
+  h410_bpi6_in   = fs->make<TH1D>("h410_bpi6_in",   "PXB2 BpI 6 residuals #Deltax , p_{t} > 4, inward-facing modules;  PXB2 #Deltax [#mum];hits", 5000, -150, 150);
+  hg410_bpo3_in  = fs->make<TH1D>("hg410_bpo3_in",  "PXB3 BpO 3 residuals #Deltax , p_{t} > 4, inward-facing modules;  PXB3 #Deltax [#mum];hits", 5000, -150, 150);
+  g510_bmi3_in   = fs->make<TH1D>("g510_bmi3_in",   "PXB4 BmI 3 residuals #Deltax , p_{t} > 4, inward-facing modules;  PXB4 #Deltax [#mum];hits", 5000, -150, 150);
+  h510_bmo2_out  = fs->make<TH1D>("h510_bmo2_out",  "PXB1 BmO 2 residuals #Deltax , p_{t} > 4, outward-facing modules;  PXB1 #Deltax [#mum];hits", 5000, -150, 150);
+  h410_bpi6_out  = fs->make<TH1D>("h410_bpi6_out",  "PXB2 BpI 6 residuals #Deltax , p_{t} > 4, outward-facing modules;  PXB2 #Deltax [#mum];hits", 5000, -150, 150);
+  hg410_bpo3_out = fs->make<TH1D>("hg410_bpo3_out", "PXB3 BpO 3 residuals #Deltax , p_{t} > 4, outward-facing modules;  PXB3 #Deltax [#mum];hits", 5000, -150, 150);
+  g510_bmi3_out  = fs->make<TH1D>("g510_bmi3_out",  "PXB4 BmI 3 residuals #Deltax , p_{t} > 4, outward-facing modules;  PXB4 #Deltax [#mum];hits", 5000, -150, 150);
+  h511_bmo2      = fs->make<TH1D>("h511_bmo2",      "PXB1 BmO 2 residuals #Deltaz , p_{t} > 4;  PXB1 #Deltaz [#mum];hits", 5000, -300, 300);
+  h411_bpi6      = fs->make<TH1D>("h411_bpi6",      "PXB2 BpI 6 residuals #Deltaz , p_{t} > 4;  PXB2 #Deltaz [#mum];hits", 5000, -300, 300);
+  hg411_bpo3     = fs->make<TH1D>("hg411_bpo3",     "PXB3 BpO 3 residuals #Deltaz , p_{t} > 4;  PXB3 #Deltaz [#mum];hits", 5000, -300, 300);
+  g511_bmi3      = fs->make<TH1D>("g511_bmi3",      "PXB4 BmI 3 residuals #Deltaz , p_{t} > 4;  PXB4 #Deltaz [#mum];hits", 5000, -300, 300);
+  h511_bmo2_in   = fs->make<TH1D>("h511_bmo2_in",   "PXB1 BmO 2 residuals #Deltaz , p_{t} > 4, inward-facing modules;  PXB1 #Deltaz [#mum];hits", 5000, -300, 300);
+  h411_bpi6_in   = fs->make<TH1D>("h411_bpi6_in",   "PXB2 BpI 6 residuals #Deltaz , p_{t} > 4, inward-facing modules;  PXB2 #Deltaz [#mum];hits", 5000, -300, 300);
+  hg411_bpo3_in  = fs->make<TH1D>("hg411_bpo3_in",  "PXB3 BpO 3 residuals #Deltaz , p_{t} > 4, inward-facing modules;  PXB3 #Deltaz [#mum];hits", 5000, -300, 300);
+  g511_bmi3_in   = fs->make<TH1D>("g511_bmi3_in",   "PXB4 BmI 3 residuals #Deltaz , p_{t} > 4, inward-facing modules;  PXB4 #Deltaz [#mum];hits", 5000, -300, 300);
+  h511_bmo2_out  = fs->make<TH1D>("h511_bmo2_out",  "PXB1 BmO 2 residuals #Deltaz , p_{t} > 4, outward-facing modules;  PXB1 #Deltaz [#mum];hits", 5000, -300, 300);
+  h411_bpi6_out  = fs->make<TH1D>("h411_bpi6_out",  "PXB2 BpI 6 residuals #Deltaz , p_{t} > 4, outward-facing modules;  PXB2 #Deltaz [#mum];hits", 5000, -300, 300);
+  hg411_bpo3_out = fs->make<TH1D>("hg411_bpo3_out", "PXB3 BpO 3 residuals #Deltaz , p_{t} > 4, outward-facing modules;  PXB3 #Deltaz [#mum];hits", 5000, -300, 300);
+  g511_bmi3_out  = fs->make<TH1D>("g511_bmi3_out",  "PXB4 BmI 3 residuals #Deltaz , p_{t} > 4, outward-facing modules;  PXB4 #Deltaz [#mum];hits", 5000, -300, 300);
+
+  h520_bmo2      = fs->make<TH1D>("h520_bmo2",      "PXB1 BmO 2 residuals #Deltax , p_{t} > 12; PXB1 #Deltax [#mum];hits", 5000, -150, 150);
+  h420_bpi6      = fs->make<TH1D>("h420_bpi6",      "PXB2 BpI 6 residuals #Deltax , p_{t} > 12; PXB2 #Deltax [#mum];hits", 5000, -150, 150);
+  hg420_bpo3     = fs->make<TH1D>("hg420_bpo3",     "PXB3 BpO 3 residuals #Deltax , p_{t} > 12; PXB3 #Deltax [#mum];hits", 5000, -150, 150);
+  g520_bmi3      = fs->make<TH1D>("g520_bmi3",      "PXB4 BmI 3 residuals #Deltax , p_{t} > 12; PXB4 #Deltax [#mum];hits", 5000, -150, 150);
+  h520_bmo2_in   = fs->make<TH1D>("h520_bmo2_in",   "PXB1 BmO 2 residuals #Deltax , p_{t} > 12, inward-facing modules; PXB1 #Deltax [#mum];hits", 5000, -150, 150);
+  h420_bpi6_in   = fs->make<TH1D>("h420_bpi6_in",   "PXB2 BpI 6 residuals #Deltax , p_{t} > 12, inward-facing modules; PXB2 #Deltax [#mum];hits", 5000, -150, 150);
+  hg420_bpo3_in  = fs->make<TH1D>("hg420_bpo3_in",  "PXB3 BpO 3 residuals #Deltax , p_{t} > 12, inward-facing modules; PXB3 #Deltax [#mum];hits", 5000, -150, 150);
+  g520_bmi3_in   = fs->make<TH1D>("g520_bmi3_in",   "PXB4 BmI 3 residuals #Deltax , p_{t} > 12, inward-facing modules; PXB4 #Deltax [#mum];hits", 5000, -150, 150);
+  h520_bmo2_out  = fs->make<TH1D>("h520_bmo2_out",  "PXB1 BmO 2 residuals #Deltax , p_{t} > 12, outward-facing modules; PXB1 #Deltax [#mum];hits", 5000, -150, 150);
+  h420_bpi6_out  = fs->make<TH1D>("h420_bpi6_out",  "PXB2 BpI 6 residuals #Deltax , p_{t} > 12, outward-facing modules; PXB2 #Deltax [#mum];hits", 5000, -150, 150);
+  hg420_bpo3_out = fs->make<TH1D>("hg420_bpo3_out", "PXB3 BpO 3 residuals #Deltax , p_{t} > 12, outward-facing modules; PXB3 #Deltax [#mum];hits", 5000, -150, 150);
+  g520_bmi3_out  = fs->make<TH1D>("g520_bmi3_out",  "PXB4 BmI 3 residuals #Deltax , p_{t} > 12, outward-facing modules; PXB4 #Deltax [#mum];hits", 5000, -150, 150);
+  h521_bmo2      = fs->make<TH1D>("h521_bmo2",      "PXB1 BmO 2 residuals #Deltaz , p_{t} > 12; PXB1 #Deltaz [#mum];hits", 5000, -300, 300);
+  h421_bpi6      = fs->make<TH1D>("h421_bpi6",      "PXB2 BpI 6 residuals #Deltaz , p_{t} > 12; PXB2 #Deltaz [#mum];hits", 5000, -300, 300);
+  hg421_bpo3     = fs->make<TH1D>("hg421_bpo3",     "PXB3 BpO 3 residuals #Deltaz , p_{t} > 12; PXB3 #Deltaz [#mum];hits", 5000, -300, 300);
+  g521_bmi3      = fs->make<TH1D>("g521_bmi3",      "PXB4 BmI 3 residuals #Deltaz , p_{t} > 12; PXB4 #Deltaz [#mum];hits", 5000, -300, 300);
+  h521_bmo2_in   = fs->make<TH1D>("h521_bmo2_in",   "PXB1 BmO 2 residuals #Deltaz , p_{t} > 12, inward-facing modules; PXB1 #Deltaz [#mum];hits", 5000, -300, 300);
+  h421_bpi6_in   = fs->make<TH1D>("h421_bpi6_in",   "PXB2 BpI 6 residuals #Deltaz , p_{t} > 12, inward-facing modules; PXB2 #Deltaz [#mum];hits", 5000, -300, 300);
+  hg421_bpo3_in  = fs->make<TH1D>("hg421_bpo3_in",  "PXB3 BpO 3 residuals #Deltaz , p_{t} > 12, inward-facing modules; PXB3 #Deltaz [#mum];hits", 5000, -300, 300);
+  g521_bmi3_in   = fs->make<TH1D>("g521_bmi3_in",   "PXB4 BmI 3 residuals #Deltaz , p_{t} > 12, inward-facing modules; PXB4 #Deltaz [#mum];hits", 5000, -300, 300);
+  h521_bmo2_out  = fs->make<TH1D>("h521_bmo2_out",  "PXB1 BmO 2 residuals #Deltaz , p_{t} > 12, outward-facing modules; PXB1 #Deltaz [#mum];hits", 5000, -300, 300);
+  h421_bpi6_out  = fs->make<TH1D>("h421_bpi6_out",  "PXB2 BpI 6 residuals #Deltaz , p_{t} > 12, outward-facing modules; PXB2 #Deltaz [#mum];hits", 5000, -300, 300);
+  hg421_bpo3_out = fs->make<TH1D>("hg421_bpo3_out", "PXB3 BpO 3 residuals #Deltaz , p_{t} > 12, outward-facing modules; PXB3 #Deltaz [#mum];hits", 5000, -300, 300);
+  g521_bmi3_out  = fs->make<TH1D>("g521_bmi3_out",  "PXB4 BmI 3 residuals #Deltaz , p_{t} > 12, outward-facing modules; PXB4 #Deltaz [#mum];hits", 5000, -300, 300);
+
   h422 = fs->make<TProfile>( "h422", "PXB2 #sigma_{x} vs #phi;#phi_{2} [deg];PXB2 rms(#Deltax) [#mum]", 360, -180, 180, 0, 99 );
   h423 = fs->make<TProfile>( "h423", "PXB2 #sigma_{z} vs #phi;#phi_{2} [deg];PXB2 rms(#Deltaz) [#mum]", 360, -180, 180, 0, 199 );
 
@@ -1089,13 +1358,13 @@ void Histos::init(TFileDirectory* fs)
   h426 = fs->make<TProfile>( "h426", "PXB2 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB2 rms(#Deltax) [#mum]", 20, 0, 2, 0, 99 );
   h427 = fs->make<TProfile>( "h427", "PXB2 #sigma_{z} vs p_{t};log(p_{t} [GeV]);PXB2 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
 
-  h428 = fs->make<TProfile>( "h428", "PXB2 #sigma_{x} vs dip;dip [deg];PXB2 rms(#Deltax) [#mum]", 70, -70, 70, 0, 99 );
-  h429 = fs->make<TProfile>( "h429", "PXB2 #sigma_{z} vs dip;dip [deg];PXB2 rms(#Deltaz) [#mum]", 70, -70, 70, 0, 199 );
+  h428 = fs->make<TProfile>( "h428", "PXB2 #sigma_{x} vs dip;dip [deg];PXB2 rms(#Deltax) [#mum]", 80, -80, 80, 0, 99 );
+  h429 = fs->make<TProfile>( "h429", "PXB2 #sigma_{z} vs dip;dip [deg];PXB2 rms(#Deltaz) [#mum]", 80, -80, 80, 0, 199 );
   h429_eta = fs->make<TProfile>( "h429_eta", "PXB2 #sigma_{z} vs #eta;Track #eta;PXB2 rms(#Deltaz) [#mum]", 70, -1.5, 1.5, 0, 199 );
 
   h430 = fs->make<TH1D>( "h430", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h431 = fs->make<TH1D>( "h431", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
-				      
+
   h432 = fs->make<TH1D>( "h432", "PXB2 residuals #Deltaz, 18 < |dip| < 50;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
   h433 = fs->make<TProfile>( "h433", "PXB2 #sigma_{z} vs p_{t}, best dip;log(p_{t} [GeV]);PXB2 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
 
@@ -1111,7 +1380,7 @@ void Histos::init(TFileDirectory* fs)
 
   h440 = fs->make<TH1D>( "h440", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h441 = fs->make<TH1D>( "h441", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
-				      
+
   h442 = fs->make<TH1D>( "h442", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h443 = fs->make<TH1D>( "h443", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h444 = fs->make<TH1D>( "h444", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
@@ -1168,12 +1437,12 @@ void Histos::init(TFileDirectory* fs)
   h476 = fs->make<TProfile>( "h476", "PXB2 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB2 rms(#Deltax) [#mum]", 20, 0, 2, 0, 99 );
   h477 = fs->make<TProfile>( "h477", "PXB2 #sigma_{z} vs p_{t};log(p_{t} [GeV]);PXB2 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
 
-  h478 = fs->make<TProfile>( "h478", "PXB2 #sigma_{x} vs dip;dip [deg];PXB2 rms(#Deltax) [#mum]", 70, -70, 70, 0, 99 );
-  h479 = fs->make<TProfile>( "h479", "PXB2 #sigma_{z} vs dip;dip [deg];PXB2 rms(#Deltaz) [#mum]", 70, -70, 70, 0, 199 );
+  h478 = fs->make<TProfile>( "h478", "PXB2 #sigma_{x} vs dip;dip [deg];PXB2 rms(#Deltax) [#mum]", 80, -80, 80, 0, 99 );
+  h479 = fs->make<TProfile>( "h479", "PXB2 #sigma_{z} vs dip;dip [deg];PXB2 rms(#Deltaz) [#mum]", 80, -80, 80, 0, 199 );
 
   h480 = fs->make<TH1D>( "h480", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h481 = fs->make<TH1D>( "h481", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
-				      
+
   h482 = fs->make<TH1D>( "h482", "PXB2 residuals #Deltaz, 18 < |dip| < 50;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
   h483 = fs->make<TProfile>( "h483", "PXB2 #sigma_{z} vs p_{t}, best dip;log(p_{t} [GeV]);PXB2 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
 
@@ -1183,13 +1452,499 @@ void Histos::init(TFileDirectory* fs)
 
   h490 = fs->make<TH1D>( "h490", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h491 = fs->make<TH1D>( "h491", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
-				      
+
   h492 = fs->make<TH1D>( "h492", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h493 = fs->make<TH1D>( "h493", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h494 = fs->make<TH1D>( "h494", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h495 = fs->make<TH1D>( "h495", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h496 = fs->make<TH1D>( "h496", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
 
+
+
+  /// fourth layer
+
+  // triplets 1+4 -> 2:
+
+  hf401 = fs->make<TH1D>( "hf401", "PXB2 triplets z2;z [cm];hits", 600, -30, 30 );
+  hf402 = fs->make<TH1D>( "hf402", "PXB2 uphi-phi;#Delta#phi [rad];tracks", 100, -0.1, 0.1 );
+  hf403 = fs->make<TH1D>( "hf403", "PXB2 udca-dca;#Deltadca [cm];tracks", 100, -0.1, 0.1 );
+  hf404 = fs->make<TH1D>( "hf404", "PXB2 udip-dip;#Deltadip;tracks", 100, -0.1, 0.1 );
+  hf405 = fs->make<TH1D>( "hf405", "PXB2 uz0-z0;#Deltaz_{0};tracks", 100, -0.1, 0.1 );
+
+  hf406 = fs->make<TH1D>( "hf406", "valid tracker hits;tracker hits;tracks", 51, -0.5, 50.5 );
+  hf407 = fs->make<TH1D>( "hf407", "valid pixel barrel hits;valid pixel barrel hits;tracks", 6, -0.5, 5.5 );
+  hf408 = fs->make<TH1D>( "hf408", "tracker layers;tracker layers;tracks", 31, -0.5, 30.5 );
+
+  hf409 = fs->make<TProfile>( "hf409", "PXB2 angle of incidence;PXB2 #phi [deg];PXB2 #phi_{inc} [deg]", 180, -180, 180, -90, 90 );
+
+  hf410 = fs->make<TH1D>( "hf410", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf411 = fs->make<TH1D>( "hf411", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  // mean resid profiles:
+
+  hf412 = fs->make<TProfile>( "hf412", "PXB2 #Deltax vs #phi;#phi_{2} [deg];PXB2 <#Deltax> [#mum]", 180, -180, 180, -99, 99 );
+  hf412_out_zplus = fs->make<TProfile>( "hf412_out_zplus", "PXB2 #Deltax vs #phi, outward-facing modules, z+;#phi_{2} [deg];PXB2 <#Deltax> [#mum]", 180, -180, 180, -99, 99 );
+  hf412_out_zminus = fs->make<TProfile>( "hf412_out_zminus", "PXB2 #Deltax vs #phi, outward-facing modules, z-;#phi_{2} [deg];PXB2 <#Deltax> [#mum]", 180, -180, 180, -99, 99 );
+  hf412_in_zplus = fs->make<TProfile>( "hf412_in_zplus", "PXB2 #Deltax vs #phi, inward-facing modules, z+;#phi_{2} [deg];PXB2 <#Deltax> [#mum]", 180, -180, 180, -99, 99 );
+  hf412_in_zminus = fs->make<TProfile>( "hf412_in_zminus", "PXB2 #Deltax vs #phi, inward-facing modules, z-;#phi_{2} [deg];PXB2 <#Deltax> [#mum]", 180, -180, 180, -99, 99 );
+  hf413 = fs->make<TProfile>( "hf413", "PXB2 #Deltaz vs #phi;#phi_{2} [deg];PXB2 <#Deltaz> [#mum]", 180, -180, 180, -199, 199 );
+
+  hf414 = fs->make<TProfile>( "hf414", "PXB2 #Deltax vs z;z2 [cm];PXB2 <#Deltax> [#mum]", 80, -20, 20, -99, 99 );
+  hf415 = fs->make<TProfile>( "hf415", "PXB2 #Deltaz vs z;z2 [cm];PXB2 <#Deltaz> [#mum]", 80, -20, 20, -199, 199 );
+
+  hf416 = fs->make<TProfile>( "hf416", "PXB2 #Deltax vs p_{t};log(p_{t} [GeV]);PXB2 <#Deltax> [#mum]", 20, 0, 2, -99, 99 );
+  hf417 = fs->make<TProfile>( "hf417", "PXB2 #Deltaz vs p_{t};log(p_{t} [GeV]);PXB2 <#Deltaz> [#mum]", 20, 0, 2, -199, 199 );
+
+  hf418 = fs->make<TProfile>( "hf418", "PXB2 #Deltax vs p_{t} +;log(p_{t} [GeV]);PXB2 <#Deltax> [#mum]", 20, 0, 2, -99, 99 );
+  hf419 = fs->make<TProfile>( "hf419", "PXB2 #Deltax vs p_{t} -;log(p_{t} [GeV]);PXB2 <#Deltax> [#mum]", 20, 0, 2, -99, 99 );
+
+  hf420 = fs->make<TH1D>( "hf420", "PXB2 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf420_out_zplus = fs->make<TH1D>( "hf420_out_zplus", "PXB2 residuals #Deltax, p_{t} > 12, outward-facing modules, z+;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf420_out_zminus = fs->make<TH1D>( "hf420_out_zminus", "PXB2 residuals #Deltax, p_{t} > 12, outward-facing modules, z-;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf420_in_zplus = fs->make<TH1D>( "hf420_in_zplus", "PXB2 residuals #Deltax, p_{t} > 12, inward-facing modules, z+;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf420_in_zminus = fs->make<TH1D>( "hf420_in_zminus", "PXB2 residuals #Deltax, p_{t} > 12, inward-facing modules, z-;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf421_out_zplus = fs->make<TH1D>( "hf421_out_zplus", "PXB2 residuals #Deltaz, p_{t} > 12, outward-facing modules, z+;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+  hf421_out_zminus = fs->make<TH1D>( "hf421_out_zminus", "PXB2 residuals #Deltaz, p_{t} > 12, outward-facing modules, z-;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+  hf421_in_zplus = fs->make<TH1D>( "hf421_in_zplus", "PXB2 residuals #Deltaz, p_{t} > 12, inward-facing modules, z+;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+  hf421_in_zminus = fs->make<TH1D>( "hf421_in_zminus", "PXB2 residuals #Deltaz, p_{t} > 12, inward-facing modules, z-;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+  hf421 = fs->make<TH1D>( "hf421", "PXB2 residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  hf420_x_plus = fs->make<TH1D>( "hf420_x_plus", "PXB2 residuals #Deltax, p_{t} > 12, local x>0 ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf420_x_minus = fs->make<TH1D>( "hf420_x_minus", "PXB2 residuals #Deltax, p_{t} > 12, local x<0 ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf421_x_plus = fs->make<TH1D>( "hf421_x_plus", "PXB2 residuals #Deltaz, p_{t} > 12, local x>0 ;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  hf421_x_minus = fs->make<TH1D>( "hf421_x_minus", "PXB2 residuals #Deltaz, p_{t} > 12, local x<0 ;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  hf420_out_xplus_zplus = fs->make<TH1D>( "hf420_out_xplus_zplus", "PXB2 residuals #Deltax, p_{t} > 12, local x>0 z-plus out facing modules ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf420_out_xminus_zplus = fs->make<TH1D>( "hf420_out_xminus_zplus", "PXB2 residuals #Deltax, p_{t} > 12, local x<0 z-plus out facing modules ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf420_out_xplus_zminus = fs->make<TH1D>( "hf420_out_xplus_zminus", "PXB2 residuals #Deltax, p_{t} > 12, local x>0 z-minus out facing modules ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf420_out_xminus_zminus = fs->make<TH1D>( "hf420_out_xminus_zminus", "PXB2 residuals #Deltax, p_{t} > 12, local x<0 z-minus out facing modules ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf420_in_xplus_zplus = fs->make<TH1D>( "hf420_in_xplus_zplus", "PXB2 residuals #Deltax, p_{t} > 12, local x>0 z-plus in facing modules ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf420_in_xminus_zplus = fs->make<TH1D>( "hf420_in_xminus_zplus", "PXB2 residuals #Deltax, p_{t} > 12, local x<0 z-plus in facing modules ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf420_in_xplus_zminus = fs->make<TH1D>( "hf420_in_xplus_zminus", "PXB2 residuals #Deltax, p_{t} > 12, local x>0 z-minus in facing modules ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf420_in_xminus_zminus = fs->make<TH1D>( "hf420_in_xminus_zminus", "PXB2 residuals #Deltax, p_{t} > 12, local x<0 z-minus in facing modules ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+
+  hf421_out_xplus_zplus = fs->make<TH1D>( "hf421_out_xplus_zplus", "PXB2 residuals #Deltaz, p_{t} > 12, local x>0 z-plus out facing modules ;PXB2 #Deltaz [#mum];hits", 100,-300, 300);
+  hf421_out_xminus_zplus = fs->make<TH1D>( "hf421_out_xminus_zplus", "PXB2 residuals #Deltaz, p_{t} > 12, local x<0 z-plus out facing modules ;PXB2 #Deltaz [#mum];hits", 100,-300, 300);
+  hf421_out_xplus_zminus = fs->make<TH1D>( "hf421_out_xplus_zminus", "PXB2 residuals #Deltaz, p_{t} > 12, local x>0 z-minus out facing modules ;PXB2 #Deltaz [#mum];hits", 100,-300, 300);
+  hf421_out_xminus_zminus = fs->make<TH1D>( "hf421_out_xminus_zminus", "PXB2 residuals #Deltaz, p_{t} > 12, local x<0 z-minus out facing modules ;PXB2 #Deltaz [#mum];hits", 100,-300, 300);
+  hf421_in_xplus_zplus = fs->make<TH1D>( "hf421_in_xplus_zplus", "PXB2 residuals #Deltaz, p_{t} > 12, local x>0 z-plus in facing modules ;PXB2 #Deltaz [#mum];hits", 100,-300, 300);
+  hf421_in_xminus_zplus = fs->make<TH1D>( "hf421_in_xminus_zplus", "PXB2 residuals #Deltaz, p_{t} > 12, local x<0 z-plus in facing modules ;PXB2 #Deltaz [#mum];hits", 100,-300, 300);
+  hf421_in_xplus_zminus = fs->make<TH1D>( "hf421_in_xplus_zminus", "PXB2 residuals #Deltaz, p_{t} > 12, local x>0 z-minus in facing modules ;PXB2 #Deltaz [#mum];hits", 100,-300, 300);
+  hf421_in_xminus_zminus = fs->make<TH1D>( "hf421_in_xminus_zminus", "PXB2 residuals #Deltaz, p_{t} > 12, local x<0 z-minus in facing modules ;PXB2 #Deltaz [#mum];hits", 100,-300, 300);
+
+
+  hf420_cluster_prob_0_010= fs->make<TH1D>( "hf420_cluster_prob_0_010", "PXB2 residuals #Deltax, p_{t} > 12, prob 0-0.010;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf420_cluster_prob_010_075= fs->make<TH1D>( "hf420_cluster_prob_010_075", "PXB2 residuals #Deltax, p_{t} > 12, prob 0.10-0.75;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf420_cluster_prob_075_090= fs->make<TH1D>( "hf420_cluster_prob_075_090", "PXB2 residuals #Deltax, p_{t} > 12, prob 0.75-0.90;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf420_cluster_prob_090_101= fs->make<TH1D>( "hf420_cluster_prob_090_101", "PXB2 residuals #Deltax, p_{t} > 12, prob 0.90-1.01;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+
+  hf421_cluster_prob_0_010= fs->make<TH1D>( "hf421_cluster_prob_0_010", "PXB2 residuals #Deltaz, p_{t} > 12, prob 0-0.010;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  hf421_cluster_prob_010_075= fs->make<TH1D>( "hf421_cluster_prob_010_075", "PXB2 residuals #Deltaz, p_{t} > 12, prob 0.10-0.75;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  hf421_cluster_prob_075_090= fs->make<TH1D>( "hf421_cluster_prob_075_090", "PXB2 residuals #Deltaz, p_{t} > 12, prob 0.75-0.90;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  hf421_cluster_prob_090_101= fs->make<TH1D>( "hf421_cluster_prob_090_101", "PXB2 residuals #Deltaz, p_{t} > 12, prob 0.90-1.01;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+
+
+  hf420_cluster_prob_0_010_etaL0p8= fs->make<TH1D>( "hf420_cluster_prob_0_010_etaL0p8", "PXB2 residuals #Deltax, p_{t} > 12, prob 0-0.010 etaL0p8 ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf420_cluster_prob_010_075_etaL0p8= fs->make<TH1D>( "hf420_cluster_prob_010_075_etaL0p8", "PXB2 residuals #Deltax, p_{t} > 12, prob 0.10-0.75 etaL0p8 ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf420_cluster_prob_075_090_etaL0p8= fs->make<TH1D>( "hf420_cluster_prob_075_090_etaL0p8", "PXB2 residuals #Deltax, p_{t} > 12, prob 0.75-0.90 etaL0p8 ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf420_cluster_prob_090_101_etaL0p8= fs->make<TH1D>( "hf420_cluster_prob_090_101_etaL0p8", "PXB2 residuals #Deltax, p_{t} > 12, prob 0.90-1.01 etaL0p8 ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+
+  hf421_cluster_prob_0_010_etaL0p8= fs->make<TH1D>( "hf421_cluster_prob_0_010_etaL0p8", "PXB2 residuals #Deltaz, p_{t} > 12, prob 0-0.010 etaL0p8 ;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  hf421_cluster_prob_010_075_etaL0p8= fs->make<TH1D>( "hf421_cluster_prob_010_075_etaL0p8", "PXB2 residuals #Deltaz, p_{t} > 12, prob 0.10-0.75 etaL0p8 ;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  hf421_cluster_prob_075_090_etaL0p8= fs->make<TH1D>( "hf421_cluster_prob_075_090_etaL0p8", "PXB2 residuals #Deltaz, p_{t} > 12, prob 0.75-0.90 etaL0p8 ;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  hf421_cluster_prob_090_101_etaL0p8= fs->make<TH1D>( "hf421_cluster_prob_090_101_etaL0p8", "PXB2 residuals #Deltaz, p_{t} > 12, prob 0.90-1.01 etaL0p8 ;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  hf420_cluster_prob_0_010_etaM0p8= fs->make<TH1D>( "hf420_cluster_prob_0_010_etaM0p8", "PXB2 residuals #Deltax, p_{t} > 12, prob 0-0.010 etaM0p8 ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf420_cluster_prob_010_075_etaM0p8= fs->make<TH1D>( "hf420_cluster_prob_010_075_etaM0p8", "PXB2 residuals #Deltax, p_{t} > 12, prob 0.10-0.75 etaM0p8 ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf420_cluster_prob_075_090_etaM0p8= fs->make<TH1D>( "hf420_cluster_prob_075_090_etaM0p8", "PXB2 residuals #Deltax, p_{t} > 12, prob 0.75-0.90 etaM0p8 ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf420_cluster_prob_090_101_etaM0p8= fs->make<TH1D>( "hf420_cluster_prob_090_101_etaM0p8", "PXB2 residuals #Deltax, p_{t} > 12, prob 0.90-1.01 etaM0p8 ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+
+  hf421_cluster_prob_0_010_etaM0p8= fs->make<TH1D>( "hf421_cluster_prob_0_010_etaM0p8", "PXB2 residuals #Deltaz, p_{t} > 12, prob 0-0.010 etaM0p8 ;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  hf421_cluster_prob_010_075_etaM0p8= fs->make<TH1D>( "hf421_cluster_prob_010_075_etaM0p8", "PXB2 residuals #Deltaz, p_{t} > 12, prob 0.10-0.75 etaM0p8 ;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  hf421_cluster_prob_075_090_etaM0p8= fs->make<TH1D>( "hf421_cluster_prob_075_090_etaM0p8", "PXB2 residuals #Deltaz, p_{t} > 12, prob 0.75-0.90 etaM0p8 ;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  hf421_cluster_prob_090_101_etaM0p8= fs->make<TH1D>( "hf421_cluster_prob_090_101_etaM0p8", "PXB2 residuals #Deltaz, p_{t} > 12, prob 0.90-1.01 etaM0p8 ;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+
+
+  hf420_1 = fs->make<TH1D>( "hf420_1", "PXB2 residuals #Deltax, p_{t} > 12, lever 1;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf420_2 = fs->make<TH1D>( "hf420_2", "PXB2 residuals #Deltax, p_{t} > 12, lever 2;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf420_3 = fs->make<TH1D>( "hf420_3", "PXB2 residuals #Deltax, p_{t} > 12, lever 3;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+
+  hf420_mod1 = fs->make<TH1D>( "hf420_mod1", "PXB2 Module 1 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
+  hf420_mod2 = fs->make<TH1D>( "hf420_mod2", "PXB2 Module 2 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
+  hf420_mod3 = fs->make<TH1D>( "hf420_mod3", "PXB2 Module 3 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
+  hf420_mod4 = fs->make<TH1D>( "hf420_mod4", "PXB2 Module 4 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
+  hf420_mod5 = fs->make<TH1D>( "hf420_mod5", "PXB2 Module 5 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
+  hf420_mod6 = fs->make<TH1D>( "hf420_mod6", "PXB2 Module 6 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
+  hf420_mod7 = fs->make<TH1D>( "hf420_mod7", "PXB2 Module 7 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
+  hf420_mod8 = fs->make<TH1D>( "hf420_mod8", "PXB2 Module 8 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
+
+  hf421_mod1 = fs->make<TH1D>( "hf421_mod1", "PXB2 Module 1  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  hf421_mod2 = fs->make<TH1D>( "hf421_mod2", "PXB2 Module 2  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  hf421_mod3 = fs->make<TH1D>( "hf421_mod3", "PXB2 Module 3  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  hf421_mod4 = fs->make<TH1D>( "hf421_mod4", "PXB2 Module 4  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  hf421_mod5 = fs->make<TH1D>( "hf421_mod5", "PXB2 Module 5  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  hf421_mod6 = fs->make<TH1D>( "hf421_mod6", "PXB2 Module 6  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  hf421_mod7 = fs->make<TH1D>( "hf421_mod7", "PXB2 Module 7  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  hf421_mod8 = fs->make<TH1D>( "hf421_mod8", "PXB2 Module 8  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  // width profiles:
+
+  hf422 = fs->make<TProfile>( "hf422", "PXB2 #sigma_{x} vs #phi;#phi_{2} [deg];PXB2 rms(#Deltax) [#mum]", 360, -180, 180, 0, 99 );
+  hf423 = fs->make<TProfile>( "hf423", "PXB2 #sigma_{z} vs #phi;#phi_{2} [deg];PXB2 rms(#Deltaz) [#mum]", 360, -180, 180, 0, 199 );
+
+  hf424 = fs->make<TProfile>( "hf424", "PXB2 #sigma_{x} vs z;z2 [cm];PXB2 rms(#Deltax) [#mum]", 80, -20, 20, 0, 99 );
+  hf425 = fs->make<TProfile>( "hf425", "PXB2 #sigma_{z} vs z;z2 [cm];PXB2 rms(#Deltaz) [#mum]", 80, -20, 20, 0, 199 );
+
+  hf426 = fs->make<TProfile>( "hf426", "PXB2 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB2 rms(#Deltax) [#mum]", 20, 0, 2, 0, 99 );
+  hf427 = fs->make<TProfile>( "hf427", "PXB2 #sigma_{z} vs p_{t};log(p_{t} [GeV]);PXB2 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
+
+  hf428 = fs->make<TProfile>( "hf428", "PXB2 #sigma_{x} vs dip;dip [deg];PXB2 rms(#Deltax) [#mum]", 80, -80, 80, 0, 99 );
+  hf429 = fs->make<TProfile>( "hf429", "PXB2 #sigma_{z} vs dip;dip [deg];PXB2 rms(#Deltaz) [#mum]", 80, -80, 80, 0, 199 );
+  hf429_eta = fs->make<TProfile>( "hf429_eta", "PXB2 #sigma_{z} vs #eta;Track #eta;PXB2 rms(#Deltaz) [#mum]", 70, -1.5, 1.5, 0, 199 );
+
+  hf430 = fs->make<TH1D>( "hf430", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf431 = fs->make<TH1D>( "hf431", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  hf432 = fs->make<TH1D>( "hf432", "PXB2 residuals #Deltaz, 18 < |dip| < 50;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  hf433 = fs->make<TProfile>( "hf433", "PXB2 #sigma_{z} vs p_{t}, best dip;log(p_{t} [GeV]);PXB2 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
+
+  hf434 = fs->make<TProfile>( "hf434", "PXB2 #sigma_{x} vs inc;#phi_{inc2} [deg];PXB2 rms(#Deltax) [#mum]", 40, -10, 10, 0, 99 );
+
+  hf435 = fs->make<TProfile>( "hf435", "PXB2 #sigma_{x} vs #phi at 1 GeV;#phi_{2} [deg];PXB2 rms(#Deltax) [#mum]", 360, -180, 180, 0, 499 );
+
+  hf436 = fs->make<TProfile>( "hf436", "PXB2 #sigma_{x} vs inc;#phi_{inc2} [deg];PXB2 rms(#Deltax) [#mum]", 40, -10, 10, 0, 99 );
+  hf437 = fs->make<TProfile>( "hf437", "PXB2 #sigma_{x} vs inc;#phi_{inc2} [deg];PXB2 rms(#Deltax) [#mum]", 40, -10, 10, 0, 99 );
+
+  hf438 = fs->make<TH1D>( "hf438", "PXB2 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf439 = fs->make<TH1D>( "hf439", "PXB2 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+
+  hf440 = fs->make<TH1D>( "hf440", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf441 = fs->make<TH1D>( "hf441", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  hf442 = fs->make<TH1D>( "hf442", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf443 = fs->make<TH1D>( "hf443", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf444 = fs->make<TH1D>( "hf444", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf445 = fs->make<TH1D>( "hf445", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf446 = fs->make<TH1D>( "hf446", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf447 = fs->make<TH1D>( "hf447", "PXB2 cluster rows;PXB2 cluster rows;hits", 10, 0.5, 10.5 );
+
+  hf448 = fs->make<TH1D>( "hf448", "PXB2 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf449 = fs->make<TH1D>( "hf449", "PXB2 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+
+  // triplets 3+1 -> 2 with refitted kappa:
+
+  hf451 = fs->make<TH1D>( "hf451", "PXB2 triplets z2;z [cm];hits", 600, -30, 30 );
+  hf452 = fs->make<TH1D>( "hf452", "PXB2 uphi-phi;#Delta#phi [rad];tracks", 100, -0.1, 0.1 );
+  hf453 = fs->make<TH1D>( "hf453", "PXB2 udca-dca;#Deltadca [cm];tracks", 100, -0.1, 0.1 );
+  hf454 = fs->make<TH1D>( "hf454", "PXB2 udip-dip;#Deltadip;tracks", 100, -0.1, 0.1 );
+  hf455 = fs->make<TH1D>( "hf455", "PXB2 uz0-z0;#Deltaz_{0};tracks", 100, -0.1, 0.1 );
+  hf456 = fs->make<TH1D>( "hf456", "PXB2 (kap2-kap)/kap;(#kappa_{2}-#kappa)/#kappa;tracks", 100, -0.02, 0.02 );
+
+  hf459 = fs->make<TProfile>( "hf459", "PXB2 angle of incidence;PXB2 #phi [deg];PXB2 #phi_{inc} [deg]", 180, -180, 180, -90, 90 );
+
+  hf460 = fs->make<TH1D>( "hf460", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf461 = fs->make<TH1D>( "hf461", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  // mean resid profiles:
+
+  hf462 = fs->make<TProfile>( "hf462", "PXB2 #Deltax vs #phi;#phi_{2} [deg];PXB2 <#Deltax> [#mum]", 180, -180, 180, -99, 99 );
+  hf463 = fs->make<TProfile>( "hf463", "PXB2 #Deltaz vs #phi;#phi_{2} [deg];PXB2 <#Deltaz> [#mum]", 180, -180, 180, -199, 199 );
+
+  hf464 = fs->make<TProfile>( "hf464", "PXB2 #Deltax vs z;z2 [cm];PXB2 <#Deltax> [#mum]", 80, -20, 20, -99, 99 );
+  hf465 = fs->make<TProfile>( "hf465", "PXB2 #Deltaz vs z;z2 [cm];PXB2 <#Deltaz> [#mum]", 80, -20, 20, -199, 199 );
+
+  hf466 = fs->make<TProfile>( "hf466", "PXB2 #Deltax vs p_{t};log(p_{t} [GeV]);PXB2 <#Deltax> [#mum]", 20, 0, 2, -99, 99 );
+  hf467 = fs->make<TProfile>( "hf467", "PXB2 #Deltaz vs p_{t};log(p_{t} [GeV]);PXB2 <#Deltaz> [#mum]", 20, 0, 2, -199, 199 );
+
+  hf468 = fs->make<TProfile>( "hf468", "PXB2 #Deltax vs p_{t} +;log(p_{t} [GeV]);PXB2 <#Deltax> [#mum]", 20, 0, 2, -99, 99 );
+  hf469 = fs->make<TProfile>( "hf469", "PXB2 #Deltax vs p_{t} -;log(p_{t} [GeV]);PXB2 <#Deltax> [#mum]", 20, 0, 2, -99, 99 );
+
+  hf470 = fs->make<TH1D>( "hf470", "PXB2 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf471 = fs->make<TH1D>( "hf471", "PXB2 residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  hf470_1 = fs->make<TH1D>( "hf470_1", "PXB2 residuals #Deltax, p_{t} > 12, lever1;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf470_2 = fs->make<TH1D>( "hf470_2", "PXB2 residuals #Deltax, p_{t} > 12, lever2;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf470_3 = fs->make<TH1D>( "hf470_3", "PXB2 residuals #Deltax, p_{t} > 12, lever3;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+
+  // width profiles:
+
+  hf472 = fs->make<TProfile>( "hf472", "PXB2 #sigma_{x} vs #phi;#phi_{2} [deg];PXB2 rms(#Deltax) [#mum]", 360, -180, 180, 0, 99 );
+  hf473 = fs->make<TProfile>( "hf473", "PXB2 #sigma_{z} vs #phi;#phi_{2} [deg];PXB2 rms(#Deltaz) [#mum]", 360, -180, 180, 0, 199 );
+
+  hf474 = fs->make<TProfile>( "hf474", "PXB2 #sigma_{x} vs z;z2 [cm];PXB2 rms(#Deltax) [#mum]", 80, -20, 20, 0, 99 );
+  hf475 = fs->make<TProfile>( "hf475", "PXB2 #sigma_{z} vs z;z2 [cm];PXB2 rms(#Deltaz) [#mum]", 80, -20, 20, 0, 199 );
+
+  hf476 = fs->make<TProfile>( "hf476", "PXB2 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB2 rms(#Deltax) [#mum]", 20, 0, 2, 0, 99 );
+  hf477 = fs->make<TProfile>( "hf477", "PXB2 #sigma_{z} vs p_{t};log(p_{t} [GeV]);PXB2 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
+
+  hf478 = fs->make<TProfile>( "hf478", "PXB2 #sigma_{x} vs dip;dip [deg];PXB2 rms(#Deltax) [#mum]", 80, -80, 80, 0, 99 );
+  hf479 = fs->make<TProfile>( "hf479", "PXB2 #sigma_{z} vs dip;dip [deg];PXB2 rms(#Deltaz) [#mum]", 80, -80, 80, 0, 199 );
+
+  hf480 = fs->make<TH1D>( "hf480", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf481 = fs->make<TH1D>( "hf481", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  hf482 = fs->make<TH1D>( "hf482", "PXB2 residuals #Deltaz, 18 < |dip| < 50;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  hf483 = fs->make<TProfile>( "hf483", "PXB2 #sigma_{z} vs p_{t}, best dip;log(p_{t} [GeV]);PXB2 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
+
+  hf484 = fs->make<TProfile>( "hf484", "PXB2 #sigma_{x} vs inc;#phi_{inc2} [deg];PXB2 rms(#Deltax) [#mum]", 40, -10, 10, 0, 99 );
+
+  hf485 = fs->make<TProfile>( "hf485", "PXB2 #sigma_{x} vs #phi at 1 GeV;#phi_{2} [deg];PXB2 rms(#Deltax) [#mum]", 360, -180, 180, 0, 499 );
+
+  hf490 = fs->make<TH1D>( "hf490", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf491 = fs->make<TH1D>( "hf491", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  hf492 = fs->make<TH1D>( "hf492", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf493 = fs->make<TH1D>( "hf493", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf494 = fs->make<TH1D>( "hf494", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf495 = fs->make<TH1D>( "hf495", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf496 = fs->make<TH1D>( "hf496", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+
+// triplets 2+4 -> 3:
+
+  hg401 = fs->make<TH1D>( "hg401", "PXB3 triplets z2;z [cm];hits", 600, -30, 30 );
+  hg402 = fs->make<TH1D>( "hg402", "PXB3 uphi-phi;#Delta#phi [rad];tracks", 100, -0.1, 0.1 );
+  hg403 = fs->make<TH1D>( "hg403", "PXB3 udca-dca;#Deltadca [cm];tracks", 100, -0.1, 0.1 );
+  hg404 = fs->make<TH1D>( "hg404", "PXB3 udip-dip;#Deltadip;tracks", 100, -0.1, 0.1 );
+  hg405 = fs->make<TH1D>( "hg405", "PXB3 uz0-z0;#Deltaz_{0};tracks", 100, -0.1, 0.1 );
+
+  hg406 = fs->make<TH1D>( "hg406", "valid tracker hits;tracker hits;tracks", 51, -0.5, 50.5 );
+  hg407 = fs->make<TH1D>( "hg407", "valid pixel barrel hits;valid pixel barrel hits;tracks", 6, -0.5, 5.5 );
+  hg408 = fs->make<TH1D>( "hg408", "tracker layers;tracker layers;tracks", 31, -0.5, 30.5 );
+
+  hg409 = fs->make<TProfile>( "hg409", "PXB3 angle of incidence;PXB3 #phi [deg];PXB3 #phi_{inc} [deg]", 180, -180, 180, -90, 90 );
+
+  hg410 = fs->make<TH1D>( "hg410", "PXB3 residuals #Deltax;PXB3 #Deltax [#mum];hits", 5000, -150, 150 );
+  hg411 = fs->make<TH1D>( "hg411", "PXB3 residuals #Deltaz;PXB3 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  // mean resid profiles:
+
+  hg412 = fs->make<TProfile>( "hg412", "PXB3 #Deltax vs #phi;#phi_{2} [deg];PXB3 <#Deltax> [#mum]", 180, -180, 180, -99, 99 );
+  hg412_out_zplus = fs->make<TProfile>( "hg412_out_zplus", "PXB3 #Deltax vs #phi, outward-facing modules, z+;#phi_{2} [deg];PXB3 <#Deltax> [#mum]", 180, -180, 180, -99, 99 );
+  hg412_out_zminus = fs->make<TProfile>( "hg412_out_zminus", "PXB3 #Deltax vs #phi, outward-facing modules, z-;#phi_{2} [deg];PXB3 <#Deltax> [#mum]", 180, -180, 180, -99, 99 );
+  hg412_in_zplus = fs->make<TProfile>( "hg412_in_zplus", "PXB3 #Deltax vs #phi, inward-facing modules, z+;#phi_{2} [deg];PXB3 <#Deltax> [#mum]", 180, -180, 180, -99, 99 );
+  hg412_in_zminus = fs->make<TProfile>( "hg412_in_zminus", "PXB3 #Deltax vs #phi, inward-facing modules, z-;#phi_{2} [deg];PXB3 <#Deltax> [#mum]", 180, -180, 180, -99, 99 );
+  hg413 = fs->make<TProfile>( "hg413", "PXB3 #Deltaz vs #phi;#phi_{2} [deg];PXB3 <#Deltaz> [#mum]", 180, -180, 180, -199, 199 );
+
+  hg414 = fs->make<TProfile>( "hg414", "PXB3 #Deltax vs z;z2 [cm];PXB3 <#Deltax> [#mum]", 80, -20, 20, -99, 99 );
+  hg415 = fs->make<TProfile>( "hg415", "PXB3 #Deltaz vs z;z2 [cm];PXB3 <#Deltaz> [#mum]", 80, -20, 20, -199, 199 );
+
+  hg416 = fs->make<TProfile>( "hg416", "PXB3 #Deltax vs p_{t};log(p_{t} [GeV]);PXB3 <#Deltax> [#mum]", 20, 0, 2, -99, 99 );
+  hg417 = fs->make<TProfile>( "hg417", "PXB3 #Deltaz vs p_{t};log(p_{t} [GeV]);PXB3 <#Deltaz> [#mum]", 20, 0, 2, -199, 199 );
+
+  hg418 = fs->make<TProfile>( "hg418", "PXB3 #Deltax vs p_{t} +;log(p_{t} [GeV]);PXB3 <#Deltax> [#mum]", 20, 0, 2, -99, 99 );
+  hg419 = fs->make<TProfile>( "hg419", "PXB3 #Deltax vs p_{t} -;log(p_{t} [GeV]);PXB3 <#Deltax> [#mum]", 20, 0, 2, -99, 99 );
+
+  hg420 = fs->make<TH1D>( "hg420", "PXB3 residuals #Deltax, p_{t} > 12;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg420_out_zplus = fs->make<TH1D>( "hg420_out_zplus", "PXB3 residuals #Deltax, p_{t} > 12, outward-facing modules, z+;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg420_out_zminus = fs->make<TH1D>( "hg420_out_zminus", "PXB3 residuals #Deltax, p_{t} > 12, outward-facing modules, z-;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg420_in_zplus = fs->make<TH1D>( "hg420_in_zplus", "PXB3 residuals #Deltax, p_{t} > 12, inward-facing modules, z+;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg420_in_zminus = fs->make<TH1D>( "hg420_in_zminus", "PXB3 residuals #Deltax, p_{t} > 12, inward-facing modules, z-;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg421_out_zplus = fs->make<TH1D>( "hg421_out_zplus", "PXB3 residuals #Deltaz, p_{t} > 12, outward-facing modules, z+;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+  hg421_out_zminus = fs->make<TH1D>( "hg421_out_zminus", "PXB3 residuals #Deltaz, p_{t} > 12, outward-facing modules, z-;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+  hg421_in_zplus = fs->make<TH1D>( "hg421_in_zplus", "PXB3 residuals #Deltaz, p_{t} > 12, inward-facing modules, z+;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+  hg421_in_zminus = fs->make<TH1D>( "hg421_in_zminus", "PXB3 residuals #Deltaz, p_{t} > 12, inward-facing modules, z-;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+  hg421 = fs->make<TH1D>( "hg421", "PXB3 residuals #Deltaz, p_{t} > 12;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+
+  hg420_x_plus = fs->make<TH1D>( "hg420_x_plus", "PXB3 residuals #Deltax, p_{t} > 12, local x>0 ;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg420_x_minus = fs->make<TH1D>( "hg420_x_minus", "PXB3 residuals #Deltax, p_{t} > 12, local x<0 ;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg421_x_plus = fs->make<TH1D>( "hg421_x_plus", "PXB3 residuals #Deltaz, p_{t} > 12, local x>0 ;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+  hg421_x_minus = fs->make<TH1D>( "hg421_x_minus", "PXB3 residuals #Deltaz, p_{t} > 12, local x<0 ;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+
+  hg420_out = fs->make<TH1D>( "hg420_out", "PXB3 residuals #Deltax, p_{t} > 12, outward-facing modules;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg420_in = fs->make<TH1D>( "hg420_in", "PXB3 residuals #Deltax, p_{t} > 12, in-facing modules;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg421_out = fs->make<TH1D>( "hg421_out", "PXB3 residuals #Deltaz, p_{t} > 12, outward-facing modules;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+  hg421_in = fs->make<TH1D>( "hg421_in", "PXB3 residuals #Deltaz, p_{t} > 12, inward-facing modules;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+
+
+
+  hg420_out_xplus_zplus = fs->make<TH1D>( "hg420_out_xplus_zplus", "PXB3 residuals #Deltax, p_{t} > 12, local x>0 z-plus out facing modules ;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg420_out_xminus_zplus = fs->make<TH1D>( "hg420_out_xminus_zplus", "PXB3 residuals #Deltax, p_{t} > 12, local x<0 z-plus out facing modules ;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg420_out_xplus_zminus = fs->make<TH1D>( "hg420_out_xplus_zminus", "PXB3 residuals #Deltax, p_{t} > 12, local x>0 z-minus out facing modules ;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg420_out_xminus_zminus = fs->make<TH1D>( "hg420_out_xminus_zminus", "PXB3 residuals #Deltax, p_{t} > 12, local x<0 z-minus out facing modules ;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg420_in_xplus_zplus = fs->make<TH1D>( "hg420_in_xplus_zplus", "PXB3 residuals #Deltax, p_{t} > 12, local x>0 z-plus in facing modules ;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg420_in_xminus_zplus = fs->make<TH1D>( "hg420_in_xminus_zplus", "PXB3 residuals #Deltax, p_{t} > 12, local x<0 z-plus in facing modules ;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg420_in_xplus_zminus = fs->make<TH1D>( "hg420_in_xplus_zminus", "PXB3 residuals #Deltax, p_{t} > 12, local x>0 z-minus in facing modules ;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg420_in_xminus_zminus = fs->make<TH1D>( "hg420_in_xminus_zminus", "PXB3 residuals #Deltax, p_{t} > 12, local x<0 z-minus in facing modules ;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+
+  hg421_out_xplus_zplus = fs->make<TH1D>( "hg421_out_xplus_zplus", "PXB3 residuals #Deltaz, p_{t} > 12, local x>0 z-plus out facing modules ;PXB3 #Deltaz [#mum];hits", 3000,-300, 300);
+  hg421_out_xminus_zplus = fs->make<TH1D>( "hg421_out_xminus_zplus", "PXB3 residuals #Deltaz, p_{t} > 12, local x<0 z-plus out facing modules ;PXB3 #Deltaz [#mum];hits", 3000,-300, 300);
+  hg421_out_xplus_zminus = fs->make<TH1D>( "hg421_out_xplus_zminus", "PXB3 residuals #Deltaz, p_{t} > 12, local x>0 z-minus out facing modules ;PXB3 #Deltaz [#mum];hits", 3000,-300, 300);
+  hg421_out_xminus_zminus = fs->make<TH1D>( "hg421_out_xminus_zminus", "PXB3 residuals #Deltaz, p_{t} > 12, local x<0 z-minus out facing modules ;PXB3 #Deltaz [#mum];hits", 3000,-300, 300);
+  hg421_in_xplus_zplus = fs->make<TH1D>( "hg421_in_xplus_zplus", "PXB3 residuals #Deltaz, p_{t} > 12, local x>0 z-plus in facing modules ;PXB3 #Deltaz [#mum];hits", 3000,-300, 300);
+  hg421_in_xminus_zplus = fs->make<TH1D>( "hg421_in_xminus_zplus", "PXB3 residuals #Deltaz, p_{t} > 12, local x<0 z-plus in facing modules ;PXB3 #Deltaz [#mum];hits", 3000,-300, 300);
+  hg421_in_xplus_zminus = fs->make<TH1D>( "hg421_in_xplus_zminus", "PXB3 residuals #Deltaz, p_{t} > 12, local x>0 z-minus in facing modules ;PXB3 #Deltaz [#mum];hits", 3000,-300, 300);
+  hg421_in_xminus_zminus = fs->make<TH1D>( "hg421_in_xminus_zminus", "PXB3 residuals #Deltaz, p_{t} > 12, local x<0 z-minus in facing modules ;PXB3 #Deltaz [#mum];hits", 3000,-300, 300);
+
+
+  //h_cluster_prob =fs->make<TH1D>( "h_cluster_prob", "cluster probability", 150,0, 1.5);
+
+  hg420_cluster_prob_0_010= fs->make<TH1D>( "hg420_cluster_prob_0_010", "PXB3 residuals #Deltax, p_{t} > 12, prob 0-0.010;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg420_cluster_prob_010_075= fs->make<TH1D>( "hg420_cluster_prob_010_075", "PXB3 residuals #Deltax, p_{t} > 12, prob 0.10-0.75;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg420_cluster_prob_075_090= fs->make<TH1D>( "hg420_cluster_prob_075_090", "PXB3 residuals #Deltax, p_{t} > 12, prob 0.75-0.90;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg420_cluster_prob_090_101= fs->make<TH1D>( "hg420_cluster_prob_090_101", "PXB3 residuals #Deltax, p_{t} > 12, prob 0.90-1.01;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+
+  hg421_cluster_prob_0_010= fs->make<TH1D>( "hg421_cluster_prob_0_010", "PXB3 residuals #Deltaz, p_{t} > 12, prob 0-0.010;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+  hg421_cluster_prob_010_075= fs->make<TH1D>( "hg421_cluster_prob_010_075", "PXB3 residuals #Deltaz, p_{t} > 12, prob 0.10-0.75;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+  hg421_cluster_prob_075_090= fs->make<TH1D>( "hg421_cluster_prob_075_090", "PXB3 residuals #Deltaz, p_{t} > 12, prob 0.75-0.90;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+  hg421_cluster_prob_090_101= fs->make<TH1D>( "hg421_cluster_prob_090_101", "PXB3 residuals #Deltaz, p_{t} > 12, prob 0.90-1.01;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+
+
+  hg420_cluster_prob_0_010_etaL0p8= fs->make<TH1D>( "hg420_cluster_prob_0_010_etaL0p8", "PXB3 residuals #Deltax, p_{t} > 12, prob 0-0.010 etaL0p8 ;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg420_cluster_prob_010_075_etaL0p8= fs->make<TH1D>( "hg420_cluster_prob_010_075_etaL0p8", "PXB3 residuals #Deltax, p_{t} > 12, prob 0.10-0.75 etaL0p8 ;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg420_cluster_prob_075_090_etaL0p8= fs->make<TH1D>( "hg420_cluster_prob_075_090_etaL0p8", "PXB3 residuals #Deltax, p_{t} > 12, prob 0.75-0.90 etaL0p8 ;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg420_cluster_prob_090_101_etaL0p8= fs->make<TH1D>( "hg420_cluster_prob_090_101_etaL0p8", "PXB3 residuals #Deltax, p_{t} > 12, prob 0.90-1.01 etaL0p8 ;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+
+  hg421_cluster_prob_0_010_etaL0p8= fs->make<TH1D>( "hg421_cluster_prob_0_010_etaL0p8", "PXB3 residuals #Deltaz, p_{t} > 12, prob 0-0.010 etaL0p8 ;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+  hg421_cluster_prob_010_075_etaL0p8= fs->make<TH1D>( "hg421_cluster_prob_010_075_etaL0p8", "PXB3 residuals #Deltaz, p_{t} > 12, prob 0.10-0.75 etaL0p8 ;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+  hg421_cluster_prob_075_090_etaL0p8= fs->make<TH1D>( "hg421_cluster_prob_075_090_etaL0p8", "PXB3 residuals #Deltaz, p_{t} > 12, prob 0.75-0.90 etaL0p8 ;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+  hg421_cluster_prob_090_101_etaL0p8= fs->make<TH1D>( "hg421_cluster_prob_090_101_etaL0p8", "PXB3 residuals #Deltaz, p_{t} > 12, prob 0.90-1.01 etaL0p8 ;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+
+  hg420_cluster_prob_0_010_etaM0p8= fs->make<TH1D>( "hg420_cluster_prob_0_010_etaM0p8", "PXB3 residuals #Deltax, p_{t} > 12, prob 0-0.010 etaM0p8 ;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg420_cluster_prob_010_075_etaM0p8= fs->make<TH1D>( "hg420_cluster_prob_010_075_etaM0p8", "PXB3 residuals #Deltax, p_{t} > 12, prob 0.10-0.75 etaM0p8 ;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg420_cluster_prob_075_090_etaM0p8= fs->make<TH1D>( "hg420_cluster_prob_075_090_etaM0p8", "PXB3 residuals #Deltax, p_{t} > 12, prob 0.75-0.90 etaM0p8 ;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg420_cluster_prob_090_101_etaM0p8= fs->make<TH1D>( "hg420_cluster_prob_090_101_etaM0p8", "PXB3 residuals #Deltax, p_{t} > 12, prob 0.90-1.01 etaM0p8 ;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+
+  hg421_cluster_prob_0_010_etaM0p8= fs->make<TH1D>( "hg421_cluster_prob_0_010_etaM0p8", "PXB3 residuals #Deltaz, p_{t} > 12, prob 0-0.010 etaM0p8 ;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+  hg421_cluster_prob_010_075_etaM0p8= fs->make<TH1D>( "hg421_cluster_prob_010_075_etaM0p8", "PXB3 residuals #Deltaz, p_{t} > 12, prob 0.10-0.75 etaM0p8 ;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+  hg421_cluster_prob_075_090_etaM0p8= fs->make<TH1D>( "hg421_cluster_prob_075_090_etaM0p8", "PXB3 residuals #Deltaz, p_{t} > 12, prob 0.75-0.90 etaM0p8 ;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+  hg421_cluster_prob_090_101_etaM0p8= fs->make<TH1D>( "hg421_cluster_prob_090_101_etaM0p8", "PXB3 residuals #Deltaz, p_{t} > 12, prob 0.90-1.01 etaM0p8 ;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+
+
+  hg420_1 = fs->make<TH1D>( "hg420_1", "PXB3 residuals #Deltax, p_{t} > 12, lever 1;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg420_2 = fs->make<TH1D>( "hg420_2", "PXB3 residuals #Deltax, p_{t} > 12, lever 2;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+  hg420_3 = fs->make<TH1D>( "hg420_3", "PXB3 residuals #Deltax, p_{t} > 12, lever 3;PXB3 #Deltax [#mum];hits", 3000, -150, 150 );
+
+  hg420_mod1 = fs->make<TH1D>( "hg420_mod1", "PXB3 Module 1 residuals #Deltax, p_{t} > 12;PXB3 #Deltax [#mum];hits ", 3000, -150, 150 );
+  hg420_mod2 = fs->make<TH1D>( "hg420_mod2", "PXB3 Module 2 residuals #Deltax, p_{t} > 12;PXB3 #Deltax [#mum];hits ", 3000, -150, 150 );
+  hg420_mod3 = fs->make<TH1D>( "hg420_mod3", "PXB3 Module 3 residuals #Deltax, p_{t} > 12;PXB3 #Deltax [#mum];hits ", 3000, -150, 150 );
+  hg420_mod4 = fs->make<TH1D>( "hg420_mod4", "PXB3 Module 4 residuals #Deltax, p_{t} > 12;PXB3 #Deltax [#mum];hits ", 3000, -150, 150 );
+  hg420_mod5 = fs->make<TH1D>( "hg420_mod5", "PXB3 Module 5 residuals #Deltax, p_{t} > 12;PXB3 #Deltax [#mum];hits ", 3000, -150, 150 );
+  hg420_mod6 = fs->make<TH1D>( "hg420_mod6", "PXB3 Module 6 residuals #Deltax, p_{t} > 12;PXB3 #Deltax [#mum];hits ", 3000, -150, 150 );
+  hg420_mod7 = fs->make<TH1D>( "hg420_mod7", "PXB3 Module 7 residuals #Deltax, p_{t} > 12;PXB3 #Deltax [#mum];hits ", 3000, -150, 150 );
+  hg420_mod8 = fs->make<TH1D>( "hg420_mod8", "PXB3 Module 8 residuals #Deltax, p_{t} > 12;PXB3 #Deltax [#mum];hits ", 3000, -150, 150 );
+
+  hg421_mod1 = fs->make<TH1D>( "hg421_mod1", "PXB3 Module 1  residuals #Deltaz, p_{t} > 12;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+  hg421_mod2 = fs->make<TH1D>( "hg421_mod2", "PXB3 Module 2  residuals #Deltaz, p_{t} > 12;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+  hg421_mod3 = fs->make<TH1D>( "hg421_mod3", "PXB3 Module 3  residuals #Deltaz, p_{t} > 12;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+  hg421_mod4 = fs->make<TH1D>( "hg421_mod4", "PXB3 Module 4  residuals #Deltaz, p_{t} > 12;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+  hg421_mod5 = fs->make<TH1D>( "hg421_mod5", "PXB3 Module 5  residuals #Deltaz, p_{t} > 12;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+  hg421_mod6 = fs->make<TH1D>( "hg421_mod6", "PXB3 Module 6  residuals #Deltaz, p_{t} > 12;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+  hg421_mod7 = fs->make<TH1D>( "hg421_mod7", "PXB3 Module 7  residuals #Deltaz, p_{t} > 12;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+  hg421_mod8 = fs->make<TH1D>( "hg421_mod8", "PXB3 Module 8  residuals #Deltaz, p_{t} > 12;PXB3 #Deltaz [#mum];hits", 3000, -300, 300 );
+  // width profiles:
+
+  hg422 = fs->make<TProfile>( "hg422", "PXB3 #sigma_{x} vs #phi;#phi_{2} [deg];PXB3 rms(#Deltax) [#mum]", 360, -180, 180, 0, 99 );
+  hg423 = fs->make<TProfile>( "hg423", "PXB3 #sigma_{z} vs #phi;#phi_{2} [deg];PXB3 rms(#Deltaz) [#mum]", 360, -180, 180, 0, 199 );
+
+  hg424 = fs->make<TProfile>( "hg424", "PXB3 #sigma_{x} vs z;z2 [cm];PXB3 rms(#Deltax) [#mum]", 80, -20, 20, 0, 99 );
+  hg425 = fs->make<TProfile>( "hg425", "PXB3 #sigma_{z} vs z;z2 [cm];PXB3 rms(#Deltaz) [#mum]", 80, -20, 20, 0, 199 );
+
+  hg426 = fs->make<TProfile>( "hg426", "PXB3 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB3 rms(#Deltax) [#mum]", 20, 0, 2, 0, 99 );
+  hg427 = fs->make<TProfile>( "hg427", "PXB3 #sigma_{z} vs p_{t};log(p_{t} [GeV]);PXB3 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
+
+  hg428 = fs->make<TProfile>( "hg428", "PXB3 #sigma_{x} vs dip;dip [deg];PXB3 rms(#Deltax) [#mum]", 80, -80, 80, 0, 99 );
+  hg429 = fs->make<TProfile>( "hg429", "PXB3 #sigma_{z} vs dip;dip [deg];PXB3 rms(#Deltaz) [#mum]", 80, -80, 80, 0, 199 );
+  hg429_eta = fs->make<TProfile>( "hg429_eta", "PXB3 #sigma_{z} vs #eta;Track #eta;PXB3 rms(#Deltaz) [#mum]", 70, -1.5, 1.5, 0, 199 );
+
+  hg430 = fs->make<TH1D>( "hg430", "PXB3 residuals #Deltax;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+  hg431 = fs->make<TH1D>( "hg431", "PXB3 residuals #Deltaz;PXB3 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  hg432 = fs->make<TH1D>( "hg432", "PXB3 residuals #Deltaz, 18 < |dip| < 50;PXB3 #Deltaz [#mum];hits", 100, -300, 300 );
+  hg433 = fs->make<TProfile>( "hg433", "PXB3 #sigma_{z} vs p_{t}, best dip;log(p_{t} [GeV]);PXB3 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
+
+  hg434 = fs->make<TProfile>( "hg434", "PXB3 #sigma_{x} vs inc;#phi_{inc2} [deg];PXB3 rms(#Deltax) [#mum]", 40, -10, 10, 0, 99 );
+
+  hg435 = fs->make<TProfile>( "hg435", "PXB3 #sigma_{x} vs #phi at 1 GeV;#phi_{2} [deg];PXB3 rms(#Deltax) [#mum]", 360, -180, 180, 0, 499 );
+
+  hg436 = fs->make<TProfile>( "hg436", "PXB3 #sigma_{x} vs inc;#phi_{inc2} [deg];PXB3 rms(#Deltax) [#mum]", 40, -10, 10, 0, 99 );
+  hg437 = fs->make<TProfile>( "hg437", "PXB3 #sigma_{x} vs inc;#phi_{inc2} [deg];PXB3 rms(#Deltax) [#mum]", 40, -10, 10, 0, 99 );
+
+  hg438 = fs->make<TH1D>( "hg438", "PXB3 residuals #Deltax, p_{t} > 12;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+  hg439 = fs->make<TH1D>( "hg439", "PXB3 residuals #Deltax, p_{t} > 12;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+
+  hg440 = fs->make<TH1D>( "hg440", "PXB3 residuals #Deltax;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+  hg441 = fs->make<TH1D>( "hg441", "PXB3 residuals #Deltaz;PXB3 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  hg442 = fs->make<TH1D>( "hg442", "PXB3 residuals #Deltax;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+  hg443 = fs->make<TH1D>( "hg443", "PXB3 residuals #Deltax;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+  hg444 = fs->make<TH1D>( "hg444", "PXB3 residuals #Deltax;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+  hg445 = fs->make<TH1D>( "hg445", "PXB3 residuals #Deltax;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+  hg446 = fs->make<TH1D>( "hg446", "PXB3 residuals #Deltax;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+  hg447 = fs->make<TH1D>( "hg447", "PXB3 cluster rows;PXB3 cluster rows;hits", 10, 0.5, 10.5 );
+
+  hg448 = fs->make<TH1D>( "hg448", "PXB3 residuals #Deltax, p_{t} > 12;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+  hg449 = fs->make<TH1D>( "hg449", "PXB3 residuals #Deltax, p_{t} > 12;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+
+  // triplets 2+4 -> 3 with refitted kappa:
+
+  hg451 = fs->make<TH1D>( "hg451", "PXB3 triplets z2;z [cm];hits", 600, -30, 30 );
+  hg452 = fs->make<TH1D>( "hg452", "PXB3 uphi-phi;#Delta#phi [rad];tracks", 100, -0.1, 0.1 );
+  hg453 = fs->make<TH1D>( "hg453", "PXB3 udca-dca;#Deltadca [cm];tracks", 100, -0.1, 0.1 );
+  hg454 = fs->make<TH1D>( "hg454", "PXB3 udip-dip;#Deltadip;tracks", 100, -0.1, 0.1 );
+  hg455 = fs->make<TH1D>( "hg455", "PXB3 uz0-z0;#Deltaz_{0};tracks", 100, -0.1, 0.1 );
+  hg456 = fs->make<TH1D>( "hg456", "PXB3 (kap2-kap)/kap;(#kappa_{2}-#kappa)/#kappa;tracks", 100, -0.02, 0.02 );
+
+  hg459 = fs->make<TProfile>( "hg459", "PXB3 angle of incidence;PXB3 #phi [deg];PXB3 #phi_{inc} [deg]", 180, -180, 180, -90, 90 );
+
+  hg460 = fs->make<TH1D>( "hg460", "PXB3 residuals #Deltax;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+  hg461 = fs->make<TH1D>( "hg461", "PXB3 residuals #Deltaz;PXB3 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  // mean resid profiles:
+
+  hg462 = fs->make<TProfile>( "hg462", "PXB3 #Deltax vs #phi;#phi_{2} [deg];PXB3 <#Deltax> [#mum]", 180, -180, 180, -99, 99 );
+  hg463 = fs->make<TProfile>( "hg463", "PXB3 #Deltaz vs #phi;#phi_{2} [deg];PXB3 <#Deltaz> [#mum]", 180, -180, 180, -199, 199 );
+
+  hg464 = fs->make<TProfile>( "hg464", "PXB3 #Deltax vs z;z2 [cm];PXB3 <#Deltax> [#mum]", 80, -20, 20, -99, 99 );
+  hg465 = fs->make<TProfile>( "hg465", "PXB3 #Deltaz vs z;z2 [cm];PXB3 <#Deltaz> [#mum]", 80, -20, 20, -199, 199 );
+
+  hg466 = fs->make<TProfile>( "hg466", "PXB3 #Deltax vs p_{t};log(p_{t} [GeV]);PXB3 <#Deltax> [#mum]", 20, 0, 2, -99, 99 );
+  hg467 = fs->make<TProfile>( "hg467", "PXB3 #Deltaz vs p_{t};log(p_{t} [GeV]);PXB3 <#Deltaz> [#mum]", 20, 0, 2, -199, 199 );
+
+  hg468 = fs->make<TProfile>( "hg468", "PXB3 #Deltax vs p_{t} +;log(p_{t} [GeV]);PXB3 <#Deltax> [#mum]", 20, 0, 2, -99, 99 );
+  hg469 = fs->make<TProfile>( "hg469", "PXB3 #Deltax vs p_{t} -;log(p_{t} [GeV]);PXB3 <#Deltax> [#mum]", 20, 0, 2, -99, 99 );
+
+  hg470 = fs->make<TH1D>( "hg470", "PXB3 residuals #Deltax, p_{t} > 12;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+  hg471 = fs->make<TH1D>( "hg471", "PXB3 residuals #Deltaz, p_{t} > 12;PXB3 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  hg470_1 = fs->make<TH1D>( "hg470_1", "PXB3 residuals #Deltax, p_{t} > 12, lever1;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+  hg470_2 = fs->make<TH1D>( "hg470_2", "PXB3 residuals #Deltax, p_{t} > 12, lever2;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+  hg470_3 = fs->make<TH1D>( "hg470_3", "PXB3 residuals #Deltax, p_{t} > 12, lever3;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+
+  // width profiles:
+
+  hg472 = fs->make<TProfile>( "hg472", "PXB3 #sigma_{x} vs #phi;#phi_{2} [deg];PXB3 rms(#Deltax) [#mum]", 360, -180, 180, 0, 99 );
+  hg473 = fs->make<TProfile>( "hg473", "PXB3 #sigma_{z} vs #phi;#phi_{2} [deg];PXB3 rms(#Deltaz) [#mum]", 360, -180, 180, 0, 199 );
+
+  hg474 = fs->make<TProfile>( "hg474", "PXB3 #sigma_{x} vs z;z2 [cm];PXB3 rms(#Deltax) [#mum]", 80, -20, 20, 0, 99 );
+  hg475 = fs->make<TProfile>( "hg475", "PXB3 #sigma_{z} vs z;z2 [cm];PXB3 rms(#Deltaz) [#mum]", 80, -20, 20, 0, 199 );
+
+  hg476 = fs->make<TProfile>( "hg476", "PXB3 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB3 rms(#Deltax) [#mum]", 20, 0, 2, 0, 99 );
+  hg477 = fs->make<TProfile>( "hg477", "PXB3 #sigma_{z} vs p_{t};log(p_{t} [GeV]);PXB3 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
+
+  hg478 = fs->make<TProfile>( "hg478", "PXB3 #sigma_{x} vs dip;dip [deg];PXB3 rms(#Deltax) [#mum]", 80, -80, 80, 0, 99 );
+  hg479 = fs->make<TProfile>( "hg479", "PXB3 #sigma_{z} vs dip;dip [deg];PXB3 rms(#Deltaz) [#mum]", 80, -80, 80, 0, 199 );
+
+  hg480 = fs->make<TH1D>( "hg480", "PXB3 residuals #Deltax;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+  hg481 = fs->make<TH1D>( "hg481", "PXB3 residuals #Deltaz;PXB3 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  hg482 = fs->make<TH1D>( "hg482", "PXB3 residuals #Deltaz, 18 < |dip| < 50;PXB3 #Deltaz [#mum];hits", 100, -300, 300 );
+  hg483 = fs->make<TProfile>( "hg483", "PXB3 #sigma_{z} vs p_{t}, best dip;log(p_{t} [GeV]);PXB3 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
+
+  hg484 = fs->make<TProfile>( "hg484", "PXB3 #sigma_{x} vs inc;#phi_{inc2} [deg];PXB3 rms(#Deltax) [#mum]", 40, -10, 10, 0, 99 );
+
+  hg485 = fs->make<TProfile>( "hg485", "PXB3 #sigma_{x} vs #phi at 1 GeV;#phi_{2} [deg];PXB3 rms(#Deltax) [#mum]", 360, -180, 180, 0, 499 );
+
+  hg490 = fs->make<TH1D>( "hg490", "PXB3 residuals #Deltax;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+  hg491 = fs->make<TH1D>( "hg491", "PXB3 residuals #Deltaz;PXB3 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  hg492 = fs->make<TH1D>( "hg492", "PXB3 residuals #Deltax;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+  hg493 = fs->make<TH1D>( "hg493", "PXB3 residuals #Deltax;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+  hg494 = fs->make<TH1D>( "hg494", "PXB3 residuals #Deltax;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+  hg495 = fs->make<TH1D>( "hg495", "PXB3 residuals #Deltax;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+  hg496 = fs->make<TH1D>( "hg496", "PXB3 residuals #Deltax;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+
+
+
+  /// end fourth
   // 2+3 -> 1 triplets:
 
   h501 = fs->make<TH1D>( "h501", "PXB1 triplets z1;PXB1 z [cm];hits", 600, -30, 30 );
@@ -1202,7 +1957,7 @@ void Histos::init(TFileDirectory* fs)
 
   h509 = fs->make<TProfile>( "h509", "PXB1 angle of incidence;PXB1 #phi [deg];PXB1 #phi_{inc} [deg]", 180, -180, 180, -90, 90 );
 
-  h510 = fs->make<TH1D>( "h510", "PXB1 residuals #Deltax;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
+  h510 = fs->make<TH1D>( "h510", "PXB1 residuals #Deltax;PXB1 #Deltax [#mum];hits", 5000, -150, 150 );
   h511 = fs->make<TH1D>( "h511", "PXB1 residuals #Deltaz;PXB1 #Deltaz [#mum];hits", 100, -300, 300 );
 
   // mean resid profiles:
@@ -1210,8 +1965,17 @@ void Histos::init(TFileDirectory* fs)
   h512 = fs->make<TProfile>( "h512", "PXB1 #Deltax vs #phi;PXB1 #phi [deg];PXB1 <#Deltax> [#mum]", 180, -180, 180, -199, 199 );
   h513 = fs->make<TProfile>( "h513", "PXB1 #Deltaz vs #phi;PXB1 #phi [deg];PXB1 <#Deltaz> [#mum]", 180, -180, 180, -199, 199 );
 
-  h514 = fs->make<TProfile>( "h514", "PXB1 #Deltax vs z;PXB1 z [cm];PXB1 <#Deltax> [#mum]", 80, -20, 20, -199, 199 );
-  h515 = fs->make<TProfile>( "h515", "PXB1 #Deltaz vs z;PXB1 z [cm];PXB1 <#Deltaz>  [#mum]", 80, -20, 20, -199, 199 );
+  h514 = fs->make<TProfile>( "h514", "PXB1 #Deltax vs z;PXB1 z [cm];PXB1 <#Deltax> [#mum]", 100, -25, 25, -199, 199 );
+  h515 = fs->make<TProfile>( "h515", "PXB1 #Deltaz vs z;PXB1 z [cm];PXB1 <#Deltaz>  [#mum]", 100, -25, 25, -199, 199 );
+
+  h514_out_bmo2 = fs->make<TProfile>("h514_out_bmo2", "PXB1 #Deltax vs z [cm];PXB1 <#Deltax> [#mum]", 100, -25, 25, -199, 199);
+  h515_out_bmo2 = fs->make<TProfile>("h515_out_bmo2", "PXB1 #Deltaz vs z [cm];PXB1 <#Deltaz> [#mum]", 100, -25, 25, -199, 199);
+  h524_out_bmo2 = fs->make<TProfile>("h524_out_bmo2", "PXB1 #Deltax vs z [cm];PXB1 <#Deltax> [#mum]", 100, -25, 25, -199, 199);
+  h525_out_bmo2 = fs->make<TProfile>("h525_out_bmo2", "PXB1 #Deltaz vs z [cm];PXB1 <#Deltaz> [#mum]", 100, -25, 25, -199, 199);
+  h514_in_bmo2  = fs->make<TProfile>("h514_in_bmo2" , "PXB1 #Deltax vs z [cm];PXB1 <#Deltax> [#mum]", 100, -25, 25, -199, 199);
+  h515_in_bmo2  = fs->make<TProfile>("h515_in_bmo2" , "PXB1 #Deltaz vs z [cm];PXB1 <#Deltaz> [#mum]", 100, -25, 25, -199, 199);
+  h524_in_bmo2  = fs->make<TProfile>("h524_in_bmo2" , "PXB1 #Deltax vs z [cm];PXB1 <#Deltax> [#mum]", 100, -25, 25, -199, 199);
+  h525_in_bmo2  = fs->make<TProfile>("h525_in_bmo2" , "PXB1 #Deltaz vs z [cm];PXB1 <#Deltaz> [#mum]", 100, -25, 25, -199, 199);
 
   h516 = fs->make<TProfile>( "h516", "PXB1 #Deltax vs p_{t};log(p_{t} [GeV]);PXB1 <#Deltax> [#mum]", 20, 0, 2, -199, 199 );
   h517 = fs->make<TProfile>( "h517", "PXB1 #Deltaz vs p_{t};log(p_{t} [GeV]);PXB1 <#Deltaz>  [#mum]", 20, 0, 2, -199, 199 );
@@ -1219,28 +1983,112 @@ void Histos::init(TFileDirectory* fs)
   h518 = fs->make<TProfile>( "h518", "PXB1 #Deltax vs p_{t} +;log(p_{t} [GeV]);PXB1 <#Deltax> [#mum]", 20, 0, 2, -199, 199 );
   h519 = fs->make<TProfile>( "h519", "PXB1 #Deltax vs p_{t} -;log(p_{t} [GeV]);PXB1 <#Deltax> [#mum]", 20, 0, 2, -199, 199 );
 
-  h520 = fs->make<TH1D>( "h520", "PXB1 residuals #Deltax, p_{t} > 12;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
-  h521 = fs->make<TH1D>( "h521", "PXB1 residuals #Deltaz, p_{t} > 12;PXB1 #Deltaz [#mum];hits", 100, -300, 300 );
+  h520 = fs->make<TH1D>( "h520", "PXB1 residuals #Deltax, p_{t} > 12;PXB1 #Deltax [#mum];hits", 3000, -150, 150 );
+  h521 = fs->make<TH1D>( "h521", "PXB1 residuals #Deltaz, p_{t} > 12;PXB1 #Deltaz [#mum];hits", 3000, -300, 300 );
+  h520_out_zplus = fs->make<TH1D>( "h520_out_zplus", "PXB1 residuals #Deltax, p_{t} > 12, outward-facing modules, z+;PXB1 #Deltax [#mum];hits", 3000, -150, 150 );
+  h520_out_zminus = fs->make<TH1D>( "h520_out_zminus", "PXB1 residuals #Deltax, p_{t} > 12, outward-facing modules, z-;PXB1 #Deltax [#mum];hits", 3000, -150, 150 );
+  h520_in_zplus = fs->make<TH1D>( "h520_in_zplus", "PXB1 residuals #Deltax, p_{t} > 12, inward-facing modules, z+;PXB1 #Deltax [#mum];hits", 3000, -150, 150 );
+  h520_in_zminus = fs->make<TH1D>( "h520_in_zminus", "PXB1 residuals #Deltax, p_{t} > 12, inward-facing modules, z-;PXB1 #Deltax [#mum];hits", 3000, -150, 150 );
+  h521_out_zplus = fs->make<TH1D>( "h521_out_zplus", "PXB1 residuals #Deltaz, p_{t} > 12, outward-facing modules, z+;PXB1 #Deltaz [#mum];hits", 3000, -300, 300 );
+  h521_out_zminus = fs->make<TH1D>( "h521_out_zminus", "PXB1 residuals #Deltaz, p_{t} > 12, outward-facing modules, z-;PXB1 #Deltaz [#mum];hits", 3000, -300, 300 );
+  h521_in_zplus = fs->make<TH1D>( "h521_in_zplus", "PXB1 residuals #Deltaz, p_{t} > 12, inward-facing modules, z+;PXB1 #Deltaz [#mum];hits", 3000, -300, 300 );
+  h521_in_zminus = fs->make<TH1D>( "h521_in_zminus", "PXB1 residuals #Deltaz, p_{t} > 12, inward-facing modules, z-;PXB1 #Deltaz [#mum];hits", 3000, -300, 300 );
 
-  h520_1 = fs->make<TH1D>( "h520_1", "PXB1 residuals #Deltax, p_{t} > 12, lever 1;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
-  h520_2 = fs->make<TH1D>( "h520_2", "PXB1 residuals #Deltax, p_{t} > 12, lever 2;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
-  h520_3 = fs->make<TH1D>( "h520_3", "PXB1 residuals #Deltax, p_{t} > 12, lever 3;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
-  h520_4 = fs->make<TH1D>( "h520_4", "PXB1 residuals #Deltax, p_{t} > 12, lever 4;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
-  h520_5 = fs->make<TH1D>( "h520_5", "PXB1 residuals #Deltax, p_{t} > 12, lever 5;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
+  h520_1 = fs->make<TH1D>( "h520_1", "PXB1 residuals #Deltax, p_{t} > 12, lever 1;PXB1 #Deltax [#mum];hits", 3000, -150, 150 );
+  h520_2 = fs->make<TH1D>( "h520_2", "PXB1 residuals #Deltax, p_{t} > 12, lever 2;PXB1 #Deltax [#mum];hits", 3000, -150, 150 );
+  h520_3 = fs->make<TH1D>( "h520_3", "PXB1 residuals #Deltax, p_{t} > 12, lever 3;PXB1 #Deltax [#mum];hits", 3000, -150, 150 );
+  h520_4 = fs->make<TH1D>( "h520_4", "PXB1 residuals #Deltax, p_{t} > 12, lever 4;PXB1 #Deltax [#mum];hits", 3000, -150, 150 );
+  h520_5 = fs->make<TH1D>( "h520_5", "PXB1 residuals #Deltax, p_{t} > 12, lever 5;PXB1 #Deltax [#mum];hits", 3000, -150, 150 );
+
+  h520_out = fs->make<TH1D>( "h520_out", "PXB1 residuals #Deltax, p_{t} > 12, outward-facing modules;PXB1 #Deltax [#mum];hits", 3000, -150, 150 );
+  h520_in = fs->make<TH1D>( "h520_in", "PXB1 residuals #Deltax, p_{t} > 12, inward-facing modules;PXB1 #Deltax [#mum];hits", 3000, -150, 150 );
+  h521_out = fs->make<TH1D>( "h521_out", "PXB1 residuals #Deltaz, p_{t} > 12, outward-facing modules;PXB1 #Deltaz [#mum];hits", 3000, -300, 300 );
+  h521_in = fs->make<TH1D>( "h521_in", "PXB1 residuals #Deltaz, p_{t} > 12, inward-facing modules;PXB1 #Deltaz [#mum];hits", 3000, -300, 300 );
+
+  h514_in = fs->make<TProfile>( "h514_in", "PXB1 #Deltax vs z inward-facing modules;PXB1 z [cm];PXB1 <#Deltax> [#mum]", 100, -25, 25, -199, 199 );
+  h515_in = fs->make<TProfile>( "h515_in", "PXB1 #Deltaz vs z inward-facing modules;PXB1 z [cm];PXB1 <#Deltaz>  [#mum]", 100, -25, 25, -199, 199 );
+  h514_out = fs->make<TProfile>( "h514_out", "PXB1 #Deltax vs z outward-facing modules;PXB1 z [cm];PXB1 <#Deltax> [#mum]", 100, -25, 25, -199, 199 );
+  h515_out = fs->make<TProfile>( "h515_out", "PXB1 #Deltaz vs z outward-facing modules;PXB1 z [cm];PXB1 <#Deltaz>  [#mum]", 100, -25, 25, -199, 199 );
+
+  h520_centr_out = fs->make<TH1D>( "h520_centr_out", "PXB1 residuals #Deltax, p_{t} > 12;central outward-facing modules;PXB1 #Deltax [#mum];hits", 3000, -150, 150 );
+  h520_centr_in = fs->make<TH1D>( "h520_centr_in", "PXB1 residuals #Deltax, p_{t} > 12,central inward-facing modules;PXB1 #Deltax [#mum];hits", 3000, -150, 150 );
+  h521_centr_out = fs->make<TH1D>( "h521_centr_out", "PXB1 residuals #Deltaz, p_{t} > 12,central outward-facing modules;PXB1 #Deltaz [#mum];hits", 3000, -300, 300 );
+  h521_centr_in = fs->make<TH1D>( "h521_centr_in", "PXB1 residuals #Deltaz, p_{t} > 12,central inward-facing modules;PXB1 #Deltaz [#mum];hits", 3000, -300, 300 );
+
+  h520_fwd_out = fs->make<TH1D>( "h520_fwd_out", "PXB1 residuals #Deltax, p_{t} > 12;forward outward-facing modules;PXB1 #Deltax [#mum];hits", 3000, -150, 150 );
+  h520_fwd_in = fs->make<TH1D>( "h520_fwd_in", "PXB1 residuals #Deltax, p_{t} > 12,forward inward-facing modules;PXB1 #Deltax [#mum];hits", 3000, -150, 150 );
+  h521_fwd_out = fs->make<TH1D>( "h521_fwd_out", "PXB1 residuals #Deltaz, p_{t} > 12,forward outward-facing modules;PXB1 #Deltaz [#mum];hits", 3000, -300, 300 );
+  h521_fwd_in = fs->make<TH1D>( "h521_fwd_in", "PXB1 residuals #Deltaz, p_{t} > 12,forward inward-facing modules;PXB1 #Deltaz [#mum];hits", 3000, -300, 300 );
+
+
+  h520_mod1 = fs->make<TH1D>( "h520_mod1", "PXB1 Module 1 residuals #Deltax, p_{t} > 12;PXB1 #Deltax [#mum];hits ", 3000, -150, 150 );
+  h520_mod2 = fs->make<TH1D>( "h520_mod2", "PXB1 Module 2 residuals #Deltax, p_{t} > 12;PXB1 #Deltax [#mum];hits ", 3000, -150, 150 );
+  h520_mod3 = fs->make<TH1D>( "h520_mod3", "PXB1 Module 3 residuals #Deltax, p_{t} > 12;PXB1 #Deltax [#mum];hits ", 3000, -150, 150 );
+  h520_mod4 = fs->make<TH1D>( "h520_mod4", "PXB1 Module 4 residuals #Deltax, p_{t} > 12;PXB1 #Deltax [#mum];hits ", 3000, -150, 150 );
+  h520_mod5 = fs->make<TH1D>( "h520_mod5", "PXB1 Module 5 residuals #Deltax, p_{t} > 12;PXB1 #Deltax [#mum];hits ", 3000, -150, 150 );
+  h520_mod6 = fs->make<TH1D>( "h520_mod6", "PXB1 Module 6 residuals #Deltax, p_{t} > 12;PXB1 #Deltax [#mum];hits ", 3000, -150, 150 );
+  h520_mod7 = fs->make<TH1D>( "h520_mod7", "PXB1 Module 7 residuals #Deltax, p_{t} > 12;PXB1 #Deltax [#mum];hits ", 3000, -150, 150 );
+  h520_mod8 = fs->make<TH1D>( "h520_mod8", "PXB1 Module 8 residuals #Deltax, p_{t} > 12;PXB1 #Deltax [#mum];hits ", 3000, -150, 150 );
+
+  h521_mod1 = fs->make<TH1D>( "h521_mod1", "PXB1 Module 1  residuals #Deltaz, p_{t} > 12;PXB1 #Deltaz [#mum];hits", 3000, -300, 300 );
+  h521_mod2 = fs->make<TH1D>( "h521_mod2", "PXB1 Module 2  residuals #Deltaz, p_{t} > 12;PXB1 #Deltaz [#mum];hits", 3000, -300, 300 );
+  h521_mod3 = fs->make<TH1D>( "h521_mod3", "PXB1 Module 3  residuals #Deltaz, p_{t} > 12;PXB1 #Deltaz [#mum];hits", 3000, -300, 300 );
+  h521_mod4 = fs->make<TH1D>( "h521_mod4", "PXB1 Module 4  residuals #Deltaz, p_{t} > 12;PXB1 #Deltaz [#mum];hits", 3000, -300, 300 );
+  h521_mod5 = fs->make<TH1D>( "h521_mod5", "PXB1 Module 5  residuals #Deltaz, p_{t} > 12;PXB1 #Deltaz [#mum];hits", 3000, -300, 300 );
+  h521_mod6 = fs->make<TH1D>( "h521_mod6", "PXB1 Module 6  residuals #Deltaz, p_{t} > 12;PXB1 #Deltaz [#mum];hits", 3000, -300, 300 );
+  h521_mod7 = fs->make<TH1D>( "h521_mod7", "PXB1 Module 7  residuals #Deltaz, p_{t} > 12;PXB1 #Deltaz [#mum];hits", 3000, -300, 300 );
+  h521_mod8 = fs->make<TH1D>( "h521_mod8", "PXB1 Module 8  residuals #Deltaz, p_{t} > 12;PXB1 #Deltaz [#mum];hits", 3000, -300, 300 );
+
+  h520_new_mods = fs->make<TH1D>("h520_new_mods", "PXB1 new modules residuals #Deltax, p_{t} > 12; PXB1 #Deltax [#mum];hits", 5000, -150, 150);
+  h521_new_mods = fs->make<TH1D>("h521_new_mods", "PXB1 new modules residuals #Deltaz, p_{t} > 12; PXB1 #Deltaz [#mum];hits", 5000, -300, 300);
+  h510_new_mods = fs->make<TH1D>("h510_new_mods", "PXB1 new modules residuals #Deltax, p_{t} > 4; PXB1 #Deltax [#mum];hits", 5000, -150, 150);
+  h511_new_mods = fs->make<TH1D>("h511_new_mods", "PXB1 new modules residuals #Deltaz, p_{t} > 4; PXB1 #Deltaz [#mum];hits", 5000, -300, 300);
+
+  h520_303054876 = fs->make<TH1D>("h520_303054876", "PXB1 BPix_BpO_SEC1_LYR1_LDR1F_MOD3 residuals #Deltax , p_{t} > 12; PXB1 #Delta [#mum];hits", 5000, -150, 150);
+  h521_303054876 = fs->make<TH1D>("h521_303054876", "PXB1 BPix_BpO_SEC1_LYR1_LDR1F_MOD3 residuals #Deltaz , p_{t} > 12; PXB1 #Delta [#mum];hits", 5000, -300, 300);
+  h520_303063068 = fs->make<TH1D>("h520_303063068", "PXB1 BPix_BpO_SEC4_LYR1_LDR3F_MOD3 residuals #Deltax , p_{t} > 12; PXB1 #Delta [#mum];hits", 5000, -150, 150);
+  h521_303063068 = fs->make<TH1D>("h521_303063068", "PXB1 BPix_BpO_SEC4_LYR1_LDR3F_MOD3 residuals #Deltaz , p_{t} > 12; PXB1 #Delta [#mum];hits", 5000, -300, 300);
+  h520_303054864 = fs->make<TH1D>("h520_303054864", "PXB1 BPix_BmO_SEC2_LYR1_LDR1F_MOD1 residuals #Deltax , p_{t} > 12; PXB1 #Delta [#mum];hits", 5000, -150, 150);
+  h521_303054864 = fs->make<TH1D>("h521_303054864", "PXB1 BPix_BmO_SEC2_LYR1_LDR1F_MOD1 residuals #Deltaz , p_{t} > 12; PXB1 #Delta [#mum];hits", 5000, -300, 300);
+  h520_303054856 = fs->make<TH1D>("h520_303054856", "PXB1 BPix_BmO_SEC1_LYR1_LDR1F_MOD3 residuals #Deltax , p_{t} > 12; PXB1 #Delta [#mum];hits", 5000, -150, 150);
+  h521_303054856 = fs->make<TH1D>("h521_303054856", "PXB1 BPix_BmO_SEC1_LYR1_LDR1F_MOD3 residuals #Deltaz , p_{t} > 12; PXB1 #Delta [#mum];hits", 5000, -300, 300);
+  h520_303063056 = fs->make<TH1D>("h520_303063056", "PXB1 BPix_BmO_SEC4_LYR1_LDR3F_MOD1 residuals #Deltax , p_{t} > 12; PXB1 #Delta [#mum];hits", 5000, -150, 150);
+  h521_303063056 = fs->make<TH1D>("h521_303063056", "PXB1 BPix_BmO_SEC4_LYR1_LDR3F_MOD1 residuals #Deltaz , p_{t} > 12; PXB1 #Delta [#mum];hits", 5000, -300, 300);
+  h520_303071248 = fs->make<TH1D>("h520_303071248", "PXB1 BPix_BmO_SEC7_LYR1_LDR5F_MOD1 residuals #Deltax , p_{t} > 12; PXB1 #Delta [#mum];hits", 5000, -150, 150);
+  h521_303071248 = fs->make<TH1D>("h521_303071248", "PXB1 BPix_BmO_SEC7_LYR1_LDR5F_MOD1 residuals #Deltaz , p_{t} > 12; PXB1 #Delta [#mum];hits", 5000, -300, 300);
+  h510_303054876 = fs->make<TH1D>("h510_303054876", "PXB1 BPix_BpO_SEC1_LYR1_LDR1F_MOD3 residuals #Deltax , p_{t} > 4; PXB1 #Delta [#mum];hits", 5000, -150, 150);
+  h511_303054876 = fs->make<TH1D>("h511_303054876", "PXB1 BPix_BpO_SEC1_LYR1_LDR1F_MOD3 residuals #Deltaz , p_{t} > 4; PXB1 #Delta [#mum];hits", 5000, -300, 300);
+  h510_303063068 = fs->make<TH1D>("h510_303063068", "PXB1 BPix_BpO_SEC4_LYR1_LDR3F_MOD3 residuals #Deltax , p_{t} > 4; PXB1 #Delta [#mum];hits", 5000, -150, 150);
+  h511_303063068 = fs->make<TH1D>("h511_303063068", "PXB1 BPix_BpO_SEC4_LYR1_LDR3F_MOD3 residuals #Deltaz , p_{t} > 4; PXB1 #Delta [#mum];hits", 5000, -300, 300);
+  h510_303054864 = fs->make<TH1D>("h510_303054864", "PXB1 BPix_BmO_SEC2_LYR1_LDR1F_MOD1 residuals #Deltax , p_{t} > 4; PXB1 #Delta [#mum];hits", 5000, -150, 150);
+  h511_303054864 = fs->make<TH1D>("h511_303054864", "PXB1 BPix_BmO_SEC2_LYR1_LDR1F_MOD1 residuals #Deltaz , p_{t} > 4; PXB1 #Delta [#mum];hits", 5000, -300, 300);
+  h510_303054856 = fs->make<TH1D>("h510_303054856", "PXB1 BPix_BmO_SEC1_LYR1_LDR1F_MOD3 residuals #Deltax , p_{t} > 4; PXB1 #Delta [#mum];hits", 5000, -150, 150);
+  h511_303054856 = fs->make<TH1D>("h511_303054856", "PXB1 BPix_BmO_SEC1_LYR1_LDR1F_MOD3 residuals #Deltaz , p_{t} > 4; PXB1 #Delta [#mum];hits", 5000, -300, 300);
+  h510_303063056 = fs->make<TH1D>("h510_303063056", "PXB1 BPix_BmO_SEC4_LYR1_LDR3F_MOD1 residuals #Deltax , p_{t} > 4; PXB1 #Delta [#mum];hits", 5000, -150, 150);
+  h511_303063056 = fs->make<TH1D>("h511_303063056", "PXB1 BPix_BmO_SEC4_LYR1_LDR3F_MOD1 residuals #Deltaz , p_{t} > 4; PXB1 #Delta [#mum];hits", 5000, -300, 300);
+  h510_303071248 = fs->make<TH1D>("h510_303071248", "PXB1 BPix_BmO_SEC7_LYR1_LDR5F_MOD1 residuals #Deltax , p_{t} > 4; PXB1 #Delta [#mum];hits", 5000, -150, 150);
+  h511_303071248 = fs->make<TH1D>("h511_303071248", "PXB1 BPix_BmO_SEC7_LYR1_LDR5F_MOD1 residuals #Deltaz , p_{t} > 4; PXB1 #Delta [#mum];hits", 5000, -300, 300);
 
   // width profiles:
 
   h522 = fs->make<TProfile>( "h522", "PXB1 #sigma_{x} vs #phi;PXB1 #phi [deg];PXB1 rms(#Deltax) [#mum]", 360, -180, 180, 0, 199 );
   h523 = fs->make<TProfile>( "h523", "PXB1 #sigma_{z} vs #phi;PXB1 #phi [deg];PXB1 rms(#Deltaz)  [#mum]", 360, -180, 180, 0, 199 );
 
-  h524 = fs->make<TProfile>( "h524", "PXB1 #sigma_{x} vs z;PXB1 z [cm];PXB1 rms(#Deltax) [#mum]", 80, -20, 20, 0, 199 );
-  h525 = fs->make<TProfile>( "h525", "PXB1 #sigma_{z} vs z;PXB1 z [cm];PXB1 rms(#Deltaz) [#mum]", 80, -20, 20, 0, 199 );
+  h524 = fs->make<TProfile>( "h524", "PXB1 #sigma_{x} vs z;PXB1 z [cm];PXB1 rms(#Deltax) [#mum]", 100, -25, 25, 0, 199 );
+  h525 = fs->make<TProfile>( "h525", "PXB1 #sigma_{z} vs z;PXB1 z [cm];PXB1 rms(#Deltaz) [#mum]", 100, -25, 25, 0, 199 );
+
+  h524_in = fs->make<TProfile>( "h524_in", "PXB1 #sigma_{x} vs z inward facing modules;PXB1 z [cm];PXB1 rms(#Deltax) [#mum]", 100, -25, 25, 0, 199 );
+  h525_in = fs->make<TProfile>( "h525_in", "PXB1 #sigma_{z} vs z inward facing modules;;PXB1 z [cm];PXB1 rms(#Deltaz) [#mum]", 100, -25, 25, 0, 199 );
+  h524_out = fs->make<TProfile>( "h524_out", "PXB1 #sigma_{x} vs z outward facing modules;PXB1 z [cm];PXB1 rms(#Deltax) [#mum]", 100, -25, 25, 0, 199 );
+  h525_out = fs->make<TProfile>( "h525_out", "PXB1 #sigma_{z} vs z outward facing modules;;PXB1 z [cm];PXB1 rms(#Deltaz) [#mum]", 100, -25, 25, 0, 199 );
+
+
 
   h526 = fs->make<TProfile>( "h526", "PXB1 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB1 rms(#Deltax) [#mum]", 20, 0, 2, 0, 199 );
   h527 = fs->make<TProfile>( "h527", "PXB1 #sigma_{z} vs p_{t};log(p_{t} [GeV]);PXB1 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
 
-  h528 = fs->make<TProfile>( "h528", "PXB1 #sigma_{x} vs dip;dip [deg];PXB1 rms(#Deltax) [#mum]", 70, -70, 70, 0, 199 );
-  h529 = fs->make<TProfile>( "h529", "PXB1 #sigma_{z} vs dip;dip [deg];PXB1 rms(#Deltaz) [#mum]", 70, -70, 70, 0, 199 );
+  h528 = fs->make<TProfile>( "h528", "PXB1 #sigma_{x} vs dip;dip [deg];PXB1 rms(#Deltax) [#mum]", 80, -80, 80, 0, 199 );
+  h529 = fs->make<TProfile>( "h529", "PXB1 #sigma_{z} vs dip;dip [deg];PXB1 rms(#Deltaz) [#mum]", 80, -80, 80, 0, 199 );
 
   h530 = fs->make<TH1D>( "h530", "PXB1 residuals #Deltax;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
   h531 = fs->make<TH1D>( "h531", "PXB1 residuals #Deltaz;PXB1 #Deltaz [#mum];hits", 100, -300, 300 );
@@ -1260,6 +2108,96 @@ void Histos::init(TFileDirectory* fs)
   h544 = fs->make<TH1D>( "h544", "PXB1 residuals #Deltax;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
   h545 = fs->make<TH1D>( "h545", "PXB1 residuals #Deltax;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
   h546 = fs->make<TH1D>( "h546", "PXB1 residuals #Deltax;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
+
+
+
+
+  // 3+4 -> 2 triplets:
+
+  hf501 = fs->make<TH1D>( "hf501", "PXB2 triplets z1;PXB2 z [cm];hits", 600, -30, 30 );
+  hf502 = fs->make<TH1D>( "hf502", "PXB2 uphi-phi;#Delta#phi [rad];tracks", 100, -0.1, 0.1 );
+  hf503 = fs->make<TH1D>( "hf503", "PXB2 udca-dca;#Deltadca [cm];tracks", 100, -0.1, 0.1 );
+  hf504 = fs->make<TH1D>( "hf504", "PXB2 udip-dip;#Deltadip;tracks", 100, -0.1, 0.1 );
+  hf505 = fs->make<TH1D>( "hf505", "PXB2 uz0-z0;#Deltaz_{0};tracks", 100, -0.1, 0.1 );
+
+  hf508 = fs->make<TH1D>( "hf508", "PXB2 lever arm;extrapolation factor to PXB2;tracks", 1000, 0, 10 );
+
+  hf509 = fs->make<TProfile>( "hf509", "PXB2 angle of incidence;PXB2 #phi [deg];PXB2 #phi_{inc} [deg]", 180, -180, 180, -90, 90 );
+
+  hf510 = fs->make<TH1D>( "hf510", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf511 = fs->make<TH1D>( "hf511", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  // mean resid profiles:
+
+  hf512 = fs->make<TProfile>( "hf512", "PXB2 #Deltax vs #phi;PXB2 #phi [deg];PXB2 <#Deltax> [#mum]", 180, -180, 180, -199, 199 );
+  hf513 = fs->make<TProfile>( "hf513", "PXB2 #Deltaz vs #phi;PXB2 #phi [deg];PXB2 <#Deltaz> [#mum]", 180, -180, 180, -199, 199 );
+
+  hf514 = fs->make<TProfile>( "hf514", "PXB2 #Deltax vs z;PXB2 z [cm];PXB2 <#Deltax> [#mum]", 80, -20, 20, -199, 199 );
+  hf515 = fs->make<TProfile>( "hf515", "PXB2 #Deltaz vs z;PXB2 z [cm];PXB2 <#Deltaz>  [#mum]", 80, -20, 20, -199, 199 );
+
+  hf516 = fs->make<TProfile>( "hf516", "PXB2 #Deltax vs p_{t};log(p_{t} [GeV]);PXB2 <#Deltax> [#mum]", 20, 0, 2, -199, 199 );
+  hf517 = fs->make<TProfile>( "hf517", "PXB2 #Deltaz vs p_{t};log(p_{t} [GeV]);PXB2 <#Deltaz>  [#mum]", 20, 0, 2, -199, 199 );
+
+  hf518 = fs->make<TProfile>( "hf518", "PXB2 #Deltax vs p_{t} +;log(p_{t} [GeV]);PXB2 <#Deltax> [#mum]", 20, 0, 2, -199, 199 );
+  hf519 = fs->make<TProfile>( "hf519", "PXB2 #Deltax vs p_{t} -;log(p_{t} [GeV]);PXB2 <#Deltax> [#mum]", 20, 0, 2, -199, 199 );
+
+  hf520 = fs->make<TH1D>( "hf520", "PXB2 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf521 = fs->make<TH1D>( "hf521", "PXB2 residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  hf520_out_zplus = fs->make<TH1D>( "hf520_out_zplus", "PXB2 residuals #Deltax, p_{t} > 12, outward-facing modules, z+;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf520_out_zminus = fs->make<TH1D>( "hf520_out_zminus", "PXB2 residuals #Deltax, p_{t} > 12, outward-facing modules, z-;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf520_in_zplus = fs->make<TH1D>( "hf520_in_zplus", "PXB2 residuals #Deltax, p_{t} > 12, inward-facing modules, z+;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf520_in_zminus = fs->make<TH1D>( "hf520_in_zminus", "PXB2 residuals #Deltax, p_{t} > 12, inward-facing modules, z-;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf521_out_zplus = fs->make<TH1D>( "hf521_out_zplus", "PXB2 residuals #Deltaz, p_{t} > 12, outward-facing modules, z+;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+  hf521_out_zminus = fs->make<TH1D>( "hf521_out_zminus", "PXB2 residuals #Deltaz, p_{t} > 12, outward-facing modules, z-;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+  hf521_in_zplus = fs->make<TH1D>( "hf521_in_zplus", "PXB2 residuals #Deltaz, p_{t} > 12, inward-facing modules, z+;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+  hf521_in_zminus = fs->make<TH1D>( "hf521_in_zminus", "PXB2 residuals #Deltaz, p_{t} > 12, inward-facing modules, z-;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+
+  hf520_1 = fs->make<TH1D>( "hf520_1", "PXB2 residuals #Deltax, p_{t} > 12, lever 1;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf520_2 = fs->make<TH1D>( "hf520_2", "PXB2 residuals #Deltax, p_{t} > 12, lever 2;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf520_3 = fs->make<TH1D>( "hf520_3", "PXB2 residuals #Deltax, p_{t} > 12, lever 3;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf520_4 = fs->make<TH1D>( "hf520_4", "PXB2 residuals #Deltax, p_{t} > 12, lever 4;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf520_5 = fs->make<TH1D>( "hf520_5", "PXB2 residuals #Deltax, p_{t} > 12, lever 5;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+
+  hf520_out = fs->make<TH1D>( "hf520_out", "PXB2 residuals #Deltax, p_{t} > 12, outward-facing modules;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf520_in = fs->make<TH1D>( "hf520_in", "PXB2 residuals #Deltax, p_{t} > 12, in-facing modules;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf521_out = fs->make<TH1D>( "hf521_out", "PXB2 residuals #Deltaz, p_{t} > 12, outward-facing modules;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+  hf521_in = fs->make<TH1D>( "hf521_in", "PXB2 residuals #Deltaz, p_{t} > 12, inward-facing modules;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+
+  // width profiles:
+
+  hf522 = fs->make<TProfile>( "hf522", "PXB2 #sigma_{x} vs #phi;PXB2 #phi [deg];PXB2 rms(#Deltax) [#mum]", 360, -180, 180, 0, 199 );
+  hf523 = fs->make<TProfile>( "hf523", "PXB2 #sigma_{z} vs #phi;PXB2 #phi [deg];PXB2 rms(#Deltaz)  [#mum]", 360, -180, 180, 0, 199 );
+
+  hf524 = fs->make<TProfile>( "hf524", "PXB2 #sigma_{x} vs z;PXB2 z [cm];PXB2 rms(#Deltax) [#mum]", 80, -20, 20, 0, 199 );
+  hf525 = fs->make<TProfile>( "hf525", "PXB2 #sigma_{z} vs z;PXB2 z [cm];PXB2 rms(#Deltaz) [#mum]", 80, -20, 20, 0, 199 );
+
+  hf526 = fs->make<TProfile>( "hf526", "PXB2 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB2 rms(#Deltax) [#mum]", 20, 0, 2, 0, 199 );
+  hf527 = fs->make<TProfile>( "hf527", "PXB2 #sigma_{z} vs p_{t};log(p_{t} [GeV]);PXB2 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
+
+  hf528 = fs->make<TProfile>( "hf528", "PXB2 #sigma_{x} vs dip;dip [deg];PXB2 rms(#Deltax) [#mum]", 80, -80, 80, 0, 199 );
+  hf529 = fs->make<TProfile>( "hf529", "PXB2 #sigma_{z} vs dip;dip [deg];PXB2 rms(#Deltaz) [#mum]", 80, -80, 80, 0, 199 );
+
+  hf530 = fs->make<TH1D>( "hf530", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf531 = fs->make<TH1D>( "hf531", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  hf532 = fs->make<TH1D>( "hf532", "PXB2 residuals #Deltaz, 18 < |dip| < 50;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+  hf533 = fs->make<TProfile>( "hf533", "PXB2 #sigma_{z} vs p_{t}, best dip;log(p_{t} [GeV]);PXB2 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
+
+  hf534 = fs->make<TProfile>( "hf534", "PXB2 #sigma_{x} vs inc;PXB2 #phi_{inc} [deg];PXB2 rms(#Deltax) [#mum]", 60, -15, 15, 0, 199 );
+
+  hf535 = fs->make<TProfile>( "hf535", "PXB2 #sigma_{x} vs #phi at 1 GeV;PXB2 #phi [deg];PXB2 rms(#Deltax) [#mum]", 360, -180, 180, 0, 499 );
+
+  hf540 = fs->make<TH1D>( "hf540", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf541 = fs->make<TH1D>( "hf541", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  hf542 = fs->make<TH1D>( "hf542", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf543 = fs->make<TH1D>( "hf543", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf544 = fs->make<TH1D>( "hf544", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf545 = fs->make<TH1D>( "hf545", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+  hf546 = fs->make<TH1D>( "hf546", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
+
+
+
 
   // pixel track Karimaki:
 
@@ -1335,6 +2273,10 @@ void Histos::init(TFileDirectory* fs)
   h620_out_zminus = fs->make<TH1D>( "h620_out_zminus", "PXB1 residuals #Deltax, p_{t} > 12, outward-facing modules, z-;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
   h620_in_zplus = fs->make<TH1D>( "h620_in_zplus", "PXB1 residuals #Deltax, p_{t} > 12, inward-facing modules, z+;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
   h620_in_zminus = fs->make<TH1D>( "h620_in_zminus", "PXB1 residuals #Deltax, p_{t} > 12, inward-facing modules, z-;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
+  h621_out_zplus = fs->make<TH1D>( "h621_out_zplus", "PXB1 residuals #Deltaz, p_{t} > 12, outward-facing modules, z+;PXB1 #Deltaz [#mum];hits", 100, -150, 150 );
+  h621_out_zminus = fs->make<TH1D>( "h621_out_zminus", "PXB1 residuals #Deltaz, p_{t} > 12, outward-facing modules, z-;PXB1 #Deltaz [#mum];hits", 100, -150, 150 );
+  h621_in_zplus = fs->make<TH1D>( "h621_in_zplus", "PXB1 residuals #Deltaz, p_{t} > 12, inward-facing modules, z+;PXB1 #Deltaz [#mum];hits", 100, -150, 150 );
+  h621_in_zminus = fs->make<TH1D>( "h621_in_zminus", "PXB1 residuals #Deltaz, p_{t} > 12, inward-facing modules, z-;PXB1 #Deltaz [#mum];hits", 100, -150, 150 );
   h621 = fs->make<TH1D>( "h621", "PXB1 residuals #Deltax, p_{t} > 25;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
 
   // width profiles:
@@ -1345,7 +2287,7 @@ void Histos::init(TFileDirectory* fs)
 
   h626 = fs->make<TProfile>( "h626", "PXB1 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB1 rms(#Deltax) [#mum]", 20, 0, 2, 0, 99 );
 
-  h628 = fs->make<TProfile>( "h628", "PXB1 #sigma_{x} vs dip;dip [deg];PXB1 rms(#Deltax) [#mum]", 70, -70, 70, 0, 99 );
+  h628 = fs->make<TProfile>( "h628", "PXB1 #sigma_{x} vs dip;dip [deg];PXB1 rms(#Deltax) [#mum]", 80, -80, 80, 0, 99 );
 
   h630 = fs->make<TH1D>( "h630", "PXB1 residuals #Deltax;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
 
@@ -1354,7 +2296,7 @@ void Histos::init(TFileDirectory* fs)
   h635 = fs->make<TProfile>( "h635", "PXB1 #sigma_{x} vs #phi at 1 GeV;PXB1 #phi [deg];PXB1 rms(#Deltax) [#mum]", 360, -180, 180, 0, 499 );
 
   h650 = fs->make<TH1D>( "h650", "PXB1 residuals #Deltax;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
-				      
+
   h652 = fs->make<TH1D>( "h652", "PXB1 residuals #Deltax;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
   h653 = fs->make<TH1D>( "h653", "PXB1 residuals #Deltax;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
   h654 = fs->make<TH1D>( "h654", "PXB1 residuals #Deltax;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
@@ -1408,7 +2350,7 @@ void Histos::init(TFileDirectory* fs)
 
   h726 = fs->make<TProfile>( "h726", "TIB2 #sigma_{x} vs p_{t};log(p_{t} [GeV]);TIB2 rms(#Deltax) [#mum]", 20, 0, 2, 0, 499 );
 
-  h728 = fs->make<TProfile>( "h728", "TIB2 #sigma_{x} vs dip;dip [deg];TIB2 rms(#Deltax) [#mum]", 70, -70, 70, 0, 499 );
+  h728 = fs->make<TProfile>( "h728", "TIB2 #sigma_{x} vs dip;dip [deg];TIB2 rms(#Deltax) [#mum]", 80, -80, 80, 0, 499 );
 
   h730 = fs->make<TH1D>( "h730", "TIB2 residuals #Deltax;TIB2 #Deltax [#mum];hits", 100, -250, 250 );
 
@@ -1450,7 +2392,7 @@ void Histos::init(TFileDirectory* fs)
 
   h776 = fs->make<TProfile>( "h776", "TIB3 #sigma_{x} vs p_{t};log(p_{t} [GeV]);TIB3 rms(#Deltax) [#mum]", 20, 0, 2, 0, 499 );
 
-  h778 = fs->make<TProfile>( "h778", "TIB3 #sigma_{x} vs dip;dip [deg];TIB3 rms(#Deltax) [#mum]", 70, -70, 70, 0, 499 );
+  h778 = fs->make<TProfile>( "h778", "TIB3 #sigma_{x} vs dip;dip [deg];TIB3 rms(#Deltax) [#mum]", 80, -80, 80, 0, 499 );
 
   h780 = fs->make<TH1D>( "h780", "residuals TIB3 #Deltax;TIB3 #Deltax [#mum];hits", 100, -250, 250 );
 
@@ -1493,7 +2435,7 @@ void Histos::init(TFileDirectory* fs)
 
   h826 = fs->make<TProfile>( "h826", "TOB4 #sigma_{x} vs p_{t};log(p_{t} [GeV]);TOB4 rms(#Deltax) [#mum]", 20, 0, 2, 0, 499 );
 
-  h828 = fs->make<TProfile>( "h828", "TOB4 #sigma_{x} vs dip;dip [deg];TOB4 rms(#Deltax) [#mum]", 70, -70, 70, 0, 499 );
+  h828 = fs->make<TProfile>( "h828", "TOB4 #sigma_{x} vs dip;dip [deg];TOB4 rms(#Deltax) [#mum]", 80, -80, 80, 0, 499 );
 
   h830 = fs->make<TH1D>( "h830", "TOB4 residuals #Deltax;TOB4 #Deltax [#mum];hits", 100, -400, 400 );
 
@@ -1535,7 +2477,7 @@ void Histos::init(TFileDirectory* fs)
 
   h876 = fs->make<TProfile>( "h876", "TOB5 #sigma_{x} vs p_{t};log(p_{t} [GeV]);TOB5 rms(#Deltax) [#mum]", 20, 0, 2, 0, 499 );
 
-  h878 = fs->make<TProfile>( "h878", "TOB5 #sigma_{x} vs dip;dip [deg];TOB5 rms(#Deltax) [#mum]", 70, -70, 70, 0, 499 );
+  h878 = fs->make<TProfile>( "h878", "TOB5 #sigma_{x} vs dip;dip [deg];TOB5 rms(#Deltax) [#mum]", 80, -80, 80, 0, 499 );
 
   h880 = fs->make<TH1D>( "h880", "residuals TOB5 #Deltax;TOB5 #Deltax [#mum];hits", 100, -250, 250 );
 
@@ -1655,8 +2597,8 @@ void Histos::init(TFileDirectory* fs)
   i526 = fs->make<TProfile>( "i526", "PXB3 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB3 rms(#Deltax) [#mum]", 20, 0, 2, 0, 199 );
   i527 = fs->make<TProfile>( "i527", "PXB3 #sigma_{z} vs p_{t};log(p_{t} [GeV]);PXB3 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
 
-  i528 = fs->make<TProfile>( "i528", "PXB3 #sigma_{x} vs dip;dip [deg];PXB3 rms(#Deltax) [#mum]", 70, -70, 70, 0, 199 );
-  i529 = fs->make<TProfile>( "i529", "PXB3 #sigma_{z} vs dip;dip [deg];PXB3 rms(#Deltaz) [#mum]", 70, -70, 70, 0, 199 );
+  i528 = fs->make<TProfile>( "i528", "PXB3 #sigma_{x} vs dip;dip [deg];PXB3 rms(#Deltax) [#mum]", 80, -80, 80, 0, 199 );
+  i529 = fs->make<TProfile>( "i529", "PXB3 #sigma_{z} vs dip;dip [deg];PXB3 rms(#Deltaz) [#mum]", 80, -80, 80, 0, 199 );
 
   i530 = fs->make<TH1D>( "i530", "PXB3 residuals #Deltax;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
   i531 = fs->make<TH1D>( "i531", "PXB3 residuals #Deltaz;PXB3 #Deltaz [#mum];hits", 100, -300, 300 );
@@ -1676,6 +2618,191 @@ void Histos::init(TFileDirectory* fs)
   i544 = fs->make<TH1D>( "i544", "PXB3 residuals #Deltax;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
   i545 = fs->make<TH1D>( "i545", "PXB3 residuals #Deltax;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
   i546 = fs->make<TH1D>( "i546", "PXB3 residuals #Deltax;PXB3 #Deltax [#mum];hits", 100, -150, 150 );
+
+
+
+
+
+  ///fourth layer
+  // 2+3 -> 4 triplets:
+
+  g501 = fs->make<TH1D>( "g501", "PXB4 triplets z3;PXB4 z [cm];hits", 600, -30, 30 );
+  g502 = fs->make<TH1D>( "g502", "PXB4 uphi-phi;#delta#phi [rad];tracks", 100, -0.1, 0.1 );
+  g503 = fs->make<TH1D>( "g503", "PXB4 udca-dca;#Deltadca [cm];tracks", 100, -0.1, 0.1 );
+  g504 = fs->make<TH1D>( "g504", "PXB4 udip-dip;ddip;tracks", 100, -0.1, 0.1 );
+  g505 = fs->make<TH1D>( "g505", "PXB4 uz0-z0;#Deltaz0;tracks", 100, -0.1, 0.1 );
+
+  g507 = fs->make<TH1D>( "g507", "PXB4 lever arm;extrapolation factor to PXB3;tracks", 1000, 0, 10 );
+  g508 = fs->make<TProfile>( "g508", "PXB4 lever arm vs #phi;PXB4 #phi [deg];PXB4 extrapolation factor", 180, -180, 180, 0, 5 );
+
+  g509 = fs->make<TProfile>( "g509", "PXB4 angle of incidence;PXB4 #phi [deg];PXB4 #phi_{inc} [deg]", 180, -180, 180, -90, 90 );
+
+  g510 = fs->make<TH1D>( "g510", "PXB4 residuals #Deltax;PXB4 #Deltax [#mum];hits", 5000, -150, 150 );
+  g511 = fs->make<TH1D>( "g511", "PXB4 residuals #Deltaz;PXB4 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  // mean resid profiles:
+
+  g512 = fs->make<TProfile>( "g512", "PXB4 #Deltax vs #phi;PXB4 #phi [deg];PXB4 <#Deltax> [#mum]", 180, -180, 180, -199, 199 );
+  g512_out_zplus = fs->make<TProfile>( "g512_out_zplus", "PXB4 #Deltax vs #phi, outward-facing modules, z+;PXB4 #phi [deg];PXB4 <#Deltax> [#mum]", 180, -180, 180, -199, 199 );
+  g512_out_zminus = fs->make<TProfile>( "g512_out_zminus", "PXB4 #Deltax vs #phi, outward-facing modules, z-;PXB4 #phi [deg];PXB4 <#Deltax> [#mum]", 180, -180, 180, -199, 199 );
+  g512_in_zplus = fs->make<TProfile>( "g512_in_zplus", "PXB4 #Deltax vs #phi, inward-facing modules, z+;PXB4 #phi [deg];PXB4 <#Deltax> [#mum]", 180, -180, 180, -199, 199 );
+  g512_in_zminus = fs->make<TProfile>( "g512_in_zminus", "PXB4 #Deltax vs #phi, inward-facing modules, z-;PXB4 #phi [deg];PXB4 <#Deltax> [#mum]", 180, -180, 180, -199, 199 );
+  g513 = fs->make<TProfile>( "g513", "PXB4 #Deltaz vs #phi;PXB4 #phi [deg];PXB4 <#Deltaz> [#mum]", 180, -180, 180, -199, 199 );
+
+  g514 = fs->make<TProfile>( "g514", "PXB4 #Deltax vs z;PXB4 z [cm];PXB4 <#Deltax> [#mum]", 104, -26, 26, -199, 199 );
+  g515 = fs->make<TProfile>( "g515", "PXB4 #Deltaz vs z;PXB4 z [cm];PXB4 <#Deltaz>  [#mum]", 104, -26, 26, -199, 199 );
+
+  g516 = fs->make<TProfile>( "g516", "PXB4 #Deltax vs p_{t};log(p_{t} [GeV]);PXB4 <#Deltax> [#mum]", 20, 0, 2, -199, 199 );
+  g517 = fs->make<TProfile>( "g517", "PXB4 #Deltaz vs p_{t};log(p_{t} [GeV]);PXB4 <#Deltaz>  [#mum]", 20, 0, 2, -199, 199 );
+
+  g518 = fs->make<TProfile>( "g518", "PXB4 #Deltax vs p_{t} +;log(p_{t} [GeV]);PXB4 <#Deltax> [#mum]", 20, 0, 2, -199, 199 );
+  g519 = fs->make<TProfile>( "g519", "PXB4 #Deltax vs p_{t} -;log(p_{t} [GeV]);PXB4 <#Deltax> [#mum]", 20, 0, 2, -199, 199 );
+
+  g520 = fs->make<TH1D>( "g520", "PXB4 residuals #Deltax, p_{t} > 12;PXB4 #Deltax [#mum];hits", 5000, -150, 150 );
+  g520_out_zplus = fs->make<TH1D>( "g520_out_zplus", "PXB4 residuals #Deltax, p_{t} > 12, outward-facing modules, z+;PXB4 #Deltax [#mum];hits", 3000, -150, 150 );
+  g520_out_zminus = fs->make<TH1D>( "g520_out_zminus", "PXB4 residuals #Deltax, p_{t} > 12, outward-facing modules, z-;PXB4 #Deltax [#mum];hits", 3000, -150, 150 );
+  g520_in_zplus = fs->make<TH1D>( "g520_in_zplus", "PXB4 residuals #Deltax, p_{t} > 12, inward-facing modules, z+;PXB4 #Deltax [#mum];hits", 3000, -150, 150 );
+  g520_in_zminus = fs->make<TH1D>( "g520_in_zminus", "PXB4 residuals #Deltax, p_{t} > 12, inward-facing modules, z-;PXB4 #Deltax [#mum];hits", 3000, -150, 150 );
+  g521_out_zplus = fs->make<TH1D>( "g521_out_zplus", "PXB4 residuals #Deltaz, p_{t} > 12, outward-facing modules, z+;PXB4 #Deltaz [#mum];hits", 3000, -300, 300 );
+  g521_out_zminus = fs->make<TH1D>( "g521_out_zminus", "PXB4 residuals #Deltaz, p_{t} > 12, outward-facing modules, z-;PXB4 #Deltaz [#mum];hits", 3000, -300, 300 );
+  g521_in_zplus = fs->make<TH1D>( "g521_in_zplus", "PXB4 residuals #Deltaz, p_{t} > 12, inward-facing modules, z+;PXB4 #Deltaz [#mum];hits", 3000, -300, 300 );
+  g521_in_zminus = fs->make<TH1D>( "g521_in_zminus", "PXB4 residuals #Deltaz, p_{t} > 12, inward-facing modules, z-;PXB4 #Deltaz [#mum];hits", 3000, -300, 300 );
+  g521 = fs->make<TH1D>( "g521", "PXB4 residuals #Deltaz, p_{t} > 12;PXB4 #Deltaz [#mum];hits", 3000, -300, 300 );
+
+  g520_1 = fs->make<TH1D>( "g520_1", "PXB4 residuals #Deltax, p_{t} > 12, lever 1;PXB4 #Deltax [#mum];hits", 3000, -150, 150 );
+  g520_2 = fs->make<TH1D>( "g520_2", "PXB4 residuals #Deltax, p_{t} > 12, lever 2;PXB4 #Deltax [#mum];hits", 3000, -150, 150 );
+  g520_3 = fs->make<TH1D>( "g520_3", "PXB4 residuals #Deltax, p_{t} > 12, lever 3;PXB4 #Deltax [#mum];hits", 3000, -150, 150 );
+  g520_4 = fs->make<TH1D>( "g520_4", "PXB4 residuals #Deltax, p_{t} > 12, lever 4;PXB4 #Deltax [#mum];hits", 3000, -150, 150 );
+  g520_5 = fs->make<TH1D>( "g520_5", "PXB4 residuals #Deltax, p_{t} > 12, lever 5;PXB4 #Deltax [#mum];hits", 3000, -150, 150 );
+
+  g520_out = fs->make<TH1D>( "g520_out", "PXB4 residuals #Deltax, p_{t} > 12, outward-facing modules;PXB4 #Deltax [#mum];hits", 3000, -150, 150 );
+  g520_in = fs->make<TH1D>( "g520_in", "PXB4 residuals #Deltax, p_{t} > 12, in-facing modules;PXB4 #Deltax [#mum];hits", 3000, -150, 150 );
+  g521_out = fs->make<TH1D>( "g521_out", "PXB4 residuals #Deltaz, p_{t} > 12, outward-facing modules;PXB4 #Deltaz [#mum];hits", 3000, -300, 300 );
+  g521_in = fs->make<TH1D>( "g521_in", "PXB4 residuals #Deltaz, p_{t} > 12, inward-facing modules;PXB4 #Deltaz [#mum];hits", 3000, -300, 300 );
+
+  // width profiles:
+
+  g522 = fs->make<TProfile>( "g522", "PXB4 #sigma_{x} vs #phi;PXB4 #phi [deg];PXB4 rms(#Deltax) [#mum]", 360, -180, 180, 0, 199 );
+  g523 = fs->make<TProfile>( "g523", "PXB4 #sigma_{z} vs #phi;PXB4 #phi [deg];PXB4 rms(#Deltaz)  [#mum]", 360, -180, 180, 0, 199 );
+
+  g524 = fs->make<TProfile>( "g524", "PXB4 #sigma_{x} vs z;PXB4 z [cm];PXB4 rms(#Deltax) [#mum]", 104, -26, 26, -199, 199 );
+  g525 = fs->make<TProfile>( "g525", "PXB4 #sigma_{z} vs z;PXB4 z [cm];PXB4 rms(#Deltaz) [#mum]", 104, -26, 26, 0, 199 );
+
+  g526 = fs->make<TProfile>( "g526", "PXB4 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB4 rms(#Deltax) [#mum]", 20, 0, 2, 0, 199 );
+  g527 = fs->make<TProfile>( "g527", "PXB4 #sigma_{z} vs p_{t};log(p_{t} [GeV]);PXB4 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
+
+  g528 = fs->make<TProfile>( "g528", "PXB4 #sigma_{x} vs dip;dip [deg];PXB4 rms(#Deltax) [#mum]", 80, -80, 80, 0, 199 );
+  g529 = fs->make<TProfile>( "g529", "PXB4 #sigma_{z} vs dip;dip [deg];PXB4 rms(#Deltaz) [#mum]", 80, -80, 80, 0, 199 );
+
+  g530 = fs->make<TH1D>( "g530", "PXB4 residuals #Deltax;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+  g531 = fs->make<TH1D>( "g531", "PXB4 residuals #Deltaz;PXB4 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  g532 = fs->make<TH1D>( "g532", "PXB4 residuals #Deltaz, 18 < |dip| < 50;PXB4 #Deltaz [#mum];hits", 100, -300, 300 );
+  g533 = fs->make<TProfile>( "g533", "PXB4 #sigma_{z} vs p_{t}, best dip;log(p_{t} [GeV]);PXB4 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
+
+  g534 = fs->make<TProfile>( "g534", "PXB4 #sigma_{x} vs inc;PXB4 #phi_{inc} [deg];PXB4 rms(#Deltax) [#mum]", 60, -15, 15, 0, 199 );
+
+  g535 = fs->make<TProfile>( "g535", "PXB4 #sigma_{x} vs #phi at 1 GeV;PXB4 #phi [deg];PXB4 rms(#Deltax) [#mum]", 360, -180, 180, 0, 499 );
+
+  g540 = fs->make<TH1D>( "g540", "PXB4 residuals #Deltax;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+  g541 = fs->make<TH1D>( "g541", "PXB4 residuals #Deltaz;PXB4 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  g542 = fs->make<TH1D>( "g542", "PXB4 residuals #Deltax;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+  g543 = fs->make<TH1D>( "g543", "PXB4 residuals #Deltax;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+  g544 = fs->make<TH1D>( "g544", "PXB4 residuals #Deltax;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+  g545 = fs->make<TH1D>( "g545", "PXB4 residuals #Deltax;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+  g546 = fs->make<TH1D>( "g546", "PXB4 residuals #Deltax;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+
+
+ // 1+2 -> 4 triplets:
+
+  f501 = fs->make<TH1D>( "f501", "PXB4 triplets z3;PXB4 z [cm];hits", 600, -30, 30 );
+  f502 = fs->make<TH1D>( "f502", "PXB4 uphi-phi;#delta#phi [rad];tracks", 100, -0.1, 0.1 );
+  f503 = fs->make<TH1D>( "f503", "PXB4 udca-dca;#Deltadca [cm];tracks", 100, -0.1, 0.1 );
+  f504 = fs->make<TH1D>( "f504", "PXB4 udip-dip;ddip;tracks", 100, -0.1, 0.1 );
+  f505 = fs->make<TH1D>( "f505", "PXB4 uz0-z0;#Deltaz0;tracks", 100, -0.1, 0.1 );
+
+  f507 = fs->make<TH1D>( "f507", "PXB4 lever arm;extrapolation factor to PXB4;tracks", 100, 1, 2 );
+  f508 = fs->make<TProfile>( "f508", "PXB4 lever arm vs #phi;PXB4 #phi [deg];PXB4 extrapolation factor", 180, -180, 180, 0, 5 );
+
+  f509 = fs->make<TProfile>( "f509", "PXB4 angle of incidence;PXB4 #phi [deg];PXB4 #phi_{inc} [deg]", 180, -180, 180, -90, 90 );
+
+  f510 = fs->make<TH1D>( "f510", "PXB4 residuals #Deltax;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+  f511 = fs->make<TH1D>( "f511", "PXB4 residuals #Deltaz;PXB4 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  // mean resid profiles:
+
+  f512 = fs->make<TProfile>( "f512", "PXB4 #Deltax vs #phi;PXB4 #phi [deg];PXB4 <#Deltax> [#mum]", 180, -180, 180, -199, 199 );
+  f512_out_zplus = fs->make<TProfile>( "f512_out_zplus", "PXB4 #Deltax vs #phi, outward-facing modules, z+;PXB4 #phi [deg];PXB4 <#Deltax> [#mum]", 180, -180, 180, -199, 199 );
+  f512_out_zminus = fs->make<TProfile>( "f512_out_zminus", "PXB4 #Deltax vs #phi, outward-facing modules, z-;PXB4 #phi [deg];PXB4 <#Deltax> [#mum]", 180, -180, 180, -199, 199 );
+  f512_in_zplus = fs->make<TProfile>( "f512_in_zplus", "PXB4 #Deltax vs #phi, inward-facing modules, z+;PXB4 #phi [deg];PXB4 <#Deltax> [#mum]", 180, -180, 180, -199, 199 );
+  f512_in_zminus = fs->make<TProfile>( "f512_in_zminus", "PXB4 #Deltax vs #phi, inward-facing modules, z-;PXB4 #phi [deg];PXB4 <#Deltax> [#mum]", 180, -180, 180, -199, 199 );
+  f513 = fs->make<TProfile>( "f513", "PXB4 #Deltaz vs #phi;PXB4 #phi [deg];PXB4 <#Deltaz> [#mum]", 180, -180, 180, -199, 199 );
+
+  f514 = fs->make<TProfile>( "f514", "PXB4 #Deltax vs z;PXB4 z [cm];PXB4 <#Deltax> [#mum]", 104, -26, 26, -199, 199 );
+  f515 = fs->make<TProfile>( "f515", "PXB4 #Deltaz vs z;PXB4 z [cm];PXB4 <#Deltaz>  [#mum]", 104, -26, 26, -199, 199 );
+
+  f516 = fs->make<TProfile>( "f516", "PXB4 #Deltax vs p_{t};log(p_{t} [GeV]);PXB4 <#Deltax> [#mum]", 20, 0, 2, -199, 199 );
+  f517 = fs->make<TProfile>( "f517", "PXB4 #Deltaz vs p_{t};log(p_{t} [GeV]);PXB4 <#Deltaz>  [#mum]", 20, 0, 2, -199, 199 );
+
+  f518 = fs->make<TProfile>( "f518", "PXB4 #Deltax vs p_{t} +;log(p_{t} [GeV]);PXB4 <#Deltax> [#mum]", 20, 0, 2, -199, 199 );
+  f519 = fs->make<TProfile>( "f519", "PXB4 #Deltax vs p_{t} -;log(p_{t} [GeV]);PXB4 <#Deltax> [#mum]", 20, 0, 2, -199, 199 );
+
+  f520 = fs->make<TH1D>( "f520", "PXB4 residuals #Deltax, p_{t} > 12;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+  f520_out_zplus = fs->make<TH1D>( "f520_out_zplus", "PXB4 residuals #Deltax, p_{t} > 12, outward-facing modules, z+;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+  f520_out_zminus = fs->make<TH1D>( "f520_out_zminus", "PXB4 residuals #Deltax, p_{t} > 12, outward-facing modules, z-;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+  f520_in_zplus = fs->make<TH1D>( "f520_in_zplus", "PXB4 residuals #Deltax, p_{t} > 12, inward-facing modules, z+;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+  f520_in_zminus = fs->make<TH1D>( "f520_in_zminus", "PXB4 residuals #Deltax, p_{t} > 12, inward-facing modules, z-;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+  f521 = fs->make<TH1D>( "f521", "PXB4 residuals #Deltaz, p_{t} > 12;PXB4 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  f520_1 = fs->make<TH1D>( "f520_1", "PXB4 residuals #Deltax, p_{t} > 12, lever 1;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+  f520_2 = fs->make<TH1D>( "f520_2", "PXB4 residuals #Deltax, p_{t} > 12, lever 2;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+  f520_3 = fs->make<TH1D>( "f520_3", "PXB4 residuals #Deltax, p_{t} > 12, lever 3;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+  f520_4 = fs->make<TH1D>( "f520_4", "PXB4 residuals #Deltax, p_{t} > 12, lever 4;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+  f520_5 = fs->make<TH1D>( "f520_5", "PXB4 residuals #Deltax, p_{t} > 12, lever 5;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+
+  // width profiles:
+
+  f522 = fs->make<TProfile>( "f522", "PXB4 #sigma_{x} vs #phi;PXB4 #phi [deg];PXB4 rms(#Deltax) [#mum]", 360, -180, 180, 0, 199 );
+  f523 = fs->make<TProfile>( "f523", "PXB4 #sigma_{z} vs #phi;PXB4 #phi [deg];PXB4 rms(#Deltaz)  [#mum]", 360, -180, 180, 0, 199 );
+
+  f524 = fs->make<TProfile>( "f524", "PXB4 #sigma_{x} vs z;PXB4 z [cm];PXB4 rms(#Deltax) [#mum]", 104, -26, 26, -199, 199 );
+  f525 = fs->make<TProfile>( "f525", "PXB4 #sigma_{z} vs z;PXB4 z [cm];PXB4 rms(#Deltaz) [#mum]", 104, -26, 26, 0, 199 );
+
+  f526 = fs->make<TProfile>( "f526", "PXB4 #sigma_{x} vs p_{t};log(p_{t} [GeV]);PXB4 rms(#Deltax) [#mum]", 20, 0, 2, 0, 199 );
+  f527 = fs->make<TProfile>( "f527", "PXB4 #sigma_{z} vs p_{t};log(p_{t} [GeV]);PXB4 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
+
+  f528 = fs->make<TProfile>( "f528", "PXB4 #sigma_{x} vs dip;dip [deg];PXB4 rms(#Deltax) [#mum]", 80, -80, 80, 0, 199 );
+  f529 = fs->make<TProfile>( "f529", "PXB4 #sigma_{z} vs dip;dip [deg];PXB4 rms(#Deltaz) [#mum]", 80, -80, 80, 0, 199 );
+
+  f530 = fs->make<TH1D>( "f530", "PXB4 residuals #Deltax;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+  f531 = fs->make<TH1D>( "f531", "PXB4 residuals #Deltaz;PXB4 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  f532 = fs->make<TH1D>( "f532", "PXB4 residuals #Deltaz, 18 < |dip| < 50;PXB4 #Deltaz [#mum];hits", 100, -300, 300 );
+  f533 = fs->make<TProfile>( "f533", "PXB4 #sigma_{z} vs p_{t}, best dip;log(p_{t} [GeV]);PXB4 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
+
+  f534 = fs->make<TProfile>( "f534", "PXB4 #sigma_{x} vs inc;PXB4 #phi_{inc} [deg];PXB4 rms(#Deltax) [#mum]", 60, -15, 15, 0, 199 );
+
+  f535 = fs->make<TProfile>( "f535", "PXB4 #sigma_{x} vs #phi at 1 GeV;PXB4 #phi [deg];PXB4 rms(#Deltax) [#mum]", 360, -180, 180, 0, 499 );
+
+  f540 = fs->make<TH1D>( "f540", "PXB4 residuals #Deltax;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+  f541 = fs->make<TH1D>( "f541", "PXB4 residuals #Deltaz;PXB4 #Deltaz [#mum];hits", 100, -300, 300 );
+
+  f542 = fs->make<TH1D>( "f542", "PXB4 residuals #Deltax;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+  f543 = fs->make<TH1D>( "f543", "PXB4 residuals #Deltax;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+  f544 = fs->make<TH1D>( "f544", "PXB4 residuals #Deltax;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+  f545 = fs->make<TH1D>( "f545", "PXB4 residuals #Deltax;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+  f546 = fs->make<TH1D>( "f546", "PXB4 residuals #Deltax;PXB4 #Deltax [#mum];hits", 100, -150, 150 );
+
+
+
+
+
+
+
+
+  ///end fourth layer
+
 
   // resids:
 
@@ -2212,17 +3339,18 @@ void Pxl::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 	{
 	  static_cast<Histos&>(*this) = iter->second;
 	}
+
 	else
 	{
 	  edm::Service<TFileService> fs;
-	  
+
 	  std::stringstream runstr;
 	  runstr << "Run" << run;
 	  TFileDirectory subdir = fs->mkdir(runstr.str().c_str());
-	  
+
 	  runmap[run].init(&subdir);
 	  static_cast<Histos&>(*this) = runmap[run];
-	}	
+	}
 
 	bool hltSetupChanged = false;
 	std::cout<<_triggerSrc<<" "<<_triggerSrc.label()<<" "<<_triggerSrc.process()<<" "
@@ -2230,7 +3358,7 @@ void Pxl::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 
 	//const bool showTrigger = false;
 
-	if(_triggerSrc.label()!="") { 
+	if(_triggerSrc.label()!="") {
 	  if(!HLTConfig.init(iRun, iSetup, _triggerSrc.process(), hltSetupChanged))
 		throw cms::Exception("Failed to init HLT config");
 	}
@@ -2238,265 +3366,268 @@ void Pxl::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 
 void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , edm::ConsumesCollector && ic
 		  ){
+        int bmo2_l1_detId[] = {303054864, 303058948, 303058952};
+        int bpi6_l2_detId[] = {304193556 ,304193560 ,304193564 ,304193568};
+        int bpo3_l3_detId[] = {305205268 ,305205272 ,305205276 ,305205280 ,305209364 ,305209368 ,305209372 ,305209376 ,305213460 ,305213464 ,305213468 ,305213472};
+        int bmi3_l4_detId[] = {306204676 ,306204680 ,306204684 ,306204688 ,306208772 ,306208776 ,306208780 ,306208784 ,306212868 ,306212872 ,306212876 ,306212880 ,306216964 ,306216968 ,306216972 ,306216976};
+  if((int)iEvent.orbitNumber() >= (int)_OC_beginning && (int)iEvent.orbitNumber() <= (int)_OC_end ){
+    using namespace std;
+    using namespace edm;
+    using namespace reco;
+    using namespace math;
 
-  using namespace std;
-  using namespace edm;
-  using namespace reco;
-  using namespace math;
-  
-  const double pi = 4*atan(1);
-  const double wt = 180/pi;
-  const double twopi = 2*pi;
-  const double pihalf = 2*atan(1);
-  const double sqrtpihalf = sqrt(pihalf);
+    const double pi = 4*atan(1);
+    const double wt = 180/pi;
+    const double twopi = 2*pi;
+    const double pihalf = 2*atan(1);
+    const double sqrtpihalf = sqrt(pihalf);
 
-  myCounters::neve++;
-  if( myCounters::prevrun != iEvent.run() ){
+    myCounters::neve++;
+    if( myCounters::prevrun != iEvent.run() ){
 
-    time_t unixZeit = iEvent.time().unixTime();
-    cout << "new run " << iEvent.run();
-    cout << ", LumiBlock " << iEvent.luminosityBlock();
-    cout << " taken " << ctime(&unixZeit); // ctime has endline
+      time_t unixZeit = iEvent.time().unixTime();
+      cout << "new run " << iEvent.run();
+      cout << ", LumiBlock " << iEvent.luminosityBlock();
+      cout << " taken " << ctime(&unixZeit); // ctime has endline
 
-    myCounters::prevrun = iEvent.run();
+      myCounters::prevrun = iEvent.run();
 
-  }// new run
+    }// new run
 
-  int idbg = 0;  // printout for the first few events
-  if( myCounters::neve < 2 ) idbg = 1;
+    int idbg = 0;  // printout for the first few events
+    if( myCounters::neve < 1 ) idbg = 1;
 
-  int jdbg = 0; // special printout
+    int jdbg = 0; // special printout
 
-  if( idbg ) {
-    cout << endl;
-    cout << "run " << iEvent.run();
-    cout << ", LumiBlock " << iEvent.luminosityBlock();
-    cout << ", event " << iEvent.eventAuxiliary().event();
-    time_t unixZeit = iEvent.time().unixTime();
-    cout << ", taken " << ctime(&unixZeit); // ctime has endline
-  }
+    if( idbg ) {
+      cout << endl;
+      cout << "run " << iEvent.run();
+      cout << ", LumiBlock " << iEvent.luminosityBlock();
+      cout << ", event " << iEvent.eventAuxiliary().event();
+      time_t unixZeit = iEvent.time().unixTime();
+      cout << ", taken " << ctime(&unixZeit); // ctime has endline
+    }
 
 
   //----------------- HLT -------------------------------------------
 
   // // Trigger information, do only if the container is defined
-  if(_triggerSrc.label()!="" && idbg==1 ) { 
-    edm::Handle<edm::TriggerResults> triggerResults;
-    
-    iEvent.getByToken( t_triggerSrc_ , triggerResults);
-    
-    //   iEvent.getByLabel(_triggerSrc, triggerResults);
-    assert(triggerResults->size() == HLTConfig.size());
+    if(_triggerSrc.label()!="" && idbg==1 ) {
+      edm::Handle<edm::TriggerResults> triggerResults;
 
-    const edm::TriggerNames& triggerNames = iEvent.triggerNames(*triggerResults);
-    for(unsigned int i = 0; i < triggerResults->size(); ++i)
-      {
-	std::string triggerName = triggerNames.triggerName(i);
-	// this does not work in 74X
-	//std::pair<int, int> prescale = HLTConfig.prescaleValues(iEvent, iSetup, triggerName);
-	// this compiles&runs but I am not sure how to use it?
-	// std::pair<std::vector<std::pair<std::basic_string<char>, int> >, int> 
-	// 	prescale = HLTConfig.prescaleValuesInDetail(iEvent, iSetup, triggerName);
-	// std::cout << i << ": " << triggerName << ", " << prescale.second << std::endl;
+      iEvent.getByToken( t_triggerSrc_ , triggerResults);
+
+      //   iEvent.getByLabel(_triggerSrc, triggerResults);
+      assert(triggerResults->size() == HLTConfig.size());
+
+      const edm::TriggerNames& triggerNames = iEvent.triggerNames(*triggerResults);
+      for(unsigned int i = 0; i < triggerResults->size(); ++i){
+	       std::string triggerName = triggerNames.triggerName(i);
+      	// this does not work in 74X
+      	//std::pair<int, int> prescale = HLTConfig.prescaleValues(iEvent, iSetup, triggerName);
+      	// this compiles&runs but I am not sure how to use it?
+      	// std::pair<std::vector<std::pair<std::basic_string<char>, int> >, int>
+      	// 	prescale = HLTConfig.prescaleValuesInDetail(iEvent, iSetup, triggerName);
+      	// std::cout << i << ": " << triggerName << ", " << prescale.second << std::endl;
       }
-  }
+    }
 
-  //--------------------------------------------------------------------
-  // beam spot:
-  //CMSSW 74 
-  // edm::Handle<reco::BeamSpot> rbs;
-  // iEvent.getByLabel( "offlineBeamSpot", rbs );
+    //--------------------------------------------------------------------
+    // beam spot:
+    //CMSSW 74
+    // edm::Handle<reco::BeamSpot> rbs;
+    // iEvent.getByLabel( "offlineBeamSpot", rbs );
 
-  edm::Handle<reco::BeamSpot> rbs;
-  iEvent.getByToken( t_offlineBeamSpot_, rbs );
-  
-
+    edm::Handle<reco::BeamSpot> rbs;
+    iEvent.getByToken( t_offlineBeamSpot_, rbs );
 
 
-  XYZPoint bsP = XYZPoint(0,0,0);
-  int ibs = 0;
 
-  if( rbs.failedToGet() ) return;
-  if( ! rbs.isValid() ) return;
 
-  ibs = 1;
-  h000->Fill( rbs->betaStar() );
-  h001->Fill( rbs->emittanceX() );
-  h002->Fill( rbs->BeamWidthX()*1e4 );
-  h003->Fill( rbs->BeamWidthY()*1e4 );
-  h004->Fill( rbs->sigmaZ() );
-  h005->Fill( rbs->x0() );
-  h006->Fill( rbs->y0() );
-  h007->Fill( rbs->z0() );
-  h008->Fill( rbs->dxdz()*1e3 );
-  h009->Fill( rbs->dydz()*1e3 );
-  bsP = XYZPoint( rbs->x0(), rbs->y0(), rbs->z0() );
+    XYZPoint bsP = XYZPoint(0,0,0);
+    int ibs = 0;
 
-  double bx = rbs->BeamWidthX();
-  double by = rbs->BeamWidthY();
+    if( rbs.failedToGet() ) return;
+    if( ! rbs.isValid() ) return;
 
-  if( idbg ){
-    cout << "beam spot x " << rbs->x0();
-    cout << ", y " << rbs->y0();
-    cout << ", z " << rbs->z0();
-    cout << endl;
-  }
+    ibs = 1;
+    h000->Fill( rbs->betaStar() );
+    h001->Fill( rbs->emittanceX() );
+    h002->Fill( rbs->BeamWidthX()*1e4 );
+    h003->Fill( rbs->BeamWidthY()*1e4 );
+    h004->Fill( rbs->sigmaZ() );
+    h005->Fill( rbs->x0() );
+    h006->Fill( rbs->y0() );
+    h007->Fill( rbs->z0() );
+    h008->Fill( rbs->dxdz()*1e3 );
+    h009->Fill( rbs->dydz()*1e3 );
+    bsP = XYZPoint( rbs->x0(), rbs->y0(), rbs->z0() );
+
+    double bx = rbs->BeamWidthX();
+    double by = rbs->BeamWidthY();
+
+    if( idbg ){
+      cout << "beam spot x " << rbs->x0();
+      cout << ", y " << rbs->y0();
+      cout << ", z " << rbs->z0();
+      cout << endl;
+    }
 
   //--------------------------------------------------------------------
   //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoH;
-  iSetup.get<TrackerTopologyRcd>().get(tTopoH);
-  const TrackerTopology *tTopo=tTopoH.product();
+    edm::ESHandle<TrackerTopology> tTopoH;
+    iSetup.get<TrackerTopologyRcd>().get(tTopoH);
+    const TrackerTopology *tTopo=tTopoH.product();
 
 
-  // primary vertices:
+    // primary vertices:
 
-  Handle<VertexCollection> vertices;
-  //iEvent.getByLabel( "offlinePrimaryVertices", vertices );
-  iEvent.getByToken( t_offlinePrimaryVertices_,vertices );
+    Handle<VertexCollection> vertices;
+    //iEvent.getByLabel( "offlinePrimaryVertices", vertices );
+    iEvent.getByToken( t_offlinePrimaryVertices_,vertices );
 
 
 
-  if( vertices.failedToGet() ) return;
-  if( !vertices.isValid() ) return;
+    if( vertices.failedToGet() ) return;
+    if( !vertices.isValid() ) return;
 
-  int nvertex = vertices->size();
-  h010->Fill( nvertex );
+    int nvertex = vertices->size();
+    h010->Fill( nvertex );
 
-  // need vertex global point for tracks
-  // from #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
-  // Global points are three-dimensional by default
-  // typedef Global3DPoint  GlobalPoint;
-  // typedef Point3DBase< float, GlobalTag> Global3DPoint;
+    // need vertex global point for tracks
+    // from #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
+    // Global points are three-dimensional by default
+    // typedef Global3DPoint  GlobalPoint;
+    // typedef Point3DBase< float, GlobalTag> Global3DPoint;
 
-  XYZPoint vtxN = XYZPoint(0,0,0);
-  XYZPoint vtxP = XYZPoint(0,0,0);
+    XYZPoint vtxN = XYZPoint(0,0,0);
+    XYZPoint vtxP = XYZPoint(0,0,0);
 
-  double bestNdof = 0;
-  double maxSumPt = 0;
-  Vertex bestPvx;
+    double bestNdof = 0;
+    double maxSumPt = 0;
+    Vertex bestPvx;
 
-  for( VertexCollection::const_iterator iVertex = vertices->begin();
-      iVertex != vertices->end(); ++iVertex ) {
+    for( VertexCollection::const_iterator iVertex = vertices->begin();
+	 iVertex != vertices->end(); ++iVertex ) {
 
-    if( ! iVertex->isValid() )
-      h011->Fill( iVertex->z() );
+      if( ! iVertex->isValid() )
+	     h011->Fill( iVertex->z() );
 
-    else {
+      else {
 
-      if( iVertex->isFake() ) 
-	h012->Fill( iVertex->z() );
+	       if( iVertex->isFake() )
+	        h012->Fill( iVertex->z() );
 
-      else{
-	h013->Fill( iVertex->z() );
-	h014->Fill( iVertex->x() );
-	h015->Fill( iVertex->y() );
-	h016->Fill( iVertex->ndof() );
-	h017->Fill( iVertex->ndof() );
+	       else{
+            h013->Fill( iVertex->z() );
+            h014->Fill( iVertex->x() );
+            h015->Fill( iVertex->y() );
+            h016->Fill( iVertex->ndof() );
+            h017->Fill( iVertex->ndof() );
 
-	if( idbg ){
-	  cout << "vertex";
-	  cout << ": x " << iVertex->x();
-	  cout << ", y " << iVertex->y();
-	  cout << ", z " << iVertex->z();
-	  cout << ", ndof " << iVertex->ndof();
-	  cout << ", sumpt " << iVertex->p4().pt();
-	  cout << endl;
-	}
+        	  if( idbg ){
+        	    cout << "vertex";
+        	    cout << ": x " << iVertex->x();
+        	    cout << ", y " << iVertex->y();
+        	    cout << ", z " << iVertex->z();
+        	    cout << ", ndof " << iVertex->ndof();
+        	    cout << ", sumpt " << iVertex->p4().pt();
+        	    cout << endl;
+        	  }
 
-	if( iVertex->hasRefittedTracks() )
-	  h018->Fill( iVertex->z() ); // empty in Zmumu sample
-	else
-	  h019->Fill( iVertex->z() ); // all here: why?
+        	  if( iVertex->hasRefittedTracks() )
+        	     h018->Fill( iVertex->z() ); // empty in Zmumu sample
+        	  else
+        	     h019->Fill( iVertex->z() ); // all here: why?
 
-	if( iVertex->ndof() > bestNdof ) {
-	  bestNdof = iVertex->ndof();
-	  vtxN = XYZPoint( iVertex->x(), iVertex->y(), iVertex->z() );
-	}
+        	  if( iVertex->ndof() > bestNdof ) {
+        	    bestNdof = iVertex->ndof();
+        	    vtxN = XYZPoint( iVertex->x(), iVertex->y(), iVertex->z() );
+        	  }
 
-	h021->Fill( iVertex->p4().pt() );
+	          h021->Fill( iVertex->p4().pt() );
 
-	if( iVertex->p4().pt() > maxSumPt ) {
-	  maxSumPt = iVertex->p4().pt();
-	  vtxP = XYZPoint( iVertex->x(), iVertex->y(), iVertex->z() );
-	  bestPvx = *iVertex;
-	}
-      }// non-fake
-    }//valid
-  } // loop over vertices
+          	if( iVertex->p4().pt() > maxSumPt ) {
+          	  maxSumPt = iVertex->p4().pt();
+          	  vtxP = XYZPoint( iVertex->x(), iVertex->y(), iVertex->z() );
+          	  bestPvx = *iVertex;
+          	}
+	       }// non-fake
+      }//valid
+    } // loop over vertices
 
-  h022->Fill( maxSumPt );
+    h022->Fill( maxSumPt );
 
-  //if( maxSumPt < 1 ) return;
-  if(!singleParticleMC && maxSumPt < 1 ) return;
+    //if( maxSumPt < 1 ) return;
+    if(!singleParticleMC && maxSumPt < 1 ) return;
 
-  if( maxSumPt < 1 ) vtxP = vtxN;
+    if( maxSumPt < 1 ) vtxP = vtxN;
 
-  h023->Fill( vtxP.x() );
-  h024->Fill( vtxP.y() );
-  h025->Fill( vtxP.z() );
+    h023->Fill( vtxP.x() );
+    h024->Fill( vtxP.y() );
+    h025->Fill( vtxP.z() );
 
-  double xBS = 0;
-  double yBS = 0;
-  if( ibs ) {
-    xBS = bsP.x();
-    yBS = bsP.y();
-  }
-  else {
-    xBS = vtxP.x();
-    yBS = vtxP.y();
-  }
-
-  //--------------------------------------------------------------------
-  // MET:
-  if(0) {
-    edm::Handle< edm::View<reco::PFMET> > pfMEThandle;
-    //iEvent.getByLabel( "pfMet", pfMEThandle );
-    iEvent.getByToken(t_pfMet_, pfMEThandle );
-
-    if( !pfMEThandle.failedToGet() && pfMEThandle.isValid()){
-      
-      h026->Fill( pfMEThandle->front().sumEt() );
-      h027->Fill( pfMEThandle->front().et() );
+    double xBS = 0;
+    double yBS = 0;
+    if( ibs ) {
+      xBS = bsP.x();
+      yBS = bsP.y();
     }
-  } // if MET
+    else {
+      xBS = vtxP.x();
+      yBS = vtxP.y();
+    }
+
+    //--------------------------------------------------------------------
+    // MET:
+    if(0) {
+      edm::Handle< edm::View<reco::PFMET> > pfMEThandle;
+      //iEvent.getByLabel( "pfMet", pfMEThandle );
+      iEvent.getByToken(t_pfMet_, pfMEThandle );
+
+      if( !pfMEThandle.failedToGet() && pfMEThandle.isValid()){
+
+	       h026->Fill( pfMEThandle->front().sumEt() );
+	        h027->Fill( pfMEThandle->front().et() );
+      }
+    } // if MET
 
 
-  //--------------------------------------------------------------------
-  // get a fitter to refit TrackCandidates, the same fitter as used in standard reconstruction:
-  // Fitter = cms.string('KFFittingSmootherWithOutliersRejectionAndRK'),
-  // KalmanFilter
-  // RungeKutta
+    //--------------------------------------------------------------------
+    // get a fitter to refit TrackCandidates, the same fitter as used in standard reconstruction:
+    // Fitter = cms.string('KFFittingSmootherWithOutliersRejectionAndRK'),
+    // KalmanFilter
+    // RungeKutta
 
 
 #ifdef NEW_TRACKINGRECHITS
 
-  // Fitter
-  edm::ESHandle<TrajectoryFitter> aFitter;
-  iSetup.get<TrajectoryFitter::Record>().get("KFFittingSmootherWithOutliersRejectionAndRK",aFitter);
-  std::unique_ptr<TrajectoryFitter> theFitter = aFitter->clone();
-  
-  //----------------------------------------------------------------------------
-  // Transient Rechit Builders
-  edm::ESHandle<TransientTrackBuilder> theB;
-  iSetup.get<TransientTrackRecord>().get( "TransientTrackBuilder", theB );
+    // Fitter
+    edm::ESHandle<TrajectoryFitter> aFitter;
+    iSetup.get<TrajectoryFitter::Record>().get("KFFittingSmootherWithOutliersRejectionAndRK",aFitter);
+    std::unique_ptr<TrajectoryFitter> theFitter = aFitter->clone();
 
-  // Transient rec hits:
-  ESHandle<TransientTrackingRecHitBuilder> hitBuilder;
-  iSetup.get<TransientRecHitRecord>().get( _ttrhBuilder, hitBuilder );
+    //----------------------------------------------------------------------------
+    // Transient Rechit Builders
+    edm::ESHandle<TransientTrackBuilder> theB;
+    iSetup.get<TransientTrackRecord>().get( "TransientTrackBuilder", theB );
 
-  // Cloner, New from 71Xpre7
-  const TkTransientTrackingRecHitBuilder * builder = 
-    static_cast<TkTransientTrackingRecHitBuilder const *>(hitBuilder.product());
-  //dynamic_cast<TkTransientTrackingRecHitBuilder const *>(hitBuilder.product());
-  auto hitCloner = builder->cloner();
-  //static_cast<TkTransientTrackingRecHitBuilder const *>(hitBuilder.product())->cloner();
-  
-  theFitter->setHitCloner(&hitCloner);
+    // Transient rec hits:
+    ESHandle<TransientTrackingRecHitBuilder> hitBuilder;
+    iSetup.get<TransientRecHitRecord>().get( _ttrhBuilder, hitBuilder );
 
-#else 
+    // Cloner, New from 71Xpre7
+    const TkTransientTrackingRecHitBuilder * builder =
+      static_cast<TkTransientTrackingRecHitBuilder const *>(hitBuilder.product());
+    //dynamic_cast<TkTransientTrackingRecHitBuilder const *>(hitBuilder.product());
+    auto hitCloner = builder->cloner();
+    //static_cast<TkTransientTrackingRecHitBuilder const *>(hitBuilder.product())->cloner();
 
-  // old
+    theFitter->setHitCloner(&hitCloner);
+
+#else
+
+    // old
   ESHandle<TrajectoryFitter> TF;
   iSetup.get<TrajectoryFitter::Record>().get( "KFFittingSmootherWithOutliersRejectionAndRK", TF );
   const TrajectoryFitter* theFitter = TF.product();
@@ -2545,17 +3676,14 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
   }
 
   // loop over tracker detectors:
-  // This is just to test some parameters 
+  // This is just to test some parameters
 #if 0
   for( TrackerGeometry::DetContainer::const_iterator idet = pTG->dets().begin();
        idet != pTG->dets().end(); ++idet ) {
-
     DetId mydetId = (*idet)->geographicalId();
     uint32_t mysubDet = mydetId.subdetId();
-
-    if( mysubDet == PixelSubdetector::PixelBarrel || 
+    if( mysubDet == PixelSubdetector::PixelBarrel ||
 	mysubDet == PixelSubdetector::PixelEndcap ) {
-
     //TEST
     const GeomDet * myGeomDet = pTG->idToDet( mydetId );
     //Surface::GlobalPoint gp = myGeomDet->toGlobal( lp );
@@ -2568,7 +3696,6 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	if(lape.xx()>0.) tmp11= sqrt(lape.xx())*1E4;
 	float tmp13= 0.;
 	if(lape.yy()>0.) tmp13= sqrt(lape.yy())*1E4;
-
 	if( mysubDet == PixelSubdetector::PixelBarrel ) {
 	  cout << ": PXB layer " << tTopo->pxbLayer(mydetId);//PXBDetId(mydetId).layer();
 	  cout << ", ladder " << tTopo->pxbLadder(mydetId);//PXBDetId(mydetId).ladder();
@@ -2584,15 +3711,11 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
       }
     }
     cout<<endl;
-
     //    if( myCounters::neve == 1 ){
     if( myCounters::neve == 0 ){
-
       //cout << "Det " << mydetId.det();
       //cout << ", subDet " << mydetId.subdetId();
-
       if( mysubDet == PixelSubdetector::PixelBarrel ) {
-
 	cout << ": PXB layer " << tTopo->pxbLayer(mydetId);// PXBDetId(mydetId).layer();
 	cout << ", ladder " << tTopo->pxbLadder(mydetId);//PXBDetId(mydetId).ladder();
 	cout << ", module " << tTopo->pxbModule(mydetId);// PXBDetId(mydetId).module();
@@ -2615,21 +3738,16 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	cout << "\t" << (*idet)->rotation().zy();
 	cout << "\t" << (*idet)->rotation().zz();
 	cout << endl;
-
 	// normal vector: includes alignment (varies from module to module along z on one ladder)
 	// neighbouring ladders alternate with inward/outward orientation
-
 	cout << "normal";
 	cout << ": x " << (*idet)->surface().normalVector().x();
 	cout << ", y " << (*idet)->surface().normalVector().y();
 	cout << ", z " << (*idet)->surface().normalVector().z();
 	cout << ", f " << (*idet)->surface().normalVector().barePhi()*wt;
 	cout << endl;
-
       }//PXB
-
       if( mysubDet == PixelSubdetector::PixelEndcap ) {
-
 	cout << ": PXD side " << PXFDetId(mydetId).side();
 	cout << ", disk " << PXFDetId(mydetId).disk();
 	cout << ", blade " << PXFDetId(mydetId).blade();
@@ -2660,17 +3778,14 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	cout << ", z " << (*idet)->surface().normalVector().z();
 	cout << ", f " << (*idet)->surface().normalVector().barePhi()*wt;
 	cout << endl;
-
       }//PXD
-
     }//idbg
-
     } // if pixels
   }//idet
 #endif
 
 #if 0
-  edm::ESHandle<SiPixelLorentzAngle> SiPixelLorentzAngle_; 
+  edm::ESHandle<SiPixelLorentzAngle> SiPixelLorentzAngle_;
   iSetup.get<SiPixelLorentzAngleRcd>().get(SiPixelLorentzAngle_);
   std::map<unsigned int,float> detid_la= SiPixelLorentzAngle_->getLorentzAngles();
   std::map<unsigned int,float>::const_iterator it;
@@ -2684,7 +3799,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
   //----------------------------------------------------------------------------
   // Tracks:
- 
+
   double sumpt = 0;
   double sumq = 0;
   Surface::GlobalPoint origin = Surface::GlobalPoint(0,0,0);
@@ -2708,7 +3823,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
     h090->Fill( (iTrack->dxy(vtxP))*1E4 );
     h091->Fill( (iTrack->dxyError())*1E4 );
 
-    if(!singleParticleMC && 
+    if(!singleParticleMC &&
        (abs( iTrack->dxy(vtxP) ) > 5*iTrack->dxyError()) ) continue; // not prompt
 
 
@@ -2738,14 +3853,14 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
       cout << ", dxyv " << iTrack->dxy(vtxP)*1E4 << " um";
       cout << ", dzv " << iTrack->dz(vtxP)*1E1 << " mm";
       cout << setprecision(4);
-      cout << ", hits " << hp.numberOfHits(HitPattern::TRACK_HITS);/// assuming HitCategory =TRACK_HITS = 0
+      //cout << ", hits " << hp.numberOfHits(HitPattern::TRACK_HITS);/// assuming HitCategory =TRACK_HITS = 0
       cout << ", valid " << hp.numberOfValidTrackerHits();
       cout << endl;
     }
 
     double phi = iTrack->phi();
-    double dca = iTrack->d0(); // w.r.t. origin                               
-    //double dca = -iTrack->dxy(); // dxy = -d0                               
+    double dca = iTrack->d0(); // w.r.t. origin
+    //double dca = -iTrack->dxy(); // dxy = -d0
     double dip = iTrack->lambda();
     double z0  = iTrack->dz();
     double tet = pihalf - dip;
@@ -2769,24 +3884,24 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
     // if( hp.hasValidHitInFirstPixelBarrel() &&
     // 	hp.trackerLayersWithMeasurement() > 7 ) {
-    if( hp.hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1) && hp.trackerLayersWithMeasurement() > 7 ) { 
+    if( hp.hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1) && hp.trackerLayersWithMeasurement() > 7 ) {
       if( pt > 8 ) {
 
-	h040->Fill( bcap*1E4 );//26 um in Oct 2011, 21 um Apr 2012
-	h041->Fill( edca*1E4 );
-	h042->Fill( sbca );//1.02 in 2011 reReco
+      	h040->Fill( bcap*1E4 );//26 um in Oct 2011, 21 um Apr 2012
+      	h041->Fill( edca*1E4 );
+      	h042->Fill( sbca );//1.02 in 2011 reReco
 
       }
 
       // vs logpt:
       // profile of abs(dca) gives mean abs(dca):
-      // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2) 
+      // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
       // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
 
       h043->Fill( logpt, ebca*1E4 );
       if( abs(sbca) < 5 ) {
-	h044->Fill( logpt, sqrtpihalf*abs(bcap)*1E4 );
-	h045->Fill( logpt, sqrtpihalf*abs(sbca) );
+        	h044->Fill( logpt, sqrtpihalf*abs(bcap)*1E4 );
+        	h045->Fill( logpt, sqrtpihalf*abs(sbca) );
       }
 
     }//long tracks
@@ -2827,7 +3942,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
     //double tt = tan(tet);
 
-    double rinv = -kap; // Karimaki                                           
+    double rinv = -kap; // Karimaki
     double rho = 1/kap;
     double erd = 1.0 - kap*dca;
     double drd = dca * ( 0.5*kap*dca - 1.0 ); // 0.5 * kap * dca**2 - dca;
@@ -2863,12 +3978,12 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
       // s = alpha / kappa:
 
       if( sina >= 1.0 )
-	s1 = pi / kap;
+	     s1 = pi / kap;
       else{
-	if( sina <= -1.0 )
-	  s1 = -pi / kap;
-	else
-	  s1 = asin(sina) / kap;//always positive
+	       if( sina <= -1.0 )
+	        s1 = -pi / kap;
+	       else
+	        s1 = asin(sina) / kap;//always positive
       }
 
       // Check direction: limit to half-turn
@@ -2895,7 +4010,6 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
       DetId mydetId = (*idet)->geographicalId();
       uint32_t mysubDet = mydetId.subdetId();
-
       if( mysubDet != PixelSubdetector::PixelBarrel ) continue;
 
       /*
@@ -2908,19 +4022,19 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	cout << endl;
       */
 
-      if(// PXBDetId(mydetId).layer() 
+      if(// PXBDetId(mydetId).layer()
 	 tTopo->pxbLayer(mydetId) == 1 ) {
 
-	double dz = zR1 - (*idet)->position().z();
+	       double dz = zR1 - (*idet)->position().z();
 
-	if( abs(dz) > 4.0 ) continue;
+	       if( abs(dz) > 4.0 ) continue;
 
-	double df = fpos1 - (*idet)->position().barePhi();//track phi at R1 vs ladder phi
+	       double df = fpos1 - (*idet)->position().barePhi();//track phi at R1 vs ladder phi
 
-	if( df > pi ) df -= twopi;
-	else if( df < -pi ) df += twopi;
+	       if( df > pi ) df -= twopi;
+	       else if( df < -pi ) df += twopi;
 
-	if( abs(df)*wt > 36.0 ) continue;//coarse matching track to ladder
+	       if( abs(df)*wt > 36.0 ) continue;//coarse matching track to ladder
 
 	// normal vector: includes alignment (varies from module to module along z on one ladder)
 	// neighbouring ladders alternate with inward/outward orientation
@@ -2958,8 +4072,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  double f2 = 0;
 
 	  if( b < 0 ) {
-            f1 = 0.5 * ( dis - b ) / a;
-	    f2 = 2.0 * c / ( dis - b );
+        f1 = 0.5 * ( dis - b ) / a;
+        f2 = 2.0 * c / ( dis - b );
 	  }
 	  else{
             f1 = -0.5 * ( dis + b ) / a;
@@ -3009,6 +4123,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
     double rmin = 99.9;
     uint32_t innerDetId = 0;
+
+    int imod_lay1=0;
     double xPXB1 = 0;
     double yPXB1 = 0;
     double zPXB1 = 0;
@@ -3020,8 +4136,13 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
     double PXB1_clusProb=-99;
     double PXB2_clusProb=-99;
     double PXB3_clusProb=-99;
+    double PXB4_clusProb=-99;
     double PXB2_clusSizeX=-99;
     double PXB2_clusSizeY=-99;
+    double PXB3_clusSizeX=-99;
+    double PXB3_clusSizeY=-99;
+    //double PXB4_clusSizeX=-99;
+    //double PXB4_clusSizeY=-99;
 
     double xPXB2 = 0;
     double yPXB2 = 0;
@@ -3036,17 +4157,37 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
     double zPXB3 = 0;
     double uPXB3 = 0;
 
+    double xPXB4 = 0;
+    double yPXB4 = 0;
+    double zPXB4 = 0;
+    double uPXB4 = 0;
 
-    //double vPXB3 = 0;
-    //double ePXB3 = 0;
-    //double fPXB3 = 0;
+
+    double vPXB3 = 0;
+    double ePXB3 = 0;
+    double fPXB3 = 0;
 
     int n1 = 0;
     int n2 = 0;
     int n3 = 0;
+    int n4 = 0;
+    int n1_sector = 0;
+    int n2_sector = 0;
+    int n3_sector = 0;
+    int n4_sector = 0;
+    int n1_nm = 0;
+
+    int n1_303054876 = 0;
+    int n1_303063068 = 0;
+    int n1_303054864 = 0;
+    int n1_303054856 = 0;
+    int n1_303063056 = 0;
+    int n1_303071248 = 0;
+
     double phiN1 = 0;
     double phiN2 = 0;
     double phiN3 = 0;
+    double phiN4 = 0;
     //double clch1 = 0;
     double clch2 = 0;
     //double clch3 = 0;
@@ -3056,12 +4197,13 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
     int nrow1 = 0;
     int nrow2 = 0;
     int nrow3 = 0;
+    int nrow4 = 0;
     //double etaX1 = 0;
     double etaX2 = 0;
     //double etaX3 = 0;
     //double cogp1 = 0;
     double cogp2 = 0;
-    //double cogp3 = 0;
+    double cogp3 = 0;
     double xmid2 = 0;
     double ymid2 = 0;
     const GeomDet * det2 = NULL;
@@ -3070,6 +4212,15 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
     int xmax2 = 0;
     int zmin2 = 0;
     int zmax2 = 0;
+
+    double xmid3 = 0;
+    double ymid3 = 0;
+    const GeomDet * det3 = NULL;
+    //int ilad3 = 0;
+    //int xmin3 = 0;
+    //int xmax3 = 0;
+    int zmin3 = 0;
+    int zmax3 = 0;
 
     int nTIB1 = 0;
     double xTIB1 = 0;
@@ -3191,7 +4342,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
       double Q_f_Y = 0.0;//first
       double Q_l_Y = 0.0;//last
       double Q_m_Y = 0.0;//middle
-     
+
 
       if( (*irecHit)->isValid() ) {
 
@@ -3212,7 +4363,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  int ilad = tTopo->pxbLadder(detId);//PXBDetId(detId).ladder();
 	  imod = tTopo->pxbModule(detId);//PXBDetId(detId).module();
 	 // std::cout << " imod 1 "<< imod<< std::endl;
-
+	  ///To be seen
 	  if( ilay == 1 ){
 	    if(      ilad ==  5 ) halfmod = 1;
 	    else if( ilad ==  6 ) halfmod = 1;
@@ -3233,6 +4384,12 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( ilad == 33 ) halfmod = 1;
 	    if( ilad == 34 ) halfmod = 1;
 	  }
+	  if( ilay == 4 ){
+	    if( ilad == 11 ) halfmod = 1;
+	    if( ilad == 12 ) halfmod = 1;
+	    if( ilad == 33 ) halfmod = 1;
+	    if( ilad == 34 ) halfmod = 1;
+	  }
 
 	  if( idbg ) {
 	    cout << "  layer  " << tTopo->pxbLayer(detId);// PXBDetId(detId).layer();
@@ -3240,16 +4397,17 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    cout << ", module " << tTopo->pxbModule(detId);//PXBDetId(detId).module();
 	    cout << endl;
 	  }
-	 
+
 	  const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( &*(*irecHit) );
 	  // cout << transRecHit->localPositionError().xx()<< endl;
 
 	  if( pixhit->hasFilledProb() ){
-	   
+
 	    float  clusProb = pixhit->clusterProbability(0);
 	    if( ilay ==1) PXB1_clusProb = pixhit->clusterProbability(0);
 	    if( ilay ==2) PXB2_clusProb = pixhit->clusterProbability(0);
 	    if( ilay ==3) PXB3_clusProb = pixhit->clusterProbability(0);
+	    //if( ilay ==4) PXB4_clusProb = pixhit->clusterProbability(0);
 	    if( idbg ) cout << "  cluster prob " << clusProb << endl;
 	  }
 
@@ -3262,6 +4420,14 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	      PXB2_clusSizeX = clust->sizeX();
 	      PXB2_clusSizeY = clust->sizeY();
 	    }
+	    if( ilay ==3) {
+	      PXB3_clusSizeX = clust->sizeX();
+	      PXB3_clusSizeY = clust->sizeY();
+	    }
+	    /*if( ilay ==4) {
+	      PXB4_clusSizeX = clust->sizeX();
+	      PXB4_clusSizeY = clust->sizeY();
+	      }*/
 	    if( idbg ) {
 	      cout << setprecision(0);
 	      cout << "  charge " << clust->charge();
@@ -3311,7 +4477,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	      if( pixelsVec[i].x == xmin )
 		Q_f_X += pix_adc;
 	      else{
-		if( pixelsVec[i].x == xmax ) 
+		if( pixelsVec[i].x == xmax )
 		  Q_l_X += pix_adc;
 		else
 		  Q_m_X += pix_adc;
@@ -3324,12 +4490,12 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	      }
 
 	      // Y projection:
-	      if( pixelsVec[i].y == ymin ) 
+	      if( pixelsVec[i].y == ymin )
 		Q_f_Y += pix_adc;
 	      else{
-		if( pixelsVec[i].y == ymax ) 
+		if( pixelsVec[i].y == ymax )
 		  Q_l_Y += pix_adc;
-		else 
+		else
 		  Q_m_Y += pix_adc;
 	      }
 
@@ -3388,7 +4554,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    //dip -7.E+01, layer  2, ladder 10, module 2, x 139 - 140, z 408 - 415
 	    //row 139    50   397   107   100    71     0     0     0
 	    //row 140     0     0     0     0    48   130   246   239
- 
+
 	    h070->Fill( clch/1E3 );
 	    h071->Fill( clch/1E3*cos(dip) );
 	    h072->Fill( ncol );
@@ -3406,11 +4572,11 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
       // build transient hit:
 #ifdef NEW_TRACKINGRECHITS
       // for pre7
-      auto tmprh = 
+      auto tmprh =
 	(*irecHit)->cloneForFit(*builder->geometry()->idToDet((**irecHit).geographicalId()));
-      auto transRecHit = 
+      auto transRecHit =
 	hitCloner.makeShared(tmprh, initialTSOS);
-#else 
+#else
 
       TransientTrackingRecHit::RecHitPointer transRecHit = hitBuilder->build( &*(*irecHit), initialTSOS);
 
@@ -3436,7 +4602,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	//if( idbg ) cout << "  try to improve\n";
 
-	TrajectoryStateOnSurface propTSOS = 
+	TrajectoryStateOnSurface propTSOS =
 	  thePropagator->propagate( initialTSOS, transRecHit->det()->surface() );
 
 	if( propTSOS.isValid() ){
@@ -3564,8 +4730,38 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	h100->Fill( ilay ); // 1,2,3, 4
 
 	if( ilay == 1 ) {
-
+	  // cout << "layer 1 imod " << imod <<  " gZ "<<  gZ << endl;
 	  n1++;
+    for( unsigned int i = 0; i < sizeof(bmo2_l1_detId)/sizeof(bmo2_l1_detId[0]); i++){
+      if(detId == bmo2_l1_detId[i]) n1_sector++;
+    }
+    switch (detId) {
+      case 303054876:
+        n1_303054876++;
+        n1_nm++;
+        break;
+      case 303063068:
+        n1_303063068++;
+        n1_nm++;
+        break;
+      case 303054864:
+        n1_303054864++;
+        n1_nm++;
+        break;
+      case 303054856:
+        n1_303054856++;
+        n1_nm++;
+        break;
+      case 303063056:
+        n1_303063056++;
+        n1_nm++;
+        break;
+      case 303071248:
+        n1_303071248++;
+        n1_nm++;
+        break;
+    }
+
 	  xPXB1 = gX;
 	  yPXB1 = gY;
 	  zPXB1 = gZ;
@@ -3579,9 +4775,13 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  nrow1 = nrow;
 	  //etaX1 = etaX;
 	  //cogp1 = cogp;
+	  imod_lay1=imod ;
+
+
 
 	  h101->Fill( ilad );// 1..20
 	  h102->Fill( imod );// 1..8
+	  h102_vs_z->Fill( gZ, imod );// 1..8
 
 	  h103->Fill( gR ); // <R1> = 4.36 cm
 	  h104->Fill( gF*wt );
@@ -3670,6 +4870,9 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	if( ilay == 2 ){
 
 	  n2++;
+    for( unsigned int i = 0; i < sizeof(bpi6_l2_detId)/sizeof(bpi6_l2_detId[0]); i++){
+      if(detId == bpi6_l2_detId[i]) n2_sector++;
+    }
 	  xPXB2 = gX; // precise hit in CMS global coordinates
 	  yPXB2 = gY;
 	  zPXB2 = gZ;
@@ -3716,19 +4919,31 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	if( ilay == 3 ){
 
 	  n3++;
+    for( unsigned int i = 0; i < sizeof(bpo3_l3_detId)/sizeof(bpo3_l3_detId[0]); i++){
+      if(detId == bpo3_l3_detId[i]) n3_sector++;
+    }
 	  xPXB3 = gX;
 	  yPXB3 = gY;
 	  zPXB3 = gZ;
 	  uPXB3 = xloc;
-	  //vPXB3 = yloc;
-	  //ePXB3 = sqrt( vxloc );
-	  //fPXB3 = sqrt( vyloc );
+	  vPXB3 = yloc;
+	  ePXB3 = sqrt( vxloc );
+	  fPXB3 = sqrt( vyloc );
 	  phiN3 = phiN;
 	  //clch3 = clch;
 	  //ncol3 = ncol;
 	  nrow3 = nrow;
 	  //etaX3 = etaX;
-	  //cogp3 = cogp;
+	  cogp3 = cogp;
+	  xmid3 = xmid; // middle of sensor in global CMS coordinates
+	  ymid3 = ymid;
+	  //ilad3 = ilad;
+	  //xmin3 = xmin;
+	  //xmax3 = xmax;
+	  zmin3 = ymin;
+	  zmax3 = ymax;
+
+	  det3 = transRecHit->det();
 
 	  h301->Fill( ilad );//1..44
 	  h302->Fill( imod );//1..8
@@ -3749,6 +4964,45 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  }
 
 	}//PXB3
+	if( ilay == 4 ){
+
+	  n4++;
+    for( unsigned int i = 0; i < sizeof(bmi3_l4_detId)/sizeof(bmi3_l4_detId[0]); i++){
+      if(detId == bmi3_l4_detId[i]) n4_sector++;
+    }
+	  xPXB4 = gX;
+	  yPXB4 = gY;
+	  zPXB4 = gZ;
+	  uPXB4 = xloc;
+	  //vPXB4 = yloc;
+	  //ePXB4 = sqrt( vxloc );
+	  //fPXB4 = sqrt( vyloc );
+	  phiN4 = phiN;
+	  //clch4 = clch;
+	  //ncol4 = ncol;
+	  nrow4 = nrow;
+	  //etaX4 = etaX;
+	  //cogp4 = cogp;
+
+	  f301->Fill( ilad );//1..44
+	  f302->Fill( imod );//1..8
+
+	  f303->Fill( gR ); //  <R3> = 10.18 cm  ->phase 10.2 R4
+	  f304->Fill( gF*wt );
+	  f305->Fill( gZ );
+
+	  f306->Fill( gF*wt, gZ ); // phi-z of hit
+
+	  if( ilad == 11 ) halfmod = 1;
+	  if( ilad == 12 ) halfmod = 1;
+	  if( ilad == 33 ) halfmod = 1;
+	  if( ilad == 34 ) halfmod = 1;
+
+	  if( !halfmod ){
+	    f307->Fill( xloc, yloc ); // hit within one module
+	  }
+
+	}//PXB4
 
       }//PXB
 
@@ -3770,7 +5024,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
     std::vector<Trajectory> refitTrajectoryCollection = theFitter->fit( seed, coTTRHvec, initialTSOS );
 
-    if( refitTrajectoryCollection.size() > 0 ) { // should be either 0 or 1            
+    if( refitTrajectoryCollection.size() > 0 ) { // should be either 0 or 1
 
       const Trajectory& refitTrajectory = refitTrajectoryCollection.front();
 
@@ -3827,7 +5081,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	if( detId.subdetId() == 1 ){
 	  ilay = PXBDetId( detId ).layer();
 	}
-	
+
 	if( subDet == 1 && idbg ){//1=PXB
 	  cout << "  PXB layer " << ilay << endl;
 	}
@@ -3858,7 +5112,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	double Z = combinedPredictedState.globalPosition().z();
 
 	double xptch;
-	double yptch;	
+	double yptch;
 
 	if( subDet <  3 ){//1,2=pixel
 	  PixelTopology & pixelTopol = (PixelTopology&) iTM->recHit()->detUnit()->topology();
@@ -3872,10 +5126,10 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	}
 
 	if( subDet == 4 && idbg ){//4=TID
-	  cout << "  TID side " << TIDDetId(detId).side();
-	  cout << ", disk " << TIDDetId(detId).diskNumber();
-	  cout << ", ring " << TIDDetId(detId).ringNumber();
-	  cout << ", stereo " << TIDDetId(detId).isStereo();
+	  cout << "  TID side " << tTopo->tidSide(detId);
+	  //cout << ", disk " << tTopo->tidWheel(detId);
+	  cout << ", ring " << tTopo->tidRing(detId);
+	  cout << ", stereo " << tTopo->tidIsStereo(detId);
 	  cout << endl;
 	  cout << setprecision(4);
 	  cout << "  xHit " << xHit;
@@ -4069,7 +5323,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	  }//layer
 
-	  if(// PXBDetId( detId ).layer() 
+	  if(// PXBDetId( detId ).layer()
 	     tTopo->pxbLayer(detId)== 3 ) {
 
 	    if( pt >  4 ) k140->Fill( dx*1E4 );
@@ -4135,8 +5389,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  }//pt
 	  if( pt > 4 ) k308->Fill( alf_inc*wt );
 
-	  if(// TIBDetId( detId ).layer()
-	     tTopo->tibLayer(detId) == 1 && TIBDetId(detId).isRPhi() ) {
+	  if(// tTopo->tibLayer(detId)
+	     tTopo->tibLayer(detId) == 1 && tTopo->tibIsRPhi(detId) ) {
 	    k310->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
 	      k311->Fill( dx*1E4 );
@@ -4151,8 +5405,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k319->Fill( dx*1E4 );
 	  }//layer
 
-	  if( //TIBDetId( detId ).layer() 
-	      tTopo->tibLayer(detId) == 1 && TIBDetId(detId).isStereo() ) {
+	  if( //tTopo->tibLayer(detId)
+	      tTopo->tibLayer(detId) == 1 && tTopo->tibIsStereo(detId) ) {
 	    k320->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
 	      k321->Fill( dx*1E4 );
@@ -4167,8 +5421,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k329->Fill( dx*1E4 );
 	  }//layer
 
-	  if( //TIBDetId( detId ).layer()
-	      tTopo->tibLayer(detId) == 2 && TIBDetId(detId).isRPhi() ) {
+	  if( //tTopo->tibLayer(detId)
+	      tTopo->tibLayer(detId) == 2 && tTopo->tibIsRPhi(detId) ) {
 	    k330->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
 	      k331->Fill( dx*1E4 );
@@ -4183,8 +5437,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k339->Fill( dx*1E4 );
 	  }//layer
 
-	  if( //TIBDetId( detId ).layer()
-	      tTopo->tibLayer(detId) == 2 && TIBDetId(detId).isStereo() ) {
+	  if( //tTopo->tibLayer(detId)
+	      tTopo->tibLayer(detId) == 2 && tTopo->tibIsStereo(detId) ) {
 	    k340->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
 	      k341->Fill( dx*1E4 );
@@ -4199,7 +5453,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k349->Fill( dx*1E4 );
 	  }//layer
 
-	  if( //TIBDetId( detId ).layer() 
+	  if( //tTopo->tibLayer(detId)
 	     tTopo->tibLayer(detId)== 3 ) {
 	    k350->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
@@ -4215,7 +5469,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k359->Fill( dx*1E4 );
 	  }//layer
 
-	  if( //TIBDetId( detId ).layer() 
+	  if( //tTopo->tibLayer(detId)
 	     tTopo->tibLayer(detId)== 4 ) {
 	    k360->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
@@ -4248,10 +5502,10 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    k406->Fill( xptch*1E4, abs(dx)*1E4 );
 	  }
 
-	  if( TIDDetId(detId).ringNumber() == 1 ) {
+	  if( tTopo->tidRing(detId) == 1 ) {
 	    k410->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
-	      if( TIDDetId(detId).isRPhi() )
+	      if( tTopo->tidIsRPhi(detId) )
 		k411->Fill( dx*1E4 );
 	      else
 		k412->Fill( dx*1E4 );
@@ -4260,10 +5514,10 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    }
 	  }
 
-	  if( TIDDetId(detId).ringNumber() == 2 ) {
+	  if( tTopo->tidRing(detId) == 2 ) {
 	    k420->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
-	      if( TIDDetId(detId).isRPhi() )
+	      if( tTopo->tidIsRPhi(detId) )
 		k421->Fill( dx*1E4 );
 	      else
 		k422->Fill( dx*1E4 );
@@ -4272,10 +5526,10 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    }
 	  }
 
-	  if( TIDDetId(detId).ringNumber() == 3 ) {
+	  if( tTopo->tidRing(detId) == 3 ) {
 	    k430->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
-	      if( TIDDetId(detId).isRPhi() )
+	      if( tTopo->tidIsRPhi(detId) )
 		k431->Fill( dx*1E4 );
 	      else
 		k432->Fill( dx*1E4 );
@@ -4299,7 +5553,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  }//pt
 	  if( pt > 4 ) k508->Fill( alf_inc*wt ); //at 0, +-180
 
-	  if( TOBDetId( detId ).layer() == 1 && TOBDetId(detId).isRPhi() ) {
+	  if( tTopo->tobLayer(detId) == 1 && tTopo->tobIsRPhi(detId) ) {
 	    k510->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
 	      k511->Fill( dx*1E4 );
@@ -4314,7 +5568,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k519->Fill( dx*1E4 );
 	  }//layer
 
-	  if( TOBDetId( detId ).layer() == 1 && TOBDetId(detId).isStereo() ) {
+	  if( tTopo->tobLayer(detId) == 1 && tTopo->tobIsStereo(detId) ) {
 	    k520->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
 	      k521->Fill( dx*1E4 );
@@ -4329,7 +5583,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k529->Fill( dx*1E4 );
 	  }//layer
 
-	  if( TOBDetId( detId ).layer() == 2 && TOBDetId(detId).isRPhi() ) {
+	  if( tTopo->tobLayer(detId) == 2 && tTopo->tobIsRPhi(detId) ) {
 	    k530->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
 	      k531->Fill( dx*1E4 );
@@ -4344,7 +5598,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k539->Fill( dx*1E4 );
 	  }//layer
 
-	  if( TOBDetId( detId ).layer() == 2 && TOBDetId(detId).isStereo() ) {
+	  if( tTopo->tobLayer(detId) == 2 && tTopo->tobIsStereo(detId) ) {
 	    k540->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
 	      k541->Fill( dx*1E4 );
@@ -4359,7 +5613,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k549->Fill( dx*1E4 );
 	  }//layer
 
-	  if( TOBDetId( detId ).layer() == 3 ) {
+	  if( tTopo->tobLayer(detId) == 3 ) {
 	    k550->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
 	      k551->Fill( dx*1E4 );
@@ -4374,7 +5628,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k559->Fill( dx*1E4 );
 	  }//layer
 
-	  if( TOBDetId( detId ).layer() == 4 ) {
+	  if( tTopo->tobLayer(detId) == 4 ) {
 	    k560->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
 	      k561->Fill( dx*1E4 );
@@ -4389,7 +5643,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k569->Fill( dx*1E4 );
 	  }//layer
 
-	  if( TOBDetId( detId ).layer() == 5 ) {
+	  if( tTopo->tobLayer(detId) == 5 ) {
 	    k570->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
 	      k571->Fill( dx*1E4 );
@@ -4404,7 +5658,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k579->Fill( dx*1E4 );
 	  }//layer
 
-	  if( TOBDetId( detId ).layer() == 6 ) {
+	  if( tTopo->tobLayer(detId) == 6 ) {
 	    k580->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
 	      k581->Fill( dx*1E4 );
@@ -4432,19 +5686,19 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    k604->Fill( dx*1E4 );
 	    k605->Fill( R, abs(dx)*1E4 );
 	    k606->Fill( R, xptch*1E4 );
-	    if( TECDetId(detId).ringNumber() < 7 )
+	    if( tTopo->tecRing(detId) < 7 )
 	      k607->Fill( xptch*1E4, abs(dx)*1E4 );
 	  }//pt
 
-	  if( TECDetId(detId).isBackPetal() )
+	  if( tTopo->tecIsBackPetal(detId) )
 	    k608->Fill( combinedPredictedState.globalPosition().x(), combinedPredictedState.globalPosition().y() );
 	  else
 	    k609->Fill( combinedPredictedState.globalPosition().x(), combinedPredictedState.globalPosition().y() );
 
-	  if( TECDetId(detId).ringNumber() == 1 ) {
+	  if( tTopo->tecRing(detId) == 1 ) {
 	    k610->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
-	      if( TECDetId(detId).isRPhi() )
+	      if( tTopo->tecIsRPhi(detId) )
 		k611->Fill( dx*1E4 );
 	      else
 		k612->Fill( dx*1E4 );
@@ -4454,10 +5708,10 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k615->Fill( dx*1E4 );
 	  }//ring
 
-	  if( TECDetId(detId).ringNumber() == 2 ) {
+	  if( tTopo->tecRing(detId) == 2 ) {
 	    k620->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
-	      if( TECDetId(detId).isRPhi() )
+	      if( tTopo->tecIsRPhi(detId) )
 		k621->Fill( dx*1E4 );
 	      else
 		k622->Fill( dx*1E4 );
@@ -4467,10 +5721,10 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k625->Fill( dx*1E4 );
 	  }//ring
 
-	  if( TECDetId(detId).ringNumber() == 3 ) {
+	  if( tTopo->tecRing(detId) == 3 ) {
 	    k630->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
-	      if( TECDetId(detId).isRPhi() )
+	      if( tTopo->tecIsRPhi(detId) )
 		k631->Fill( dx*1E4 );
 	      else
 		k632->Fill( dx*1E4 );
@@ -4480,10 +5734,10 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k635->Fill( dx*1E4 );
 	  }//ring
 
-	  if( TECDetId(detId).ringNumber() == 4 ) {
+	  if( tTopo->tecRing(detId) == 4 ) {
 	    k640->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
-	      if( TECDetId(detId).isRPhi() )
+	      if( tTopo->tecIsRPhi(detId) )
 		k641->Fill( dx*1E4 );
 	      else
 		k642->Fill( dx*1E4 );
@@ -4493,10 +5747,10 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k645->Fill( dx*1E4 );
 	  }//ring
 
-	  if( TECDetId(detId).ringNumber() == 5 ) {
+	  if( tTopo->tecRing(detId) == 5 ) {
 	    k650->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
-	      if( TECDetId(detId).isRPhi() )
+	      if( tTopo->tecIsRPhi(detId) )
 		k651->Fill( dx*1E4 );
 	      else
 		k652->Fill( dx*1E4 );
@@ -4506,10 +5760,10 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k655->Fill( dx*1E4 );
 	  }//ring
 
-	  if( TECDetId(detId).ringNumber() == 6 ) {
+	  if( tTopo->tecRing(detId) == 6 ) {
 	    k660->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
-	      if( TECDetId(detId).isRPhi() )
+	      if( tTopo->tecIsRPhi(detId) )
 		k661->Fill( dx*1E4 );
 	      else
 		k662->Fill( dx*1E4 );
@@ -4519,10 +5773,10 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k665->Fill( dx*1E4 );
 	  }//ring
 
-	  if( TECDetId(detId).ringNumber() == 7 ) {
+	  if( tTopo->tecRing(detId) == 7 ) {
 	    k670->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
-	      if( TECDetId(detId).isRPhi() )
+	      if( tTopo->tecIsRPhi(detId) )
 		k671->Fill( dx*1E4 );
 	      else
 		k672->Fill( dx*1E4 );
@@ -4532,17 +5786,17 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k675->Fill( dx*1E4 );
 	  }//ring
 
-	  if( pt > 4 && TECDetId(detId).ringNumber() < 7 ) {
+	  if( pt > 4 && tTopo->tecRing(detId) < 7 ) {
 
-	    if( TECDetId(detId).wheelNumber() == 1 ) k681->Fill( dx*1E4 );
-	    if( TECDetId(detId).wheelNumber() == 2 ) k682->Fill( dx*1E4 );
-	    if( TECDetId(detId).wheelNumber() == 3 ) k683->Fill( dx*1E4 );
-	    if( TECDetId(detId).wheelNumber() == 4 ) k684->Fill( dx*1E4 );
-	    if( TECDetId(detId).wheelNumber() == 5 ) k685->Fill( dx*1E4 );
-	    if( TECDetId(detId).wheelNumber() == 6 ) k686->Fill( dx*1E4 );
-	    if( TECDetId(detId).wheelNumber() == 7 ) k687->Fill( dx*1E4 );
-	    if( TECDetId(detId).wheelNumber() == 8 ) k688->Fill( dx*1E4 );
-	    if( TECDetId(detId).wheelNumber() == 9 ) k689->Fill( dx*1E4 );
+	    if( tTopo->tecWheel(detId) == 1 ) k681->Fill( dx*1E4 );
+	    if( tTopo->tecWheel(detId) == 2 ) k682->Fill( dx*1E4 );
+	    if( tTopo->tecWheel(detId) == 3 ) k683->Fill( dx*1E4 );
+	    if( tTopo->tecWheel(detId) == 4 ) k684->Fill( dx*1E4 );
+	    if( tTopo->tecWheel(detId) == 5 ) k685->Fill( dx*1E4 );
+	    if( tTopo->tecWheel(detId) == 6 ) k686->Fill( dx*1E4 );
+	    if( tTopo->tecWheel(detId) == 7 ) k687->Fill( dx*1E4 );
+	    if( tTopo->tecWheel(detId) == 8 ) k688->Fill( dx*1E4 );
+	    if( tTopo->tecWheel(detId) == 9 ) k689->Fill( dx*1E4 );
 	  }
 
 	}//TEC
@@ -4564,10 +5818,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	const Local3DPoint lp3( iTM->recHit()->localPosition().x(), // measurement direction
 				iTM->predictedState().localPosition().y(), // track in z (or R)
 				iTM->predictedState().localPosition().z() ); // track in 3rd D
-
 	const GeomDet * myGeomDet = pTG->idToDet( detId );
 	Surface::GlobalPoint gp = myGeomDet->toGlobal( lp3 );
-
 	double gX = gp.x();
 	double gY = gp.y();
 	double gZ = gp.z();
@@ -4602,13 +5854,13 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	if( idbg && subDet == StripSubdetector::TEC ) {
 	  cout << "  TEC hit ";
-	  cout << ", side " << TECDetId(detId).side();
-	  cout << ", wheel " << TECDetId(detId).wheel();
-	  cout << ", ring " << TECDetId(detId).ring();
-	  cout << ", petal " << TECDetId(detId).petalNumber();
-	  cout << ", order " << TECDetId(detId).order();//1=back or 2=front
-	  cout << ", module " << TECDetId(detId).module();
-	  cout << ", stereo " << TECDetId(detId).isStereo();
+	  cout << ", side " << tTopo->tecSide(detId);
+	  cout << ", wheel " << tTopo->tecWheel(detId);
+	  cout << ", ring " << tTopo->tecRing(detId);
+	  cout << ", petal " << tTopo->tecPetalNumber(detId);
+	  cout << ", order " << tTopo->tecOrder(detId);//1=back or 2=front
+	  cout << ", module " << tTopo->tecModule(detId);
+	  cout << ", stereo " << tTopo->tecIsStereo(detId);
 	  cout << ", comp " << myGeomDet->components().size(); //always 0
 	  cout << endl;
 	}
@@ -4618,7 +5870,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	if( subDet == PixelSubdetector::PixelBarrel ) {
 
 	  int ilay = tTopo->pxbLayer(detId); //PXBDetId(detId).layer();
-  
+
 	  if( ilay == 1 ) {
 	    xPXB1 = gX;
 	    yPXB1 = gY;
@@ -4642,7 +5894,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	if( subDet == StripSubdetector::TIB ) {
 
-	  if(TIBDetId(detId).isRPhi() ){
+	  if(tTopo->tibIsRPhi(detId) ){
 
 	    if( tTopo->tibLayer(detId) == 1 ) {
 
@@ -4686,9 +5938,9 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	if( subDet == StripSubdetector::TOB ) {
 
-	  if( TOBDetId(detId).isRPhi() ){
+	  if( tTopo->tobIsRPhi(detId) ){
 
-	    if( TOBDetId(detId).layer() == 1 ) {
+	    if( tTopo->tobLayer(detId) == 1 ) {
 
 	      nTOB1++;
 	      //xTOB1 = gX;
@@ -4697,7 +5949,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	      //phiNTOB1 = phiN;
 	    }
 
-	    if( TOBDetId(detId).layer() == 2 ) {
+	    if( tTopo->tobLayer(detId) == 2 ) {
 
 	      nTOB2++;
 	      //xTOB2 = gX;
@@ -4706,7 +5958,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	      //phiNTOB2 = phiN;
 	    }
 
-	    if( TOBDetId(detId).layer() == 3 ) {
+	    if( tTopo->tobLayer(detId) == 3 ) {
 
 	      nTOB3++;
 	      xTOB3 = gX;
@@ -4715,7 +5967,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	      //phiNTOB3 = phiN;
 	    }
 
-	    if( TOBDetId(detId).layer() == 4 ) {
+	    if( tTopo->tobLayer(detId) == 4 ) {
 
 	      nTOB4++;
 	      xTOB4 = gX;
@@ -4724,7 +5976,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	      phiNTOB4 = phiN;
 	    }
 
-	    if( TOBDetId(detId).layer() == 5 ) {
+	    if( tTopo->tobLayer(detId) == 5 ) {
 
 	      nTOB5++;
 	      xTOB5 = gX;
@@ -4733,7 +5985,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	      phiNTOB5 = phiN;
 	    }
 
-	    if( TOBDetId(detId).layer() == 6 ) {
+	    if( tTopo->tobLayer(detId) == 6 ) {
 
 	      nTOB6++;
 	      xTOB6 = gX;
@@ -4748,10 +6000,10 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	if( subDet == StripSubdetector::TEC ) {
 
-	  if( TECDetId(detId).isRPhi() ){
+	  if( tTopo->tecIsRPhi(detId) ){
 
-	    int is = TECDetId(detId).side();//1..2
-	    int iw = TECDetId(detId).wheel();//1..9
+	    int is = tTopo->tecSide(detId);//1..2
+	    int iw = tTopo->tecWheel(detId);//1..9
 
 	    if( nTEC[is][iw] == 0 ) {//take first hit per wheel
 	      nTEC[is][iw]++;
@@ -4789,7 +6041,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  if( (*iTTRH)->hit()->isValid() ){
 	    cout << ": subdet " << (*iTTRH)->hit()->geographicalId().subdetId();
 	    cout << ", weight " << (*iTTRH)->weight(); // default weight is 1
-	  
+
 	    cout << endl;
 	  }
 	  else cout << " not valid\n";
@@ -4814,7 +6066,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
       std::vector<Trajectory> refitTrajectoryVec2 = theFitter->fit( seed, nyTTRHvec, initialTSOS );
 
-      if( refitTrajectoryVec2.size() > 0 ) { // should be either 0 or 1            
+      if( refitTrajectoryVec2.size() > 0 ) { // should be either 0 or 1
 
 	const Trajectory& refitTrajectory2 = refitTrajectoryVec2.front();
 
@@ -4830,7 +6082,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	     iTM != refitTMvec2.end(); iTM++ ) {
 
 	  TransientTrackingRecHit::ConstRecHitPointer iTTRH = iTM->recHit();
-	 
+
 	  if( iTTRH->hit()->isValid() ){
 	    // const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( iTTRH->hit() );
 	    // if (pixhit->hasFilledProb()){
@@ -4869,14 +6121,2137 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	// now use it!
 
       }//refit2
-      else 
+      else
 	if( idbg ) cout << "  no refit\n";
 
     }// n2 > 0
+    //------------------------------------------------------------------------
+//------------------------------------------------------------------------
+      // 1-2-4 pixel triplet:
+
+
+
+      if( n1*n2*n4 > 0 ) {
+
+	{ // let's open a scope, so we can redefine the variables further down
+
+	if( jdbg ) cout << "  triplet 1+4 -> 2\n";
+
+	double f2 = atan2( yPXB2, xPXB2 );//position angle in layer 2
+
+	double ax = xPXB4 - xPXB1;
+	double ay = yPXB4 - yPXB1;
+	double aa = sqrt( ax*ax + ay*ay ); // from 1 to 4
+
+	double xmid = 0.5 * ( xPXB1 + xPXB4 );
+	double ymid = 0.5 * ( yPXB1 + yPXB4 );
+	double bx = xPXB2 - xmid;
+	double by = yPXB2 - ymid;
+	double bb = sqrt( bx*bx + by*by ); // from mid point to point 2
+
+	hf406->Fill( hp.numberOfValidTrackerHits() );
+	hf407->Fill( hp.numberOfValidPixelBarrelHits() );
+	hf408->Fill( hp.trackerLayersWithMeasurement() );
+
+	// Author: Johannes Gassner (15.11.1996)
+	// Make track from 2 space points and kappa (cmz98/ftn/csmktr.f)
+	// Definition of the Helix :
+
+	// x( t ) = X0 + KAPPA^-1 * SIN( PHI0 + t )
+	// y( t ) = Y0 - KAPPA^-1 * COS( PHI0 + t )          t > 0
+	// z( t ) = Z0 + KAPPA^-1 * TAN( DIP ) * t
+
+	// Center of the helix in the xy-projection:
+
+	// X0 = + ( DCA - KAPPA^-1 ) * SIN( PHI0 )
+	// Y0 = - ( DCA - KAPPA^-1 ) * COS( PHI0 )
+
+	// Point 1 must be in the inner layer, 4 in the outer:
+
+	double r1 = sqrt( xPXB1*xPXB1 + yPXB1*yPXB1 );
+	double r4 = sqrt( xPXB4*xPXB4 + yPXB4*yPXB4 );
+
+	//	cout << "!!!warn r1 = " << r1 << ", r4 = " << r4 << endl;
+
+	if( r4-r1 < 2.0 ) cout << "warn r1 = " << r1 << ", r4 = " << r4 << endl;
+
+	// Calculate the centre of the helix in xy-projection that
+	// transverses the two spacepoints. The points with the same
+	// distance from the two points are lying on a line.
+	// LAMBDA is the distance between the point in the middle of
+	// the two spacepoints and the centre of the helix.
+
+	// we already have kap and rho = 1/kap
+
+	double lam = sqrt( -0.25 +
+			   rho*rho / ( ( xPXB1 - xPXB4 )*( xPXB1 - xPXB4 ) + ( yPXB1 - yPXB4 )*( yPXB1 - yPXB4 ) ) );
+
+	// There are two solutions, the sign of kap gives the information
+	// which of them is correct:
+
+	if( kap > 0 ) lam = -lam;
+
+	// ( X0, Y0 ) is the centre of the circle
+	// that describes the helix in xy-projection:
+
+	double x0 =  0.5*( xPXB1 + xPXB4 ) + lam * ( -yPXB1 + yPXB4 );
+	double y0 =  0.5*( yPXB1 + yPXB4 ) + lam * (  xPXB1 - xPXB4 );
+
+	// Calculate theta:
+
+	double num = ( yPXB4 - y0 ) * ( xPXB1 - x0 ) - ( xPXB4 - x0 ) * ( yPXB1 - y0 );
+	double den = ( xPXB1 - x0 ) * ( xPXB4 - x0 ) + ( yPXB1 - y0 ) * ( yPXB4 - y0 );
+	double tandip = kap * ( zPXB4 - zPXB1 ) / atan( num / den );
+	double udip = atan(tandip);
+	//double utet = pihalf - udip;
+
+	// To get phi0 in the right interval one must distinguish
+	// two cases with positve and negative kap:
+
+	double uphi;
+	if( kap > 0 ) uphi = atan2( -x0,  y0 );
+	else          uphi = atan2(  x0, -y0 );
+
+	// The distance of the closest approach DCA depends on the sign
+	// of kappa:
+
+	double udca;
+	if( kap > 0 ) udca = rho - sqrt( x0*x0 + y0*y0 );
+	else          udca = rho + sqrt( x0*x0 + y0*y0 );
+
+	// angle from first hit to dca point:
+
+	double dphi = atan( ( ( xPXB1 - x0 ) * y0 - ( yPXB1 - y0 ) * x0 )
+			  / ( ( xPXB1 - x0 ) * x0 + ( yPXB1 - y0 ) * y0 ) );
+
+	double uz0 = zPXB1 + tandip * dphi * rho;
+
+	hf401->Fill( zPXB2 );
+	hf402->Fill( uphi - iTrack->phi() );
+	hf403->Fill( udca - iTrack->d0() );
+	hf404->Fill( udip - iTrack->lambda() );
+	hf405->Fill( uz0  - iTrack->dz() );
+
+	// interpolate to middle hit:
+	// cirmov
+	// we already have rinv = -kap
+
+	double cosphi = cos(uphi);
+	double sinphi = sin(uphi);
+	double dp = -xPXB2*sinphi + yPXB2*cosphi + udca;
+	double dl = -xPXB2*cosphi - yPXB2*sinphi;
+	double sa = 2*dp + rinv * ( dp*dp + dl*dl );
+	double dca2 = sa / ( 1 + sqrt(1 + rinv*sa) );// distance to hit 2
+	double ud = 1 + rinv*udca;
+	double phi2 = atan2( -rinv*xPXB2 + ud*sinphi, rinv*yPXB2 + ud*cosphi );//direction
+
+	double phiinc = phi2 - phiN2;//angle of incidence in rphi w.r.t. normal vector
+
+	// phiN alternates inward/outward
+	// reduce phiinc:
+
+	if( phiinc > pihalf ) phiinc -= pi;
+	else if( phiinc < -pihalf ) phiinc += pi;
+
+	// arc length:
+
+	double xx = xPXB2 + dca2 * sin(phi2); // point on track
+	double yy = yPXB2 - dca2 * cos(phi2);
+
+	double vx = xx - xmid2;//from module center
+	double vy = yy - ymid2;
+	double vv = sqrt( vx*vx + vy*vy );
+
+	double f0 = uphi;//
+	double kx = kap*xx;
+	double ky = kap*yy;
+	double kd = kap*udca;
+
+	// Solve track equation for s:
+
+	double dx = kx - (kd-1)*sin(f0);
+	double dy = ky + (kd-1)*cos(f0);
+	double ks = atan2( dx, -dy ) - f0;// turn angle
+
+	// Limit to half-turn:
+
+	if(      ks >  pi ) ks = ks - twopi;
+	else if( ks < -pi ) ks = ks + twopi;
+
+	double s = ks*rho; // signed
+	double uz2 = uz0 + s*tandip; // track z at R2
+	double dz2 = zPXB2 - uz2;
+
+	Surface::GlobalPoint gp2( xx, yy, uz2 );
+	Surface::LocalPoint lp2 = det2->toLocal( gp2 );
+
+	if( idbg ) {
+	  std::cout <<"**** local  Point coord ****" <<std::endl;
+	  std::cout <<"gp2.x() "<< gp2.x() <<std::endl;
+	  std::cout <<"gp2.y() "<< gp2.y() <<std::endl;
+	  std::cout <<"gp2.z() "<< gp2.z() <<std::endl;
+
+	  std::cout <<"lp2.x() "<< lp2.x() <<std::endl;
+	  std::cout <<"lp2.y() "<< lp2.y() <<std::endl;
+	  std::cout <<"lp2.z() "<< lp2.z() <<std::endl;
+
+	  std::cout <<"  uPXB2 = xloc;  precise hit in local coordinates (w.r.t. sensor center)"<< uPXB2 <<std::endl;
+	  std::cout <<"  vPXB2 = yloc;precise hit in local coordinates (w.r.t. sensor center)" << vPXB2 <<std::endl;
+
+	}
+	// local x = phi
+	// local y = z in barrel
+	// local z = radial in barrel (thickness)
+
+	double xpix = fmod( uPXB2 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed
+	double xpx2 = fmod( uPXB2 + 0.82, 0.02 ); // xpix = 0..0.02 reconstructed
+	double xpx1 = fmod( uPXB1 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed
+	double xpx4 = fmod( uPXB4 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed
+
+	//double dpix = fmod( uPXB2 + dca2 + 0.82, 0.01 ); // dpix = 0..0.01 predicted
+
+	double vpix = fmod( vv, 0.01 ); // vpix = 0..0.01 predicted
+	if( uPXB2 < 0 ) vpix = -vpix; // vv is unsigned distance from module center
+
+	double lpix = fmod( lp2.x() + 0.82, 0.01 ); // lpix = 0..0.01 predicted
+	double tpix = fmod( lp2.x() + 0.82, 0.02 ); // tpix = 0..0.02 predicted
+
+	double zpix = fmod( lp2.y() + 3.24, 0.015 ); // zpix = 0..0.015 predicted
+	double spix = fmod( lp2.y() + 3.24, 0.03  ); // spix = 0..0.03  predicted
+
+	int smin = zmin2%52; // 0..51 column along z
+	int smax = zmax2%52; // 0..51 column along z
+
+	double cogx = (cogp2 + 0.5 - 80) * 0.01 - 0.0054; // Lorentz shift
+	if( cogp2 < 79 ) cogx -= 0.01; // big pix
+	if( cogp2 > 80 ) cogx += 0.01; // big pix
+
+	double mpix = fmod( cogx + 0.82, 0.01 ); // mpix = 0..0.01 from cluster COG
+	double cogdx = cogx - lp2.x(); // residual
+
+	// hybrid method:
+
+	double hybx = uPXB2; // template
+	if( mpix*1E4 < 20 ) hybx = cogx; // COG
+	if( mpix*1E4 > 75 ) hybx = cogx;
+	//double hpix = fmod( hybx + 0.82, 0.01 ); // hpix = 0..0.01 from cluster hybrid method
+	double hybdx = hybx - lp2.x(); // residual
+
+	/*bool halfmod = 0;
+	if(      ilad2 ==  8 ) halfmod = 1;
+	else if( ilad2 ==  9 ) halfmod = 1;
+	else if( ilad2 == 24 ) halfmod = 1;
+	else if( ilad2 == 25 ) halfmod = 1;
+	*/
+	if( pt > 4 ) {
+
+	  // h308->Fill( bb/aa ); // lever arm
+	  hf409->Fill( f2*wt, phiinc*wt );
+	  hf410->Fill( dca2*1E4 );
+	  hf411->Fill( dz2*1E4 );
+
+	  // pile up study Summer 2011:
+
+	  // if( nvertex < 3 ) {
+	  //   h310->Fill( dca2*1E4 );
+	  //   h311->Fill( dz2*1E4 );
+	  // }
+	  // else if( nvertex < 6 ) {
+	  //   h312->Fill( dca2*1E4 );
+	  //   h313->Fill( dz2*1E4 );
+	  // }
+	  // else if( nvertex < 10 ) {
+	  //   h314->Fill( dca2*1E4 );
+	  //   h315->Fill( dz2*1E4 );
+	  // }
+	  // else {
+	  //   h316->Fill( dca2*1E4 );
+	  //   h317->Fill( dz2*1E4 );
+	  //   h318->Fill( nvertex );
+	  // } // pile up
+
+	} // pt > 4
+
+
+	if( pt > 12 ) {
+	  //std::cout <<" PXB2_clusProb " <<  PXB2_clusProb <<" PXB1_clusProb " <<  PXB1_clusProb <<" PXB3_clusProb " <<  PXB3_clusProb <<std::endl;
+	  //	  const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( &*(*irecHit) );
+	  if( PXB2_clusProb!=-99  && PXB1_clusProb > 0.5  && PXB4_clusProb >0.5 && PXB2_clusSizeX > 1 && PXB2_clusSizeY > 1 ){
+	    h_cluster_prob->Fill(PXB2_clusProb);
+
+	    if( idbg ) cout << "  cluster prob " << PXB2_clusProb << endl;
+
+	    if( PXB2_clusProb<0.10) hf420_cluster_prob_0_010->Fill(dca2*1E4 );
+	    else if( PXB2_clusProb<0.75) hf420_cluster_prob_010_075->Fill(dca2*1E4 );
+	    else if( PXB2_clusProb<0.90) hf420_cluster_prob_075_090->Fill(dca2*1E4 );
+	    else hf420_cluster_prob_090_101->Fill(dca2*1E4 );
+
+	    if( PXB2_clusProb<0.1) hf421_cluster_prob_0_010->Fill(dz2*1E4 );
+	    else if( PXB2_clusProb<0.75) hf421_cluster_prob_010_075->Fill(dz2*1E4 );
+	    else if( PXB2_clusProb<0.90) hf421_cluster_prob_075_090->Fill(dz2*1E4 );
+	    else hf421_cluster_prob_090_101->Fill(dz2*1E4 );
+	    if  ( fabs(iTrack->eta() )<0.8) {
+
+	      if( PXB2_clusProb<0.10) hf420_cluster_prob_0_010_etaL0p8->Fill(dca2*1E4 );
+	      else if( PXB2_clusProb<0.75) hf420_cluster_prob_010_075_etaL0p8->Fill(dca2*1E4 );
+	      else if( PXB2_clusProb<0.90) hf420_cluster_prob_075_090_etaL0p8->Fill(dca2*1E4 );
+	      else hf420_cluster_prob_090_101_etaL0p8->Fill(dca2*1E4 );
+
+	      if( PXB2_clusProb<0.1) hf421_cluster_prob_0_010_etaL0p8->Fill(dz2*1E4 );
+	      else if( PXB2_clusProb<0.75) hf421_cluster_prob_010_075_etaL0p8->Fill(dz2*1E4 );
+	      else if( PXB2_clusProb<0.90) hf421_cluster_prob_075_090_etaL0p8->Fill(dz2*1E4 );
+	      else hf421_cluster_prob_090_101_etaL0p8->Fill(dz2*1E4 );
+	    }
+	    else{
+
+
+	      if( PXB2_clusProb<0.10) hf420_cluster_prob_0_010_etaM0p8->Fill(dca2*1E4 );
+	      else if( PXB2_clusProb<0.75) hf420_cluster_prob_010_075_etaM0p8->Fill(dca2*1E4 );
+	      else if( PXB2_clusProb<0.90) hf420_cluster_prob_075_090_etaM0p8->Fill(dca2*1E4 );
+	      else hf420_cluster_prob_090_101_etaM0p8->Fill(dca2*1E4 );
+
+	      if( PXB2_clusProb<0.1) hf421_cluster_prob_0_010_etaM0p8->Fill(dz2*1E4 );
+	      else if( PXB2_clusProb<0.75) hf421_cluster_prob_010_075_etaM0p8->Fill(dz2*1E4 );
+	      else if( PXB2_clusProb<0.90) hf421_cluster_prob_075_090_etaM0p8->Fill(dz2*1E4 );
+	      else hf421_cluster_prob_090_101_etaM0p8->Fill(dz2*1E4 );
+	    }
+
+	  }
+
+
+
+
+	  hf420->Fill( dca2*1E4 ); // 12.7 um
+
+
+	  hf421->Fill( dz2*1E4 );
+
+	  // // Add errors and pulls
+          // h077->Fill( ePXB2*1E4 );
+          // h078->Fill( fPXB2*1E4 );
+          // if(idbg) cout<<" residuals "<<dca2*1E4<<" "<<ePXB2*1E4<<" "<<dz2*1E4
+	  // 	       <<" "<<fPXB2*1E4<<endl;
+          // double pulx=0., puly=0.;
+          // if(ePXB2!=0.0) pulx = dca2/ePXB2;
+          // if(fPXB2!=0.0) puly = dz2/fPXB2;
+          // h079->Fill( pulx );
+          // h069->Fill( puly );
+
+	  // // Alignment errors
+	  // //LocalError lape = det2->localAlignmentError();
+	  // //cout<<geomDet2<<endl;
+	  // if(geomDet2 != NULL) {
+	  //   LocalError lape = geomDet2->localAlignmentError();
+	  //   //cout<< lape.valid() <<endl;
+	  //   if (lape.valid()) {
+	  //     float tmp11= 0.;
+	  //     if(lape.xx()>0.) tmp11= sqrt(lape.xx())*1E4;
+	  //     float tmp14= 0.;
+	  //     if(lape.yy()>0.) tmp14= sqrt(lape.yy())*1E4;
+	  //     //cout<<" layer 2 "<<tmp11<<" "<<tmp14<<endl;
+	  //     h088->Fill( tmp11 );
+	  //     h089->Fill( tmp14 );
+	  //   } else {   if( myCounters::neve < 10 ) cout<<" lape invalid?"<<endl;}
+	  // }
+
+          if(bb/aa < 0.015) hf420_1->Fill(dca2*1E4);
+          else if(bb/aa >= 0.015 && bb/aa < 0.065) hf420_2->Fill(dca2*1E4);
+          else hf420_3->Fill(dca2*1E4);
+
+	  //Flipped/non-flipped
+	  if( abs( phi2 - phiN2 ) < pihalf ) // outward facing module
+            if(zPXB2 > 0){
+	      hf420_out_zplus->Fill( dca2*1E4 );
+	      hf421_out_zplus->Fill(dz2*1E4 );}
+            else{
+	      hf420_out_zminus->Fill( dca2*1E4 );
+	      hf421_out_zminus->Fill( dz2*1E4 );}
+	  else
+            if(zPXB2 > 0){
+	      hf420_in_zplus->Fill( dca2*1E4 );
+	      hf421_in_zplus->Fill( dz2*1E4 );}
+            else{
+	      hf420_in_zminus->Fill( dca2*1E4 );
+	      hf421_in_zminus->Fill( dz2*1E4 );
+	    }
+
+	  //local x>0 ,local x<0
+	  if( uPXB2>0 ){
+
+	    hf420_x_plus->Fill( dca2*1E4 );
+	    hf421_x_plus->Fill( dz2*1E4 );
+
+	  } else{
+	    hf420_x_minus->Fill( dca2*1E4 );
+	    hf421_x_minus->Fill( dz2*1E4 );
+	  }
+
+
+	  ////check for bias dot flip, unflipped, zplus,zminus,xplu,xminus combination
+
+
+	  if( abs( phi2 - phiN2 ) < pihalf ) {// outward facing module
+	    if(zPXB2 > 0){
+	      if( uPXB2>0 ){
+
+		hf420_out_xplus_zplus->Fill( dca2*1E4 );
+		hf421_out_xplus_zplus->Fill( dz2*1E4 );
+
+	      } else {
+		hf420_out_xminus_zplus->Fill( dca2*1E4 );
+	   	hf421_out_xminus_zplus->Fill( dz2*1E4 );
+	      }
+	    } else{
+	      if( uPXB2>0 ){
+
+		hf420_out_xplus_zminus->Fill( dca2*1E4 );
+		hf421_out_xplus_zminus->Fill( dz2*1E4 );
+
+	      } else {
+		hf420_out_xminus_zminus->Fill( dca2*1E4 );
+		hf421_out_xminus_zminus->Fill( dz2*1E4 );
+	      }
+	    }
+	  }  else {
+	    if(zPXB2 > 0){
+	      if( uPXB2>0 ){
+
+		hf420_in_xplus_zplus->Fill( dca2*1E4 );
+		hf421_in_xplus_zplus->Fill( dz2*1E4 );
+
+	      } else {
+		hf420_in_xminus_zplus->Fill( dca2*1E4 );
+	   	hf421_in_xminus_zplus->Fill( dz2*1E4 );
+	      }
+	    } else{
+	      if( uPXB2>0 ){
+
+		hf420_in_xplus_zminus->Fill( dca2*1E4 );
+		hf421_in_xplus_zminus->Fill( dz2*1E4 );
+
+	      } else {
+		hf420_in_xminus_zminus->Fill( dca2*1E4 );
+		hf421_in_xminus_zminus->Fill( dz2*1E4 );
+	      }
+	    }
+	  }
+
+
+
+
+	  // //////// Modules:1-8
+
+	  if( imod==1  ){// innermost  module
+	    hf420_mod1->Fill( dca2*1E4 );
+	    hf421_mod1->Fill( dz2*1E4 );
+	  }
+	  if( imod==2  ){
+	    hf420_mod2->Fill( dca2*1E4 );
+	    hf421_mod2->Fill( dz2*1E4 );
+	  }
+	  if( imod==3  ){
+	    hf420_mod3->Fill( dca2*1E4 );
+	    hf421_mod3->Fill( dz2*1E4 );
+	  }
+	  if( imod==4  ){
+	    hf420_mod4->Fill( dca2*1E4 );
+	     hf421_mod4->Fill( dz2*1E4 );
+	  }
+	  if( imod==5  ){
+	    hf420_mod5->Fill( dca2*1E4 );
+	     hf421_mod5->Fill( dz2*1E4 );
+	  }
+	  if( imod==6 ){
+	    hf420_mod6->Fill( dca2*1E4 );
+	    hf421_mod6->Fill( dz2*1E4 );
+	  }
+	  if( imod==7  ){
+	    hf420_mod7->Fill( dca2*1E4 );
+	    hf421_mod7->Fill( dz2*1E4 );
+	  }
+	  if( imod==8  ){// outermost  module
+	    hf420_mod8->Fill( dca2*1E4 );
+	    hf421_mod8->Fill( dz2*1E4 );
+	  }
+
+
+	  // versus number o ftracker hits
+	  if( hp.trackerLayersWithMeasurement() > 8 ) {
+	    hf430->Fill( dca2*1E4 );
+	    hf431->Fill( dz2*1E4 );
+	  }
+	  //
+	  if( phiinc*wt > -1 && phiinc*wt < 7 ){
+	    hf440->Fill( dca2*1E4 ); // 11.4 um
+	    hf441->Fill( dz2*1E4 );
+	  }
+	  // Versus cluster size in x
+	  if(      nrow2 == 1 ) hf442->Fill( dca2*1E4 ); // 13.6
+	  else if( nrow2 == 2 ) hf443->Fill( dca2*1E4 ); // 12.7
+	  else if( nrow2 == 3 ) hf444->Fill( dca2*1E4 ); // 19.7 um
+	  else                  hf445->Fill( dca2*1E4 ); // two peaks
+
+	  if( nrow1 == 2 && nrow2 == 2 && nrow3 == 2 ) hf446->Fill( dca2*1E4 ); // 12.2 um
+
+	  hf447->Fill( nrow2 );
+
+	} // pt > 12
+
+	// residual profiles: alignment check
+
+	if( pt > 4 ) {
+	  hf412->Fill( f2*wt, dca2*1E4 );
+	  hf413->Fill( f2*wt, dz2*1E4 );
+
+	  if( abs( phi2 - phiN2 ) < pihalf ) // outward facing module
+            if(zPXB2 > 0)
+	      hf412_out_zplus->Fill( f2*wt, dca2*1E4 );
+            else
+	      hf412_out_zminus->Fill( f2*wt, dca2*1E4 );
+	  else
+            if(zPXB2 > 0)
+	      hf412_in_zplus->Fill( f2*wt, dca2*1E4 );
+            else
+	      hf412_in_zminus->Fill( f2*wt, dca2*1E4 );
+
+	  hf414->Fill( zPXB2, dca2*1E4 );
+	  hf415->Fill( zPXB2, dz2*1E4 );
+	}
+	hf416->Fill( logpt, dca2*1E4 );
+	hf417->Fill( logpt, dz2*1E4 );
+	if( iTrack->charge() > 0 ) hf418->Fill( logpt, dca2*1E4 );
+	else hf419->Fill( logpt, dca2*1E4 );
+
+	// profile of abs(dca) gives mean abs(dca):
+	// mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
+	// => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
+	// point resolution = 1/sqrt(3/2) * triplet middle residual width
+	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
+
+	if( pt > 4 ) {
+
+	  hf422->Fill( f2*wt, abs(dca2)*1E4 );
+	  hf423->Fill( f2*wt, abs(dz2)*1E4 );
+
+	  hf424->Fill( zPXB2, abs(dca2)*1E4 );
+	  hf425->Fill( zPXB2, abs(dz2)*1E4 );
+
+	  hf428->Fill( udip*wt, abs(dca2)*1E4 );
+	  hf429->Fill( udip*wt, abs(dz2)*1E4 );
+          hf429_eta->Fill(iTrack->eta(), abs(dz2)*1E4);
+	  if( abs(dip)*wt > 18 && abs(dip)*wt < 50 ) hf432->Fill( dz2*1E4 );
+
+	  hf434->Fill( phiinc*wt, abs(dca2)*1E4 );
+	  // h334->Fill( phiinc*wt, abs(cogdx)*1E4 );//similar
+
+	  if( abs( phi2 - phiN2 ) < pihalf ) // outward facing module
+	    hf436->Fill( phiinc*wt, abs(dca2)*1E4 );
+	  else
+	    hf437->Fill( phiinc*wt, abs(dca2)*1E4 );//similar
+
+	  //	  if(  lpix*1E4 > 30 && lpix*1E4 < 70 ) h319->Fill( phiinc*wt, abs(dca2)*1E4 );//flat
+
+	} // pt > 4
+
+	hf426->Fill( logpt, abs(dca2)*1E4 );
+	hf427->Fill( logpt, abs(dz2)*1E4 );
+	if( abs(dip)*wt > 18 && abs(dip)*wt < 50 ) hf433->Fill( logpt, abs(dz2)*1E4 );
+
+	// pt bins:
+	// uPXB2 = local x
+	// vPXB2 = local z
+	// low pt: material
+	}
+
+      }
+
+
+      if (n3*n2*n4>0){
+
+	//------------------------------------------------------------------------
+	// triplet 3+4 -> 2:
+
+	{
+	  if( jdbg ) cout << "  triplet 3+4 -> 2\n";
+
+	  double f2 = atan2( yPXB2, xPXB2 );//position angle in layer 2
+
+	  double ax = xPXB4 - xPXB3;
+	  double ay = yPXB4 - yPXB3;
+	  double aa = sqrt( ax*ax + ay*ay ); // from 2 to 3
+
+	  double xmid = 0.5 * ( xPXB3 + xPXB4 );
+	  double ymid = 0.5 * ( yPXB3 + yPXB4 );
+	  double bx = xPXB2 - xmid;
+	  double by = yPXB2 - ymid;
+	  double bb = sqrt( bx*bx + by*by ); // from mid point to point 2
+
+	  // Calculate the centre of the helix in xy-projection that
+	  // transverses the two spacepoints. The points with the same
+	  // distance from the two points are lying on a line.
+	  // LAMBDA is the distance between the point in the middle of
+	  // the two spacepoints and the centre of the helix.
+
+	  // we already have kap and rho = 1/kap
+
+	  double lam = sqrt( -0.25 +
+			     rho*rho / ( ( xPXB3 - xPXB4 )*( xPXB3 - xPXB4 ) + ( yPXB3 - yPXB4 )*( yPXB3 - yPXB4 ) ) );
+
+	  // There are two solutions, the sign of kap gives the information
+	  // which of them is correct:
+
+	  if( kap > 0 ) lam = -lam;
+
+	  // ( X0, Y0 ) is the centre of the circle
+	  // that describes the helix in xy-projection:
+
+	  double x0 =  0.5*( xPXB3 + xPXB4 ) + lam * ( -yPXB3 + yPXB4 );
+	  double y0 =  0.5*( yPXB3 + yPXB4 ) + lam * (  xPXB3 - xPXB4 );
+
+	  // Calculate theta:
+
+	  double num = ( yPXB4 - y0 ) * ( xPXB3 - x0 ) - ( xPXB4 - x0 ) * ( yPXB3 - y0 );
+	  double den = ( xPXB3 - x0 ) * ( xPXB4 - x0 ) + ( yPXB3 - y0 ) * ( yPXB4 - y0 );
+	  double tandip = kap * ( zPXB4 - zPXB3 ) / atan( num / den );
+	  double udip = atan(tandip);
+	  //double utet = pihalf - udip;
+
+	  // To get phi0 in the right interval one must distinguish
+	  // two cases with positve and negative kap:
+
+	  double uphi;
+	  if( kap > 0 ) uphi = atan2( -x0,  y0 );
+	  else          uphi = atan2(  x0, -y0 );
+
+	  // The distance of the closest approach DCA depends on the sign
+	  // of kappa:
+
+	  double udca;
+	  if( kap > 0 ) udca = rho - sqrt( x0*x0 + y0*y0 );
+	  else          udca = rho + sqrt( x0*x0 + y0*y0 );
+
+	  // angle from first hit to dca point:
+
+	  double dphi = atan( ( ( xPXB3 - x0 ) * y0 - ( yPXB3 - y0 ) * x0 )
+			      / ( ( xPXB3 - x0 ) * x0 + ( yPXB3 - y0 ) * y0 ) );
+
+	  double uz0 = zPXB3 + tandip * dphi * rho;
+
+	  hf501->Fill( zPXB2 );
+	  hf502->Fill( uphi - iTrack->phi() );
+	  hf503->Fill( udca - iTrack->d0() );
+	  hf504->Fill( udip - iTrack->lambda() );
+	  hf505->Fill( uz0  - iTrack->dz() );
+
+	  // extrapolate to inner hit:
+	  // cirmov
+	  // we already have rinv = -kap
+
+	  double cosphi = cos(uphi);
+	  double sinphi = sin(uphi);
+	  double dp = -xPXB2*sinphi + yPXB2*cosphi + udca;
+	  double dl = -xPXB2*cosphi - yPXB2*sinphi;
+	  double sa = 2*dp + rinv * ( dp*dp + dl*dl );
+	  double dca2 = sa / ( 1 + sqrt(1 + rinv*sa) );// distance to hit 1
+	  double ud = 1 + rinv*udca;
+	  double phi2 = atan2( -rinv*xPXB2 + ud*sinphi, rinv*yPXB2 + ud*cosphi );//direction
+
+	  double phiinc = phi2 - phiN2;//angle of incidence in rphi w.r.t. normal vector
+
+	  // phiN alternates inward/outward
+	  // reduce phiinc:
+
+	  if( phiinc > pihalf ) phiinc -= pi;
+	  else if( phiinc < -pihalf ) phiinc += pi;
+
+	  // arc length:
+
+	  double xx = xPXB2 + dca2 * sin(phi2); // point on track
+	  double yy = yPXB2 - dca2 * cos(phi2);
+
+	  double f0 = uphi;//
+	  double kx = kap*xx;
+	  double ky = kap*yy;
+	  double kd = kap*udca;
+
+	  // Solve track equation for s:
+
+	  double dx = kx - (kd-1)*sin(f0);
+	  double dy = ky + (kd-1)*cos(f0);
+	  double ks = atan2( dx, -dy ) - f0;// turn angle
+
+	  //---  Limit to half-turn:
+
+	  if(      ks >  pi ) ks = ks - twopi;
+	  else if( ks < -pi ) ks = ks + twopi;
+
+	  double s = ks*rho;// signed
+	  double uz2 = uz0 + s*tandip; //track z at R2
+	  double dz2 = zPXB2 - uz2;
+
+	  if( pt > 4 ) {
+	    hf508->Fill( bb/aa );//lever arm
+	    hf509->Fill( f2*wt, phiinc*wt );
+	    hf510->Fill( dca2*1E4 );
+	    hf511->Fill( dz2*1E4 );
+	  }
+
+	  if( pt > 12 ) {
+
+	    hf520->Fill( dca2*1E4 );
+	    hf521->Fill( dz2*1E4 );
+
+	    if( abs( phi2 - phiN2 ) < pihalf ) {
+	      hf520_out->Fill( dca2*1E4 );
+	      hf521_out->Fill( dz2*1E4 );
+	    }
+	    else{
+	      hf520_in->Fill( dca2*1E4 );
+	      hf521_in->Fill( dz2*1E4 );
+	    }
+
+
+	    if( abs( phi2 - phiN2 ) < pihalf ) // outward facing module
+	      if(zPXB2 > 0){
+		hf520_out_zplus->Fill( dca2*1E4 );
+		hf521_out_zplus->Fill( dz2*1E4 );}
+	      else{
+		hf520_out_zminus->Fill( dca2*1E4 );
+		hf521_out_zminus->Fill( dz2*1E4 );}
+	    else
+	      if(zPXB2 > 0){
+		hf520_in_zplus->Fill( dca2*1E4 );
+		hf521_in_zplus->Fill( dz2*1E4 );}
+	      else{
+		hf520_in_zminus->Fill( dca2*1E4 );
+		hf521_in_zminus->Fill( dz2*1E4 );}
+
+	    if(bb/aa >= 1.10 && bb/aa < 1.27) hf520_1->Fill(dca2*1E4);
+	    else if(bb/aa >= 1.27 && bb/aa < 1.43) hf520_2->Fill(dca2*1E4);
+	    else if(bb/aa >= 1.43 && bb/aa < 1.57) hf520_3->Fill(dca2*1E4);
+	    else if(bb/aa >= 1.57 && bb/aa < 1.80) hf520_4->Fill(dca2*1E4);
+	    else if(bb/aa >= 1.80 && bb/aa < 2.00) hf520_5->Fill(dca2*1E4);
+
+	    if( hp.trackerLayersWithMeasurement() > 8 ) {
+	      hf530->Fill( dca2*1E4 );
+	      hf531->Fill( dz2*1E4 );
+	    }
+
+	    if( phiinc*wt > -1 && phiinc*wt < 7 ){
+	      hf540->Fill( dca2*1E4 );
+	      hf541->Fill( dz2*1E4 );
+	    }
+
+	    if( nrow2 == 1 ) hf542->Fill( dca2*1E4 );
+	    else {
+	      if( nrow2 == 2 ) hf543->Fill( dca2*1E4 );
+	      else {
+		if( nrow2 == 3 ) hf544->Fill( dca2*1E4 );
+		else hf545->Fill( dca2*1E4 );
+	      }
+	    }
+
+	    if( nrow2 == 2 && nrow2 == 2 && nrow3 == 2 ) hf546->Fill( dca2*1E4 );
+
+	  }//pt>12
+
+	  // residual profiles: alignment check
+
+	  if( pt > 4 ) {
+	    hf512->Fill( f2*wt, dca2*1E4 );
+	    hf513->Fill( f2*wt, dz2*1E4 );
+
+	    hf514->Fill( zPXB2, dca2*1E4 );
+	    hf515->Fill( zPXB2, dz2*1E4 );
+	  }
+	  hf516->Fill( logpt, dca2*1E4 );
+	  hf517->Fill( logpt, dz2*1E4 );
+	  if( iTrack->charge() > 0 ) hf518->Fill( logpt, dca2*1E4 );
+	  else hf519->Fill( logpt, dca2*1E4 );
+
+	  // profile of abs(dca) gives mean abs(dca):
+	  // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
+	  // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
+	  // point resolution = 1/sqrt(3/2) * triplet middle residual width
+	  // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
+
+	  if( pt > 4 ) {
+
+	    hf522->Fill( f2*wt, abs(dca2)*1E4 );
+	    hf523->Fill( f2*wt, abs(dz2)*1E4 );
+
+	    hf524->Fill( zPXB2, abs(dca2)*1E4 );
+	    hf525->Fill( zPXB2, abs(dz2)*1E4 );
+
+	    hf528->Fill( udip*wt, abs(dca2)*1E4 );
+	    hf529->Fill( udip*wt, abs(dz2)*1E4 );
+	    if( abs(dip)*wt > 18 && abs(dip)*wt < 50 ) hf532->Fill( dz2*1E4 );
+
+	    hf534->Fill( phiinc*wt, abs(dca2)*1E4 );
+
+	  }//pt
+
+	  if( pt > 0.8 && pt < 1.2 ) { // low pt
+	    hf535->Fill( f2*wt, abs(dca2)*1E4 );
+	  }
+	  hf526->Fill( logpt, abs(dca2)*1E4 );
+	  hf527->Fill( logpt, abs(dz2)*1E4 );
+	  if( abs(dip)*wt > 18 && abs(dip)*wt < 50 ) hf533->Fill( logpt, abs(dz2)*1E4 );
+	}
+
+
+
+
+	{
+	  if( jdbg ) cout << "  triplet 2+3 -> 4\n";
+
+	  double f4 = atan2( yPXB4, xPXB4 );//position angle in layer 4
+
+	  double ax = xPXB3 - xPXB2;
+	  double ay = yPXB3 - yPXB2;
+	  double aa = sqrt( ax*ax + ay*ay ); // from 2 to 3
+
+	  double xmid = 0.5 * ( xPXB2 + xPXB3 );
+	  double ymid = 0.5 * ( yPXB2 + yPXB3 );
+	  double bx = xPXB4 - xmid;
+	  double by = yPXB4 - ymid;
+	  double bb = sqrt( bx*bx + by*by ); // from mid point to point 4
+
+	  // Calculate the centre of the helix in xy-projection that
+	  // transverses the two spacepoints. The points with the same
+	  // distance from the two points are lying on a line.
+	  // LAMBDA is the distance between the point in the middle of
+	  // the two spacepoints and the centre of the helix.
+
+	  // we already have kap and rho = 1/kap
+
+	  double lam = sqrt( -0.25 +
+			     rho*rho / ( ( xPXB2 - xPXB3 )*( xPXB2 - xPXB3 ) + ( yPXB2 - yPXB3 )*( yPXB2 - yPXB3 ) ) );
+
+	  // There are two solutions, the sign of kap gives the information
+	  // which of them is correct:
+
+	  if( kap > 0 ) lam = -lam;
+
+	  // ( X0, Y0 ) is the centre of the circle
+	  // that describes the helix in xy-projection:
+
+	  double x0 =  0.5*( xPXB2 + xPXB3 ) + lam * ( -yPXB2 + yPXB3 );
+	  double y0 =  0.5*( yPXB2 + yPXB3 ) + lam * (  xPXB2 - xPXB3 );
+
+	  // Calculate theta:
+
+	  double num = ( yPXB3 - y0 ) * ( xPXB2 - x0 ) - ( xPXB3 - x0 ) * ( yPXB2 - y0 );
+	  double den = ( xPXB2 - x0 ) * ( xPXB3 - x0 ) + ( yPXB2 - y0 ) * ( yPXB3 - y0 );
+	  double tandip = kap * ( zPXB3 - zPXB2 ) / atan( num / den );
+	  double udip = atan(tandip);
+	  //double utet = pihalf - udip;
+
+	  // To get phi0 in the right interval one must distinguish
+	  // two cases with positve and negative kap:
+
+	  double uphi;
+	  if( kap > 0 ) uphi = atan2( -x0,  y0 );
+	  else          uphi = atan2(  x0, -y0 );
+
+	  // The distance of the closest approach DCA depends on the sign
+	  // of kappa:
+
+	  double udca;
+	  if( kap > 0 ) udca = rho - sqrt( x0*x0 + y0*y0 );
+	  else          udca = rho + sqrt( x0*x0 + y0*y0 );
+
+	  // angle from first hit to dca point:
+
+	  double dphi = atan( ( ( xPXB2 - x0 ) * y0 - ( yPXB2 - y0 ) * x0 )
+			      / ( ( xPXB2 - x0 ) * x0 + ( yPXB2 - y0 ) * y0 ) );
+
+	  double uz0 = zPXB2 + tandip * dphi * rho;
+
+	  g501->Fill( zPXB4 );
+	  g502->Fill( uphi - iTrack->phi() );
+	  g503->Fill( udca - iTrack->d0() );
+	  g504->Fill( udip - iTrack->lambda() );
+	  g505->Fill( uz0  - iTrack->dz() );
+
+	  // extrapolate to outer hit:
+	  // cirmov
+	  // we already have rinv = -kap
+
+	  double cosphi = cos(uphi);
+	  double sinphi = sin(uphi);
+	  double dp = -xPXB4*sinphi + yPXB4*cosphi + udca;
+	  double dl = -xPXB4*cosphi - yPXB4*sinphi;
+	  double sa = 2*dp + rinv * ( dp*dp + dl*dl );
+	  double dca4 = sa / ( 1 + sqrt(1 + rinv*sa) );// distance to hit 4
+	  double ud = 1 + rinv*udca;
+	  double phi4 = atan2( -rinv*xPXB4 + ud*sinphi, rinv*yPXB4 + ud*cosphi );//track direction
+
+	  double phiinc = phi4 - phiN4;//angle of incidence in rphi w.r.t. normal vector
+
+	  // phiN alternates inward/outward
+	  // reduce phiinc:
+
+	  if( phiinc > pihalf ) phiinc -= pi;
+	  else if( phiinc < -pihalf ) phiinc += pi;
+
+	  // arc length:
+
+	  double xx = xPXB4 + dca4 * sin(phi4); // point on track
+	  double yy = yPXB4 - dca4 * cos(phi4);
+
+	  double f0 = uphi;//
+	  double kx = kap*xx;
+	  double ky = kap*yy;
+	  double kd = kap*udca;
+
+	  // Solve track equation for s:
+
+	  double dx = kx - (kd-1)*sin(f0);
+	  double dy = ky + (kd-1)*cos(f0);
+	  double ks = atan2( dx, -dy ) - f0;// turn angle
+
+	  //---  Limit to half-turn:
+
+	  if(      ks >  pi ) ks = ks - twopi;
+	  else if( ks < -pi ) ks = ks + twopi;
+
+	  double s = ks*rho;// signed
+	  double uz4 = uz0 + s*tandip; //track z at R4
+	  double dz4 = zPXB4 - uz4;
+
+	  if( pt > 4 ) {
+	    g507->Fill( bb/aa );//lever arm
+	    g508->Fill( f4*wt, bb/aa );//lever arm
+	    g509->Fill( f4*wt, phiinc*wt );
+	    g510->Fill( dca4*1E4 );
+	    g511->Fill( dz4*1E4 );
+      if(n2*n3*n4_sector > 0 ){
+        g510_bmi3->Fill(dca4*1E4);
+        g511_bmi3->Fill(dz4*1E4);
+        if( abs( phi4 - phiN4 ) < pihalf ) {
+          g510_bmi3_out->Fill(dca4*1E4);
+          g511_bmi3_out->Fill(dz4*1E4);
+  	    }
+  	    else{
+          g510_bmi3_in->Fill(dca4*1E4);
+          g511_bmi3_in->Fill(dz4*1E4);
+  	    }
+      }
+	  }
+
+	  if( pt > 12 ) {
+
+	    g520->Fill( dca4*1E4 );
+	    g521->Fill( dz4*1E4 );
+
+      if(n2*n3*n4_sector > 0 ){
+        g520_bmi3->Fill(dca4*1E4);
+        g521_bmi3->Fill(dz4*1E4);
+      }
+
+	    if(bb/aa >= 1.10 && bb/aa < 1.27) g520_1->Fill(dca4*1E4);
+	    else if(bb/aa >= 1.27 && bb/aa < 1.43) g520_2->Fill(dca4*1E4);
+	    else if(bb/aa >= 1.43 && bb/aa < 1.57) g520_3->Fill(dca4*1E4);
+	    else if(bb/aa >= 1.57 && bb/aa < 1.80) g520_4->Fill(dca4*1E4);
+	    else if(bb/aa >= 1.80 && bb/aa < 2.00) g520_5->Fill(dca4*1E4);
+
+	    if( abs( phi4 - phiN4 ) < pihalf ) {
+	      g520_out->Fill( dca4*1E4 );
+	      g521_out->Fill( dz4*1E4 );
+        if(n2*n3*n4_sector > 0 ){
+          g520_bmi3_out->Fill(dca4*1E4);
+          g521_bmi3_out->Fill(dz4*1E4);
+        }
+	    }
+	    else{
+	      g520_in->Fill( dca4*1E4 );
+	      g521_in->Fill( dz4*1E4 );
+        if(n2*n3*n4_sector > 0 ){
+          g520_bmi3_in->Fill(dca4*1E4);
+          g521_bmi3_in->Fill(dz4*1E4);
+        }
+	    }
+
+
+
+	    if( abs( phi4 - phiN4 ) < pihalf ) // outward facing module
+	      if(zPXB4 > 0){
+		g520_out_zplus->Fill(dca4*1E4);
+		g521_out_zplus->Fill(dz4*1E4);}
+	      else{
+		g520_out_zminus->Fill(dca4*1E4);
+		g521_out_zminus->Fill(dz4*1E4);}
+	    else
+	      if(zPXB4 > 0){
+		g520_in_zplus->Fill(dca4*1E4);
+		g521_in_zplus->Fill(dz4*1E4);}
+	      else{
+		g520_in_zminus->Fill(dca4*1E4);
+		g521_in_zminus->Fill(dz4*1E4);}
+
+	    if( hp.trackerLayersWithMeasurement() > 8 ) {
+	      g530->Fill( dca4*1E4 );
+	      g531->Fill( dz4*1E4 );
+	    }
+
+	    if( phiinc*wt > -1 && phiinc*wt < 7 ){
+	      g540->Fill( dca4*1E4 );
+	      g541->Fill( dz4*1E4 );
+	    }
+
+	    if( nrow1 == 1 ) g542->Fill( dca4*1E4 );
+	    else {
+	      if( nrow1 == 2 ) g543->Fill( dca4*1E4 );
+	      else {
+		if( nrow1 == 3 ) g544->Fill( dca4*1E4 );
+		else g545->Fill( dca4*1E4 );
+	      }
+	    }
+
+	    if( nrow1 == 2 && nrow2 == 2 && nrow3 == 2 ) g546->Fill( dca4*1E4 );
+
+	  }//pt>12
+
+	  // residual profiles: alignment check
+
+	  if( pt > 4 ) {
+	    g512->Fill( f4*wt, dca4*1E4 );
+	    g513->Fill( f4*wt, dz4*1E4 );
+
+	    if( abs( phi4 - phiN4 ) < pihalf ) // outward facing module
+	      if(zPXB4 > 0)
+		g512_out_zplus->Fill( f4*wt, dca4*1E4 );
+	      else
+		g512_out_zminus->Fill( f4*wt, dca4*1E4 );
+	    else
+	      if(zPXB4 > 0)
+		g512_in_zplus->Fill( f4*wt, dca4*1E4 );
+	      else
+		g512_in_zminus->Fill( f4*wt, dca4*1E4 );
+
+	    g514->Fill( zPXB4, dca4*1E4 );
+	    g515->Fill( zPXB4, dz4*1E4 );
+	  }
+	  g516->Fill( logpt, dca4*1E4 );
+	  g517->Fill( logpt, dz4*1E4 );
+	  if( iTrack->charge() > 0 ) g518->Fill( logpt, dca4*1E4 );
+	  else g519->Fill( logpt, dca4*1E4 );
+
+	  // profile of abs(dca) gives mean abs(dca):
+	  // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
+	  // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
+	  // point resolution = 1/sqrt(3/2) * triplet middle residual width
+	  // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
+
+	  if( pt > 4 ) {
+
+	    g522->Fill( f4*wt, abs(dca4)*1E4 );
+	    g523->Fill( f4*wt, abs(dz4)*1E4 );
+
+	    g524->Fill( zPXB4, abs(dca4)*1E4 );
+	    g525->Fill( zPXB4, abs(dz4)*1E4 );
+
+	    g528->Fill( udip*wt, abs(dca4)*1E4 );
+	    g529->Fill( udip*wt, abs(dz4)*1E4 );
+	    if( abs(dip)*wt > 18 && abs(dip)*wt < 50 ) g532->Fill( dz4*1E4 );
+
+	    g534->Fill( phiinc*wt, abs(dca4)*1E4 );
+
+	  }//pt
+
+	  if( pt > 0.8 && pt < 1.2 ) { // low pt
+	    g535->Fill( f4*wt, abs(dca4)*1E4 );
+	  }
+	  g526->Fill( logpt, abs(dca4)*1E4 );
+	  g527->Fill( logpt, abs(dz4)*1E4 );
+	  if( abs(dip)*wt > 18 && abs(dip)*wt < 50 ) g533->Fill( logpt, abs(dz4)*1E4 );
+	  }
+
+
+  }
+
+      if( n3*n2*n4 > 0 ) {
+
+
+
+
+      	{ // let's open a scope, so we can redefine the variables further down
+
+      	  if( jdbg ) cout << "  triplet 2+4 -> 3\n";
+
+      	  double f3 = atan2( yPXB3, xPXB3 );//position angle in layer 3
+
+      	  double ax = xPXB4 - xPXB2;
+      	  double ay = yPXB4 - yPXB2;
+      	  double aa = sqrt( ax*ax + ay*ay ); // from 2 to 4
+
+      	  double xmid = 0.5 * ( xPXB2 + xPXB4 );
+      	  double ymid = 0.5 * ( yPXB2 + yPXB4 );
+      	  double bx = xPXB3 - xmid;
+      	  double by = yPXB3 - ymid;
+      	  double bb = sqrt( bx*bx + by*by ); // from mid point to point 3
+
+      	  hg406->Fill( hp.numberOfValidTrackerHits() );
+      	  hg407->Fill( hp.numberOfValidPixelBarrelHits() );
+      	  hg408->Fill( hp.trackerLayersWithMeasurement() );
+
+      	  // Author: Johannes Gassner (15.11.1996)
+      	  // Make track from 3 space points and kappa (cmz98/ftn/csmktr.f)
+      	  // Definition of the Helix :
+
+      	  // x( t ) = X0 + KAPPA^-1 * SIN( PHI0 + t )
+      	  // y( t ) = Y0 - KAPPA^-1 * COS( PHI0 + t )          t > 0
+      	  // z( t ) = Z0 + KAPPA^-1 * TAN( DIP ) * t
+
+      	  // Center of the helix in the xy-projection:
+
+      	  // X0 = + ( DCA - KAPPA^-1 ) * SIN( PHI0 )
+      	  // Y0 = - ( DCA - KAPPA^-1 ) * COS( PHI0 )
+
+      	  // Point 1 must be in the inner layer, 4 in the outer:
+
+      	  double r2 = sqrt( xPXB2*xPXB2 + yPXB2*yPXB2 );
+      	  double r4 = sqrt( xPXB4*xPXB4 + yPXB4*yPXB4 );
+
+      	  //	cout << "!!!warn r2 = " << r2 << ", r4 = " << r4 << endl;
+
+      	  if( r4-r2 < 2.0 ) cout << "warn r2 = " << r2 << ", r4 = " << r4 << endl;
+
+      	  // Calculate the centre of the helix in xy-projection that
+      	  // transverses the two spacepoints. The points with the same
+      	  // distance from the two points are lying on a line.
+      	  // LAMBDA is the distance between the point in the middle of
+      	  // the two spacepoints and the centre of the helix.
+
+      	  // we already have kap and rho = 1/kap
+
+      	  double lam = sqrt( -0.25 +
+      			     rho*rho / ( ( xPXB2 - xPXB4 )*( xPXB2 - xPXB4 ) + ( yPXB2 - yPXB4 )*( yPXB2 - yPXB4 ) ) );
+
+      	  // There are two solutions, the sign of kap gives the information
+      	  // which of them is correct:
+
+      	  if( kap > 0 ) lam = -lam;
+
+      	  // ( X0, Y0 ) is the centre of the circle
+      	  // that describes the helix in xy-projection:
+
+      	  double x0 =  0.5*( xPXB2 + xPXB4 ) + lam * ( -yPXB2 + yPXB4 );
+      	  double y0 =  0.5*( yPXB2 + yPXB4 ) + lam * (  xPXB2 - xPXB4 );
+
+      	  // Calculate theta:
+
+      	  double num = ( yPXB4 - y0 ) * ( xPXB2 - x0 ) - ( xPXB4 - x0 ) * ( yPXB2 - y0 );
+      	  double den = ( xPXB2 - x0 ) * ( xPXB4 - x0 ) + ( yPXB2 - y0 ) * ( yPXB4 - y0 );
+      	  double tandip = kap * ( zPXB4 - zPXB2 ) / atan( num / den );
+      	  double udip = atan(tandip);
+      	  //double utet = pihalf - udip;
+
+      	  // To get phi0 in the right interval one must distinguish
+      	  // two cases with positve and negative kap:
+
+      	  double uphi;
+      	  if( kap > 0 ) uphi = atan2( -x0,  y0 );
+      	  else          uphi = atan2(  x0, -y0 );
+
+      	  // The distance of the closest approach DCA depends on the sign
+      	  // of kappa:
+
+      	  double udca;
+      	  if( kap > 0 ) udca = rho - sqrt( x0*x0 + y0*y0 );
+      	  else          udca = rho + sqrt( x0*x0 + y0*y0 );
+
+      	  // angle from first hit to dca point:
+
+      	  double dphi = atan( ( ( xPXB2 - x0 ) * y0 - ( yPXB2 - y0 ) * x0 )
+      			      / ( ( xPXB2 - x0 ) * x0 + ( yPXB2 - y0 ) * y0 ) );
+
+      	  double uz0 = zPXB2 + tandip * dphi * rho;
+
+      	  hg401->Fill( zPXB3 );
+      	  hg402->Fill( uphi - iTrack->phi() );
+      	  hg404->Fill( udca - iTrack->d0() );
+      	  hg404->Fill( udip - iTrack->lambda() );
+      	  hg405->Fill( uz0  - iTrack->dz() );
+
+      	  // interpolate to middle hit:
+      	  // cirmov
+      	  // we already have rinv = -kap
+
+      	  double cosphi = cos(uphi);
+      	  double sinphi = sin(uphi);
+      	  double dp = -xPXB3*sinphi + yPXB3*cosphi + udca;
+      	  double dl = -xPXB3*cosphi - yPXB3*sinphi;
+      	  double sa = 2*dp + rinv * ( dp*dp + dl*dl );
+      	  double dca3 = sa / ( 1 + sqrt(1 + rinv*sa) );// distance to hit 3
+      	  double ud = 1 + rinv*udca;
+      	  double phi3 = atan2( -rinv*xPXB3 + ud*sinphi, rinv*yPXB3 + ud*cosphi );//direction
+
+      	  double phiinc = phi3 - phiN3;//angle of incidence in rphi w.r.t. normal vector
+
+      	  // phiN alternates inward/outward
+      	  // reduce phiinc:
+
+      	  if( phiinc > pihalf ) phiinc -= pi;
+      	  else if( phiinc < -pihalf ) phiinc += pi;
+
+      	  // arc length:
+
+      	  double xx = xPXB3 + dca3 * sin(phi3); // point on track
+      	  double yy = yPXB3 - dca3 * cos(phi3);
+
+      	  double vx = xx - xmid3;//from module center
+      	  double vy = yy - ymid3;
+      	  double vv = sqrt( vx*vx + vy*vy );
+
+      	  double f0 = uphi;//
+      	  double kx = kap*xx;
+      	  double ky = kap*yy;
+      	  double kd = kap*udca;
+
+      	  // Solve track equation for s:
+
+      	  double dx = kx - (kd-1)*sin(f0);
+      	  double dy = ky + (kd-1)*cos(f0);
+      	  double ks = atan2( dx, -dy ) - f0;// turn angle
+
+      	  // Limit to half-turn:
+
+      	  if(      ks >  pi ) ks = ks - twopi;
+      	  else if( ks < -pi ) ks = ks + twopi;
+
+      	  double s = ks*rho; // signed
+      	  double uz3 = uz0 + s*tandip; // track z at R3
+      	  double dz3 = zPXB3 - uz3;
+
+      	  Surface::GlobalPoint gp3( xx, yy, uz3 );
+      	  Surface::LocalPoint lp3 = det3->toLocal( gp3 );
+
+      	  if( idbg ) {
+      	    std::cout <<"**** local  Point coord ****" <<std::endl;
+      	    std::cout <<"gp3.x() "<< gp3.x() <<std::endl;
+      	    std::cout <<"gp3.y() "<< gp3.y() <<std::endl;
+      	    std::cout <<"gp3.z() "<< gp3.z() <<std::endl;
+
+      	    std::cout <<"lp3.x() "<< lp3.x() <<std::endl;
+      	    std::cout <<"lp3.y() "<< lp3.y() <<std::endl;
+      	    std::cout <<"lp3.z() "<< lp3.z() <<std::endl;
+
+      	    std::cout <<"  uPXB3 = xloc;  precise hit in local coordinates (w.r.t. sensor center)"<< uPXB3 <<std::endl;
+      	    std::cout <<"  vPXB3 = yloc;precise hit in local coordinates (w.r.t. sensor center)" << vPXB3 <<std::endl;
+
+      	  }
+      	  // local x = phi
+      	  // local y = z in barrel
+      	  // local z = radial in barrel (thickness)
+
+      	  double xpix = fmod( uPXB3 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed
+      	  double xpx3 = fmod( uPXB3 + 0.82, 0.02 ); // xpix = 0..0.02 reconstructed
+      	  double xpx2 = fmod( uPXB2 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed
+      	  double xpx4 = fmod( uPXB4 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed
+
+      	  //double dpix = fmod( uPXB3 + dca3 + 0.82, 0.01 ); // dpix = 0..0.01 predicted
+
+      	  double vpix = fmod( vv, 0.01 ); // vpix = 0..0.01 predicted
+      	  if( uPXB3 < 0 ) vpix = -vpix; // vv is unsigned distance from module center
+
+      	  double lpix = fmod( lp3.x() + 0.82, 0.01 ); // lpix = 0..0.01 predicted
+      	  double tpix = fmod( lp3.x() + 0.82, 0.02 ); // tpix = 0..0.02 predicted
+
+      	  double zpix = fmod( lp3.y() + 3.24, 0.015 ); // zpix = 0..0.015 predicted
+      	  double spix = fmod( lp3.y() + 3.24, 0.03  ); // spix = 0..0.03  predicted
+
+      	  int smin = zmin3%52; // 0..51 column along z
+      	  int smax = zmax3%52; // 0..51 column along z
+
+      	  double cogx = (cogp3 + 0.5 - 80) * 0.01 - 0.0054; // Lorentz shift
+      	  if( cogp3 < 79 ) cogx -= 0.01; // big pix
+      	  if( cogp3 > 80 ) cogx += 0.01; // big pix
+
+      	  double mpix = fmod( cogx + 0.82, 0.01 ); // mpix = 0..0.01 from cluster COG
+      	  double cogdx = cogx - lp3.x(); // residual
+
+      	  // hybrid method:
+
+      	  double hybx = uPXB3; // template
+      	  if( mpix*1E4 < 20 ) hybx = cogx; // COG
+      	  if( mpix*1E4 > 75 ) hybx = cogx;
+      	  //double hpix = fmod( hybx + 0.82, 0.01 ); // hpix = 0..0.01 from cluster hybrid method
+      	  double hybdx = hybx - lp3.x(); // residual
+
+      	  /*bool halfmod = 0;
+      	  if(      ilad3 ==  8 ) halfmod = 1;
+      	  else if( ilad3 ==  9 ) halfmod = 1;
+      	  else if( ilad3 == 24 ) halfmod = 1;
+      	  else if( ilad3 == 25 ) halfmod = 1;
+	  */
+      	  if( pt > 4 ) {
+
+      	    hg308->Fill( bb/aa ); // lever arm
+      	    hg409->Fill( f3*wt, phiinc*wt );
+      	    hg410->Fill( dca3*1E4 );
+      	    hg411->Fill( dz3*1E4 );
+            if(n2*n3_sector*n4 > 0 ){
+              hg410_bpo3->Fill(dca3*1E4);
+              hg411_bpo3->Fill(dz3*1E4);
+              if( abs( phi3 - phiN3 ) < pihalf ) {
+                hg410_bpo3_out->Fill(dca3*1E4);
+                hg411_bpo3_out->Fill(dz3*1E4);
+  	          }
+              else{
+                hg410_bpo3_in->Fill(dca3*1E4);
+                hg411_bpo3_in->Fill(dz3*1E4);
+  	          }
+            }
+      	    // pile up study Summer 2011:
+
+      	    // if( nvertex < 3 ) {
+      	    //   h310->Fill( dca3*1E4 );
+      	    //   h311->Fill( dz3*1E4 );
+      	    // }
+      	    // else if( nvertex < 6 ) {
+      	    //   h312->Fill( dca3*1E4 );
+      	    //   h313->Fill( dz3*1E4 );
+      	    // }
+      	    // else if( nvertex < 10 ) {
+      	    //   h314->Fill( dca3*1E4 );
+      	    //   h315->Fill( dz3*1E4 );
+      	    // }
+      	    // else {
+      	    //   h316->Fill( dca3*1E4 );
+      	    //   h317->Fill( dz3*1E4 );
+      	    //   h318->Fill( nvertex );
+      	    // } // pile up
+
+      	  } // pt > 4
+
+
+      	  if( pt > 12 ) {
+      	    //std::cout <<" PXB2_clusProb " <<  PXB2_clusProb <<" PXB1_clusProb " <<  PXB1_clusProb <<" PXB3_clusProb " <<  PXB3_clusProb <<std::endl;
+      	    //	  const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( &*(*irecHit) );
+      	    if( PXB3_clusProb!=-99  && PXB1_clusProb > 0.5  && PXB4_clusProb >0.5 && PXB3_clusSizeX > 1 && PXB3_clusSizeY > 1 ){
+      	      // h_cluster_prob->Fill(PXB3_clusProb);
+
+      	      if( idbg ) cout << "  cluster prob " << PXB3_clusProb << endl;
+
+      	      if( PXB3_clusProb<0.10) hg420_cluster_prob_0_010->Fill(dca3*1E4 );
+      	      else if( PXB3_clusProb<0.75) hg420_cluster_prob_010_075->Fill(dca3*1E4 );
+      	      else if( PXB3_clusProb<0.90) hg420_cluster_prob_075_090->Fill(dca3*1E4 );
+      	      else hg420_cluster_prob_090_101->Fill(dca3*1E4 );
+
+      	      if( PXB3_clusProb<0.1) hg421_cluster_prob_0_010->Fill(dz3*1E4 );
+      	      else if( PXB3_clusProb<0.75) hg421_cluster_prob_010_075->Fill(dz3*1E4 );
+      	      else if( PXB3_clusProb<0.90) hg421_cluster_prob_075_090->Fill(dz3*1E4 );
+      	      else hg421_cluster_prob_090_101->Fill(dz3*1E4 );
+      	      if  ( fabs(iTrack->eta() )<0.8) {
+
+      		if( PXB3_clusProb<0.10) hg420_cluster_prob_0_010_etaL0p8->Fill(dca3*1E4 );
+      		else if( PXB3_clusProb<0.75) hg420_cluster_prob_010_075_etaL0p8->Fill(dca3*1E4 );
+      		else if( PXB3_clusProb<0.90) hg420_cluster_prob_075_090_etaL0p8->Fill(dca3*1E4 );
+      		else hg420_cluster_prob_090_101_etaL0p8->Fill(dca3*1E4 );
+
+      		if( PXB3_clusProb<0.1) hg421_cluster_prob_0_010_etaL0p8->Fill(dz3*1E4 );
+      		else if( PXB3_clusProb<0.75) hg421_cluster_prob_010_075_etaL0p8->Fill(dz3*1E4 );
+      		else if( PXB3_clusProb<0.90) hg421_cluster_prob_075_090_etaL0p8->Fill(dz3*1E4 );
+      		else hg421_cluster_prob_090_101_etaL0p8->Fill(dz3*1E4 );
+      	      }
+      	      else{
+
+
+      		if( PXB3_clusProb<0.10) hg420_cluster_prob_0_010_etaM0p8->Fill(dca3*1E4 );
+      		else if( PXB3_clusProb<0.75) hg420_cluster_prob_010_075_etaM0p8->Fill(dca3*1E4 );
+      		else if( PXB3_clusProb<0.90) hg420_cluster_prob_075_090_etaM0p8->Fill(dca3*1E4 );
+      		else hg420_cluster_prob_090_101_etaM0p8->Fill(dca3*1E4 );
+
+      		if( PXB3_clusProb<0.1) hg421_cluster_prob_0_010_etaM0p8->Fill(dz3*1E4 );
+      		else if( PXB3_clusProb<0.75) hg421_cluster_prob_010_075_etaM0p8->Fill(dz3*1E4 );
+      		else if( PXB3_clusProb<0.90) hg421_cluster_prob_075_090_etaM0p8->Fill(dz3*1E4 );
+      		else hg421_cluster_prob_090_101_etaM0p8->Fill(dz3*1E4 );
+      	      }
+
+      	    }
+
+
+
+
+      	    hg420->Fill( dca3*1E4 ); // 12.7 um
+
+
+      	    hg421->Fill( dz3*1E4 );
+
+            if(n2*n3_sector*n4 > 0 ){
+              hg420_bpo3->Fill(dca3*1E4);
+              hg421_bpo3->Fill(dz3*1E4);
+            }
+
+	    if( abs( phi3 - phiN3 ) < pihalf ) {
+	      hg420_out->Fill( dca3*1E4 );
+	      hg421_out->Fill( dz3*1E4 );
+        if(n2*n3_sector*n4 > 0 ){
+          hg420_bpo3_out->Fill(dca3*1E4);
+          hg421_bpo3_out->Fill(dz3*1E4);
+        }
+	    }
+	    else{
+	      hg420_in->Fill( dca3*1E4 );
+	      hg421_in->Fill( dz3*1E4 );
+        if(n2*n3_sector*n4 > 0 ){
+          hg420_bpo3_in->Fill(dca3*1E4);
+          hg421_bpo3_in->Fill(dz3*1E4);
+        }
+	    }
+
+
+
+      	    // Add errors and pulls
+      	    // h077->Fill( ePXB3*1E4 );
+      	    // h078->Fill( fPXB3*1E4 );
+      	    if(idbg) cout<<" residuals "<<dca3*1E4<<" "<<ePXB3*1E4<<" "<<dz3*1E4
+      			 <<" "<<fPXB3*1E4<<endl;
+      	    //double pulx=0., puly=0.;
+      	    //if(ePXB3!=0.0) pulx = dca3/ePXB3;
+      	    //if(fPXB3!=0.0) puly = dz3/fPXB3;
+      	    // h079->Fill( pulx );
+      	    // h069->Fill( puly );
+
+      	    // Alignment errors
+      	    //LocalError lape = det3->localAlignmentError();
+      	    //cout<<geomDet3<<endl;
+      	    if(geomDet2 != NULL) {
+      	      LocalError lape = geomDet2->localAlignmentError();
+      	      //cout<< lape.valid() <<endl;
+      	      if (lape.valid()) {
+      		//float tmp11= 0.;
+      		//if(lape.xx()>0.) tmp11= sqrt(lape.xx())*1E4;
+      		//float tmp14= 0.;
+      		//if(lape.yy()>0.) tmp14= sqrt(lape.yy())*1E4;
+      		//cout<<" layer 3 "<<tmp11<<" "<<tmp14<<endl;
+      		// h088->Fill( tmp11 );
+      		// h089->Fill( tmp14 );
+      	      } else {   if( myCounters::neve < 10 ) cout<<" lape invalid?"<<endl;}
+      	    }
+
+      	    if(bb/aa < 0.015) hg420_1->Fill(dca3*1E4);
+      	    else if(bb/aa >= 0.015 && bb/aa < 0.065) hg420_2->Fill(dca3*1E4);
+      	    else hg420_3->Fill(dca3*1E4);
+
+      	    //Flipped/non-flipped
+      	    if( abs( phi3 - phiN3 ) < pihalf ) // outward facing module
+      	      if(zPXB3 > 0){
+      		hg420_out_zplus->Fill( dca3*1E4 );
+      	 	hg421_out_zplus->Fill( dz3*1E4 );}
+      	      else{
+      		hg420_out_zminus->Fill( dca3*1E4 );
+		hg421_out_zminus->Fill( dz3*1E4 );}
+      	    else
+      	      if(zPXB3 > 0){
+		hg420_in_zplus->Fill( dca3*1E4 );
+      		hg421_in_zplus->Fill( dz3*1E4 );}
+      	      else{
+      		hg420_in_zminus->Fill( dca3*1E4 );
+		hg421_in_zminus->Fill( dz3*1E4 );}
+
+      	    //local x>0 ,local x<0
+      	    if( uPXB3>0 ){
+
+      	      hg420_x_plus->Fill( dca3*1E4 );
+      	      hg421_x_plus->Fill( dz3*1E4 );
+
+      	    } else{
+      	      hg420_x_minus->Fill( dca3*1E4 );
+      	      hg421_x_minus->Fill( dz3*1E4 );
+      	    }
+
+
+      	    ////check for bias dot flip, unflipped, zplus,zminus,xplu,xminus combination
+
+
+      	    if( abs( phi3 - phiN3 ) < pihalf ) {// outward facing module
+      	      if(zPXB3 > 0){
+      		if( uPXB3>0 ){
+
+      		  hg420_out_xplus_zplus->Fill( dca3*1E4 );
+      		  hg421_out_xplus_zplus->Fill( dz3*1E4 );
+
+      		} else {
+      		  hg420_out_xminus_zplus->Fill( dca3*1E4 );
+      		  hg421_out_xminus_zplus->Fill( dz3*1E4 );
+      		}
+      	      } else{
+      		if( uPXB3>0 ){
+
+      		  hg420_out_xplus_zminus->Fill( dca3*1E4 );
+      		  hg421_out_xplus_zminus->Fill( dz3*1E4 );
+
+      		} else {
+      		  hg420_out_xminus_zminus->Fill( dca3*1E4 );
+      		  hg421_out_xminus_zminus->Fill( dz3*1E4 );
+      		}
+      	      }
+      	    }  else {
+      	      if(zPXB3 > 0){
+      		if( uPXB3>0 ){
+
+      		  hg420_in_xplus_zplus->Fill( dca3*1E4 );
+      		  hg421_in_xplus_zplus->Fill( dz3*1E4 );
+
+      		} else {
+      		  hg420_in_xminus_zplus->Fill( dca3*1E4 );
+      		  hg421_in_xminus_zplus->Fill( dz3*1E4 );
+      		}
+      	      } else{
+      		if( uPXB3>0 ){
+
+      		  hg420_in_xplus_zminus->Fill( dca3*1E4 );
+      		  hg421_in_xplus_zminus->Fill( dz3*1E4 );
+
+      		} else {
+      		  hg420_in_xminus_zminus->Fill( dca3*1E4 );
+      		  hg421_in_xminus_zminus->Fill( dz3*1E4 );
+      		}
+      	      }
+      	    }
+
+
+
+
+      	    // //////// Modules:1-8
+
+      	    if( imod==1  ){// innermost  module
+      	      hg420_mod1->Fill( dca3*1E4 );
+      	      hg421_mod1->Fill( dz3*1E4 );
+      	    }
+      	    if( imod==2  ){
+      	      hg420_mod2->Fill( dca3*1E4 );
+      	      hg421_mod2->Fill( dz3*1E4 );
+      	    }
+      	    if( imod==3  ){
+      	      hg420_mod3->Fill( dca3*1E4 );
+      	      hg421_mod3->Fill( dz3*1E4 );
+      	    }
+      	    if( imod==4  ){
+      	      hg420_mod4->Fill( dca3*1E4 );
+      	      hg421_mod4->Fill( dz3*1E4 );
+      	    }
+      	    if( imod==5  ){
+      	      hg420_mod5->Fill( dca3*1E4 );
+      	      hg421_mod5->Fill( dz3*1E4 );
+      	    }
+      	    if( imod==6 ){
+      	      hg420_mod6->Fill( dca3*1E4 );
+      	      hg421_mod6->Fill( dz3*1E4 );
+      	    }
+      	    if( imod==7  ){
+      	      hg420_mod7->Fill( dca3*1E4 );
+      	      hg421_mod7->Fill( dz3*1E4 );
+	    }
+	    if( imod==8  ){// outermost  module
+	      hg420_mod8->Fill( dca3*1E4 );
+	      hg421_mod8->Fill( dz3*1E4 );
+	    }
+
+
+	    // versus number o ftracker hits
+	    if( hp.trackerLayersWithMeasurement() > 8 ) {
+	      hg430->Fill( dca3*1E4 );
+	      hg431->Fill( dz3*1E4 );
+	    }
+	    //
+	    if( phiinc*wt > -1 && phiinc*wt < 7 ){
+	      hg440->Fill( dca3*1E4 ); // 11.4 um
+	      hg441->Fill( dz3*1E4 );
+	    }
+	    // Versus cluster size in x
+	    if(      nrow3 == 1 ) hg442->Fill( dca3*1E4 ); // 13.6
+	    else if( nrow3 == 2 ) hg443->Fill( dca3*1E4 ); // 12.7
+	    else if( nrow3 == 3 ) hg444->Fill( dca3*1E4 ); // 19.7 um
+	    else                  hg445->Fill( dca3*1E4 ); // two peaks
+
+	    if( nrow2 == 2 && nrow3 == 2 && nrow4 == 2 ) hg446->Fill( dca3*1E4 ); // 12.2 um
+
+	    hg447->Fill( nrow2 );
+
+	  } // pt > 12
+
+	  // residual profiles: alignment check
+
+	  if( pt > 4 ) {
+	    hg412->Fill( f3*wt, dca3*1E4 );
+	    hg413->Fill( f3*wt, dz3*1E4 );
+
+	    if( abs( phi3 - phiN3 ) < pihalf ) // outward facing module
+	      if(zPXB3 > 0)
+		hg412_out_zplus->Fill( f3*wt, dca3*1E4 );
+	      else
+		hg412_out_zminus->Fill( f3*wt, dca3*1E4 );
+	    else
+	      if(zPXB3 > 0)
+		hg412_in_zplus->Fill( f3*wt, dca3*1E4 );
+	      else
+		hg412_in_zminus->Fill( f3*wt, dca3*1E4 );
+
+	    hg414->Fill( zPXB3, dca3*1E4 );
+	    hg415->Fill( zPXB3, dz3*1E4 );
+	  }
+	  hg416->Fill( logpt, dca3*1E4 );
+	  hg417->Fill( logpt, dz3*1E4 );
+	  if( iTrack->charge() > 0 ) hg418->Fill( logpt, dca3*1E4 );
+	  else hg419->Fill( logpt, dca3*1E4 );
+
+	  // profile of abs(dca) gives mean abs(dca):
+	  // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
+	  // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
+	  // point resolution = 1/sqrt(3/2) * triplet middle residual width
+	  // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
+
+	  if( pt > 4 ) {
+
+	    hg422->Fill( f3*wt, abs(dca3)*1E4 );
+	    hg423->Fill( f3*wt, abs(dz3)*1E4 );
+
+	    hg424->Fill( zPXB3, abs(dca3)*1E4 );
+	    hg425->Fill( zPXB3, abs(dz3)*1E4 );
+
+	    hg428->Fill( udip*wt, abs(dca3)*1E4 );
+	    hg429->Fill( udip*wt, abs(dz3)*1E4 );
+	    hg429_eta->Fill(iTrack->eta(), abs(dz3)*1E4);
+	    if( abs(dip)*wt > 18 && abs(dip)*wt < 50 ) hg432->Fill( dz3*1E4 );
+
+	    hg434->Fill( phiinc*wt, abs(dca3)*1E4 );
+	    h334->Fill( phiinc*wt, abs(cogdx)*1E4 );//similar
+
+	    if( abs( phi3 - phiN3 ) < pihalf ) // outward facing module
+	      hg436->Fill( phiinc*wt, abs(dca3)*1E4 );
+	    else
+	      hg437->Fill( phiinc*wt, abs(dca3)*1E4 );//similar
+
+	    if(  lpix*1E4 > 30 && lpix*1E4 < 70 ) h319->Fill( phiinc*wt, abs(dca3)*1E4 );//flat
+
+	  } // pt > 4
+
+	  hg426->Fill( logpt, abs(dca3)*1E4 );
+	  hg427->Fill( logpt, abs(dz3)*1E4 );
+	  if( abs(dip)*wt > 18 && abs(dip)*wt < 50 ) hg433->Fill( logpt, abs(dz3)*1E4 );
+
+	  // pt bins:
+	  // uPXB2 = local x
+	  // vPXB2 = local z
+	  // low pt: material
+
+	  // if( pt > 0.8 && pt < 1.2 ) {
+	  //   hg435->Fill( f3*wt, abs(dca3)*1E4 );
+	  //   if( ! halfmod ) {
+	  //     h210->Fill( uPXB3, abs(dca3)*1E4 ); // hump at +-0.15
+	  //     //search material along v=z in u=x slices:
+	  //     if(      abs(uPXB2) < 0.1 ) h215->Fill( vPXB2, abs(dca2)*1E4 );
+	  //     else if( abs(uPXB2) < 0.2 ) h216->Fill( vPXB2, abs(dca2)*1E4 );
+	  //     else if( abs(uPXB2) < 0.3 ) h217->Fill( vPXB2, abs(dca2)*1E4 );
+	  //     else if( abs(uPXB2) < 0.4 ) h218->Fill( vPXB2, abs(dca2)*1E4 );
+	  //     else if( abs(uPXB2) < 0.5 ) h219->Fill( vPXB2, abs(dca2)*1E4 );
+	  //     else if( abs(uPXB2) < 0.6 ) h225->Fill( vPXB2, abs(dca2)*1E4 );
+	  //     else if( abs(uPXB2) < 0.7 ) h226->Fill( vPXB2, abs(dca2)*1E4 );
+	  //     else                        h327->Fill( vPXB2, abs(dca2)*1E4 );
+	  //   } // !halfmod
+	  //   h220->Fill( vPXB2, abs(dca2)*1E4 );
+	  //   h230->Fill( vPXB2, abs(dz2)*1E4 );
+	  // } // pt
+
+	  // if( pt > 1.2 && pt < 1.6 ) {
+	  //   if( ! halfmod ) h211->Fill( uPXB2, abs(dca2)*1E4 );
+	  //   h221->Fill( vPXB2, abs(dca2)*1E4 );
+	  //   h231->Fill( vPXB2, abs(dz2)*1E4 );
+	  // }
+
+	  // if( pt > 1.6 && pt < 2.2 ) {
+	  //   if( ! halfmod ) h212->Fill( uPXB2, abs(dca2)*1E4 );
+	  //   h222->Fill( vPXB2, abs(dca2)*1E4 );
+	  //   h232->Fill( vPXB2, abs(dz2)*1E4 );
+	  // }
+
+	  // if( pt > 2.2 && pt < 4.0 ) {
+	  //   if( ! halfmod ) h213->Fill( uPXB2, abs(dca2)*1E4 );
+	  //   h223->Fill( vPXB2, abs(dca2)*1E4 );
+	  //   h233->Fill( vPXB2, abs(dz2)*1E4 );
+	  // }
+
+	  // if( pt > 4.0 ) {
+	  //   if( ! halfmod ) h214->Fill( uPXB2, abs(dca2)*1E4 );
+	  //   h224->Fill( vPXB2, abs(dca2)*1E4 );
+	  //   h234->Fill( vPXB2, abs(dz2)*1E4 );
+	  // }
+
+	  // // full modules:
+
+	  // if( pt > 4.0 &&
+	  //     ! halfmod &&
+	  //     xmin2 > 0 && xmax2 < 159 && // skip edges
+	  //     xmin2 != 79 && xmax2 != 79 &&  // skip wide pixels
+	  //     xmin2 != 80 && xmax2 != 80 ) { // skip wide pixels
+
+	  //   h235->Fill( xpix*1E4 ); // from cluster
+	  //   h236->Fill( lpix*1E4 ); // from track: flat
+
+	  //   h285->Fill( mpix*1E4 ); // from cluster mixed
+	  //   h286->Fill( uPXB2, (cogx - uPXB2)*1E4 ); // flat
+
+	  //   if( nrow2 == 1 ) h237->Fill( lpix*1E4 );
+	  //   if( nrow2 == 2 ) h238->Fill( lpix*1E4 );
+	  //   if( nrow2 == 3 ) h239->Fill( lpix*1E4 );
+
+	  //   if( nrow2 == 1 ) h227->Fill( xpix*1E4 );
+	  //   if( nrow2 == 2 ) h228->Fill( xpix*1E4 );
+	  //   if( nrow2 == 3 ) h229->Fill( xpix*1E4 );
+
+	  //   h240->Fill( tpix*1E4, nrow2 );
+	  //   h322->Fill( tpix*1E4, clch2*1E-3*cos(dip) );
+	  //   if( nrow2 < 3 ) h330->Fill( tpix*1E4, etaX2 );
+	  //   h331->Fill( tpix*1E4, ePXB2*1E4 );//hit error
+	  //   h332->Fill( ePXB2*1E4 );//hit error
+
+	  //   h241->Fill( xpix*1E4, dca2*1E4 ); // flat at zero
+
+	  //   h242->Fill( xpx2*1E4, abs(dca2)*1E4 ); // xpix = from cluster
+
+	  //   h243->Fill( lpix*1E4, dca2*1E4 ); // no bias
+	  //   h244->Fill( tpix*1E4, abs(dca2)*1E4 ); // tpix = from track, sine
+
+	  //   // dca w.r.t. cluster COG cogx:
+
+	  //   h287->Fill( lp2.x(), cogdx*1E4 ); // zero
+	  //   h288->Fill( lpix*1E4, cogdx*1E4 ); // +-2 um
+	  //   h289->Fill( tpix*1E4, abs(cogdx)*1E4 ); // cogx = COG
+
+	  //   // hybrid method:
+
+	  //   h283->Fill( tpix*1E4, abs(hybdx)*1E4 ); // similar to dca2
+
+	  //   if( nrow2 == 2 ) {
+	  //     h343->Fill( lpix*1E4, dca2*1E4 ); // bias? no.
+	  //     h267->Fill( tpix*1E4, abs(dca2)*1E4 ); // U-shaped
+	  //   }
+
+	  //   h268->Fill( lpix*1E4, abs(dca2)*1E4 ); // one-pixel wide resolution
+	  //   h320->Fill( zpix*1E4, abs(dca2)*1E4 );//flat
+	  //   h321->Fill( spix*1E4, abs(dca2)*1E4 );//two-pixel z, flat
+
+	  //   // in-pixel map:
+
+	  //   if( smin > 0 && smax < 51 ) { // skip long pixels in z
+	  //     h323->Fill( spix*1E4, tpix*1E4 ); // 2x2 flat
+	  //     if( abs(dip)*wt < 10 ) h324->Fill( spix*1E4, tpix*1E4 );
+	  //   }
+
+	  //   // highest pt:
+
+	  //   if( pt > 12 ) {
+
+	  //     if(      lpix*1E4 > 30 && lpix*1E4 < 70 ) hg438->Fill( dca2*1E4 ); // 9.1 um
+	  //     else if( lpix*1E4 < 20 || lpix*1E4 > 80 ) hg439->Fill( dca2*1E4 ); // 17.0, two peaks
+	  //     if( nrow2 == 1 ) h290->Fill( dca2*1E4 ); // single 13.1
+
+	  //     h379->Fill( dca2 *1E4 ); // dca from templates
+	  //     h380->Fill( cogdx*1E4 ); // dca from COG: 12.8
+	  //     h284->Fill( hybdx*1E4 ); // hybrid 12.6
+
+	  //     // nrow = 1 and nrow = 2 are related
+	  //     // might expect shifts and biases if analyzed separately
+
+	  //     if( nrow2 == 2 ) {
+
+	  //       if( lpix*1E4 < 20 ) h291->Fill( dca2*1E4 ); // split
+	  //       if( lpix*1E4 > 80 ) h292->Fill( dca2*1E4 ); // split
+
+	  //       h381->Fill( cogdx*1E4 );
+
+	  //       if( lpix*1E4 < 20 ) h382->Fill( cogdx*1E4 );//right
+	  //       if( lpix*1E4 > 80 ) h383->Fill( cogdx*1E4 );//left
+
+	  //       // study split:
+
+	  //       if( lpix*1E4 < 20 || lpix*1E4 > 80 ){
+
+	  // 	if( abs( phi2 - phiN2 ) < pihalf )
+	  // 	  h293->Fill( dca2*1E4 ); // split
+	  // 	else
+	  // 	  h294->Fill( dca2*1E4 ); // split
+
+	  // 	if( zPXB2 > 0 )
+	  // 	  h295->Fill( dca2*1E4 ); // split
+	  // 	else
+	  // 	  h296->Fill( dca2*1E4 ); // split
+
+	  // 	if( iTrack->charge() > 0 )
+	  // 	  h297->Fill( dca2*1E4 ); // split
+	  // 	else
+	  // 	  h298->Fill( dca2*1E4 ); // split
+
+	  // 	if( phiinc > 0 )
+	  // 	  h299->Fill( dca2*1E4 ); // split
+	  // 	else
+	  // 	  h300->Fill( dca2*1E4 ); // split
+
+	  // 	if( uPXB2 > 0 )
+	  // 	  h390->Fill( dca2*1E4 ); // split
+	  // 	else
+	  // 	  h391->Fill( dca2*1E4 ); // split
+
+	  // 	if( clch2 < 40E3 )
+	  // 	  h392->Fill( dca2*1E4 ); // split
+	  // 	else
+	  // 	  h393->Fill( dca2*1E4 );//
+
+	  //       }//pixel edges
+
+	  //       // 4-Felder test (Claus Kleinwort):
+
+	  //       if( lpix*1E4 < 20 ) {
+	  // 	if( abs( phi2 - phiN2 ) < pihalf )
+	  // 	  h394->Fill( dca2*1E4 );//left
+	  // 	else
+	  // 	  h395->Fill( dca2*1E4 );//right
+	  //       }
+	  //       if( lpix*1E4 > 80 ) {
+	  // 	if( abs( phi2 - phiN2 ) < pihalf )
+	  // 	  h396->Fill( dca2*1E4 );//right
+	  // 	else
+	  // 	  h397->Fill( dca2*1E4 );//left
+	  //       }
+
+	  //     }//nrow=2
+
+	  //     // study split for all nrow:
+	  //     // 4-Felder test (Claus Kleinwort):
+
+	  //     if( lpix*1E4 < 20 ) {
+	  //       if( abs( phi2 - phiN2 ) < pihalf )
+	  // 	h374->Fill( dca2*1E4 ); // left
+	  //       else
+	  // 	h375->Fill( dca2*1E4 ); // right
+	  //     }
+	  //     if( lpix*1E4 > 80 ) {
+	  //       if( abs( phi2 - phiN2 ) < pihalf )
+	  // 	h376->Fill( dca2*1E4 ); // right
+	  //       else
+	  // 	h377->Fill( dca2*1E4 ); // left
+	  //     }
+
+	  //     if( lpix*1E4 > 30 &&
+	  // 	lpix*1E4 < 70 &&
+	  // 	xpx1*1E4 > 25 &&
+	  // 	xpx1*1E4 < 75 &&
+	  // 	xpx3*1E4 > 25 &&
+	  // 	xpx3*1E4 < 75 )
+	  //       hg448->Fill( dca2*1E4 ); // 9.1 um
+
+	  //   }//pt > 12
+
+	  //   // study eta:
+
+	  //   //if( nrow2 == 2 ) {
+	  //   if( nrow2 < 3 ) {
+
+	  //     if( pt > 12 && lpix*1E4 > 30 && lpix*1E4 < 70 ) hg449->Fill( dca2*1E4 );//9.2
+
+	  //     h245->Fill( tpix*1E4, etaX2 ); // x from track
+
+	  //     if( abs( phi2 - phiN2 ) < pihalf ) // outward module
+	  //       h246->Fill( tpix*1E4, etaX2 ); // identical
+	  //     else
+	  //       h247->Fill( tpix*1E4, etaX2 ); // identical
+
+	  //     h248->Fill( xpx2*1E4, etaX2 ); // x from cluster
+
+	  //     if(      lpix < 0.0000 ) h249->Fill( etaX2 );
+	  //     else if( lpix < 0.0010 ) h250->Fill( etaX2 );
+	  //     else if( lpix < 0.0020 ) h251->Fill( etaX2 );
+	  //     else if( lpix < 0.0030 ) h252->Fill( etaX2 );
+	  //     else if( lpix < 0.0040 ) h253->Fill( etaX2 );
+	  //     else if( lpix < 0.0050 ) h254->Fill( etaX2 );
+	  //     else if( lpix < 0.0060 ) h255->Fill( etaX2 );
+	  //     else if( lpix < 0.0070 ) h256->Fill( etaX2 );
+	  //     else if( lpix < 0.0080 ) h257->Fill( etaX2 );
+	  //     else if( lpix < 0.0090 ) h258->Fill( etaX2 );
+	  //     else if( lpix < 0.0100 ) h259->Fill( etaX2 );
+
+	  //     // angle of incidence:
+
+	  //     h260->Fill( phiinc*wt ); // +-10 deg
+
+	  //     if(      phiinc*wt  < -10 )
+	  //       h261->Fill( tpix*1E4, etaX2 );
+	  //     else if( phiinc*wt  <  -5 )
+	  //       h262->Fill( tpix*1E4, etaX2 );
+	  //     else if( phiinc*wt  <   0 )
+	  //       h263->Fill( tpix*1E4, etaX2 );
+	  //     else if( phiinc*wt  <   5 )
+	  //       h264->Fill( tpix*1E4, etaX2 );
+	  //     else if( phiinc*wt  <  10 )
+	  //       h265->Fill( tpix*1E4, etaX2 );
+	  //     else
+	  //       h266->Fill( tpix*1E4, etaX2 );
+
+	  //     // understand xpix algorithm:
+
+	  //     if(      xpix < 0.0000 ) h269->Fill( etaX2 );
+	  //     else if( xpix < 0.0010 ) h270->Fill( etaX2 );
+	  //     else if( xpix < 0.0020 ) h271->Fill( etaX2 );
+	  //     else if( xpix < 0.0030 ) h272->Fill( etaX2 );
+	  //     else if( xpix < 0.0040 ) h273->Fill( etaX2 );
+	  //     else if( xpix < 0.0050 ) h274->Fill( etaX2 );
+	  //     else if( xpix < 0.0060 ) h275->Fill( etaX2 );
+	  //     else if( xpix < 0.0070 ) h276->Fill( etaX2 );
+	  //     else if( xpix < 0.0080 ) h277->Fill( etaX2 );
+	  //     else if( xpix < 0.0090 ) h278->Fill( etaX2 );
+	  //     else if( xpix < 0.0100 ) h279->Fill( etaX2 );
+
+	  //     if(      etaX2 < -0.3 ) h280->Fill( xpix*1E4 );
+	  //     else if( etaX2 <  0.3 ) h281->Fill( xpix*1E4 );
+	  //     else                    h282->Fill( xpix*1E4 );
+
+      	}//nrow = 2
+
+      }//pt > 4, ! halfmod
+
+      //}//triplet 1+3 -> 2
+
+      // }
+
+
+
+      // triplet 1+2 -> 4:
+      if( n1*n2*n4 > 0 ) {
+      {
+	if( jdbg ) cout << "  triplet 1+2 -> 4\n";
+
+	double f4 = atan2( yPXB4, xPXB4 );//position angle in layer 4
+
+	double ax = xPXB2 - xPXB1;
+	double ay = yPXB2 - yPXB1;
+	double aa = sqrt( ax*ax + ay*ay ); // from 1 to 2
+
+	double xmid = 0.5 * ( xPXB1 + xPXB2 );
+	double ymid = 0.5 * ( yPXB1 + yPXB2 );
+	double bx = xPXB4 - xmid;
+	double by = yPXB4 - ymid;
+	double bb = sqrt( bx*bx + by*by ); // from mid point to point 3
+
+	// Calculate the centre of the helix in xy-projection that
+	// transverses the two spacepoints. The points with the same
+	// distance from the two points are lying on a line.
+	// LAMBDA is the distance between the point in the middle of
+	// the two spacepoints and the centre of the helix.
+
+	// we already have kap and rho = 1/kap
+
+	double lam = sqrt( -0.25 +
+			   rho*rho / ( ( xPXB1 - xPXB2 )*( xPXB1 - xPXB2 ) + ( yPXB1 - yPXB2 )*( yPXB1 - yPXB2 ) ) );
+
+	// There are two solutions, the sign of kap gives the information
+	// which of them is correct:
+
+	if( kap > 0 ) lam = -lam;
+
+	// ( X0, Y0 ) is the centre of the circle
+	// that describes the helix in xy-projection:
+
+	double x0 =  0.5*( xPXB1 + xPXB2 ) + lam * ( -yPXB1 + yPXB2 );
+	double y0 =  0.5*( yPXB1 + yPXB2 ) + lam * (  xPXB1 - xPXB2 );
+
+	// Calculate theta:
+
+	double num = ( yPXB2 - y0 ) * ( xPXB1 - x0 ) - ( xPXB2 - x0 ) * ( yPXB1 - y0 );
+	double den = ( xPXB1 - x0 ) * ( xPXB2 - x0 ) + ( yPXB1 - y0 ) * ( yPXB2 - y0 );
+	double tandip = kap * ( zPXB2 - zPXB1 ) / atan( num / den );
+	double udip = atan(tandip);
+	//double utet = pihalf - udip;
+
+	// To get phi0 in the right interval one must distinguish
+	// two cases with positve and negative kap:
+
+	double uphi;
+	if( kap > 0 ) uphi = atan2( -x0,  y0 );
+	else          uphi = atan2(  x0, -y0 );
+
+	// The distance of the closest approach DCA depends on the sign
+	// of kappa:
+
+	double udca;
+	if( kap > 0 ) udca = rho - sqrt( x0*x0 + y0*y0 );
+	else          udca = rho + sqrt( x0*x0 + y0*y0 );
+
+	// angle from first hit to dca point:
+
+	double dphi = atan( ( ( xPXB1 - x0 ) * y0 - ( yPXB1 - y0 ) * x0 )
+			  / ( ( xPXB1 - x0 ) * x0 + ( yPXB1 - y0 ) * y0 ) );
+
+	double uz0 = zPXB1 + tandip * dphi * rho;
+
+	f501->Fill( zPXB4 );
+	f502->Fill( uphi - iTrack->phi() );
+	f503->Fill( udca - iTrack->d0() );
+	f504->Fill( udip - iTrack->lambda() );
+	f505->Fill( uz0  - iTrack->dz() );
+
+	// extrapolate to outer hit:
+	// cirmov
+	// we already have rinv = -kap
+
+	double cosphi = cos(uphi);
+	double sinphi = sin(uphi);
+	double dp = -xPXB4*sinphi + yPXB4*cosphi + udca;
+	double dl = -xPXB4*cosphi - yPXB4*sinphi;
+	double sa = 2*dp + rinv * ( dp*dp + dl*dl );
+	double dca4 = sa / ( 1 + sqrt(1 + rinv*sa) );// distance to hit 4
+	double ud = 1 + rinv*udca;
+	double phi4 = atan2( -rinv*xPXB4 + ud*sinphi, rinv*yPXB4 + ud*cosphi );//track direction
+
+	double phiinc = phi4 - phiN4;//angle of incidence in rphi w.r.t. normal vector
+
+	// phiN alternates inward/outward
+	// reduce phiinc:
+
+	if( phiinc > pihalf ) phiinc -= pi;
+	else if( phiinc < -pihalf ) phiinc += pi;
+
+	// arc length:
+
+	double xx = xPXB4 + dca4 * sin(phi4); // point on track
+	double yy = yPXB4 - dca4 * cos(phi4);
+
+	double f0 = uphi;//
+	double kx = kap*xx;
+	double ky = kap*yy;
+	double kd = kap*udca;
+
+	// Solve track equation for s:
+
+	double dx = kx - (kd-1)*sin(f0);
+	double dy = ky + (kd-1)*cos(f0);
+	double ks = atan2( dx, -dy ) - f0;// turn angle
+
+	//---  Limit to half-turn:
+
+	if(      ks >  pi ) ks = ks - twopi;
+	else if( ks < -pi ) ks = ks + twopi;
+
+	double s = ks*rho;// signed
+	double uz4 = uz0 + s*tandip; //track z at R4
+	double dz4 = zPXB4 - uz4;
+
+	if( pt > 4 ) {
+	  f507->Fill( bb/aa );//lever arm
+	  f508->Fill( f4*wt, bb/aa );//lever arm
+	  f509->Fill( f4*wt, phiinc*wt );
+	  f510->Fill( dca4*1E4 );
+	  f511->Fill( dz4*1E4 );
+	}
+
+	if( pt > 12 ) {
+
+	  f520->Fill( dca4*1E4 );
+	  f521->Fill( dz4*1E4 );
+
+          if(bb/aa >= 1.10 && bb/aa < 1.27) f520_1->Fill(dca4*1E4);
+          else if(bb/aa >= 1.27 && bb/aa < 1.43) f520_2->Fill(dca4*1E4);
+          else if(bb/aa >= 1.43 && bb/aa < 1.57) f520_3->Fill(dca4*1E4);
+          else if(bb/aa >= 1.57 && bb/aa < 1.80) f520_4->Fill(dca4*1E4);
+          else if(bb/aa >= 1.80 && bb/aa < 2.00) f520_5->Fill(dca4*1E4);
+
+          if( abs( phi4 - phiN4 ) < pihalf ) // outward facing module
+            if(zPXB4 > 0)
+              f520_out_zplus->Fill(dca4*1E4);
+            else
+              f520_out_zminus->Fill(dca4*1E4);
+          else
+            if(zPXB4 > 0)
+              f520_in_zplus->Fill(dca4*1E4);
+            else
+              f520_in_zminus->Fill(dca4*1E4);
+
+	  if( hp.trackerLayersWithMeasurement() > 8 ) {
+	    f530->Fill( dca4*1E4 );
+	    f531->Fill( dz4*1E4 );
+	  }
+
+	  if( phiinc*wt > -1 && phiinc*wt < 7 ){
+	    f540->Fill( dca4*1E4 );
+	    f541->Fill( dz4*1E4 );
+	  }
+
+	  if( nrow1 == 1 ) f542->Fill( dca4*1E4 );
+	  else {
+	    if( nrow1 == 2 ) f543->Fill( dca4*1E4 );
+	    else {
+	      if( nrow1 == 3 ) f544->Fill( dca4*1E4 );
+	      else f545->Fill( dca4*1E4 );
+	    }
+	  }
+
+	  if( nrow1 == 2 && nrow2 == 2 && nrow3 == 2 ) f546->Fill( dca4*1E4 );
+
+	}//pt>12
+
+	// residual profiles: alignment check
+
+	if( pt > 4 ) {
+	  f512->Fill( f4*wt, dca4*1E4 );
+	  f513->Fill( f4*wt, dz4*1E4 );
+
+          if( abs( phi4 - phiN4 ) < pihalf ) // outward facing module
+            if(zPXB4 > 0)
+	      f512_out_zplus->Fill( f4*wt, dca4*1E4 );
+            else
+	      f512_out_zminus->Fill( f4*wt, dca4*1E4 );
+          else
+            if(zPXB4 > 0)
+  	      f512_in_zplus->Fill( f4*wt, dca4*1E4 );
+            else
+  	      f512_in_zminus->Fill( f4*wt, dca4*1E4 );
+
+	  f514->Fill( zPXB4, dca4*1E4 );
+	  f515->Fill( zPXB4, dz4*1E4 );
+	}
+	f516->Fill( logpt, dca4*1E4 );
+	f517->Fill( logpt, dz4*1E4 );
+	if( iTrack->charge() > 0 ) f518->Fill( logpt, dca4*1E4 );
+	else f519->Fill( logpt, dca4*1E4 );
+
+	// profile of abs(dca) gives mean abs(dca):
+	// mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
+	// => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
+	// point resolution = 1/sqrt(3/2) * triplet middle residual width
+	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
+
+	if( pt > 4 ) {
+
+	  f522->Fill( f4*wt, abs(dca4)*1E4 );
+	  f523->Fill( f4*wt, abs(dz4)*1E4 );
+
+	  f524->Fill( zPXB4, abs(dca4)*1E4 );
+	  f525->Fill( zPXB4, abs(dz4)*1E4 );
+
+	  f528->Fill( udip*wt, abs(dca4)*1E4 );
+	  f529->Fill( udip*wt, abs(dz4)*1E4 );
+	  if( abs(dip)*wt > 18 && abs(dip)*wt < 50 ) f532->Fill( dz4*1E4 );
+
+	  f534->Fill( phiinc*wt, abs(dca4)*1E4 );
+
+	}//pt
+
+	if( pt > 0.8 && pt < 1.2 ) { // low pt
+	  f535->Fill( f4*wt, abs(dca4)*1E4 );
+	}
+	f526->Fill( logpt, abs(dca4)*1E4 );
+	f527->Fill( logpt, abs(dz4)*1E4 );
+	if( abs(dip)*wt > 18 && abs(dip)*wt < 50 ) f533->Fill( logpt, abs(dz4)*1E4 );
+      }
+      ////END PXB4
+      }
+
 
     //------------------------------------------------------------------------
     // 1-2-3 pixel triplet:
-
     if( n1*n2*n3 > 0 ) {
 
       { // let's open a scope, so we can redefine the variables further down
@@ -4916,7 +8291,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	double r1 = sqrt( xPXB1*xPXB1 + yPXB1*yPXB1 );
 	double r3 = sqrt( xPXB3*xPXB3 + yPXB3*yPXB3 );
-	
+
 	//	cout << "!!!warn r1 = " << r1 << ", r3 = " << r3 << endl;
 
 	if( r3-r1 < 2.0 ) cout << "warn r1 = " << r1 << ", r3 = " << r3 << endl;
@@ -4929,7 +8304,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	// we already have kap and rho = 1/kap
 
-	double lam = sqrt( -0.25 + 
+	double lam = sqrt( -0.25 +
 			   rho*rho / ( ( xPXB1 - xPXB3 )*( xPXB1 - xPXB3 ) + ( yPXB1 - yPXB3 )*( yPXB1 - yPXB3 ) ) );
 
 	// There are two solutions, the sign of kap gives the information
@@ -5031,7 +8406,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	Surface::GlobalPoint gp2( xx, yy, uz2 );
 	Surface::LocalPoint lp2 = det2->toLocal( gp2 );
 
-	if( idbg ) {	
+	if( idbg ) {
 	  std::cout <<"**** local  Point coord ****" <<std::endl;
 	  std::cout <<"gp2.x() "<< gp2.x() <<std::endl;
 	  std::cout <<"gp2.y() "<< gp2.y() <<std::endl;
@@ -5095,7 +8470,19 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  h409->Fill( f2*wt, phiinc*wt );
 	  h410->Fill( dca2*1E4 );
 	  h411->Fill( dz2*1E4 );
+    if(n1*n2_sector*n3 > 0){
+      h410_bpi6->Fill(dca2*1E4);
+      h411_bpi6->Fill(dz2*1E4);
 
+      if( abs( phi2 - phiN2 ) < pihalf ) {
+          h410_bpi6_out->Fill(dca2*1E4);
+          h411_bpi6_out->Fill(dz2*1E4);
+      }
+  	  else{
+          h410_bpi6_in->Fill(dca2*1E4);
+          h411_bpi6_in->Fill(dz2*1E4);
+      }
+	  }
 	  // pile up study Summer 2011:
 
 	  if( nvertex < 3 ) {
@@ -5136,7 +8523,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    else if( PXB2_clusProb<0.75) h421_cluster_prob_010_075->Fill(dz2*1E4 );
 	    else if( PXB2_clusProb<0.90) h421_cluster_prob_075_090->Fill(dz2*1E4 );
 	    else h421_cluster_prob_090_101->Fill(dz2*1E4 );
-	    if  ( fabs(iTrack->eta() )<0.8) { 
+	    if  ( fabs(iTrack->eta() )<0.8) {
 
 	      if( PXB2_clusProb<0.10) h420_cluster_prob_0_010_etaL0p8->Fill(dca2*1E4 );
 	      else if( PXB2_clusProb<0.75) h420_cluster_prob_010_075_etaL0p8->Fill(dca2*1E4 );
@@ -5149,7 +8536,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	      else h421_cluster_prob_090_101_etaL0p8->Fill(dz2*1E4 );
 	    }
 	    else{
-	      
+
 
 	      if( PXB2_clusProb<0.10) h420_cluster_prob_0_010_etaM0p8->Fill(dca2*1E4 );
 	      else if( PXB2_clusProb<0.75) h420_cluster_prob_010_075_etaM0p8->Fill(dca2*1E4 );
@@ -5164,12 +8551,17 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	  }
 
+    // cout << detId << endl;
 
+    if(n1*n2_sector*n3 > 0){
+      h420_bpi6->Fill(dca2*1E4);
+      h421_bpi6->Fill(dz2*1E4);
+    }
 
 
 	  h420->Fill( dca2*1E4 ); // 12.7 um
-	 
-	
+
+
 	  h421->Fill( dz2*1E4 );
 
 	  // Add errors and pulls
@@ -5183,9 +8575,13 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
           h079->Fill( pulx );
           h069->Fill( puly );
 
-	  // Alignment errors 
+	  // Alignment errors
 	  //LocalError lape = det2->localAlignmentError();
 	  //cout<<geomDet2<<endl;
+
+
+
+
 	  if(geomDet2 != NULL) {
 	    LocalError lape = geomDet2->localAlignmentError();
 	    //cout<< lape.valid() <<endl;
@@ -5200,41 +8596,75 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    } else {   if( myCounters::neve < 10 ) cout<<" lape invalid?"<<endl;}
 	  }
 
-          if(bb/aa < 0.015) h420_1->Fill(dca2*1E4);
-          else if(bb/aa >= 0.015 && bb/aa < 0.065) h420_2->Fill(dca2*1E4);
-          else h420_3->Fill(dca2*1E4);
+    if(bb/aa < 0.015) h420_1->Fill(dca2*1E4);
+    else if(bb/aa >= 0.015 && bb/aa < 0.065) h420_2->Fill(dca2*1E4);
+    else h420_3->Fill(dca2*1E4);
+
+	  if( abs( phi2 - phiN2 ) < pihalf ) {
+	    h420_out->Fill( dca2*1E4 );
+	    h421_out->Fill( dz2*1E4 );
+
+
+      if(n1*n2_sector*n3 > 0){
+        h420_bpi6_out->Fill(dca2*1E4);
+        h421_bpi6_out->Fill(dz2*1E4);
+      }
+
+	  }
+	  else{
+	    h420_in->Fill( dca2*1E4 );
+	    h421_in->Fill( dz2*1E4 );
+
+      if(n1*n2_sector*n3 > 0){
+        h420_bpi6_in->Fill(dca2*1E4);
+        h421_bpi6_in->Fill(dz2*1E4);
+      }
+	  }
+
+
 
 	  //Flipped/non-flipped
 	  if( abs( phi2 - phiN2 ) < pihalf ) // outward facing module
-            if(zPXB2 > 0)
-	      h420_out_zplus->Fill( dca2*1E4 );
-            else
+
+      if(zPXB2 > 0){
+        h420_out_zplus->Fill( dca2*1E4 );
+        h421_out_zplus->Fill( dz2*1E4 );
+      }
+	    else{
 	      h420_out_zminus->Fill( dca2*1E4 );
+	      h421_out_zminus->Fill( dz2*1E4 );
+      }
+
+
 	  else
-            if(zPXB2 > 0)
-	      h420_in_zplus->Fill( dca2*1E4 );
-            else
-	      h420_in_zminus->Fill( dca2*1E4 );
+      if(zPXB2 > 0){
+         h420_in_zplus->Fill( dca2*1E4 );
+         h421_in_zplus->Fill( dz2*1E4 );
+      }
+      else{
+         h420_in_zminus->Fill( dca2*1E4 );
+         h421_in_zminus->Fill( dz2*1E4 );
+      }
 
 	  //local x>0 ,local x<0
-	  if( uPXB2>0 ){ 
-            
+	  if( uPXB2>0 ){
+
 	    h420_x_plus->Fill( dca2*1E4 );
 	    h421_x_plus->Fill( dz2*1E4 );
 
 	  } else{
 	    h420_x_minus->Fill( dca2*1E4 );
 	    h421_x_minus->Fill( dz2*1E4 );
-	  }    
+	  }
 
 
 	  ////check for bias dot flip, unflipped, zplus,zminus,xplu,xminus combination
 
-	  
+
 	  if( abs( phi2 - phiN2 ) < pihalf ) {// outward facing module
 	    if(zPXB2 > 0){
-	      if( uPXB2>0 ){ 
-		
+	      if( uPXB2>0 ){
+
 		h420_out_xplus_zplus->Fill( dca2*1E4 );
 		h421_out_xplus_zplus->Fill( dz2*1E4 );
 
@@ -5243,8 +8673,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	   	h421_out_xminus_zplus->Fill( dz2*1E4 );
 	      }
 	    } else{
-	      if( uPXB2>0 ){ 
-		
+	      if( uPXB2>0 ){
+
 		h420_out_xplus_zminus->Fill( dca2*1E4 );
 		h421_out_xplus_zminus->Fill( dz2*1E4 );
 
@@ -5255,8 +8685,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    }
 	  }  else {
 	    if(zPXB2 > 0){
-	      if( uPXB2>0 ){ 
-		
+	      if( uPXB2>0 ){
+
 		h420_in_xplus_zplus->Fill( dca2*1E4 );
 		h421_in_xplus_zplus->Fill( dz2*1E4 );
 
@@ -5265,8 +8695,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	   	h421_in_xminus_zplus->Fill( dz2*1E4 );
 	      }
 	    } else{
-	      if( uPXB2>0 ){ 
-		
+	      if( uPXB2>0 ){
+
 		h420_in_xplus_zminus->Fill( dca2*1E4 );
 		h421_in_xplus_zminus->Fill( dz2*1E4 );
 
@@ -5275,13 +8705,13 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		h421_in_xminus_zminus->Fill( dz2*1E4 );
 	      }
 	    }
-	  } 
+	  }
 
 
 
 
 	  // //////// Modules:1-8
-	
+
 	  if( imod==1  ){// innermost  module
 	    h420_mod1->Fill( dca2*1E4 );
 	    h421_mod1->Fill( dz2*1E4 );
@@ -5305,17 +8735,17 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  if( imod==6 ){
 	    h420_mod6->Fill( dca2*1E4 );
 	    h421_mod6->Fill( dz2*1E4 );
-	  }	  
+	  }
 	  if( imod==7  ){
 	    h420_mod7->Fill( dca2*1E4 );
 	    h421_mod7->Fill( dz2*1E4 );
 	  }
 	  if( imod==8  ){// outermost  module
-	    h420_mod8->Fill( dca2*1E4 );     
+	    h420_mod8->Fill( dca2*1E4 );
 	     h421_mod8->Fill( dz2*1E4 );
 	  }
-	  
-	  
+
+
 	  // versus number o ftracker hits
 	  if( hp.trackerLayersWithMeasurement() > 8 ) {
 	    h430->Fill( dca2*1E4 );
@@ -5364,10 +8794,12 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	else h419->Fill( logpt, dca2*1E4 );
 
 	// profile of abs(dca) gives mean abs(dca):
-	// mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2) 
+	// mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
 	// => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
 	// point resolution = 1/sqrt(3/2) * triplet middle residual width
 	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
+	//For the properties of the folded normal distribution with mean 0.
+	////https://en.wikipedia.org/wiki/Folded_normal_distribution
 
 	if( pt > 4 ) {
 
@@ -5540,7 +8972,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		else
 		  h294->Fill( dca2*1E4 ); // split
 
-		if( zPXB2 > 0 ) 
+		if( zPXB2 > 0 )
 		  h295->Fill( dca2*1E4 ); // split
 		else
 		  h296->Fill( dca2*1E4 ); // split
@@ -5706,7 +9138,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	// LAMBDA is the distance between the point in the middle of
 	// the two spacepoints and the centre of the helix.
 
-	double lam = sqrt( -0.25 + 
+	double lam = sqrt( -0.25 +
 			   rho2*rho2 / ( ( xPXB1 - xPXB3 )*( xPXB1 - xPXB3 ) + ( yPXB1 - yPXB3 )*( yPXB1 - yPXB3 ) ) );
 
 	// There are two solutions, the sign of kap gives the information
@@ -5845,7 +9277,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	if( pt > 4 ) {
 	  h462->Fill( f2*wt, dca2*1E4 );
 	  h463->Fill( f2*wt, dz2*1E4 );
-	  
+
 	  h464->Fill( zPXB2, dca2*1E4 );
 	  h465->Fill( zPXB2, dz2*1E4 );
 	}
@@ -5855,7 +9287,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	else h469->Fill( logpt, dca2*1E4 );
 
 	// profile of abs(dca) gives mean abs(dca):
-	// mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2) 
+	// mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
 	// => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
 	// point resolution = 1/sqrt(3/2) * triplet middle residual width
 	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
@@ -5911,7 +9343,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	// we already have kap and rho = 1/kap
 
-	double lam = sqrt( -0.25 + 
+	double lam = sqrt( -0.25 +
 			   rho*rho / ( ( xPXB2 - xPXB3 )*( xPXB2 - xPXB3 ) + ( yPXB2 - yPXB3 )*( yPXB2 - yPXB3 ) ) );
 
 	// There are two solutions, the sign of kap gives the information
@@ -6011,12 +9443,170 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  h509->Fill( f1*wt, phiinc*wt );
 	  h510->Fill( dca1*1E4 );
 	  h511->Fill( dz1*1E4 );
+    if(n1_nm*n2*n3){
+      h510_new_mods->Fill(dca1*1E4);
+      h511_new_mods->Fill(dz1*1E4);
+    }
+    if(n1_303054876*n2*n3){
+      h510_303054876->Fill(dca1*1E4);
+      h511_303054876->Fill(dz1*1E4);
+    }
+    if(n1_303063068*n2*n3){
+      h510_303063068->Fill(dca1*1E4);
+      h511_303063068->Fill(dz1*1E4);
+    }
+    if(n1_303054864*n2*n3){
+      h510_303054864->Fill(dca1*1E4);
+      h511_303054864->Fill(dz1*1E4);
+    }
+    if(n1_303054856*n2*n3){
+      h510_303054856->Fill(dca1*1E4);
+      h511_303054856->Fill(dz1*1E4);
+    }
+    if(n1_303063056*n2*n3){
+      h510_303063056->Fill(dca1*1E4);
+      h511_303063056->Fill(dz1*1E4);
+    }
+    if(n1_303071248*n2*n3){
+      h510_303071248->Fill(dca1*1E4);
+      h511_303071248->Fill(dz1*1E4);
+    }
+    if(n1_sector*n2*n3 > 0 ){
+      h510_bmo2->Fill(dca1*1E4);
+      h511_bmo2->Fill(dz1*1E4);
+
+      if( abs( phi1 - phiN1 ) < pihalf ) {
+        h510_bmo2_out->Fill(dca1*1E4);
+        h511_bmo2_out->Fill(dz1*1E4);
+      }
+      else{
+        h510_bmo2_in->Fill(dca1*1E4);
+        h511_bmo2_in->Fill(dz1*1E4);
+      }
+    }
 	}
 
 	if( pt > 12 ) {
-
 	  h520->Fill( dca1*1E4 );
 	  h521->Fill( dz1*1E4 );
+    if(n1_nm*n2*n3 > 0 ){
+      h520_new_mods->Fill(dca1*1E4);
+      h521_new_mods->Fill(dz1*1E4);
+    }
+    if(n1_303054876*n2*n3){
+      h520_303054876->Fill(dca1*1E4);
+      h521_303054876->Fill(dz1*1E4);
+    }
+    if(n1_303063068*n2*n3){
+      h520_303063068->Fill(dca1*1E4);
+      h521_303063068->Fill(dz1*1E4);
+    }
+    if(n1_303054864*n2*n3){
+      h520_303054864->Fill(dca1*1E4);
+      h521_303054864->Fill(dz1*1E4);
+    }
+    if(n1_303054856*n2*n3){
+      h520_303054856->Fill(dca1*1E4);
+      h521_303054856->Fill(dz1*1E4);
+    }
+    if(n1_303063056*n2*n3){
+      h520_303063056->Fill(dca1*1E4);
+      h521_303063056->Fill(dz1*1E4);
+    }
+    if(n1_303071248*n2*n3){
+      h520_303071248->Fill(dca1*1E4);
+      h521_303071248->Fill(dz1*1E4);
+    }
+    if(n1_sector*n2*n3 > 0 ){
+      h520_bmo2->Fill(dca1*1E4);
+      h521_bmo2->Fill(dz1*1E4);
+    }
+
+    if(imod_lay1==1){
+	    h520_mod1->Fill( dca1*1E4 );
+	    h521_mod1->Fill( dz1*1E4 );
+	  }
+	  if(imod_lay1==2){
+	    h520_mod2->Fill( dca1*1E4 );
+	    h521_mod2->Fill( dz1*1E4 );
+	  }
+	  if(imod_lay1==3){
+	    h520_mod3->Fill( dca1*1E4 );
+	    h521_mod3->Fill( dz1*1E4 );
+	  }
+	  if(imod_lay1==4){
+	    h520_mod4->Fill( dca1*1E4 );
+	    h521_mod4->Fill( dz1*1E4 );
+	  }
+	  if(imod_lay1==5){
+	    h520_mod5->Fill( dca1*1E4 );
+	    h521_mod5->Fill( dz1*1E4 );
+	  }
+	  if(imod_lay1==6){
+	    h520_mod6->Fill( dca1*1E4 );
+	    h521_mod6->Fill( dz1*1E4 );
+	  }
+	  if(imod_lay1==7){
+	    h520_mod6->Fill( dca1*1E4 );
+	    h521_mod6->Fill( dz1*1E4 );
+	  }
+	  if(imod_lay1==8){
+	    h520_mod8->Fill( dca1*1E4 );
+	    h521_mod8->Fill( dz1*1E4 );
+	  }
+
+	  if( abs( phi1 - phiN1 ) < pihalf ) {
+	    h520_out->Fill( dca1*1E4 );
+	    h521_out->Fill( dz1*1E4 );
+      if(n1_sector*n2*n3 > 0 ){
+        h520_bmo2_out->Fill(dca1*1E4);
+        h521_bmo2_out->Fill(dz1*1E4);
+      }
+
+	    if (imod_lay1 == 4 || imod_lay1 == 5){
+		h520_centr_out->Fill( dca1*1E4 );
+		h521_centr_out->Fill( dz1*1E4 );
+	      }else{
+		h520_fwd_out->Fill( dca1*1E4 );
+		h521_fwd_out->Fill( dz1*1E4 );
+	      }
+
+	    }
+	    else{
+	      h520_in->Fill( dca1*1E4 );
+	      h521_in->Fill( dz1*1E4 );
+
+        if(n1_sector*n2*n3 > 0 ){
+          h520_bmo2_in->Fill(dca1*1E4);
+          h521_bmo2_in->Fill(dz1*1E4);
+        }
+
+
+	      if (imod_lay1 == 4 || imod_lay1 == 5){
+		h520_centr_in->Fill( dca1*1E4 );
+		h521_centr_in->Fill( dz1*1E4 );
+	      }else{
+		h520_fwd_in->Fill( dca1*1E4 );
+		h521_fwd_in->Fill( dz1*1E4 );
+	      }
+
+	    }
+
+
+	  if( abs( phi1 - phiN1 ) < pihalf ) // outward facing module
+	    if(zPXB1 > 0){
+	      h520_out_zplus->Fill( dca1*1E4 );
+	      h521_out_zplus->Fill( dz1*1E4 );}
+	    else{
+	      h520_out_zminus->Fill( dca1*1E4 );
+	      h521_out_zminus->Fill( dz1*1E4 );}
+	  else
+	    if(zPXB1 > 0){
+	      h520_in_zplus->Fill( dca1*1E4 );
+	      h521_in_zplus->Fill( dz1*1E4 );}
+	    else{
+	      h520_in_zminus->Fill( dca1*1E4 );
+	      h521_in_zminus->Fill( dz1*1E4 );}
 
           if(bb/aa >= 1.10 && bb/aa < 1.27) h520_1->Fill(dca1*1E4);
           else if(bb/aa >= 1.27 && bb/aa < 1.43) h520_2->Fill(dca1*1E4);
@@ -6055,6 +9645,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	  h514->Fill( zPXB1, dca1*1E4 );
 	  h515->Fill( zPXB1, dz1*1E4 );
+
 	}
 	h516->Fill( logpt, dca1*1E4 );
 	h517->Fill( logpt, dz1*1E4 );
@@ -6062,7 +9653,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	else h519->Fill( logpt, dca1*1E4 );
 
 	// profile of abs(dca) gives mean abs(dca):
-	// mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2) 
+	// mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
 	// => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
 	// point resolution = 1/sqrt(3/2) * triplet middle residual width
 	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
@@ -6074,6 +9665,37 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	  h524->Fill( zPXB1, abs(dca1)*1E4 );
 	  h525->Fill( zPXB1, abs(dz1)*1E4 );
+
+	  if( abs( phi1 - phiN1 ) < pihalf ) {
+	    h524_out->Fill(  zPXB1, abs(dca1)*1E4  );
+	    h525_out->Fill(  zPXB1, abs(dz1)*1E4 );
+	    h514_out->Fill( zPXB1, dca1*1E4 );
+	    h515_out->Fill( zPXB1, dz1*1E4 );
+      if(n1_sector*n2*n3){
+        h514_out_bmo2->Fill( zPXB1, dca1*1E4 );
+        h515_out_bmo2->Fill( zPXB1, dz1*1E4 );
+        h524_out_bmo2->Fill( zPXB1, abs(dca1)*1E4 );
+        h525_out_bmo2->Fill( zPXB1, abs(dz1)*1E4 );
+      }
+	    //cout << "out modules at R" << sqrt(xPXB1*xPXB1+yPXB1*yPXB1)<<endl;
+	  }
+	  else{
+	    h524_in->Fill(  zPXB1, abs(dca1)*1E4);
+	    h525_in->Fill(  zPXB1, abs(dz1)*1E4 );
+	    h514_in->Fill( zPXB1, dca1*1E4 );
+	    h515_in->Fill( zPXB1, dz1*1E4 );
+      if(n1_sector*n2*n3){
+        h514_in_bmo2->Fill( zPXB1, dca1*1E4 );
+        h515_in_bmo2->Fill( zPXB1, dz1*1E4 );
+        h524_in_bmo2->Fill( zPXB1, abs(dca1)*1E4 );
+        h525_in_bmo2->Fill( zPXB1, abs(dz1)*1E4 );
+      }
+	    //cout << "in modules at R" << sqrt(xPXB1*xPXB1+yPXB1*yPXB1)<<endl;
+
+
+	  }
+
+
 
 	  h528->Fill( udip*wt, abs(dca1)*1E4 );
 	  h529->Fill( udip*wt, abs(dz1)*1E4 );
@@ -6090,6 +9712,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	h527->Fill( logpt, abs(dz1)*1E4 );
 	if( abs(dip)*wt > 18 && abs(dip)*wt < 50 ) h533->Fill( logpt, abs(dz1)*1E4 );
       }
+
+
 
       //------------------------------------------------------------------------
       // triplet 1+2 -> 3:
@@ -6117,7 +9741,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	// we already have kap and rho = 1/kap
 
-	double lam = sqrt( -0.25 + 
+	double lam = sqrt( -0.25 +
 			   rho*rho / ( ( xPXB1 - xPXB2 )*( xPXB1 - xPXB2 ) + ( yPXB1 - yPXB2 )*( yPXB1 - yPXB2 ) ) );
 
 	// There are two solutions, the sign of kap gives the information
@@ -6291,7 +9915,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	else i519->Fill( logpt, dca3*1E4 );
 
 	// profile of abs(dca) gives mean abs(dca):
-	// mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2) 
+	// mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
 	// => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
 	// point resolution = 1/sqrt(3/2) * triplet middle residual width
 	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
@@ -6300,7 +9924,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	  i522->Fill( f3*wt, abs(dca3)*1E4 );
 	  i523->Fill( f3*wt, abs(dz3)*1E4 );
-	  
+
 	  i524->Fill( zPXB3, abs(dca3)*1E4 );
 	  i525->Fill( zPXB3, abs(dz3)*1E4 );
 
@@ -6319,6 +9943,10 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	i527->Fill( logpt, abs(dz3)*1E4 );
 	if( abs(dip)*wt > 18 && abs(dip)*wt < 50 ) i533->Fill( logpt, abs(dz3)*1E4 );
       }
+
+
+      //------------------------------------------------------------------------
+
 
       //------------------------------------------------------------------------
       // Karimaki circle fit through 3 points:
@@ -6720,7 +10348,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  double resid = hitMeasurement.x() - predictedPosition.x();//[pitch]
 
 	  double xptch;
-	  //double yptch;	
+	  //double yptch;
 
 	  if( subDet <  3 ){//1,2=pixel
 	    PixelTopology & pixelTopol = (PixelTopology&) (*iTTRH)->detUnit()->topology();
@@ -6789,7 +10417,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  double resid = hitMeasurement.x() - predictedPosition.x();//[pitch]
 
 	  double xptch;
-	  //double yptch;	
+	  //double yptch;
 
 	  if( subDet <  3 ){//1,2=pixel
 	    PixelTopology & pixelTopol = (PixelTopology&) (*iTTRH)->detUnit()->topology();
@@ -6882,7 +10510,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
       // we already have kap and rho = 1/kap
 
-      double lam = sqrt( -0.25 + 
+      double lam = sqrt( -0.25 +
 			 rho*rho / ( ( xb - xPXB2 )*( xb - xPXB2 ) + ( yb - yPXB2 )*( yb - yPXB2 ) ) );
 
       // There are two solutions, the sign of kap gives the information
@@ -6926,7 +10554,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
       double dca1 = sa / ( 1 + sqrt(1 + rinv*sa) );// distance to hit 1
       double ud = 1 + rinv*udca;
       double phi1 = atan2( -rinv*xPXB1 + ud*sinphi, rinv*yPXB1 + ud*cosphi );//direction
-
+      // double uz1 = uz0 + s*tandip;
+      // double dz1 = zPXB1 - uz1;
       double phiinc = phi1 - phiN1;//angle of incidence in rphi w.r.t. normal vector
 
       // phiN alternates inward/outward
@@ -6946,15 +10575,23 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	h620->Fill( dca1*1E4 );
         if( abs( phi1 - phiN1 ) < pihalf ) // outward facing module
-          if(zPXB1 > 0)
+          if(zPXB1 > 0){
 	    h620_out_zplus->Fill( dca1*1E4 );
-          else
+	    // h621_out_zplus->Fill( dz1*1E4 );
+	  }
+          else{
 	    h620_out_zminus->Fill( dca1*1E4 );
+	    // h621_out_zminus->Fill( dz1*1E4 );
+	  }
         else
-          if(zPXB1 > 0)
+          if(zPXB1 > 0){
 	    h620_in_zplus->Fill( dca1*1E4 );
-          else
+	    // h621_in_zplus->Fill( dz1*1E4 );
+	  }
+          else{
 	    h620_in_zminus->Fill( dca1*1E4 );
+	    // h621_in_zminus->Fill( dz1*1E4 );
+	  }
 
 	if( hp.trackerLayersWithMeasurement() > 8 ) {
 	  h630->Fill( dca1*1E4 );
@@ -7003,7 +10640,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
       else h619->Fill( logpt, dca1*1E4 );
 
       // profile of abs(dca) gives mean abs(dca):
-      // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2) 
+      // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
       // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
       // point resolution = 1/sqrt(3/2) * triplet middle residual width
       // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
@@ -7054,7 +10691,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
       // we already have kap and rho = 1/kap
 
-      double lam = sqrt( -0.25 + 
+      double lam = sqrt( -0.25 +
 			 rho*rho / ( ( xTIB1 - xTIB3 )*( xTIB1 - xTIB3 ) + ( yTIB1 - yTIB3 )*( yTIB1 - yTIB3 ) ) );
 
       // There are two solutions, the sign of kap gives the information
@@ -7142,7 +10779,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
       else h719->Fill( logpt, dca2*1E4 );
 
       // profile of abs(dca) gives mean abs(dca):
-      // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2) 
+      // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
       // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
       // point resolution = 1/sqrt(3/2) * triplet middle residual width
       // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
@@ -7193,7 +10830,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
       // we already have kap and rho = 1/kap
 
-      double lam = sqrt( -0.25 + 
+      double lam = sqrt( -0.25 +
 			 rho*rho / ( ( xTIB2 - xTIB4 )*( xTIB2 - xTIB4 ) + ( yTIB2 - yTIB4 )*( yTIB2 - yTIB4 ) ) );
 
       // There are two solutions, the sign of kap gives the information
@@ -7277,7 +10914,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
       else h769->Fill( logpt, dca3*1E4 );
 
       // profile of abs(dca) gives mean abs(dca):
-      // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2) 
+      // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
       // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
       // point resolution = 1/sqrt(3/2) * triplet middle residual width
       // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
@@ -7328,7 +10965,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
       // we already have kap and rho = 1/kap
 
-      double lam = sqrt( -0.25 + 
+      double lam = sqrt( -0.25 +
 			 rho*rho / ( ( xTOB3 - xTOB5 )*( xTOB3 - xTOB5 ) + ( yTOB3 - yTOB5 )*( yTOB3 - yTOB5 ) ) );
 
       // There are two solutions, the sign of kap gives the information
@@ -7416,7 +11053,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
       else h819->Fill( logpt, dca2*1E4 );
 
       // profile of abs(dca) gives mean abs(dca):
-      // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2) 
+      // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
       // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
       // point resolution = 1/sqrt(3/2) * triplet middle residual width
       // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
@@ -7467,7 +11104,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
       // we already have kap and rho = 1/kap
 
-      double lam = sqrt( -0.25 + 
+      double lam = sqrt( -0.25 +
 			 rho*rho / ( ( xTOB4 - xTOB6 )*( xTOB4 - xTOB6 ) + ( yTOB4 - yTOB6 )*( yTOB4 - yTOB6 ) ) );
 
       // There are two solutions, the sign of kap gives the information
@@ -7551,7 +11188,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
       else h869->Fill( logpt, dca3*1E4 );
 
       // profile of abs(dca) gives mean abs(dca):
-      // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2) 
+      // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
       // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
       // point resolution = 1/sqrt(3/2) * triplet middle residual width
       // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
@@ -7637,7 +11274,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	// we already have kap and rho = 1/kap
 
-	double lam = sqrt( -0.25 + 
+	double lam = sqrt( -0.25 +
 			   rho*rho / ( ( x1 - x3 )*( x1 - x3 ) + ( y1 - y3 )*( y1 - y3 ) ) );
 
 	// There are two solutions, the sign of kap gives the information
@@ -7707,21 +11344,21 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	  h930->Fill( dca2*1E4 );
 
-	  if(      xptch < 0.0091 ) 
+	  if(      xptch < 0.0091 )
 	    h931->Fill( dca2*1E4 );
-	  else if( xptch < 0.0102 ) 
+	  else if( xptch < 0.0102 )
 	    h932->Fill( dca2*1E4 );
-	  else if( xptch < 0.0113 ) 
+	  else if( xptch < 0.0113 )
 	    h933->Fill( dca2*1E4 );
-	  else if( xptch < 0.0123 ) 
+	  else if( xptch < 0.0123 )
 	    h934->Fill( dca2*1E4 );
-	  else if( xptch < 0.0133 ) 
+	  else if( xptch < 0.0133 )
 	    h935->Fill( dca2*1E4 );
-	  else if( xptch < 0.0144 ) 
+	  else if( xptch < 0.0144 )
 	    h936->Fill( dca2*1E4 );
-	  else if( xptch < 0.0158 ) 
+	  else if( xptch < 0.0158 )
 	    h937->Fill( dca2*1E4 );
-	  else if( xptch < 0.0184 ) 
+	  else if( xptch < 0.0184 )
 	    h938->Fill( dca2*1E4 );
 	  else
 	    h939->Fill( dca2*1E4 );
@@ -7738,7 +11375,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	else h919->Fill( logpt, dca2*1E4 );
 
 	// profile of abs(dca) gives mean abs(dca):
-	// mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2) 
+	// mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
 	// => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
 	// point resolution = 1/sqrt(3/2) * triplet middle residual width
 	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
@@ -7792,7 +11429,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	std::vector<Trajectory> refitTrajectoryVec2 = theFitter->fit( seed, nyTTRHvec, initialTSOS );
 
-	if( refitTrajectoryVec2.size() > 0 ) { // should be either 0 or 1            
+	if( refitTrajectoryVec2.size() > 0 ) { // should be either 0 or 1
 
 	  const Trajectory& refitTrajectory2 = refitTrajectoryVec2.front();
 
@@ -7857,27 +11494,27 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	    if( subDet == StripSubdetector::TIB ) {
 
-	      if( TIBDetId( detId ).layer() == 1 && TIBDetId(detId).isRPhi() ) {
+	      if( tTopo->tibLayer(detId) == 1 && tTopo->tibIsRPhi(detId) ) {
 		u310->Fill( resid*1E4 );
 	      }//layer
 
-	      if( TIBDetId( detId ).layer() == 1 && TIBDetId(detId).isStereo() ) {
+	      if( tTopo->tibLayer(detId) == 1 && tTopo->tibIsStereo(detId) ) {
 		u320->Fill( resid*1E4 );
 	      }//layer
 
-	      if( TIBDetId( detId ).layer() == 2 && TIBDetId(detId).isRPhi() ) {
+	      if( tTopo->tibLayer(detId) == 2 && tTopo->tibIsRPhi(detId) ) {
 		u330->Fill( resid*1E4 );
 	      }//layer
 
-	      if( TIBDetId( detId ).layer() == 2 && TIBDetId(detId).isStereo() ) {
+	      if( tTopo->tibLayer(detId) == 2 && tTopo->tibIsStereo(detId) ) {
 		u340->Fill( resid*1E4 );
 	      }//layer
 
-	      if( TIBDetId( detId ).layer() == 3 ) {
+	      if( tTopo->tibLayer(detId) == 3 ) {
 		u350->Fill( resid*1E4 );
 	      }//layer
 
-	      if( TIBDetId( detId ).layer() == 4 ) {
+	      if( tTopo->tibLayer(detId) == 4 ) {
 		u360->Fill( resid*1E4 );
 	      }//layer
 
@@ -7885,10 +11522,10 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	    if( subDet == StripSubdetector::TID ) {
 
-	      if( TIDDetId(detId).side() == 1 ){
+	      if( tTopo->tidSide(detId) == 1 ){
 
-		if( TIDDetId(detId).diskNumber() == 1 ){
-		  if( TIDDetId(detId).isRPhi() ) {
+		if( tTopo->tidWheel(detId) == 1 ){
+		  if( tTopo->tidIsRPhi(detId) ) {
 		    u410->Fill( resid*1E4 );
 		  }
 		  else {
@@ -7896,8 +11533,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TIDDetId(detId).diskNumber() == 2 ){
-		  if( TIDDetId(detId).isRPhi() ) {
+		if( tTopo->tidWheel(detId) == 2 ){
+		  if( tTopo->tidIsRPhi(detId) ) {
 		    u412->Fill( resid*1E4 );
 		  }
 		  else {
@@ -7905,8 +11542,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TIDDetId(detId).diskNumber() == 3 ){
-		  if( TIDDetId(detId).isRPhi() ) {
+		if( tTopo->tidWheel(detId) == 3 ){
+		  if( tTopo->tidIsRPhi(detId) ) {
 		    u414->Fill( resid*1E4 );
 		  }
 		  else {
@@ -7914,8 +11551,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TIDDetId(detId).ringNumber() == 1 ) {
-		  if( TIDDetId(detId).isRPhi() ) {
+		if( tTopo->tidRing(detId) == 1 ) {
+		  if( tTopo->tidIsRPhi(detId) ) {
 		    u430->Fill( resid*1E4 );
 		  }
 		  else {
@@ -7923,8 +11560,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TIDDetId(detId).ringNumber() == 2 ) {
-		  if( TIDDetId(detId).isRPhi() ) {
+		if( tTopo->tidRing(detId) == 2 ) {
+		  if( tTopo->tidIsRPhi(detId) ) {
 		    u432->Fill( resid*1E4 );
 		  }
 		  else {
@@ -7932,8 +11569,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TIDDetId(detId).ringNumber() == 3 ) {
-		  if( TIDDetId(detId).isRPhi() ) {
+		if( tTopo->tidRing(detId) == 3 ) {
+		  if( tTopo->tidIsRPhi(detId) ) {
 		    u434->Fill( resid*1E4 );
 		  }
 		  else {
@@ -7944,8 +11581,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	      }//z side 1
 	      else { // other z side
 
-		if( TIDDetId(detId).diskNumber() == 1 ){
-		  if( TIDDetId(detId).isRPhi() ) {
+		if( tTopo->tidWheel(detId) == 1 ){
+		  if( tTopo->tidIsRPhi(detId) ) {
 		    u420->Fill( resid*1E4 );
 		  }
 		  else {
@@ -7953,8 +11590,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TIDDetId(detId).diskNumber() == 2 ){
-		  if( TIDDetId(detId).isRPhi() ) {
+		if( tTopo->tidWheel(detId) == 2 ){
+		  if( tTopo->tidIsRPhi(detId) ) {
 		    u422->Fill( resid*1E4 );
 		  }
 		  else {
@@ -7962,8 +11599,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TIDDetId(detId).diskNumber() == 3 ){
-		  if( TIDDetId(detId).isRPhi() ) {
+		if( tTopo->tidWheel(detId) == 3 ){
+		  if( tTopo->tidIsRPhi(detId) ) {
 		    u424->Fill( resid*1E4 );
 		  }
 		  else {
@@ -7971,8 +11608,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TIDDetId(detId).ringNumber() == 1 ) {
-		  if( TIDDetId(detId).isRPhi() ) {
+		if( tTopo->tidRing(detId) == 1 ) {
+		  if( tTopo->tidIsRPhi(detId) ) {
 		    u440->Fill( resid*1E4 );
 		  }
 		  else {
@@ -7980,8 +11617,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TIDDetId(detId).ringNumber() == 2 ) {
-		  if( TIDDetId(detId).isRPhi() ) {
+		if( tTopo->tidRing(detId) == 2 ) {
+		  if( tTopo->tidIsRPhi(detId) ) {
 		    u442->Fill( resid*1E4 );
 		  }
 		  else {
@@ -7989,8 +11626,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TIDDetId(detId).ringNumber() == 3 ) {
-		  if( TIDDetId(detId).isRPhi() ) {
+		if( tTopo->tidRing(detId) == 3 ) {
+		  if( tTopo->tidIsRPhi(detId) ) {
 		    u444->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8002,35 +11639,35 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	    if( subDet == StripSubdetector::TOB ) {
 
-	      if( TOBDetId( detId ).layer() == 1 && TOBDetId(detId).isRPhi() ) {
+	      if( tTopo->tobLayer(detId) == 1 && tTopo->tobIsRPhi(detId) ) {
 		u510->Fill( resid*1E4 );
 	      }//layer
 
-	      if( TOBDetId( detId ).layer() == 1 && TOBDetId(detId).isStereo() ) {
+	      if( tTopo->tobLayer(detId) == 1 && tTopo->tobIsStereo(detId) ) {
 		u520->Fill( resid*1E4 );
 	      }//layer
 
-	      if( TOBDetId( detId ).layer() == 2 && TOBDetId(detId).isRPhi() ) {
+	      if( tTopo->tobLayer(detId) == 2 && tTopo->tobIsRPhi(detId) ) {
 		u530->Fill( resid*1E4 );
 	      }//layer
 
-	      if( TOBDetId( detId ).layer() == 2 && TOBDetId(detId).isStereo() ) {
+	      if( tTopo->tobLayer(detId) == 2 && tTopo->tobIsStereo(detId) ) {
 		u540->Fill( resid*1E4 );
 	      }//layer
 
-	      if( TOBDetId( detId ).layer() == 3 ) {
+	      if( tTopo->tobLayer(detId) == 3 ) {
 		u550->Fill( resid*1E4 );
 	      }//layer
 
-	      if( TOBDetId( detId ).layer() == 4 ) {
+	      if( tTopo->tobLayer(detId) == 4 ) {
 		u560->Fill( resid*1E4 );
 	      }//layer
 
-	      if( TOBDetId( detId ).layer() == 5 ) {
+	      if( tTopo->tobLayer(detId) == 5 ) {
 		u570->Fill( resid*1E4 );
 	      }//layer
 
-	      if( TOBDetId( detId ).layer() == 6 ) {
+	      if( tTopo->tobLayer(detId) == 6 ) {
 		u580->Fill( resid*1E4 );
 	      }//layer
 
@@ -8038,10 +11675,10 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	    if( subDet == StripSubdetector::TEC ) {
 
-	      if( TECDetId(detId).side() == 1 ){
+	      if( tTopo->tecSide(detId) == 1 ){
 
-		if( TECDetId(detId).wheelNumber() == 1 ){
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecWheel(detId) == 1 ){
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u610->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8049,8 +11686,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).wheelNumber() == 2 ){
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecWheel(detId) == 2 ){
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u612->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8058,8 +11695,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).wheelNumber() == 3 ){
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecWheel(detId) == 3 ){
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u614->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8067,8 +11704,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).wheelNumber() == 4 ){
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecWheel(detId) == 4 ){
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u616->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8076,8 +11713,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).wheelNumber() == 5 ){
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecWheel(detId) == 5 ){
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u618->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8085,8 +11722,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).wheelNumber() == 6 ){
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecWheel(detId) == 6 ){
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u620->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8094,8 +11731,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).wheelNumber() == 7 ){
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecWheel(detId) == 7 ){
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u622->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8103,8 +11740,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).wheelNumber() == 8 ){
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecWheel(detId) == 8 ){
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u624->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8112,8 +11749,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).wheelNumber() == 9 ){
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecWheel(detId) == 9 ){
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u626->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8121,8 +11758,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).ringNumber() == 1 ) {
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecRing(detId) == 1 ) {
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u630->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8130,8 +11767,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).ringNumber() == 2 ) {
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecRing(detId) == 2 ) {
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u632->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8139,8 +11776,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).ringNumber() == 3 ) {
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecRing(detId) == 3 ) {
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u634->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8148,8 +11785,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).ringNumber() == 4 ) {
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecRing(detId) == 4 ) {
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u636->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8157,8 +11794,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).ringNumber() == 5 ) {
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecRing(detId) == 5 ) {
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u638->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8166,8 +11803,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).ringNumber() == 6 ) {
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecRing(detId) == 6 ) {
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u640->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8175,8 +11812,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).ringNumber() == 7 ) {
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecRing(detId) == 7 ) {
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u642->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8188,8 +11825,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	      else { // other z side
 
-		if( TECDetId(detId).wheelNumber() == 1 ){
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecWheel(detId) == 1 ){
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u650->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8197,8 +11834,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).wheelNumber() == 2 ){
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecWheel(detId) == 2 ){
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u652->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8206,8 +11843,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).wheelNumber() == 3 ){
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecWheel(detId) == 3 ){
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u654->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8215,8 +11852,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).wheelNumber() == 4 ){
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecWheel(detId) == 4 ){
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u656->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8224,8 +11861,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).wheelNumber() == 5 ){
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecWheel(detId) == 5 ){
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u658->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8233,8 +11870,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).wheelNumber() == 6 ){
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecWheel(detId) == 6 ){
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u660->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8242,8 +11879,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).wheelNumber() == 7 ){
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecWheel(detId) == 7 ){
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u662->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8251,8 +11888,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).wheelNumber() == 8 ){
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecWheel(detId) == 8 ){
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u664->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8260,8 +11897,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).wheelNumber() == 9 ){
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecWheel(detId) == 9 ){
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u666->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8269,8 +11906,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).ringNumber() == 1 ) {
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecRing(detId) == 1 ) {
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u670->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8278,8 +11915,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).ringNumber() == 2 ) {
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecRing(detId) == 2 ) {
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u672->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8287,8 +11924,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).ringNumber() == 3 ) {
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecRing(detId) == 3 ) {
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u674->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8296,8 +11933,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).ringNumber() == 4 ) {
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecRing(detId) == 4 ) {
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u676->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8305,8 +11942,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).ringNumber() == 5 ) {
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecRing(detId) == 5 ) {
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u678->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8314,8 +11951,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).ringNumber() == 6 ) {
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecRing(detId) == 6 ) {
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u680->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8323,8 +11960,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		  }
 		}
 
-		if( TECDetId(detId).ringNumber() == 7 ) {
-		  if( TECDetId(detId).isRPhi() ) {
+		if( tTopo->tecRing(detId) == 7 ) {
+		  if( tTopo->tecIsRPhi(detId) ) {
 		    u682->Fill( resid*1E4 );
 		  }
 		  else {
@@ -8348,7 +11985,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
   h028->Fill( sumpt );
   h029->Fill( sumq );
-
+  }
 }//event
 //----------------------------------------------------------------------
 // method called just after ending the event loop:

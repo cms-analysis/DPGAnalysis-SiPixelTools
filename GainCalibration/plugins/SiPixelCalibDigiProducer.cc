@@ -37,6 +37,7 @@
 #include "CondFormats/SiPixelObjects/interface/LocalPixel.h"
 
 #include "SiPixelCalibDigiProducer.h"
+#include "SiPixelParameters.h"
 #include <sstream>
 
 //
@@ -146,11 +147,11 @@ bool SiPixelCalibDigiProducer::checkFED(uint32_t detid){
 
   if(detid_to_fedid_[detid])
     return true;
-  for(int fedid=0; fedid<=40; ++fedid){
+  for(std::vector<unsigned int>::const_iterator fedid=PixelParameters::pixFEDID.begin(); fedid!=PixelParameters::pixFEDID.end(); ++fedid){
     //    edm::LogInfo("SiPixelCalibProducer") << " looking at fedid " << fedid << std::endl;
-    SiPixelFrameConverter converter(theCablingMap_.product(),fedid);
+    SiPixelFrameConverter converter(theCablingMap_.product(),*fedid);
     if(converter.hasDetUnit(detid)){
-      detid_to_fedid_[detid]=fedid;
+      detid_to_fedid_[detid]=*fedid;
       edm::LogInfo("SiPixelCalibDigiProducer") << "matched detid " << detid << " to fed " << detid_to_fedid_[detid] << std::endl;
       return true;
     }
@@ -296,8 +297,8 @@ SiPixelCalibDigiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSe
   //  edm::LogInfo("SiPixelCalibDigiProducer") << "now starting fill..." << std::endl;
   fill(iEvent,iSetup); // fill method where the actual looping over the digis is done.
   //  edm::LogInfo("SiPixelCalibDigiProducer") << "done filling..." << std::endl;
-  std::auto_ptr<edm::DetSetVector<SiPixelCalibDigi> > pOut(new edm::DetSetVector<SiPixelCalibDigi>);
-  std::auto_ptr<edm::DetSetVector<SiPixelCalibDigiError> > pErr (new edm::DetSetVector<SiPixelCalibDigiError> );
+  auto pOut = std::make_unique<edm::DetSetVector<SiPixelCalibDigi>>();
+  auto pErr = std::make_unique<edm::DetSetVector<SiPixelCalibDigiError>>();
   
   // copy things over into pOut if necessary (this is only once per pattern)
   if(store()){
@@ -325,9 +326,9 @@ SiPixelCalibDigiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     edm::LogInfo("INFO") << "now filling event " << iEventCounter_ << " as pixel pattern changes every " <<  pattern_repeat_ << " events..." << std::endl;
     clear();
   }
-  iEvent.put(pOut);
+  iEvent.put(std::move(pOut));
   if(includeErrors_)
-    iEvent.put(pErr);
+    iEvent.put(std::move(pErr));
 }
 //-----------------------------------------------
 //  method to check that the pixels are actually valid...

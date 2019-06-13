@@ -15,8 +15,8 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, '75X_upgrade2017_design_v4', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, '75X_upgrade2017_design_v4', '')
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.destinations = cms.untracked.vstring("cout")
@@ -52,11 +52,13 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
         enableReadOnlySessionOnUpdateConnection = cms.untracked.bool(False)
     ),
     timetype = cms.untracked.string('runnumber'),
-    connect = cms.string("sqlite_file:SiPixelLorentzAngle_forWidth_phase1_mc_v1.db"),
+#    connect = cms.string("sqlite_file:SiPixelLorentzAngle_forWidth_phase1_mc_v1.db"),
+    connect = cms.string("sqlite_file:SiPixelLorentzAngle_forWidth_phase1_mc_v2.db"),
     toPut = cms.VPSet(
         cms.PSet(
             record = cms.string('SiPixelLorentzAngleRcd'),
-            tag = cms.string('SiPixelLorentzAngle_forWidth_phase1_mc_v1')
+#            tag = cms.string('SiPixelLorentzAngle_forWidth_phase1_mc_v1')
+            tag = cms.string('SiPixelLorentzAngle_forWidth_phase1_mc_v2')
 #	     tag = cms.string("SiPixelLorentzAngle_fromAlignment_v01_mc")	
 #	     tag = cms.string("SiPixelLorentzAngle_fromAlignment_v01")	
 #	     tag = cms.string("SiPixelLorentzAngle_forWidth_v01_mc")
@@ -72,14 +74,14 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
 
 ###### LORENTZ ANGLE OBJECT ######
 process.SiPixelLorentzAngle = cms.EDAnalyzer("SiPixelLorentzAngleDBLoader",
-# common input for all rings 
-    bPixLorentzAnglePerTesla = cms.untracked.double(0.1),
-    fPixLorentzAnglePerTesla = cms.untracked.double(0.06),
-# enter -9999 if individual input for rings 
+    # common input for all bpix/fpix
+    bPixLorentzAnglePerTesla = cms.untracked.double(0.122), # Both correspond to 150V operation at T=263K
+    fPixLorentzAnglePerTesla = cms.untracked.double(0.122),
+    # enter -9999 if individual input
 #    bPixLorentzAnglePerTesla = cms.untracked.double(-9999.),
 #    fPixLorentzAnglePerTesla = cms.untracked.double(-9999.),
 
-    #in case of PSet
+    #in case of PSet (only works if above is -9999)
     BPixParameters = cms.untracked.VPSet(
         cms.PSet(
             layer = cms.uint32(1),
@@ -265,13 +267,18 @@ process.SiPixelLorentzAngle = cms.EDAnalyzer("SiPixelLorentzAngleDBLoader",
 )
 
 process.SiPixelLorentzAngleSim = cms.EDAnalyzer("SiPixelLorentzAngleDBLoader",
-    bPixLorentzAnglePerTesla = cms.untracked.double(0.098),
-    fPixLorentzAnglePerTesla = cms.untracked.double(0.058),
+    # common input for all bpix/fpix
+    bPixLorentzAnglePerTesla = cms.untracked.double(0.122), # Both correspond to 150V operation at T=263K
+    fPixLorentzAnglePerTesla = cms.untracked.double(0.122),
+    # enter -9999 if individual input
+#    bPixLorentzAnglePerTesla = cms.untracked.double(-9999.),
+#    fPixLorentzAnglePerTesla = cms.untracked.double(-9999.),
+
     #in case lorentz angle values for bpix should be read from file -> not implemented yet
     useFile = cms.bool(False),
     record = cms.untracked.string('SiPixelLorentzAngleSimRcd'),
     fileName = cms.string('lorentzFit.txt'),	
-    #in case of PSet
+    #in case of PSet (only works if above is -9999)
     BPixParameters = cms.untracked.VPSet(
         cms.PSet(
             layer = cms.uint32(0),

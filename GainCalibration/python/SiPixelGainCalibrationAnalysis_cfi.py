@@ -54,6 +54,7 @@ siPixelGainCalibrationAnalysis = cms.EDAnalyzer("SiPixelGainCalibrationAnalysis"
     # conversion factor to go from VCAL_HIGH to VCAL_LOW. Current best estimate: VCAL_HIGH = 7 * VCAL_LOW, which is encoded in the parameter below 
     vcalHighToLowConversionFac = cms.double(7.0),
     # use this mode if you want to analyze S-Curve data with the Gain analysis
-    ignoreMode = cms.untracked.bool(False)                                          
+    ignoreMode = cms.untracked.bool(False),
+    phase1 = cms.untracked.bool(False)                                   
 )
 

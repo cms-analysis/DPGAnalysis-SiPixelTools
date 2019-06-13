@@ -7,13 +7,12 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
-#include "Geometry/Records/interface/TrackerTopologyRcd.h" // new from 75X
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h" // 
 
 #include "CondCore/DBOutputService/interface/PoolDBOutputService.h"
 #include "CondFormats/SiPixelObjects/interface/SiPixelLorentzAngle.h"
 
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
+#include "DQM/SiPixelPhase1Common/interface/SiPixelCoordinates.h"
 #include "DataFormats/GeometryCommonDetAlgo/interface/MeasurementPoint.h"
 #include "DataFormats/GeometryCommonDetAlgo/interface/MeasurementError.h"
 #include "DataFormats/GeometrySurface/interface/GloballyPositioned.h"
@@ -60,15 +59,9 @@ void SiPixelLorentzAngleDBLoader::analyze(const edm::Event& e, const edm::EventS
 
 	SiPixelLorentzAngle* LorentzAngle = new SiPixelLorentzAngle();
 
-        //Retrieve tracker topology from geometry
-	// In 75X
-        edm::ESHandle<TrackerTopology> tTopoHandle;
-        es.get<TrackerTopologyRcd>().get(tTopoHandle);
-        const TrackerTopology* const tTopo = tTopoHandle.product();
-
-	// In 74X
-	//edm::ESHandle<TrackerTopology> tTopo;
-	//es.get<IdealGeometryRecord>().get(tTopo);
+        // Initialize SiPixelCoordinates
+	SiPixelCoordinates coord;
+	coord.init(es);
 	
         //Retrieve old style tracker geometry from geometry
 	edm::ESHandle<TrackerGeometry> pDD;
@@ -79,14 +72,13 @@ void SiPixelLorentzAngleDBLoader::analyze(const edm::Event& e, const edm::EventS
 	    it != pDD->detUnits().end(); it++){
 	  
 	  if( dynamic_cast<PixelGeomDetUnit const*>((*it))!=0){
-	    DetId detid=(*it)->geographicalId();
-	    const DetId detidc = (*it)->geographicalId();
+	    const DetId detid = (*it)->geographicalId();
 	    int found = 0;
 	    
 	    // fill bpix values for LA 
 	    if(detid.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel)) {
 	      
-	      cout << " pixel barrel:" << "  layer=" << tTopo->pxbLayer(detidc.rawId()) << "  ladder=" << tTopo->pxbLadder(detidc.rawId()) << "  module=" << tTopo->pxbModule(detidc.rawId()) << "  rawId=" << detidc.rawId();
+	      cout << " pixel barrel:" << "  layer=" << coord.layer(detid.rawId()) << "  ladder=" << coord.ladder(detid.rawId()) << "  module=" << coord.module(detid.rawId()) << "  rawId=" << detid.rawId();
 
 	      // use a commmon value (e.g. for MC)
 	      if(bPixLorentzAnglePerTesla_ != -9999.) {  // use common value for all 
@@ -103,7 +95,7 @@ void SiPixelLorentzAngleDBLoader::analyze(const edm::Event& e, const edm::EventS
 		//first individuals are put
 		for(Parameters::iterator it = ModuleParameters_.begin(); 
 		    it != ModuleParameters_.end(); ++it) {
-		  if( it->getParameter<unsigned int>("rawid") == detidc.rawId() ) {
+		  if( it->getParameter<unsigned int>("rawid") == detid.rawId() ) {
 		    float lorentzangle = (float)it->getParameter<double>("angle");
 		    if (!found) {
 		      LorentzAngle->putLorentzAngle(detid.rawId(),lorentzangle);
@@ -117,10 +109,10 @@ void SiPixelLorentzAngleDBLoader::analyze(const edm::Event& e, const edm::EventS
 		//modules already put are automatically skipped
 		for(Parameters::iterator it = BPixParameters_.begin(); 
 		    it != BPixParameters_.end(); ++it) {
-		  if (it->exists("layer"))  if (it->getParameter<unsigned int>("layer")  != tTopo->pxbLayer(detidc.rawId()))  continue;
-		  if (it->exists("ladder")) if (it->getParameter<unsigned int>("ladder") != tTopo->pxbLadder(detidc.rawId())) continue;
-		  if (it->exists("module")) if (it->getParameter<unsigned int>("module") != tTopo->pxbModule(detidc.rawId())) continue;
-		  if (it->exists("side"))   if (it->getParameter<unsigned int>("side")   != (tTopo->pxbModule(detidc.rawId())>4)+1) continue;
+		  if (it->exists("layer"))  if (it->getParameter<int>("layer")  != coord.layer(detid))  continue;
+		  if (it->exists("ladder")) if (it->getParameter<int>("ladder") != coord.ladder(detid)) continue;
+		  if (it->exists("module")) if (it->getParameter<int>("module") != coord.module(detid)) continue;
+		  if (it->exists("side"))   if (it->getParameter<int>("side")   != coord.side(detid)) continue;
 		  if (!found) {
 		    float lorentzangle = (float)it->getParameter<double>("angle");
 		    LorentzAngle->putLorentzAngle(detid.rawId(),lorentzangle);
@@ -136,7 +128,7 @@ void SiPixelLorentzAngleDBLoader::analyze(const edm::Event& e, const edm::EventS
 	      // fill fpix values for LA 
 	    } else if(detid.subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap)) {
 	      
-	      cout << " pixel endcap:" << "  side=" << tTopo->pxfSide(detidc.rawId()) << "  disk=" << tTopo->pxfDisk(detidc.rawId()) << "  blade=" << tTopo->pxfBlade(detidc.rawId()) << "  panel=" << tTopo->pxfPanel(detidc.rawId()) << "  module=" << tTopo->pxfModule(detidc.rawId()) << "  rawId=" << detidc.rawId();
+	      cout << " pixel endcap:" << "  side=" << coord.side(detid) << "  disk=" << coord.disk(detid) << "  blade=" << coord.blade(detid) << "  panel=" << coord.panel(detid) << "  module=" << coord.module(detid) << "  rawId=" << detid.rawId();
 	      
 	      // use a commmon value (e.g. for MC)
 	      if(fPixLorentzAnglePerTesla_ != -9999.) {  // use common value for all 
@@ -153,7 +145,7 @@ void SiPixelLorentzAngleDBLoader::analyze(const edm::Event& e, const edm::EventS
 		//first individuals are put
 		for(Parameters::iterator it = ModuleParameters_.begin(); 
 		    it != ModuleParameters_.end(); ++it) {
-		  if( it->getParameter<unsigned int>("rawid") == detidc.rawId() ) {
+		  if( it->getParameter<unsigned int>("rawid") == detid.rawId() ) {
 		    float lorentzangle = (float)it->getParameter<double>("angle");
 		    if (!found) {
 		      LorentzAngle->putLorentzAngle(detid.rawId(),lorentzangle);
@@ -167,13 +159,14 @@ void SiPixelLorentzAngleDBLoader::analyze(const edm::Event& e, const edm::EventS
 		//modules already put are automatically skipped
 		for(Parameters::iterator it = FPixParameters_.begin(); 
 		    it != FPixParameters_.end(); ++it) {
-		  if (it->exists("side"))    if (it->getParameter<unsigned int>("side")    != tTopo->pxfSide(detidc.rawId()))   continue;
-		  if (it->exists("disk") )   if (it->getParameter<unsigned int>("disk")    != tTopo->pxfDisk(detidc.rawId()))   continue;
-		  if (it->exists("blade"))   if (it->getParameter<unsigned int>("blade")   != tTopo->pxfBlade(detidc.rawId()))  continue;
-		  if (it->exists("panel"))   if (it->getParameter<unsigned int>("panel")   != tTopo->pxfPanel(detidc.rawId()))  continue;
-		  if (it->exists("plq"))     if (it->getParameter<unsigned int>("plq")     != tTopo->pxfModule(detidc.rawId())) continue;
-		  if (it->exists("HVgroup")) if (it->getParameter<unsigned int>("HVgroup") != 
-						 HVgroup(tTopo->pxfPanel(detidc.rawId()), tTopo->pxfModule(detidc.rawId())))    continue;
+		  if (it->exists("side"))    if (it->getParameter<int>("side")    != coord.side(detid))   continue;
+		  if (it->exists("disk") )   if (it->getParameter<int>("disk")    != coord.disk(detid))   continue;
+		  if (it->exists("ring") )   if (it->getParameter<int>("ring")    != coord.ring(detid))   continue;
+		  if (it->exists("blade"))   if (it->getParameter<int>("blade")   != coord.blade(detid))  continue;
+		  if (it->exists("panel"))   if (it->getParameter<int>("panel")   != coord.panel(detid))  continue;
+		  if (it->exists("plq"))     if (it->getParameter<int>("plq")     != coord.module(detid)) continue;
+		  if (it->exists("HVgroup")) if (it->getParameter<int>("HVgroup") != 
+						 HVgroup(coord.panel(detid), coord.module(detid)))    continue;
 		  if (!found) {
 		    float lorentzangle = (float)it->getParameter<double>("angle");
 		    LorentzAngle->putLorentzAngle(detid.rawId(),lorentzangle);
@@ -220,7 +213,7 @@ void SiPixelLorentzAngleDBLoader::analyze(const edm::Event& e, const edm::EventS
 	
 }
 
-unsigned int SiPixelLorentzAngleDBLoader::HVgroup(unsigned int panel, unsigned int module){
+int SiPixelLorentzAngleDBLoader::HVgroup(int panel, int module){
 
    if( 1 == panel && ( 1 == module || 2 == module ))  {
       return 1;

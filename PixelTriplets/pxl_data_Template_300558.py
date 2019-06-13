@@ -4,13 +4,13 @@ import FWCore.ParameterSet.VarParsing as opts
 opt = opts.VarParsing('analysis')
 
 opt.register('outputFileName',
-             'job.root',
+             'job_data_300558_Template.root',
              opts.VarParsing.multiplicity.singleton,
              opts.VarParsing.varType.string,
              'The name of the output file')
 
 opt.register('GlobalTag',
-              'auto:phase1_2017_realistic', #'auto:run2_data',
+             '92X_dataRun2_Express_v7',  #'auto:phase1_2017_realistic', #'auto:run2_data',
              opts.VarParsing.multiplicity.singleton,
              opts.VarParsing.varType.string,
              'Global tag for this run')
@@ -34,7 +34,7 @@ opt.register('useLocalDBTemplate',
              'Read Templates from local DB')
 
 opt.register('useTemplateReco',
-             False,
+             True,
              opts.VarParsing.multiplicity.singleton,
              opts.VarParsing.varType.bool,
              'Set if you want to use Template (True) or Generic Reco (False)')
@@ -145,24 +145,23 @@ myfilelist.extend([
 process.source = cms.Source("PoolSource",
 # fileNames =  myfilelist
 	fileNames = cms.untracked.vstring(
-#"file:/afs/cern.ch/work/c/cgalloni/PXL_GIT/CMSSW_9_0_0_pre4/src/DPGAnalysis-SiPixelTools/PixelHitAssociator/GENSIMRECO_MuPt10_TemplateReco_100.root",
-"/store/mc/PhaseIFall16DR/DYToMuMu_M-20_13TeV_pythia8/GEN-SIM-RECO/FlatPU20to50RECO_81X_upgrade2017_realistic_v26-v1/110000/FC2572D7-9EEE-E611-8C4D-0CC47A7EEE0E.root",
-"/store/mc/PhaseIFall16DR/DYToMuMu_M-20_13TeV_pythia8/GEN-SIM-RECO/FlatPU20to50RECO_81X_upgrade2017_realistic_v26-v1/110000/FC55DA16-B3EE-E611-8108-6CC2173BC0A0.root",
-"/store/mc/PhaseIFall16DR/DYToMuMu_M-20_13TeV_pythia8/GEN-SIM-RECO/FlatPU20to50RECO_81X_upgrade2017_realistic_v26-v1/110000/FC88E26C-3EF0-E611-8EB3-0CC47AD98C8A.root",
-"/store/mc/PhaseIFall16DR/DYToMuMu_M-20_13TeV_pythia8/GEN-SIM-RECO/FlatPU20to50RECO_81X_upgrade2017_realistic_v26-v1/110000/FCE0054E-C0EE-E611-9D68-1418776420DF.root",
-"/store/mc/PhaseIFall16DR/DYToMuMu_M-20_13TeV_pythia8/GEN-SIM-RECO/FlatPU20to50RECO_81X_upgrade2017_realistic_v26-v1/110000/FEAEA56F-98EE-E611-A78C-0CC47A706FF4.root",
-"/store/mc/PhaseIFall16DR/DYToMuMu_M-20_13TeV_pythia8/GEN-SIM-RECO/FlatPU20to50RECO_81X_upgrade2017_realistic_v26-v1/110000/FEC5CDAA-CDEE-E611-896C-002590E7D7DE.root",
-#"/data/store/express/Run2016H/ExpressPhysics/FEVT/Express-v2/000/282/735/00000/0050618F-5C8E-E611-BD9F-FA163E7C262F.root"
-#"/store/express/Run2016H/ExpressPhysics/FEVT/Express-v2/000/281/663/00000/72B55B7C-FD83-E611-934E-FA163E244B58.root",
-#"/store/data/Run2012D/MinimumBias/RECO/PromptReco-v1/000/208/686/F60495B3-1E41-E211-BB7C-003048D3756A.root",
-# my re-reco 
-#    'file:/afs/cern.ch/work/d/dkotlins/public/data/tracks/r208686_1_0.root',
-# mc
-#    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_73/tracks/tracks1_mc73_13.root'
-	)
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/F6DB51B0-BD7A-E711-9988-02163E0144E5.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/F802CEAD-B17A-E711-9316-02163E0144AC.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/F85E23A5-AE7A-E711-AEA9-02163E019CAB.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/F89AD26D-AA7A-E711-8282-02163E019B4A.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/F8D1D930-A97A-E711-86DD-02163E01A58F.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/F8FC69DC-BA7A-E711-B365-02163E019D76.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/FA20CBEC-AF7A-E711-A1D1-02163E01441B.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/FA3624F6-BE7A-E711-B616-02163E01A60E.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/FA59A5D3-BF7A-E711-931F-02163E01A5C6.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/FAC392F0-BE7A-E711-A59D-02163E01A6F1.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/FC043595-AD7A-E711-A5D8-02163E01A4AC.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/FCB5E0BE-AE7A-E711-BEFE-02163E01A377.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/FE53DC4E-B57A-E711-9D59-02163E0142B1.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/FE569111-A97A-E711-918B-02163E01A5C3.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/FED6E124-A77A-E711-A585-02163E019DDD.root",
+		)
 )
-
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('208686:73-208686:463')
 
 # DB stuff options can now be set using comamnd Line, see beginning for defaults
 if opt.useLocalDBLA:
@@ -272,7 +271,7 @@ process.Histos = cms.EDAnalyzer('Pxl',#BPix',
 #	triggerSource = cms.InputTag('TriggerResults::HLT'),
 # For MC or my rereco
 	triggerSource = cms.InputTag(''),
-	singleParticleMC = cms.untracked.bool(True),
+	singleParticleMC = cms.untracked.bool(False),
 )
 if opt.useTemplateReco:
     process.Histos.ttrhBuilder = cms.string('WithAngleAndTemplate')

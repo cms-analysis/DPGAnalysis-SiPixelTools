@@ -22,6 +22,7 @@
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetType.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h" 
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 
 #include "CondFormats/SiPixelObjects/interface/SiPixelFrameConverter.h"
 #include "CondFormats/SiPixelObjects/interface/ElectronicIndex.h"
@@ -51,7 +52,6 @@ SiPixelOfflineCalibAnalysisBase::SiPixelOfflineCalibAnalysisBase(const edm::Para
    createOutputFile_ = iConfig.getUntrackedParameter<bool>("saveFile",false);
    outputFileName_ = iConfig.getParameter<std::string>("outputFileName");
    daqBE_ = &*edm::Service<DQMStore>();
-   folderMaker_ = new SiPixelFolderOrganizerGC();
    tPixelCalibDigi = consumes <edm::DetSetVector<SiPixelCalibDigi> > (siPixelCalibDigiProducer_);
    prova_ = iConfig.getParameter<std::string>("prova");
    calibrationMode_ = iConfig.getParameter<std::string>("CalibMode");
@@ -59,7 +59,8 @@ SiPixelOfflineCalibAnalysisBase::SiPixelOfflineCalibAnalysisBase(const edm::Para
    vCalValues_Int_ = iConfig.getParameter<std::vector<int> >("vCalValues_Int");
    calibcols_Int_ = iConfig.getParameter<std::vector<int> >("calibcols_Int");
    calibrows_Int_ = iConfig.getParameter<std::vector<int> >("calibrows_Int");
-  
+   folderMaker_ = new SiPixelFolderOrganizerGC();
+   phase1_ = iConfig.getUntrackedParameter<bool>("phase1",false);
 }
 
 SiPixelOfflineCalibAnalysisBase::SiPixelOfflineCalibAnalysisBase()
@@ -85,6 +86,10 @@ SiPixelOfflineCalibAnalysisBase::analyze(const edm::Event& iEvent, const edm::Ev
    iSetup.get<TrackerDigiGeometryRecord>().get( geom_ );
    iSetup.get<SiPixelFedCablingMapRcd>().get(theCablingMap_);
    //iSetup.get<SiPixelCalibConfigurationRcd>().get(calib_);
+   edm::ESHandle<TrackerTopology> tTopo;
+   iSetup.get<TrackerTopologyRcd>().get(tTopo);
+   tt_ = tTopo.product();
+
    if(eventCounter_==0)
      this->calibrationSetup(iSetup);
    eventCounter_++;
@@ -204,11 +209,11 @@ SiPixelOfflineCalibAnalysisBase::translateDetIdToString(uint32_t detid)
    }
    if (detSubId == 2)  	//FPIX
    {
-      PixelEndcapName nameworker(detid);
+     PixelEndcapName nameworker(detid,tt_,phase1_);
       output = nameworker.name();
    } else 		//BPIX
    {
-      PixelBarrelName nameworker(detid);
+     PixelBarrelName nameworker(detid,tt_,phase1_);
       output = nameworker.name();
    }
    detIdNames_.insert(std::make_pair(detid, output));
@@ -319,10 +324,10 @@ std::string SiPixelOfflineCalibAnalysisBase::GetPixelDirectory(uint32_t detID )
 { //Get the directory name and create it if it doesn't exists///
   
   // return  folderMaker_->setModuleFolder(detID,0,myTFileDirMap_ );
-  std::string path= folderMaker_->setModuleFolderPath( detID,0 );
+  std::string path= folderMaker_->setModuleFolderPath( detID,tt_,0,phase1_ );
   if (myTFileDirMap_.find(path)==myTFileDirMap_.end()){
     // std::cout << " Creating the directory " << std::endl;
-    folderMaker_->setModuleFolder( &myTFileDirMap_ , detID,0 );
+    folderMaker_->setModuleFolder( &myTFileDirMap_ , detID,tt_,0,phase1_ );
     if (myTFileDirMap_.find(path)==myTFileDirMap_.end()) std::cout << " I think I created the directory but I dont find it" << std::endl;
   }  
   // std::cout << "SiPixelOfflineCalibAnalysisBase.cc  get the directory with path " <<path << std::endl;

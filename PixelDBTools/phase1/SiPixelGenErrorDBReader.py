@@ -1,7 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 import sys
 
-process = cms.Process("SiPixelGenErrorDBReader")
+from Configuration.StandardSequences.Eras import eras
+
+process = cms.Process("SiPixelGenErrorDBReader",eras.Run2_2017)
 
 process.load("CondCore.DBCommon.CondDBSetup_cfi") # needed for custom tags
 
@@ -11,7 +13,8 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 # process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 #process.load("Configuration.StandardSequences.GeometryIdeal_cff")
 #process.load("Configuration.Geometry.GeometryDB_cff")
-process.load("Configuration.Geometry.GeometryExtended2017Reco_cff")
+process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
+process.load('Configuration.StandardSequences.GeometrySimDB_cff')
 
 
 process.source = cms.Source("EmptySource",
@@ -29,18 +32,18 @@ process.maxEvents = cms.untracked.PSet(
 #testGlobalTag = False
 #if testGlobalTag :
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-#process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
-from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-# from Configuration.AlCa.GlobalTag import GlobalTag
-# works with condDB and condDBv2
+process.XMLFromDBSource.label = cms.string("Extended")
+from Configuration.AlCa.GlobalTag import GlobalTag
 # process.GlobalTag = GlobalTag(process.GlobalTag, '74X_dataRun2_Prompt_v3', '')
 # process.GlobalTag = GlobalTag(process.GlobalTag, 'GR_R_75_V1A', '')
 # process.GlobalTag = GlobalTag(process.GlobalTag, 'FT_R_74_V15B', '')
 # process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 # process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
 # process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, '75X_upgrade2017_design_v4', '')
+# process.GlobalTag = GlobalTag(process.GlobalTag, '75X_upgrade2017_design_v4', '')
+# process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
+
 
 # for local sqlite files
 testTag = True
@@ -61,14 +64,14 @@ if testTag :
 #           tag = cms.string('SiPixelGenErrorDBObject38Tv3')
 #           tag = cms.string('SiPixelGenErrorDBObject0Tv10')
 #           tag = cms.string('SiPixelGenErrorDBObject0Tv3')
+           tag = cms.string('SiPixelGenErrorDBObject_phase1_38T_2017_v1')
+#           tag = cms.string('SiPixelGenErrorDBObject_phase1_00T_2017_v1')
 #           MC
 #           tag = cms.string('SiPixelGenErrorDBObject38TV10')
-           tag = cms.string('SiPixelGenErrorDBObject_phase1_38T_mc_v1')
+#           tag = cms.string('SiPixelGenErrorDBObject_phase1_38T_mc_v1')
+#           tag = cms.string('SiPixelGenErrorDBObject_phase1_38T_mc_v2')
          )),
         #timetype = cms.string('runnumber'),
-        # MC
-        #connect = cms.string('sqlite_file:../../../../../DB/siPixelGenErrors38T_v1_mc.db')
-        connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/public/CMSSW/DB/phase1/SiPixelGenErrorDBObject_phase1_38T_mc_v1.db')
         # DATA 
         #connect = cms.string('sqlite_file:../../../../../DB/siPixelGenErrors38T_2012_IOV7_v1.db')
         #connect = cms.string('sqlite_file:../../../../../DB/siPixelGenErrors38T_IOV8a.db')
@@ -81,6 +84,12 @@ if testTag :
         #connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
         #connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
         #connect = cms.string('frontier://FrontierPrep/CMS_COND_PIXEL')
+        connect = cms.string('sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/2017_03_20/SiPixelGenErrorDBObject_phase1_38T_2017_v1.db')
+#        connect = cms.string('sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/2017_03_20/SiPixelGenErrorDBObject_phase1_00T_2017_v1.db')
+        # MC
+        #connect = cms.string('sqlite_file:../../../../../DB/siPixelGenErrors38T_v1_mc.db')
+        #connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/public/CMSSW/DB/phase1/SiPixelGenErrorDBObject_phase1_38T_mc_v1.db')
+        #connect = cms.string('sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/2017_02_13/SiPixelGenErrorDBObject_phase1_38T_mc_v2.db')
 
     )
     #process.PoolDBESSource.DBParameters.authenticationPath='.'

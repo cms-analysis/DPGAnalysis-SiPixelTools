@@ -83,7 +83,7 @@ create(){
   echo "indir = $indir" 	>> $runningdir/config
   echo "storedir = $storedir" 	>> $runningdir/config
   
-  for i in `seq 0 39`;do
+  for i in "${PIXFEDarray[@]}";do
     file=GainCalibration_${i}_$run.$ext
     if [ `is_file_present $indir/$file` -eq 0 ];then echo "File $file is not present in $indir ...";continue;fi
     sed "s#FILENAME#file:$file#" gain_calib_template_cfg.py > $runningdir/gain_calib_${i}_cfg.py
@@ -128,7 +128,7 @@ wait_for_staging(){
   need_to_wait=1
   while [ $need_to_wait -eq 1 ];do
     need_to_wait=0
-    for i in `seq 0 39`;do
+    for i in "${PIXFEDarray[@]}";do
       file=GainCalibration_${i}_$run.$ext
       if [ `is_file_present $indir/$file` -eq 0 ];then echo "File $file is not present in $indir ...";continue;fi	 
       stager_qry -M $indir/$file
@@ -149,16 +149,23 @@ wait_for_staging(){
 submit_calib(){
   set_specifics $indir
   sed "s;INDIR;$indir;;s;RUN;$run;;s;.EXT;.$ext;;s;STOREDIR;${storedir};" submit_template.sh |\
-      sed "s;T2_CP;${T2_CP};;s;T2_TMP_DIR;${T2_TMP_DIR};;s;CFGDIR;${runningdir};" > ${runningdir}/submit_template.sh
+      sed "s;T2_CP;${T2_CP};;s;T2_TMP_DIR;${T2_TMP_DIR};;s;CFGDIR;${runningdir};;s;T2_PREFIX;${T2_PREFIX};" > ${runningdir}/submit_template.sh
   set_specifics $storedir
   sed -i "s#T2_OUT_CP#${T2_CP}#" ${runningdir}/submit_template.sh
   cd $runningdir
-  
-  for i in `seq 0 39`;do
-    make_dir ${runningdir}/JOB_${i}
-    rm -f submit_${i}.sh
-    sed "s/NUM/${i}/" submit_template.sh > submit_${i}.sh
-    submit_to_queue ${run}_${i} ${runningdir}/JOB_${i}/stdout submit_${i}.sh
+  echo "pwd  "`pwd`
+  echo "Run "${run}
+  for i in "${PIXFEDarray[@]}";
+  do
+      if ls ${runningdir}/gain_calib_${i}_cfg.py > /dev/null 2>&1;
+	  then
+	  make_dir ${runningdir}/JOB_${i}
+	  rm -f submit_${i}.sh
+	  sed "s/NUM/${i}/" submit_template.sh > submit_${i}.sh
+	  submit_to_queue ${run}_${i} ${runningdir}/JOB_${i}/stdout submit_${i}.sh
+      else
+	  echo "Could not find: gain_calib_${i}_cfg.py"
+      fi
   done
   
   cd -
@@ -167,7 +174,6 @@ submit_calib(){
 resubmit_job(){
   set_specifics $storedir 
   
-  cd $runningdir
   if [ `is_file_present $storedir/$ijob.root` -eq 1 ];then
     echo "Output of job $ijob is already in $storedir."
     exit
@@ -175,20 +181,23 @@ resubmit_job(){
   
   echo "Re-submitting job $ijob:"
   submit_to_queue ${run}_${ijob} ${runningdir}/JOB_${ijob}/stdout submit_${ijob}.sh
-  
-  cd -
 }
 
 resubmit_all(){
   set_specifics $storedir 
   cd $runningdir
-  
-  for ijob in `seq 0 39`;do
+  nothing_to_resubmit=true
+  for ijob in "${PIXFEDarray[@]}";do
     if [ `is_file_present $storedir/$ijob.root` -eq 0 ];then
-      resubmit_job
-    fi
-  
+	nothing_to_resubmit=false
+	resubmit_job
+    fi  
   done
+
+  if [ "$nothing_to_submit" = true ];
+  then
+      echo "Nothing to resubmit."
+  fi
 
   cd -
 }
@@ -391,20 +400,25 @@ compare_runs(){
 
 make_payload(){
 
+  if [ -z $db_version ] || [ -z $year ];
+  then echo -e "\e[31mYou must provide a year AND a version!\n  e.g.: ./Run.sh -payload RUNNUMBER YEAR VERSION --> SiPixelGainCalibration_YEAR_vVERSION_offline\n e.g.: ./Run.sh -payload 265850 2016 1\e[0m";exit
+  fi
+
   set_specifics $storedir
   stage_list_of_files $storedir/GainCalibration.root
   
   file=$T2_TMP_DIR/GainCalibration_$run.root
   echo "Copying $storedir/GainCalibration.root to $file"
-  $T2_CP $storedir/GainCalibration.root $file
+  $T2_CP $T2_PREFIX$storedir/GainCalibration.root $file
   
   ###########################################   OFFLINE PAYLOAD
   
-  
-  payload=prova_GainRun${run}.db
-  echo " Copying   $T2_CP prova.db $T2_TMP_DIR/$payload "
-  $T2_CP prova.db $T2_TMP_DIR/$payload
-  payload_root=Summary_payload_Run${run}.root
+  # payload=prova_GainRun${run}.db
+  # echo " Copying   $T2_CP prova.db $T2_TMP_DIR/$payload "
+  # $T2_CP prova.db $T2_TMP_DIR/$payload
+  # payload_root=Summary_payload_Run${run}.root
+  payload=SiPixelGainCalibration_${year}_v${db_version}_offline.db
+  payload_root=Summary_payload_Run${run}_${year}_v${db_version}.root
   
   echo -e "RM: $T2_RM$storedir/$payload"
   echo -e "RM: $T2_RM$storedir/$payload_root"
@@ -413,7 +427,8 @@ make_payload(){
   cat SiPixelGainCalibrationDBUploader_cfg.py |\
     sed "s#file:///tmp/rougny/test.root#`file_loc $file`#"  |\
     sed "s#sqlite_file:prova.db#sqlite_file:$T2_TMP_DIR/${payload}#" |\
-    sed "s#/tmp/rougny/histos.root#$T2_TMP_DIR/$payload_root#" > SiPixelGainCalibrationDBUploader_Offline_cfg.py
+    sed "s#/tmp/rougny/histos.root#$T2_TMP_DIR/$payload_root#" |\
+    sed "s#GainCalib_TEST_offline#SiPixelGainCalibration_${year}_v${db_version}_offline#" > SiPixelGainCalibrationDBUploader_Offline_cfg.py
     
     
   echo -e "\n--------------------------------------"
@@ -427,11 +442,11 @@ make_payload(){
   
   echo " finish SiPixelGainCalibrationDBUploader_Offline_cfg.py "
 
-  $T2_CP $T2_TMP_DIR/$payload $storedir/$payload
-  $T2_CP $T2_TMP_DIR/$payload_root $storedir/$payload_root
+  $T2_CP $T2_TMP_DIR/$payload $T2_PREFIX$storedir/$payload
+  $T2_CP $T2_TMP_DIR/$payload_root $T2_PREFIX$storedir/$payload_root
   
-  echo "Copying   $T2_CP $T2_TMP_DIR/$payload $storedir/$payload "
-  echo "Copying   $T2_CP $T2_TMP_DIR/$payload_root $storedir/$payload_root "
+  echo "Copying   $T2_CP $T2_TMP_DIR/$payload $T2_PREFIX$storedir/$payload "
+  echo "Copying   $T2_CP $T2_TMP_DIR/$payload_root $T2_PREFIX$storedir/$payload_root "
  
   rm -f $T2_TMP_DIR/${payload}
   rm -f $T2_TMP_DIR/${payload_root}
@@ -440,9 +455,11 @@ make_payload(){
   echo "removing  $T2_TMP_DIR/${payload_root} "
   ###########################################   HLT PAYLOAD
   
-  payload=prova_GainRun${run}_HLT.db
-  cp prova.db $T2_TMP_DIR/$payload
-  payload_root=Summary_payload_Run${run}_HLT.root
+  # payload=prova_GainRun${run}_HLT.db
+  # cp prova.db $T2_TMP_DIR/$payload
+  # payload_root=Summary_payload_Run${run}_HLT.root
+  payload=SiPixelGainCalibration_${year}_v${db_version}_HLT.db
+  payload_root=Summary_payload_Run${run}_${year}_v${db_version}_HLT.root
   
   echo -e "RM: `$T2_RM$storedir/$payload`"
   echo -e "RM: `$T2_RM$storedir/$payload_root`"
@@ -454,7 +471,7 @@ make_payload(){
     sed "s#/tmp/rougny/histos.root#$T2_TMP_DIR/$payload_root#" |\
     sed "s#cms.Path(process.gainDBOffline)#cms.Path(process.gainDBHLT)#"|\
     sed "s#record = cms.string('SiPixelGainCalibrationOfflineRcd')#record = cms.string('SiPixelGainCalibrationForHLTRcd')#"|\
-    sed "s#GainCalib_TEST_offline#GainCalib_TEST_hlt#" > SiPixelGainCalibrationDBUploader_HLT_cfg.py
+    sed "s#GainCalib_TEST#SiPixelGainCalibration_${year}_v${db_version}_HLT#" > SiPixelGainCalibrationDBUploader_HLT_cfg.py
   
   echo -e "\n--------------------------------------"
   echo "Making the payload for HLT:"
@@ -466,8 +483,8 @@ make_payload(){
   cmsRun SiPixelGainCalibrationDBUploader_HLT_cfg.py
   
   ls $T2_TMP_DIR
-  $T2_CP $T2_TMP_DIR/$payload $storedir/$payload
-  $T2_CP $T2_TMP_DIR/$payload_root $storedir/$payload_root
+  $T2_CP $T2_TMP_DIR/$payload $T2_PREFIX$storedir/$payload
+  $T2_CP $T2_TMP_DIR/$payload_root $T2_PREFIX$storedir/$payload_root
   
   rm -f $T2_TMP_DIR/${payload}
   rm -f $T2_TMP_DIR/${payload_root}
@@ -476,7 +493,6 @@ make_payload(){
    
   rm -f $file  
 }
-
 
 
 print_twiki_text(){
@@ -558,6 +574,10 @@ run2=0
 file2=""
 dat_file=''
 
+FPIXFEDarray=(1296 1297 1298 1299 1300 1301 1302 1308 1309 1310 1311 1312 1313 1314 1320 1321 1322 1323 1324 1325 1326 1332 1333 1334 1335 1336 1337 1338)
+BPIXFEDarray=(1200 1201 1202 1203 1204 1205 1206 1207 1208 1209 1212 1213 1214 1215 1216 1217 1218 1219 1220 1221 1224 1225 1226 1227 1228 1229 1230 1231 1232 1233 1236 1237 1238 1239 1240 1241 1242 1243 1244 1245 1248 1249 1250 1251 1252 1253 1254 1255 1256 1257 1260 1261 1262 1263 1264 1265 1266 1267 1268 1269 1272 1273 1274 1275 1276 1277 1278 1279 1280 1281 1284 1285 1286 1287 1288 1289 1290 1291 1292 1293)
+PIXFEDarray=("${BPIXFEDarray[@]}" "${FPIXFEDarray[@]}")
+
 
 #lock
 
@@ -573,7 +593,7 @@ for arg in $* ; do
     -summary)      summary=1    ; run=$2 ; shift ;;
     -pdf)          pdf=1        ; run=$2 ; shift ;;
     -compare)      compare=1    ; run=0  ; run1=$2 ; file1=$3 ; run2=$4 ; file2=$5 ; shift ; shift ; shift ; shift ; shift ;;
-    -payload)      prova=1      ; run=$2 ; shift ;;
+    -payload)      prova=1      ; run=$2 ; year=$3 ; db_version=$4 ; shift ; shift ; shift ;;
     -twiki)        twiki=1      ; run=$2 ; shift ;;
     -comp_twiki)   comp_twiki=1 ; run=$2 ; shift ;;
     -info)         info=1       ; run=$2 ; shift ;;

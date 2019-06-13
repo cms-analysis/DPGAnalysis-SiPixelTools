@@ -2,12 +2,12 @@
 # using: 
 # Revision: 1.19 
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
-# with command line options: -s GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,RECO --evt_type SingleMuPt10_pythia8_cfi --conditions auto:phase1_2017_realistic --era Run2_2017 --geometry DB:Extended --fileout file:GENSIMRECO_MuPt10.root --python_filename=PhaseI_MuPt10_cfg.py --runUnscheduled -n 10
+# with command line options: -s GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,RECO --evt_type SingleMuPt10_pythia8_cfi --conditions auto:run2_mc --era Run2_2016 --fileout file:GENSIMRECO_MuPt10.root --python_filename=Phase0_MuPt10_cfg.py --runUnscheduled -n 10
 import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
 
-process = cms.Process('RECO',eras.Run2_2017)
+process = cms.Process('RECO',eras.Run2_2016)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -16,7 +16,7 @@ process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
-process.load('Configuration.StandardSequences.GeometrySimDB_cff')
+process.load('Configuration.Geometry.GeometrySimDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Generator_cff')
 process.load('IOMC.EventVertexGenerators.VtxSmearedRealistic50ns13TeVCollision_cfi')
@@ -67,10 +67,9 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
 # Additional output definition
 
 # Other statements
-process.XMLFromDBSource.label = cms.string("Extended")
 process.genstepfilter.triggerConditions=cms.vstring("generation_step")
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 
 process.generator = cms.EDFilter("Pythia8PtGun",
     PGunParameters = cms.PSet(
@@ -119,6 +118,10 @@ for path in process.paths:
 
 
 
+
+
+
+
 # begin inserting configs
 #------------------------------------------
 #  Options - can be given from command line
@@ -150,11 +153,6 @@ opt.register('useRECO',            False,
 opt.register('RECOFileName',  '',
 	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.string,
 	     'Name of the histograms file')
-
-
-opt.register('noMagField',         False,
-	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
-	     'Test LA (SIM) conditions locally (prep/prod database or sqlite file')
 
 opt.register('outputFileName',      '',
 	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.string,
@@ -197,9 +195,11 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 if opt.useClustersOnTrack:
 	if opt.useTemplates:
 		process.initialStepTracks.TTRHBuilder = 'WithAngleAndTemplate'
+		#process.generalTracks.TTRHBuilder     = 'WithAngleAndTemplate'
 		if opt.RECOFileName == '': opt.RECOFileName = 'file:GENSIMRECO_MuPt10_TemplateReco_'+str(opt.maxEvents)+'.root'
 	else:
 		process.initialStepTracks.TTRHBuilder = 'WithTrackAngle'
+		#process.generalTracks.TTRHBuilder     = 'WithTrackAngle'
 		if opt.RECOFileName == '': opt.RECOFileName = 'file:GENSIMRECO_MuPt10_GenericReco_'+str(opt.maxEvents)+'.root'
 else:
 	if opt.RECOFileName == '': opt.RECOFileName = 'file:GENSIMRECO_MuPt10_GenericReco_'+str(opt.maxEvents)+'.root'
@@ -211,11 +211,6 @@ if opt.useRECO:
 		# This is the file you create with saveRECO, by default
 		opt.RECOFileName # Use previously saved RECO as input
 		))
-
-# Switch off magnetic field
-if opt.noMagField:
-	process.load('Configuration.StandardSequences.MagneticField_0T_cff')
-	process.g4SimHits.UseMagneticField = cms.bool(False)
 
 #________________________________________________________________________
 #                        Main Analysis Module
@@ -255,11 +250,6 @@ else:
 
 # Some other options
 process.pixRecHitsValid.outputFile = opt.outputFileName
-# showing defaults
-#process.pixRecHitsValid.verbose=False
-#process.pixRecHitsValid.associatePixel = True
-#process.pixRecHitsValid.associateStrip = False
-#process.pixRecHitsValid.associateRecoTracks = False
 
 # myAnalyzer Path
 process.myAnalyzer_step = cms.Path(process.MeasurementTrackerEvent*process.TrackRefitter*process.pixRecHitsValid)
@@ -270,7 +260,7 @@ process.myAnalyzer_step = cms.Path(process.MeasurementTrackerEvent*process.Track
 # Print settings
 print "Using options: "
 if opt.globalTag == '':
-    print "  globalTag (auto:phase1_2017_realistic) = "+str(process.GlobalTag.globaltag)
+    print "  globalTag (auto:run2_mc) = "+str(process.GlobalTag.globaltag)
 else:
     if "auto:" in opt.globalTag:
 	process.GlobalTag = GlobalTag(process.GlobalTag, opt.globalTag, '')
@@ -283,103 +273,55 @@ print "  useTemplates                           = "+str(opt.useTemplates)
 print "  saveRECO                               = "+str(opt.saveRECO)
 print "  useRECO                                = "+str(opt.useRECO)
 print "  RECOFileName                           = "+str(opt.RECOFileName)
-print "  noMagField                             = "+str(opt.noMagField)
 print "  outputFileName                         = "+str(opt.outputFileName)
 print "  maxEvents                              = "+str(opt.maxEvents)
-print "  useLocalLASim                          = "+str(opt.useLocalLASim)
 print "  useLocalQuality                        = "+str(opt.useLocalQuality)
-print "  useLocalLA                             = "+str(opt.useLocalLA)
 print "  useLocalGain                           = "+str(opt.useLocalGain)
+print "  useLocalLASim                          = "+str(opt.useLocalLASim)
+print "  useLocalLA                             = "+str(opt.useLocalLA)
 print "  useLocalGenErr                         = "+str(opt.useLocalGenErr)
-
-
-dir   = 'sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/'
-Danek = 'sqlite_file:/afs/cern.ch/user/d/dkotlins/public/CMSSW/DB/phase1/'
+print "  useLocalTemplates                      = "+str(opt.useLocalTemplates)
 
 # Test Local DB conditions
+# LA (SIM)
+LASim_tag       = "SiPixelLorentzAngleSim_v02_mc"
+#LASim_db        = 'sqlite_file:/afs/cern.ch/cms/CAF/CMSALCA/ALCA_TRACKERCALIB/Pixels/'
+#LASim_db        = 'frontier://FrontierPrep/CMS_CONDITIONS'
+LASim_db        = 'frontier://FrontierProd/CMS_CONDITIONS'
+
 # Quality
+Qua_tag         = 'SiPixelQuality_v36_mc'
+#Qua_db          = 'sqlite_file:/afs/cern.ch/cms/CAF/CMSALCA/ALCA_TRACKERCALIB/Pixels/PixelDB2016/1SiPixelQuality/SiPixelQuality_v36.db'
 #Qua_db          = 'frontier://FrontierPrep/CMS_CONDITIONS'
 Qua_db          = 'frontier://FrontierProd/CMS_CONDITIONS'
-#Qua_db          = 'sqlite_file:../../../../../DB/phase1/SiPixelQuality_phase1_ideal.db'
-Qua_tag         = 'SiPixelQuality_phase1_ideal'
-
-# Gains
-#Gain_db         = 'frontier://FrontierPrep/CMS_CONDITIONS'
-#Gain_db         = 'frontier://FrontierProd/CMS_CONDITIONS'
-#Gain_db         = Danek + 'SiPixelGainCalibration_phase1_ideal_v2.db'
-#Gain_tag        = 'SiPixelGainCalibration_phase1_ideal_v2'
-Gain_db         = Danek + 'SiPixelGainCalibration_phase1_mc_v2.db'
-Gain_tag        = 'SiPixelGainCalibration_phase1_mc_v2'
-
-# LA (SIM)
-#LASim_db        = 'frontier://FrontierPrep/CMS_CONDITIONS'
-#LASim_db        = 'frontier://FrontierProd/CMS_CONDITIONS'
-# MC
-#LASim_db        = Danek+'SiPixelLorentzAngleSim_phase1_mc_v1.db'
-#LASim_tag       = "SiPixelLorentzAngleSim_phase1_mc_v1"
-#LASim_db        = dir+'2017_02_13/SiPixelLorentzAngleSim_phase1_mc_v2.db'
-#LASim_tag       = "SiPixelLorentzAngleSim_phase1_mc_v2"
-# Data (DUMMY)
-LASim_db        = dir+'2017_03_20/SiPixelLorentzAngleSim_phase1_2017_v1_TESTONLY.db'
-LASim_tag       = "SiPixelLorentzAngleSim_phase1_2017_v1_TESTONLY"
 
 # LA (RECO)
+LA_tag          = 'SiPixelLorentzAngle_v02_mc'
+LA_Width_tag    = 'SiPixelLorentzAngle_forWidth_v1_mc'
+#LA_db           = 'sqlite_file:/afs/cern.ch/cms/CAF/CMSALCA/ALCA_TRACKERCALIB/Pixels/'
 #LA_db           = 'frontier://FrontierPrep/CMS_CONDITIONS'
-#LA_db           = 'frontier://FrontierProd/CMS_CONDITIONS'
-# MC
-#LA_db           = dir+'2017_02_13/SiPixelLorentzAngle_phase1_mc_v2.db'
-#LA_tag          = 'SiPixelLorentzAngle_phase1_mc_v2'
-# Data
-LA_db           = dir+'2017_04_05/SiPixelLorentzAngle_phase1_2017_v1.db'
-LA_tag          = 'SiPixelLorentzAngle_phase1_2017_v1'
-
-# LA (Width)
+LA_db           = 'frontier://FrontierProd/CMS_CONDITIONS'
+#LA_Width_db     = 'sqlite_file:/afs/cern.ch/cms/CAF/CMSALCA/ALCA_TRACKERCALIB/Pixels/'
 #LA_Width_db     = 'frontier://FrontierPrep/CMS_CONDITIONS'
-#LA_Width_db     = 'frontier://FrontierProd/CMS_CONDITIONS'
-LA_Width_db     = dir+'2017_02_13/SiPixelLorentzAngle_forWidth_phase1_mc_v2.db'
-LA_Width_tag    = 'SiPixelLorentzAngle_forWidth_phase1_mc_v2'
+LA_Width_db     = 'frontier://FrontierProd/CMS_CONDITIONS'
+
+# Gains
+Gain_tag        = 'SiPixelGainCalibration_split_smeared_mc'
+#Gain_db         = 'sqlite_file:/afs/cern.ch/cms/CAF/CMSALCA/ALCA_TRACKERCALIB/Pixels/'
+#Gain_db         = 'frontier://FrontierPrep/CMS_CONDITIONS'
+Gain_db         = 'frontier://FrontierProd/CMS_CONDITIONS'
 
 # GenErrors
-if opt.noMagField:
-	# 0T GenErrors
-	#GenErr_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
-	#GenErr_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
-	# MC
-	GenErr_db       = dir+'2017_04_05/SiPixelGenErrorDBObject_phase1_00T_mc_v2.db'
-	GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_00T_mc_v2'
-	# Data
-	#GenErr_db       = dir+'2017_03_20/SiPixelGenErrorDBObject_phase1_00T_2017_v1.db'
-	#GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_00T_2017_v1'
-	
-	# 0T Templates
-	#Templates_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
-	#Templates_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
-	# MC
-	Templates_db       = dir+'2017_04_05/SiPixelTemplateDBObject_phase1_00T_mc_v2.db'
-	Templates_tag      = 'SiPixelTemplateDBObject_phase1_00T_mc_v2'
-	# Data
-	#Templates_db       = dir+'2017_03_20/SiPixelTemplateDBObject_phase1_00T_2017_v1.db'
-	#Templates_tag      = 'SiPixelTemplateDBObject_phase1_00T_2017_v1'
-else:
-	# 3.8T GenErrors
-	#GenErr_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
-	#GenErr_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
-	# MC
-	#GenErr_db       = dir+'2017_02_13/SiPixelGenErrorDBObject_phase1_38T_mc_v2.db'
-	#GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_mc_v2'
-	# Data
-	GenErr_db       = dir+'2017_04_05/SiPixelGenErrorDBObject_phase1_38T_2017_v1.db'
-	GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_2017_v1'
-	
-	# 3.8T Templates
-	#Templates_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
-	#Templates_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
-	# MC
-	#Templates_db       = dir+'2017_02_13/SiPixelTemplateDBObject_phase1_38T_mc_v2.db'
-	#Templates_tag      = 'SiPixelTemplateDBObject_phase1_38T_mc_v2'
-	# Data
-	Templates_db       = dir+'2017_04_05/SiPixelTemplateDBObject_phase1_38T_2017_v1.db'
-	Templates_tag      = 'SiPixelTemplateDBObject_phase1_38T_2017_v1'
+GenErr_tag      = 'SiPixelGenErrorDBObject_38T_v1_mc'
+#GenErr_db       = 'sqlite_file:/afs/cern.ch/cms/CAF/CMSALCA/ALCA_TRACKERCALIB/Pixels/'
+#GenErr_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
+GenErr_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
+
+# Templates
+Templates_tag      = 'SiPixelTemplates38T_2010_2011_mc'
+#Templates_db       = 'sqlite_file:/afs/cern.ch/cms/CAF/CMSALCA/ALCA_TRACKERCALIB/Pixels/'
+#Templates_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
+Templates_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
 
 #LA
 if opt.useLocalLASim :
@@ -463,14 +405,6 @@ if opt.useLocalTemplates :
 			record = cms.string('SiPixelTemplateDBObjectRcd'),
 			tag = cms.string(Templates_tag))),
 		connect = cms.string(Templates_db))
-	if opt.noMagField:
-		process.TemplatesReader.toGet = cms.VPSet(
-			cms.PSet(
-				label = cms.untracked.string('0T'),
-				record = cms.string('SiPixelTemplateDBObjectRcd'),
-				tag = cms.string(Templates_tag)
-				)
-			)
 	process.templateprefer = cms.ESPrefer("PoolDBESSource","TemplatesReader")
 
 #---------------------------
@@ -492,7 +426,6 @@ else:
 	process.schedule.remove(process.genfiltersummary_step)
 	process.schedule.append(process.myAnalyzer_step)
 # End of inserted code
-
 
 
 
