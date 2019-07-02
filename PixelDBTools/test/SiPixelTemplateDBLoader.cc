@@ -115,8 +115,7 @@ void SiPixelTemplateDBLoader::analyze(const edm::Event& iEvent, const edm::Event
     if(PRINT) cout<<" load template "<<templid<<" for modules "<<s_detid<<endl;
 
     // Now loop over all modules 
-    for(TrackerGeometry::DetUnitContainer::const_iterator it = pDD->detUnits().begin(); 
-	it != pDD->detUnits().end(); it++){
+    for(auto it = pDD->detUnits().begin(); it != pDD->detUnits().end(); it++){
       
       //cout<< "Detid  "<<((*it)->geographicalId()).rawId()<<" "
       //  <<((*it)->geographicalId()).subdetId()<<endl;

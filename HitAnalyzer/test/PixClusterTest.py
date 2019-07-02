@@ -56,9 +56,15 @@ process.source = cms.Source("PoolSource",
 #  fileNames =  myfilelist
  fileNames = cms.untracked.vstring(    
 # "/store/express/Run2016B/ExpressPhysics/FEVT/Express-v2/000/274/314/00000/1A57B62A-4328-E611-9D78-02163E01339F.root",
- "root://eoscms//eos/cms/tier0/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/0E6E4ACA-4F5A-E611-97B5-FA163E1E4ACD.root",
+# "root://eoscms//eos/cms/tier0/store/express/Run2016F/ExpressPhysics/FEVT/Express-v1/000/278/193/00000/0E6E4ACA-4F5A-E611-97B5-FA163E1E4ACD.root",
 
 # for MC 
+#"/store/relval/CMSSW_10_0_2/RelValNuGun/GEN-SIM-RECO/PU25ns_100X_upgrade2018_realistic_v10-v1/10000/2C85DC12-9B11-E811-A95B-0CC47A4D769C.root",
+"/store/relval/CMSSW_10_0_2/RelValNuGun/GEN-SIM-RECO/PUpmx25ns_100X_upgrade2018_realistic_v10-v1/20000/247A9A8B-7513-E811-995F-0CC47A4D767C.root",
+#"/store/relval/CMSSW_10_0_2/RelValNuGun/GEN-SIM-RECO/100X_upgrade2018_realistic_v10-v1/10000/0A939C94-010F-E811-83AE-0CC47A7C345E.root",   # no pixel hits?
+
+#"/store/relval/CMSSW_10_0_2/RelValNuGun/GEN-SIM-DIGI-RAW/PU25ns_100X_upgrade2018_realistic_v10-v1/10000/0C5A8C7A-5611-E811-A200-0CC47A7C340C.root", # only raw, no reco 
+
 #  'file:../scripts/tracks.root'
 #  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100/clus/clus1.root'
 #  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100/rechits/rechits1.root'
@@ -73,7 +79,7 @@ process.source = cms.Source("PoolSource",
 # for data 
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('206940:0-206940:1027')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('274314:97-274314:9999')
-process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('278193:77-278193:9999')
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('278193:77-278193:9999')
 
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string('clus.root')
@@ -93,7 +99,11 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag.globaltag = 'GR_P_V49::All'
 # 2016
 #process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v3' # for 266277
-process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v9' # for 272
+#process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v9' # for 272
+# MC AUTO 
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
 
 process.analysis = cms.EDAnalyzer("PixClusterTest",
     Verbosity = cms.untracked.bool(False),
@@ -102,11 +112,11 @@ process.analysis = cms.EDAnalyzer("PixClusterTest",
 )
 
 # for data
-process.p = cms.Path(process.hltfilter*process.analysis)
+#process.p = cms.Path(process.hltfilter*process.analysis)
 #process.p = cms.Path(process.analysis)
 
 # for MC
-#process.p = cms.Path(process.analysis)
+process.p = cms.Path(process.analysis)
 
 # define an EndPath to analyze all other path results
 #process.hltTrigReport = cms.EDAnalyzer( 'HLTrigReport',

@@ -31,6 +31,20 @@
 <use   name="DataFormats/FEDRawData"/>
 <use   name="EventFilter/SiPixelRawToDigi"/>
 #
+# for gain calib
+<use   name="CalibTracker/SiPixelESProducers"/>
+#
+
+# for trajectory
+<use name="TrackingTools/Records"/>
+#<use name="Geometry/TrackerGeometryBuilder"/>
+#<use name="TrackingTools/TransientTrack"/>
+#<use name="TrackingTools/MaterialEffects"/>
+#<use name="TrackingTools/TrackFitters"/>
+<use name="TrackingTools/TransientTrackingRecHit"/>
+<use name="RecoTracker/TransientTrackingRecHit"/>
+
+
 <library   file="*.cc" name="testPixels">
  <flags   EDM_PLUGIN="1"/>
 </library>

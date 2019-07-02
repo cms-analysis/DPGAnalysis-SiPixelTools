@@ -939,7 +939,7 @@ void PixelTree::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         double time = (*hHf)[i].time();
         HcalDetId cell((*hHf)[i].id());
 
-        const CaloCellGeometry* cellGeometry = caloGeometry->getSubdetectorGeometry(cell)->getGeometry (cell);
+        auto cellGeometry = caloGeometry->getSubdetectorGeometry(cell)->getGeometry (cell);
         if (cellGeometry == 0) cout << "No cell geometry " << cell.rawId() << endl;
         double fEta = cellGeometry->getPosition().eta();
         double fTheta = cellGeometry->getPosition().theta();

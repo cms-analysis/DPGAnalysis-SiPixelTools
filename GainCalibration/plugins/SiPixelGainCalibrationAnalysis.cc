@@ -26,8 +26,13 @@ Implementation:
 #include "TGraphErrors.h"
 #include "TMath.h"
 
+#include <iostream>
+#include <fstream>
+#include <string>
+
 using std::cout;
 using std::endl;
+
 //
 // constructors and destructor
 //
@@ -71,7 +76,8 @@ SiPixelGainCalibrationAnalysis::SiPixelGainCalibrationAnalysis(const edm::Parame
   theGainCalibrationDbInputService_(iConfig),*/
   gainlow_(10.),gainhi_(0.),pedlow_(255.),pedhi_(0.),
   useVcalHigh_(conf_.getParameter<bool>("useVCALHIGH")),
-  scalarVcalHigh_VcalLow_(conf_.getParameter<double>("vcalHighToLowConversionFac"))
+  scalarVcalHigh_VcalLow_(conf_.getParameter<double>("vcalHighToLowConversionFac")),
+  vCalToEleConvFactors_(conf_.getParameter<std::string>("vCalToEleConvFactors"))
 {
   if(reject_single_entries_)
     min_nentries_=1;
@@ -88,6 +94,35 @@ SiPixelGainCalibrationAnalysis::SiPixelGainCalibrationAnalysis(const edm::Parame
   statusNumbers_ = new int[10];
   for(int ii=0;ii<10;ii++)
     statusNumbers_[ii]=0;
+  
+  
+  //Define VCal to ele conversion factors
+  std::ifstream fin;
+  fin.open(vCalToEleConvFactors_);
+  if(fin.is_open()){
+     std::cout << "File ./" << vCalToEleConvFactors_ << " is open.\n";
+     for(std::string line; std::getline(fin, line); ) {
+       std::istringstream in(line);      //make a stream for the line itself
+       std::string type;
+       double VCslope_, VCoffset_;
+       in >> type;
+       
+       in >> VCslope_ >> VCoffset_; 
+       VcalToEleMap[type] = std::make_pair(VCslope_,VCoffset_);
+     }
+     fin.close();
+   }
+   else
+    std::cout << "Error opening " << vCalToEleConvFactors_ << ". Are you sure you passed it correctly?\n";
+  
+   std::map<std::string, std::pair<double, double>>::iterator it = VcalToEleMap.begin();
+   std::cout << "Using the following VCal to electron conversion factors per layer/ring (Rp = ring plus, Rm = ring minus, L = Layer):\n";
+   while(it != VcalToEleMap.end()){
+     std::pair<double, double> val = it->second;
+     std::cout<<it->first<<" : Slope =  "<<val.first<<"  Offset = "<<val.second<<" "<<std::endl;
+     it++;
+   } 
+      
 }
 
 SiPixelGainCalibrationAnalysis::~SiPixelGainCalibrationAnalysis()
@@ -197,8 +232,21 @@ void SiPixelGainCalibrationAnalysis::fillDatabase(){
 }
 // ------------ method called to do fits to all objects available  ------------
 bool
-SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibDigi>::const_iterator ipix)
+SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibDigi>::const_iterator ipix,std::string layerString)
 {
+ 
+  double VcalToEle_slope  ;
+  double VcalToEle_offset ;
+  
+  if (!layerString.empty()){
+    VcalToEle_slope  = VcalToEleMap[layerString].first;
+    VcalToEle_offset = VcalToEleMap[layerString].second;
+  }
+  else{
+    VcalToEle_slope  = 1.;
+    VcalToEle_offset = 0.;
+  }
+  
   std::string currentDir = GetPixelDirectory(detid);
   float lowmeanval=255;
   float highmeanval=0;
@@ -218,12 +266,15 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
   bool use_point=true;
   int status=0;
   statusNumbers_[9]++;
-  
   bookkeeper_2D_[detid]["status_2d"]->SetBinContent(ipix->col()+1,ipix->row()+1,0);
   if(writeSummary_ && detid!=currentDetID_){
     currentDetID_ = detid;
     summary_<<endl<<"DetId_"<<currentDetID_<<endl;
   }
+
+
+
+  
   
   for(uint32_t ii=0; ii< ipix->getnpoints() && ii<200; ii++){
     //    std::cout << ipix->getsum(ii) << " " << ipix->getnentries(ii) << " " << ipix->getsumsquares(ii) << std::endl;
@@ -234,6 +285,8 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     }
     else
       xvalsall[ii]=vCalValues_[ii];
+    
+    xvalsall[ii]= xvalsall[ii]*VcalToEle_slope+VcalToEle_offset;
     yerrvalsall[ii]=yvalsall[ii]=0; 
   
     if(ipix->getnentries(ii)>min_nentries_){
@@ -340,7 +393,6 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     tempname+="_";
     tempname+=pixelinfo.str();
     // setDQMDirectory(detid);
-   
 
     //bookkeeper_pixels_[detid][pixelinfo.str()] = bookDQMHistogram1D(detid,pixelinfo.str(),tempname,105*nallpoints,xvalsall[0],xvalsall[nallpoints-1]*1.05);
     bookkeeper_pixels_1D_[detid][pixelinfo.str()] = bookHistogram1D(detid,pixelinfo.str(),tempname,(xvalsall[nallpoints-1]-xvalsall[0])/binwidth+1,xvalsall[0]-binwidth/2.0,xvalsall[nallpoints-1]+binwidth/2.0 , currentDir );
@@ -364,6 +416,11 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     graph_->SetPointError(ipointtemp,0,yerrvals[ipointtemp]);
   }
   Int_t tempresult = graph_->Fit("func","FQ0N");
+  if (makehistopersistent) 
+    {
+      //std::cout << "swdebug: saving TGraph." << std::endl;
+      TGraphErrors *savedGraph = bookTGraphs(detid, "savedGraph", npoints, xvals, yvals, 0, yerrvals, GetPixelDirectory(detid)) ;
+    }
   slope=func_->GetParameter(1);
   slopeerror=func_->GetParError(1);
   intercept=func_->GetParameter(0);
@@ -462,6 +519,7 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     
     // and book the histo
     // fill the last value of the vcal array...   
+
 
     //bookkeeper_pixels_[detid][pixelinfo.str()] =  bookDQMHistogram1D(detid,pixelinfo.str(),tempname,105*nallpoints,xvalsall[0],xvalsall[nallpoints-1]*1.05);
     //TH1D* h = new TH1D("h","h",105*nallpoints,xvalsall[0],xvalsall[nallpoints-1]*1.05);

@@ -50,6 +50,7 @@ private:
   edm::ParameterSet conf_;
   edm::ESHandle<TrackerGeometry> tkgeom;
   SiPixelGainCalibrationServiceBase *SiPixelGainCalibrationService_;
+  bool PRINT;
 
   std::map< uint32_t, TH1F* >  _TH1F_Pedestals_m;
   std::map< uint32_t, TH1F* >  _TH1F_Gains_m;
@@ -68,6 +69,10 @@ private:
   TH1F *_TH1F_Gains_fpix;
   TH1F *_TH1F_Pedestals_bpix;
   TH1F *_TH1F_Pedestals_fpix;
-
+  TH1D *GainsL1, *GainsL2, *GainsL3, *GainsL4, *PedsL1,*PedsL2,*PedsL3,*PedsL4, *GainsF, *PedsF; 
+  TH1D *ADCL1, *ADCL2, *ADCL3, *ADCL4, *VcalL1,*VcalL2,*VcalL3,*VcalL4,* ADCF, *VcalF; 
+  TH1D *GainsSumL1, *GainsSumL2, *GainsSumL3, *GainsSumL4, *PedsSumL1,*PedsSumL2,*PedsSumL3,*PedsSumL4,
+    *GainsSumF, *PedsSumF; 
+  TH1D *ADCSumL1, *ADCSumL2, *ADCSumL3, *ADCSumL4, *VcalSumL1,*VcalSumL2,*VcalSumL3,*VcalSumL4,*ADCSumF, *VcalSumF; 
 };
 #endif

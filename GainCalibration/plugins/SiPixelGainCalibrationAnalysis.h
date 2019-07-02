@@ -54,7 +54,7 @@ public:
   ~SiPixelGainCalibrationAnalysis();
 
   void doSetup(const edm::ParameterSet&);
-  virtual bool doFits(uint32_t detid, std::vector<SiPixelCalibDigi>::const_iterator ipix);
+  virtual bool doFits(uint32_t detid, std::vector<SiPixelCalibDigi>::const_iterator ipix,std::string layerString);
 
   virtual bool checkCorrectCalibrationType();
 
@@ -85,7 +85,11 @@ private:
   std::string fitfunction_;
   TF1 *func_;
   TGraphErrors *graph_;
-
+  
+  //VCal to ele conversion map
+  typedef  std::map<std::string, std::pair<double, double>> Maptype;
+  Maptype VcalToEleMap;
+  
   std::vector<uint32_t> listofdetids_;
   bool ignoreMode_;
   // flags
@@ -108,8 +112,11 @@ private:
   bool filldb_;
   bool writeSummary_;
   
+ 
+  
   // parameters for database output  
   std::string  recordName_;
+  
   bool appendMode_;
   /*SiPixelGainCalibration *theGainCalibrationDbInput_;
   SiPixelGainCalibrationOffline *theGainCalibrationDbInputOffline_;
@@ -124,6 +131,9 @@ private:
   uint16_t min_nentries_;
   bool useVcalHigh_;
   double scalarVcalHigh_VcalLow_;
+  
+  // VCal to electrons conversion factor
+  std::string  vCalToEleConvFactors_;
   
   //Summary
   std::ofstream summary_;

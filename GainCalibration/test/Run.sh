@@ -49,8 +49,8 @@ create(){
   if [ "$indir" == "" ] && [ "$storedir" == "" ];then
     #indir=/castor/cern.ch/user/${USER:0:1}/$USER/GainCalib_run$run
     #storedir=/castor/cern.ch/user/${USER:0:1}/$USER/
-    indir=/store/group/dpg_tracker_pixel/comm_pixel/GainCalibrations/Run_$run
-    storedir=/store/group/dpg_tracker_pixel/comm_pixel/GainCalibrations/Run_$run
+    indir=/store/group/dpg_tracker_pixel/comm_pixel/GainCalibrations/Phase1/Run_$run
+    storedir=/store/group/dpg_tracker_pixel/comm_pixel/GainCalibrations/Phase1/Run_$run
   fi
   
   storedir=$storedir/GainRun_$run
@@ -186,6 +186,7 @@ resubmit_job(){
 resubmit_all(){
   set_specifics $storedir 
   cd $runningdir
+
   nothing_to_resubmit=true
   for ijob in "${PIXFEDarray[@]}";do
     if [ `is_file_present $storedir/$ijob.root` -eq 0 ];then
@@ -244,17 +245,22 @@ status(){
 }
 
 hadd_files(){
-  /afs/cern.ch/project/eos/installation/cms/bin/eos.select -b fuse mount /tmp/`whoami`/eos
-  dir="/tmp/`whoami`/eos/cms$storedir"
-  rm -f $dir/GainCalibration.root
-  hadd -f $dir/GainCalibration.root $dir/*.root
-  /afs/cern.ch/project/eos/installation/cms/bin/eos.select -b fuse umount /tmp/`whoami`/eos
+  # /afs/cern.ch/project/eos/installation/cms/bin/eos.select -b fuse mount /tmp/`whoami`/eos
+  # dir="/tmp/`whoami`/eos/cms$storedir"
+  # rm -f $dir/GainCalibration.root
+  # hadd -f $dir/GainCalibration.root $dir/*.root
+  # /afs/cern.ch/project/eos/installation/cms/bin/eos.select -b fuse umount /tmp/`whoami`/eos
+
+    #EOS is now permanently mounted at /eos/cms
+    dir="/eos/cms$storedir"
+    rm -f $dir/GainCalibration.root
+    hadd -f $dir/GainCalibration.root $dir/*.root
 }
 
 submit_summary_new(){
 
   set_specifics ${storedir}
-  if [ `$T2_LS  $storedir/GainCalibration.root 2>&1|grep "No such"|wc -l` -eq 1 ]; then
+  if [ `$T2_LS$storedir/GainCalibration.root 2>&1|grep "No such"|wc -l` -eq 1 ]; then
     echo "File $storedir/GainCalibration.root is not present ..."; exit ; fi ;
   stage_list_of_files $storedir/GainCalibration.root
 
@@ -397,7 +403,6 @@ compare_runs(){
 
 
 
-
 make_payload(){
 
   if [ -z $db_version ] || [ -z $year ];
@@ -411,22 +416,22 @@ make_payload(){
   echo "Copying $storedir/GainCalibration.root to $file"
   $T2_CP $T2_PREFIX$storedir/GainCalibration.root $file
   
+
   ###########################################   OFFLINE PAYLOAD
   
-  # payload=prova_GainRun${run}.db
-  # echo " Copying   $T2_CP prova.db $T2_TMP_DIR/$payload "
-  # $T2_CP prova.db $T2_TMP_DIR/$payload
-  # payload_root=Summary_payload_Run${run}.root
   payload=SiPixelGainCalibration_${year}_v${db_version}_offline.db
   payload_root=Summary_payload_Run${run}_${year}_v${db_version}.root
   
   echo -e "RM: $T2_RM$storedir/$payload"
   echo -e "RM: $T2_RM$storedir/$payload_root"
+
+  $T2_RM$storedir/$payload
+  $T2_RM$storedir/$payload_root
   
   #Changing some parameters in the python file:
   cat SiPixelGainCalibrationDBUploader_cfg.py |\
     sed "s#file:///tmp/rougny/test.root#`file_loc $file`#"  |\
-    sed "s#sqlite_file:prova.db#sqlite_file:$T2_TMP_DIR/${payload}#" |\
+    sed "s#sqlite_file:dummy.db#sqlite_file:$T2_TMP_DIR/${payload}#" |\
     sed "s#/tmp/rougny/histos.root#$T2_TMP_DIR/$payload_root#" |\
     sed "s#GainCalib_TEST_offline#SiPixelGainCalibration_${year}_v${db_version}_offline#" > SiPixelGainCalibrationDBUploader_Offline_cfg.py
     
@@ -455,19 +460,19 @@ make_payload(){
   echo "removing  $T2_TMP_DIR/${payload_root} "
   ###########################################   HLT PAYLOAD
   
-  # payload=prova_GainRun${run}_HLT.db
-  # cp prova.db $T2_TMP_DIR/$payload
-  # payload_root=Summary_payload_Run${run}_HLT.root
   payload=SiPixelGainCalibration_${year}_v${db_version}_HLT.db
   payload_root=Summary_payload_Run${run}_${year}_v${db_version}_HLT.root
   
-  echo -e "RM: `$T2_RM$storedir/$payload`"
-  echo -e "RM: `$T2_RM$storedir/$payload_root`"
+  echo -e "RM: $T2_RM$storedir/$payload"
+  echo -e "RM: $T2_RM$storedir/$payload_root"
+
+  $T2_RM$storedir/$payload
+  $T2_RM$storedir/$payload_root
   
   #Changing some parameters in the python file:
   cat SiPixelGainCalibrationDBUploader_cfg.py |\
     sed "s#file:///tmp/rougny/test.root#`file_loc $file`#"  |\
-    sed "s#sqlite_file:prova.db#sqlite_file:$T2_TMP_DIR/${payload}#" |\
+    sed "s#sqlite_file:dummy.db#sqlite_file:$T2_TMP_DIR/${payload}#" |\
     sed "s#/tmp/rougny/histos.root#$T2_TMP_DIR/$payload_root#" |\
     sed "s#cms.Path(process.gainDBOffline)#cms.Path(process.gainDBHLT)#"|\
     sed "s#record = cms.string('SiPixelGainCalibrationOfflineRcd')#record = cms.string('SiPixelGainCalibrationForHLTRcd')#"|\
@@ -489,6 +494,44 @@ make_payload(){
   rm -f $T2_TMP_DIR/${payload}
   rm -f $T2_TMP_DIR/${payload_root}
   
+  ####################################
+
+####testing the pixelbypixel payload
+  payload=SiPixelGainCalibration_${year}_v${db_version}_full.db
+  payload_root=Summary_payload_Run${run}_${year}_v${db_version}_full.root
+  
+  echo -e "RM: $T2_RM$storedir/$payload"
+  echo -e "RM: $T2_RM$storedir/$payload_root"
+
+  $T2_RM$storedir/$payload
+  $T2_RM$storedir/$payload_root
+  
+  #Changing some parameters in the python file:
+  cat SiPixelGainCalibrationDBUploader_cfg.py |\
+    sed "s#file:///tmp/rougny/test.root#`file_loc $file`#"  |\
+    sed "s#sqlite_file:dummy.db#sqlite_file:$T2_TMP_DIR/${payload}#" |\
+    sed "s#/tmp/rougny/histos.root#$T2_TMP_DIR/$payload_root#" |\
+    sed "s#cms.Path(process.gainDBOffline)#cms.Path(process.gainDBOfflineFull)#"|\
+    sed "s#record = cms.string('SiPixelGainCalibrationOfflineRcd')#record = cms.string('SiPixelGainCalibrationRcd')#"|\
+    sed "s#GainCalib_TEST_offline#SiPixelGainCalibration_${year}_v${db_version}#" > SiPixelGainCalibrationDBUploader_full_cfg.py
+  
+  echo -e "\n--------------------------------------"
+  echo "Making the payload for Offline pixel by pixel:"
+  echo "  $storedir/$payload"
+  echo "  ==> Summary root file: $payload_root"
+  echo -e "--------------------------------------\n"
+  
+  echo "  (\" cmsRun SiPixelGainCalibrationDBUploader_full_cfg.py \" )"
+  cmsRun SiPixelGainCalibrationDBUploader_full_cfg.py
+  
+  ls $T2_TMP_DIR
+  $T2_CP $T2_TMP_DIR/$payload $T2_PREFIX$storedir/$payload
+  $T2_CP $T2_TMP_DIR/$payload_root $T2_PREFIX$storedir/$payload_root
+  
+  rm -f $T2_TMP_DIR/${payload}
+  rm -f $T2_TMP_DIR/${payload_root}
+  
+### end testing pixelbypixel
   ####################################
    
   rm -f $file  
@@ -563,7 +606,7 @@ pdf=0
 compare=0
 verbose=0
 ijob=-1
-prova=0
+createPayload=0
 twiki=0
 comp_twiki=0
 info=0
@@ -576,7 +619,9 @@ dat_file=''
 
 FPIXFEDarray=(1296 1297 1298 1299 1300 1301 1302 1308 1309 1310 1311 1312 1313 1314 1320 1321 1322 1323 1324 1325 1326 1332 1333 1334 1335 1336 1337 1338)
 BPIXFEDarray=(1200 1201 1202 1203 1204 1205 1206 1207 1208 1209 1212 1213 1214 1215 1216 1217 1218 1219 1220 1221 1224 1225 1226 1227 1228 1229 1230 1231 1232 1233 1236 1237 1238 1239 1240 1241 1242 1243 1244 1245 1248 1249 1250 1251 1252 1253 1254 1255 1256 1257 1260 1261 1262 1263 1264 1265 1266 1267 1268 1269 1272 1273 1274 1275 1276 1277 1278 1279 1280 1281 1284 1285 1286 1287 1288 1289 1290 1291 1292 1293)
-PIXFEDarray=("${BPIXFEDarray[@]}" "${FPIXFEDarray[@]}")
+PIXFEDarray=("${BPIXFEDarray[@]}" "${FPIXFEDarray[@]}") #To run over BPix+FPix
+# PIXFEDarray=("${BPIXFEDarray[@]}") #To run over BPix only
+# PIXFEDarray=("${FPIXFEDarray[@]}") #To run over FPix only
 
 
 #lock
@@ -593,7 +638,7 @@ for arg in $* ; do
     -summary)      summary=1    ; run=$2 ; shift ;;
     -pdf)          pdf=1        ; run=$2 ; shift ;;
     -compare)      compare=1    ; run=0  ; run1=$2 ; file1=$3 ; run2=$4 ; file2=$5 ; shift ; shift ; shift ; shift ; shift ;;
-    -payload)      prova=1      ; run=$2 ; year=$3 ; db_version=$4 ; shift ; shift ; shift ;;
+    -payload)      createPayload=1      ; run=$2 ; year=$3 ; db_version=$4 ; shift ; shift ; shift ;;
     -twiki)        twiki=1      ; run=$2 ; shift ;;
     -comp_twiki)   comp_twiki=1 ; run=$2 ; shift ;;
     -info)         info=1       ; run=$2 ; shift ;;
@@ -655,7 +700,7 @@ if [ $compare -eq 1 ];then
 fi
 
 
-if [ $prova -eq 1 ];then
+if [ $createPayload -eq 1 ];then
   read_config
   make_payload
 fi

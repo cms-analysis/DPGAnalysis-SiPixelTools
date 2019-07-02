@@ -9,7 +9,8 @@
 
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/EventSetup.h"
-#include "RecoLocalTracker/SiPixelRecHits/interface/SiPixelGenError.h"
+//#include "RecoLocalTracker/SiPixelRecHits/interface/SiPixelGenError.h"
+#include "CondFormats/SiPixelTransient/interface/SiPixelGenError.h"
 //#include "MagneticField/Engine/interface/MagneticField.h"
 //#include "FWCore/ParameterSet/interface/FileInPath.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"

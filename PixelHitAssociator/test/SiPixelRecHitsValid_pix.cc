@@ -16,7 +16,7 @@
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
-#include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
+#include "Geometry/CommonDetUnit/interface/GeomDet.h"
 
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHit.h"
 #include "DataFormats/Common/interface/OwnVector.h"
@@ -492,6 +492,7 @@ void SiPixelRecHitsValid_pix::endJob() {
 }
 
 void SiPixelRecHitsValid_pix::analyze(const edm::Event& e, const edm::EventSetup& es) {
+  double ptMin=1., etaMax=2.5;
 
   //#ifdef QUICK
   //const bool quick = true; // fill only essential histos
@@ -549,30 +550,66 @@ void SiPixelRecHitsValid_pix::analyze(const edm::Event& e, const edm::EventSetup
 	   (detId.subdetId() == PixelSubdetector::PixelEndcap) )) continue;
     
     const PixelGeomDetUnit * theGeomDet = dynamic_cast<const PixelGeomDetUnit*>(theTracker.idToDet(detId) );
+    //if(verbose_) cout<<" pixel det "<<endl;
     
     if (useTracks_) {
+
+      //if(verbose_) cout<<" use tracks "<<endl;
+
       if (hTTAC.isValid()) {
+
 	const TrajTrackAssociationCollection ttac = *(hTTAC.product());
-	if (verbose_) cout << "   hTTAC.isValid()" << endl;
+	if (verbose_) cout << "   hTTAC.isValid() " << ttac.size()<< endl;
+
 	// Loop on traj-track pairs
 	for (TrajTrackAssociationCollection::const_iterator it = ttac.begin(); it !=  ttac.end(); ++it) {
 	  
 	  if (verbose_) cout << "      TracjTrackAssociationCollection iterating" << endl;
 	  reco::TrackRef trackref = it->val;
-	  
+	  auto pt = trackref->pt();
+	  auto eta = trackref->eta();
+
+	  if (verbose_) cout<<" track "<<pt<<" "<<eta<<endl;
+	  	  
+        // fTkQuality[fTkN]= trackref->qualityMask(); // see: CMSSW/DataFormats/TrackReco/interface/TrackBase.h
+        // fTkCharge[fTkN] = trackref->charge();
+        // fTkChi2[fTkN]   = trackref->chi2();
+        // fTkNdof[fTkN]   = trackref->ndof();
+        // fTkPt[fTkN]     = trackref->pt();
+        // fTkTheta[fTkN]  = trackref->theta();
+        // fTkEta[fTkN]    = trackref->eta();
+        // fTkPhi[fTkN]    = trackref->phi();
+        // fTkD0[fTkN]     = trackref->d0();
+        // fTkDz[fTkN]     = trackref->dz();
+        // fTkVx[fTkN]     = trackref->vx();
+        // fTkVy[fTkN]     = trackref->vy();
+        // fTkVz[fTkN]     = trackref->vz();
+        // fTkNHits[fTkN]  = trackref->hitPattern().numberOfValidHits();
+        // fTkLHits[fTkN]  = trackref->hitPattern().numberOfLostHits(reco::HitPattern::TRACK_HITS);
+        // fTkLHitsI[fTkN] = trackref->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS);  
+        // fTkLHitsO[fTkN] = trackref->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_OUTER_HITS); 
+
+	  // look at pt & eta 
+	  if(pt<ptMin || abs(eta)>etaMax) continue; // skip tracks 
+ 
 	  for(trackingRecHit_iterator irecHit = trackref->recHitsBegin();
-	      irecHit != trackref->recHitsEnd(); ++irecHit)
+	      irecHit != trackref->recHitsEnd(); ++irecHit) {
+
+	    //cout<<(*irecHit)->type()<<endl;
+	    if( (*irecHit)->type() != 0 ) continue; // skip non valid hits 
+
 	    if (detId == (*irecHit)->geographicalId())
 	      matchToSimHits(associate, (*irecHit), detId, theGeomDet,tTopo);
 	  
-	  //const edm::Ref<std::vector<Trajectory> > refTraj = it->key;
-	  //std::vector<TrajectoryMeasurement> tmeasColl =refTraj->measurements();
-	  //for (std::vector<TrajectoryMeasurement>::const_iterator tmeasIt = refTraj->measurements().begin(); 
-	  //     tmeasIt!=refTraj->measurements().end(); tmeasIt++) {   
-	  //  if (!tmeasIt->updatedState().isValid()) continue; 
-	  //  TransientTrackingRecHit::ConstRecHitPointer hit = tmeasIt->recHit();
-	  //  if (detId == hit->geographicalId()) matchToSimHits(associate, &(*hit), detId, theGeomDet,tTopo);
-	  //}
+	    //const edm::Ref<std::vector<Trajectory> > refTraj = it->key;
+	    //std::vector<TrajectoryMeasurement> tmeasColl =refTraj->measurements();
+	    //for (std::vector<TrajectoryMeasurement>::const_iterator tmeasIt = refTraj->measurements().begin(); 
+	    //     tmeasIt!=refTraj->measurements().end(); tmeasIt++) {   
+	    //  if (!tmeasIt->updatedState().isValid()) continue; 
+	    //  TransientTrackingRecHit::ConstRecHitPointer hit = tmeasIt->recHit();
+	    //  if (detId == hit->geographicalId()) matchToSimHits(associate, &(*hit), detId, theGeomDet,tTopo);
+	    //}
+	  }
 	}
       }
     } else {
@@ -594,6 +631,8 @@ void SiPixelRecHitsValid_pix::matchToSimHits(const PixelHitAssociator& associate
 void SiPixelRecHitsValid_pix::matchToSimHits(const TrackerHitAssociator& associate, const TrackingRecHit* hit, 
 					     DetId detId, const PixelGeomDetUnit* theGeomDet, const TrackerTopology *tTopo) {
 #endif
+
+
   std::vector<PSimHit> matched = associate.associateHit(*hit); // get the matched simhits
   
   if(verbose_) 
@@ -769,7 +808,7 @@ void SiPixelRecHitsValid_pix::fillBarrel(const TrackingRecHit* recHit, const PSi
       if(phi<0.) recHitX21->Fill(abs(phi),res_x); else recHitX22->Fill(abs(phi),res_x);
     } else if( layer == 3) {
       recHitXError3B->Fill(lerr_x); recHitYError3B->Fill(lerr_y);
-      }
+    }
     //int rows = theGeomDet->specificTopology().nrows(); 
     //if (rows == 160) recHitXFullModules->Fill(lp_x);
     //else if (rows == 80) recHitXHalfModules->Fill(lp_x);

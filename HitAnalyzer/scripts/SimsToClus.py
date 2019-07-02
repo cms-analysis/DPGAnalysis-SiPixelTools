@@ -1,5 +1,6 @@
 ##############################################################################
 # start from simhits, do trackerlocal, compare sim and rec-hits
+# only pixel hits 
 import FWCore.ParameterSet.Config as cms
 process = cms.Process("Test")
 
@@ -31,13 +32,17 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, '76X_upgrade2017_design_v8', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '') # for phase1, idealBS
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '') # for phase1 
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '') # for phase1 "design"
+
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(100)
 )
 
 # process.load("SimGeneral.MixingModule.mixNoPU_cfi")
@@ -162,9 +167,15 @@ process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService
 
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
   #'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100_76/simhits/simHits1.root',
-  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_74/simhits/simHits1.root',
+  #'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_74/simhits/simHits1.root',
 # gen-sim
 # '/store/relval/CMSSW_7_0_0_pre8/RelValSingleMuPt100/GEN-SIM/START70_V2_RR-v7/00000/B464EA42-2B59-E311-A2C1-0025905964C2.root',
+
+"/store/relval/CMSSW_9_4_0_pre3/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_94X_mc2017_design_IdealBS_v4-v1/10000/0E1F186E-1BBB-E711-AD29-0CC47A7C34A0.root",
+
+#"/store/relval/CMSSW_9_4_0_pre3/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_94X_mc2017_realistic_v4_highPU_AVE50-v1/10000/06DBBF38-BEBA-E711-80DC-4C79BA1814BB.root",
+
+
   )
 )
 

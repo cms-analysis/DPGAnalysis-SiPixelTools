@@ -28,10 +28,15 @@
 #include "CondFormats/SiPixelObjects/interface/ElectronicIndex.h"
 #include "CondFormats/SiPixelObjects/interface/DetectorIndex.h"
 #include "CondFormats/SiPixelObjects/interface/LocalPixel.h"
+
 #include "TList.h"
+#include "TGraphErrors.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+
+// // Includes for tracker geometry
+#include "DataFormats/SiPixelDetId/interface/PixelBarrelName.h"
 
  
 TF1* SiPixelOfflineCalibAnalysisBase::fitFunction_ = NULL;
@@ -53,7 +58,6 @@ SiPixelOfflineCalibAnalysisBase::SiPixelOfflineCalibAnalysisBase(const edm::Para
    outputFileName_ = iConfig.getParameter<std::string>("outputFileName");
    daqBE_ = &*edm::Service<DQMStore>();
    tPixelCalibDigi = consumes <edm::DetSetVector<SiPixelCalibDigi> > (siPixelCalibDigiProducer_);
-   prova_ = iConfig.getParameter<std::string>("prova");
    calibrationMode_ = iConfig.getParameter<std::string>("CalibMode");
    nTriggers_ =  iConfig.getParameter<int>("Repeat");
    vCalValues_Int_ = iConfig.getParameter<std::vector<int> >("vCalValues_Int");
@@ -79,64 +83,84 @@ SiPixelOfflineCalibAnalysisBase::~SiPixelOfflineCalibAnalysisBase()
 
 // ------------ method called to for each event  ------------
 void
-SiPixelOfflineCalibAnalysisBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
-{ //  std::cout<< "Camilla Output di prova_ " << prova_ <<std::endl;
-   using namespace edm;
-  
-   iSetup.get<TrackerDigiGeometryRecord>().get( geom_ );
-   iSetup.get<SiPixelFedCablingMapRcd>().get(theCablingMap_);
-   //iSetup.get<SiPixelCalibConfigurationRcd>().get(calib_);
-   edm::ESHandle<TrackerTopology> tTopo;
-   iSetup.get<TrackerTopologyRcd>().get(tTopo);
-   tt_ = tTopo.product();
+  SiPixelOfflineCalibAnalysisBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+{
+  using namespace edm;
 
-   if(eventCounter_==0)
-     this->calibrationSetup(iSetup);
-   eventCounter_++;
+  iSetup.get<TrackerDigiGeometryRecord>().get( geom_ );
+  iSetup.get<SiPixelFedCablingMapRcd>().get(theCablingMap_);
+  //iSetup.get<SiPixelCalibConfigurationRcd>().get(calib_);
+  edm::ESHandle<TrackerTopology> tTopo;
+  iSetup.get<TrackerTopologyRcd>().get(tTopo);
+  tt_ = tTopo.product();
+
+  if(eventCounter_==0)
+    this->calibrationSetup(iSetup);
+  eventCounter_++;
      
-   // check first if you're analyzing the right type of calibration
-   if(!checkCorrectCalibrationType())
-     return;
+  // check first if you're analyzing the right type of calibration
+  if(!checkCorrectCalibrationType())
+    return;
    
-   uint32_t runnumber=iEvent.id().run();
-   if(runnumbers_.size()==0)
-     runnumbers_.push_back(runnumber);
-   else{
-     bool foundnumber=false;
-     for(size_t iter=0; iter<runnumbers_.size() && !foundnumber; ++ iter){
-       if(runnumbers_[iter]==runnumber){
-	 foundnumber=true;
-	 continue;
-       }
-     }
-     if(!foundnumber)
-       runnumbers_.push_back(runnumber);
-   }
+  uint32_t runnumber=iEvent.id().run();
+  if(runnumbers_.size()==0)
+    runnumbers_.push_back(runnumber);
+  else{
+    bool foundnumber=false;
+    for(size_t iter=0; iter<runnumbers_.size() && !foundnumber; ++ iter){
+      if(runnumbers_[iter]==runnumber){
+        foundnumber=true;
+        continue;
+      }
+    }
+    if(!foundnumber)
+      runnumbers_.push_back(runnumber);
+  }
     
-   Handle<DetSetVector<SiPixelCalibDigi> > thePlaquettes;
-   iEvent.getByToken( tPixelCalibDigi, thePlaquettes);
+  Handle<DetSetVector<SiPixelCalibDigi> > thePlaquettes;
+  iEvent.getByToken( tPixelCalibDigi, thePlaquettes);
 
-   DetSetVector<SiPixelCalibDigi>::const_iterator digiIter;
+  DetSetVector<SiPixelCalibDigi>::const_iterator digiIter;
 
-   //loop over the plaquettes pulsed in this pattern 
-   for(digiIter=thePlaquettes->begin(); digiIter!=thePlaquettes->end(); ++digiIter) 
-   {
-      uint32_t detId = digiIter->id;
-      //check to see if this detID has not been encountered.  If not, run the newDetID (pure virtual) function
-      if (detIdsEntered_.find(detId) == detIdsEntered_.end()) 
-      {
-	 detIdsEntered_.insert(std::make_pair(detId, 0));
-	 detIdNames_.insert(std::make_pair(detId, translateDetIdToString(detId)));
-	 newDetID(detId);
+  //loop over the plaquettes pulsed in this pattern 
+  for(digiIter=thePlaquettes->begin(); digiIter!=thePlaquettes->end(); ++digiIter) 
+  {
+    uint32_t detId = digiIter->id;
+    //check to see if this detID has not been encountered.  If not, run the newDetID (pure virtual) function
+    if (detIdsEntered_.find(detId) == detIdsEntered_.end()) 
+    {
+      detIdsEntered_.insert(std::make_pair(detId, 0));
+      detIdNames_.insert(std::make_pair(detId, translateDetIdToString(detId)));
+      newDetID(detId);
+    }
+    DetSet<SiPixelCalibDigi>::const_iterator ipix;
+    //loop over pixels pulsed in the current plaquette
+    for(ipix=digiIter->data.begin(); ipix!=digiIter->end(); ++ipix)
+    {
+        
+      // Get layer/ring
+      std::string layerString = "";
+      
+      DetId detid = DetId(detId);
+      unsigned int subid=detid.subdetId();
+      
+      if(subid==2) {// forward
+        int disk=tTopo->pxfDisk(detId); //1,2,3 --> Gives ring R 1-3
+        int side=tTopo->pxfSide(detId); //1 for -z, 2 for +z --> Gives ring pluss minus (Rp and Rm)
+        std::string sside = "Rm";
+        if( side > 1) sside ="Rp"; 
+        layerString = (sside+std::to_string(disk)).c_str();
       }
-      DetSet<SiPixelCalibDigi>::const_iterator ipix;
-      //loop over pixels pulsed in the current plaquette
-      for(ipix=digiIter->data.begin(); ipix!=digiIter->end(); ++ipix)
-      {
-	 //called derived function to fit this curve
-	this->doFits(detId, ipix);
+      else if (subid==1) {  // barrel
+        PixelBarrelName pbn(detId,tt_,phase1_);
+        int layer  = pbn.layerName();
+        layerString = ("L"+std::to_string(layer)).c_str();
       }
-   }
+        
+      //Now fit (SiPixelGainCalibrationAnalysis::doFits)
+      this->doFits(detId, ipix, layerString);
+    }
+  }
    
 }
 
@@ -159,7 +183,7 @@ void SiPixelOfflineCalibAnalysisBase::beginRun(const edm::Run &, const edm::Even
    }
 
 
-   std::cout << "!!!! in beginRun" << std::endl;
+   std::cout << "Begin run. Loading calibration file. Mode: " << calibrationMode_ << " nTriggers: " << nTriggers_ << " Vcal steps: " << vCalValues_.size() << std::endl;
    edm::LogInfo("SiPixelOfflineCalibAnalysisBase") << "Calibration file loaded. Mode: " << calibrationMode_ << " nTriggers: " << nTriggers_ << " Vcal steps: " << vCalValues_.size() << std::endl;
    //call calibrationSetup virtual function
    this->calibrationSetup(iSetup);
@@ -209,7 +233,7 @@ SiPixelOfflineCalibAnalysisBase::translateDetIdToString(uint32_t detid)
    }
    if (detSubId == 2)  	//FPIX
    {
-     PixelEndcapName nameworker(detid,tt_,phase1_);
+     PixelEndcapName nameworker(detid,tt_,phase1_); //or detID(detid)
       output = nameworker.name();
    } else 		//BPIX
    {
@@ -249,6 +273,20 @@ SiPixelOfflineCalibAnalysisBase::translateDetIdToString(uint32_t detid)
 //   std::string hid = theHistogramIdWorker_->setHistoId(name,detid);
 //   return daqBE_->book2D(hid,title,maxcol,0,maxcol,maxrow,0,maxrow);
 // }
+
+TGraphErrors* SiPixelOfflineCalibAnalysisBase::bookTGraphs(uint32_t detid, std::string name, int points, double *x, double *y, double *xE, double *yE, std::string dir)  
+{
+  TGraphErrors * temp;
+  std::string hid = theHistogramIdWorker_->setHistoId(name,detid);
+  //return fs->make<TH1F>( hid.c_str()  , title.c_str(), nchX,  lowX, highX );
+
+  if (myTFileDirMap_.find(dir)==myTFileDirMap_.end()){
+    temp= fs->make<TGraphErrors>( points, x, y, xE, yE); 
+  }  
+  else  temp= myTFileDirMap_[dir].make<TGraphErrors>( points, x, y, xE, yE);
+  return temp;// TH1F * TEMP= new TH1F( hid.c_str()  , title.c_str(), nchX,  lowX, highX );
+  // return  new TH1F( hid.c_str()  , title.c_str(), nchX,  lowX, highX );
+}
 
 TH1F* SiPixelOfflineCalibAnalysisBase::bookHistogram1D(uint32_t detid, std::string name, std::string title, int nchX, double lowX, double highX, std::string dir)  
 {TH1F * temp;
@@ -309,7 +347,7 @@ SiPixelOfflineCalibAnalysisBase::setDQMDirectory(std::string dirName)
 bool
 SiPixelOfflineCalibAnalysisBase::setDQMDirectory(uint32_t detID)
 {
-  return folderMaker_->setModuleFolder( &myTFileDirMap_, detID,0 ); //Camilla da cambiare o da riscrivere quella vecchia
+  return folderMaker_->setModuleFolder( &myTFileDirMap_,detID,tt_,0,phase1_ ); //Camilla da cambiare o da riscrivere quella vecchia
 ;
 }
 // bool
@@ -343,7 +381,7 @@ SiPixelOfflineCalibAnalysisBase::checkCorrectCalibrationType()
 }
 
 bool
-SiPixelOfflineCalibAnalysisBase::doFits(uint32_t detid, std::vector<SiPixelCalibDigi>::const_iterator ipix)
+SiPixelOfflineCalibAnalysisBase::doFits(uint32_t detid, std::vector<SiPixelCalibDigi>::const_iterator ipix, std::string layerString)
 {
   short row=ipix->row();
   short col=ipix->col();

@@ -59,7 +59,7 @@ void SiPixelLorentzAngleDBLoader::analyze(const edm::Event& e, const edm::EventS
 
 	SiPixelLorentzAngle* LorentzAngle = new SiPixelLorentzAngle();
 
-        // Initialize SiPixelCoordinates
+        // Initialize SiPixelCoordinates, used for the individual LA selection and printout
 	SiPixelCoordinates coord;
 	coord.init(es);
 	
@@ -68,21 +68,27 @@ void SiPixelLorentzAngleDBLoader::analyze(const edm::Event& e, const edm::EventS
 	es.get<TrackerDigiGeometryRecord>().get( pDD );
 	std::cout<<" There are "<<pDD->detUnits().size() <<" detectors (old)"<<std::endl;
 	
-	for(TrackerGeometry::DetUnitContainer::const_iterator it = pDD->detUnits().begin(); 
-	    it != pDD->detUnits().end(); it++){
+	//for(TrackerGeometry::DetContainer::const_iterator it = pDD->detUnits().begin(); 
+	for(auto it = pDD->detUnits().begin(); it != pDD->detUnits().end(); it++){
 	  
-	  if( dynamic_cast<PixelGeomDetUnit const*>((*it))!=0){
+	  // for phase2 this does not select the inner tracker module but all modules 
+	  if( dynamic_cast<PixelGeomDetUnit const*>((*it))!=0) {
 	    const DetId detid = (*it)->geographicalId();
+	    auto detType= detid.det(); // det type, tracker=1
+	    auto  rawId = detid.rawId();
 	    int found = 0;
 	    
 	    // fill bpix values for LA 
 	    if(detid.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel)) {
 	      
-	      cout << " pixel barrel:" << "  layer=" << coord.layer(detid.rawId()) << "  ladder=" << coord.ladder(detid.rawId()) << "  module=" << coord.module(detid.rawId()) << "  rawId=" << detid.rawId();
+	      // 
+	      cout <<" pixel barrel:" 
+		   <<" layer="<<coord.layer(rawId)<<" ladder="<<coord.ladder(rawId)<<" module="<<coord.module(rawId) 
+		   <<"  rawId=" << rawId;
 
 	      // use a commmon value (e.g. for MC)
 	      if(bPixLorentzAnglePerTesla_ != -9999.) {  // use common value for all 
-		cout<<" LA = "<< bPixLorentzAnglePerTesla_<<endl;
+		cout<<" LA = "<< bPixLorentzAnglePerTesla_<<" common for all bpix"<<endl;
 		if(!LorentzAngle->putLorentzAngle(detid.rawId(),bPixLorentzAnglePerTesla_))
 		  cout<<"[SiPixelLorentzAngleDB::analyze] ERROR!: detid already exists"<<std::endl;
 		
@@ -125,14 +131,16 @@ void SiPixelLorentzAngleDBLoader::analyze(const edm::Event& e, const edm::EventS
 		
 	      }
 	      
-	      // fill fpix values for LA 
+	      // fill fpix values for LA (for phase2 fpix & epix)
 	    } else if(detid.subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap)) {
 	      
-	      cout << " pixel endcap:" << "  side=" << coord.side(detid) << "  disk=" << coord.disk(detid) << "  blade=" << coord.blade(detid) << "  panel=" << coord.panel(detid) << "  module=" << coord.module(detid) << "  rawId=" << detid.rawId();
+	      // for phase2: ring=blade, panel==1 
+	      cout << " pixel endcap:" 
+		   <<" side="<<coord.side(detid)<<" disk=" << coord.disk(detid)<<" blade(ring)="<<coord.blade(detid)<<" panel="<< coord.panel(detid) << "  module=" << coord.module(detid) << "  rawId=" << rawId;
 	      
 	      // use a commmon value (e.g. for MC)
 	      if(fPixLorentzAnglePerTesla_ != -9999.) {  // use common value for all 
-		cout<<" LA = "<< fPixLorentzAnglePerTesla_<<endl;
+		cout<<" LA = "<< fPixLorentzAnglePerTesla_<<" common for all fpix"<<endl;
 		if(!LorentzAngle->putLorentzAngle(detid.rawId(),fPixLorentzAnglePerTesla_))
 		  cout<<"[SiPixelLorentzAngleDB::analyze] detid already exists"<<std::endl;
 		
@@ -178,8 +186,14 @@ void SiPixelLorentzAngleDBLoader::analyze(const edm::Event& e, const edm::EventS
 		} // for  
 	
 	      } // if 	
+
 	    } else { // bpix/fpix 
-	      cout<<"detid is Pixel but neither bpix nor fpix"<<std::endl;
+	      // other tracker modules 
+	      //cout<<"detid is Pixel but neither bpix nor fpix, det type  "<<detType<<" subdet "<<detid.subdetId()<<std::endl;
+	      // put an LA for an unknown module, this is a strip or outer-tracker module
+	      // so probably not 
+	      //float defaultLA = 0.106;
+	      //LorentzAngle->putLorentzAngle(detid.rawId(),defaultLA); // some default value 
 	    } // bpix/fpix
 	    
 	  }

@@ -9,9 +9,11 @@ q_T2=localgrid@cream01
 #order: name stdout submit.sh
 submit_to_queue(){
  if [ `working_on_lxplus` -eq 1 ]; then
+      # echo "bsub -q $q_lxplus -J $1 -eo $2 < $3"
    bsub -q $q_lxplus -J $1 -eo $2 < $3
  else
-   qsub -q $q_T2 -j oe -N $1 -o $2 $3
+     echo "bla"
+   #qsub -q $q_T2 -j oe -N $1 -o $2 $3
  fi
 }
 
@@ -41,16 +43,31 @@ set_castor_specifics(){
   if [ $verbose -eq 1 ] ; then echo "Setting castor specifics ..." ; fi
 }
 
+# set_eos_specifics(){
+#   # alias eos='/afs/cern.ch/project/eos/installation/cms/bin/eos.select' # This doesn't work (eos cmd missing in bash?)
+#   T2_LS='/afs/cern.ch/project/eos/installation/cms/bin/eos.select ls'
+#   T2_RM='/afs/cern.ch/project/eos/installation/cms/bin/eos.select rm -r /eos/cms' # Do not add space before next argument when using this cmd
+#   #T2_CP='cmsStage'
+#   #T2_CP='/afs/cern.ch/project/eos/installation/cms/bin/eos.select cp'
+#   T2_CP='xrdcp'
+#   T2_PREFIX='root://eoscms.cern.ch//eos/cms/'
+#   T2_MKDIR='/afs/cern.ch/project/eos/installation/cms/bin/eos.select mkdir -p /eos/cms' # Do not add space before next argument when using this cmd
+#   T2_CHMOD='/afs/cern.ch/project/eos/installation/cms/bin/eos.select chmod 2777 /eos/cms' # Do not add space before next argument when using this cmd
+#   T2_FSYS='root://eoscms//eos/cms' # Can check what needs to be added with cmsPfn /store/...
+#   T2_TMP_DIR="/tmp/$USER"
+#   if [ $verbose -eq 1 ] ; then echo "Setting eos specifics ..." ; fi
+# }
+
 set_eos_specifics(){
   # alias eos='/afs/cern.ch/project/eos/installation/cms/bin/eos.select' # This doesn't work (eos cmd missing in bash?)
-  T2_LS='/afs/cern.ch/project/eos/installation/cms/bin/eos.select ls'
-  T2_RM='/afs/cern.ch/project/eos/installation/cms/bin/eos.select rm -r /eos/cms' # Do not add space before next argument when using this cmd
+  T2_LS='ls /eos/cms'
+  T2_RM='rm -r /eos/cms' # Do not add space before next argument when using this cmd
   #T2_CP='cmsStage'
   #T2_CP='/afs/cern.ch/project/eos/installation/cms/bin/eos.select cp'
   T2_CP='xrdcp'
   T2_PREFIX='root://eoscms.cern.ch//eos/cms/'
-  T2_MKDIR='/afs/cern.ch/project/eos/installation/cms/bin/eos.select mkdir -p /eos/cms' # Do not add space before next argument when using this cmd
-  T2_CHMOD='/afs/cern.ch/project/eos/installation/cms/bin/eos.select chmod 2777 /eos/cms' # Do not add space before next argument when using this cmd
+  T2_MKDIR='mkdir -p /eos/cms' # Do not add space before next argument when using this cmd
+  T2_CHMOD=' chmod 2777 /eos/cms' # Do not add space before next argument when using this cmd
   T2_FSYS='root://eoscms//eos/cms' # Can check what needs to be added with cmsPfn /store/...
   T2_TMP_DIR="/tmp/$USER"
   if [ $verbose -eq 1 ] ; then echo "Setting eos specifics ..." ; fi
@@ -117,7 +134,8 @@ file_loc(){
 }
 
 is_file_present(){
-    if eval $T2_LS $1 >/dev/null 2>&1; then echo 1;else echo 0;fi
+    #echo "command: $T2_LS"
+    if eval $T2_LS$1 >/dev/null 2>&1; then echo 1;else echo 0;fi
   # if [ `$T2_LS $1 2>&1|grep "No such"|wc -l` -eq 1 ];then echo 0;
   # else echo 1;
   # fi

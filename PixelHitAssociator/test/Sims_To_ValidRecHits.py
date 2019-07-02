@@ -1,193 +1,75 @@
 ##############################################################################
 # start from simhits, do trackerlocal, compare sim and rec-hits
 import FWCore.ParameterSet.Config as cms
-process = cms.Process("TestValid")
+from Configuration.StandardSequences.Eras import eras
+process = cms.Process("TestValid",eras.Run2_2017)
 
-# process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.Geometry.GeometryDB_cff")
-
-process.load("FWCore.MessageLogger.MessageLogger_cfi")
-process.load("Configuration.StandardSequences.MagneticField_38T_cff")
+process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.Services_cff")
 process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
+process.load('Configuration.StandardSequences.Digi_cff')
+process.load('Configuration.StandardSequences.SimL1Emulator_cff')
+process.load('Configuration.StandardSequences.DigiToRaw_cff')
+process.load('Configuration.StandardSequences.RawToDigi_cff')
+process.load("FWCore.MessageLogger.MessageLogger_cfi")
 
 # process.load("SimTracker.Configuration.SimTracker_cff")
 process.load("SimG4Core.Configuration.SimG4Core_cff")
+
+process.load('Configuration.EventContent.EventContent_cff')
+process.load('SimGeneral.MixingModule.mixNoPU_cfi')
 
 # for strips 
 process.load("CalibTracker.SiStripESProducers.SiStripGainSimESProducer_cfi")
 
 # clusterizers & rhs 
-process.load("RecoLocalTracker.Configuration.RecoLocalTracker_cff")
+#process.load("RecoLocalTracker.Configuration.RecoLocalTracker_cff")
 # needed for pixel RecHits (templates?)
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 
-#process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+# Refitter
+process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(1)
 )
 
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
-
-from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-#from Configuration.AlCa.GlobalTag import GlobalTag
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+from Configuration.AlCa.GlobalTag import GlobalTag
 # to use no All 
-
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
 
-# Choose the global tag here:
-# for v7.0
-#process.GlobalTag.globaltag = "MC_70_V1::All"
-#process.GlobalTag.globaltag = "MC_71_V1::All"
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_design', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_realistic', '')
 
-#process.GlobalTag.globaltag = "PRE_MC_71_V2::All"
-#process.GlobalTag.globaltag = "PRE_STA71_V3::All"
-
-#process.GlobalTag.globaltag = "START70_V1::All"
-#process.GlobalTag.globaltag = "START71_V1::All"
-#process.GlobalTag.globaltag = "START72_V3::All"
-#process.GlobalTag.globaltag = "MCRUN2_73_V7::All"
-
-#process.GlobalTag.globaltag = "POSTLS170_V4::All"
-#process.GlobalTag.globaltag = "POSTLS171_V1::All"
-#process.GlobalTag.globaltag = "PRE_LS171_V3::All"
-
-
-# process.load("SimGeneral.MixingModule.mixNoPU_cfi")
-
-from SimGeneral.MixingModule.aliases_cfi import * 
-from SimGeneral.MixingModule.mixObjects_cfi import *
-# from SimGeneral.MixingModule.digitizers_cfi import *
-from SimGeneral.MixingModule.pixelDigitizer_cfi import *
-from SimGeneral.MixingModule.stripDigitizer_cfi import *
-from SimGeneral.MixingModule.trackingTruthProducer_cfi import *
-
-
-process.simSiPixelDigis = cms.EDProducer("MixingModule",
-#    digitizers = cms.PSet(theDigitizers),
-#    digitizers = cms.PSet(
-#      mergedtruth = cms.PSet(
-#            trackingParticles
-#      )
-#    ),
-
-  digitizers = cms.PSet(
-   pixel = cms.PSet(
-    pixelDigitizer
-   ),
-#  strip = cms.PSet(
-#    stripDigitizer
-#  ),
-  ),
-
-#theDigitizersValid = cms.PSet(
-#  pixel = cms.PSet(
-#    pixelDigitizer
-#  ),
-#  strip = cms.PSet(
-#    stripDigitizer
-#  ),
-#  ecal = cms.PSet(
-#    ecalDigitizer
-#  ),
-#  hcal = cms.PSet(
-#    hcalDigitizer
-#  ),
-#  castor = cms.PSet(
-#    castorDigitizer
-#  ),
-#  mergedtruth = cms.PSet(
-#    trackingParticles
-#  )
-#),
-
-
-    LabelPlayback = cms.string(' '),
-    maxBunch = cms.int32(3),
-    minBunch = cms.int32(-5), ## in terms of 25 ns
-
-    bunchspace = cms.int32(25),
-    mixProdStep1 = cms.bool(False),
-    mixProdStep2 = cms.bool(False),
-
-    playback = cms.untracked.bool(False),
-    useCurrentProcessOnly = cms.bool(False),
-    mixObjects = cms.PSet(
-        mixTracks = cms.PSet(
-            mixSimTracks
-        ),
-        mixVertices = cms.PSet(
-            mixSimVertices
-        ),
-        mixSH = cms.PSet(
-#            mixPixSimHits
-# mixPixSimHits = cms.PSet(
-    input = cms.VInputTag(cms.InputTag("g4SimHits","TrackerHitsPixelBarrelHighTof"), 
-                          cms.InputTag("g4SimHits","TrackerHitsPixelBarrelLowTof"),
-                          cms.InputTag("g4SimHits","TrackerHitsPixelEndcapHighTof"), 
-                          cms.InputTag("g4SimHits","TrackerHitsPixelEndcapLowTof"), 
-#                          cms.InputTag("g4SimHits","TrackerHitsTECHighTof"), 
-#                          cms.InputTag("g4SimHits","TrackerHitsTECLowTof"), 
-#                          cms.InputTag("g4SimHits","TrackerHitsTIBHighTof"),
-#                          cms.InputTag("g4SimHits","TrackerHitsTIBLowTof"), 
-#                          cms.InputTag("g4SimHits","TrackerHitsTIDHighTof"), 
-#                          cms.InputTag("g4SimHits","TrackerHitsTIDLowTof"), 
-#                          cms.InputTag("g4SimHits","TrackerHitsTOBHighTof"), 
-#                          cms.InputTag("g4SimHits","TrackerHitsTOBLowTof")
-    ),
-    type = cms.string('PSimHit'),
-    subdets = cms.vstring(
-        'TrackerHitsPixelBarrelHighTof',
-        'TrackerHitsPixelBarrelLowTof',
-        'TrackerHitsPixelEndcapHighTof',
-        'TrackerHitsPixelEndcapLowTof',
-#        'TrackerHitsTECHighTof',
-#        'TrackerHitsTECLowTof',
-#        'TrackerHitsTIBHighTof',
-#        'TrackerHitsTIBLowTof',
-#        'TrackerHitsTIDHighTof',
-#        'TrackerHitsTIDLowTof',
-#        'TrackerHitsTOBHighTof',
-#        'TrackerHitsTOBLowTof'
-    ),
-    crossingFrames = cms.untracked.vstring(),
-#        'MuonCSCHits',
-#        'MuonDTHits',
-#        'MuonRPCHits'),
-#)   
-        ),
-        mixHepMC = cms.PSet(
-            mixHepMCProducts
-        )
-    )
-)
-
-process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
-#     simMuonCSCDigis = cms.PSet(
-#        initialSeed = cms.untracked.uint32(1234567),
-#        engineName = cms.untracked.string('TRandom3')
-#    ),
-     simSiPixelDigis = cms.PSet(
-        initialSeed = cms.untracked.uint32(1234567),
-        engineName = cms.untracked.string('TRandom3')
-   )
-)
 
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
-  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_74/simhits/simHits1.root',
-#  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_72/simhits/simHits1.root',
-#  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_72/simhits/simHits3.root',
-#  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_72/simhits/simHits4.root',
-# gen-sim
-# '/store/relval/CMSSW_7_0_0_pre8/RelValSingleMuPt100/GEN-SIM/START70_V2_RR-v7/00000/B464EA42-2B59-E311-A2C1-0025905964C2.root',
-# '/store/relval/CMSSW_7_0_0_pre10/RelValSingleMuPt100/GEN-SIM-RECO/START70_V3-v1/00000/908DD48F-1466-E311-BEBE-0025905A48F0.root',
-# '/store/relval/CMSSW_7_0_0_pre10/RelValSingleMuPt100/GEN-SIM-DIGI-RAW-HLTDEBUG/START70_V3-v1/00000/EAA29CCF-8965-E311-A43D-0025905A6084.root',
+ '/store/user/kotlinski/MC/mu_pt100/simhits/simHits1.root'
+
+# mb
+#"/store/relval/CMSSW_10_4_0/RelValMinBias_13/GEN-SIM/103X_mc2017_realistic_v2-v1/20000/F0FF4DFA-613B-4749-BBC3-FB29AD691FA5.root"
+#"/store/relval/CMSSW_10_4_0/RelValMinBias_13/GEN-SIM/103X_upgrade2018_design_v4-v1/20000/C9CE0381-F732-4A4F-A263-D445DF99148C.root"
+#"/store/relval/CMSSW_10_4_0/RelValMinBias_13/GEN-SIM/103X_upgrade2018_realistic_v8-v1/20000/E0E79FD8-5A76-6145-9816-B7BBC5E79AB1.root" 
+
+#"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_upgrade2018_design_v4-v1/20000/193FB1CE-333D-E540-995E-1BA38BA1CE3C.root"
+
+#"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_upgrade2018_realistic_v8-v1/20000/0D388168-67C8-A544-8A75-8A96D40C396B.root"
+
+#"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_mc2017_realistic_v2-v1/20000/222AF93E-CE66-6342-A266-E78F6FCDD8EC.root"
+
+
   )
 )
+
+# allow for events to have the same event number 
+process.source.duplicateCheckMode=cms.untracked.string("noDuplicateCheck")
+
 
 process.MessageLogger = cms.Service("MessageLogger",
     debugModules = cms.untracked.vstring('pixRecHitsValid'),
@@ -239,11 +121,11 @@ if useLocalDB :
 process.g4SimHits.Generator.HepMCProductLabel = 'source'
 
 # for direct digis
-process.siPixelClustersPreSplitting.src = 'simSiPixelDigis' # for V5, direct
+#process.siPixelClustersPreSplitting.src = 'simSiPixelDigis' # for V5, direct
 # process.siPixelClusters.src = 'mix'
 # modify digitizer parameters
 #process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix = 3500.0 
-process.simSiPixelDigis.digitizers.pixel.AddPixelInefficiencyFromPython = cms.bool(False)
+#process.simSiPixelDigis.digitizers.pixel.AddPixelInefficiencyFromPython = cms.bool(False)
 # use inefficiency from DB Gain calibration payload?
 #process.simSiPixelDigis.digitizers.pixel.useDB = cms.bool(False) 
 # use LA from file 
@@ -251,26 +133,160 @@ process.simSiPixelDigis.digitizers.pixel.AddPixelInefficiencyFromPython = cms.bo
 #process.simSiPixelDigis.digitizers.pixel.TanLorentzAnglePerTesla_BPix = 0.106 
 #process.simSiPixelDigis.digitizers.pixel.TanLorentzAnglePerTesla=FPix = 0.106 
 
+# Additional output definition
+# modify digitizer parameters
+#process.mix.digitizers.pixel.TofUpperCut = 9999.5  # 12.5
+#process.mix.digitizers.pixel.TofLowerCut =-9999.5  # -12.5
+#process.mix.digitizers.pixel.ThresholdInElectrons_FPix    = cms.double(1500.0)
+#process.mix.digitizers.pixel.ThresholdInElectrons_BPix    = cms.double(1500.0)
+#process.mix.digitizers.pixel.ThresholdInElectrons_BPix_L1 = cms.double(1500.0)
+#process.mix.digitizers.pixel.ThresholdInElectrons_BPix_L2 = cms.double(1500.0)
+#process.mix.digitizers.pixel.ThresholdSmearing_FPix    = cms.double(1.0)
+#process.mix.digitizers.pixel.ThresholdSmearing_BPix    = cms.double(1.0)
+#process.mix.digitizers.pixel.ThresholdSmearing_BPix_L1 = cms.double(1.0)
+#process.mix.digitizers.pixel.ThresholdSmearing_BPix_L2 = cms.double(1.0)
+
+
+
 # to run rechit "official" validation
 #process.load("Validation.TrackerRecHits.trackerRecHitsValidation_cff")
 #process.load("Validation.TrackerRecHits.SiPixelRecHitsValid_cfi")
 
 # my rec-sim hit compare 
-process.load("DPGAnalysis-SiPixelTools.PixelHitAssociator.SiPixelRecHitsValid_cff")
+#process.load("DPGAnalysis-SiPixelTools.PixelHitAssociator.SiPixelRecHitsValid_cff")
+process.load("DPGAnalysis-SiPixelTools.PixelHitAssociator.StudyRecHitResolution_cff")
 
-#process.pixRecHitsValid.outputFile="pixelrechitshisto.root"
-#process.pixRecHitsValid.verbose=True
+# not on track 
+process.pixRecHitsValid.outputFile="pixelrechits.root"
+process.pixRecHitsValid.verbose=False
+process.pixRecHitsValid.muOnly=False
+process.pixRecHitsValid.ptCut=1.
 process.pixRecHitsValid.src="siPixelRecHitsPreSplitting"
+#process.pixRecHitsValid.src="siPixelRecHits"
 #process.pixRecHitsValid.associatePixel = True
 #process.pixRecHitsValid.associateStrip = False
 #process.pixRecHitsValid.associateRecoTracks = False
 
-#This process is to run the digitizer:
-#process.p1 = cms.Path(process.simSiPixelDigis*process.pixeltrackerlocalreco)
-process.p1 = cms.Path(process.simSiPixelDigis*process.pixeltrackerlocalreco*process.pixRecHitsValid)
+# on track 
+#process.pixRecHitsValid.useTracks = True
+process.pixRecHitsValid.useTracks = False
+process.pixRecHitsValid.tracks = 'TrackRefitter'
 
-# for RelVal GEN-SIM-DIGI-RAW-HLTDEBUG
-#process.p1 = cms.Path(process.pixeltrackerlocalreco*process.pixRecHitsValid)
+process.TrackRefitter.src = "generalTracks"
+#process.TrackRefitter.TTRHBuilder = 'WithAngleAndTemplate'
+process.TrackRefitter.TTRHBuilder = 'WithTrackAngle'
+
+
+process.d = cms.EDAnalyzer("PixClusterAna",
+    Verbosity = cms.untracked.bool(False),
+    phase1 = cms.untracked.bool(True),
+    #src = cms.InputTag("siPixelClustersForLumi"),   # from the lumi stream
+    src = cms.InputTag("siPixelClusters"),
+    #src = cms.InputTag("siPixelClustersPreSplitting"),
+    #src = cms.InputTag("ALCARECOTkAlMinBias"), # ALCARECO
+    Tracks = cms.InputTag("generalTracks"),
+    # additional selections, e.g. select bx=1 -> (2,1)
+    Select1 = cms.untracked.int32(9998),  # select the cut type, 0 no cut
+    Select2 = cms.untracked.int32(0),  # select the cut value   
+)
+
+process.c = cms.EDAnalyzer("PixClustersWithTracks",
+    Verbosity = cms.untracked.bool(False),
+    phase1 = cms.untracked.bool(True),
+    src = cms.InputTag("generalTracks"),
+# for cosmics 
+#    src = cms.InputTag("ctfWithMaterialTracksP5"),
+#     PrimaryVertexLabel = cms.untracked.InputTag("offlinePrimaryVertices"),
+#     trajectoryInput = cms.string("TrackRefitterP5")
+#     trajectoryInput = cms.string('cosmictrackfinderP5')
+# additional selections
+    Select1 = cms.untracked.int32(9998),  # select the cut type, o no cut
+    Select2 = cms.untracked.int32(0),  # select the cut value   
+)
+
+
+process.a0 = cms.EDAnalyzer("PixDigisTest",
+    Verbosity = cms.untracked.bool(False),
+    phase1 = cms.untracked.bool(True),
+# after the digitizer 
+    src = cms.InputTag("mix"),
+# after raw
+#    src = cms.InputTag("siPixelDigis"),
+)
+
+process.a = cms.EDAnalyzer("PixDigisTest",
+    Verbosity = cms.untracked.bool(False),
+    phase1 = cms.untracked.bool(True),
+# after the digitizer 
+#    src = cms.InputTag("mix"),
+# after raw
+    src = cms.InputTag("siPixelDigis"),
+)
+
+
+# use the test from SiTracker
+process.b =  cms.EDAnalyzer("PixSimHitsTest",
+                                   src = cms.string("g4SimHits"),
+        mode = cms.untracked.string("bpix"),
+        list = cms.string("TrackerHitsPixelBarrelLowTof"),
+        #list = cms.string("TrackerHitsPixelBarrelHighTof"),
+#        mode = cms.untracked.string("fpix"),
+                                   #list = cms.string("TrackerHitsPixelEndcapLowTof"),
+                                   #list = cms.string("TrackerHitsPixelEndcapHighTof"),
+        Verbosity = cms.untracked.bool(False),
+        phase1 = cms.untracked.bool(True),
+)
+# use the test from SiTracker
+process.bf =  cms.EDAnalyzer("PixSimHitsTest",
+                             src = cms.string("g4SimHits"),
+                             #mode = cms.untracked.string("bpix"),
+                             #list = cms.string("TrackerHitsPixelBarrelLowTof"),
+                             #list = cms.string("TrackerHitsPixelBarrelHighTof"),
+                             mode = cms.untracked.string("fpix"),
+                             list = cms.string("TrackerHitsPixelEndcapLowTof"),
+                             #list = cms.string("TrackerHitsPixelEndcapHighTof"),
+                             Verbosity = cms.untracked.bool(False),
+                             phase1 = cms.untracked.bool(True),
+)
+
+
+process.r = cms.EDAnalyzer("SiPixelRawDump", 
+    Timing = cms.untracked.bool(False),
+    IncludeErrors = cms.untracked.bool(True),
+#   In 2015 data, label = rawDataCollector, extension = _LHC                                
+    InputLabel = cms.untracked.string('rawDataCollector'),
+# for MC
+#    InputLabel = cms.untracked.string('siPixelRawData'),
+#   For PixelLumi stream                           
+#    InputLabel = cms.untracked.string('hltFEDSelectorLumiPixels'),
+# for dump files 
+#    InputLabel = cms.untracked.string('source'),
+# old
+#    InputLabel = cms.untracked.string('siPixelRawData'),
+#    InputLabel = cms.untracked.string('source'),
+#    InputLabel = cms.untracked.string("ALCARECOTkAlMinBias"), # does not work
+    CheckPixelOrder = cms.untracked.bool(False),
+# 0 - nothing, 1 - error , 2- data, 3-headers, 4-hex
+    Verbosity = cms.untracked.int32(0),
+# threshold, print fed/channel num of errors if tot_errors > events * PrintThreshold, default 0,001 
+    PrintThreshold = cms.untracked.double(0.001)
+)
+
+
+
+process.TFileService = cms.Service("TFileService",
+    fileName = cms.string('simtorec.root')
+)
+
+
+# go through raw
+#process.p1 = cms.Path(process.pdigi_valid*process.SimL1Emulator*process.DigiToRaw*process.RawToDigi*process.reconstruction*process.TrackRefitter*process.pixRecHitsValid)
+process.p1 = cms.Path(process.b*process.bf*process.pdigi_valid*process.a0*process.SimL1Emulator*process.DigiToRaw*process.RawToDigi*process.a*process.reconstruction*process.TrackRefitter*process.d*process.c*process.pixRecHitsValid)
+#process.p1 = cms.Path(process.pdigi_valid*process.a)
+
+# go directly - fails for muons 
+#process.p1 = cms.Path(process.pdigi_valid*process.SimL1Emulator*process.reconstruction*process.TrackRefitter*process.pixRecHitsValid)
+
 
 #process.outpath = cms.EndPath(process.o1)
 

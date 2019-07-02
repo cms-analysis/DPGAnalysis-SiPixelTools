@@ -104,7 +104,7 @@ void SiPixelGenErrorDBLoader::analyze(const edm::Event& iEvent, const edm::Event
     } else {
       edm::LogInfo("DetUnit Info")<<" There are "<<pDD->detUnits().size()<<" detectors";
     }
-    for(TrackerGeometry::DetUnitContainer::const_iterator it = pDD->detUnits().begin(); it != pDD->detUnits().end(); it++) {
+    for(auto it = pDD->detUnits().begin(); it != pDD->detUnits().end(); it++) {
       
       if( dynamic_cast<PixelGeomDetUnit const*>((*it))!=0){
 	DetId detid=(*it)->geographicalId();

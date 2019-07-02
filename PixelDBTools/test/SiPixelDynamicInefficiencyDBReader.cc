@@ -12,6 +12,7 @@
 #include "DataFormats/SiPixelDetId/interface/PixelBarrelName.h"
 #include "DataFormats/SiPixelDetId/interface/PixelEndcapName.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 
@@ -259,7 +260,7 @@ void SiPixelDynamicInefficiencyDBReader::analyze( const edm::Event& e, const edm
   std::vector<int> pu_match(nBarrelLayers_+nForwardDisks_, 0);
   
   // Matching Geometry
-  for(TrackerGeometry::DetUnitContainer::const_iterator it = pDD->detUnits().begin(); it != pDD->detUnits().end(); it++) {
+  for(auto it = pDD->detUnits().begin(); it != pDD->detUnits().end(); it++) {
     if( dynamic_cast<PixelGeomDetUnit const*>((*it))==0) continue;
 
     // Geometry variables

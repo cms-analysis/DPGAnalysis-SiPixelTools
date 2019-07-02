@@ -172,8 +172,8 @@ void PixSimHitsTest::beginJob() {
    hdetunit = fs->make<TH1F>( "hdetunit", "Det unit", 1000,
                               302000000.,302300000.);
     hpabs = fs->make<TH1F>( "hpabs", "Pabs", 100, 0., 110.);
-    htof = fs->make<TH1F>( "htof", "TOF", 50, -25., 25.);
-    hpid = fs->make<TH1F>( "hpid", "PID", 1000, 0., 1000.);
+    htof = fs->make<TH1F>( "htof", "TOF", 400, -50., 150.);
+    hpid = fs->make<TH1F>( "hpid", "PID", 6000, 0., 6000.);
     htid = fs->make<TH1F>( "htid", "Track id", 100, 0., 100.);
  
     hpixid = fs->make<TH1F>( "hpixid", "Pix det id", 10, 0., 10.);
@@ -434,7 +434,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
        
      } else if(mode_ == "bpix") { // Barrel 
 
-       // Barell layer = 1,2,3
+       // Barell layer = 1,2,3, 4
        layerC=tTopo->pxbLayer(detid);
        // Barrel ladder id 1-20,32,44.
        ladderC=tTopo->pxbLadder(detid);
@@ -513,8 +513,8 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
        if(pt>0.1)       cout<<" simhit: ";
        else if(pid==11) cout<<" delta: ";
        else             cout<<" low pt (sec?): ";
-       cout<<" id "<<pid<<" "<<tid<<" proc "<<procType<<" tof "<<tof<<" de "
-	   <<eloss<<" pt "<<pt<<" entry "<<x<<"/"<<y<<"/"<<z<<" lenz "<<dz<<" "
+       cout<<" id "<<pid<<" trackid  "<<tid<<" proc "<<procType<<" tof "<<tof<<" de "
+	   <<eloss<<" pt "<<pt<<" entry "<<x<<"/"<<y<<"/"<<z<<" lenz "<<(z-z2)<<" "
 	   <<moduleDirectionUp<<endl;
      }
      if(DEBUG) {

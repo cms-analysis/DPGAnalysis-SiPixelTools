@@ -61,8 +61,8 @@ if useLocalDB :
     toGet = cms.VPSet(
       cms.PSet(
 #       record = cms.string('SiPixelGainCalibrationForHLTRcd'),
-#       record = cms.string('SiPixelGainCalibrationOfflineRcd'),
-       record = cms.string('SiPixelGainCalibrationOfflineSimRcd'),  
+       record = cms.string('SiPixelGainCalibrationOfflineRcd'),
+#       record = cms.string('SiPixelGainCalibrationOfflineSimRcd'),  
 #       record = cms.string('SiPixelGainCalibrationForHLTSimRcd'),  
 #
 #       tag = cms.string('SiPixelGainCalibration_r203368_offline')
@@ -71,7 +71,7 @@ if useLocalDB :
 #       Phase1-MC
 #       tag = cms.string('SiPixelGainCalibration_phase1_mc_v1')
 #       tag = cms.string('SiPixelGainCalibration_phase1_ideal')
-       tag = cms.string('SiPixelGainCalibrationSim_phase1_ideal')
+#       tag = cms.string('SiPixelGainCalibrationSim_phase1_ideal')
 #       tag = cms.string('SiPixelGainCalibration_hlt_phase1_mc_v1')
 #       tag = cms.string('SiPixelGainCalibration_hlt_phase1_ideal')
 #       tag = cms.string('SiPixelGainCalibrationSim_hlt_phase1_ideal')

@@ -39,6 +39,19 @@ opt.register('useTemplateReco',
              opts.VarParsing.varType.bool,
              'Set if you want to use Template (True) or Generic Reco (False)')
 
+opt.register('LAoffset',
+             0.0,
+             opts.VarParsing.multiplicity.singleton,
+             opts.VarParsing.varType.float,
+             'Set Lorentz Angel offset (if zero, taken from DB)')
+
+opt.register('LAwidth',
+             0.0,
+             opts.VarParsing.multiplicity.singleton,
+             opts.VarParsing.varType.float,
+             'Set Lorentz Angel width (if zero, taken from DB)')
+
+
 ### Events to process: 'maxEvents' is already registered by the framework
 opt.setDefault('maxEvents', -1)
 
@@ -57,9 +70,9 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condD
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 # tags for 74X
 #process.GlobalTag.globaltag = 'FT_R_74_V15B' # for 251643
-process.GlobalTag = GlobalTag(process.GlobalTag, opt.GlobalTag, '') # Read from commandLine 
-#process.GlobalTag.globaltag = '76X_dataRun2_v15' # 
-#process.GlobalTag.globaltag = '74X_dataRun2_Prompt_v2' # 
+process.GlobalTag = GlobalTag(process.GlobalTag, opt.GlobalTag, '') # Read from commandLine
+#process.GlobalTag.globaltag = '76X_dataRun2_v15' #
+#process.GlobalTag.globaltag = '74X_dataRun2_Prompt_v2' #
 #process.GlobalTag.globaltag = '74X_dataRun2_Prompt_v1' # only for 746
 #process.GlobalTag.globaltag = '74X_dataRun2_Prompt_v0' # for 251643
 #process.GlobalTag.globaltag = '74X_dataRun2_PromptValidation_forPostTS2_v2' # for 251643
@@ -73,7 +86,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, opt.GlobalTag, '') # Read from 
 #process.GlobalTag.globaltag = 'FT_R_53_V21::All'
 # for data in V7
 #process.GlobalTag.globaltag = "GR_R_62_V1::All"
-# for simulations 
+# for simulations
 #process.GlobalTag.globaltag = "MC_70_V1::All"
 #process.GlobalTag.globaltag = "START70_V1::All"
 #process.GlobalTag.globaltag = "MC_71_V1::All"
@@ -143,22 +156,11 @@ myfilelist.extend([
 ])
 
 process.source = cms.Source("PoolSource",
-# fileNames =  myfilelist
 	fileNames = cms.untracked.vstring(
-#"file:/afs/cern.ch/work/c/cgalloni/PXL_GIT/CMSSW_9_0_0_pre4/src/DPGAnalysis-SiPixelTools/PixelHitAssociator/GENSIMRECO_MuPt10_TemplateReco_100.root",
-"/store/mc/PhaseIFall16DR/DYToMuMu_M-20_13TeV_pythia8/GEN-SIM-RECO/FlatPU20to50RECO_81X_upgrade2017_realistic_v26-v1/110000/FC2572D7-9EEE-E611-8C4D-0CC47A7EEE0E.root",
-"/store/mc/PhaseIFall16DR/DYToMuMu_M-20_13TeV_pythia8/GEN-SIM-RECO/FlatPU20to50RECO_81X_upgrade2017_realistic_v26-v1/110000/FC55DA16-B3EE-E611-8108-6CC2173BC0A0.root",
-"/store/mc/PhaseIFall16DR/DYToMuMu_M-20_13TeV_pythia8/GEN-SIM-RECO/FlatPU20to50RECO_81X_upgrade2017_realistic_v26-v1/110000/FC88E26C-3EF0-E611-8EB3-0CC47AD98C8A.root",
-"/store/mc/PhaseIFall16DR/DYToMuMu_M-20_13TeV_pythia8/GEN-SIM-RECO/FlatPU20to50RECO_81X_upgrade2017_realistic_v26-v1/110000/FCE0054E-C0EE-E611-9D68-1418776420DF.root",
-"/store/mc/PhaseIFall16DR/DYToMuMu_M-20_13TeV_pythia8/GEN-SIM-RECO/FlatPU20to50RECO_81X_upgrade2017_realistic_v26-v1/110000/FEAEA56F-98EE-E611-A78C-0CC47A706FF4.root",
-"/store/mc/PhaseIFall16DR/DYToMuMu_M-20_13TeV_pythia8/GEN-SIM-RECO/FlatPU20to50RECO_81X_upgrade2017_realistic_v26-v1/110000/FEC5CDAA-CDEE-E611-896C-002590E7D7DE.root",
-#"/data/store/express/Run2016H/ExpressPhysics/FEVT/Express-v2/000/282/735/00000/0050618F-5C8E-E611-BD9F-FA163E7C262F.root"
-#"/store/express/Run2016H/ExpressPhysics/FEVT/Express-v2/000/281/663/00000/72B55B7C-FD83-E611-934E-FA163E244B58.root",
-#"/store/data/Run2012D/MinimumBias/RECO/PromptReco-v1/000/208/686/F60495B3-1E41-E211-BB7C-003048D3756A.root",
-# my re-reco 
-#    'file:/afs/cern.ch/work/d/dkotlins/public/data/tracks/r208686_1_0.root',
-# mc
-#    'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu/pt100_73/tracks/tracks1_mc73_13.root'
+"file:/eos/cms/store/relval/CMSSW_9_4_0/RelValSingleMuPt10/GEN-SIM-RECO/94X_mc2017_realistic_v10-v1/10000/1A0C459B-63CA-E711-A9A8-0CC47A4D76AA.root",
+"file:/eos/cms/store/relval/CMSSW_9_4_0/RelValSingleMuPt10/GEN-SIM-RECO/94X_mc2017_realistic_v10-v1/10000/2C1FD59F-63CA-E711-A75D-0CC47A4D7600.root",
+"file:/eos/cms/store/relval/CMSSW_9_4_0/RelValSingleMuPt10/GEN-SIM-RECO/94X_mc2017_realistic_v10-v1/10000/DABB00E3-68CA-E711-BF46-0CC47A4D75F2.root",
+"file:/eos/cms/store/relval/CMSSW_9_4_0/RelValSingleMuPt10/GEN-SIM-RECO/94X_mc2017_realistic_v10-v1/10000/DCA18BE8-68CA-E711-B3ED-0025905A48D8.root",
 	)
 )
 
@@ -206,7 +208,7 @@ if opt.useLocalDBLA:
 
 
 # options can now be set using comamnd Line, see beginning for defaults
-if opt.useLocalDBGenErr:	
+if opt.useLocalDBGenErr:
 	process.DBReaderFrontier2 = cms.ESSource("PoolDBESSource",
 		DBParameters = cms.PSet(
 			messageLevel = cms.untracked.int32(0),
@@ -235,7 +237,7 @@ if opt.useLocalDBGenErr:
         process.myprefer2 = cms.ESPrefer("PoolDBESSource","DBReaderFrontier2")
 # endif
 
-# SQ_LITE Templates 
+# SQ_LITE Templates
 # options can now be set using comamnd Line, see beginning for defaults
 if opt.useLocalDBTemplate :
 	process.DBReaderFrontier3 = cms.ESSource("PoolDBESSource",
@@ -265,9 +267,8 @@ if opt.useLocalDBTemplate :
 	) # end process
 	process.myprefer3 = cms.ESPrefer("PoolDBESSource","DBReaderFrontier3")
 # endif
- 
 
-process.Histos = cms.EDAnalyzer('Pxl',#BPix',
+process.Histos = cms.EDAnalyzer('Pxl',#PxlBPix,PxlFPix'
 # for official RECO
 #	triggerSource = cms.InputTag('TriggerResults::HLT'),
 # For MC or my rereco
@@ -280,19 +281,20 @@ else:
     process.Histos.ttrhBuilder = cms.string('WithTrackAngle')
 
 
-# values for LA, if 0 it is taken from DB 
-#process.PixelCPEGenericESProducer.lAOffset = cms.double(0.098)
-#process.PixelCPEGenericESProducer.lAOffset = cms.double(0.09)
-#process.PixelCPEGenericESProducer.lAOffset = cms.double(0.0)
-#process.PixelCPEGenericESProducer.lAWidthBPix = cms.double(0.098)
-#process.PixelCPEGenericESProducer.lAWidthBPix = cms.double(0.0)
-#process.PixelCPEGenericESProducer.lAWidthFPix = cms.double(0.058)
-#process.PixelCPEGenericESProducer.lAWidthFPix = cms.double(0.0)
+# values for LA, if 0 it is taken from DB
+process.PixelCPEGenericESProducer.lAOffset    = cms.double(opt.LAoffset)
+process.PixelCPEGenericESProducer.lAWidthFPix = cms.double(opt.LAwidth)
+# process.PixelCPEGenericESProducer.lAOffset = cms.double(0.09)
+# process.PixelCPEGenericESProducer.lAOffset = cms.double(0.0)
+# process.PixelCPEGenericESProducer.lAWidthBPix = cms.double(0.098)
+# process.PixelCPEGenericESProducer.lAWidthBPix = cms.double(0.0)
+# process.PixelCPEGenericESProducer.lAWidthFPix = cms.double(0.058)
+
 
 #process.PixelCPEGenericESProducer.useLAAlignmentOffsets = cms.bool(True)
 #process.PixelCPEGenericESProducer.useLAWidthFromDB = cms.bool(True)
 
-# use the LA correction from alignment in templates 
+# use the LA correction from alignment in templates
 #process.templates.DoLorentz = cms.bool(True)
 
 process.TFileService = cms.Service('TFileService',

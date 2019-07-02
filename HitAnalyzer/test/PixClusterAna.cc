@@ -1,11 +1,12 @@
 // File: PixClusterAna.cc
-// Description: T0 test the pixel clusters. 
+//eos/cms/store/group/dpg_tracker_pixel/comm_pixel/GainCalibrations/Phase0/ Description: To test pixel clusters. 
 // Author: Danek Kotlinski 
 // Creation Date:  Initial version. 3/06
 // Modify to work with CMSSW354, 11/03/10 d.k.
 // Modify to work with CMSSW620, SLC6, CMSSW700, 10/10/13 d.k.
-// Change to ByToken (clusters only) so other data access does not work for the moment.
-// not yet for 4 layers.
+// Change to ByToken.
+// Make for 4 layers. 1/17 
+// Add Normalise configurable. 1/18
 //--------------------------------------------
 #include <memory>
 #include <string>
@@ -35,13 +36,14 @@
 
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 #include "DataFormats/SiPixelDetId/interface/PixelBarrelName.h"
+#include "DataFormats/SiPixelDetId/interface/PixelEndcapName.h"
 
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetType.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "Geometry/CommonDetUnit/interface/GeomDetType.h"
-#include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
+//#include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
 //#include "Geometry/TrackerTopology/interface/RectangularPixelTopology.h"
 #include "Geometry/CommonTopologies/interface/PixelTopology.h"
 
@@ -58,7 +60,6 @@
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 #include "FWCore/Common/interface/TriggerNames.h"
-
 
 // for resyncs 
 #include "DataFormats/Scalers/interface/Level1TriggerScalers.h"
@@ -86,64 +87,44 @@
 #include <TH2F.h>
 #include <TH1F.h>
 #include <TProfile.h>
+#include <TProfile2D.h>
+#include <TVector3.h>
 
-#define NEW_ID
-#ifdef NEW_ID
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 #include "Geometry/Records/interface/IdealGeometryRecord.h"
-#else 
-#include "DataFormats/SiPixelDetId/interface/PXBDetId.h" 
-#include "DataFormats/SiPixelDetId/interface/PXFDetId.h" 
-#endif 
 
 using namespace std;
 
 #define HISTOS
 //#define L1
-#define HLT
+//#define HLT
 #define PV
+#define BX_TESTS
+//#define STUDY_LAY1
+//#define SINGLE_MODULES
+//#define PHI_PROFILES
+//#define TEST_GEOM
+//#define TEST_DCOLS
+
 //#define HI
 //#define ROC_EFF
 //#define Lumi
 //#define USE_RESYNCS  // get theinfo about recyncs 
 
 // special hitos with parameters normalized to intlumi (usually disabled)
-//#define INSTLUMI_STUDIES
+#define LS_TESTS
 //#define VDM_STUDIES
-
-#define BX
 //#define BX_NEW
-
 //#define HF
 
-#define NEW_MODULES 
+//#define TESTING_ADC
+//#define LAY1_SPLIT
+#define ROC_RATE
+//#define STUDY_ONEMOD
 
 #ifdef HF
 #include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
 #endif // HF
-
-#ifdef NEW_MODULES
-namespace {
-  const unsigned int bpi1[9] = {
-    302056472, 302056476, 302056212, 302055700, 302055708, 302060308, 302060312,
-    302059800, 302059548
-  }; 
-  const unsigned int bpi2[18] = {
-    302123040, 302122772, 302122776, 302122516, 302122264, 302122272,
-    302122008, 302121752, 302121496, 302121240, 302121244, 302128920,
-    302128924, 302129176, 302129180, 302129184, 302128404, 302128408
-  }; 
-  const unsigned int bpi3[14] = {
-    302189088, 302188820, 302188832, 302188052, 302187552, 302197784,
-    302197532, 302197536, 302197016, 302196244, 302195232, 302188824,
-    302186772, 302186784
-  }; 
-  const unsigned int bmi2[1] = {302121992};
-  const unsigned int bmi3[6] = {
-    302188552, 302187280, 302186768, 302186764, 302186756, 302197516
-  };
-}
-#endif
 
 
 //=======================================================================
@@ -172,80 +153,11 @@ int getBX::find(int bx) {
 
   const int limit=3394;
 
-  // For the 48-35 fill used for VdM
-//   const int coll_num = 35;
-//   const int coll[35] = {
-//        1,41,81,121,161,201,241,721,761,801,841,881,921,961,1581,1621,1661,1701,1741,1781,1821,2161,2201,2241,2281,
-//        2321,2361,2401,2881,2921,2961,3001,3041,3081,3121
-//   };
-//   const int beam1_num=13;
-//   const int beam1[13] = {
-//     301,341,381,541,581,621,661,1335,1375,1415,1455,1495,1535
-//   };
-//   const int beam2_num=13;
-//   const int beam2[13] = {
-//     441,481,521,561,601,641,1192,1232,1272,2001,2041,2081,2121
-//   };
-
-
   // For the usuall 1375-1368 50ns fill
   const int coll_num = 1368;
   const int coll[1368] = {
- 66,68,70,72,74,76,78,80,82,84,86,88,90,92,94,96,98,100,102,104,106,108,110,112,114,
- 116,118,120,122,124,126,128,130,132,134,136,146,148,150,152,154,156,158,160,162,164,166,168,170,172,
- 174,176,178,180,182,184,186,188,190,192,194,196,198,200,202,204,206,208,210,212,214,216,226,228,230,
- 232,234,236,238,240,242,244,246,248,250,252,254,256,258,260,262,264,266,268,270,272,274,276,278,280,
- 282,284,286,288,290,292,294,296,306,308,310,312,314,316,318,320,322,324,326,328,330,332,334,336,338,
- 340,342,344,346,348,350,352,354,356,358,360,362,364,366,368,370,372,374,376,413,415,417,419,421,423,
- 425,427,429,431,433,435,437,439,441,443,445,447,449,451,453,455,457,459,461,463,465,467,469,471,473,
- 475,477,479,481,483,493,495,497,499,501,503,505,507,509,511,513,515,517,519,521,523,525,527,529,531,
- 533,535,537,539,541,543,545,547,549,551,553,555,557,559,561,563,573,575,577,579,581,583,585,587,589,
- 591,593,595,597,599,601,603,605,607,609,611,613,615,617,619,621,623,625,627,629,631,633,635,637,639,
- 641,643,653,655,657,659,661,663,665,667,669,671,673,675,677,679,681,683,685,687,689,691,693,695,697,
- 699,701,703,705,707,709,711,713,715,717,719,721,723,773,775,777,779,781,783,785,787,789,791,793,795,
- 797,799,801,803,805,807,809,811,813,815,817,819,821,823,825,827,829,831,833,835,837,839,841,843,853,
- 855,857,859,861,863,865,867,869,871,873,875,877,879,881,883,885,887,889,891,893,895,897,899,901,903,
- 905,907,909,911,913,915,917,919,921,923,960,962,964,966,968,970,972,974,976,978,980,982,984,986,988,
- 990,992,994,996,998,1000,1002,1004,1006,1008,1010,1012,1014,1016,1018,1020,1022,1024,1026,1028,1030,1040,1042,1044,1046,
- 1048,1050,1052,1054,1056,1058,1060,1062,1064,1066,1068,1070,1072,1074,1076,1078,1080,1082,1084,1086,1088,1090,1092,1094,1096,
- 1098,1100,1102,1104,1106,1108,1110,1120,1122,1124,1126,1128,1130,1132,1134,1136,1138,1140,1142,1144,1146,1148,1150,1152,1154,
- 1156,1158,1160,1162,1164,1166,1168,1170,1172,1174,1176,1178,1180,1182,1184,1186,1188,1190,1200,1202,1204,1206,1208,1210,1212,
- 1214,1216,1218,1220,1222,1224,1226,1228,1230,1232,1234,1236,1238,1240,1242,1244,1246,1248,1250,1252,1254,1256,1258,1260,1262,
- 1264,1266,1268,1270,1307,1309,1311,1313,1315,1317,1319,1321,1323,1325,1327,1329,1331,1333,1335,1337,1339,1341,1343,1345,1347,
- 1349,1351,1353,1355,1357,1359,1361,1363,1365,1367,1369,1371,1373,1375,1377,1387,1389,1391,1393,1395,1397,1399,1401,1403,1405,
- 1407,1409,1411,1413,1415,1417,1419,1421,1423,1425,1427,1429,1431,1433,1435,1437,1439,1441,1443,1445,1447,1449,1451,1453,1455,
- 1457,1467,1469,1471,1473,1475,1477,1479,1481,1483,1485,1487,1489,1491,1493,1495,1497,1499,1501,1503,1505,1507,1509,1511,1513,
- 1515,1517,1519,1521,1523,1525,1527,1529,1531,1533,1535,1537,1547,1549,1551,1553,1555,1557,1559,1561,1563,1565,1567,1569,1571,
- 1573,1575,1577,1579,1581,1583,1585,1587,1589,1591,1593,1595,1597,1599,1601,1603,1605,1607,1609,1611,1613,1615,1617,1667,1669,
- 1671,1673,1675,1677,1679,1681,1683,1685,1687,1689,1691,1693,1695,1697,1699,1701,1703,1705,1707,1709,1711,1713,1715,1717,1719,
- 1721,1723,1725,1727,1729,1731,1733,1735,1737,1747,1749,1751,1753,1755,1757,1759,1761,1763,1765,1767,1769,1771,1773,1775,1777,
- 1779,1781,1783,1785,1787,1789,1791,1793,1795,1797,1799,1801,1803,1805,1807,1809,1811,1813,1815,1817,1854,1856,1858,1860,1862,
- 1864,1866,1868,1870,1872,1874,1876,1878,1880,1882,1884,1886,1888,1890,1892,1894,1896,1898,1900,1902,1904,1906,1908,1910,1912,
- 1914,1916,1918,1920,1922,1924,1934,1936,1938,1940,1942,1944,1946,1948,1950,1952,1954,1956,1958,1960,1962,1964,1966,1968,1970,
- 1972,1974,1976,1978,1980,1982,1984,1986,1988,1990,1992,1994,1996,1998,2000,2002,2004,2014,2016,2018,2020,2022,2024,2026,2028,
- 2030,2032,2034,2036,2038,2040,2042,2044,2046,2048,2050,2052,2054,2056,2058,2060,2062,2064,2066,2068,2070,2072,2074,2076,2078,
- 2080,2082,2084,2094,2096,2098,2100,2102,2104,2106,2108,2110,2112,2114,2116,2118,2120,2122,2124,2126,2128,2130,2132,2134,2136,
- 2138,2140,2142,2144,2146,2148,2150,2152,2154,2156,2158,2160,2162,2164,2201,2203,2205,2207,2209,2211,2213,2215,2217,2219,2221,
- 2223,2225,2227,2229,2231,2233,2235,2237,2239,2241,2243,2245,2247,2249,2251,2253,2255,2257,2259,2261,2263,2265,2267,2269,2271,
- 2281,2283,2285,2287,2289,2291,2293,2295,2297,2299,2301,2303,2305,2307,2309,2311,2313,2315,2317,2319,2321,2323,2325,2327,2329,
- 2331,2333,2335,2337,2339,2341,2343,2345,2347,2349,2351,2361,2363,2365,2367,2369,2371,2373,2375,2377,2379,2381,2383,2385,2387,
- 2389,2391,2393,2395,2397,2399,2401,2403,2405,2407,2409,2411,2413,2415,2417,2419,2421,2423,2425,2427,2429,2431,2441,2443,2445,
- 2447,2449,2451,2453,2455,2457,2459,2461,2463,2465,2467,2469,2471,2473,2475,2477,2479,2481,2483,2485,2487,2489,2491,2493,2495,
- 2497,2499,2501,2503,2505,2507,2509,2511,2549,2551,2553,2555,2557,2559,2561,2563,2565,2567,2569,2571,2573,2575,2577,2579,2581,
- 2583,2585,2587,2589,2591,2593,2595,2597,2599,2601,2603,2605,2607,2609,2611,2613,2615,2617,2619,2629,2631,2633,2635,2637,2639,
- 2641,2643,2645,2647,2649,2651,2653,2655,2657,2659,2661,2663,2665,2667,2669,2671,2673,2675,2677,2679,2681,2683,2685,2687,2689,
- 2691,2693,2695,2697,2699,2736,2738,2740,2742,2744,2746,2748,2750,2752,2754,2756,2758,2760,2762,2764,2766,2768,2770,2772,2774,
- 2776,2778,2780,2782,2784,2786,2788,2790,2792,2794,2796,2798,2800,2802,2804,2806,2816,2818,2820,2822,2824,2826,2828,2830,2832,
- 2834,2836,2838,2840,2842,2844,2846,2848,2850,2852,2854,2856,2858,2860,2862,2864,2866,2868,2870,2872,2874,2876,2878,2880,2882,
- 2884,2886,2896,2898,2900,2902,2904,2906,2908,2910,2912,2914,2916,2918,2920,2922,2924,2926,2928,2930,2932,2934,2936,2938,2940,
- 2942,2944,2946,2948,2950,2952,2954,2956,2958,2960,2962,2964,2966,2976,2978,2980,2982,2984,2986,2988,2990,2992,2994,2996,2998,
- 3000,3002,3004,3006,3008,3010,3012,3014,3016,3018,3020,3022,3024,3026,3028,3030,3032,3034,3036,3038,3040,3042,3044,3046,3083,
- 3085,3087,3089,3091,3093,3095,3097,3099,3101,3103,3105,3107,3109,3111,3113,3115,3117,3119,3121,3123,3125,3127,3129,3131,3133,
- 3135,3137,3139,3141,3143,3145,3147,3149,3151,3153,3163,3165,3167,3169,3171,3173,3175,3177,3179,3181,3183,3185,3187,3189,3191,
- 3193,3195,3197,3199,3201,3203,3205,3207,3209,3211,3213,3215,3217,3219,3221,3223,3225,3227,3229,3231,3233,3243,3245,3247,3249,
- 3251,3253,3255,3257,3259,3261,3263,3265,3267,3269,3271,3273,3275,3277,3279,3281,3283,3285,3287,3289,3291,3293,3295,3297,3299,
- 3301,3303,3305,3307,3309,3311,3313,3323,3325,3327,3329,3331,3333,3335,3337,3339,3341,3343,3345,3347,3349,3351,3353,3355,3357,
- 3359,3361,3363,3365,3367,3369,3371,3373,3375,3377,3379,3381,3383,3385,3387,3389,3391,3393
+ 66,68,70,72,74,76,78,80,82,84,86,88,90,92,94,96,98,100,102,104,106,108,110,112,114
+ //.........................
   };
   const int beam1_num=6;
   const int beam1[6] = {
@@ -282,324 +194,6 @@ int getBX::find(int bx) {
 }
 
 #endif  // BX_NEW
-
-//=======================================================================
-
-#ifdef BX
-class getBX {
-
-public:
-  getBX(void);
-  ~getBX(void);
-  int find(int bx);
-
-private:
-  int limit;
-  int trains;
-  int train_start[40];
-  int train_stop[40];
-  int beam1_start[40];
-  int beam1_stop[40];
-  int beam2_start[40];
-  int beam2_stop[40];
-};
-
-getBX::getBX(void) {
-  int count = 0;
-  limit=4000;
-
-  // trains = 8;
-  // train_start[count]=208;
-  // ++count;
-  // train_start[count]=308;
-  // ++count;
-  // train_start[count]=408;
-  // ++count;
-  // train_start[count]=508;
-  // ++count;
-  // train_start[count]=1993;
-  // ++count;
-  // train_start[count]=2093;
-  // ++count;
-  // train_start[count]=2193;
-  // ++count;
-  // train_start[count]=2293;
-  // ++count;
-
-
-  // limit=1841;
-  // trains = 22;
-  // train 1
-  train_start[count] = 67;
-  train_stop[count]  = 102;
-  beam1_start[count] = 1;
-  beam1_stop[count]  = 12;
-  beam2_start[count] = 16;
-  beam2_stop[count]  = 27;
-
-  // // train 2
-  count++;
-  train_start[count] = 112;
-  // train_stop[count] = 137;
-  // beam1_start[count] = -1;
-  // beam1_stop[count] = -1;
-  // beam2_start[count] = -1;
-  // beam2_stop[count] = -1;
-
-  // // train 3
-  // count++;
-  // train_start[count] = 146;
-  // train_stop[count] = 217;
-  // beam1_start[count] = -1;
-  // beam1_stop[count] = -1;
-  // beam2_start[count] = -1;
-  // beam2_stop[count] = -1;
-
-  // // train 4
-  // count++;
-  // train_start[count] = 226;
-  // train_stop[count] = 297;
-  // beam1_start[count] = -1;
-  // beam1_stop[count] = -1;
-  // beam2_start[count] = -1;
-  // beam2_stop[count] = -1;
-
-  // // train 5
-  // count++;
-  // train_start[count] = 306;
-  // train_stop[count] = 377;
-  // beam1_start[count] = -1;
-  // beam1_stop[count] = -1;
-  // beam2_start[count] = -1;
-  // beam2_stop[count] = -1;
-
-  // // train 6
-  // count++;
-  // train_start[count] = 413;
-  // train_stop[count] = 484;
-  // beam1_start[count] = -1;
-  // beam1_stop[count] = -1;
-  // beam2_start[count] = -1;
-  // beam2_stop[count] = -1;
-
-  // // train 7
-  // count++;
-  // train_start[count] = 493;
-  // train_stop[count] = 564;
-  // beam1_start[count] = -1;
-  // beam1_stop[count] = -1;
-  // beam2_start[count] = -1;
-  // beam2_stop[count] = -1;
-
-  // // train 8
-  // count++;
-  // train_start[count] = 573;
-  // train_stop[count] = 644;
-  // beam1_start[count] = -1;
-  // beam1_stop[count] = -1;
-  // beam2_start[count] = -1;
-  // beam2_stop[count] = -1;
-
-  // // train 9
-  // count++;
-  // train_start[count] = 653;
-  // train_stop[count] = 724;
-  // beam1_start[count] = -1;
-  // beam1_stop[count] = -1;
-  // beam2_start[count] = -1;
-  // beam2_stop[count] = -1;
-
-  // // train 10
-  // count++;
-  // train_start[count] = 773;
-  // train_stop[count] = 844;
-  // beam1_start[count] = -1;
-  // beam1_stop[count] = -1;
-  // beam2_start[count] = -1;
-  // beam2_stop[count] = -1;
-
-
-  // // train 11
-  // count++;
-  // train_start[count] = 853;
-  // train_stop[count] = 924;
-  // beam1_start[count] = -1;
-  // beam1_stop[count] = -1;
-  // beam2_start[count] = -1;
-  // beam2_stop[count] = -1;
-
-  // // train 12
-  // count++;
-  // train_start[count] = 960;
-  // train_stop[count] = 1031;
-  // beam1_start[count] = -1;
-  // beam1_stop[count] = -1;
-  // beam2_start[count] = -1;
-  // beam2_stop[count] = -1;
-
-  // // train 13
-  // count++;
-  // train_start[count] = 1040;
-  // train_stop[count] = 1111;
-  // beam1_start[count] = -1;
-  // beam1_stop[count] = -1;
-  // beam2_start[count] = -1;
-  // beam2_stop[count] = -1;
-
-  // // train 14
-  // count++;
-  // train_start[count] = 1120;
-  // train_stop[count] = 1191;
-  // beam1_start[count] = -1;
-  // beam1_stop[count] = -1;
-  // beam2_start[count] = -1;
-  // beam2_stop[count] = -1;
-
-  // // train 15
-  // count++;
-  // train_start[count] = 1200;
-  // train_stop[count] = 1271;
-  // beam1_start[count] = -1;
-  // beam1_stop[count] = -1;
-  // beam2_start[count] = -1;
-  // beam2_stop[count] = -1;
-
-  // // train 16
-  // count++;
-  // train_start[count] = 1307;
-  // train_stop[count] = 1378;
-  // beam1_start[count] = -1;
-  // beam1_stop[count] = -1;
-  // beam2_start[count] = -1;
-  // beam2_stop[count] = -1;
-
-  // // train 17
-  // count++;
-  // train_start[count] = 1387;
-  // train_stop[count] = 1458;
-  // beam1_start[count] = -1;
-  // beam1_stop[count] = -1;
-  // beam2_start[count] = -1;
-  // beam2_stop[count] = -1;
-
-  // // train 18
-  // count++;
-  // train_start[count] = 1467;
-  // train_stop[count] = 1538;
-  // beam1_start[count] = -1;
-  // beam1_stop[count] = -1;
-  // beam2_start[count] = -1;
-  // beam2_stop[count] = -1;
-
-  // // train 19
-  // count++;
-  // train_start[count] = 1547;
-  // train_stop[count] = 1618;
-  // beam1_start[count] = -1;
-  // beam1_stop[count] = -1;
-  // beam2_start[count] = -1;
-  // beam2_stop[count] = -1;
-
-  // // train 20
-  // count++;
-  // train_start[count] = 1667;
-  // train_stop[count] = 1726;
-  // beam1_start[count] = 1727;
-  // beam1_stop[count] = 1734;
-  // beam2_start[count] = 1655;
-  // beam2_stop[count] = 1666;
-
-  // // train 21
-  // count++;
-  // train_start[count] = 1735;
-  // train_stop[count] = 1738;
-  // beam1_start[count] = -1;
-  // beam1_stop[count] = -1;
-  // beam2_start[count] = -1;
-  // beam2_stop[count] = -1;
-
-  // // train 22
-  // count++;
-  // train_start[count] = 1747;
-  // train_stop[count]  = 1806;
-  // beam1_start[count] = 1807;
-  // beam1_stop[count]  = 1818;
-  // beam2_start[count] = 1739;
-  // beam2_stop[count]  = 1745;
-
-  cout<<" number of trains "<<trains<<" "<<limit<<endl;
-}
-
-getBX::~getBX(void) {
-}
-
-int getBX::find(int bx) {
-  // invalid -1, empty (before collisions) 0. beam1 1, beam2 2, collision 3, collison+1 4, 
-  // orbit gap 5, gap in between 6
- 
-  //if(bx>limit) return (-1);
-
-  // look only at train 1
-  if(bx>111 && bx<3290) return (-1);
-  //cout<<bx<<endl;
-
-  // simple lookup
-  // check beam1
-  if(    bx==train_stop[0]) return (4);  // 1+ collsion
-  else if(bx>=beam1_start[0] && bx<=beam1_stop[0]) return (1); // beam 1
-  else if(bx>=beam2_start[0] && bx<=beam2_stop[0]) return (2); // beam 2
-  else if(bx>=train_start[0] && bx<=train_stop[0]) return (3); // collisions 
-  else if(bx>=3290 && bx<=3528) return (5); // abort gap
-  else if(bx>beam1_stop[0] && bx<beam2_start[1]) return (1); // gap in between 
-  return (0); // initial empty 
-
-
-  // Check collisions
-  // for(int train=0;train<trains;++train) {
-  //   //cout<<bx<<" "<<train<<endl;
-  //   int b=train_start[train];
-  //   //cout<<bx<<" "<<train<<" "<<b<<endl;
-  //   if(bx == b) return (3);  // collision
-  //   else if(bx == (b+1)) return (4); // collision+1
-  // }
-  
-  // // Check collisions
-  // for(int train=0;train<trains;++train) {
-  //   //cout<<bx<<" "<<train<<endl;
-
-  //   for(int b=train_start[train];b<=train_stop[train];b+=2) {
-  //     //cout<<bx<<" "<<train<<" "<<b<<endl;
-  //     if(bx == b) return (3);  // collision
-  //     else if(bx == (b+1)) return (4); // collision+1
-  //   }
-    
-  //   if(beam1_start[train]!= -1) {
-  //     for(int b=beam1_start[train];b<=beam1_stop[train];b+=2) {
-  // 	//cout<<bx<<" "<<train<<" "<<b<<endl;
-  // 	if(bx == b) return (1);  // beam1
-  // 	else if(bx == (b+1)) return (5); // beam1+1
-  //     }
-  //   }
- 
-  //   if(beam2_start[train]!= -1) {
-  //     for(int b=beam2_start[train];b<=beam2_stop[train];b+=2) {
-  // 	//cout<<bx<<" "<<train<<" "<<b<<endl;
-  // 	if(bx == b) return (2);  // beam1
-  // 	else if(bx == (b+1)) return (6); // beam1+1
-  //     }
-  //   }
-
-  // }  // loop trains
- 
-  // //cout<<bx<<endl;
-
-  return 0; // return no collision 
-}
-
-#endif
-//=========================================================================
-
-
 
 //=======================================================================
 
@@ -882,18 +476,30 @@ class PixClusterAna : public edm::EDAnalyzer {
   virtual void beginRun(const edm::EventSetup& iSetup);
   virtual void beginJob();
   virtual void endJob();
+#ifdef TEST_DCOLS
+  void histogramDcols(int layer, int ladder, int ring);
+#endif
   
  private:
   edm::ParameterSet conf_;
   edm::InputTag src_;
   //const static bool PRINT = false;
   bool PRINT;
+  bool Normalise;
   int select1, select2;
   int countEvents, countAllEvents;
   double sumClusters, sumPixels, countLumi;
   //float rocHits[3][10]; // layer, ids, store hits in 30 rocs
   //float moduleHits[3][10]; // layer, ids, store hits in 30 modules
-
+  bool phase1_;
+  int selectLayer, selectLadder, selectModule;
+  bool useTracks;
+#ifdef SINGLE_MODULES
+  bool eventFlag[40];
+#endif
+#ifdef TEST_DCOLS
+  int moduleArray[160][416];
+#endif
   // Needed for the ByToken method
   edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster> > myClus;
   edm::EDGetTokenT<LumiSummary> LumiToken;
@@ -901,124 +507,205 @@ class PixClusterAna : public edm::EDAnalyzer {
   edm::EDGetTokenT<L1GlobalTriggerReadoutRecord> L1TrigReadoutToken;
   edm::EDGetTokenT<edm::TriggerResults> TrigResultsToken;
   edm::EDGetTokenT<reco::VertexCollection> VertexCollectionToken;
+  edm::EDGetTokenT<std::vector<reco::Track>> TrackToken;
 
 #ifdef HF
 edm::EDGetTokenT<HFRecHitCollection> HFHitsToken_;
 #endif //HF
 
   //TFile* hFile;
-  TH1D *hdetunit;
-  TH1D *hpixid,*hpixsubid,
-    *hlayerid,
-    *hladder1id,*hladder2id,*hladder3id,
-    *hz1id,*hz2id,*hz3id;
+  //TH1D *hdetunit;
+  //TH1D *hpixid,*hpixsubid;
+  TH1D *hlayerid;
+  TH1D *hladder1id,*hladder2id,*hladder3id,*hladder4id,
+    *hz1id,*hz2id,*hz3id,*hz4id;
+  TH1D *hpladder1id,*hpladder2id,*hpladder3id,*hpladder4id,
+    *hpz1id,*hpz2id,*hpz3id,*hpz4id;
 
-  TH1D *hcharge1,*hcharge2, *hcharge3, *hcharge4, *hcharge5 ;
-  TH1D *hpixcharge1,*hpixcharge2, *hpixcharge3, *hpixcharge4, *hpixcharge5;
-  TH1D *hpcols1,*hpcols2,*hpcols3,*hprows1,*hprows2,*hprows3;
-  TH1D *hsize1,*hsize2,*hsize3,
-    *hsizex1,*hsizex2,*hsizex3,
-    *hsizey1,*hsizey2,*hsizey3;
+  TH1D *hcols1,*hcols2,*hcols3,*hrows1,*hrows2,*hrows3,*hcols4,*hrows4;
+  TH1D *hpcols1,*hpcols2,*hpcols3,*hprows1,*hprows2,*hprows3,*hpcols4,*hprows4;
 
-#ifdef NEW_MODULES
-  // new modules 
-  TH1D *hcharge11,*hcharge12, *hcharge13; // newmodules 
-  TH1D *hpixcharge11,*hpixcharge12, *hpixcharge13; // newmodules 
-  TH1D *hsize11,*hsize12,*hsize13,
-    *hsizex11,*hsizex12,*hsizex13,
-    *hsizey11,*hsizey12,*hsizey13;
-#endif
+  TH1D *hcharge1,*hcharge2, *hcharge3, *hcharge4, 
+    *hcharge5,*hcharge6,*hcharge7,*hcharge8 ;
+  TH1D *hpixcharge1,*hpixcharge2, *hpixcharge3, *hpixcharge4, 
+    *hpixcharge5,*hpixcharge6,*hpixcharge7,*hpixcharge8;
+  TH1D *hsize1,*hsize2,*hsize3,*hsize4,
+    *hsizex1,*hsizex2,*hsizex3,*hsizex4,
+    *hsizey1,*hsizey2,*hsizey3,*hsizey4;
+  // new L1 modules 
+  TH1D *hcharge1n, *hpixcharge1n, *hsize1n, *hsizex1n, *hsizey1n; 
+  TH1D *hcharge2g, *hcharge2b, *hpixcharge2g,*hpixcharge2b, *hsize2g, *hsize2b;
 
-#if defined(BX) || defined(BX_NEW)
-  TH1D *hchargebx1,*hchargebx2,*hchargebx3,*hchargebx4,*hchargebx5,*hchargebx6;
-  TH1D *hpixChargebx1,*hpixChargebx2,*hpixChargebx3,*hpixChargebx4,*hpixChargebx5,*hpixChargebx6;
-  TH1D *hsizebx1,*hsizebx2,*hsizebx3,*hsizebx4,*hsizebx5,*hsizebx6;
+  TH1D *hcharge11, *hcharge12, *hpixcharge11, *hpixcharge12;
+  TH1D *hcharge1_zoom, *hpixcharge1_zoom;
 
-#endif
+  TH1D *hcols11,*hcols12,*hrows11; 
+  TH1D *hcols21,*hrows21; 
 
-  TH1D *hclusPerDet1,*hclusPerDet2,*hclusPerDet3;
-  TH1D *hpixPerDet1,*hpixPerDet2,*hpixPerDet3;
-  TH1D *hpixPerLink1,*hpixPerLink2,*hpixPerLink3;
-  TH1D *hclusPerLay1,*hclusPerLay2,*hclusPerLay3;
-  TH1D *hpixPerLay1,*hpixPerLay2,*hpixPerLay3;
-  TH1D *hdetsPerLay1,*hdetsPerLay2,*hdetsPerLay3;
+  TH1D *hclusPerDet1,*hclusPerDet2,*hclusPerDet3,*hclusPerDet4;
+  TH1D *hpixPerDet1,*hpixPerDet2,*hpixPerDet3,*hpixPerDet4;
+  //TH1D *hpixPerLink1,*hpixPerLink2,*hpixPerLink3,*hpixPerLink4;
+  TH1D *hclusPerLay1,*hclusPerLay2,*hclusPerLay3,*hclusPerLay4;
+  TH1D *hpixPerLay1,*hpixPerLay2,*hpixPerLay3,*hpixPerLay4;
+  TH1D *hdetsPerLay1,*hdetsPerLay2,*hdetsPerLay3,*hdetsPerLay4;
   TH1D *hclus, *hclusBPix, *hclusFPix, *hdigis, *hdigis2, *hdigisB, *hdigisF;
-  TH1D *hclus2,*hclus5; // *hclus6,*hclus7,*hclus8,*hclus9;
+  TH1D *hclus2; // ,*hclus5; // *hclus6,*hclus7,*hclus8,*hclus9;
   TH1D *hdets, *hdets2;
 
-  TH1D *hpixDiskR1,*hpixDiskR2; // *hdetr, *hdetz;
+  TH1D *hpixDiskR1,*hpixDiskR2,*hpixDiskR3; // *hdetr, *hdetz;
 
-  TH2F *hDetsMap1, *hDetsMap2, *hDetsMap3;    // all modules
-  TH2F *hDetMap1,  *hDetMap2,  *hDetMap3;    // all modules
-  TH2F *hpDetMap1, *hpDetMap2, *hpDetMap3; // all modules
-  TH2F *hl1DetMap1, *hl1DetMap2, *hl1DetMap3; // link 1
-  TH2F *hl2DetMap1, *hl2DetMap2, *hl2DetMap3; // link 2
-  TH2F *hsizeDetMap1, *hsizeDetMap2, *hsizeDetMap3;
-  //TH2F *hpDetMapE1, *hpDetMapE2, *hpDetMapE3; // all modules
-  //TH2F *hsizeXDetMap1, *hsizeXDetMap2, *hsizeXDetMap3;
-  //TH2F *hsizeYDetMap1, *hsizeYDetMap2, *hsizeYDetMap3;
+  TH2F *hDets1, *hDets2, *hDets3,*hDets4;    // all modules
+  TH2F *hcluDets1,  *hcluDets2,  *hcluDets3, *hcluDets4;     // all modules
+  TH2F *hpixDets1, *hpixDets2, *hpixDets3,*hpixDets4;    // all modules
+  TH2F *hsizeDets1, *hsizeDets2, *hsizeDets3, *hsizeDets4;
 
-  TH2F *hpixDetMap1, *hpixDetMap2, *hpixDetMap3;  // in a  modules
-  TH2F *hcluDetMap1, *hcluDetMap2, *hcluDetMap3; // in a  modules 
+  TProfile2D *hchargeDets1, *hchargeDets2, *hchargeDets3, *hchargeDets4;
+  TProfile2D *hpixchargeDets1, *hpixchargeDets2, *hpixchargeDets3, *hpixchargeDets4;
 
-  TH2F *hpixDetMap10, *hpixDetMap20, *hpixDetMap30;
-  TH2F *hpixDetMap11, *hpixDetMap12, *hpixDetMap13, *hpixDetMap14, *hpixDetMap15;
-  TH2F *hpixDetMap21, *hpixDetMap22, *hpixDetMap23, *hpixDetMap24, *hpixDetMap25;
-  TH2F *hpixDetMap31, *hpixDetMap32, *hpixDetMap33, *hpixDetMap34, *hpixDetMap35;
-  TH2F *hpixDetMap16, *hpixDetMap17, *hpixDetMap18, *hpixDetMap19;
-  TH2F *hpixDetMap26, *hpixDetMap27, *hpixDetMap28, *hpixDetMap29;
-  TH2F *hpixDetMap36, *hpixDetMap37, *hpixDetMap38, *hpixDetMap39;
+  TH2F *hpixDetMap1, *hpixDetMap2, *hpixDetMap3, *hpixDetMap4;  //in a  modules
+  TH2F *hcluDetMap1, *hcluDetMap2, *hcluDetMap3, *hcluDetMap4;  //in a  modules 
 
-  //TH2F *h2d1, *h2d2, *h2d3;
+#ifdef TESTING_ADC
+  TH2F *hpixDetsT1, *hpixDetsT2, *hpixDetsT3,*hpixDetsT4;    // all modules
+  TH2F *hpixDetMapT1, *hpixDetMapT2, *hpixDetMapT3, *hpixDetMapT4;  //in a  modules
 
-  TH1D *hevent, *hlumi, *hlumi0, *hlumi1, 
-    *hlumi10, *hlumi11, *hlumi12, *hlumi13, *hlumi14;
-  TH1D *hbx, *hbx0, *hbx1, *hbx2,*hbx3,*hbx4,*hbx5,*hbx6,*hbx7;
+  TProfile2D *hsizeDetT1, *hsizeDetT2, *hsizeDetT3, *hsizeDetT4;
+  TProfile2D *hcluDetT1, *hcluDetT2, *hcluDetT3, *hcluDetT4;     
+  TH1D *hchargeT1, *hsizeT1 , *hchargeT12_1 , *hchargeT12_2; 
+
+  TH1D *hclusPerDetT1, *hpixPerDetT1;
+#endif
+
+  TH1D *hevent, *hlumi, *hlumi0,*hlumi1; //*hlumi10,*hlumi11, *hlumi12, *hlumi13, *hlumi14;
+  TH1D *hbx, *hbx0;
   TH1D *hmaxPixPerDet;
 
-  TH1D *hclusPerDisk1,*hclusPerDisk2,*hclusPerDisk3,*hclusPerDisk4;
-  TH1D *hpixPerDisk1,*hpixPerDisk2,*hpixPerDisk3,*hpixPerDisk4;
-  TH1D *hl1a, *hl1t, *hltt; 
-  TH1D *hl1a1, *hl1t1;
-  TH1D *hlt1, *hlt2, *hlt3;
-
+  TH1D *hclusPerDisk1,*hclusPerDisk2,*hclusPerDisk3,*hclusPerDisk4,
+    *hclusPerDisk5,*hclusPerDisk6;
+  TH1D *hpixPerDisk1,*hpixPerDisk2,*hpixPerDisk3,*hpixPerDisk4,
+    *hpixPerDisk5,*hpixPerDisk6;
+  //
   TH1D *hpixPerDet11,*hpixPerDet12,*hpixPerDet13,*hpixPerDet14;
   TH1D *hpixPerDet21,*hpixPerDet22,*hpixPerDet23,*hpixPerDet24;
   TH1D *hpixPerDet31,*hpixPerDet32,*hpixPerDet33,*hpixPerDet34;
+  TH1D *hpixPerDet41,*hpixPerDet42,*hpixPerDet43,*hpixPerDet44;
 
-  TH1D *hgz1,*hgz2,*hgz3; 
-  TH1D *hintg, *hinst, *hpvs;
+  TH1D *hgz1,*hgz2,*hgz3, *hgz4; 
 
-  TH2F *hrocMap1,*hrocMap2,*hrocMap3; 
+  TH2F *hsizeyz1,*hsizeyz2,*hsizeyz3,*hsizeyz4 ;
+  TH2F *htest1,*htest2,*htest3,*htest4;
+
+  // Profiles 
+  TProfile *hclumult1,  *hclumult2,  *hclumult3,  *hclumult4;
+  TProfile *hclumultx1, *hclumultx2, *hclumultx3, *hclumultx4;
+  TProfile *hclumulty1, *hclumulty2, *hclumulty3, *hclumulty4;
+  TProfile *hcluchar1,  *hcluchar2,  *hcluchar3,  *hcluchar4;
+  TProfile *hpixchar1,  *hpixchar2,  *hpixchar3,  *hpixchar4;
+
+#ifdef PHI_PROFILES
+  TProfile *hclumultxPhi1, *hclumultxPhi2; // , *hclumultx3, *hclumultx4;
+  TProfile *hclumultyPhi1, *hclumultyPhi2; // *hclumulty3, *hclumulty4;
+  TProfile *hclucharPhi1, *hclucharPhi2; //  *hcluchar3,  *hcluchar4;
+  TProfile *hpixcharPhi1, *hpixcharPhi2; //  *hpixchar3,  *hpixchar4;
+#endif
+
+  TProfile *hclusls,  *hpixls;
+
+#ifdef PV
+  TH1D *hpvs, *htracks;
+  TProfile *hpvls, *hclupv, *hpixpv,*hpvbx;
+#endif
+
+  //TProfile *hcharCluls, *hcharPixls, *hsizeCluls, *hsizeXCluls;
+  //TProfile *hpixbx, *hclubx, *hpvbx, *hcharClubx, *hcharPixbx,*hsizeClubx, *hsizeYClubx;
+#ifdef MINMAX
+  TH1D *hcharMin1,*hcharMin2,*hcharMin3,*hcharMin4,*hcharMax1,*hcharMax2,*hcharMax3,*hcharMax4;
+#endif
+
+  TH1D *hpixz1,*hpixz2,*hpixz3,*hpixz4; 
+
+#ifdef TEST_GEOM
+  TH2F *hbpixXY;
+#endif
+
+#ifdef Lumi
+  TH1D *hinst;
+  TProfile *hinstls, *hinstlsbx;
+  TProfile *hinstbx;
+#endif
+		  
+#ifdef L1
+  TH1D *hl1a, *hl1t, *hltt; 
+  TH1D *hl1a1, *hl1t1;
+#endif
+#ifdef HLT
+  TH1D *hlt1, *hlt2, *hlt3;
+#endif
+ 
+#ifdef TEST_DCOLS 		 
+  TProfile *hdcolHitProb1,*hdcolHitProb2,*hdcolHitProb3,*hdcolHitProb4; 
+  TProfile *hdcolHitMult1,*hdcolHitMult2,*hdcolHitMult3,*hdcolHitMult4; 
+  TProfile *hmoduleHitMult1,*hmoduleHitMult2,*hmoduleHitMult3,*hmoduleHitMult4; 
+  TProfile *hrocHitMult1,*hrocHitMult2,*hrocHitMult3,*hrocHitMult4; 
+  TProfile *hdcolHitProbLadder1, *hdcolHitMultLadder1;
+#endif
+
+#if defined(BX) || defined(BX_NEW)
+		  TH1D *hbx1, *hbx2,*hbx3,*hbx4,*hbx5,*hbx6,*hbx7;
+		  TH1D *hchargebx1,*hchargebx2,*hchargebx3,*hchargebx4,*hchargebx5,*hchargebx6;
+  TH1D *hpixChargebx1,*hpixChargebx2,*hpixChargebx3,*hpixChargebx4,*hpixChargebx5,*hpixChargebx6;
+  TH1D *hsizebx1,*hsizebx2,*hsizebx3,*hsizebx4,*hsizebx5,*hsizebx6;
+#endif
+
+#ifdef SINGLE_MODULES
+  TH2F *hpixDetMap10, *hpixDetMap20, *hpixDetMap30, *hpixDetMap40;
+  TH2F *hpixDetMap11, *hpixDetMap12, *hpixDetMap13, *hpixDetMap14, *hpixDetMap15;
+  TH2F *hpixDetMap16, *hpixDetMap17, *hpixDetMap18, *hpixDetMap19;
+  TH2F *hpixDetMap21, *hpixDetMap22, *hpixDetMap23, *hpixDetMap24, *hpixDetMap25;
+  TH2F *hpixDetMap26, *hpixDetMap27, *hpixDetMap28, *hpixDetMap29;
+  TH2F *hpixDetMap31, *hpixDetMap32, *hpixDetMap33, *hpixDetMap34, *hpixDetMap35;
+  TH2F *hpixDetMap36, *hpixDetMap37, *hpixDetMap38, *hpixDetMap39;
+  TH2F *hpixDetMap41, *hpixDetMap42, *hpixDetMap43, *hpixDetMap44, *hpixDetMap45;
+  TH2F *hpixDetMap46, *hpixDetMap47, *hpixDetMap48, *hpixDetMap49;
+#endif
 
 #ifdef USE_RESYNCS
   TH1D *htest1,*htest2,*htest3,*htest4,*htest5,*htest6 ;
 #endif
 
-  TProfile *hclumult1,  *hclumult2,  *hclumult3;
-  TProfile *hclumultx1, *hclumultx2, *hclumultx3;
-  TProfile *hclumulty1, *hclumulty2, *hclumulty3;
-  TProfile *hcluchar1,  *hcluchar2,  *hcluchar3;
-  TProfile *hpixchar1,  *hpixchar2,  *hpixchar3;
-  TProfile *hclusls,  *hpixls,*hinstls, *hinstlsbx;
-  TProfile *hpvls, *hclupv, *hpixpv; //  *hclupvlsn, *hpixpvlsn;
-  TProfile *hcharCluls, *hcharPixls, *hsizeCluls, *hsizeXCluls;
-  TProfile *hpixbx, *hclubx, *hpvbx, *hcharClubx, *hcharPixbx,*hsizeClubx, *hsizeYClubx;
-  TProfile *hinstbx;
+
+#ifdef STUDY_LAY1
+  TH1D *hcharge111,*hcharge112,*hcharge122,*hcharge121,*hcharge12_1,*hcharge12_2;
+  TH1D *hpixcharge111,*hpixcharge112,*hpixcharge122,*hpixcharge121,*hpixcharge12_1,*hpixcharge12_2;
+#endif
+
+#ifdef ROC_RATE
+  TH2F *hrocMap1,*hrocMap2,*hrocMap3,*hrocMap4;
+  TProfile2D *hrocSizeXMap1, *hrocSizeYMap1,*hrocClucharMap1,*hrocPixcharMap1;
+  TProfile2D *hrocSizeXMap2, *hrocSizeYMap2,*hrocClucharMap2,*hrocPixcharMap2;
+  TProfile2D *hrocSizeXMap3, *hrocSizeYMap3,*hrocClucharMap3,*hrocPixcharMap3;
+  TProfile2D *hrocSizeXMap4, *hrocSizeYMap4,*hrocClucharMap4,*hrocPixcharMap4;
+
+  TH1D *hrocLadder1, *hrocZ11, *hrocZ12;
+  TH1D *hpixRocRate1,*hpixRocRate2,*hpixRocRate3,*hpixRocRate4, 
+    *hcluRocRate1,*hcluRocRate2,*hcluRocRate3,*hcluRocRate4;
+
+#endif
+
+#ifdef LS_TESTS
   TProfile *hcharClu1ls, *hcharPix1ls, *hsizeClu1ls;
   TProfile *hcharClu2ls, *hcharPix2ls, *hsizeClu2ls;
   TProfile *hcharClu3ls, *hcharPix3ls, *hsizeClu3ls;
   TProfile *hcharClu4ls, *hcharPix4ls, *hsizeClu4ls;
+  TProfile *hpixb4l,*hpixb1l,*hpixb2l,*hpixb3l,*hpixfl,*hpixfml,*hpixfpl; 
+  TProfile *hclusb4l,*hclusb1l,*hclusb2l,*hclusb3l,*hclusfl,*hclusfml,*hclusfpl;
+#endif
 
-  //TProfile *hcharCluLumi,*hcharPixLumi,*hsizeCluLumi,*hsizeXCluLumi,*hsizeYCluLumi; 
-  //TProfile *hcluLumi,*hpixLumi;
-
-
-#ifdef INSTLUMI_STUDIES
-  TProfile *hcluslsn,  *hpixlsn;
-  TProfile *hpixbl,*hpixb1l,*hpixb2l,*hpixb3l,*hpixfl,*hpixfml,*hpixfpl; 
-  TProfile *hclusbl,*hclusb1l,*hclusb2l,*hclusb3l,*hclusfl,*hclusfml,*hclusfpl;   
-  TProfile *hpixbxn, *hclubxn, *hpvbxn;
+#ifdef BX_TESTS
+  TProfile *hpix1bx, *hclu1bx, *hcharClu1bx, *hcharPix1bx,*hsizeClu1bx;
+  TProfile *hpix2bx, *hclu2bx, *hcharClu2bx, *hcharPix2bx,*hsizeClu2bx;
+  TProfile *hpix3bx, *hclu3bx, *hcharClu3bx, *hcharPix3bx,*hsizeClu3bx;
+  TProfile *hpix4bx, *hclu4bx, *hcharClu4bx, *hcharPix4bx,*hsizeClu4bx;
 #endif
 
 #ifdef VDM_STUDIES
@@ -1041,6 +728,18 @@ edm::EDGetTokenT<HFRecHitCollection> HFHitsToken_;
   TH1D *hcountInRoc1,*hcountInRoc2,*hcountInRoc3,*hcountInRoc12,*hcountInRoc22,*hcountInRoc32;
 #endif
 
+#ifdef LAY1_SPLIT
+  TH1D *hcharge1InR12,*hcharge1InR34,*hcharge1OutR12,*hcharge1OutR34; 
+  TH1D *hpixcharge1InR12,*hpixcharge1InR34,*hpixcharge1OutR12,*hpixcharge1OutR34; 
+  TH1D *hsize1InR12,*hsize1InR34,*hsize1OutR12,*hsize1OutR34; 
+  TH1D *hsizex1InR12,*hsizex1InR34,*hsizex1OutR12,*hsizex1OutR34; 
+  TH1D *hsizey1InR12,*hsizey1InR34,*hsizey1OutR12,*hsizey1OutR34; 
+#endif
+
+#ifdef STUDY_ONEMOD
+  TProfile2D *hsizeMap1, *hsizeXMap1, *hsizeYMap1,*hclucharMap1,*hpixcharMap1;
+#endif
+
 #ifdef BX
   getBX * getbx;
 #endif
@@ -1050,20 +749,34 @@ edm::EDGetTokenT<HFRecHitCollection> HFHitsToken_;
   LumiCorrector * lumiCorrector;
 #endif
 
-#ifdef NEW_MODULES
-  std::vector<unsigned int> l1New, l2New, l3New;
-#endif
 };
 
 /////////////////////////////////////////////////////////////////
 // Contructor, empty.
 PixClusterAna::PixClusterAna(edm::ParameterSet const& conf) 
-  : conf_(conf), src_(conf.getParameter<edm::InputTag>( "src" )) { 
+  : conf_(conf), src_(conf.getParameter<edm::InputTag>( "src" )), Normalise(true) { 
+
   PRINT = conf.getUntrackedParameter<bool>("Verbosity",false);
+  Normalise = conf.getUntrackedParameter<bool>("Normalise",true);
   select1 = conf.getUntrackedParameter<int>("Select1",0);
   select2 = conf.getUntrackedParameter<int>("Select2",0);
   //src_ =  conf.getParameter<edm::InputTag>( "src" );
-  if(PRINT) cout<<" Construct "<<endl;
+  cout<<" Construct, Normalise = "<<Normalise<<" Select "<<select1<<"/"<<select2<<endl;
+  // +-LDDM L layer DD ladder M module e.g. 1065 for BmI8/1/6/1  
+  if(select1==201) { //select specifix module 
+    int sign  = select2/abs(select2); // negative sign for outer O ladders
+    selectLayer = abs(select2)/1000; // layer
+    selectLadder = (abs(select2)%1000)/10; // ladder
+    selectModule = (abs(select2)%10); // module
+    selectLadder *= sign;
+    if(selectModule>4) selectModule = -(selectModule-4); // 8 7 6 5 - 1 2 3 4
+  }
+
+  cout<<(conf.getParameter<edm::InputTag>("Tracks")).label()<<endl;
+  string tracksTag = (conf.getParameter<edm::InputTag>("Tracks")).label();
+
+  if(tracksTag=="") useTracks = false;
+  else useTracks=true;
 
   // For the ByToken method
   myClus = consumes<edmNew::DetSetVector<SiPixelCluster> >(conf.getParameter<edm::InputTag>( "src" ));
@@ -1071,8 +784,13 @@ PixClusterAna::PixClusterAna(edm::ParameterSet const& conf)
   ConditionsInLumiBlockToken = consumes <edm::ConditionsInLumiBlock> (edm::InputTag("conditionsInEdm"));
   L1TrigReadoutToken         = consumes <L1GlobalTriggerReadoutRecord>(edm::InputTag("gtDigis"));
   TrigResultsToken           = consumes <edm::TriggerResults>(edm::InputTag("TriggerResults","","HLT"));
-  VertexCollectionToken      = consumes <reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
-
+#ifdef PV
+  if(useTracks) {
+    VertexCollectionToken      = consumes <reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
+    TrackToken                 = consumes <std::vector<reco::Track>>(conf.getParameter<edm::InputTag>("Tracks"));
+  }
+#endif
+  phase1_ = conf.getUntrackedParameter<bool>("phase1",false);
 
 #ifdef HF
   //HFHits_       = iConfig.getParameter<edm::InputTag>("HFHitCollection");
@@ -1083,7 +801,65 @@ PixClusterAna::PixClusterAna(edm::ParameterSet const& conf)
 }
 // Virtual destructor needed.
 PixClusterAna::~PixClusterAna() { }  
+// -------------------------------------
+#ifdef TEST_DCOLS
+void PixClusterAna::histogramDcols(int layer, int ladder, int module) { 
+  int countInModule=0, countInRoc=0, countDcols=0;
 
+  // loop over rocs
+  for(int rr=0;rr<2;++rr) {
+    for(int rc=0;rc<8;++rc) {
+      countInRoc=0;
+      for(int dcol=0;dcol<26;++dcol) {
+	bool dcolHit = false;
+	int dcolMult=0;
+	// col 1
+	int col=(rc*52)+dcol*2;
+	for(int row=(rr*80);row<((rr*80)+80);++row) {
+	  if( moduleArray[row][col]>0 ) {countInModule++; countInRoc++;dcolHit=true;dcolMult++;}
+	}
+
+	// col 2
+	col=(rc*52)+dcol*2+1;
+	for(int row=(rr*80);row<((rr*80)+80);++row) {
+	  if( moduleArray[row][col]>0 ) {countInModule++; countInRoc++;dcolHit=true;dcolMult++;}
+	}
+
+	if(dcolHit) {
+	  countDcols++;
+	  if(layer==1)      {
+	    hdcolHitMult1->Fill(float(module),float(dcolMult));
+	    hdcolHitMultLadder1->Fill(float(ladder),float(dcolMult));}
+	  else if(layer==2) {hdcolHitMult2->Fill(float(module),float(dcolMult));}
+	  else if(layer==3) {hdcolHitMult3->Fill(float(module),float(dcolMult));}
+	  else if(layer==4) {hdcolHitMult4->Fill(float(module),float(dcolMult));}
+	}
+	  
+      } // rocs
+      if(countInRoc>0) {
+	if(layer==1)      {hrocHitMult1->Fill(float(module),float(countInRoc));}
+	else if(layer==2) {hrocHitMult2->Fill(float(module),float(countInRoc));}
+	else if(layer==3) {hrocHitMult3->Fill(float(module),float(countInRoc));}
+	else if(layer==4) {hrocHitMult4->Fill(float(module),float(countInRoc));}
+      }
+    }
+  }
+
+  if(countInModule>0) {
+    float prob = float(countDcols)/416.;
+    if(layer==1)      {
+      hdcolHitProb1->Fill(float(module),prob);
+      hdcolHitProbLadder1->Fill(float(ladder),prob);
+      hmoduleHitMult1->Fill(float(module),float(countInModule));}
+    else if(layer==2) {hdcolHitProb2->Fill(float(module),prob);
+      hmoduleHitMult2->Fill(float(module),float(countInModule));}
+    else if(layer==3) {hdcolHitProb3->Fill(float(module),prob);
+      hmoduleHitMult3->Fill(float(module),float(countInModule));}
+    else if(layer==4) {hdcolHitProb4->Fill(float(module),prob);
+      hmoduleHitMult4->Fill(float(module),float(countInModule));}
+  }
+}  
+#endif
 // ------------ method called at the begining   ------------
 void PixClusterAna::beginRun(const edm::EventSetup& iSetup) {
   cout << "beginRun -  PixelClusterTest " <<endl;
@@ -1097,12 +873,48 @@ void PixClusterAna::beginJob() {
 
   //=====================================================================
 
-  hladder1id = fs->make<TH1D>( "hladder1id", "Ladder L1 id", 23, -11.5, 11.5);
-  hladder2id = fs->make<TH1D>( "hladder2id", "Ladder L2 id", 35, -17.5, 17.5);
-  hladder3id = fs->make<TH1D>( "hladder3id", "Ladder L3 id", 47, -23.5, 23.5);
-  hz1id = fs->make<TH1D>( "hz1id", "Z-index id L1", 11, -5.5, 5.5);
-  hz2id = fs->make<TH1D>( "hz2id", "Z-index id L2", 11, -5.5, 5.5);
-  hz3id = fs->make<TH1D>( "hz3id", "Z-index id L3", 11, -5.5, 5.5);
+  hladder1id = fs->make<TH1D>( "hladder1id", "Clus in ladder L1", 13, -6.5, 6.5);
+  hladder2id = fs->make<TH1D>( "hladder2id", "Clus in ladder L2", 29, -14.5, 14.5);
+  hladder3id = fs->make<TH1D>( "hladder3id", "Clus in adder L3", 45, -22.5, 22.5);
+  hladder4id = fs->make<TH1D>( "hladder4id", "Clus in ladder L4", 65, -32.5, 32.5);
+  hpladder1id = fs->make<TH1D>( "hpladder1id", "Pix in ladder L1", 13, -6.5, 6.5);
+  hpladder2id = fs->make<TH1D>( "hpladder2id", "Pix in ladder L2", 29, -14.5, 14.5);
+  hpladder3id = fs->make<TH1D>( "hpladder3id", "Pix in adder L3", 45, -22.5, 22.5);
+  hpladder4id = fs->make<TH1D>( "hpladder4id", "Pix in ladder L4", 65, -32.5, 32.5);
+
+  hz1id = fs->make<TH1D>( "hz1id", "Clus in ring L1", 11, -5.5, 5.5);
+  hz2id = fs->make<TH1D>( "hz2id", "Clus in ring L2", 11, -5.5, 5.5);
+  hz3id = fs->make<TH1D>( "hz3id", "Clus in ring L3", 11, -5.5, 5.5);
+  hz4id = fs->make<TH1D>( "hz4id", "Clus in ring L4", 11, -5.5, 5.5);
+  hpz1id = fs->make<TH1D>( "hpz1id", "Pix in ring L1", 11, -5.5, 5.5);
+  hpz2id = fs->make<TH1D>( "hpz2id", "Pix in ring L2", 11, -5.5, 5.5);
+  hpz3id = fs->make<TH1D>( "hpz3id", "Pix in ring L3", 11, -5.5, 5.5);
+  hpz4id = fs->make<TH1D>( "hpz4id", "Pix in ring L4", 11, -5.5, 5.5);
+
+  hcols12 = fs->make<TH1D>( "hcols11", "Layer 1 clus per cols", 500,-0.5,499.5); // test 
+  hcols11 = fs->make<TH1D>( "hcols12", "Layer 1 clus per cols", 8000,-4.,4.);
+  hrows11 = fs->make<TH1D>( "hrows11", "Layer 1 clus per rows", 2000,-1.,1.);
+  hcols21 = fs->make<TH1D>( "hcols21", "Layer 2 clus per cols", 8000,-4.,4.);
+  hrows21 = fs->make<TH1D>( "hrows21", "Layer 2 clus per rows", 2000,-1.,1.);
+
+  hcols1 = fs->make<TH1D>( "hcols1", "Layer 1 clus per cols", 500,0.,500.);
+  hcols2 = fs->make<TH1D>( "hcols2", "Layer 2 clus per cols", 500,0.,500.);
+  hcols3 = fs->make<TH1D>( "hcols3", "Layer 3 clus per cols", 500,0.,500.);
+  hcols4 = fs->make<TH1D>( "hcols4", "Layer 4 clus per cols", 500,0.,500.);
+  hpcols1 = fs->make<TH1D>( "hpcols1", "Layer 1 pix per cols", 500,-0.5,499.5);
+  hpcols2 = fs->make<TH1D>( "hpcols2", "Layer 2 pix per cols", 500,-0.5,499.5);
+  hpcols3 = fs->make<TH1D>( "hpcols3", "Layer 3 pix per cols", 500,-0.5,499.5);
+  hpcols4 = fs->make<TH1D>( "hpcols4", "Layer 4 pix percols", 500,-0.5,499.5);
+  
+  hrows1 = fs->make<TH1D>( "hrows1", "Layer 1 clus per rows", 200,-0.5,199.5);
+  hrows2 = fs->make<TH1D>( "hrows2", "Layer 2 clus per rows", 200,-0.5,199.5);
+  hrows3 = fs->make<TH1D>( "hrows3", "layer 3 clus per rows", 200,-0.5,199.5);
+  hrows4 = fs->make<TH1D>( "hrows4", "layer 4 clus per rows", 200,-0.5,199.5);
+  hprows1 = fs->make<TH1D>( "hprows1", "Layer 1 pix per rows", 200,-0.5,199.5);
+  hprows2 = fs->make<TH1D>( "hprows2", "Layer 2 pix per rows", 200,-0.5,199.5);
+  hprows3 = fs->make<TH1D>( "hprows3", "layer 3 pix per rows", 200,-0.5,199.5);
+  hprows4 = fs->make<TH1D>( "hprows4", "layer 4 pix per rows", 200,-0.5,199.5);
+
 
   int sizeH=200;
   float lowH = -0.5;
@@ -1114,14 +926,22 @@ void PixClusterAna::beginJob() {
 			    sizeH, lowH, highH);
   hclusPerDet3 = fs->make<TH1D>( "hclusPerDet3", "Clus per det l3",
 			    sizeH, lowH, highH);
+  hclusPerDet4 = fs->make<TH1D>( "hclusPerDet4", "Clus per det l4",
+			    sizeH, lowH, highH);
 
-  sizeH=1000;
+  sizeH=500;
+#ifdef HI
   highH = 1999.5;
+#else
+  highH = 999.5;
+#endif
   hpixPerDet1 = fs->make<TH1D>( "hpixPerDet1", "Pix per det l1",
 			    sizeH, lowH, highH);
   hpixPerDet2 = fs->make<TH1D>( "hpixPerDet2", "Pix per det l2",
 			    sizeH, lowH, highH);
   hpixPerDet3 = fs->make<TH1D>( "hpixPerDet3", "Pix per det l3",
+			    sizeH, lowH, highH);
+  hpixPerDet4 = fs->make<TH1D>( "hpixPerDet4", "Pix per det l4",
 			    sizeH, lowH, highH);
 
   hpixPerDet11 = fs->make<TH1D>( "hpixPerDet11", "Pix per det l1 - ring 1",
@@ -1148,21 +968,23 @@ void PixClusterAna::beginJob() {
 			    sizeH, lowH, highH);
   hpixPerDet34 = fs->make<TH1D>( "hpixPerDet34", "Pix per det l3 - ring 4",
 			    sizeH, lowH, highH);
+  hpixPerDet41 = fs->make<TH1D>( "hpixPerDet41", "Pix per det l4 - ring 1",
+			    sizeH, lowH, highH);
+  hpixPerDet42 = fs->make<TH1D>( "hpixPerDet42", "Pix per det l4 - ring 2",
+			    sizeH, lowH, highH);
+  hpixPerDet43 = fs->make<TH1D>( "hpixPerDet43", "Pix per det l4 - ring 3",
+			    sizeH, lowH, highH);
+  hpixPerDet44 = fs->make<TH1D>( "hpixPerDet44", "Pix per det l4 - ring 4",
+			    sizeH, lowH, highH);
 
-  sizeH=1000;
-  highH = 999.5;
-  hpixPerLink1 = fs->make<TH1D>( "hpixPerLink1", "Pix per link l1",
-			    sizeH, lowH, highH);
-  hpixPerLink2 = fs->make<TH1D>( "hpixPerLink2", "Pix per link l2",
-			    sizeH, lowH, highH);
-  hpixPerLink3 = fs->make<TH1D>( "hpixPerLink3", "Pix per link l3",
-			    sizeH, lowH, highH);
+  //sizeH=1000;
+  //highH = 999.5;
 
-  sizeH=5000;
+  sizeH=10000;
 #ifdef HI
   highH = 19999.5;
 #else
-  highH = 4999.5;
+  highH = 9999.5;
 #endif
 
   hclusPerLay1 = fs->make<TH1D>( "hclusPerLay1", "Clus per layer l1",
@@ -1170,6 +992,8 @@ void PixClusterAna::beginJob() {
   hclusPerLay2 = fs->make<TH1D>( "hclusPerLay2", "Clus per layer l2",
 			    sizeH, lowH, highH);
   hclusPerLay3 = fs->make<TH1D>( "hclusPerLay3", "Clus per layer l3",
+			    sizeH, lowH, highH);
+  hclusPerLay4 = fs->make<TH1D>( "hclusPerLay4", "Clus per layer l4",
 			    sizeH, lowH, highH);
 
   hclus = fs->make<TH1D>( "hclus", "Clus per event, after cut",
@@ -1188,8 +1012,8 @@ void PixClusterAna::beginJob() {
   highH = 4999.5;
 #endif
 
-  hclus5 = fs->make<TH1D>( "hclus5", "Clus per event, none edge",
-			   sizeH, lowH, highH);
+  //hclus5 = fs->make<TH1D>( "hclus5", "Clus per event, none edge",
+  //			   sizeH, lowH, highH);
 
 #ifdef HI
   highH = 3999.5;
@@ -1205,11 +1029,15 @@ void PixClusterAna::beginJob() {
 			    sizeH, lowH, highH);
   hclusPerDisk4 = fs->make<TH1D>( "hclusPerDisk4", "Clus per disk4",
 			    sizeH, lowH, highH);
+  hclusPerDisk5 = fs->make<TH1D>( "hclusPerDisk5", "Clus per disk5",
+			    sizeH, lowH, highH);
+  hclusPerDisk6 = fs->make<TH1D>( "hclusPerDisk6", "Clus per disk6",
+			    sizeH, lowH, highH);
 
 #ifdef HI
   highH = 9999.5;
 #else
-  highH = 3999.5;
+  highH = 9999.5;
 #endif
 
   hpixPerDisk1 = fs->make<TH1D>( "hpixPerDisk1", "Pix per disk1",
@@ -1220,13 +1048,17 @@ void PixClusterAna::beginJob() {
 			    sizeH, lowH, highH);
   hpixPerDisk4 = fs->make<TH1D>( "hpixPerDisk4", "Pix per disk4",
 			    sizeH, lowH, highH);
+  hpixPerDisk5 = fs->make<TH1D>( "hpixPerDisk5", "Pix per disk5",
+			    sizeH, lowH, highH);
+  hpixPerDisk6 = fs->make<TH1D>( "hpixPerDisk6", "Pix per disk6",
+			    sizeH, lowH, highH);
 
 
-  sizeH=2000;
+  sizeH=4000;
 #ifdef HI
   highH = 99999.5;
 #else
-  highH = 19999.5;
+  highH = 39999.5;
 #endif
 
   hpixPerLay1 = fs->make<TH1D>( "hpixPerLay1", "Pix per layer l1",
@@ -1234,6 +1066,8 @@ void PixClusterAna::beginJob() {
   hpixPerLay2 = fs->make<TH1D>( "hpixPerLay2", "Pix per layer l2",
 				 sizeH, lowH, highH);
   hpixPerLay3 = fs->make<TH1D>( "hpixPerLay3", "Pix per layer l3",
+				 sizeH, lowH, highH);
+  hpixPerLay4 = fs->make<TH1D>( "hpixPerLay4", "Pix per layer l4",
 				 sizeH, lowH, highH);
 
   hdigis = fs->make<TH1D>( "hdigis", "All Digis in clus per event, after cut",
@@ -1246,10 +1080,12 @@ void PixClusterAna::beginJob() {
 
   hdetsPerLay1 = fs->make<TH1D>( "hdetsPerLay1", "Full dets per layer l1",
 				 161, -0.5, 160.5);
-  hdetsPerLay3 = fs->make<TH1D>( "hdetsPerLay3", "Full dets per layer l3",
-				 353, -0.5, 352.5);
   hdetsPerLay2 = fs->make<TH1D>( "hdetsPerLay2", "Full dets per layer l2",
 				 257, -0.5, 256.5);
+  hdetsPerLay3 = fs->make<TH1D>( "hdetsPerLay3", "Full dets per layer l3",
+				 353, -0.5, 352.5);
+  hdetsPerLay4 = fs->make<TH1D>( "hdetsPerLay4", "Full dets per layer l4",
+				 513, -0.5, 512.5);
 
   hdets2 = fs->make<TH1D>("hdets2","Dets per event after cut",2000, -0.5, 1999.5);
   hdets = fs->make<TH1D>( "hdets","Dets per event before cut",
@@ -1258,231 +1094,189 @@ void PixClusterAna::beginJob() {
 
   sizeH= 400;
   lowH = 0.;
-  highH = 100.0; // charge limit in kelec
+  highH = 400.0; // charge limit in kelec
   hcharge1 = fs->make<TH1D>( "hcharge1", "Clu charge l1", sizeH, 0.,highH); //in ke
+  hcharge1_zoom = fs->make<TH1D>( "hcharge1_zoom", "Clu charge l1", 500, 0.,10.); //in ke
   hcharge2 = fs->make<TH1D>( "hcharge2", "Clu charge l2", sizeH, 0.,highH);
   hcharge3 = fs->make<TH1D>( "hcharge3", "Clu charge l3", sizeH, 0.,highH);
-  hcharge4 = fs->make<TH1D>( "hcharge4", "Clu charge d1", sizeH, 0.,highH);
-  hcharge5 = fs->make<TH1D>( "hcharge5", "Clu charge d2", sizeH, 0.,highH);
+  hcharge4 = fs->make<TH1D>( "hcharge4", "Clu charge l4", sizeH, 0.,highH);
+  hcharge5 = fs->make<TH1D>( "hcharge5", "Clu charge d1", sizeH, 0.,highH);
+  hcharge6 = fs->make<TH1D>( "hcharge6", "Clu charge d2", sizeH, 0.,highH);
+  hcharge7 = fs->make<TH1D>( "hcharge7", "Clu charge d3", sizeH, 0.,highH);
+  hcharge8 = fs->make<TH1D>( "hcharge8", "Clu charge test", sizeH, 0.,highH);
+  hcharge1n = fs->make<TH1D>( "hcharge1n", "Clu charge l1", sizeH, 0.,highH); //in ke
+  hcharge2b = fs->make<TH1D>( "hcharge2b", "Clu charge l2", sizeH, 0.,highH); //in ke
+  hcharge2g = fs->make<TH1D>( "hcharge2g", "Clu charge l2", sizeH, 0.,highH); //in ke
 
-#ifdef NEW_MODULES
-  hcharge11 = fs->make<TH1D>( "hcharge11", "Clu charge l1 new", sizeH, 0.,highH); //in ke
-  hcharge12 = fs->make<TH1D>( "hcharge12", "Clu charge l2 new", sizeH, 0.,highH);
-  hcharge13 = fs->make<TH1D>( "hcharge13", "Clu charge l3 new", sizeH, 0.,highH);
-#endif
+  hcharge11 = fs->make<TH1D>( "hcharge11", "Clu charge l1-inner", sizeH, 0.,highH); //in ke
+  hcharge12 = fs->make<TH1D>( "hcharge12", "Clu charge l1-outer", sizeH, 0.,highH); //in ke
 
-#if defined(BX) || defined(BX_NEW)
-  hchargebx1 = fs->make<TH1D>( "hchargebx1", "Clu charge", 100, 0.,highH); //in ke
-  hchargebx2 = fs->make<TH1D>( "hchargebx2", "Clu charge", 100, 0.,highH); //in ke
-  hchargebx3 = fs->make<TH1D>( "hchargebx3", "Clu charge", 100, 0.,highH); //in ke
-  hchargebx4 = fs->make<TH1D>( "hchargebx4", "Clu charge", 100, 0.,highH); //in ke
-  hchargebx5 = fs->make<TH1D>( "hchargebx5", "Clu charge", 100, 0.,highH); //in ke
-  hchargebx6 = fs->make<TH1D>( "hchargebx6", "Clu charge", 100, 0.,highH); //in ke
-  sizeH=300; // 600
-  highH = 60.0; // charge limit in kelec
-  hpixChargebx1 = fs->make<TH1D>( "hpixChargebx1", "Pix charge", sizeH, 0.,highH); //in ke
-  hpixChargebx2 = fs->make<TH1D>( "hpixChargebx2", "Pix charge", sizeH, 0.,highH); //in ke
-  hpixChargebx3 = fs->make<TH1D>( "hpixChargebx3", "Pix charge", sizeH, 0.,highH); //in ke
-  hpixChargebx5 = fs->make<TH1D>( "hpixChargebx5", "Pix charge", sizeH, 0.,highH); //in ke
-  hpixChargebx6 = fs->make<TH1D>( "hpixChargebx6", "Pix charge", sizeH, 0.,highH); //in ke
-
-  sizeH=200;
-  highH = 199.5; // charge limit in kelec
-  hsizebx1 = fs->make<TH1D>( "hsizebx1", "clu size",sizeH,-0.5,highH);
-  hsizebx2 = fs->make<TH1D>( "hsizebx2", "clu size",sizeH,-0.5,highH);
-  hsizebx3 = fs->make<TH1D>( "hsizebx3", "clu size",sizeH,-0.5,highH);
-  hsizebx5 = fs->make<TH1D>( "hsizebx5", "clu size",sizeH,-0.5,highH);
-  hsizebx6 = fs->make<TH1D>( "hsizebx6", "clu size",sizeH,-0.5,highH);
-#endif
-
-  sizeH=300; // 600
-  highH = 60.0; // charge limit in kelec
+  sizeH=  400; // 600
+  highH = 100.0; // charge limit in kelec
   hpixcharge1 = fs->make<TH1D>( "hpixcharge1", "Pix charge l1",sizeH, 0.,highH);//in ke
+  hpixcharge1_zoom = fs->make<TH1D>( "hpixcharge1_zoom", "Pix charge l1",4000, 0.,4.);//in ke
   hpixcharge2 = fs->make<TH1D>( "hpixcharge2", "Pix charge l2",sizeH, 0.,highH);
   hpixcharge3 = fs->make<TH1D>( "hpixcharge3", "Pix charge l3",sizeH, 0.,highH);
-  hpixcharge4 = fs->make<TH1D>( "hpixcharge4", "Pix charge d1",sizeH, 0.,highH);
-  hpixcharge5 = fs->make<TH1D>( "hpixcharge5", "Pix charge d2",sizeH, 0.,highH);
-#ifdef NEW_MODULES
-  hpixcharge11 = fs->make<TH1D>( "hpixcharge11", "Pix charge l1 new",sizeH, 0.,highH);//in ke
-  hpixcharge12 = fs->make<TH1D>( "hpixcharge12", "Pix charge l2 new",sizeH, 0.,highH);
-  hpixcharge13 = fs->make<TH1D>( "hpixcharge13", "Pix charge l3 new",sizeH, 0.,highH);
-#endif
+  hpixcharge4 = fs->make<TH1D>( "hpixcharge4", "Pix charge l4",sizeH, 0.,highH);
+  hpixcharge5 = fs->make<TH1D>( "hpixcharge5", "Pix charge d1",sizeH, 0.,highH);
+  hpixcharge6 = fs->make<TH1D>( "hpixcharge6", "Pix charge d1",sizeH, 0.,highH);
+  hpixcharge7 = fs->make<TH1D>( "hpixcharge7", "Pix charge d2",sizeH, 0.,highH);
+  hpixcharge8 = fs->make<TH1D>( "hpixcharge8", "Pix charge test",sizeH, 0.,highH);
 
-
-  hpcols1 = fs->make<TH1D>( "hpcols1", "Layer 1 pix cols", 500,-0.5,499.5);
-  hpcols2 = fs->make<TH1D>( "hpcols2", "Layer 2 pix cols", 500,-0.5,499.5);
-  hpcols3 = fs->make<TH1D>( "hpcols3", "Layer 3 pix cols", 500,-0.5,499.5);
-  
-  hprows1 = fs->make<TH1D>( "hprows1", "Layer 1 pix rows", 200,-0.5,199.5);
-  hprows2 = fs->make<TH1D>( "hprows2", "Layer 2 pix rows", 200,-0.5,199.5);
-  hprows3 = fs->make<TH1D>( "hprows3", "layer 3 pix rows", 200,-0.5,199.5);
+  hpixcharge11 = fs->make<TH1D>( "hpixcharge11", "Pix charge l1-inner",sizeH, 0.,highH);//in ke
+  hpixcharge12 = fs->make<TH1D>( "hpixcharge12", "Pix charge l1-outer",sizeH, 0.,highH);//in ke
+  hpixcharge1n = fs->make<TH1D>( "hpixcharge1n", "Pix charge l1",sizeH, 0.,highH);//in ke
+  hpixcharge2b = fs->make<TH1D>( "hpixcharge2b", "Pix charge l2",sizeH, 0.,highH);//in ke
+  hpixcharge2g = fs->make<TH1D>( "hpixcharge2g", "Pix charge l2",sizeH, 0.,highH);//in ke
 
   sizeH=300;
   highH = 299.5; // charge limit in kelec
   hsize1 = fs->make<TH1D>( "hsize1", "layer 1 clu size",sizeH,-0.5,highH);
   hsize2 = fs->make<TH1D>( "hsize2", "layer 2 clu size",sizeH,-0.5,highH);
   hsize3 = fs->make<TH1D>( "hsize3", "layer 3 clu size",sizeH,-0.5,highH);
+  hsize4 = fs->make<TH1D>( "hsize4", "layer 4 clu size",sizeH,-0.5,highH);
+  hsize1n = fs->make<TH1D>( "hsize1n", "layer 1 clu size",sizeH,-0.5,highH);
+  hsize2b = fs->make<TH1D>( "hsize2b", "layer 2 clu size",sizeH,-0.5,highH);
+  hsize2g = fs->make<TH1D>( "hsize2g", "layer 2 clu size",sizeH,-0.5,highH);
+  
   hsizex1 = fs->make<TH1D>( "hsizex1", "lay1 clu size in x",
+		      100,-0.5,99.5);
+  hsizex1n = fs->make<TH1D>( "hsizex1n", "lay1 clu size in x",
 		      100,-0.5,99.5);
   hsizex2 = fs->make<TH1D>( "hsizex2", "lay2 clu size in x",
 		      100,-0.5,99.5);
   hsizex3 = fs->make<TH1D>( "hsizex3", "lay3 clu size in x",
 		      100,-0.5,99.5);
+  hsizex4 = fs->make<TH1D>( "hsizex4", "lay4 clu size in x",
+		      100,-0.5,99.5);
   hsizey1 = fs->make<TH1D>( "hsizey1", "lay1 clu size in y",
+		      100,-0.5,99.5);
+  hsizey1n = fs->make<TH1D>( "hsizey1n", "lay1 clu size in y",
 		      100,-0.5,99.5);
   hsizey2 = fs->make<TH1D>( "hsizey2", "lay2 clu size in y",
 		      100,-0.5,99.5);
   hsizey3 = fs->make<TH1D>( "hsizey3", "lay3 clu size in y",
 		      100,-0.5,99.5);
-
-#ifdef NEW_MODULES
-  hsize11 = fs->make<TH1D>( "hsize11", "layer 1 clu size new",sizeH,-0.5,highH);
-  hsize12 = fs->make<TH1D>( "hsize12", "layer 2 clu size new",sizeH,-0.5,highH);
-  hsize13 = fs->make<TH1D>( "hsize13", "layer 3 clu size new",sizeH,-0.5,highH);
-  hsizex11 = fs->make<TH1D>( "hsizex11", "lay1 clu size in x new",
+  hsizey4 = fs->make<TH1D>( "hsizey4", "lay4 clu size in y",
 		      100,-0.5,99.5);
-  hsizex12 = fs->make<TH1D>( "hsizex12", "lay2 clu size in x new",
-		      100,-0.5,99.5);
-  hsizex13 = fs->make<TH1D>( "hsizex13", "lay3 clu size in x new",
-		      100,-0.5,99.5);
-  hsizey11 = fs->make<TH1D>( "hsizey11", "lay1 clu size in y new",
-		      100,-0.5,99.5);
-  hsizey12 = fs->make<TH1D>( "hsizey12", "lay2 clu size in y new",
-		      100,-0.5,99.5);
-  hsizey13 = fs->make<TH1D>( "hsizey13", "lay3 clu size in y new",
-		      100,-0.5,99.5);
-#endif
 
   hpixDiskR1 = fs->make<TH1D>("hpixDiskR1","pix vs. r, disk 1",200,0.,20.);
   hpixDiskR2 = fs->make<TH1D>("hpixDiskR2","pix vs. r, disk 2",200,0.,20.);
+  hpixDiskR3 = fs->make<TH1D>("hpixDiskR3","pix vs. r, disk 3",200,0.,20.);
 
   hevent = fs->make<TH1D>("hevent","event",100,0,10000000.);
   //horbit = fs->make<TH1D>("horbit","orbit",100, 0,100000000.);
 
-  hlumi1  = fs->make<TH1D>("hlumi1", "lumi", 2000,0,2000.);
-  hlumi0  = fs->make<TH1D>("hlumi0", "lumi", 2000,0,2000.);
-  hlumi   = fs->make<TH1D>("hlumi", "lumi",   2000,0,2000.);
-  hlumi10 = fs->make<TH1D>("hlumi10", "lumi10",   2000,0,2000.);
-  hlumi11 = fs->make<TH1D>("hlumi11", "lumi11",   2000,0,2000.);
-  hlumi12 = fs->make<TH1D>("hlumi12", "lumi12",   2000,0,2000.);
-  hlumi13 = fs->make<TH1D>("hlumi13", "lumi13",   2000,0,2000.);
-  hlumi14 = fs->make<TH1D>("hlumi14", "lumi14",   2000,0,2000.);
+  hlumi1  = fs->make<TH1D>("hlumi1", "LS", 2000,0,2000.);
+  hlumi0  = fs->make<TH1D>("hlumi0", "LS", 2000,0,2000.);
+  hlumi   = fs->make<TH1D>("hlumi", "LS",   2000,0,2000.);
+  //hlumi10 = fs->make<TH1D>("hlumi10", "LS", 2000,0,2000.);
+  //hlumi11 = fs->make<TH1D>("hlumi11", "lumi11",   2000,0,2000.);
+  //hlumi12 = fs->make<TH1D>("hlumi12", "lumi12",   2000,0,2000.);
+  //hlumi13 = fs->make<TH1D>("hlumi13", "lumi13",   2000,0,2000.);
+  //hlumi14 = fs->make<TH1D>("hlumi14", "lumi14",   2000,0,2000.);
 
-  hbx6    = fs->make<TH1D>("hbx6",   "bx",   4000,0,4000.);  
-  hbx5    = fs->make<TH1D>("hbx5",   "bx",   4000,0,4000.);  
-  hbx4    = fs->make<TH1D>("hbx4",   "bx",   4000,0,4000.);  
-  hbx3    = fs->make<TH1D>("hbx3",   "bx",   4000,0,4000.);  
-  hbx2    = fs->make<TH1D>("hbx2",   "bx",   4000,0,4000.);  
-  hbx1    = fs->make<TH1D>("hbx1",   "bx",   4000,0,4000.);  
   hbx0    = fs->make<TH1D>("hbx0",   "bx",   4000,0,4000.);  
   hbx    = fs->make<TH1D>("hbx",   "bx",     4000,0,4000.);  
 
-  hl1a    = fs->make<TH1D>("hl1a",   "l1a",   128,-0.5,127.5);
-  hl1t    = fs->make<TH1D>("hl1t",   "l1t",   128,-0.5,127.5);
-  hltt    = fs->make<TH1D>("hltt",   "ltt",   128,-0.5,127.5);
-  hl1t1 = fs->make<TH1D>("hl1t1","l1t1",128,-0.5,127.5);
-  hl1a1 = fs->make<TH1D>("hl1a1","l1a1",128,-0.5,127.5);
+  hgz1 = fs->make<TH1D>("hgz1","layer1, clus vs z",600,-30.,30.);
+  hgz2 = fs->make<TH1D>("hgz2","layer2, clus vs z",600,-30.,30.);
+  hgz3 = fs->make<TH1D>("hgz3","layer3, clus vs z",600,-30.,30.);
+  hgz4 = fs->make<TH1D>("hgz4","layer4, clus vs z",600,-30.,30.);
 
-  hlt1 = fs->make<TH1D>("hlt1","hlt1",512,-0.5,511.5);
-  hlt2 = fs->make<TH1D>("hlt2","hlt2",512,-0.5,511.5);
-  hlt3 = fs->make<TH1D>("hlt3","hlt3",512,-0.5,511.5);
+  hpixz1 = fs->make<TH1D>("hpixz1", "pix vs z l1",520,-26.,26.);
+  hpixz2 = fs->make<TH1D>("hpixz2", "pix vs z l2",520,-26.,26.);
+  hpixz3 = fs->make<TH1D>("hpixz3", "pix vs z l3",520,-26.,26.);
+  hpixz4 = fs->make<TH1D>("hpixz4", "pix ve z l4",520,-26.,26.);
 
-  hgz1 = fs->make<TH1D>("hgz1","layer1, clu global z",600,-30.,30.);
-  hgz2 = fs->make<TH1D>("hgz2","layer2, clu global z",600,-30.,30.);
-  hgz3 = fs->make<TH1D>("hgz3","layer3, clu global z",600,-30.,30.);
 
-#ifdef USE_RESYNCS
-  htest1 = fs->make<TH1D>("htest1","test1",1000,0.,1000.);
-  htest2 = fs->make<TH1D>("htest2","test2",1000,0.,1000.);
-  htest3 = fs->make<TH1D>("htest3","test3",1000,0.,3.0E8);
-  htest4 = fs->make<TH1D>("htest4","test4",1000,0.,3.0E8);
-#endif
+  htest1 = fs->make<TH2F>("htest1","size vs clu charge",50,0.,400.,15,0.5,15.5);
+  htest2 = fs->make<TH2F>("htest2","size vs pix charge",50,0.,100.,15,0.5,15.5);
+  htest3 = fs->make<TH2F>("htest3","size vs clu charge",50,0.,400.,10,0.5,10.5);
+  htest4 = fs->make<TH2F>("htest4","size vs pix charge",50,0.,100.,10,0.5,10.5);
+
 
   // dets hit per event
-  hDetsMap1 = fs->make<TH2F>("hDetsMap1"," hit modules per event",
-			     9,-4.5,4.5,21,-10.5,10.5);
-  hDetsMap1->SetOption("colz");
-  hDetsMap2 = fs->make<TH2F>("hDetsMap2"," hit modules per event",
-			     9,-4.5,4.5,33,-16.5,16.5);
-  hDetsMap2->SetOption("colz");
-  hDetsMap3 = fs->make<TH2F>("hDetsMap3"," hit modules per event",
+  hDets1 = fs->make<TH2F>("hDets1"," hit modules per event",
+			     9,-4.5,4.5,13,-6.5,6.5);
+  hDets1->SetOption("colz");
+  hDets2 = fs->make<TH2F>("hDets2"," hit modules per event",
+			     9,-4.5,4.5,29,-14.5,14.5);
+  hDets2->SetOption("colz");
+  hDets3 = fs->make<TH2F>("hDets3"," hit modules per event",
 			     9,-4.5,4.5,45,-22.5,22.5);
-  hDetsMap3->SetOption("colz");
-  // clus per det
-  hDetMap1 = fs->make<TH2F>("hDetMap1"," clusters per event",
-			    9,-4.5,4.5,21,-10.5,10.5);
-  hDetMap1->SetOption("colz");
-  hDetMap2 = fs->make<TH2F>("hDetMap2"," clusters per event",
-			    9,-4.5,4.5,33,-16.5,16.5);
-  hDetMap2->SetOption("colz");
-  hDetMap3 = fs->make<TH2F>("hDetMap3"," clusters per event",
-			    9,-4.5,4.5,45,-22.5,22.5);
-  hDetMap3->SetOption("colz");
-  // pix per det
-  hpDetMap1 = fs->make<TH2F>("hpDetMap1"," pixels per event",
-			     9,-4.5,4.5,21,-10.5,10.5);
-  hpDetMap1->SetOption("colz");
-  hpDetMap2 = fs->make<TH2F>("hpDetMap2"," pixels per event",
-			     9,-4.5,4.5,33,-16.5,16.5);
-  hpDetMap2->SetOption("colz");
-  hpDetMap3 = fs->make<TH2F>("hpDetMap3"," pixels per event",
-			     9,-4.5,4.5,45,-22.5,22.5);
-  hpDetMap3->SetOption("colz");
-  // split per link 
-  hl1DetMap1 = fs->make<TH2F>("hl1DetMap1"," pixels per event",
-			     9,-4.5,4.5,21,-10.5,10.5);
-  hl1DetMap1->SetOption("colz");
-  hl1DetMap2 = fs->make<TH2F>("hl1DetMap2"," pixels per event",
-			     9,-4.5,4.5,33,-16.5,16.5);
-  hl1DetMap2->SetOption("colz");
-  hl1DetMap3 = fs->make<TH2F>("hl1DetMap3"," pixels per event",
-			     9,-4.5,4.5,45,-22.5,22.5);
-  hl1DetMap3->SetOption("colz");
+  hDets3->SetOption("colz");
+  hDets4 = fs->make<TH2F>("hDets4"," hit modules per event",
+			     9,-4.5,4.5,65,-32.5,32.5);
+  hDets4->SetOption("colz");
 
-  hl2DetMap1 = fs->make<TH2F>("hl2DetMap1"," pixels per event",
-			     9,-4.5,4.5,21,-10.5,10.5);
-  hl2DetMap1->SetOption("colz");
-  hl2DetMap2 = fs->make<TH2F>("hl2DetMap2"," pixels per event",
-			     9,-4.5,4.5,33,-16.5,16.5);
-  hl2DetMap2->SetOption("colz");
-  hl2DetMap3 = fs->make<TH2F>("hl2DetMap3"," pixels per event",
+  // clus per det
+  hcluDets1 = fs->make<TH2F>("hcluDets1"," clusters L1 per event",
+			    9,-4.5,4.5,13,-6.5,6.5);
+  hcluDets1->SetOption("colz");
+  hcluDets2 = fs->make<TH2F>("hcluDets2"," clusters L2 per event",
+			    9,-4.5,4.5,29,-14.5,14.5);
+  hcluDets2->SetOption("colz");
+  hcluDets3 = fs->make<TH2F>("hcluDets3"," clusters L3 per event",
+			    9,-4.5,4.5,45,-22.5,22.5);
+  hcluDets3->SetOption("colz");
+  hcluDets4 = fs->make<TH2F>("hcluDets4"," clusters L4 per event",
+			    9,-4.5,4.5,65,-32.5,32.5);
+  hcluDets4->SetOption("colz");
+
+  // pix per det
+  hpixDets1 = fs->make<TH2F>("hpixDets1"," pixels L1 per event",
+			     9,-4.5,4.5,13,-6.5,6.5);
+  hpixDets1->SetOption("colz");
+  hpixDets2 = fs->make<TH2F>("hpixDets2"," pixels L2 per event",
+			     9,-4.5,4.5,29,-14.5,14.5);
+  hpixDets2->SetOption("colz");
+  hpixDets3 = fs->make<TH2F>("hpixDets3"," pixels L3 per event",
 			     9,-4.5,4.5,45,-22.5,22.5);
-  hl2DetMap3->SetOption("colz");
-  // for edge pixels 
-  //hpDetMapE1 = fs->make<TH2F>("hpDetMapE1"," edge pixels per event",
-  //			     9,-4.5,4.5,21,-10.5,10.5);
-  //hpDetMapE1->SetOption("colz");
-  //hpDetMapE2 = fs->make<TH2F>("hpDetMapE2"," edge pixels per event",
-  //			     9,-4.5,4.5,33,-16.5,16.5);
-  //hpDetMapE2->SetOption("colz");
-  //hpDetMapE3 = fs->make<TH2F>("hpDetMapE3"," edge pixels per event",
-  //		     9,-4.5,4.5,45,-22.5,22.5);
-  //hpDetMapE3->SetOption("colz");
+  hpixDets3->SetOption("colz");
+  hpixDets4 = fs->make<TH2F>("hpixDets4"," pixels L4 per event",
+			     9,-4.5,4.5,65,-32.5,32.5);
+  hpixDets4->SetOption("colz");
 
   // clu size per det
-  hsizeDetMap1 = fs->make<TH2F>("hsizeDetMap1"," cluster size",
-				9,-4.5,4.5,21,-10.5,10.5);
-  hsizeDetMap1->SetOption("colz");
-  hsizeDetMap2 = fs->make<TH2F>("hsizeDetMap2"," cluster size",
-				9,-4.5,4.5,33,-16.5,16.5);
-  hsizeDetMap2->SetOption("colz");
-  hsizeDetMap3 = fs->make<TH2F>("hsizeDetMap3"," cluster size",
+  hsizeDets1 = fs->make<TH2F>("hsizeDets1"," cluster size L1",
+				9,-4.5,4.5,13,-6.5,6.5);
+  hsizeDets1->SetOption("colz");
+  hsizeDets2 = fs->make<TH2F>("hsizeDets2"," cluster size L2",
+				9,-4.5,4.5,29,-14.5,14.5);
+  hsizeDets2->SetOption("colz");
+  hsizeDets3 = fs->make<TH2F>("hsizeDets3"," cluster size L3",
 				9,-4.5,4.5,45,-22.5,22.5);
-  hsizeDetMap3->SetOption("colz");
+  hsizeDets3->SetOption("colz");
+  hsizeDets4 = fs->make<TH2F>("hsizeDets4"," cluster size L4",
+				9,-4.5,4.5,65,-32.5,32.5);
+  hsizeDets4->SetOption("colz");
 
-  //hsizeXDetMap1 = fs->make<TH2F>("hsizeXDetMap1"," ",9,-4.5,4.5,21,-10.5,10.5);
-  //hsizeXDetMap1->SetOption("colz");
-  //hsizeXDetMap2 = fs->make<TH2F>("hsizeXDetMap2"," ",9,-4.5,4.5,33,-16.5,16.5);
-  //hsizeXDetMap2->SetOption("colz");
-  //hsizeXDetMap3 = fs->make<TH2F>("hsizeXDetMap3"," ",9,-4.5,4.5,45,-22.5,22.5);
-  //hsizeXDetMap3->SetOption("colz");
+  hchargeDets1 = fs->make<TProfile2D>("hchargeDets1"," cluster charge L1",
+				      9,-4.5,4.5,13,-6.5,6.5,0.,1000.);
+  hchargeDets1->SetOption("colz");
+  hchargeDets2 = fs->make<TProfile2D>("hchargeDets2"," cluster charge L2",
+				9,-4.5,4.5,29,-14.5,14.5,0.,1000.);
+  hchargeDets2->SetOption("colz");
+  hchargeDets3 = fs->make<TProfile2D>("hchargeDets3"," cluster charge L3",
+				9,-4.5,4.5,45,-22.5,22.5,0.,1000.);
+  hchargeDets3->SetOption("colz");
+  hchargeDets4 = fs->make<TProfile2D>("hchargeDets4"," cluster charge L4",
+				9,-4.5,4.5,65,-32.5,32.5,0.,1000.);
+  hchargeDets4->SetOption("colz");
 
-  //hsizeYDetMap1 = fs->make<TH2F>("hsizeYDetMap1"," ",9,-4.5,4.5,21,-10.5,10.5);
-  //hsizeYDetMap1->SetOption("colz");
-  //hsizeYDetMap2 = fs->make<TH2F>("hsizeYDetMap2"," ",9,-4.5,4.5,33,-16.5,16.5);
-  //hsizeYDetMap2->SetOption("colz");
-  //hsizeYDetMap3 = fs->make<TH2F>("hsizeYDetMap3"," ",9,-4.5,4.5,45,-22.5,22.5);
-  //hsizeYDetMap3->SetOption("colz");
+  hpixchargeDets1 = fs->make<TProfile2D>("hpixchargeDets1","pix charge L1",
+			        9,-4.5,4.5,13,-6.5,6.5,0.,1000.);
+  hpixchargeDets1->SetOption("colz");
+  hpixchargeDets2 = fs->make<TProfile2D>("hpixchargeDets2","pix charge L2",
+				9,-4.5,4.5,29,-14.5,14.5,0.,1000.);
+  hpixchargeDets2->SetOption("colz");
+  hpixchargeDets3 = fs->make<TProfile2D>("hpixchargeDets3","pix charge L3",
+				9,-4.5,4.5,45,-22.5,22.5,0.,1000.);
+  hpixchargeDets3->SetOption("colz");
+  hpixchargeDets4 = fs->make<TProfile2D>("hpixchargeDets4","pix charge L4",
+				9,-4.5,4.5,65,-32.5,32.5,0.,1000.);
+  hpixchargeDets4->SetOption("colz");
 
   // pix in all dets (superimposed)
   hpixDetMap1 = fs->make<TH2F>( "hpixDetMap1", "pix in det layer 1",
@@ -1494,6 +1288,10 @@ void PixClusterAna::beginJob() {
   hpixDetMap3 = fs->make<TH2F>( "hpixDetMap3", "pix in det layer 3",
 		      416,0.,416.,160,0.,160.);
   hpixDetMap3->SetOption("colz");
+  hpixDetMap4 = fs->make<TH2F>( "hpixDetMap4", "pix in det layer 4",
+		      416,0.,416.,160,0.,160.);
+  hpixDetMap4->SetOption("colz");
+
   // clus in all dets (superimposed)
   hcluDetMap1 = fs->make<TH2F>( "hcluDetMap1", "clu in det layer 1",
 				416,0.,416.,160,0.,160.);
@@ -1504,8 +1302,289 @@ void PixClusterAna::beginJob() {
   hcluDetMap3 = fs->make<TH2F>( "hcluDetMap3", "clu in det layer 3",
 				416,0.,416.,160,0.,160.);
   hcluDetMap3->SetOption("colz");
+  hcluDetMap4 = fs->make<TH2F>( "hcluDetMap4", "clu in det layer 3",
+				416,0.,416.,160,0.,160.);
+  hcluDetMap4->SetOption("colz");
+  hsizeyz1 = fs->make<TH2F>( "hsizeyz1", "sizy vs z for layer 1",
+			     56,-28.,28.,20,0.5,20.5);
+  hsizeyz2 = fs->make<TH2F>( "hsizeyz2", "sizy vs z for layer 2",
+			     56,-28.,28.,14,0.5,14.5);
+  hsizeyz3 = fs->make<TH2F>( "hsizeyz3", "sizy vs z for layer 3",
+			     56,-28.,28.,14,0.5,14.5);
+  hsizeyz4 = fs->make<TH2F>( "hsizeyz4", "sizy vs z for layer 4",
+			     56,-28.,28.,14,0.5,14.5);
+
+#ifdef TESTING_ADC
+
+  //TH1D *hclusPerDetT1, *hpixPerDetT1;
+  hclusPerDetT1 = fs->make<TH1D>( "hclusPerDetT1", "Clus per det l1",
+				 200, -0.5, 199.5);
+  hpixPerDetT1 = fs->make<TH1D>( "hpixPerDetT1", "Pix per det l1",
+				 500, -0.5,999.5);
+
+  // hchargeT1, hsizeT1 , hchargeT12_1 , hchargeT12_2  
+  sizeH= 400;
+  highH = 400.0; // charge limit in kelec
+  hchargeT1 = fs->make<TH1D>( "hchargeT1", "Clu charge l1", sizeH, 0.,highH); //in
+  sizeH=300;
+  highH = 299.5; // charge limit in kelec
+  hsizeT1 = fs->make<TH1D>( "hsizeT1", "layer 1 clu size",sizeH,-0.5,highH);
+
+  hchargeT12_1    = fs->make<TH1D>( "hchargeT12_1", "Clu charge l2_1", 400, 0.,400.);
+  hchargeT12_2    = fs->make<TH1D>( "hchargeT12_2", "Clu charge l2_1", 400, 0.,400.);
+
+  // pix per det
+  hpixDetsT1 = fs->make<TH2F>("hpixDetsT1"," pixels per event",
+			     9,-4.5,4.5,13,-6.5,6.5);
+  hpixDetsT1->SetOption("colz");
+  // hpixDetsT2 = fs->make<TH2F>("hpixDetsT2"," pixels per event",
+  // 			     9,-4.5,4.5,29,-14.5,14.5);
+  // hpixDetsT2->SetOption("colz");
+  // hpixDetsT3 = fs->make<TH2F>("hpixDetsT3"," pixels per event",
+  // 			     9,-4.5,4.5,45,-22.5,22.5);
+  // hpixDetsT3->SetOption("colz");
+  // hpixDetsT4 = fs->make<TH2F>("hpixDetsT4"," pixels per event",
+  // 			     9,-4.5,4.5,65,-32.5,32.5);
+  // hpixDetsT4->SetOption("colz");
+
+  // pixel in modules 
+  hpixDetMapT1 = fs->make<TH2F>( "hpixDetMapT1", "pix in det layer 1",
+		      416,0.,416.,160,0.,160.);
+  hpixDetMapT1->SetOption("colz");
+  // hpixDetMapT2 = fs->make<TH2F>( "hpixDetMapT2", "pix in det layer 2",
+  // 		      416,0.,416.,160,0.,160.);
+  // hpixDetMapT2->SetOption("colz");
+  // hpixDetMapT3 = fs->make<TH2F>( "hpixDetMapT3", "pix in det layer 3",
+  // 		      416,0.,416.,160,0.,160.);
+  // hpixDetMapT3->SetOption("colz");
+  // hpixDetMapT4 = fs->make<TH2F>( "hpixDetMapT4", "pix in det layer 4",
+  // 		      416,0.,416.,160,0.,160.);
+  // hpixDetMapT4->SetOption("colz");
+
+  hsizeDetT1 = fs->make<TProfile2D>("hsizeDetT", "clus size",
+				    9,-4.5,4.5,13,-6.5,6.5,0.,10000.);
+  hcluDetT1 = fs->make<TProfile2D>("hcluDetT", "clus char",
+				    9,-4.5,4.5,13,-6.5,6.5,0.,100000.);
+
+#endif
 
 
+   hclumult1 = fs->make<TProfile>("hclumult1","cluster size layer 1",560,-28.,28.,0.0,100.);
+   hclumult2 = fs->make<TProfile>("hclumult2","cluster size layer 2",560,-28.,28.,0.0,100.);
+   hclumult3 = fs->make<TProfile>("hclumult3","cluster size layer 3",560,-28.,28.,0.0,100.);
+   hclumult4 = fs->make<TProfile>("hclumult4","cluster size layer 4",560,-28.,28.,0.0,100.);
+
+   hclumultx1 = fs->make<TProfile>("hclumultx1","cluster x-size layer 1",560,-28.,28.,0.0,100.);
+   hclumultx2 = fs->make<TProfile>("hclumultx2","cluster x-size layer 2",560,-28.,28.,0.0,100.);
+   hclumultx3 = fs->make<TProfile>("hclumultx3","cluster x-size layer 3",560,-28.,28.,0.0,100.);
+   hclumultx4 = fs->make<TProfile>("hclumultx4","cluster x-size layer 4",560,-28.,28.,0.0,100.);
+
+   hclumulty1 = fs->make<TProfile>("hclumulty1","cluster y-size layer 1",560,-28.,28.,0.0,100.);
+   hclumulty2 = fs->make<TProfile>("hclumulty2","cluster y-size layer 2",560,-28.,28.,0.0,100.);
+   hclumulty3 = fs->make<TProfile>("hclumulty3","cluster y-size layer 3",560,-28.,28.,0.0,100.);
+   hclumulty4 = fs->make<TProfile>("hclumulty4","cluster y-size layer 4",560,-28.,28.,0.0,100.);
+
+   hcluchar1 = fs->make<TProfile>("hcluchar1","cluster char layer 1",560,-28.,28.,0.0,1000.);
+   hcluchar2 = fs->make<TProfile>("hcluchar2","cluster char layer 2",560,-28.,28.,0.0,1000.);
+   hcluchar3 = fs->make<TProfile>("hcluchar3","cluster char layer 3",560,-28.,28.,0.0,1000.);
+   hcluchar4 = fs->make<TProfile>("hcluchar4","cluster char layer 4",560,-28.,28.,0.0,1000.);
+
+   hpixchar1 = fs->make<TProfile>("hpixchar1","pix char layer 1",560,-28.,28.,0.0,1000.);
+   hpixchar2 = fs->make<TProfile>("hpixchar2","pix char layer 2",560,-28.,28.,0.0,1000.);
+   hpixchar3 = fs->make<TProfile>("hpixchar3","pix char layer 3",560,-28.,28.,0.0,1000.);
+   hpixchar4 = fs->make<TProfile>("hpixchar4","pix char layer 4",560,-28.,28.,0.0,1000.);
+
+#ifdef TEST_DCOLS
+   hdcolHitProb1 = fs->make<TProfile>("hdcolHitProb1","dcol hit prob layer 1",9,-4.5,4.5,0.0,1.);
+   hdcolHitProb2 = fs->make<TProfile>("hdcolHitProb2","dcol hit prob layer 2",9,-4.5,4.5,0.0,1.);
+   hdcolHitProb3 = fs->make<TProfile>("hdcolHitProb3","dcol hit prob layer 3",9,-4.5,4.5,0.0,1.);
+   hdcolHitProb4 = fs->make<TProfile>("hdcolHitProb4","dcol hit prob layer 4",9,-4.5,4.5,0.0,1.);
+
+   hdcolHitMult1 = fs->make<TProfile>("hdcolHitMult1","dcol hit mult layer 1",9,-4.5,4.5,0.0,200.);
+   hdcolHitMult2 = fs->make<TProfile>("hdcolHitMult2","dcol hit mult layer 2",9,-4.5,4.5,0.0,200.);
+   hdcolHitMult3 = fs->make<TProfile>("hdcolHitMult3","dcol hit mult layer 3",9,-4.5,4.5,0.0,200.);
+   hdcolHitMult4 = fs->make<TProfile>("hdcolHitMult4","dcol hit mult layer 4",9,-4.5,4.5,0.0,200.);
+
+   hrocHitMult1 = fs->make<TProfile>("hrocHitMult1","roc hit mult layer 1",9,-4.5,4.5,0.0,1000.);
+   hrocHitMult2 = fs->make<TProfile>("hrocHitMult2","roc hit mult layer 2",9,-4.5,4.5,0.0,1000.);
+   hrocHitMult3 = fs->make<TProfile>("hrocHitMult3","roc hit mult layer 3",9,-4.5,4.5,0.0,1000.);
+   hrocHitMult4 = fs->make<TProfile>("hrocHitMult4","roc hit mult layer 4",9,-4.5,4.5,0.0,1000.);
+
+   hmoduleHitMult1 = fs->make<TProfile>("hmoduleHitMult1","mod hit mult layer 1",9,-4.5,4.5,0.0,1000.);
+   hmoduleHitMult2 = fs->make<TProfile>("hmoduleHitMult2","mod hit mult layer 2",9,-4.5,4.5,0.0,1000.);
+   hmoduleHitMult3 = fs->make<TProfile>("hmoduleHitMult3","mod hit mult layer 3",9,-4.5,4.5,0.0,1000.);
+   hmoduleHitMult4 = fs->make<TProfile>("hmoduleHitMult4","mod hit mult layer 4",9,-4.5,4.5,0.0,1000.);
+
+   hdcolHitProbLadder1 = fs->make<TProfile>("hdcolHitProbLadder1","dcol hit prob layer 1",13,-6.5,6.5,0.0,1.);
+   hdcolHitMultLadder1 = fs->make<TProfile>("hdcolHitMultLadder1","dcol hit mult layer 1",13,-6.5,6.5,0.0,1000.);
+
+#endif
+
+#ifdef PHI_PROFILES
+   // phi profiles 
+   hclumultxPhi1 = fs->make<TProfile>("hclumultxPhi1","cluster x-size layer 1",700,-3.5,3.5,0.0,100.);
+   hclumultxPhi2 = fs->make<TProfile>("hclumultxPhi2","cluster x-size layer 2",700,-3.5,3.5,0.0,100.);
+   //hclumultxPhi3 = fs->make<TProfile>("hclumultxPhi3","cluster x-size layer 3",700,-28.,28.,0.0,100.);
+   //hclumultxPhi4 = fs->make<TProfile>("hclumultxPhi4","cluster x-size layer 4",700,-28.,28.,0.0,100.);
+
+   hclumultyPhi1 = fs->make<TProfile>("hclumultyPhi1","cluster y-size layer 1",700,-3.5,3.5,0.0,100.);
+   hclumultyPhi2 = fs->make<TProfile>("hclumultyPhi2","cluster y-size layer 2",700,-3.5,3.5,0.0,100.);
+   //hclumultyPhi3 = fs->make<TProfile>("hclumultyPhi3","cluster y-size layer 3",560,-28.,28.,0.0,100.);
+   //hclumultyPhi4 = fs->make<TProfile>("hclumultyPhi4","cluster y-size layer 4",560,-28.,28.,0.0,100.);
+
+   hclucharPhi1 = fs->make<TProfile>("hclucharPhi1","cluster char layer 1",700,-3.5,3.5,0.0,1000.);
+   hclucharPhi2 = fs->make<TProfile>("hclucharPhi2","cluster char layer 2",700,-3.5,3.5,0.0,1000.);
+   //hclucharPhi3 = fs->make<TProfile>("hclucharPhi3","cluster char layer 3",560,-28.,28.,0.0,1000.);
+   //hclucharPhi4 = fs->make<TProfile>("hclucharPhi4","cluster char layer 4",560,-28.,28.,0.0,1000.);
+
+   hpixcharPhi1 = fs->make<TProfile>("hpixcharPhi1","pix char layer 1",700,-3.5,3.5,0.0,1000.);
+   hpixcharPhi2 = fs->make<TProfile>("hpixcharPhi2","pix char layer 2",700,-3.5,3.5,0.0,1000.);
+   //hpixcharPhi3 = fs->make<TProfile>("hpixcharPhi3","pix char layer 3",560,-28.,28.,0.0,1000.);
+   //hpixcharPhi4 = fs->make<TProfile>("hpixcharPhi4","pix char layer 4",560,-28.,28.,0.0,1000.);
+#endif // PHI_PROFILES
+
+#ifdef ROC_RATE
+   hrocMap1 = fs->make<TH2F>("hrocMap1"," ",8*9,-4.5,4.5,2*13,-6.5,6.5);
+   hrocMap1->SetOption("colz");
+   hrocMap2 = fs->make<TH2F>("hrocMap2"," ",8*9,-4.5,4.5,2*29,-14.5,14.5);
+   hrocMap2->SetOption("colz");
+   hrocMap3 = fs->make<TH2F>("hrocMap3"," ",8*9,-4.5,4.5,2*45,-22.5,22.5);
+   hrocMap3->SetOption("colz");
+   hrocMap4 = fs->make<TH2F>("hrocMap4"," ",8*9,-4.5,4.5,2*65,-32.5,32.5);
+   hrocMap4->SetOption("colz");
+
+   hrocSizeXMap1 = fs->make<TProfile2D>("hrocSizeXMap1"," ",8*9,-4.5,4.5,2*13,-6.5,6.5,0.,1000.);
+   hrocSizeXMap1->SetOption("colz");
+   hrocSizeXMap2 = fs->make<TProfile2D>("hrocSizeXMap2"," ",8*9,-4.5,4.5,2*29,-14.5,14.5,0.,1000.);
+   hrocSizeXMap2->SetOption("colz");
+   hrocSizeXMap3 = fs->make<TProfile2D>("hrocSizeXMap3"," ",8*9,-4.5,4.5,2*45,-22.5,22.5,0.,1000.);
+   hrocSizeXMap3->SetOption("colz");
+   hrocSizeXMap4 = fs->make<TProfile2D>("hrocSizeXMap4"," ",8*9,-4.5,4.5,2*65,-32.5,32.5,0.,1000.);
+   hrocSizeXMap4->SetOption("colz");
+
+   hrocSizeYMap1 = fs->make<TProfile2D>("hrocSizeYMap1"," ",8*9,-4.5,4.5,2*13,-6.5,6.5,0.,1000.);
+   hrocSizeYMap1->SetOption("colz");
+   hrocSizeYMap2 = fs->make<TProfile2D>("hrocSizeYMap2"," ",8*9,-4.5,4.5,2*29,-14.5,14.5,0.,1000.);
+   hrocSizeYMap2->SetOption("colz");
+   hrocSizeYMap3 = fs->make<TProfile2D>("hrocSizeYMap3"," ",8*9,-4.5,4.5,2*45,-22.5,22.5,0.,1000.);
+   hrocSizeYMap3->SetOption("colz");
+   hrocSizeYMap4 = fs->make<TProfile2D>("hrocSizeYMap4"," ",8*9,-4.5,4.5,2*65,-32.5,32.5,0.,1000.);
+   hrocSizeYMap4->SetOption("colz");
+
+   hrocClucharMap1 = fs->make<TProfile2D>("hrocClucharMap1"," ",8*9,-4.5,4.5,2*13,-6.5,6.5,0.,1000.);
+   hrocClucharMap1->SetOption("colz");
+   hrocClucharMap2 = fs->make<TProfile2D>("hrocClucharMap2"," ",8*9,-4.5,4.5,2*29,-14.5,14.5,0.,1000.);
+   hrocClucharMap2->SetOption("colz");
+   hrocClucharMap3 = fs->make<TProfile2D>("hrocClucharMap3"," ",8*9,-4.5,4.5,2*45,-22.5,22.5,0.,1000.);
+   hrocClucharMap3->SetOption("colz");
+   hrocClucharMap4 = fs->make<TProfile2D>("hrocClucharMap4"," ",8*9,-4.5,4.5,2*65,-32.5,32.5,0.,1000.);
+   hrocClucharMap4->SetOption("colz");
+
+   hrocPixcharMap1 = fs->make<TProfile2D>("hrocPixcharMap1"," ",8*9,-4.5,4.5,2*13,-6.5,6.5,0.,1000.);
+   hrocPixcharMap1->SetOption("colz");
+   hrocPixcharMap2 = fs->make<TProfile2D>("hrocPixcharMap2"," ",8*9,-4.5,4.5,2*29,-14.5,14.5,0.,1000.);
+   hrocPixcharMap2->SetOption("colz");
+   hrocPixcharMap3 = fs->make<TProfile2D>("hrocPixcharMap3"," ",8*9,-4.5,4.5,2*45,-22.5,22.5,0.,1000.);
+   hrocPixcharMap3->SetOption("colz");
+   hrocPixcharMap4 = fs->make<TProfile2D>("hrocPixcharMap4"," ",8*9,-4.5,4.5,2*65,-32.5,32.5,0.,1000.);
+   hrocPixcharMap4->SetOption("colz");
+   
+   hrocLadder1 = fs->make<TH1D>("hrocLadder1"," ",2*13,-6.5,6.5);
+   hrocZ11 = fs->make<TH1D>("hrocZ11","roc pix occ. l1 inner",8*9,-4.5,4.5);
+   hrocZ12 = fs->make<TH1D>("hrocZ12","roc pix occ. l1 outer",8*9,-4.5,4.5);
+   
+   hpixRocRate1 = fs->make<TH1D>("hpixRocRate1"," ",8*9,-4.5,4.5);
+   hpixRocRate2 = fs->make<TH1D>("hpixRocRate2"," ",8*9,-4.5,4.5);
+   hpixRocRate3 = fs->make<TH1D>("hpixRocRate3"," ",8*9,-4.5,4.5);
+   hpixRocRate4 = fs->make<TH1D>("hpixRocRate4"," ",8*9,-4.5,4.5);
+   hcluRocRate1 = fs->make<TH1D>("hcluRocRate1"," ",8*9,-4.5,4.5);
+   hcluRocRate2 = fs->make<TH1D>("hcluRocRate2"," ",8*9,-4.5,4.5);
+   hcluRocRate3 = fs->make<TH1D>("hcluRocRate3"," ",8*9,-4.5,4.5);
+   hcluRocRate4 = fs->make<TH1D>("hcluRocRate4"," ",8*9,-4.5,4.5);
+#endif
+
+   sizeH = 1000;
+   highH = 3000.; 
+   hclusls = fs->make<TProfile>("hclusls","clus vs ls",sizeH,0.,highH,0.0,50000.);
+   hpixls  = fs->make<TProfile>("hpixls", "pix vs ls ",sizeH,0.,highH,0.0,200000.);
+
+#ifdef PV
+   hpvls = fs->make<TProfile>("hpvls","pvs vs ls",sizeH,0.,highH,0.0,10000.);
+   //hpvlsn = fs->make<TProfile>("hpvlsn","pvs/lumi vs ls",sizeH,0.,highH,0.0,1000.);
+   hpvs   = fs->make<TH1D>("hpvs", "pvs",100,-0.5,99.5);
+   hpixpv  = fs->make<TProfile>("hpixpv","pv vs pix", 100,0.,100,0.0,100000.);
+   hclupv  = fs->make<TProfile>("hclupv","pv vs clus",100,0.,100,0.0,50000.);
+   //hpixbx  = fs->make<TProfile>("hpixbx", "pix vs bx ",4000,-0.5,3999.5,0.0,1000000.);
+   //hclubx  = fs->make<TProfile>("hclubx", "clu vs bx ",4000,-0.5,3999.5,0.0,1000000.);
+   hpvbx   = fs->make<TProfile>("hpvbx",  "pv vs bx ", 4000,-0.5,3999.5,0.0,1000000.);
+   htracks   = fs->make<TH1D>("htracks",  "tracks ", 1000,-0.5,4999.5);
+#endif // PV
+
+   //hcharCluls = fs->make<TProfile>("hcharCluls","clu char vs ls",sizeH,0.,highH,0.0,500.);
+   //hcharPixls = fs->make<TProfile>("hcharPixls","pix char vs ls",sizeH,0.,highH,0.0,500.);
+   //hsizeCluls = fs->make<TProfile>("hsizeCluls","clu size vs ls",sizeH,0.,highH,0.0,300.);
+   //hsizeXCluls= fs->make<TProfile>("hsizeXCluls","clu size-x vs ls",sizeH,0.,highH,0.0,100.);
+   //hcharClubx  = fs->make<TProfile>("hcharClubx", "clu charge vs bx ",4000,-0.5,3999.5,0.0,1000.);
+   //hcharPixbx  = fs->make<TProfile>("hcharPixbx", "pix charge vs bx ",4000,-0.5,3999.5,0.0,1000.);
+   //hsizeClubx  = fs->make<TProfile>("hsizeClubx", "clu size vs bx ",4000,-0.5,3999.5,0.0,1000.);
+   //hsizeYClubx = fs->make<TProfile>("hsizeYClubx", "clu size-y vs bx ",4000,-0.5,3999.5,0.0,1000.);
+   //sizeH = 1000;
+   //highH = 3000.; 
+
+#ifdef MINMAX
+   hcharMin1 = fs->make<TH1D>("hcharMin1","min pix char in a cluster L1",600,0.,60.);
+   hcharMin2 = fs->make<TH1D>("hcharMin2","min pix char in a cluster L2",600,0.,60.);
+   hcharMin3 = fs->make<TH1D>("hcharMin3","min pix char in a cluster L3",600,0.,60.);
+   hcharMin4 = fs->make<TH1D>("hcharMin4","min pix char in a cluster L4",600,0.,60.);
+   hcharMax1 = fs->make<TH1D>("hcharMax1","max pix char in a cluster L1",600,0.,60.);
+   hcharMax2 = fs->make<TH1D>("hcharMax2","max pix char in a cluster L2",600,0.,60.);
+   hcharMax3 = fs->make<TH1D>("hcharMax3","max pix char in a cluster L3",600,0.,60.);
+   hcharMax4 = fs->make<TH1D>("hcharMax4","max pix char in a cluster L4",600,0.,60.);
+#endif
+
+#ifdef NEW_MODULES
+  hsize11 = fs->make<TH1D>( "hsize11", "layer 1 clu size new",sizeH,-0.5,highH);
+  hsize12 = fs->make<TH1D>( "hsize12", "layer 2 clu size new",sizeH,-0.5,highH);
+  hsize13 = fs->make<TH1D>( "hsize13", "layer 3 clu size new",sizeH,-0.5,highH);
+  hsizex11 = fs->make<TH1D>( "hsizex11", "lay1 clu size in x new",
+		      100,-0.5,99.5);
+  hsizex12 = fs->make<TH1D>( "hsizex12", "lay2 clu size in x new",
+		      100,-0.5,99.5);
+  hsizex13 = fs->make<TH1D>( "hsizex13", "lay3 clu size in x new",
+		      100,-0.5,99.5);
+  hsizex13 = fs->make<TH1D>( "hsizex14", "lay4 clu size in x new",
+		      100,-0.5,99.5);
+  hsizey11 = fs->make<TH1D>( "hsizey11", "lay1 clu size in y new",
+		      100,-0.5,99.5);
+  hsizey12 = fs->make<TH1D>( "hsizey12", "lay2 clu size in y new",
+		      100,-0.5,99.5);
+  hsizey13 = fs->make<TH1D>( "hsizey13", "lay3 clu size in y new",
+		      100,-0.5,99.5);
+  hsizey14 = fs->make<TH1D>( "hsizey14", "lay4 clu size in y new",
+		      100,-0.5,99.5);
+#endif
+
+#ifdef L1
+  hl1a    = fs->make<TH1D>("hl1a",   "l1a",   128,-0.5,127.5);
+  hl1t    = fs->make<TH1D>("hl1t",   "l1t",   128,-0.5,127.5);
+  hltt    = fs->make<TH1D>("hltt",   "ltt",   128,-0.5,127.5);
+  hl1t1 = fs->make<TH1D>("hl1t1","l1t1",128,-0.5,127.5);
+  hl1a1 = fs->make<TH1D>("hl1a1","l1a1",128,-0.5,127.5);
+#endif
+#ifdef HLT
+  hlt1 = fs->make<TH1D>("hlt1","hlt1",512,-0.5,511.5);
+  hlt2 = fs->make<TH1D>("hlt2","hlt2",512,-0.5,511.5);
+  hlt3 = fs->make<TH1D>("hlt3","hlt3",512,-0.5,511.5);
+#endif
+  
+#ifdef USE_RESYNCS
+  htest1 = fs->make<TH1D>("htest1","test1",1000,0.,1000.);
+  htest2 = fs->make<TH1D>("htest2","test2",1000,0.,1000.);
+  htest3 = fs->make<TH1D>("htest3","test3",1000,0.,3.0E8);
+  htest4 = fs->make<TH1D>("htest4","test4",1000,0.,3.0E8);
+#endif
+
+#ifdef SINGLE_MODULES
   // Special test hitos for inefficiency effects
   hpixDetMap10 = fs->make<TH2F>( "hpixDetMap10", "pix det layer 1",
 				 416,0.,416.,160,0.,160.);
@@ -1568,141 +1647,156 @@ void PixClusterAna::beginJob() {
   hpixDetMap38 = fs->make<TH2F>( "hpixDetMap38", "pix det layer 3",
 				  416,0.,416.,160,0.,160.);
   hpixDetMap39 = fs->make<TH2F>( "hpixDetMap39", "pix det layer 3",
+				 416,0.,416.,160,0.,160.);
+
+  hpixDetMap40 = fs->make<TH2F>( "hpixDetMap40", "pix det layer 4",
+				 416,0.,416.,160,0.,160.);
+  hpixDetMap41 = fs->make<TH2F>( "hpixDetMap41", "pix det layer 4",
+				 416,0.,416.,160,0.,160.);
+  hpixDetMap42 = fs->make<TH2F>( "hpixDetMap42", "pix det layer 4",
+				 416,0.,416.,160,0.,160.);
+  hpixDetMap43 = fs->make<TH2F>( "hpixDetMap43", "pix det layer 4",
+				 416,0.,416.,160,0.,160.);
+  hpixDetMap44 = fs->make<TH2F>( "hpixDetMap44", "pix det layer 4",
 				  416,0.,416.,160,0.,160.);
+  hpixDetMap45 = fs->make<TH2F>( "hpixDetMap45", "pix det layer 4",
+				  416,0.,416.,160,0.,160.);
+  hpixDetMap46 = fs->make<TH2F>( "hpixDetMap46", "pix det layer 4",
+				  416,0.,416.,160,0.,160.);
+  hpixDetMap47 = fs->make<TH2F>( "hpixDetMap47", "pix det layer 4",
+				  416,0.,416.,160,0.,160.);
+  hpixDetMap48 = fs->make<TH2F>( "hpixDetMap48", "pix det layer 4",
+				  416,0.,416.,160,0.,160.);
+  hpixDetMap49 = fs->make<TH2F>( "hpixDetMap49", "pix det layer 4",
+				  416,0.,416.,160,0.,160.);
+#endif 
 
-   hclumult1 = fs->make<TProfile>("hclumult1","cluster size layer 1",56,-28.,28.,0.0,100.);
-   hclumult2 = fs->make<TProfile>("hclumult2","cluster size layer 2",56,-28.,28.,0.0,100.);
-   hclumult3 = fs->make<TProfile>("hclumult3","cluster size layer 3",56,-28.,28.,0.0,100.);
+#ifdef STUDY_LAY1
+  hcharge111     = fs->make<TH1D>( "hcharge111", "Clu charge l11", 400, 0.,400.);
+  hpixcharge111  = fs->make<TH1D>( "hpixcharge111", "Pix charge l11",400, 0.,100.);
+  hcharge112     = fs->make<TH1D>( "hcharge112", "Clu charge l12", 400, 0.,400.);
+  hpixcharge112  = fs->make<TH1D>( "hpixcharge12", "Pix charge l12",400, 0.,100.);
+  hcharge121     = fs->make<TH1D>( "hcharge121", "Clu charge l21", 400, 0.,400.);
+  hpixcharge121  = fs->make<TH1D>( "hpixcharge121", "Pix charge l21",400, 0.,100.);
+  hcharge122     = fs->make<TH1D>( "hcharge122", "Clu charge l22", 400, 0.,400.);
+  hpixcharge122  = fs->make<TH1D>( "hpixcharge122", "Pix charge l22",400, 0.,100.);
+  hcharge12_1    = fs->make<TH1D>( "hcharge12_1", "Clu charge l2_1", 400, 0.,400.);
+  hpixcharge12_1 = fs->make<TH1D>( "hpixcharge12_1", "Pix charge l2_1",400, 0.,100.);
+  hcharge12_2    = fs->make<TH1D>( "hcharge12_2", "Clu charge l2_2", 400, 0.,400.);
+  hpixcharge12_2 = fs->make<TH1D>( "hpixcharge12_2", "Pix charge l2_2",400, 0.,100.);
+#endif
 
-   hclumultx1 = fs->make<TProfile>("hclumultx1","cluster x-size layer 1",56,-28.,28.,0.0,100.);
-   hclumultx2 = fs->make<TProfile>("hclumultx2","cluster x-size layer 2",56,-28.,28.,0.0,100.);
-   hclumultx3 = fs->make<TProfile>("hclumultx3","cluster x-size layer 3",56,-28.,28.,0.0,100.);
+#ifdef LS_TESTS
+   sizeH = 250;
+   highH =  250.; 
+   hcharClu1ls = fs->make<TProfile>("hcharClu1ls","clu char 1 vs ls",sizeH,0.,highH,0.0,400.);
+   hcharPix1ls = fs->make<TProfile>("hcharPix1ls","pix char 1 vs ls",sizeH,0.,highH,0.0,400.);
+   hsizeClu1ls = fs->make<TProfile>("hsizeClu1ls","clu size 1 vs ls",sizeH,0.,highH,0.0,400.);
+   hcharClu2ls = fs->make<TProfile>("hcharClu2ls","clu char 2 vs ls",sizeH,0.,highH,0.0,400.);
+   hcharPix2ls = fs->make<TProfile>("hcharPix2ls","pix char 2 vs ls",sizeH,0.,highH,0.0,400.);
+   hsizeClu2ls = fs->make<TProfile>("hsizeClu2ls","clu size 2 vs ls",sizeH,0.,highH,0.0,400.);
+   hcharClu3ls = fs->make<TProfile>("hcharClu3ls","clu char 3 vs ls",sizeH,0.,highH,0.0,400.);
+   hcharPix3ls = fs->make<TProfile>("hcharPix3ls","pix char 3 vs ls",sizeH,0.,highH,0.0,400.);
+   hsizeClu3ls = fs->make<TProfile>("hsizeClu3ls","clu size 3 vs ls",sizeH,0.,highH,0.0,400.);
+   hcharClu4ls = fs->make<TProfile>("hcharClu4ls","clu char 4 vs ls",sizeH,0.,highH,0.0,400.);
+   hcharPix4ls = fs->make<TProfile>("hcharPix4ls","pix char 4 vs ls",sizeH,0.,highH,0.0,400.);
+   hsizeClu4ls = fs->make<TProfile>("hsizeClu4ls","clu size 4 vs ls",sizeH,0.,highH,0.0,400.);
 
-   hclumulty1 = fs->make<TProfile>("hclumulty1","cluster y-size layer 1",56,-28.,28.,0.0,100.);
-   hclumulty2 = fs->make<TProfile>("hclumulty2","cluster y-size layer 2",56,-28.,28.,0.0,100.);
-   hclumulty3 = fs->make<TProfile>("hclumulty3","cluster y-size layer 3",56,-28.,28.,0.0,100.);
-
-   hcluchar1 = fs->make<TProfile>("hcluchar1","cluster char layer 1",56,-28.,28.,0.0,1000.);
-   hcluchar2 = fs->make<TProfile>("hcluchar2","cluster char layer 2",56,-28.,28.,0.0,1000.);
-   hcluchar3 = fs->make<TProfile>("hcluchar3","cluster char layer 3",56,-28.,28.,0.0,1000.);
-
-   hpixchar1 = fs->make<TProfile>("hpixchar1","pix char layer 1",56,-28.,28.,0.0,1000.);
-   hpixchar2 = fs->make<TProfile>("hpixchar2","pix char layer 2",56,-28.,28.,0.0,1000.);
-   hpixchar3 = fs->make<TProfile>("hpixchar3","pix char layer 3",56,-28.,28.,0.0,1000.);
-
-
-   sizeH = 1000;
-   highH = 3000.; 
-   hclusls = fs->make<TProfile>("hclusls","clus vs ls",sizeH,0.,highH,0.0,30000.);
-   hpixls  = fs->make<TProfile>("hpixls", "pix vs ls ",sizeH,0.,highH,0.0,100000.);
-   hpvls = fs->make<TProfile>("hpvls","pvs vs ls",sizeH,0.,highH,0.0,10000.);
-   //hpvlsn = fs->make<TProfile>("hpvlsn","pvs/lumi vs ls",sizeH,0.,highH,0.0,1000.);
-
-   hcharCluls = fs->make<TProfile>("hcharCluls","clu char vs ls",sizeH,0.,highH,0.0,300.);
-   hcharPixls = fs->make<TProfile>("hcharPixls","pix char vs ls",sizeH,0.,highH,0.0,300.);
-   hsizeCluls = fs->make<TProfile>("hsizeCluls","clu size vs ls",sizeH,0.,highH,0.0,300.);
-   hsizeXCluls= fs->make<TProfile>("hsizeXCluls","clu size-x vs ls",sizeH,0.,highH,0.0,100.);
-
-   hcharClu1ls = fs->make<TProfile>("hcharClu1ls","clu char 1 vs ls",sizeH,0.,highH,0.0,300.);
-   hcharPix1ls = fs->make<TProfile>("hcharPix1ls","pix char 1 vs ls",sizeH,0.,highH,0.0,300.);
-   hsizeClu1ls = fs->make<TProfile>("hsizeClu1ls","clu size 1 vs ls",sizeH,0.,highH,0.0,300.);
-   hcharClu2ls = fs->make<TProfile>("hcharClu2ls","clu char 2 vs ls",sizeH,0.,highH,0.0,300.);
-   hcharPix2ls = fs->make<TProfile>("hcharPix2ls","pix char 2 vs ls",sizeH,0.,highH,0.0,300.);
-   hsizeClu2ls = fs->make<TProfile>("hsizeClu2ls","clu size 2 vs ls",sizeH,0.,highH,0.0,300.);
-   hcharClu3ls = fs->make<TProfile>("hcharClu3ls","clu char 3 vs ls",sizeH,0.,highH,0.0,300.);
-   hcharPix3ls = fs->make<TProfile>("hcharPix3ls","pix char 3 vs ls",sizeH,0.,highH,0.0,300.);
-   hsizeClu3ls = fs->make<TProfile>("hsizeClu3ls","clu size 3 vs ls",sizeH,0.,highH,0.0,300.);
-   hcharClu4ls = fs->make<TProfile>("hcharClu4ls","clu char 4 vs ls",sizeH,0.,highH,0.0,300.);
-   hcharPix4ls = fs->make<TProfile>("hcharPix4ls","pix char 4 vs ls",sizeH,0.,highH,0.0,300.);
-   hsizeClu4ls = fs->make<TProfile>("hsizeClu4ls","clu size 4 vs ls",sizeH,0.,highH,0.0,300.);
+   hpixb4l  = fs->make<TProfile>("hpixb4l", "pixb4 vs ls ", sizeH,0.,highH,0.0,100000.);
+   hclusb4l = fs->make<TProfile>("hclusb4l","clusb4 vs ls", sizeH,0.,highH,0.0,30000.);
+   hpixb1l  = fs->make<TProfile>("hpixb1l", "pixb1 vs ls", sizeH,0.,highH,0.0,100000.);
+   hclusb1l = fs->make<TProfile>("hclusb1l","clusb1 vs s",sizeH,0.,highH,0.0,30000.);
+   hpixb2l  = fs->make<TProfile>("hpixb2l", "pixb2 vs ls ",sizeH,0.,highH,0.0,100000.);
+   hclusb2l = fs->make<TProfile>("hclusb2l","clusb2 vs ls",sizeH,0.,highH,0.0,30000.);
+   hpixb3l  = fs->make<TProfile>("hpixb3l", "pixb3 vs ls",sizeH,0.,highH,0.0,100000.);
+   hclusb3l = fs->make<TProfile>("hclusb3l","clusb3 vs ls",sizeH,0.,highH,0.0,30000.);
+   hpixfl   = fs->make<TProfile>("hpixfl",  "pixf vs ls", sizeH,0.,highH,0.0,100000.);
+   hclusfl  = fs->make<TProfile>("hclusfl", "clusf vs ls", sizeH,0.,highH,0.0,30000.);
+   hpixfml  = fs->make<TProfile>("hpixfml", "pixfm vs ls",sizeH,0.,highH,0.0,100000.);
+   hclusfml = fs->make<TProfile>("hclusfml","clusfm vs ls",sizeH,0.,highH,0.0,30000.);
+   hpixfpl  = fs->make<TProfile>("hpixfpl", "pixfp vs ls",sizeH,0.,highH,0.0,100000.);
+   hclusfpl = fs->make<TProfile>("hclusfpl","clusfp vs ls",sizeH,0.,highH,0.0,30000.);
+#endif
 
 
-   // sizeH = 100;
-   // highH =  10.; 
-   // hpixbl   = fs->make<TProfile>("hpixbl",  "pixb vs lumi ", sizeH,0.,highH,0.0,100000.);
-   // hclusbl  = fs->make<TProfile>("hclusbl", "clusb vs lumi", sizeH,0.,highH,0.0,30000.);
-   // hpixb1l  = fs->make<TProfile>("hpixb1l", "pixb1 vs lumi", sizeH,0.,highH,0.0,100000.);
-   // hclusb1l = fs->make<TProfile>("hclusb1l","clusb1 vs lumi",sizeH,0.,highH,0.0,30000.);
-   // hpixb2l  = fs->make<TProfile>("hpixb2l", "pixb2 vs lumi ",sizeH,0.,highH,0.0,100000.);
-   // hclusb2l = fs->make<TProfile>("hclusb2l","clusb2 vs lumi",sizeH,0.,highH,0.0,30000.);
-   // hpixb3l  = fs->make<TProfile>("hpixb3l", "pixb3 vs lumi ",sizeH,0.,highH,0.0,100000.);
-   // hclusb3l = fs->make<TProfile>("hclusb3l","clusb3 vs lumi",sizeH,0.,highH,0.0,30000.);
-   // hpixfl   = fs->make<TProfile>("hpixfl",  "pixf vs lumi ", sizeH,0.,highH,0.0,100000.);
-   // hclusfl  = fs->make<TProfile>("hclusfl", "clusf vs lumi", sizeH,0.,highH,0.0,30000.);
-   // hpixfml  = fs->make<TProfile>("hpixfml", "pixfm vs lumi ",sizeH,0.,highH,0.0,100000.);
-   // hclusfml = fs->make<TProfile>("hclusfml","clusfm vs lumi",sizeH,0.,highH,0.0,30000.);
-   // hpixfpl  = fs->make<TProfile>("hpixfpl", "pixfp vs lumi ",sizeH,0.,highH,0.0,100000.);
-   // hclusfpl = fs->make<TProfile>("hclusfpl","clusfp vs lumi",sizeH,0.,highH,0.0,30000.);
-
-   sizeH = 1000;
-   highH = 3000.; 
-   //hpixpvlsn  = fs->make<TProfile>("hpixpvlsn","pix/pv vs ls",sizeH,0.,highH,0.0,100000.);
-   //hclupvlsn  = fs->make<TProfile>("hclupvlsn","clu/pv vs ls",sizeH,0.,highH,0.0,30000.);
-
-   hpixpv  = fs->make<TProfile>("hpixpv","pix vs pv",1000,0.,20000,0.0,1000.);
-   hclupv  = fs->make<TProfile>("hclupv","clu vs pv",1000,0.,10000,0.0,1000.);
-
-   //hintgls  = fs->make<TProfile>("hintgls", "intg lumi vs ls ",sizeH,0.,highH,0.0,10000.);
+#ifdef Lumi
+   hinstbx = fs->make<TProfile>("hinstbx", "inst lumi vs bx ",4000,-0.5,3999.5,0.0,100.);
+   hinst  = fs->make<TH1D>("hinst", "inst lumi",100,0.0,10.);
    hinstls  = fs->make<TProfile>("hinstls", "inst bx lumi vs ls ",sizeH,0.,highH,0.0,1000.);
    hinstlsbx= fs->make<TProfile>("hinstlsbx","inst bx lumi vs ls ",sizeH,0.,highH,0.0,1000.);
-   //hbeam1  = fs->make<TProfile>("hbeam1", "beam1 vs ls ",sizeH,0.,highH,0.0,1000.);
-   //hbeam2  = fs->make<TProfile>("hbeam2", "beam2 vs ls ",sizeH,0.,highH,0.0,1000.);
+#endif 
 
-   hpixbx  = fs->make<TProfile>("hpixbx", "pix vs bx ",4000,-0.5,3999.5,0.0,1000000.);
-   hclubx  = fs->make<TProfile>("hclubx", "clu vs bx ",4000,-0.5,3999.5,0.0,1000000.);
-   hpvbx   = fs->make<TProfile>("hpvbx",  "pv vs bx ", 4000,-0.5,3999.5,0.0,1000000.);
-   //hpixbxn = fs->make<TProfile>("hpixbxn","pix/lumi vs bx ",4000,-0.5,3999.5,0.0,1000000.);
-   //hclubxn = fs->make<TProfile>("hclubxn","clu/lumi vs bx ",4000,-0.5,3999.5,0.0,1000000.);
-   //hpvbxn  = fs->make<TProfile>("hpvbxn", "pv/lumi vs bx ", 4000,-0.5,3999.5,0.0,1000000.);
+#if defined(BX) || defined(BX_NEW)
+   hbx6    = fs->make<TH1D>("hbx6",   "bx",   4000,0,4000.);  
+   hbx5    = fs->make<TH1D>("hbx5",   "bx",   4000,0,4000.);  
+   hbx4    = fs->make<TH1D>("hbx4",   "bx",   4000,0,4000.);  
+   hbx3    = fs->make<TH1D>("hbx3",   "bx",   4000,0,4000.);  
+   hbx2    = fs->make<TH1D>("hbx2",   "bx",   4000,0,4000.);  
+   hbx1    = fs->make<TH1D>("hbx1",   "bx",   4000,0,4000.);  
+   
+   hchargebx1 = fs->make<TH1D>( "hchargebx1", "Clu charge", 100, 0.,highH); //in ke
+   hchargebx2 = fs->make<TH1D>( "hchargebx2", "Clu charge", 100, 0.,highH); //in ke
+   hchargebx3 = fs->make<TH1D>( "hchargebx3", "Clu charge", 100, 0.,highH); //in ke
+   hchargebx4 = fs->make<TH1D>( "hchargebx4", "Clu charge", 100, 0.,highH); //in ke
+   hchargebx5 = fs->make<TH1D>( "hchargebx5", "Clu charge", 100, 0.,highH); //in ke
+   hchargebx6 = fs->make<TH1D>( "hchargebx6", "Clu charge", 100, 0.,highH); //in ke
+   sizeH=400; // 600
+   highH = 100.0; // charge limit in kelec
+   hpixChargebx1 = fs->make<TH1D>( "hpixChargebx1", "Pix charge", sizeH, 0.,highH); //in ke
+   hpixChargebx2 = fs->make<TH1D>( "hpixChargebx2", "Pix charge", sizeH, 0.,highH); //in ke
+   hpixChargebx3 = fs->make<TH1D>( "hpixChargebx3", "Pix charge", sizeH, 0.,highH); //in ke
+   hpixChargebx3 = fs->make<TH1D>( "hpixChargebx4", "Pix charge", sizeH, 0.,highH); //in ke
+   hpixChargebx5 = fs->make<TH1D>( "hpixChargebx5", "Pix charge", sizeH, 0.,highH); //in ke
+   hpixChargebx6 = fs->make<TH1D>( "hpixChargebx6", "Pix charge", sizeH, 0.,highH); //in ke
+   
+   sizeH=200;
+   highH = 199.5; // charge limit in kelec
+   hsizebx1 = fs->make<TH1D>( "hsizebx1", "clu size",sizeH,-0.5,highH);
+   hsizebx2 = fs->make<TH1D>( "hsizebx2", "clu size",sizeH,-0.5,highH);
+   hsizebx3 = fs->make<TH1D>( "hsizebx3", "clu size",sizeH,-0.5,highH);
+   hsizebx5 = fs->make<TH1D>( "hsizebx5", "clu size",sizeH,-0.5,highH);
+   hsizebx6 = fs->make<TH1D>( "hsizebx6", "clu size",sizeH,-0.5,highH);
+#endif
 
-   hcharClubx  = fs->make<TProfile>("hcharClubx", "clu charge vs bx ",4000,-0.5,3999.5,0.0,100.);
-   hcharPixbx  = fs->make<TProfile>("hcharPixbx", "pix charge vs bx ",4000,-0.5,3999.5,0.0,100.);
-   hsizeClubx  = fs->make<TProfile>("hsizeClubx", "clu size vs bx ",4000,-0.5,3999.5,0.0,1000.);
-   hsizeYClubx = fs->make<TProfile>("hsizeYClubx", "clu size-y vs bx ",4000,-0.5,3999.5,0.0,1000.);
+#ifdef BX_TESTS
+   hpix1bx  = fs->make<TProfile>("hpix1bx", "l1 pix vs bx ",4000,-0.5,3999.5,0.0,1000000.);
+   hclu1bx  = fs->make<TProfile>("hclu1bx", "l1 clu vs bx ",4000,-0.5,3999.5,0.0,1000000.);
+   hcharClu1bx  = fs->make<TProfile>("hcharClu1bx", "l1 clu charge vs bx ",4000,-0.5,3999.5,0.0,1000.);
+   hcharPix1bx  = fs->make<TProfile>("hcharPix1bx", "l1 pix charge vs bx ",4000,-0.5,3999.5,0.0,1000.);
+   hsizeClu1bx  = fs->make<TProfile>("hsizeClu1bx", "l1 clu size vs bx ",4000,-0.5,3999.5,0.0,1000.);
 
-   hinstbx = fs->make<TProfile>("hinstbx", "inst lumi vs bx ",4000,-0.5,3999.5,0.0,100.);
+   hpix2bx  = fs->make<TProfile>("hpix2bx", "l2 pix vs bx ",4000,-0.5,3999.5,0.0,1000000.);
+   hclu2bx  = fs->make<TProfile>("hclu2bx", "l2 clu vs bx ",4000,-0.5,3999.5,0.0,1000000.);
+   hcharClu2bx  = fs->make<TProfile>("hcharClu2bx", "l2 clu charge vs bx ",4000,-0.5,3999.5,0.0,1000.);
+   hcharPix2bx  = fs->make<TProfile>("hcharPix2bx", "l2 pix charge vs bx ",4000,-0.5,3999.5,0.0,1000.);
+   hsizeClu2bx  = fs->make<TProfile>("hsizeClu2bx", "l2 clu size vs bx ",4000,-0.5,3999.5,0.0,1000.);
 
-   //hcluLumi = fs->make<TProfile>("hcluLumi", "clus vs inst lumi",100,0.0,10.,0.0,100000.);
-   //hpixLumi = fs->make<TProfile>("hpixLumi", "pixs vs inst lumi",100,0.0,10.,0.0,100000.);
-   //hcharCluLumi = fs->make<TProfile>("hcharCluLumi", "clu char vs inst lumi",100,0.0,10.,0.0,100.);
-   //hcharPixLumi = fs->make<TProfile>("hcharPixLumi", "pix char vs inst lumi",100,0.0,10.,0.0,100.);
-   //hsizeCluLumi = fs->make<TProfile>("hsizeCluLumi", "clu size vs inst lumi",100,0.0,10.,0.0,100.);
-   //hsizeXCluLumi = fs->make<TProfile>("hsizeXCluLumi", "clu size-x vs inst lumi",100,0.0,10.,0.0,100.);
-   //hsizeYCluLumi = fs->make<TProfile>("hsizeYCluLumi", "clu size-y vs inst lumi",100,0.0,10.,0.0,100.);
+   hpix3bx  = fs->make<TProfile>("hpix3bx", "l3 pix vs bx ",4000,-0.5,3999.5,0.0,1000000.);
+   hclu3bx  = fs->make<TProfile>("hclu3bx", "l3 clu vs bx ",4000,-0.5,3999.5,0.0,1000000.);
+   hcharClu3bx  = fs->make<TProfile>("hcharClu3bx", "l3 clu charge vs bx ",4000,-0.5,3999.5,0.0,1000.);
+   hcharPix3bx  = fs->make<TProfile>("hcharPix3bx", "l3 pix charge vs bx ",4000,-0.5,3999.5,0.0,1000.);
+   hsizeClu3bx  = fs->make<TProfile>("hsizeClu3bx", "l3 clu size vs bx ",4000,-0.5,3999.5,0.0,1000.);
 
-   //hclusls2 = fs->make<TH2F>("hclusls2","clus bs ls", 300,0.,900.,100,0.,5000.);
-   //hpixls2  = fs->make<TH2F>("hpixls2", "pix per ls ",300,0.,900.,100,0.,20000.);
-   //h2pixpv  = fs->make<TH2F>("h2pixpv","pix vs pv",100,0.,40000, 25,0.0,50.);
-   //h2clupv  = fs->make<TH2F>("h2clupv","clu vs pv",100,0.,20000, 25,0.0,50.);
-
-   //hclusls1 = fs->make<TH1D>("hclusls1","av clus/lumi",200,0.,2000.);
-   //hpixls1  = fs->make<TH1D>("hpixls1", "av pix/lumi ",500,0.,5000.);
-
-   //hintg  = fs->make<TH1D>("hintg", "intg lumi",100,0.0,1000.);
-   hinst  = fs->make<TH1D>("hinst", "inst lumi",100,0.0,10.);
-   hpvs   = fs->make<TH1D>("hpvs", "pvs",100,-0.5,99.5);
-
-  hrocMap1 = fs->make<TH2F>("hrocMap1"," ",8*9,-4.5,4.5,2*21,-10.5,10.5);
-  hrocMap1->SetOption("colz");
-  hrocMap2 = fs->make<TH2F>("hrocMap2"," ",8*9,-4.5,4.5,2*33,-16.5,16.5);
-  hrocMap2->SetOption("colz");
-  hrocMap3 = fs->make<TH2F>("hrocMap3"," ",8*9,-4.5,4.5,2*45,-22.5,22.5);
-  hrocMap3->SetOption("colz");
-
+   hpix4bx  = fs->make<TProfile>("hpix4bx", "l4 pix vs bx ",4000,-0.5,3999.5,0.0,1000000.);
+   hclu4bx  = fs->make<TProfile>("hclu4bx", "l4 clu vs bx ",4000,-0.5,3999.5,0.0,1000000.);
+   hcharClu4bx  = fs->make<TProfile>("hcharClu4bx", "l4 clu charge vs bx ",4000,-0.5,3999.5,0.0,1000.);
+   hcharPix4bx  = fs->make<TProfile>("hcharPix4bx", "l4 pix charge vs bx ",4000,-0.5,3999.5,0.0,1000.);
+   hsizeClu4bx  = fs->make<TProfile>("hsizeClu4bx", "l4 clu size vs bx ",4000,-0.5,3999.5,0.0,1000.);
+#endif
 
 #ifdef VDM_STUDIES
-   hcharCluls1 = fs->make<TProfile>("hcharCluls1","clu char vs ls",sizeH,0.,highH,0.0,100.);
-   hcharPixls1 = fs->make<TProfile>("hcharPixls1","pix char vs ls",sizeH,0.,highH,0.0,100.);
+   hcharCluls1 = fs->make<TProfile>("hcharCluls1","clu char vs ls",sizeH,0.,highH,0.0,1000.);
+   hcharPixls1 = fs->make<TProfile>("hcharPixls1","pix char vs ls",sizeH,0.,highH,0.0,1000.);
    hsizeCluls1 = fs->make<TProfile>("hsizeCluls1","clu size vs ls",sizeH,0.,highH,0.0,1000.);
-   hsizeXCluls1= fs->make<TProfile>("hsizeXCluls1","clu size-x vs ls",sizeH,0.,highH,0.0,100.);
-   hcharCluls2 = fs->make<TProfile>("hcharCluls2","clu char vs ls",sizeH,0.,highH,0.0,100.);
-   hcharPixls2 = fs->make<TProfile>("hcharPixls2","pix char vs ls",sizeH,0.,highH,0.0,100.);
+   hsizeXCluls1= fs->make<TProfile>("hsizeXCluls1","clu size-x vs ls",sizeH,0.,highH,0.0,1000.);
+   hcharCluls2 = fs->make<TProfile>("hcharCluls2","clu char vs ls",sizeH,0.,highH,0.0,1000.);
+   hcharPixls2 = fs->make<TProfile>("hcharPixls2","pix char vs ls",sizeH,0.,highH,0.0,1000.);
    hsizeCluls2 = fs->make<TProfile>("hsizeCluls2","clu size vs ls",sizeH,0.,highH,0.0,1000.);
-   hsizeXCluls2= fs->make<TProfile>("hsizeXCluls2","clu size-x vs ls",sizeH,0.,highH,0.0,100.);
-   hcharCluls3 = fs->make<TProfile>("hcharCluls3","clu char vs ls",sizeH,0.,highH,0.0,100.);
-   hcharPixls3 = fs->make<TProfile>("hcharPixls3","pix char vs ls",sizeH,0.,highH,0.0,100.);
+   hsizeXCluls2= fs->make<TProfile>("hsizeXCluls2","clu size-x vs ls",sizeH,0.,highH,0.0,1000.);
+   hcharCluls3 = fs->make<TProfile>("hcharCluls3","clu char vs ls",sizeH,0.,highH,0.0,1000.);
+   hcharPixls3 = fs->make<TProfile>("hcharPixls3","pix char vs ls",sizeH,0.,highH,0.0,1000.);
    hsizeCluls3 = fs->make<TProfile>("hsizeCluls3","clu size vs ls",sizeH,0.,highH,0.0,1000.);
-   hsizeXCluls3= fs->make<TProfile>("hsizeXCluls3","clu size-x vs ls",sizeH,0.,highH,0.0,100.);
+   hsizeXCluls3= fs->make<TProfile>("hsizeXCluls3","clu size-x vs ls",sizeH,0.,highH,0.0,1000.);
    hclusls1 = fs->make<TProfile>("hclusls1","clus vs ls",sizeH,0.,highH,0.0,30000.);
    hpixls1  = fs->make<TProfile>("hpixls1", "pix vs ls ",sizeH,0.,highH,0.0,100000.);
    hclusls2 = fs->make<TProfile>("hclusls2","clus vs ls",sizeH,0.,highH,0.0,30000.);
@@ -1711,39 +1805,17 @@ void PixClusterAna::beginJob() {
    hpixls3  = fs->make<TProfile>("hpixls3", "pix vs ls ",sizeH,0.,highH,0.0,100000.);
 #endif // VDM_STUDIES
 
-#ifdef INSTLUMI_STUDIES
-   hcluslsn = fs->make<TProfile>("hcluslsn","clus/lumi",sizeH,0.,highH,0.0,30000.);
-   hpixlsn  = fs->make<TProfile>("hpixlsn", "pix/lumi ",sizeH,0.,highH,0.0,100000.);
-   sizeH = 100;
-   highH =  10.; 
-   hpixbl   = fs->make<TProfile>("hpixbl",  "pixb vs lumi ", sizeH,0.,highH,0.0,100000.);
-   hclusbl  = fs->make<TProfile>("hclusbl", "clusb vs lumi", sizeH,0.,highH,0.0,30000.);
-   hpixb1l  = fs->make<TProfile>("hpixb1l", "pixb1 vs lumi", sizeH,0.,highH,0.0,100000.);
-   hclusb1l = fs->make<TProfile>("hclusb1l","clusb1 vs lumi",sizeH,0.,highH,0.0,30000.);
-   hpixb2l  = fs->make<TProfile>("hpixb2l", "pixb2 vs lumi ",sizeH,0.,highH,0.0,100000.);
-   hclusb2l = fs->make<TProfile>("hclusb2l","clusb2 vs lumi",sizeH,0.,highH,0.0,30000.);
-   hpixb3l  = fs->make<TProfile>("hpixb3l", "pixb3 vs lumi ",sizeH,0.,highH,0.0,100000.);
-   hclusb3l = fs->make<TProfile>("hclusb3l","clusb3 vs lumi",sizeH,0.,highH,0.0,30000.);
-   hpixfl   = fs->make<TProfile>("hpixfl",  "pixf vs lumi ", sizeH,0.,highH,0.0,100000.);
-   hclusfl  = fs->make<TProfile>("hclusfl", "clusf vs lumi", sizeH,0.,highH,0.0,30000.);
-   hpixfml  = fs->make<TProfile>("hpixfml", "pixfm vs lumi ",sizeH,0.,highH,0.0,100000.);
-   hclusfml = fs->make<TProfile>("hclusfml","clusfm vs lumi",sizeH,0.,highH,0.0,30000.);
-   hpixfpl  = fs->make<TProfile>("hpixfpl", "pixfp vs lumi ",sizeH,0.,highH,0.0,100000.);
-   hclusfpl = fs->make<TProfile>("hclusfpl","clusfp vs lumi",sizeH,0.,highH,0.0,30000.);
-
-   hpixbxn = fs->make<TProfile>("hpixbxn","pix/lumi vs bx ",4000,-0.5,3999.5,0.0,1000000.);
-   hclubxn = fs->make<TProfile>("hclubxn","clu/lumi vs bx ",4000,-0.5,3999.5,0.0,1000000.);
-   hpvbxn  = fs->make<TProfile>("hpvbxn", "pv/lumi vs bx ", 4000,-0.5,3999.5,0.0,1000000.);
-#endif // INSTLUMI_STUDIES
 
 #ifdef ROC_EFF
   // dets with bad rocs
-  hbadMap1 = fs->make<TH2F>("hbadMap1"," ",9,-4.5,4.5,21,-10.5,10.5);
+  hbadMap1 = fs->make<TH2F>("hbadMap1"," ",9,-4.5,4.5,13,-6.5,6.5);
   hbadMap1->SetOption("colz");
-  hbadMap2 = fs->make<TH2F>("hbadMap2"," ",9,-4.5,4.5,33,-16.5,16.5);
+  hbadMap2 = fs->make<TH2F>("hbadMap2"," ",9,-4.5,4.5,29,-14.5,14.5);
   hbadMap2->SetOption("colz");
   hbadMap3 = fs->make<TH2F>("hbadMap3"," ",9,-4.5,4.5,45,-22.5,22.5);
   hbadMap3->SetOption("colz");
+  hbadMap4 = fs->make<TH2F>("hbadMap4"," ",9,-4.5,4.5,65,-32.5,32.5);
+  hbadMap4->SetOption("colz");
 
   hrocHits1ls = fs->make<TH2F>("hrocHits1ls"," ",1000,0.,3000.,10,0.,10.);
   hrocHits1ls->SetOption("colz");
@@ -1768,6 +1840,10 @@ void PixClusterAna::beginJob() {
 
 #endif // ROC_EFF
 
+#ifdef TEST_GEOM
+   hbpixXY = fs->make<TH2F>("hbpixXY","bpix XY",180,-18.,18.,180,-18.,18.);
+#endif
+
 #ifdef HF
   hhf = fs->make<TH1D>("hhf"," HF ",2000,0.,20000.);
   hclushf = fs->make<TH2F>("hclushf"," HF versus clusters",100,0.,10000.,100,0.,20000.);
@@ -1783,39 +1859,88 @@ void PixClusterAna::beginJob() {
   hbxhfp = fs->make<TProfile>("hbxhfp"," HF versus bx",4000,0.,4000.,0.,20000.);
 #endif
 
+
+#ifdef LAY1_SPLIT
+
+
+  sizeH= 400;
+  lowH = 0.;
+  highH = 400.0; // charge limit in kelec
+  //TH1D *hcharge1InR12,*hcharge1InR34,*hcharge1OutR12,*hcharge1OutR34; 
+  hcharge1InR12  = fs->make<TH1D>( "hcharge1InR12",  "Clu charge l1 in ring12",  sizeH, 0.,highH); //in ke
+  hcharge1InR34  = fs->make<TH1D>( "hcharge1InR34",  "Clu charge l1 in ring34",  sizeH, 0.,highH); //in ke
+  hcharge1OutR12 = fs->make<TH1D>( "hcharge1OutR12", "Clu charge l1 out ring12", sizeH, 0.,highH); //in ke
+  hcharge1OutR34 = fs->make<TH1D>( "hcharge1OutR34", "Clu charge l1 out ring34", sizeH, 0.,highH); //in ke
+
+  sizeH=  400; // 600
+  highH = 100.0; // charge limit in kelec
+  //TH1D *hpixcharge1InR12,*hpixcharge1InR34,*hpixcharge1OutR12,*hpixcharge1OutR34; 
+  hpixcharge1InR12  = fs->make<TH1D>( "hpixcharge1InR12",  "Pix charge l1 in  ring12",sizeH, 0.,highH);//in ke
+  hpixcharge1InR34  = fs->make<TH1D>( "hpixcharge1InR34",  "Pix charge l1 out ring34",sizeH, 0.,highH);//in ke
+  hpixcharge1OutR12 = fs->make<TH1D>( "hpixcharge1OutR12", "Pix charge l1 in  ring12",sizeH, 0.,highH);//in ke
+  hpixcharge1OutR34 = fs->make<TH1D>( "hpixcharge1OutR34", "Pix charge l1 out ring34",sizeH, 0.,highH);//in ke
+
+  sizeH=300;
+  highH = 299.5; // charge limit in kelec
+  //TH1D *hsize1InR12,*hsize1InR34,*hsize1OutR12,*hsize1OutR34; 
+  //TH1D *hsizex1InR12,*hsizex1InR34,*hsizex1OutR12,*hsizex1OutR34; 
+  //TH1D *hsizey1InR12,*hsizey1InR34,*hsizey1OutR12,*hsizey1OutR34; 
+  hsize1InR12  = fs->make<TH1D>( "hsize1InR12",  "layer 1 clu size in R12", sizeH,-0.5,highH);
+  hsize1InR34  = fs->make<TH1D>( "hsize1InR34",  "layer 1 clu size in R34", sizeH,-0.5,highH);
+  hsize1OutR12 = fs->make<TH1D>( "hsize1OutR12", "layer 1 clu size out R12",sizeH,-0.5,highH);
+  hsize1OutR34 = fs->make<TH1D>( "hsize1OutR34", "layer 1 clu size out R34",sizeH,-0.5,highH);
+
+  hsizex1InR12   = fs->make<TH1D>( "hsizex1InR12",  "layer 1 clu sizex in R12", 100,-0.5,99.5);
+  hsizex1InR34   = fs->make<TH1D>( "hsizex1InR34",  "layer 1 clu sizex in R34", 100,-0.5,99.5);
+  hsizex1OutR12  = fs->make<TH1D>( "hsizex1Ou1R12", "layer 1 clu sizex out R12",100,-0.5,99.5);
+  hsizex1OutR34  = fs->make<TH1D>( "hsizex1OutR34", "layer 1 clu sizex out R34",100,-0.5,99.5);
+
+  hsizey1InR12  = fs->make<TH1D>( "hsizey1InR12",  "layer 1 clu sizey in R12", 100,-0.5,99.5);
+  hsizey1InR34  = fs->make<TH1D>( "hsizey1InR34",  "layer 1 clu sizey in R34", 100,-0.5,99.5);
+  hsizey1OutR12 = fs->make<TH1D>( "hsizey1OutR12", "layer 1 clu sizey out R12",100,-0.5,99.5);
+  hsizey1OutR34 = fs->make<TH1D>( "hsizey1OutR34", "layer 1 clu sizey out R34",100,-0.5,99.5);
+#endif
+
+#ifdef STUDY_ONEMOD
+  hsizeMap1 = fs->make<TProfile2D>("hsizeMap1", "clus size, module in L1",
+                                    416,0.,416.,160,0.,160.,0.,10000.);
+  hsizeMap1->SetOption("colz");
+  hsizeXMap1 = fs->make<TProfile2D>("hsizeXMap1", "clus sizeX, module in L1",
+                                    416,0.,416.,160,0.,160.,0.,10000.);
+  hsizeXMap1->SetOption("colz");
+  hsizeYMap1 = fs->make<TProfile2D>("hsizeYMap1", "clus sizeY, module in L1",
+                                    416,0.,416.,160,0.,160.,0.,10000.);
+  hsizeYMap1->SetOption("colz");
+  hclucharMap1 = fs->make<TProfile2D>("hclucharMap1", "clus char, module in L1",
+                                    416,0.,416.,160,0.,160.,0.,10000.);
+  hclucharMap1->SetOption("colz");
+  hpixcharMap1 = fs->make<TProfile2D>("hpixcharMap1", "pix char, module in L1",
+                                    416,0.,416.,160,0.,160.,0.,10000.);
+  hpixcharMap1->SetOption("colz");
+#endif
+
   countEvents=0;
   countAllEvents=0;
   sumClusters=0., sumPixels=0.;
   countLumi = 0.;
 
-  //for(int ilayer = 0; ilayer<3; ++ilayer) 
-  //for(int id=0;id<10;++id) {rocHits[ilayer][id]=0.; moduleHits[ilayer][id]=0.;}
+#ifdef SINGLE_MODULES
+  for(int i=0; i<40;++i) eventFlag[i]=true;
+#endif
 
 #ifdef ROC_EFF
   // Analyze single pixel efficiency
   pixEff = new rocEfficiency();
 #endif
 
-#ifdef BX
-  getbx = new getBX();
-#endif
-
 #ifdef Lumi
   lumiCorrector = new LumiCorrector();
-#endif
-
-#ifdef NEW_MODULES
-  for(int i=0; i<9; ++i) l1New.push_back(bpi1[i]);
-  for(int i=0; i<18; ++i) l2New.push_back(bpi2[i]);
-  for(int i=0; i<14; ++i) l3New.push_back(bpi3[i]);
-  for(int i=0; i<1; ++i) l2New.push_back(bmi2[i]);
-  for(int i=0; i<6; ++i) l3New.push_back(bmi3[i]);
 #endif
 
 }
 // ------------ method called to at the end of the job  ------------
 void PixClusterAna::endJob(){
-  double norm = 1;
+  double norm = 1, norm1=1, norm2=1, norm3=1,norm4=1;
   cout << " End PixClusterAna, events all/with hits=  " 
        << countAllEvents<<"/"<<countEvents<<endl;
 
@@ -1827,11 +1952,14 @@ void PixClusterAna::endJob(){
     sumClusters = sumClusters/float(countEvents);
     sumPixels = sumPixels/float(countEvents);
     norm = 1./float(countEvents);
+    norm1 = norm/12.; // normalisation for module per ring
+    norm2 = norm/28.;
+    norm3 = norm/44.;
+    norm4 = norm/64.;
   }
 
 
   cout <<" clus/pix per full event "<<sumClusters<<"/"<<sumPixels<<endl;
-  cout<<" 2D plots are rescaled by the number of full events "<<countEvents<<endl;
 
   //countLumi /= 1000.;
   //double c1=0, c2=0;
@@ -1839,29 +1967,110 @@ void PixClusterAna::endJob(){
   //if(c3>0.) {c1=sumClusters/c3; c2=sumPixels/c3;}
   //cout<<" Lumi = "<<countLumi<<" still the /10 bug? "<<"clu and pix per lumi unit"<<c1<<" "<<c2<<endl;
   
-  if(countEvents==0) return;
+  if(!Normalise || countEvents==0) return;
 
+  cout<<" 2D plots are rescaled by the number of full events "<<countEvents<<endl;
   //Divide the size histos
-  hsizeDetMap1->Divide(hsizeDetMap1,hDetMap1,1.,1.);
-  hsizeDetMap2->Divide(hsizeDetMap2,hDetMap2,1.,1.);
-  hsizeDetMap3->Divide(hsizeDetMap3,hDetMap3,1.,1.);
+  hsizeDets1->Divide(hsizeDets1,hcluDets1,1.,1.);
+  hsizeDets2->Divide(hsizeDets2,hcluDets2,1.,1.);
+  hsizeDets3->Divide(hsizeDets3,hcluDets3,1.,1.);
+  hsizeDets4->Divide(hsizeDets4,hcluDets4,1.,1.);
+
+  // rescale if histos 
+  hladder1id->Scale(norm/8.);
+  hladder2id->Scale(norm/8.);
+  hladder3id->Scale(norm/8.);
+  hladder4id->Scale(norm/8.);
+
+  hz1id->Scale(norm1);
+  hz2id->Scale(norm2);
+  hz3id->Scale(norm3);
+  hz4id->Scale(norm4);
+
+  hpladder1id->Scale(norm/8.);
+  hpladder2id->Scale(norm/8.);
+  hpladder3id->Scale(norm/8.);
+  hpladder4id->Scale(norm/8.);
+
+  hpz1id->Scale(norm1);
+  hpz2id->Scale(norm2);
+  hpz3id->Scale(norm3);
+  hpz4id->Scale(norm4);
+
+  hpcols1->Scale(norm);
+  hpcols2->Scale(norm);
+  hpcols3->Scale(norm);
+  hpcols4->Scale(norm);
+  hprows1->Scale(norm);
+  hprows2->Scale(norm);
+  hprows3->Scale(norm);
+  hprows4->Scale(norm);
+
+  hcols1->Scale(norm);
+  hcols2->Scale(norm);
+  hcols3->Scale(norm);
+  hcols4->Scale(norm);
+  hrows1->Scale(norm);
+  hrows2->Scale(norm);
+  hrows3->Scale(norm);
+  hrows4->Scale(norm);
 
   // Rescale all 2D plots
-  hDetsMap1->Scale(norm);
-  hDetsMap2->Scale(norm);
-  hDetsMap3->Scale(norm);
-  hDetMap1->Scale(norm);
-  hDetMap2->Scale(norm);
-  hDetMap3->Scale(norm);
-  hpDetMap1->Scale(norm);
-  hpDetMap2->Scale(norm);
-  hpDetMap3->Scale(norm);
+  hDets1->Scale(norm);
+  hDets2->Scale(norm);
+  hDets3->Scale(norm);
+  hDets4->Scale(norm);
+  hcluDets1->Scale(norm);
+  hcluDets2->Scale(norm);
+  hcluDets3->Scale(norm);
+  hcluDets4->Scale(norm);
+  hpixDets1->Scale(norm);
+  hpixDets2->Scale(norm);
+  hpixDets3->Scale(norm);
+  hpixDets4->Scale(norm);
   hpixDetMap1->Scale(norm);
   hpixDetMap2->Scale(norm);
   hpixDetMap3->Scale(norm);
+  hpixDetMap4->Scale(norm);
   hcluDetMap1->Scale(norm);
   hcluDetMap2->Scale(norm);
   hcluDetMap3->Scale(norm);
+  hcluDetMap4->Scale(norm);
+
+  hgz1->Scale(norm1); // normalize to modules in a ring
+  hgz2->Scale(norm2);
+  hgz3->Scale(norm3);
+  hgz4->Scale(norm4);
+
+  hpixz1->Scale(norm1);
+  hpixz2->Scale(norm2);
+  hpixz3->Scale(norm3);
+  hpixz4->Scale(norm4);
+
+#ifdef ROC_RATE
+  hrocMap1->Scale(norm);
+  hrocMap2->Scale(norm);
+  hrocMap3->Scale(norm);
+  hrocMap4->Scale(norm);
+
+  hpixRocRate1->Scale(norm1/2.); // nptmalize to roc
+  hpixRocRate2->Scale(norm2/2.);
+  hpixRocRate3->Scale(norm3/2.);
+  hpixRocRate4->Scale(norm4/2.);
+  hcluRocRate1->Scale(norm1/2.);
+  hcluRocRate2->Scale(norm2/2.);
+  hcluRocRate3->Scale(norm3/2.);
+  hcluRocRate4->Scale(norm4/2.);
+
+  hrocLadder1->Scale(norm/64.); // 8 modules in a ladder, 8 rocs in z per module  
+  hrocZ11->Scale(norm1); // only in or outer ladder so 2 times less 
+  hrocZ12->Scale(norm1);
+#endif
+
+#ifdef TESTING_ADC
+  hpixDetsT1->Scale(norm);
+  hpixDetMap1->Scale(norm);
+#endif
 
 #ifdef ROC_EFF
   // Do this only if there is enough statistics
@@ -2024,11 +2233,9 @@ void PixClusterAna::analyze(const edm::Event& e,
   using namespace edm;
   //const int MAX_CUT = 1000000; unused
   const int selectEvent = -1;
-  //bool select = false; unused
-  static int runNumberOld=-1;
-  static int countRuns=0;
-  //static double pixsum = 0., clussum=0.;
-  //static int nsum = 0, lsold=-999, lumiold=0.;
+  bool select = false;
+  //static int runNumberOld=-1;
+  //static int countRuns=0;
 
   // Get event setup 
   edm::ESHandle<TrackerGeometry> geom;
@@ -2049,7 +2256,7 @@ void PixClusterAna::analyze(const edm::Event& e,
   //if(lumiBlock<127) return;
   //if(event!=3787937) return;
 
-  float instlumi=0;
+  //float instlumi=0;
   //int beamint1=0, beamint2=0;
 
 #ifdef Lumi
@@ -2115,7 +2322,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 #ifdef PV
   // PVs
   int numPVsGood = 0;
-  if(run>165000) { // skip for earlier runs, crashes
+  if(useTracks && run>165000) { // skip for earlier runs, crashes
     edm::Handle<reco::VertexCollection> vertices;
     //e.getByLabel( "offlinePrimaryVertices", vertices );
     e.getByToken(VertexCollectionToken, vertices);
@@ -2148,22 +2355,18 @@ void PixClusterAna::analyze(const edm::Event& e,
       //hpvlsn->Fill(float(lumiBlock),tmp);
     //}
   } // if run
+
+  // Tracks
+  int numOfTracks=0;
+  if(useTracks) {
+    Handle<reco::TrackCollection> recTracks;
+    e.getByToken(TrackToken, recTracks);
+    numOfTracks = recTracks->size();
+    htracks->Fill(float(numOfTracks));
+    if(PRINT) cout<<" Tracks "<<numOfTracks<<endl;
+  }
 #endif // PV 
     
-#ifdef BX
-  //cout<<" for bx "<<bx<<endl;
-  int bxId = getbx->find(bx);  // get the bunch type 
-  // select special events only 
-  if(select2>0 && select2<11) {
-    // skip events which are not single beams, only if select2=2 
-    if( (select2==2) && (bxId!=1) && (bxId!=2) ) return;
-    // skip events which are not collisions 
-    if( (select2==1) && (bxId!=3) ) return;
-    // skip events which are not cempty
-    if( (select2==6) && (bxId!=0) ) return;
-    //cout<<" id is "<<bxId<<" "<<bx<<endl;
-  }
-#endif // BX
 
 #ifdef BX_NEW
   //cout<<" for bx "<<bx<<endl;
@@ -2211,8 +2414,8 @@ void PixClusterAna::analyze(const edm::Event& e,
   //cout<<"run "<<run<<" event "<<event<<" bx "<<bx<<" lumi "<<lumiBlock<<" orbit "<<orbit<<" "
   //  <<numOf<<" lumi "<<instlumi<<endl;  
 
-  if(PRINT) cout<<"run "<<run<<" event "<<event<<" bx "<<bx<<" lumi "<<lumiBlock<<" orbit "<<orbit<<" "
-		<<numOf<<" lumi "<<instlumi<<endl;  
+  if(PRINT) cout<<"run "<<run<<" event "<<event<<" bx "<<bx<<" ls "<<lumiBlock<<" orbit "<<orbit<<" "
+		<<numOf<<endl;  
 
   // For L1 
   //bool bit0=false; // , bit126=false, bit121=false,bit122=false;
@@ -2287,11 +2490,10 @@ void PixClusterAna::analyze(const edm::Event& e,
   //---------------------------------------
   // Analyse HLT
   //bool passHLT1=false,passHLT2=false,passHLT3=false,passHLT4=false,passHLT5=false;
+#ifdef HLT
   const int hltSize = 1024;
   bool hlt[hltSize];
   for(int i=0;i<hltSize;++i) hlt[i]=false;
-
-#ifdef HLT
 
   edm::TriggerNames TrigNames;
   edm::Handle<edm::TriggerResults> HLTResults;
@@ -2361,45 +2563,67 @@ void PixClusterAna::analyze(const edm::Event& e,
   //----------------------------------------------
   hdets->Fill(float(numOf)); // number of modules with pix
 
-  // Select events with pixels
-  //if(numOf<1) return; // skip events with  pixel dets
+  // Select events if select1>0
+  if(select1>0) {
+    // skip events with few pixel dets
+    if(select1==1) { if(numOf<select2) return; } 
+    // select events only for a defined bx
+    else if(select1==2) { if(bx != select2) return; } 
+    else if(select1==3) { if(bx == select2) return; } 
+    //else if(select1==4) { if(  !( (bx==39)||(bx==201)||(bx==443)||(bx==499)||(bx==1083)||(bx==1337)||(bx==1492)||(bx==1977)||(bx==2231)||(bx==2287)||(bx==2871)||(bx==3224)||(bx==3280) )   ) return; } 
+    //else if(select1==5) { if( ( (bx==1)||(bx==39)||(bx==201)||(bx==443)||(bx==499)||(bx==1083)||(bx==1337)||(bx==1492)||(bx==1977)||(bx==2231)||(bx==2287)||(bx==2871)||(bx==3224)||(bx==3280) )   ) return; } 
+    //else if(select1==6) { if(bx < select2) return; } 
+    //else if(select1==7) { if(bx > select2) return; } 
+    // select specific event
+#ifdef PV
+    else if(select1==100) { if(numOfTracks<1) return; } // with tracks 
+    else if(select1==101) { if(numOfTracks>0) return; } // no tracks
+    else if(select1==102) { if(numPVsGood<1) return; } // with pvs 
+    else if(select1==103) { if(numPVsGood>0) return; } // no pvs
+#endif
+    else if(select1== 201) {goto label1;} // select specific module 
+    else if(select1==9999) { if(event!=select2) return; } 
+    else { 
+    // skip bx outside the select1-select2 region 
+    //....
+      //if( !((bx>=select1) && (bx<=select2)) ) return; 
+    } 
+  }
 
-  if(select1<=0) { if(numOf<4) return; } // skip events with few pixel dets
-  else           { if(numOf<select1) return; } // skip events with few pixel dets
-
+ label1:
   hevent->Fill(float(event));
   hlumi->Fill(float(lumiBlock));
   hbx->Fill(float(bx));
   //horbit->Fill(float(orbit));
+#ifdef HLT
   for (unsigned int i=0;i<256;i++) if(hlt[i]==true) hlt2->Fill(float(i));
-
-  if(run!=runNumberOld) {
-    runNumberOld=run;
-    countRuns++;
-  }
-  switch(countRuns) {
-  case 1: {hlumi10->Fill(float(lumiBlock)); break;}
-  case 2: {hlumi11->Fill(float(lumiBlock)); break;}
-  case 3: {hlumi12->Fill(float(lumiBlock)); break;}
-  case 4: {hlumi13->Fill(float(lumiBlock)); break;}
-  case 5: {hlumi14->Fill(float(lumiBlock)); break;}
-  //case 6: {hlumi15->Fill(float(lumiBlock)); break;}
-  //case 7: {hlumi16->Fill(float(lumiBlock)); break;}
-  //case 8: {hlumi17->Fill(float(lumiBlock)); break;}
-  //case 9: {hlumi18->Fill(float(lumiBlock)); break;}
-  //case 10: {hlumi19->Fill(float(lumiBlock)); break;}
-  default: cout<<" too many runs "<<countRuns<<endl;
-  }
-
-#ifdef NEW_ID
-  //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopo;
-  es.get<TrackerTopologyRcd>().get(tTopo);
 #endif
 
-  //---------------------------------------
+  // if(run!=runNumberOld) {
+  //   runNumberOld=run;
+  //   countRuns++;
+  // }
+  // switch(countRuns) {
+  // case 1: {hlumi10->Fill(float(lumiBlock)); break;}
+  //   //case 2: {hlumi11->Fill(float(lumiBlock)); break;}
+  //   //case 3: {hlumi12->Fill(float(lumiBlock)); break;}
+  //   //case 4: {hlumi13->Fill(float(lumiBlock)); break;}
+  //   //case 5: {hlumi14->Fill(float(lumiBlock)); break;}
+  // //case 6: {hlumi15->Fill(float(lumiBlock)); break;}
+  // //case 7: {hlumi16->Fill(float(lumiBlock)); break;}
+  // //case 8: {hlumi17->Fill(float(lumiBlock)); break;}
+  // //case 9: {hlumi18->Fill(float(lumiBlock)); break;}
+  // //case 10: {hlumi19->Fill(float(lumiBlock)); break;}
+  // default: cout<<" too many runs "<<countRuns<<endl;
+  // }
 
-  countEvents++;
+  //Retrieve tracker topology from geometry
+  edm::ESHandle<TrackerTopology> tTopoH;
+  es.get<TrackerTopologyRcd>().get(tTopoH);
+  const TrackerTopology *tTopo=tTopoH.product();
+
+  //---------------------------------------
+  if(numOf>0) countEvents++; // count events with pixel hits 
   int numberOfDetUnits = 0;
   int numberOfClusters = 0;
   int numberOfPixels = 0;
@@ -2413,19 +2637,24 @@ void PixClusterAna::analyze(const edm::Event& e,
   int numberOfDetUnits3 = 0;
   int numOfClustersPerDet3=0;        
   int numOfClustersPerLay3=0;        
+  int numberOfDetUnits4 = 0;
+  int numOfClustersPerDet4=0;        
+  int numOfClustersPerLay4=0;        
 
   int numOfPixPerLay1=0;     
   int numOfPixPerLay2=0;     
   int numOfPixPerLay3=0;     
+  int numOfPixPerLay4=0;     
 
   int numOfPixPerDet1=0;  
   int numOfPixPerDet2=0;  
   int numOfPixPerDet3=0;  
+  int numOfPixPerDet4=0;  
       
-  int numOfPixPerLink11=0;  
-  int numOfPixPerLink12=0;  
-  int numOfPixPerLink21=0;  
-  int numOfPixPerLink22=0;  
+  //int numOfPixPerLink11=0;  
+  //int numOfPixPerLink12=0;  
+  //int numOfPixPerLink21=0;  
+  //int numOfPixPerLink22=0;  
   //int numOfPixPerLink3=0;  
 
   int maxClusPerDet=0;
@@ -2436,10 +2665,14 @@ void PixClusterAna::analyze(const edm::Event& e,
   int numOfClustersPerDisk2=0;  
   int numOfClustersPerDisk3=0;  
   int numOfClustersPerDisk4=0;  
+  int numOfClustersPerDisk5=0;  
+  int numOfClustersPerDisk6=0;  
   int numOfPixPerDisk1=0;  
   int numOfPixPerDisk2=0;  
   int numOfPixPerDisk3=0;  
   int numOfPixPerDisk4=0;  
+  int numOfPixPerDisk5=0;  
+  int numOfPixPerDisk6=0;  
 
   float avCharge1=0.,avCharge2=0.,avCharge3=0.,avCharge4=0.,avCharge5=0.;
         
@@ -2507,6 +2740,9 @@ void PixClusterAna::analyze(const edm::Event& e,
     //int rows = theGeomDet->specificTopology().nrows();
     
     const PixelTopology * topol = &(theGeomDet->specificTopology());
+#ifdef TESTING_ADC            
+      bool detWithNegativeADC = false;
+#endif
 
     // barrel ids
     unsigned int layerC=0;
@@ -2518,6 +2754,10 @@ void PixClusterAna::analyze(const edm::Event& e,
     int layer  = 0; // 1-3
     int module = 0; // 1-4
     bool half  = false; // 
+    bool goodL2Modules = false;
+    bool badL2Modules = false;
+    bool newL1Modules = false;
+
 
     // Endcap ids
     unsigned int disk=0; //1,2,3
@@ -2525,26 +2765,21 @@ void PixClusterAna::analyze(const edm::Event& e,
     unsigned int zindexF=0; //
     unsigned int side=0; //size=1 for -z, 2 for +z
     unsigned int panel=0; //panel=1
-
+#ifdef LAY1_SPLIT
+    bool inner = false; // inner and outer ladders
+    bool ring12=false; // rings 1&2
+#endif
     edmNew::DetSet<SiPixelCluster>::const_iterator clustIt;
 
     // Subdet id, pix barrel=1, forward=2
     if(subid==2) {  // forward
 
-#ifdef NEW_ID
       disk=tTopo->pxfDisk(detid); //1,2,3
       blade=tTopo->pxfBlade(detid); //1-24
       zindex=tTopo->pxfModule(detid); //
       side=tTopo->pxfSide(detid); //size=1 for -z, 2 for +z
       panel=tTopo->pxfPanel(detid); //panel=1
-#else 
-      PXFDetId pdetId = PXFDetId(detid);       
-      disk=pdetId.disk(); //1,2,3
-      blade=pdetId.blade(); //1-24
-      moduleF=pdetId.module(); // plaquette
-      side=pdetId.side(); //size=1 for -z, 2 for +z
-      panel=pdetId.panel(); //panel=1
-#endif
+      PixelEndcapName pen(detid,tTopo,phase1_);
 
       if(PRINT) cout<<" forward det, disk "<<disk<<", blade "
  		    <<blade<<", module "<<zindexF<<", side "<<side<<", panel "
@@ -2553,24 +2788,15 @@ void PixClusterAna::analyze(const edm::Event& e,
 
     } else if (subid==1) {  // barrel
 
-#ifdef NEW_ID
+#ifdef TEST_DCOLS
+      for(int i=0;i<160;++i) for(int j=0;j<416;++j) moduleArray[i][j]=0;
+#endif
+
       layerC=tTopo->pxbLayer(detid);
       ladderC=tTopo->pxbLadder(detid);
       zindex=tTopo->pxbModule(detid);
-      PixelBarrelName pbn(detid);
-#else      
-      PXBDetId pdetId = PXBDetId(detid);
-      //unsigned int detTypeP=pdetId.det();
-      //unsigned int subidP=pdetId.subdetId();
-      // Barell layer = 1,2,3
-      layerC=pdetId.layer();
-      // Barrel ladder id 1-20,32,44.
-      ladderC=pdetId.ladder();
-      // Barrel Z-index=1,8
-      zindex=pdetId.module();
-      // Convert to online 
-      PixelBarrelName pbn(pdetId);
-#endif
+      //PixelBarrelName pbn(detid);
+      PixelBarrelName pbn(detid,tTopo,phase1_);
 
       // Shell { mO = 1, mI = 2 , pO =3 , pI =4 };
       PixelBarrelName::Shell sh = pbn.shell(); //enum
@@ -2584,12 +2810,49 @@ void PixClusterAna::analyze(const edm::Event& e,
       if(shell==1 || shell==2) module = -module;
       // change ladeer sign for Outer )x<0)
       if(shell==1 || shell==3) ladder = -ladder;
+
+      if( layer==2 && select1!=9998 ) {
+	if( (ladder ==-1) && ( (module == 1) || (module == 2) || (module == 3)) ) badL2Modules=true;
+	else if( (ladder ==-5) &&( (module == -1) || (module == -2) || (module == -3)) ) badL2Modules=true;
+	else if( (ladder == 14) && (module == -1) ) badL2Modules=true;
+	else if( (ladder == 13) && (module == -4) ) badL2Modules=true;
+	else if( (ladder == 12) && (module == -1) ) badL2Modules=true;
+	else if( (ladder == 11) && (module == -4) ) badL2Modules=true;
+
+	else if( (ladder == 1) &&( (module == 1) || (module == 2) || (module == 3))) goodL2Modules=true;
+	else if( (ladder ==-1) &&( (module ==-1) || (module ==-2) || (module ==-3))) goodL2Modules=true;
+	else if( (ladder ==-8) &&( (module ==-1) || (module ==-2) || (module ==-3))) goodL2Modules=true;
+	else if( (ladder == 7) && (module == 1) ) goodL2Modules=true;
+	else if( (ladder == 6) && (module == 4) ) goodL2Modules=true;
+	else if( (ladder ==-5) && (module ==-3) ) goodL2Modules=true;	
+      }
       
+      // find inner and outer modules for layer 1 onl
+      if( (layer==1) ) {
+#ifdef LAY1_SPLIT
+	if( (ladder==2) || (ladder==4) || (ladder==6) ||
+	    (ladder==-1) || (ladder==-3) || (ladder==-5) ) inner=true;
+	else inner=false;
+#endif
+	if( (select1!=9998) ) {
+	  if     ( (ladder ==-1) && (module == 3) ) newL1Modules=true;
+	  else if( (ladder ==-3) && (module == 3) ) newL1Modules=true;
+	  else if( (ladder ==-1) && (module ==-3) ) newL1Modules=true;
+	  else if( (ladder ==-1) && (module ==-1) ) newL1Modules=true;
+	  else if( (ladder ==-3) && (module ==-1) ) newL1Modules=true;
+	  else if( (ladder ==-5) && (module ==-1) ) newL1Modules=true;
+	} // seperate new modules 
+      }
+      
+      // find rings 1-2 and 3-4
+#ifdef LAY1_SPLIT
+      if(abs(module)<3) ring12=true; 
+#endif
       if(PRINT) { 
 	cout<<" Barrel layer, ladder, module "
 	    <<layerC<<" "<<ladderC<<" "<<zindex<<" "
 	    <<sh<<"("<<shell<<") "<<sector<<" "<<layer<<" "<<ladder<<" "
-	    <<module<<" "<<half<< endl;
+	    <<module<<" "<<half<< " "<<newL1Modules<<endl;
 	//cout<<" Barrel det, thick "<<detThick<<" "
 	//  <<" layer, ladder, module "
 	//  <<layer<<" "<<ladder<<" "<<zindex<<endl;
@@ -2598,6 +2861,14 @@ void PixClusterAna::analyze(const edm::Event& e,
       }      
       
     } // if subid
+
+    // select for special printout 
+    //select = (abs(module)==4)  && layer==1;
+    if(select) cout<<" run "<<run<<" event "<<event<<" bx "<<bx<< " det "<<ladder<<" "<<module<<endl;
+
+    if(select1==201) { // select a specific module 
+      if( (layer!=selectLayer) || (ladder!=selectLadder) || (module!=selectModule) ) continue; // skip module 
+    }
 
     if(PRINT) {
       cout<<"List clusters : "<<endl;
@@ -2630,8 +2901,10 @@ void PixClusterAna::analyze(const edm::Event& e,
 
       bool edgeHitX2 = false; // edge method moved 
       bool edgeHitY2 = false; // to topologu class
-            
-      if(PRINT) cout<<numberOfClusters<<" "<<ch<<" "<<size<<" "<<sizeX<<" "<<sizeY<<" "
+#ifdef TESTING_ADC            
+      bool cluWithNegativeADC = false;
+#endif
+      if(PRINT || select) cout<<numberOfClusters<<" "<<ch<<" "<<size<<" "<<sizeX<<" "<<sizeY<<" "
 		    <<x<<" "<<y<<" "<<minPixelRow<<" "<<maxPixelRow<<" "<<minPixelCol<<" "
 		    <<maxPixelCol<<" "<<edgeHitX<<" "<<edgeHitY<<endl;
 
@@ -2640,13 +2913,27 @@ void PixClusterAna::analyze(const edm::Event& e,
       float lx = lp.x(); // local cluster position in cm
       float ly = lp.y();
 
+      GlobalPoint clustgp = theGeomDet->surface().toGlobal( lp );
+      double gZ = clustgp.z();  // global z
+      double gX = clustgp.x();
+      double gY = clustgp.y();      
+      TVector3 v(gX,gY,gZ);
+#ifdef PHI_PROFILES
+      float gPhi = v.Phi(); // phi of the hit
+#endif
+      float gR = v.Perp(); // r of the hit
 
-      float zPos = detZ - ly;
-      float rPos = detR + lx;
+      //float zPos = detZ - ly;
+      float zPos = gZ;
+      //float rPos = detR + lx;
+      float rPos = gR;
 
+      //#ifdef PHI_PROFILES
+      //#endif
+      
       // Get the pixels in the Cluster
       const vector<SiPixelCluster::Pixel>& pixelsVec = clustIt->pixels();
-      if(PRINT) cout<<" Pixels in this cluster "<<endl;
+      if(PRINT) cout<<" Pixels in this cluster (i/x/y/char)"<<endl;
       //bool bigInX=false, bigInY=false;
       // Look at pixels in this cluster. ADC is calibrated, in electrons
       bool edgeInX = false; // edge method moved 
@@ -2655,30 +2942,52 @@ void PixClusterAna::analyze(const edm::Event& e,
       //bool cluBigInY = false; // does this clu include a big pixel
       //int noisy = 0;
 
+#ifdef ROC_RATE
+      int roc = -1, link = -1, rocInCol = -1;
+      float rocZ=-1., rocPhi=-1.;
+#endif
+
       if(pixelsVec.size()>maxPixPerClu) maxPixPerClu = pixelsVec.size();
- 
+      float adcMin=9999., adcMax=0.;
       for (unsigned int i = 0;  i < pixelsVec.size(); ++i) { // loop over pixels
-	bool isBig=false;
+	//bool isBig=false;
 	sumPixels++;
 	numberOfPixels++;
 	float pixx = pixelsVec[i].x; // index as float=iteger, row index
 	float pixy = pixelsVec[i].y; // same, col index
-	float adc = (float(pixelsVec[i].adc)/1000.);
+	float intADC = pixelsVec[i].adc;
+	float adc = (float(intADC)/1000.);
 
-	int roc = rocId(int(pixy),int(pixx));  // 0-15, column, row
-	int link = int(roc/8); // link 0 & 1
-	int rocInCol = roc%8; // 0-7
+#ifdef TESTING_ADC
+	bool negativeADC = (intADC<=100); // signals that there was negative charge 
+	if(negativeADC) {cluWithNegativeADC= true; detWithNegativeADC= true;}
+#endif
+	if(adc<adcMin) adcMin=adc;
+	if(adc>adcMax) adcMax=adc;
+
+#ifdef ROC_RATE
+	roc = rocId(int(pixy),int(pixx));  // 0-15, column, row
+	link = int(roc/8); // link 0 & 1
+	rocInCol = roc%8; // 0-7
+	//rocZ   = float(module) - 0.5 + (0.125/2.) + (float(rocInCol) * 0.125); //z
+	//rocZ   = float(module) + 0.5 + (0.125/2.) - (float(rocInCol) * 0.125); //z
+	if(module>0) rocZ = float(module) + (0.125/2.) - (float(rocInCol) * 0.125); //z
+	else         rocZ = float(module) + 1.0 + (0.125/2.) - (float(rocInCol) * 0.125); //z
+	rocPhi = float(ladder) - 0.5 + (0.5/2.)   + (float(link) * 0.5); 
+#endif
 
 	//int chan = PixelChannelIdentifier::pixelToChannel(int(pixx),int(pixy));
-
 	bool bigInX = topol->isItBigPixelInX(int(pixx));
 	bool bigInY = topol->isItBigPixelInY(int(pixy));
 	if( !(bigInX || bigInY) ) {numberOfNoneEdgePixels++;}
-	else {isBig=true;}
+	//else {isBig=true;}
 
 #ifdef HISTOS
 	// Pixel histos
 	if (subid==1 && (selectEvent==-1 || countEvents==selectEvent)) {  // barrel
+#ifdef TEST_DCOLS
+	  moduleArray[int(pixx)][int(pixy)]=1;
+#endif	  
 	  if(layer==1) {
 
 	    //cout<<" module "<<layer<<" "<<ladder<<" "<<module<<" "
@@ -2686,42 +2995,99 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 	    numOfPixPerDet1++;
 	    numOfPixPerLay1++;     
-	    if(newModule) hpixcharge11->Fill(adc);
-	    else          hpixcharge1->Fill(adc);
+	    if(newL1Modules) {
+	      hpixcharge1n->Fill(adc);
+	    } else {
+	      hpixcharge1->Fill(adc);
+	      hpixcharge1_zoom->Fill(adc);
+	    }
+ 	    htest2->Fill(adc,float(size));
+
 	    hpixDetMap1->Fill(pixy,pixx);
-	    hpDetMap1->Fill(float(module),float(ladder));
-	    if(link==0)      hl1DetMap1->Fill(float(module),float(ladder));
-	    else if(link==1) hl2DetMap1->Fill(float(module),float(ladder));
-	    //if(isBig) hpDetMapE1->Fill(float(module),float(ladder));
-	    //module1[int(pixx)][int(pixy)]++;
-	    
-	    float tmp1= float(module) - 0.5 + (0.125/2.) + (float(rocInCol) * 0.125); 
-	    float tmp2= float(ladder) - 0.5 + (0.5/2.)   + (float(link) * 0.5); 
-	    hrocMap1->Fill(tmp1,tmp2);
+	    hpixDets1->Fill(float(module),float(ladder));
+	    hpixchargeDets1->Fill(float(module),float(ladder),adc);
 
+	    hpladder1id->Fill(float(ladder));
+	    hpz1id->Fill(float(module));
 
+#ifdef ROC_RATE
+	    hrocMap1->Fill(rocZ,rocPhi);
+	    hrocPixcharMap1->Fill(rocZ,rocPhi,adc);
+	    hrocLadder1->Fill(rocPhi);
+	    hpixRocRate1->Fill(rocZ);
+#endif
 	    hpcols1->Fill(pixy);
 	    hprows1->Fill(pixx);
+	    hpixz1->Fill(gZ);
+	    hpixchar1->Fill(zPos,adc);
+	    //hcharPixbx->Fill(bx,adc);
+	    //hcharPixls->Fill(lumiBlock,adc);
+#ifdef STUDY_ONEMOD
+	    hpixcharMap1->Fill(pixy,pixx,adc);
+#endif
+	
+#ifdef LAY1_SPLIT    
+	    if(inner) {
+	      hpixcharge11->Fill(adc); hrocZ11->Fill(rocZ);
+	      if(ring12) hpixcharge1InR12->Fill(adc);
+	      else       hpixcharge1InR34->Fill(adc);
+	    }  else { // out
+	      hpixcharge12->Fill(adc); hrocZ12->Fill(rocZ);
+	      if(ring12) hpixcharge1OutR12->Fill(adc);
+	      else       hpixcharge1OutR34->Fill(adc);
+	    }  
+#endif
 
-	    if     (ladder== 7 && module==-2) hpixDetMap10->Fill(pixy,pixx); // NOISY Run2
-	    else if(ladder== 2 && module== -3) hpixDetMap11->Fill(pixy,pixx); // " 
-	    else if(ladder== 9 && module== 2) hpixDetMap12->Fill(pixy,pixx); // "
-	    else if(ladder==-9 && module== 4) hpixDetMap13->Fill(pixy,pixx); // ineff, SPOT
-	    else if(ladder==-8 && module==-4) hpixDetMap14->Fill(pixy,pixx); // bad al, ENE
-	    else if(ladder== 6 && module== 4) hpixDetMap15->Fill(pixy,pixx); // pix 0,0, dead col, 15
-	    else if(ladder== 9 && module== 4) hpixDetMap16->Fill(pixy,pixx); // gain low off
-	    else if(ladder==-3 && module==-3) hpixDetMap17->Fill(pixy,pixx); // bad col, NOISY in 2015
-	    else if(ladder==-7 && module==-4) hpixDetMap18->Fill(pixy,pixx); // bad col
-	    else if(ladder==6 && module==-2) hpixDetMap19->Fill(pixy,pixx); // 
-	    
-	    if(pixx<80.) numOfPixPerLink11++;
-	    else numOfPixPerLink12++;
+#ifdef PHI_PROFILES
+	    hpixcharPhi1->Fill(gPhi,adc);
+#endif 
 
-	   hpixchar1->Fill(zPos,adc);
-	   hcharPixbx->Fill(bx,adc);
-	   hcharPixls->Fill(lumiBlock,adc);
+#ifdef TESTING_ADC
+	    if(negativeADC)  {
+	      hpixDetsT1->Fill(float(module),float(ladder));
+	      hpixDetMapT1->Fill(pixy,pixx);
+	    }
+#endif
+
+#ifdef STUDY_LAY1
+	    if(size==1) {
+	      hpixcharge111->Fill(adc);
+	    } else if ((size>=2) && (size<=4)) {
+	      if((sizeX==2) && (sizeY==1)) {
+		hpixcharge121->Fill(adc);
+	      } else if((sizeX==2) && (sizeY==2)) {
+		hpixcharge122->Fill(adc);
+		if( (minPixelCol%2)==0 ) hpixcharge12_1->Fill(adc);  //1st pixel in 1st col of dcol  
+		else                     hpixcharge12_2->Fill(adc);  //1st pixel in 2nd col of dcol  
+	      } else if((sizeX==1) && (sizeY==2)) {
+		hpixcharge112->Fill(adc);
+		if( (minPixelCol%2)==0 ) hpixcharge12_1->Fill(adc);  //1st pixel in 1st col of dcol  
+		else                     hpixcharge12_2->Fill(adc);  //1st pixel in 2nd col of dcol  
+	      }
+	    } // size=1/2
+#endif
+
+#ifdef SINGLE_MODULES
+	    float weight = 1.; // adc
+	    if     ( ladder==-6 && module==-1) hpixDetMap10->Fill(pixy,pixx,weight); // 
+	    else if( ladder==-1 && module==-1) hpixDetMap11->Fill(pixy,pixx,weight); // "
+	    else if( ladder==-1 && module==-2) hpixDetMap12->Fill(pixy,pixx,weight); // "
+	    else if( ladder==-3 && module==-4) hpixDetMap13->Fill(pixy,pixx,weight); // 
+	    else if( ladder== 4 && module==-2) hpixDetMap14->Fill(pixy,pixx,weight); // 
+	    else if( ladder== 6 && module==-1) hpixDetMap15->Fill(pixy,pixx,weight); // 
+	    else if( ladder== 4 && module== 1) hpixDetMap16->Fill(pixy,pixx,weight); //
+	    else if( ladder== 2 && module== 1) hpixDetMap17->Fill(pixy,pixx,weight); // 
+	    else if( ladder==-4 && module== 2) hpixDetMap18->Fill(pixy,pixx,weight); // 
+	    else if( ladder==-1 && module== 2) hpixDetMap19->Fill(pixy,pixx,weight); // 
+#endif
+
+#ifdef LS_TESTS
 	   hcharPix1ls->Fill(lumiBlock,adc);
-	   //hcharPixLumi->Fill(instlumi,adc);
+#endif
+
+#ifdef BX_TESTS
+	   hcharPix1bx->Fill(bx,adc);
+#endif
 
 #ifdef VDM_STUDIES
 	    hcharPixls1->Fill(lumiBlock,adc);
@@ -2747,7 +3113,7 @@ void PixClusterAna::analyze(const edm::Event& e,
 // 	   if     (ladder== 3 && module== 3)  hmoduleHits1ls->Fill(float(lumiBlock),0);
 // 	   if     (ladder==-9 && module==-3 && roc== 9)  hrocHits1ls->Fill(float(lumiBlock),0);
 // 	   else if(ladder==-9 && module==-1 && roc== 0)  hrocHits1ls->Fill(float(lumiBlock),1);
-// 	   else if(ladder==-8 && module==-1 && roc== 2)  hrocHits1ls->Fill(float(lumiBlock),2);
+//	   else if(ladder==-8 && module==-1 && roc== 2)  hrocHits1ls->Fill(float(lumiBlock),2);
 // 	   else if(ladder==-8 && module== 1 && roc== 2)  hrocHits1ls->Fill(float(lumiBlock),3);
 // 	   else if(ladder==-4 && module==-2 && roc== 2)  hrocHits1ls->Fill(float(lumiBlock),4);
 // 	   else if(ladder== 2 && module== 2 && roc== 4)  hrocHits1ls->Fill(float(lumiBlock),5);
@@ -2763,11 +3129,11 @@ void PixClusterAna::analyze(const edm::Event& e,
 	   //else if(ladder== 7 && module==-1 && roc== 8)  hrocHits1ls->Fill(float(lumiBlock),4);
 	   //else if(ladder== 2 && module== 1 && roc== 0)  hrocHits1ls->Fill(float(lumiBlock),5);
 	   // run 180250
-	   if     (ladder==-9 && module== 4 && roc== 12) hrocHits1ls->Fill(float(lumiBlock),0);
-	   else if(ladder==-7 && module==-4 && roc==3)   hrocHits1ls->Fill(float(lumiBlock),1);
-	   else if(ladder==-5 && module==-4 && roc==11)  hrocHits1ls->Fill(float(lumiBlock),2);
-	   else if(ladder== 2 && module==-2 && roc== 1)  hrocHits1ls->Fill(float(lumiBlock),3);
-	   else if(ladder== 8 && module== 2 && roc== 1)  hrocHits1ls->Fill(float(lumiBlock),4);
+	   // if     (ladder==-9 && module== 4 && roc== 12) hrocHits1ls->Fill(float(lumiBlock),0);
+	   // else if(ladder==-7 && module==-4 && roc==3)   hrocHits1ls->Fill(float(lumiBlock),1);
+	   // else if(ladder==-5 && module==-4 && roc==11)  hrocHits1ls->Fill(float(lumiBlock),2);
+	   // else if(ladder== 2 && module==-2 && roc== 1)  hrocHits1ls->Fill(float(lumiBlock),3);
+	   // else if(ladder== 8 && module== 2 && roc== 1)  hrocHits1ls->Fill(float(lumiBlock),4);
 	   //else if(ladder== 2 && module== 1 && roc== 0)  hrocHits1ls->Fill(float(lumiBlock),5);
 #endif
 	    
@@ -2775,40 +3141,54 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 	    numOfPixPerDet2++;
 	    numOfPixPerLay2++;   
-	    
-	    hpcols2->Fill(pixy);
-	    hprows2->Fill(pixx);
-	    if(newModule) hpixcharge12->Fill(adc);
-	    else          hpixcharge2->Fill(adc);
-	    hpixDetMap2->Fill(pixy,pixx);
-	    hpDetMap2->Fill(float(module),float(ladder));
-	    if(link==0)      hl1DetMap2->Fill(float(module),float(ladder));
-	    else if(link==1) hl2DetMap2->Fill(float(module),float(ladder));
-	    //if(isBig) hpDetMapE2->Fill(float(module),float(ladder));
-	    //module2[int(pixx)][int(pixy)]++;
-	    float tmp1= float(module) - 0.5 + (0.125/2.) + (float(rocInCol) * 0.125); 
-	    float tmp2= float(ladder) - 0.5 + (0.5/2.)   + (float(link) * 0.5); 
-	    hrocMap2->Fill(tmp1,tmp2);
-
+	    //if(ladder==1 && module>0) {hpixcharge8->Fill(adc);}
+	    hpixDets2->Fill(float(module),float(ladder));
+	    hpixchargeDets2->Fill(float(module),float(ladder),adc);
+	    hpladder2id->Fill(float(ladder));
+	    hpz2id->Fill(float(module));
+	    hpixz2->Fill(gZ);
  	    hpixchar2->Fill(zPos,adc);
-	    hcharPixbx->Fill(bx,adc);
-	    hcharPixls->Fill(lumiBlock,adc);
-	    hcharPix2ls->Fill(lumiBlock,adc);
-	    //hcharPixLumi->Fill(instlumi,adc);
+	    
+	    if(badL2Modules ) {
+	      hpixcharge2b->Fill(adc);
 
-	    if     (ladder== -4 && module==-4) hpixDetMap20->Fill(pixy,pixx); // noise 15 
-	    else if(ladder==  4 && module== 1) hpixDetMap21->Fill(pixy,pixx); // "
-	    else if(ladder== 12 && module== 1) hpixDetMap22->Fill(pixy,pixx); // "
-	    else if(ladder==-14 && module== 4) hpixDetMap23->Fill(pixy,pixx); // ineff
-	    else if(ladder==-14 && module== 1) hpixDetMap24->Fill(pixy,pixx); // bad al
-	    else if(ladder==-14 && module==-1) hpixDetMap25->Fill(pixy,pixx); // evn errors
-	    else if(ladder== -4 && module== 4) hpixDetMap26->Fill(pixy,pixx); // bad dcol 
-	    else if(ladder== 6  && module==-2) hpixDetMap27->Fill(pixy,pixx); // bad dcol
-	    else if(ladder==-10 && module==-3) hpixDetMap28->Fill(pixy,pixx); // roc eff 1 run 
-	    else if(ladder== 14 && module== 3) hpixDetMap29->Fill(pixy,pixx); // 
+	    } else if(goodL2Modules) {
+	      hpixcharge2g->Fill(adc);
 
-	    if(pixx<80.) numOfPixPerLink21++;
-	    else numOfPixPerLink22++;
+	    } else {
+	      hpixcharge2->Fill(adc);
+	      htest4->Fill(adc,float(size));
+	      hpcols2->Fill(pixy);
+	      hprows2->Fill(pixx);
+	      hpixDetMap2->Fill(pixy,pixx);
+#ifdef ROC_RATE
+	      hrocMap2->Fill(rocZ,rocPhi);
+	      hrocPixcharMap2->Fill(rocZ,rocPhi,adc);
+	      hpixRocRate2->Fill(rocZ);
+#endif	      
+#ifdef PHI_PROFILES
+	      hpixcharPhi2->Fill(gPhi,adc);
+#endif 	      
+#ifdef LS_TESTS
+	      hcharPix2ls->Fill(lumiBlock,adc);
+#endif	      
+#ifdef BX_TESTS
+	      hcharPix2bx->Fill(bx,adc);
+#endif
+	    }
+
+#ifdef SINGLE_MODULES
+	   //if     (ladder== -1 && module== 2) hpixDetMap20->Fill(pixy,pixx); // dcdc 
+	   // else if(ladder== -1 && module== 1) hpixDetMap21->Fill(pixy,pixx); //  "
+	   //else if(ladder==  1 && module== 2) hpixDetMap22->Fill(pixy,pixx); //  "
+	   //else if(ladder== -5 && module==-2) hpixDetMap23->Fill(pixy,pixx); //  "
+	   //else if(ladder==  9 && module== 4) hpixDetMap24->Fill(pixy,pixx); //  "
+	   //else if(ladder==-10 && module== 3) hpixDetMap25->Fill(pixy,pixx); // noisy 34/64
+	   //else if(ladder== 13 && module==-4) hpixDetMap26->Fill(pixy,pixx); // dcdc
+	    //else if(ladder== 12 && module==-1) hpixDetMap27->Fill(pixy,pixx); // dcdc
+	    //else if(ladder== 14 && module==-1) hpixDetMap28->Fill(pixy,pixx); // dcdc
+	    //else if(ladder==  6 && module== 4) hpixDetMap29->Fill(pixy,pixx); // noisy
+#endif
 
 #if defined(BX) || defined(BX_NEW)
 	   if(bxId>-1) {
@@ -2827,7 +3207,6 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 	   //index = lumiBlock/5;
 // 	    if     (ladder==10 && module== 2)  hmoduleHits2ls->Fill(float(lumiBlock),0); // many resyncs
-
 // 	   if     (ladder==-2 && module== 1 && roc==10)  hrocHits2ls->Fill(float(lumiBlock),0);
 // 	   else if(ladder== 1 && module== 1 && roc== 3)  hrocHits2ls->Fill(float(lumiBlock),1);
 // 	   else if(ladder== 1 && module== 2 && roc== 4)  hrocHits2ls->Fill(float(lumiBlock),2);
@@ -2840,16 +3219,6 @@ void PixClusterAna::analyze(const edm::Event& e,
 // 	   else if(ladder==-5 && module==-2 && roc==10)  hrocHits2ls->Fill(float(lumiBlock),9);
 // 	   else if(ladder==10 && module== 2 && roc== 0)  hrocHits3ls->Fill(float(lumiBlock),9); // many resuncs 
 
-	   // run 176286
-	   //if     (ladder==-5 && module==-2 && roc==10)  hrocHits2ls->Fill(float(lumiBlock),0);
-	   //else if(ladder==-2 && module==-4 && roc==12)  hrocHits2ls->Fill(float(lumiBlock),1);
-	   //else if(ladder==15 && module==-1 && roc==11)  hrocHits2ls->Fill(float(lumiBlock),2);
-	   //else if(ladder== 2 && module==1  && roc== 0)  hrocHits2ls->Fill(float(lumiBlock),3);
-	   // run 180250
-	   if     (ladder==-2 && module== 1 && roc==10)  hrocHits2ls->Fill(float(lumiBlock),0);
-	   else if(ladder==10 && module==-3 && roc== 2)  hrocHits2ls->Fill(float(lumiBlock),1);
-	   else if(ladder==15 && module== 3 && roc== 7)  hrocHits2ls->Fill(float(lumiBlock),2);
-	   //else if(ladder== 2 && module==1  && roc== 0)  hrocHits2ls->Fill(float(lumiBlock),3);
 #endif
 
 
@@ -2857,64 +3226,56 @@ void PixClusterAna::analyze(const edm::Event& e,
 #ifdef VDM_STUDIES
 	    hcharPixls2->Fill(lumiBlock,adc);
 #endif	    
-	    //if( (ladder==-11 && module==-1) || (ladder==-11 && module== 1) ) {
-	      //hpixchargen->Fill(adc); 
-	      //if(       ladder==-11 && module==-1 ) hpixchargen1->Fill(adc); 
-	      //else if ( ladder==-11 && module== 1 ) hpixchargen2->Fill(adc);
-	    //}
-
-	    //if(module2[int(pixx)][int(pixy)]>MAX_CUT) 
-	    // cout<<" module "<<layer<<" "<<ladder<<" "<<module<<" "
-	    //  <<pixx<<" "<<pixy<<" "<<module2[int(pixx)][int(pixy)]<<endl;
 
 	  } else if(layer==3) {
 
 	    numOfPixPerDet3++;
-	    numOfPixPerLay3++; 
-	    if(newModule) hpixcharge13->Fill(adc);
-	    else          hpixcharge3->Fill(adc);
+	    numOfPixPerLay3++;
+	    hpixcharge3->Fill(adc);
 	    hpixDetMap3->Fill(pixy,pixx);
-	    //if(ladder==l3ldr&&module==l3mod) hpixDetMap30->Fill(pixy,pixx,adc);
-	    hpDetMap3->Fill(float(module),float(ladder));
-	    if(link==0)      hl1DetMap3->Fill(float(module),float(ladder));
-	    else if(link==1) hl2DetMap3->Fill(float(module),float(ladder));
-	    //if(isBig) hpDetMapE3->Fill(float(module),float(ladder));
+	    hpixDets3->Fill(float(module),float(ladder));
+	    hpixchargeDets3->Fill(float(module),float(ladder),adc);
+	    hpladder3id->Fill(float(ladder));
+	    hpz3id->Fill(float(module));
+
+ 	    htest4->Fill(adc,float(size));
+	    //if(link==0)      hl1DetMap3->Fill(float(module),float(ladder));
+	    //else if(link==1) hl2DetMap3->Fill(float(module),float(ladder));
+	    //if(isBig) hpixDetsE3->Fill(float(module),float(ladder));
 	    //module3[int(pixx)][int(pixy)]++;
-	    float tmp1= float(module) - 0.5 + (0.125/2.) + (float(rocInCol) * 0.125); 
-	    float tmp2= float(ladder) - 0.5 + (0.5/2.)   + (float(link) * 0.5); 
-	    hrocMap3->Fill(tmp1,tmp2);
 
 	    hpcols3->Fill(pixy);
 	    hprows3->Fill(pixx);
+	    hpixz3->Fill(gZ);
 
-	    if     (ladder==  4 && module==-3) hpixDetMap30->Fill(pixy,pixx); // nois 15
-	    else if(ladder== 11 && module==-1) hpixDetMap31->Fill(pixy,pixx); // "
-	    else if(ladder== 20 && module== 2) hpixDetMap32->Fill(pixy,pixx); // "
-	    else if(ladder== 15 && module== 2) hpixDetMap33->Fill(pixy,pixx); // "
-	    else if(ladder==-6  && module==-1) hpixDetMap34->Fill(pixy,pixx); // roc eff 1 run  
-	    else if(ladder==-13 && module== 4) hpixDetMap35->Fill(pixy,pixx); // " 
-	    else if(ladder== 14 && module==-4) hpixDetMap36->Fill(pixy,pixx); // ineff pixel alive
-	    else if(ladder==-6  && module== 2) hpixDetMap37->Fill(pixy,pixx); // E pattern 
-	    else if(ladder== 19 && module==-4) hpixDetMap38->Fill(pixy,pixx); // large thr.
-	    else if(ladder==-7  && module==-4) hpixDetMap39->Fill(pixy,pixx); //  
+#ifdef ROC_RATE
+	    hrocMap3->Fill(rocZ,rocPhi);
+	    hrocPixcharMap3->Fill(rocZ,rocPhi,adc);
+	    hpixRocRate3->Fill(rocZ);
+#endif
 
+#ifdef SINGLE_MODULES
+	    //if     (ladder==  9 && module== 2) hpixDetMap30->Fill(pixy,pixx); // fed errors
+	    //else if(ladder==  8 && module== 3) hpixDetMap31->Fill(pixy,pixx); // bad caldel
+	    //else if(ladder== -6 && module== 2) hpixDetMap32->Fill(pixy,pixx); // pix 0,0
+	    //else if(ladder== 21 && module== 4) hpixDetMap33->Fill(pixy,pixx); // unmaskable pixel
+	    //else if(ladder==-5  && module==-2) hpixDetMap34->Fill(pixy,pixx); // noisy
+	    //else if(ladder==-10 && module== 3) hpixDetMap35->Fill(pixy,pixx); // " 
+	    //else if(ladder==3   && module==-3) hpixDetMap36->Fill(pixy,pixx); // "   
+	    //else if(ladder== 19 && module==-3) hpixDetMap37->Fill(pixy,pixx); // noisy 
+	    //else if(ladder== 8  && module==-4) hpixDetMap38->Fill(pixy,pixx); // noisy  
+	    //else if(ladder==-11 && module== 1) hpixDetMap39->Fill(pixy,pixx); // noisy
+#endif
 	    hpixchar3->Fill(zPos,adc);
-	    hcharPixbx->Fill(bx,adc);
-	    hcharPixls->Fill(lumiBlock,adc);
+	    //hcharPixbx->Fill(bx,adc);
+	    //hcharPixls->Fill(lumiBlock,adc);
+#ifdef LS_TESTS
 	    hcharPix3ls->Fill(lumiBlock,adc);
-	    //hcharPixLumi->Fill(instlumi,adc);
+#endif
 
-// 	    if(     countEvents== 66  && ladder==-17 && module== 4) hpixDetMap300->Fill(pixy,pixx); 
-// 	    else if(countEvents==502  && ladder== 14 && module== 3) hpixDetMap301->Fill(pixy,pixx); 
-// 	    else if(countEvents==1830 && ladder== 14 && module==-2) hpixDetMap302->Fill(pixy,pixx); 
-// 	    else if(countEvents==4720 && ladder== 12 && module==-3) hpixDetMap303->Fill(pixy,pixx); 
-// 	    else if(countEvents==7241 && ladder== -2 && module== 4) hpixDetMap304->Fill(pixy,pixx); 
-// 	    else if(countEvents==8845 && ladder== -5 && module== 4) hpixDetMap305->Fill(pixy,pixx); 
-// 	    else if(countEvents==9267 && ladder==  6 && module== 4) hpixDetMap306->Fill(pixy,pixx); 
-
-	    //if(module3[int(pixx)][int(pixy)]>MAX_CUT) 
-	    //cout<<" module "<<layer<<" "<<ladder<<" "<<module<<" "
-	    //  <<pixx<<" "<<pixy<<" "<<module3[int(pixx)][int(pixy)]<<endl;
+#ifdef BX_TESTS
+	   hcharPix3bx->Fill(bx,adc);
+#endif
 
 #ifdef VDM_STUDIES
 	    hcharPixls3->Fill(lumiBlock,adc);
@@ -2931,7 +3292,6 @@ void PixClusterAna::analyze(const edm::Event& e,
 	     else cout<<" wrong bx id "<<bxId<<endl;
 	   }
 #endif
-
 
 #ifdef ROC_EFF
 	    pixEff->addPixel(3,ladder,module,roc);
@@ -2956,37 +3316,84 @@ void PixClusterAna::analyze(const edm::Event& e,
 	    //else if(ladder== 3  && module==-1 && roc==12)  hrocHits3ls->Fill(float(lumiBlock),2);
 	    //else if(ladder==16  && module==-3 && roc== 6)  hrocHits3ls->Fill(float(lumiBlock),3);
 	    //else if(ladder== 2  && module== 1 && roc== 0)  hrocHits3ls->Fill(float(lumiBlock),4);
-	    // run 180250
-	    if     (ladder==-13 && module== 4 && roc==12)  hrocHits3ls->Fill(float(lumiBlock),0);
-	    else if(ladder==-7  && module==-4 && roc==15)  hrocHits3ls->Fill(float(lumiBlock),1);
-	    else if(ladder==-6  && module==-2 && roc==10)  hrocHits3ls->Fill(float(lumiBlock),2);
-	    //else if(ladder==16  && module==-3 && roc== 6)  hrocHits3ls->Fill(float(lumiBlock),3);
-	    //else if(ladder== 2  && module== 1 && roc== 0)  hrocHits3ls->Fill(float(lumiBlock),4);
-	    
 #endif
 
+	  } else if(layer==4) {
+
+	    numOfPixPerDet4++;
+	    numOfPixPerLay4++;
+ 
+	    hpixcharge4->Fill(adc);
+	    hpixDetMap4->Fill(pixy,pixx);
+	    hpixDets4->Fill(float(module),float(ladder));
+	    hpixchargeDets4->Fill(float(module),float(ladder),adc);
+	    hpladder4id->Fill(float(ladder));
+	    hpz4id->Fill(float(module));
+ 	    htest4->Fill(adc,float(size));
+	    hpcols4->Fill(pixy);
+	    hprows4->Fill(pixx);
+
+	    hpixchar4->Fill(zPos,adc);
+	    //hcharPixbx->Fill(bx,adc);
+	    //hcharPixls->Fill(lumiBlock,adc);
+	    hpixz4->Fill(gZ);
+
+#ifdef ROC_RATE
+	    hrocMap4->Fill(rocZ,rocPhi);
+	    hrocPixcharMap4->Fill(rocZ,rocPhi,adc);
+	    hpixRocRate4->Fill(rocZ);
+#endif
+
+#ifdef LS_TESTS
+	    hcharPix4ls->Fill(lumiBlock,adc);
+#endif
+
+#ifdef BX_TESTS
+	   hcharPix4bx->Fill(bx,adc);
+#endif
+
+#ifdef SINGLE_MODULES
+	   //if     (ladder==-17 && module==-2) hpixDetMap40->Fill(pixy,pixx); // noisy 
+	   //else if(ladder== 13 && module== 4) hpixDetMap41->Fill(pixy,pixx); // noise
+	   //else if(ladder==-14 && module== 2) hpixDetMap42->Fill(pixy,pixx); //  "
+	   //else if(ladder== 13 && module== 3) hpixDetMap43->Fill(pixy,pixx); //  "
+	   //else if(ladder== 32 && module== 1) hpixDetMap44->Fill(pixy,pixx); //  " 
+	   //else if(ladder== 25 && module== 4) hpixDetMap45->Fill(pixy,pixx); // " 
+	   //else if(ladder== -1 && module==-1) hpixDetMap46->Fill(pixy,pixx); // "
+	    //else if(ladder==-30 && module==-2) hpixDetMap47->Fill(pixy,pixx); // "
+	    //else if(ladder==-22 && module== 2) hpixDetMap48->Fill(pixy,pixx); //  
+	    //else if(ladder== 32 && module== 2) hpixDetMap49->Fill(pixy,pixx); //  
+#endif
 	  }  // if layer
 
 	} else if (subid==2 && (selectEvent==-1 || countEvents==selectEvent)) {  // endcap
 	  // pixels
 
 	  if(disk==1) { // disk1 -+z
-	    if(side==1) numOfPixPerDisk2++;      // d1,-z
-	    else if(side==2) numOfPixPerDisk3++; // d1, +z
+	    if(side==1) numOfPixPerDisk3++;      // d1,-z
+	    else if(side==2) numOfPixPerDisk4++; // d1, +z
 	    else cout<<" unknown side "<<side<<endl;
 
-	    hpixcharge4->Fill(adc);
+	    hpixcharge5->Fill(adc);
 	    hpixDiskR1->Fill(rPos);
 	    
 	  } else if(disk==2) { // disk2 -+z
 	    
-	    if(side==1) numOfPixPerDisk1++;      // d2, -z
-	    else if(side==2) numOfPixPerDisk4++; // d2, +z
+	    if(side==1) numOfPixPerDisk2++;      // d2, -z
+	    else if(side==2) numOfPixPerDisk5++; // d2, +z
 	    else cout<<" unknown side "<<side<<endl;
 
-	    hpixcharge5->Fill(adc);
+	    hpixcharge6->Fill(adc);
 	    hpixDiskR2->Fill(rPos);
 	    
+	  } else if(disk==3) { // disk3 -+z
+
+	    if(side==1) numOfPixPerDisk1++;      // d3, -z
+	    else if(side==2) numOfPixPerDisk6++; // d3, +z
+	    else cout<<" unknown side "<<side<<endl;
+	    hpixcharge7->Fill(adc);
+	    hpixDiskR3->Fill(rPos);
+
 	  } else cout<<" unknown disk "<<disk<<endl;
 
 	} // end if subdet (pixel loop)
@@ -2997,8 +3404,8 @@ void PixClusterAna::analyze(const edm::Event& e,
 	edgeInX = topol->isItEdgePixelInX(int(pixx));
 	edgeInY = topol->isItEdgePixelInY(int(pixy));
 	
-	if(PRINT) cout<<i<<" "<<pixx<<" "<<pixy<<" "<<adc<<" "<<bigInX<<" "<<bigInY
-		      <<" "<<edgeInX<<" "<<edgeInY<<" "<<isBig<<endl;
+	if(PRINT || select ) cout<<i<<" "<<pixx<<" "<<pixy<<" "<<adc<<endl;
+	//" "<<bigInX<<" "<<bigInY<<" "<<edgeInX<<" "<<edgeInY<<" "<<isBig<<endl;
 	
 	if(edgeInX) edgeHitX2=true;
 	if(edgeInY) edgeHitY2=true; 
@@ -3014,38 +3421,153 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 	if(layer==1) {  // layer 1
 	  
-	  hDetMap1->Fill(float(module),float(ladder));
-	  hsizeDetMap1->Fill(float(module),float(ladder),float(size));
-	  //hsizeXDetMap1->Fill(float(module),float(ladder),float(sizeX));
-	  //hsizeYDetMap1->Fill(float(module),float(ladder),float(sizeY));
+	  hcluDets1->Fill(float(module),float(ladder));
+	  hsizeDets1->Fill(float(module),float(ladder),float(size));
+	  hchargeDets1->Fill(float(module),float(ladder),ch);
+	  hladder1id->Fill(float(ladder));
+	  hz1id->Fill(float(module));
+	  hcols1->Fill(y);
+	  hrows1->Fill(x);
+	  hcols12->Fill(y);
+	  hcols11->Fill(ly);
+	  hrows11->Fill(lx);
 
 	  hcluDetMap1->Fill(y,x);
 
-	  if(newModule) { // new from 2014
-	    hcharge11->Fill(ch);
-	    hsize11->Fill(float(size));
-	    hsizex11->Fill(float(sizeX));
-	    hsizey11->Fill(float(sizeY));
-	  } else {  // old 2008 modules 
+
+	  if(newL1Modules) {
+	    hcharge1n->Fill(ch);
+	    hsize1n->Fill(float(size));
+	    hsizex1n->Fill(float(sizeX));
+	    hsizey1n->Fill(float(sizeY));
+	  } else {
 	    hcharge1->Fill(ch);
+	    hcharge1_zoom->Fill(ch);
 	    hsize1->Fill(float(size));
 	    hsizex1->Fill(float(sizeX));
 	    hsizey1->Fill(float(sizeY));
 	  }
+
 	  numOfClustersPerDet1++;
 	  numOfClustersPerLay1++;
 	  avCharge1 += ch;
 
+	  htest1->Fill(ch,float(size));
+
+#ifdef STUDY_ONEMOD
+	    hsizeMap1->Fill(y,x,size);
+	    hsizeXMap1->Fill(y,x,sizeX);
+	    hsizeYMap1->Fill(y,x,sizeY);
+	    hclucharMap1->Fill(y,x,ch);
+#endif
+
+#ifdef MINMAX
+	  if(size>1) {
+	    hcharMin1->Fill(adcMin);
+	    hcharMax1->Fill(adcMax);
+	  }
+#endif
+
+#ifdef ROC_RATE
+	    hcluRocRate1->Fill(rocZ);
+	    hrocClucharMap1->Fill(rocZ,rocPhi,ch);
+	    hrocSizeXMap1->Fill(rocZ,rocPhi,sizeX);
+	    hrocSizeYMap1->Fill(rocZ,rocPhi,sizeY);
+#endif
+
+#ifdef LAY1_SPLIT
+	  if(inner) { // inner
+	    hcharge11->Fill(ch);
+	    if(ring12) {
+	      hcharge1InR12->Fill(ch);
+	      hsize1InR12->Fill(size);
+	      hsizex1InR12->Fill(sizeX);
+	      hsizey1InR12->Fill(sizeY);
+	    } else { // ring 34
+	      hcharge1InR34->Fill(ch);
+	      hsize1InR34->Fill(size);
+	      hsizex1InR34->Fill(sizeX);
+	      hsizey1InR34->Fill(sizeY);
+	    }  
+	  } else { // outer
+	    hcharge12->Fill(ch);
+	    if(ring12) {
+	      hcharge1OutR12->Fill(ch);
+	      hsize1OutR12->Fill(size);
+	      hsizex1OutR12->Fill(sizeX);
+	      hsizey1OutR12->Fill(sizeY);
+	    } else { // ring 34
+	      hcharge1OutR34->Fill(ch);
+	      hsize1OutR34->Fill(size);
+	      hsizex1OutR34->Fill(sizeX);
+	      hsizey1OutR34->Fill(sizeY);
+	    }  
+	  }  
+#endif
+
+#ifdef TESTING_ADC
+	  if(cluWithNegativeADC) {
+	    hcluDetT1->Fill(float(module),float(ladder),ch);
+	    hsizeDetT1->Fill(float(module),float(ladder),float(size));
+
+	    hchargeT1->Fill(ch);
+	    hsizeT1->Fill(float(size));
+
+	    if((sizeX==2) && (sizeY==2)) {
+	      if( (minPixelCol%2)==0 ) hchargeT12_1->Fill(ch);  //1st pixel in 1st col of dcol  
+	      else                     hchargeT12_2->Fill(ch);  //1st pixel in 2nd col of dcol  
+	    } else if((sizeX==1) && (sizeY==2)) {
+	      if( (minPixelCol%2)==0 ) hchargeT12_1->Fill(ch);  //1st pixel in 1st col of dcol  
+	      else                     hchargeT12_2->Fill(ch);  //1st pixel in 2nd col of dcol  
+	    } // size=1/2
+
+	  }
+#endif
+
+#ifdef STUDY_LAY1
+	    if(size==1) {
+	      hcharge111->Fill(ch);
+	    } else if ((size>=2) && (size<=4)) {
+	      if((sizeX==2) && (sizeY==1)) {
+		hcharge121->Fill(ch);
+	      } else if((sizeX==2) && (sizeY==2)) {
+		hcharge122->Fill(ch);
+		if( (minPixelCol%2)==0 ) hcharge12_1->Fill(ch);  //1st pixel in 1st col of dcol  
+		else                     hcharge12_2->Fill(ch);  //1st pixel in 2nd col of dcol  
+	      } else if((sizeX==1) && (sizeY==2)) {
+		hcharge112->Fill(ch);
+		if( (minPixelCol%2)==0 ) hcharge12_1->Fill(ch);  //1st pixel in 1st col of dcol  
+		else                     hcharge12_2->Fill(ch);  //1st pixel in 2nd col of dcol  
+	      }
+	    } // size=1/2
+#endif
+
+#ifdef NEW_MODULES
+	  // if(newModule) { // new from 2014
+	  //   hcharge11->Fill(ch);
+	  //   hsize11->Fill(float(size));
+	  //   hsizex11->Fill(float(sizeX));
+	  //   hsizey11->Fill(float(sizeY));
+	  // } else {  // old 2008 modules 
+#endif
+	    //	  }
 	  //if(numOf<10) hcharge11->Fill(ch);
 	  //else if(numOf<25) hcharge12->Fill(ch);
 	  //else if(numOf<100) hcharge13->Fill(ch);
 	  //else hcharge14->Fill(ch);
 
 	  hgz1->Fill(zPos);
+
 	  hclumult1->Fill(zPos,size);
 	  hclumultx1->Fill(zPos,sizeX);
 	  hclumulty1->Fill(zPos,sizeY);
+	  hsizeyz1->Fill(zPos,sizeY);
 	  hcluchar1->Fill(zPos,ch);
+#ifdef PHI_PROFILES
+	  hclumultxPhi1->Fill(gPhi,sizeX);
+	  hclumultyPhi1->Fill(gPhi,sizeY);
+	  hclucharPhi1->Fill(gPhi,ch);
+#endif 
 
 #if defined(BX) || defined(BX_NEW)
 	  if(bxId>-1) {
@@ -3060,16 +3582,23 @@ void PixClusterAna::analyze(const edm::Event& e,
 	  //if(bxId==0) htestbx->Fill(bx,ch);
 #endif
 
-	  hcharClubx->Fill(bx,ch);
-	  hsizeClubx->Fill(bx,size);
-	  hsizeYClubx->Fill(bx,sizeY);
+	  //hcharClubx->Fill(bx,ch);
+	  //hsizeClubx->Fill(bx,size);
+	  //hsizeYClubx->Fill(bx,sizeY);
 
-	  hcharCluls->Fill(lumiBlock,ch);
-	  hsizeCluls->Fill(lumiBlock,size);
-	  hsizeXCluls->Fill(lumiBlock,sizeX);
+	  //hcharCluls->Fill(lumiBlock,ch);
+	  //hsizeCluls->Fill(lumiBlock,size);
+	  //hsizeXCluls->Fill(lumiBlock,sizeX);
 
+#ifdef BX_TESTS
+	  hcharClu1bx->Fill(float(bx),ch); //
+	  hsizeClu1bx->Fill(float(bx),size); //
+#endif
+
+#ifdef LS_TESTS
 	  hcharClu1ls->Fill(lumiBlock,ch);
 	  hsizeClu1ls->Fill(lumiBlock,size);
+#endif
 
 	  //hcharCluLumi->Fill(instlumi,ch);
 	  //hsizeCluLumi->Fill(instlumi,size);
@@ -3080,43 +3609,91 @@ void PixClusterAna::analyze(const edm::Event& e,
 	  //hchargen3->Fill(ch);
 	  //if(size==1) hchargen4->Fill(ch);
 
+#ifdef TEST_GEOM
+	  hbpixXY->Fill(gX,gY);
+#endif
+
 #ifdef VDM_STUDIES
 	  hcharCluls1->Fill(lumiBlock,ch);
 	  hsizeCluls1->Fill(lumiBlock,size);
 	  hsizeXCluls1->Fill(lumiBlock,sizeX);
 #endif
 
-	} else if(layer==2) {
+	} else if( layer==2 ) {
 
-	  hDetMap2->Fill(float(module),float(ladder));
-	  hsizeDetMap2->Fill(float(module),float(ladder),float(size));
+	  numOfClustersPerDet2++;
+	  numOfClustersPerLay2++;
+	  avCharge2 += ch;
+
+	  hcluDets2->Fill(float(module),float(ladder));
+	  hsizeDets2->Fill(float(module),float(ladder),float(size));
+	  hchargeDets2->Fill(float(module),float(ladder),ch);
+	  hladder2id->Fill(float(ladder));
+	  hz2id->Fill(float(module));
 	  //hsizeXDetMap2->Fill(float(module),float(ladder),float(sizeX));
 	  //hsizeYDetMap2->Fill(float(module),float(ladder),float(sizeY));
+	  hcols2->Fill(y);
+	  hrows2->Fill(x);
+	  hcols21->Fill(ly);
+	  hrows21->Fill(lx);
 
-	  hcluDetMap2->Fill(y,x);
-	  if(newModule) { // new from 2014
-	    hcharge12->Fill(ch);
-	    hsize12->Fill(float(size));
-	    hsizex12->Fill(float(sizeX));
-	    hsizey12->Fill(float(sizeY));
-	  } else {  // old 2008 modules 
+	  //if(ladder==1 && module>0) {hcharge8->Fill(ch);}
+
+	  if(badL2Modules) {
+	    hcharge2b->Fill(ch);
+	    hsize2b->Fill(float(size));
+
+	  } else if(goodL2Modules) {
+	    hcharge2g->Fill(ch);
+	    hsize2g->Fill(float(size));
+
+	  } else {
 	    hcharge2->Fill(ch);
 	    hsize2->Fill(float(size));
 	    hsizex2->Fill(float(sizeX));
 	    hsizey2->Fill(float(sizeY));
-	  }
-	  numOfClustersPerDet2++;
-	  numOfClustersPerLay2++;
-	  avCharge2 += ch;
-	  hgz2->Fill(zPos);
-	  hclumult2->Fill(zPos,size);
-	  hclumultx2->Fill(zPos,sizeX);
-	  hclumulty2->Fill(zPos,sizeY);
-	  hcluchar2->Fill(zPos,ch);
+ 
+	    hgz2->Fill(zPos);
+	    hclumult2->Fill(zPos,size);
+	    hclumultx2->Fill(zPos,sizeX);
+	    hclumulty2->Fill(zPos,sizeY);
+	    hcluchar2->Fill(zPos,ch);
+	    hsizeyz2->Fill(zPos,sizeY);
+	    
+	    hcluDetMap2->Fill(y,x);
+	    htest3->Fill(ch,float(size));
+
+#ifdef ROC_RATE
+	    hcluRocRate2->Fill(rocZ);
+	    hrocClucharMap2->Fill(rocZ,rocPhi,ch);
+	    hrocSizeXMap2->Fill(rocZ,rocPhi,sizeX);
+	    hrocSizeYMap2->Fill(rocZ,rocPhi,sizeY);
+#endif
+#ifdef PHI_PROFILES
+	    hclumultxPhi2->Fill(gPhi,sizeX);
+	    hclumultyPhi2->Fill(gPhi,sizeY);
+	    hclucharPhi2->Fill(gPhi,ch);
+#endif 
+#ifdef BX_TESTS
+	    hcharClu2bx->Fill(float(bx),ch); //
+	    hsizeClu2bx->Fill(float(bx),size); //
+#endif
+	    
+#ifdef LS_TESTS
+	    hcharClu2ls->Fill(lumiBlock,ch);
+	    hsizeClu2ls->Fill(lumiBlock,size);
+#endif
+#ifdef MINMAX
+	    if(size>1) {
+	      hcharMin2->Fill(adcMin);
+	      hcharMax2->Fill(adcMax);
+	    }
+#endif	    
+	  } // if bad 
 
 #if defined(BX) || defined(BX_NEW)
-	  if(bxId>-1) {
-	    if(bxId==3)      {hchargebx1->Fill(ch); hsizebx1->Fill(size);} // coll
+	    if(bxId>-1) {
+	      if(bxId==3)      {hchargebx1->Fill(ch); hsizebx1->Fill(size);} // coll
 	    else if(bxId==4) {hchargebx2->Fill(ch); hsizebx2->Fill(size);} // coll+1
 	    else if(bxId==0) {hchargebx6->Fill(ch); hsizebx6->Fill(size);} // empty
 	    else if(bxId==1) {hchargebx3->Fill(ch); hsizebx3->Fill(size);} // beam1
@@ -3126,23 +3703,9 @@ void PixClusterAna::analyze(const edm::Event& e,
 	  }
 #endif
 
-
-	  hcharClubx->Fill(bx,ch);
-	  hsizeClubx->Fill(bx,size);
-	  hsizeYClubx->Fill(bx,sizeY);
-	  hcharCluls->Fill(lumiBlock,ch);
-	  hsizeCluls->Fill(lumiBlock,size);
-	  hsizeXCluls->Fill(lumiBlock,sizeX);
-
-	  hcharClu2ls->Fill(lumiBlock,ch);
-	  hsizeClu2ls->Fill(lumiBlock,size);
-
-	  //hcharCluLumi->Fill(instlumi,ch);
-	  //hsizeCluLumi->Fill(instlumi,size);
-	  //hsizeXCluLumi->Fill(instlumi,sizeX);
-	  //hsizeYCluLumi->Fill(instlumi,sizeY);
-
-
+#ifdef TEST_GEOM
+	  hbpixXY->Fill(gX,gY);
+#endif
 #ifdef VDM_STUDIES
 	  hcharCluls2->Fill(lumiBlock,ch);
 	  hsizeCluls2->Fill(lumiBlock,size);
@@ -3151,23 +3714,30 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 	} else if(layer==3) {
 
-	  hDetMap3->Fill(float(module),float(ladder));
-	  hsizeDetMap3->Fill(float(module),float(ladder),float(size));
-	  //hsizeXDetMap3->Fill(float(module),float(ladder),float(sizeX));
-	  //hsizeYDetMap3->Fill(float(module),float(ladder),float(sizeY));
+	  hcluDets3->Fill(float(module),float(ladder));
+	  hsizeDets3->Fill(float(module),float(ladder),float(size));
+	  hchargeDets3->Fill(float(module),float(ladder),ch);
+	  hladder3id->Fill(float(ladder));
+	  hz3id->Fill(float(module));
+	  hcols3->Fill(y);
+	  hrows3->Fill(x);
 
 	  hcluDetMap3->Fill(y,x);
-	  if(newModule) { // new from 2014
-	    hcharge13->Fill(ch);
-	    hsize13->Fill(float(size));
-	    hsizex13->Fill(float(sizeX));
-	    hsizey13->Fill(float(sizeY));
-	  } else {  // old 2008 modules 
-	    hcharge3->Fill(ch);
-	    hsize3->Fill(float(size));
-	    hsizex3->Fill(float(sizeX));
-	    hsizey3->Fill(float(sizeY));
+
+	  hcharge3->Fill(ch);
+	  hsize3->Fill(float(size));
+	  hsizex3->Fill(float(sizeX));
+	  hsizey3->Fill(float(sizeY));
+	  htest3->Fill(ch,float(size));
+
+
+
+#ifdef MINMAX
+	  if(size>1) {
+	    hcharMin3->Fill(adcMin);
+	    hcharMax3->Fill(adcMax);
 	  }
+#endif
 	  numOfClustersPerDet3++;
 	  numOfClustersPerLay3++;
 	  avCharge3 += ch;
@@ -3176,6 +3746,23 @@ void PixClusterAna::analyze(const edm::Event& e,
 	  hclumultx3->Fill(zPos,sizeX);
 	  hclumulty3->Fill(zPos,sizeY);
 	  hcluchar3->Fill(zPos,ch);
+	  hsizeyz3->Fill(zPos,sizeY);
+
+#ifdef ROC_RATE
+	  hcluRocRate3->Fill(rocZ);
+	  hrocClucharMap3->Fill(rocZ,rocPhi,ch);
+	  hrocSizeXMap3->Fill(rocZ,rocPhi,sizeX);
+	  hrocSizeYMap3->Fill(rocZ,rocPhi,sizeY);
+#endif
+
+#ifdef TEST_GEOM
+	  hbpixXY->Fill(gX,gY);
+#endif
+
+#ifdef BX_TESTS
+	  hcharClu3bx->Fill(float(bx),ch); //
+	  hsizeClu3bx->Fill(float(bx),size); //
+#endif
 
 #if defined(BX) || defined(BX_NEW)
 	  if(bxId>-1) {
@@ -3189,25 +3776,89 @@ void PixClusterAna::analyze(const edm::Event& e,
 	  }
 #endif
 
-	  hcharClubx->Fill(bx,ch);
-	  hsizeClubx->Fill(bx,size);
-	  hsizeYClubx->Fill(bx,sizeY);
-	  hcharCluls->Fill(lumiBlock,ch);
-	  hsizeCluls->Fill(lumiBlock,size);
-	  hsizeXCluls->Fill(lumiBlock,sizeX);
+	  //hcharClubx->Fill(bx,ch);
+	  //hsizeClubx->Fill(bx,size);
+	  //hsizeYClubx->Fill(bx,sizeY);
+	  //hcharCluls->Fill(lumiBlock,ch);
+	  //hsizeCluls->Fill(lumiBlock,size);
+	  //hsizeXCluls->Fill(lumiBlock,sizeX);
 
+#ifdef LS_TESTS
 	  hcharClu3ls->Fill(lumiBlock,ch);
 	  hsizeClu3ls->Fill(lumiBlock,size);
-
-	  //hcharCluLumi->Fill(instlumi,ch);
-	  //hsizeCluLumi->Fill(instlumi,size);
-	  //hsizeXCluLumi->Fill(instlumi,sizeX);
-	  //hsizeYCluLumi->Fill(instlumi,sizeY);
+#endif
 
 #ifdef VDM_STUDIES
 	  hcharCluls3->Fill(lumiBlock,ch);
 	  hsizeCluls3->Fill(lumiBlock,size);
 	  hsizeXCluls3->Fill(lumiBlock,sizeX);
+#endif
+
+	} else if(layer==4) {
+
+
+	  numOfClustersPerDet4++;
+	  numOfClustersPerLay4++;
+
+	  hcharge4->Fill(ch);
+	  hsize4->Fill(float(size));
+	  hsizex4->Fill(float(sizeX));
+	  hsizey4->Fill(float(sizeY));
+	  
+	  avCharge4 += ch;
+	  hgz4->Fill(zPos);
+	  hclumult4->Fill(zPos,size);
+	  hclumultx4->Fill(zPos,sizeX);
+	  hclumulty4->Fill(zPos,sizeY);
+	  hcluchar4->Fill(zPos,ch);
+
+	  hsizeyz4->Fill(zPos,sizeY);
+
+	  htest3->Fill(ch,float(size));
+#ifdef MINMAX
+	  if(size>1) {
+	    hcharMin4->Fill(adcMin);
+	    hcharMax4->Fill(adcMax);
+	  }
+#endif
+	  hcluDets4->Fill(float(module),float(ladder));
+	  hsizeDets4->Fill(float(module),float(ladder),float(size));
+	  hchargeDets4->Fill(float(module),float(ladder),ch);
+	  hladder4id->Fill(float(ladder));
+	  hz4id->Fill(float(module));
+	  hcols4->Fill(y);
+	  hrows4->Fill(x);
+
+	  hcluDetMap4->Fill(y,x);
+
+
+	  //hcharClubx->Fill(bx,ch);
+	  //hsizeClubx->Fill(bx,size);
+	  //hsizeYClubx->Fill(bx,sizeY);
+
+	  //hcharCluls->Fill(lumiBlock,ch);
+	  //hsizeCluls->Fill(lumiBlock,size);
+	  //hsizeXCluls->Fill(lumiBlock,sizeX);
+
+#ifdef ROC_RATE
+	  hcluRocRate4->Fill(rocZ);
+	  hrocClucharMap4->Fill(rocZ,rocPhi,ch);
+	  hrocSizeXMap4->Fill(rocZ,rocPhi,sizeX);
+	  hrocSizeYMap4->Fill(rocZ,rocPhi,sizeY);
+#endif
+
+#ifdef TEST_GEOM
+	  hbpixXY->Fill(gX,gY);
+#endif
+
+#ifdef BX_TESTS
+	  hcharClu4bx->Fill(float(bx),ch); //
+	  hsizeClu4bx->Fill(float(bx),size); //
+#endif
+
+#ifdef LS_TESTS
+	  hcharClu4ls->Fill(lumiBlock,ch);
+	  hsizeClu4ls->Fill(lumiBlock,size);
 #endif
 
 
@@ -3218,26 +3869,37 @@ void PixClusterAna::analyze(const edm::Event& e,
 	//cout<<disk<<" "<<side<<endl;
 	if(disk==1) { // disk1 -+z
 	  if(side==1) {
-	    numOfClustersPerDisk2++;      // d1,-z
-	    avCharge4 += ch;
-	  } else if(side==2) {
-	    numOfClustersPerDisk3++; // d1, +z
+	    numOfClustersPerDisk3++;      // d1,-z
 	    avCharge5 += ch;
-	  } else cout<<" unknown side "<<side<<endl;
-
-	  hcharge4->Fill(ch);
-
-	} else if(disk==2) { // disk2 -+z
-
-	  if(side==1) {
-	    numOfClustersPerDisk1++;      // d2, -z
-	    avCharge4 += ch;
-	  } else if(side==2) { 
-	    numOfClustersPerDisk4++; // d2, +z
+	  } else if(side==2) {
+	    numOfClustersPerDisk4++; // d1, +z
 	    avCharge5 += ch;
 	  } else cout<<" unknown side "<<side<<endl;
 
 	  hcharge5->Fill(ch);
+
+	} else if(disk==2) { // disk2 -+z
+
+	  if(side==1) {
+	    numOfClustersPerDisk2++;      // d2, -z
+	    avCharge5 += ch;
+	  } else if(side==2) { 
+	    numOfClustersPerDisk5++; // d2, +z
+	    avCharge5 += ch;
+	  } else cout<<" unknown side "<<side<<endl;
+
+	  hcharge6->Fill(ch);
+
+	} else if(disk==3) { // disk3 -+z
+
+	  if(side==1) {
+	    numOfClustersPerDisk1++;      // d3, -z
+	    avCharge5 += ch;
+	  } else if(side==2) { 
+	    numOfClustersPerDisk6++; // d3, +z
+	    avCharge5 += ch;
+	  } else cout<<" unknown side "<<side<<endl;
+	  hcharge7->Fill(ch);
 
 	} else cout<<" unknown disk "<<disk<<endl;
 
@@ -3272,42 +3934,39 @@ void PixClusterAna::analyze(const edm::Event& e,
 
       //hlayerid->Fill(float(layer));
 
+#ifdef TEST_DCOLS
+      histogramDcols(layer,ladder,module);
+#endif
       // Det histos
       if(layer==1) {
 	
-	hladder1id->Fill(float(ladder));
-	hz1id->Fill(float(module));
 	++numberOfDetUnits1;
 	hclusPerDet1->Fill(float(numOfClustersPerDet1));
 	hpixPerDet1->Fill(float(numOfPixPerDet1));
 	if(numOfPixPerDet1>maxPixPerDet) maxPixPerDet = numOfPixPerDet1;  
-	//if(numOfPixPerLink11>798 || numOfPixPerLink12>798) select=true; 
-	hpixPerLink1->Fill(float(numOfPixPerLink11));
-	hpixPerLink1->Fill(float(numOfPixPerLink12));
-	hDetsMap1->Fill(float(module),float(ladder));
+	hDets1->Fill(float(module),float(ladder));
 
 	if(abs(module)==1)      hpixPerDet11->Fill(float(numOfPixPerDet1));
 	else if(abs(module)==2) hpixPerDet12->Fill(float(numOfPixPerDet1));
 	else if(abs(module)==3) hpixPerDet13->Fill(float(numOfPixPerDet1));
 	else if(abs(module)==4) hpixPerDet14->Fill(float(numOfPixPerDet1));
 
+#ifdef TESTING_ADC
+	  if(detWithNegativeADC) {
+	    hclusPerDetT1->Fill(float(numOfClustersPerDet1));
+	    hpixPerDetT1->Fill(float(numOfPixPerDet1));
+	  }
+#endif
 	numOfClustersPerDet1=0;        
 	numOfPixPerDet1=0;
-	numOfPixPerLink11=0;        
-	numOfPixPerLink12=0;        
 
       } else if(layer==2) {
 
-	hladder2id->Fill(float(ladder));
-	hz2id->Fill(float(module));
 	++numberOfDetUnits2;
 	hclusPerDet2->Fill(float(numOfClustersPerDet2));
 	hpixPerDet2->Fill(float(numOfPixPerDet2));
 	if(numOfPixPerDet2>maxPixPerDet) maxPixPerDet = numOfPixPerDet2;  
-	hpixPerLink2->Fill(float(numOfPixPerLink21));
-	hpixPerLink2->Fill(float(numOfPixPerLink22));
-	hDetsMap2->Fill(float(module),float(ladder));
-
+	hDets2->Fill(float(module),float(ladder));
 
 	if(abs(module)==1)      hpixPerDet21->Fill(float(numOfPixPerDet2));
 	else if(abs(module)==2) hpixPerDet22->Fill(float(numOfPixPerDet2));
@@ -3316,45 +3975,67 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 	numOfClustersPerDet2=0;
 	numOfPixPerDet2=0;        
-	numOfPixPerLink21=0;        
-	numOfPixPerLink22=0;        
 
       } else if(layer==3) {
 
-	hladder3id->Fill(float(ladder));
-	hz3id->Fill(float(module));
 	++numberOfDetUnits3;
 	hclusPerDet3->Fill(float(numOfClustersPerDet3));
 	hpixPerDet3->Fill(float(numOfPixPerDet3));
 	if(numOfPixPerDet3>maxPixPerDet) maxPixPerDet = numOfPixPerDet3;  
-	hDetsMap3->Fill(float(module),float(ladder));
+	hDets3->Fill(float(module),float(ladder));
 
 	if(abs(module)==1)      hpixPerDet31->Fill(float(numOfPixPerDet3));
 	else if(abs(module)==2) hpixPerDet32->Fill(float(numOfPixPerDet3));
 	else if(abs(module)==3) hpixPerDet33->Fill(float(numOfPixPerDet3));
 	else if(abs(module)==4) hpixPerDet34->Fill(float(numOfPixPerDet3));
 
-// 	if(      module==-2&& ladder==13)  hpixPerDet100->Fill(float(numOfPixPerDet3));
-// 	else if( module==+1&& ladder==11)  hpixPerDet101->Fill(float(numOfPixPerDet3));
-// 	else if( module==-1&& ladder==9 )  hpixPerDet102->Fill(float(numOfPixPerDet3));
-// 	else if( module==-4&& ladder==11)  hpixPerDet103->Fill(float(numOfPixPerDet3));
-// 	else if( module==-2&& ladder==11)  hpixPerDet104->Fill(float(numOfPixPerDet3));
-// 	else if( module==-2&& ladder==19)  hpixPerDet105->Fill(float(numOfPixPerDet3));
-
-// 	if( numOfPixPerDet3>191 ) {
-// 	  cout<<" Layer 3 module "<<ladder<<" "<<module<<" "<<numOfPixPerDet3<<endl;
-// 	  select = true;
-// 	}
-
 	numOfClustersPerDet3=0;
 	numOfPixPerDet3=0;        
-	//numOfPixPerLink3=0;        
+
+      } else if(layer==4) {
+
+	++numberOfDetUnits4;
+	hclusPerDet4->Fill(float(numOfClustersPerDet4));
+	hpixPerDet4->Fill(float(numOfPixPerDet4));
+	if(numOfPixPerDet3>maxPixPerDet) maxPixPerDet = numOfPixPerDet4;  
+	hDets4->Fill(float(module),float(ladder));
+
+	numOfClustersPerDet4=0;
+	numOfPixPerDet4=0;        
 
       } // layer
       
     } // end barrel/forward
 
 #endif // HISTOS
+
+// #ifdef SINGLE_MODULES
+//     if     (ladder==1 && module==4) eventFlag[0]=false; // 
+//     else if(ladder==2 && module==4) eventFlag[1]=false;
+//     else if(ladder==3 && module==4) eventFlag[2]=false; // 
+//     else if(ladder==4 && module==4) eventFlag[3]=false; // 
+//     else if(ladder==5 && module==4) eventFlag[4]=false; // 
+//     else if(ladder==6 && module==4) eventFlag[5]=false; // 
+//     else if(ladder==1 && module==-4) eventFlag[6]=false; //
+//     else if(ladder==2 && module==-4) eventFlag[7]=false; // 
+//     else if(ladder==3 && module==-4) eventFlag[8]=false; // 
+//     else if(ladder==4 && module==-4) eventFlag[9]=false; // 
+//     else if(ladder==5 && module==-4) eventFlag[10]=false; // 
+//     else if(ladder==6 && module==-4) eventFlag[11]=false; // 
+//     else if(ladder==-1 && module==4) eventFlag[12]=false; // 
+//     else if(ladder==-2 && module==4) eventFlag[13]=false;
+//     else if(ladder==-3 && module==4) eventFlag[14]=false; // 
+//     else if(ladder==-4 && module==4) eventFlag[15]=false; // 
+//     else if(ladder==-5 && module==4) eventFlag[16]=false; // 
+//     else if(ladder==-6 && module==4) eventFlag[17]=false; // 
+//     else if(ladder==-1 && module==-4) eventFlag[18]=false; //
+//     else if(ladder==-2 && module==-4) eventFlag[19]=false; // 
+//     else if(ladder==-3 && module==-4) eventFlag[20]=false; // 
+//     else if(ladder==-4 && module==-4) eventFlag[21]=false; // 
+//     else if(ladder==-5 && module==-4) eventFlag[22]=false; // 
+//     else if(ladder==-6 && module==-4) eventFlag[23]=false; // 
+//     else if(ladder==-1 && module==-2) eventFlag[24]=false; // 
+// #endif 
     
   } // detunits loop
 
@@ -3371,7 +4052,7 @@ void PixClusterAna::analyze(const edm::Event& e,
     cout<<"Number of dets with clus in Lay1,2,3: "<<numberOfDetUnits1<<" "
 	<<numberOfDetUnits2<<" "<<numberOfDetUnits3<<endl;
   } // if PRINT
-  
+    
 #ifdef HISTOS
 
   //if(numberOfClusters<=3) continue; // skip events
@@ -3380,17 +4061,13 @@ void PixClusterAna::analyze(const edm::Event& e,
     hdets2->Fill(float(numOf));            // number of modules with pix
     hlumi1->Fill(float(lumiBlock));
     
-    //if(bptx_m && bptx_xor) hbx7->Fill(float(bx));
-    //if(bptx_p && bptx_xor) hbx8->Fill(float(bx));
-    //if(bptx_and) hbx9->Fill(float(bx));
-    //if(bptx_or)  hbx10->Fill(float(bx));
-
     hdigis->Fill(float(numberOfPixels));  // all pix 
     hdigis2->Fill(float(numberOfPixels));  // same zoomed 
 
-    int pixb = numOfPixPerLay1+numOfPixPerLay2+numOfPixPerLay3;
+    int pixb = numOfPixPerLay1+numOfPixPerLay2+numOfPixPerLay3+numOfPixPerLay4;
     hdigisB->Fill(float(pixb));  // pix in bpix
-    int pixf = numOfPixPerDisk1 + numOfPixPerDisk2 + numOfPixPerDisk3 + numOfPixPerDisk4; 
+    int pixf = numOfPixPerDisk1 + numOfPixPerDisk2 + numOfPixPerDisk3 + numOfPixPerDisk4+ 
+      numOfPixPerDisk5+ numOfPixPerDisk6; 
     hdigisF->Fill(float(pixf));   // pix in fpix
     
     hclus->Fill(float(numberOfClusters)); // clusters fpix+bpix
@@ -3399,8 +4076,8 @@ void PixClusterAna::analyze(const edm::Event& e,
 #ifdef PV
     //h2clupv->Fill(float(numberOfClusters),float(numPVsGood));
     //h2pixpv->Fill(float(numberOfPixels),float(numPVsGood));
-    hclupv->Fill(float(numberOfClusters),float(numPVsGood));
-    hpixpv->Fill(float(numberOfPixels),float(numPVsGood));
+    hclupv->Fill(float(numPVsGood),float(numberOfClusters));
+    hpixpv->Fill(float(numPVsGood),float(numberOfPixels));
     //if(numPVsGood>0) {
       //float tmp = float(numberOfClusters)/float(numPVsGood);
       //hclupvlsn->Fill(float(lumiBlock),tmp);
@@ -3409,11 +4086,12 @@ void PixClusterAna::analyze(const edm::Event& e,
     //}
 #endif //PV
 
-    int clusb = numOfClustersPerLay1+numOfClustersPerLay2+numOfClustersPerLay3;
+    int clusb = numOfClustersPerLay1+numOfClustersPerLay2+numOfClustersPerLay3+numOfClustersPerLay4;
     hclusBPix->Fill(float(clusb));  // clusters in bpix
 
     int clusf = numOfClustersPerDisk1+numOfClustersPerDisk2+
-      numOfClustersPerDisk3+numOfClustersPerDisk4;
+      numOfClustersPerDisk3+numOfClustersPerDisk4+
+      numOfClustersPerDisk5+numOfClustersPerDisk6;
     hclusFPix->Fill(float(clusf));  // clusters in fpix
 
 #ifdef HF
@@ -3426,13 +4104,25 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 #endif // HF
 
-    hclus5->Fill(float(numberOfNoneEdgePixels));   // count none edge pixels
+    //hclus5->Fill(float(numberOfNoneEdgePixels));   // count none edge pixels
     hclusls->Fill(float(lumiBlock),float(numberOfClusters)); // clusters fpix+bpix
     hpixls->Fill(float(lumiBlock),float(numberOfPixels)); // pixels fpix+bpix
 
-    hclubx->Fill(float(bx),float(numberOfClusters)); // clusters fpix+bpix
-    hpixbx->Fill(float(bx),float(numberOfPixels)); // pixels fpix+bpix
-#if PB
+    //hclubx->Fill(float(bx),float(numberOfClusters)); // clusters fpix+bpix
+    //hpixbx->Fill(float(bx),float(numberOfPixels)); // pixels fpix+bpix
+
+#ifdef BX_TESTS
+    hclu1bx->Fill(float(bx),float(numOfClustersPerLay1)); //
+    hpix1bx->Fill(float(bx),float(numOfPixPerLay1)); // 
+    hclu2bx->Fill(float(bx),float(numOfClustersPerLay2)); //
+    hpix2bx->Fill(float(bx),float(numOfPixPerLay2)); // 
+    hclu3bx->Fill(float(bx),float(numOfClustersPerLay3)); //
+    hpix3bx->Fill(float(bx),float(numOfPixPerLay3)); // 
+    hclu4bx->Fill(float(bx),float(numOfClustersPerLay4)); //
+    hpix4bx->Fill(float(bx),float(numOfPixPerLay4)); // 
+#endif
+
+#ifdef PV
     hpvbx->Fill(float(bx),float(numPVsGood)); // pvs
 #endif 
 
@@ -3446,145 +4136,71 @@ void PixClusterAna::analyze(const edm::Event& e,
 #endif
 
 
-    if(instlumi>0.) {
-
-#ifdef INSTLUMI_STUDIES
-
-      //hcluLumi->Fill(instlumi,float(numberOfClusters)); // clus 
-      //hpixLumi->Fill(instlumi,float(numberOfPixels)); // pix
-
-      float tmp = float(numberOfClusters)/instlumi;
-      hcluslsn->Fill(float(lumiBlock),tmp); // clusters fpix+bpix
-      tmp = float(numberOfPixels)/instlumi;
-      hpixlsn->Fill(float(lumiBlock),tmp); // pixels fpix+bpix
-
-      // pix & clus per lumi
-      tmp = float(pixb);
-      hpixbl->Fill(instlumi,tmp); // pixels bpix
-
-      tmp = float(numOfPixPerLay1);
-      hpixb1l->Fill(instlumi,tmp); // pixels bpix
-      tmp = float(numOfPixPerLay2);
-      hpixb2l->Fill(instlumi,tmp); // pixels bpix
-      tmp = float(numOfPixPerLay3);
-      hpixb3l->Fill(instlumi,tmp); // pixels bpix
-      
-      tmp = float(pixf);
-      hpixfl->Fill(instlumi,tmp); // pixels fpix
+#ifdef LS_TESTS
+    // pix & clus per ls
+    float tmp = float(numOfPixPerLay1);
+    hpixb1l->Fill(float(lumiBlock),tmp); // pixels bpix
+    tmp = float(numOfPixPerLay2);
+    hpixb2l->Fill(float(lumiBlock),tmp); // pixels bpix
+    tmp = float(numOfPixPerLay3);
+    hpixb3l->Fill(float(lumiBlock),tmp); // pixels bpix
+    tmp = float(numOfPixPerLay4);
+    hpixb4l->Fill(float(lumiBlock),tmp); // pixels bpix
     
-      tmp = float(numOfPixPerDisk1 + numOfPixPerDisk2); // -z
-      hpixfml->Fill(instlumi,tmp); // pixels fpix
-      tmp = float(numOfPixPerDisk3 + numOfPixPerDisk4); // +z
-      hpixfpl->Fill(instlumi,tmp); // pixels fpix
-
-      tmp = float(clusb);
-      hclusbl->Fill(instlumi,tmp); // clus bpix
-      tmp = float(numOfClustersPerLay1);
-      hclusb1l->Fill(instlumi,tmp); // clus bpix
-      tmp = float(numOfClustersPerLay2);
-      hclusb2l->Fill(instlumi,tmp); // clus bpix
-      tmp = float(numOfClustersPerLay3);
-      hclusb3l->Fill(instlumi,tmp); // clus bpix
-
-      tmp = float(clusf);
-      hclusfl->Fill(instlumi,tmp); // clus  fpix
-      tmp = float(numOfClustersPerDisk1+numOfClustersPerDisk2);
-      hclusfml->Fill(instlumi,tmp); // clus fpix
-      tmp = float(numOfClustersPerDisk3+numOfClustersPerDisk4);
-      hclusfpl->Fill(instlumi,tmp); // clus fpix
-
-
-      // bx 
-      tmp = float( numberOfClusters) / instlumi;
-      hclubxn->Fill(float(bx),tmp); // clusters fpix+bpix
-      tmp = float( numberOfPixels) / instlumi;
-      hpixbxn->Fill(float(bx),tmp); // pixels fpix+bpix
-#ifdef PV
-      tmp = float( numPVsGood) / instlumi;
-#endif
-      hpvbxn->Fill(float(bx),tmp); // pvs
-
-//       tmp = float(numOfClustersPerLay1)/float(numOfClustersPerLay3);
-//       hclus13ls->Fill(float(lumiBlock),tmp); // clus 1/3
-//       tmp = float(numOfClustersPerLay2)/float(numOfClustersPerLay3);
-//       hclus23ls->Fill(float(lumiBlock),tmp); // clus 2/3
-//       tmp = float(numOfClustersPerLay1)/float(numOfClustersPerLay2);
-//       hclus12ls->Fill(float(lumiBlock),tmp); // clus 1/2
-//       tmp = float(clusf)/float(numOfClustersPerLay3);
-//       hclusf3ls->Fill(float(lumiBlock),tmp); // clus f/3
+    tmp = float(pixf);
+    hpixfl->Fill(float(lumiBlock),tmp); // pixels fpix
+    
+    tmp = float(numOfPixPerDisk1 + numOfPixPerDisk2); // -z
+    hpixfml->Fill(float(lumiBlock),tmp); // pixels fpix
+    tmp = float(numOfPixPerDisk3 + numOfPixPerDisk4); // +z
+    hpixfpl->Fill(float(lumiBlock),tmp); // pixels fpix
+    
+    tmp = float(numOfClustersPerLay1);
+    hclusb1l->Fill(float(lumiBlock),tmp); // clus bpix
+    tmp = float(numOfClustersPerLay2);
+    hclusb2l->Fill(float(lumiBlock),tmp); // clus bpix
+    tmp = float(numOfClustersPerLay3);
+    hclusb3l->Fill(float(lumiBlock),tmp); // clus bpix
+    tmp = float(numOfClustersPerLay4);
+    hclusb4l->Fill(float(lumiBlock),tmp); // clus bpix
+    
+    tmp = float(clusf);
+    hclusfl->Fill(float(lumiBlock),tmp); // clus  fpix
+    tmp = float(numOfClustersPerDisk1+numOfClustersPerDisk2);
+    hclusfml->Fill(float(lumiBlock),tmp); // clus fpix
+    tmp = float(numOfClustersPerDisk3+numOfClustersPerDisk4);
+    hclusfpl->Fill(float(lumiBlock),tmp); // clus fpix    
+#endif // LS_TESTS
       
-#endif // INSTLUMI_STUDIES
-      
-    } // if instlumi
-
-
     hclusPerLay1->Fill(float(numOfClustersPerLay1));
     hclusPerLay2->Fill(float(numOfClustersPerLay2));
     hclusPerLay3->Fill(float(numOfClustersPerLay3));
+    hclusPerLay4->Fill(float(numOfClustersPerLay4));
     hpixPerLay1->Fill(float(numOfPixPerLay1));
     hpixPerLay2->Fill(float(numOfPixPerLay2));
     hpixPerLay3->Fill(float(numOfPixPerLay3));
+    hpixPerLay4->Fill(float(numOfPixPerLay4));
+
     if(numOfClustersPerLay1>0) hdetsPerLay1->Fill(float(numberOfDetUnits1));
     if(numOfClustersPerLay2>0) hdetsPerLay2->Fill(float(numberOfDetUnits2));
     if(numOfClustersPerLay3>0) hdetsPerLay3->Fill(float(numberOfDetUnits3));
+    if(numOfClustersPerLay4>0) hdetsPerLay4->Fill(float(numberOfDetUnits4));
     
     hclusPerDisk1->Fill(float(numOfClustersPerDisk1));
     hclusPerDisk2->Fill(float(numOfClustersPerDisk2));
     hclusPerDisk3->Fill(float(numOfClustersPerDisk3));
     hclusPerDisk4->Fill(float(numOfClustersPerDisk4));
+    hclusPerDisk5->Fill(float(numOfClustersPerDisk5));
+    hclusPerDisk6->Fill(float(numOfClustersPerDisk6));
 
     hpixPerDisk1->Fill(float(numOfPixPerDisk1));
     hpixPerDisk2->Fill(float(numOfPixPerDisk2));
     hpixPerDisk3->Fill(float(numOfPixPerDisk3));
     hpixPerDisk4->Fill(float(numOfPixPerDisk4));
+    hpixPerDisk5->Fill(float(numOfPixPerDisk5));
+    hpixPerDisk6->Fill(float(numOfPixPerDisk6));
     
     hmaxPixPerDet->Fill(float(maxPixPerDet));
-
-
-//     // Check mod and roc time dependence
-//     if( (lumiBlock%5) == 0 ) { // do every 5 lumi blocks
-//       int id=0, lad=0, mod=0, roc=0, layer=0, index=0;
-//       float tmp=0;
-//       // ROCs
-//       // Layer 1, 
-//       layer=1;
-//       id = 0;
-//       lad=-3;mod=1;roc=5;
-//       tmp = pixEff->getRoc(layer,lad,mod,roc);
-//       tmp = tmp - rocHits[layer-1][id];
-//       rocHits[layer-1][id] = tmp;
-//       index = lumiBlock/5;
-//       hrocHits1ls->Fill(float(index),id,tmp);
-//       // Layer 2, 
-//       layer=2;
-//       id = 0;
-//       lad=-5;mod=-2;roc=10;
-//       tmp = pixEff->getRoc(layer,lad,mod,roc);
-//       tmp = tmp - rocHits[layer-1][id];
-//       rocHits[layer-1][id] = tmp;
-//       index = lumiBlock/5;
-//       hrocHits2ls->Fill(float(index),id,tmp);
-//       // Layer 3, 
-//       layer=3;
-//       id = 0;
-//       lad=-18;mod=-2;roc=14;
-//       tmp = pixEff->getRoc(layer,lad,mod,roc);
-//       tmp = tmp - rocHits[layer-1][id];
-//       rocHits[layer-1][id] = tmp;
-//       index = lumiBlock/5;
-//       hrocHits3ls->Fill(float(index),id,tmp);
-//       // MODULES
-//       float half1=0, half2=0;
-//       // Layer 1, 
-//       layer=1;
-//       id = 0;
-//       lad=-3;mod=1;
-//       tmp = pixEff->getModule(layer,lad,mod,half1,half2);
-//       tmp = tmp - moduleHits[layer-1][id];
-//       moduleHits[layer-1][id] = tmp;
-//       index = lumiBlock/5;
-//       hmoduleHits1ls->Fill(float(index),id,tmp);
-//     }
 
 
 #ifdef L1
@@ -3628,8 +4244,9 @@ void PixClusterAna::analyze(const edm::Event& e,
 #endif // L1
 
     // HLT bits
+#ifdef HLT
     for (unsigned int i=0;i<256;i++) if(hlt[i]) hlt3->Fill(float(i));
-    
+#endif    
   } // if select event
 
 #endif // HISTOS

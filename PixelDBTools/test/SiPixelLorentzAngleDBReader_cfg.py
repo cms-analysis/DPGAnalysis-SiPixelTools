@@ -4,6 +4,7 @@ process = cms.Process("Test")
 process.load("Configuration.Geometry.GeometryRecoDB_cff") # works
 #process.load("Configuration.StandardSequences.GeometryDB_cff") # works
 
+
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(1)
 )
@@ -32,9 +33,11 @@ process.source = cms.Source("EmptySource",
 #    firstRun = cms.untracked.uint32(240000), # for offline
 #    firstRun = cms.untracked.uint32(250000), # for prompt 
 # 2016, iov 1
-    firstRun = cms.untracked.uint32(270000),
+#    firstRun = cms.untracked.uint32(270000),
 # 2016, iov 2
 #    firstRun = cms.untracked.uint32(281500),
+# 2017, iov 
+    firstRun = cms.untracked.uint32(303000),
 )
 
 
@@ -49,21 +52,18 @@ process.MessageLogger = cms.Service("MessageLogger",
     destinations = cms.untracked.vstring('cout')
 )
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-#from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_Prompt_v15', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_Prompt_v5', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_v11', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, '74X_dataRun2_Prompt_v0', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, '92X_dataRun2_Express_v7', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_realistic', '')
 
 
 # DB stuff 
-useLocalDB = True
+useLocalDB = False
 if useLocalDB :
   process.DBReader = cms.ESSource("PoolDBESSource",
     DBParameters = cms.PSet(
@@ -155,13 +155,13 @@ if useLocalDB :
 #    connect = cms.string('sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase0/2016_11_20/SiPixelLorentzAngle_2016_v1.db')
 #    connect = cms.string('sqlite_file:/afs/cern.ch/cms/CAF/CMSALCA/ALCA_TRACKERCALIB/Pixels/PixelDB2016/2SiPixelLorentzAngle/SiPixelLorentzAngle_2016_v2.db')
 #    connect = cms.string('sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase0/2016_11_20/SiPixelLorentzAngle_2016_v3.db')
-    connect = cms.string('sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase0/2016_11_20/SiPixelLorentzAngle_2016_v4.db')
+#    connect = cms.string('sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase0/2016_11_20/SiPixelLorentzAngle_2016_v4.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngle_test.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngleSim_test.db')
 
 #    connect = cms.string('frontier://FrontierProd/CMS_COND_31X_PIXEL')
 #    connect = cms.string('frontier://FrontierPrep/CMS_COND_PIXEL')
-#    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
+    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
 #    connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
   ) # end process
   process.es_prefer_DBReader = cms.ESPrefer("PoolDBESSource","DBReader")
@@ -172,7 +172,7 @@ process.LorentzAngleReader = cms.EDAnalyzer("SiPixelLorentzAngleDBReader",
     printDebug = cms.untracked.bool(False),
 #   use label to read labeled object from DB
 #    label = cms.untracked.string("fromAlignment"),
-#    label = cms.untracked.string("forWidth"),
+    label = cms.untracked.string("forWidth"),
     useSimRcd = cms.bool(False)                                    
 )
 
