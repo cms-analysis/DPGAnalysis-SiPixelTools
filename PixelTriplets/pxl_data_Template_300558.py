@@ -4,13 +4,13 @@ import FWCore.ParameterSet.VarParsing as opts
 opt = opts.VarParsing('analysis')
 
 opt.register('outputFileName',
-             'job.root',
+             'job_data_300558_Template.root',
              opts.VarParsing.multiplicity.singleton,
              opts.VarParsing.varType.string,
              'The name of the output file')
 
 opt.register('GlobalTag',
-              'auto:phase1_2017_realistic', #'auto:run2_data',
+             '92X_dataRun2_Express_v7',  #'auto:phase1_2017_realistic', #'auto:run2_data',
              opts.VarParsing.multiplicity.singleton,
              opts.VarParsing.varType.string,
              'Global tag for this run')
@@ -34,23 +34,10 @@ opt.register('useLocalDBTemplate',
              'Read Templates from local DB')
 
 opt.register('useTemplateReco',
-             False,
+             True,
              opts.VarParsing.multiplicity.singleton,
              opts.VarParsing.varType.bool,
              'Set if you want to use Template (True) or Generic Reco (False)')
-
-opt.register('LAoffset',
-             0.0,
-             opts.VarParsing.multiplicity.singleton,
-             opts.VarParsing.varType.float,
-             'Set Lorentz Angel offset (if zero, taken from DB)')
-
-opt.register('LAwidth',
-             0.0,
-             opts.VarParsing.multiplicity.singleton,
-             opts.VarParsing.varType.float,
-             'Set Lorentz Angel width (if zero, taken from DB)')
-
 
 ### Events to process: 'maxEvents' is already registered by the framework
 opt.setDefault('maxEvents', -1)
@@ -70,9 +57,9 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condD
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 # tags for 74X
 #process.GlobalTag.globaltag = 'FT_R_74_V15B' # for 251643
-process.GlobalTag = GlobalTag(process.GlobalTag, opt.GlobalTag, '') # Read from commandLine
-#process.GlobalTag.globaltag = '76X_dataRun2_v15' #
-#process.GlobalTag.globaltag = '74X_dataRun2_Prompt_v2' #
+process.GlobalTag = GlobalTag(process.GlobalTag, opt.GlobalTag, '') # Read from commandLine 
+#process.GlobalTag.globaltag = '76X_dataRun2_v15' # 
+#process.GlobalTag.globaltag = '74X_dataRun2_Prompt_v2' # 
 #process.GlobalTag.globaltag = '74X_dataRun2_Prompt_v1' # only for 746
 #process.GlobalTag.globaltag = '74X_dataRun2_Prompt_v0' # for 251643
 #process.GlobalTag.globaltag = '74X_dataRun2_PromptValidation_forPostTS2_v2' # for 251643
@@ -86,7 +73,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, opt.GlobalTag, '') # Read from 
 #process.GlobalTag.globaltag = 'FT_R_53_V21::All'
 # for data in V7
 #process.GlobalTag.globaltag = "GR_R_62_V1::All"
-# for simulations
+# for simulations 
 #process.GlobalTag.globaltag = "MC_70_V1::All"
 #process.GlobalTag.globaltag = "START70_V1::All"
 #process.GlobalTag.globaltag = "MC_71_V1::All"
@@ -156,15 +143,25 @@ myfilelist.extend([
 ])
 
 process.source = cms.Source("PoolSource",
+# fileNames =  myfilelist
 	fileNames = cms.untracked.vstring(
-"file:/eos/cms/store/relval/CMSSW_9_4_0/RelValSingleMuPt10/GEN-SIM-RECO/94X_mc2017_realistic_v10-v1/10000/1A0C459B-63CA-E711-A9A8-0CC47A4D76AA.root",
-"file:/eos/cms/store/relval/CMSSW_9_4_0/RelValSingleMuPt10/GEN-SIM-RECO/94X_mc2017_realistic_v10-v1/10000/2C1FD59F-63CA-E711-A75D-0CC47A4D7600.root",
-"file:/eos/cms/store/relval/CMSSW_9_4_0/RelValSingleMuPt10/GEN-SIM-RECO/94X_mc2017_realistic_v10-v1/10000/DABB00E3-68CA-E711-BF46-0CC47A4D75F2.root",
-"file:/eos/cms/store/relval/CMSSW_9_4_0/RelValSingleMuPt10/GEN-SIM-RECO/94X_mc2017_realistic_v10-v1/10000/DCA18BE8-68CA-E711-B3ED-0025905A48D8.root",
-	)
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/F6DB51B0-BD7A-E711-9988-02163E0144E5.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/F802CEAD-B17A-E711-9316-02163E0144AC.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/F85E23A5-AE7A-E711-AEA9-02163E019CAB.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/F89AD26D-AA7A-E711-8282-02163E019B4A.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/F8D1D930-A97A-E711-86DD-02163E01A58F.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/F8FC69DC-BA7A-E711-B365-02163E019D76.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/FA20CBEC-AF7A-E711-A1D1-02163E01441B.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/FA3624F6-BE7A-E711-B616-02163E01A60E.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/FA59A5D3-BF7A-E711-931F-02163E01A5C6.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/FAC392F0-BE7A-E711-A59D-02163E01A6F1.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/FC043595-AD7A-E711-A5D8-02163E01A4AC.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/FCB5E0BE-AE7A-E711-BEFE-02163E01A377.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/FE53DC4E-B57A-E711-9D59-02163E0142B1.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/FE569111-A97A-E711-918B-02163E01A5C3.root",
+"/store/express/Run2017C/ExpressPhysics/FEVT/Express-v2/000/300/558/00000/FED6E124-A77A-E711-A585-02163E019DDD.root",
+		)
 )
-
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('208686:73-208686:463')
 
 # DB stuff options can now be set using comamnd Line, see beginning for defaults
 if opt.useLocalDBLA:
@@ -208,7 +205,7 @@ if opt.useLocalDBLA:
 
 
 # options can now be set using comamnd Line, see beginning for defaults
-if opt.useLocalDBGenErr:
+if opt.useLocalDBGenErr:	
 	process.DBReaderFrontier2 = cms.ESSource("PoolDBESSource",
 		DBParameters = cms.PSet(
 			messageLevel = cms.untracked.int32(0),
@@ -237,7 +234,7 @@ if opt.useLocalDBGenErr:
         process.myprefer2 = cms.ESPrefer("PoolDBESSource","DBReaderFrontier2")
 # endif
 
-# SQ_LITE Templates
+# SQ_LITE Templates 
 # options can now be set using comamnd Line, see beginning for defaults
 if opt.useLocalDBTemplate :
 	process.DBReaderFrontier3 = cms.ESSource("PoolDBESSource",
@@ -267,13 +264,14 @@ if opt.useLocalDBTemplate :
 	) # end process
 	process.myprefer3 = cms.ESPrefer("PoolDBESSource","DBReaderFrontier3")
 # endif
+ 
 
-process.Histos = cms.EDAnalyzer('Pxl',#PxlBPix,PxlFPix'
+process.Histos = cms.EDAnalyzer('Pxl',#BPix',
 # for official RECO
 #	triggerSource = cms.InputTag('TriggerResults::HLT'),
 # For MC or my rereco
 	triggerSource = cms.InputTag(''),
-	singleParticleMC = cms.untracked.bool(True),
+	singleParticleMC = cms.untracked.bool(False),
 )
 if opt.useTemplateReco:
     process.Histos.ttrhBuilder = cms.string('WithAngleAndTemplate')
@@ -281,20 +279,19 @@ else:
     process.Histos.ttrhBuilder = cms.string('WithTrackAngle')
 
 
-# values for LA, if 0 it is taken from DB
-process.PixelCPEGenericESProducer.lAOffset    = cms.double(opt.LAoffset)
-process.PixelCPEGenericESProducer.lAWidthFPix = cms.double(opt.LAwidth)
-# process.PixelCPEGenericESProducer.lAOffset = cms.double(0.09)
-# process.PixelCPEGenericESProducer.lAOffset = cms.double(0.0)
-# process.PixelCPEGenericESProducer.lAWidthBPix = cms.double(0.098)
-# process.PixelCPEGenericESProducer.lAWidthBPix = cms.double(0.0)
-# process.PixelCPEGenericESProducer.lAWidthFPix = cms.double(0.058)
-
+# values for LA, if 0 it is taken from DB 
+#process.PixelCPEGenericESProducer.lAOffset = cms.double(0.098)
+#process.PixelCPEGenericESProducer.lAOffset = cms.double(0.09)
+#process.PixelCPEGenericESProducer.lAOffset = cms.double(0.0)
+#process.PixelCPEGenericESProducer.lAWidthBPix = cms.double(0.098)
+#process.PixelCPEGenericESProducer.lAWidthBPix = cms.double(0.0)
+#process.PixelCPEGenericESProducer.lAWidthFPix = cms.double(0.058)
+#process.PixelCPEGenericESProducer.lAWidthFPix = cms.double(0.0)
 
 #process.PixelCPEGenericESProducer.useLAAlignmentOffsets = cms.bool(True)
 #process.PixelCPEGenericESProducer.useLAWidthFromDB = cms.bool(True)
 
-# use the LA correction from alignment in templates
+# use the LA correction from alignment in templates 
 #process.templates.DoLorentz = cms.bool(True)
 
 process.TFileService = cms.Service('TFileService',

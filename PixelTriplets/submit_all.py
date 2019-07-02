@@ -41,7 +41,8 @@ def main():
 
     from CRABAPI.RawCommand import crabCommand
     from httplib import HTTPException
-
+    #from WMCore.DataStructs.LumiList import LumiList
+    
     # We want to put all the CRAB project directories from the tasks we submit here into one common directory.
     # That's why we need to set this parameter (here or above in the configuration file, it does not matter, we will not overwrite it).
     config.section_("General")
@@ -57,7 +58,8 @@ def main():
     config.Data.inputDataset = None
     # config.Data.inputDBS = 'phys03' #to be commented in case of global#
     #config.Data.splitting = 'LumiBased'#
-    config.Data.unitsPerJob = 2
+    #config.Data.runRange= "295463"
+    config.Data.unitsPerJob = 3
     #config.Data.lumiMask = './JSON.txt'
     config.Data.splitting = 'FileBased'
     #config.Data.unitsPerJob = 1
@@ -97,9 +99,9 @@ def main():
 
         ptbin = job.split('/')[1]
         cond = job.split('/')[2]
-        config.General.requestName =  ptbin +"_PxlRes_updated" 
+        config.General.requestName =  ptbin +"_PxlRes_Template" 
         config.Data.inputDataset = job
-        config.Data.outputDatasetTag = ptbin +"_PxlRes_updated" 
+        config.Data.outputDatasetTag = ptbin +"_PxlRes_Template" 
         print "ptbin :%s and cond: %s " %(ptbin, cond)
         print 'Submitting ' + config.General.requestName + ', dataset = ' + job
         print 'Configuration :'

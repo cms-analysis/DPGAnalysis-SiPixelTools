@@ -51,10 +51,11 @@
 // To convert detId to subdet/layer number:
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
-#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TECDetId.h"
-#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+//#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+//#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+//#include "DataFormats/SiStripDetId/interface/TECDetId.h"
+//#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/DetId/interface/DetId.h"
 #include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
 #include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
 
@@ -194,8 +195,8 @@ struct Histos{
   TProfile                                                                *h409;
   TH1D     *h410, *h411;
   TProfile               *h412, *h412_out_zplus, *h412_out_zminus, *h412_in_zplus, *h412_in_zminus, *h413, *h414, *h415, *h416, *h417, *h418, *h419;
-  TH1D     *h420, *h420_out_zplus, *h420_out_zminus, *h420_in_zplus, *h420_in_zminus, *h421; 
-  TH1D     *h420_mod1, *h420_mod2, *h420_mod3, *h420_mod4, *h420_mod5, *h420_mod6, *h420_mod7, *h420_mod8; 
+  TH1D     *h420, *h420_out_zplus, *h420_out_zminus, *h420_in_zplus, *h420_in_zminus, *h421;
+  TH1D     *h420_mod1, *h420_mod2, *h420_mod3, *h420_mod4, *h420_mod5, *h420_mod6, *h420_mod7, *h420_mod8;
   TH1D     *h421_mod1, *h421_mod2, *h421_mod3, *h421_mod4, *h421_mod5, *h421_mod6, *h421_mod7, *h421_mod8;
   TH1D     *h420_x_plus,*h420_x_minus, *h421_x_plus,*h421_x_minus;
   TH1D     *h420_out_xplus_zplus,*h420_out_xminus_zplus, *h420_out_xplus_zminus,*h420_out_xminus_zminus;
@@ -555,7 +556,7 @@ struct Histos{
 };
 
 class Pxl : public edm::EDAnalyzer, public Histos {
-  
+
 public:
   explicit Pxl(const edm::ParameterSet& // ,edm::ConsumesCollector&&
 	       );
@@ -605,7 +606,7 @@ Pxl::Pxl(const edm::ParameterSet& iConfig// , edm::ConsumesCollector && ic
 
 
 
-  //Definition of parameters 
+  //Definition of parameters
   t_triggerSrc_ = consumes<edm::TriggerResults> (iConfig.getParameter<edm::InputTag>("triggerSource"));
   t_offlineBeamSpot_ =    consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
   t_offlinePrimaryVertices_ =   consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
@@ -998,7 +999,7 @@ void Histos::init(TFileDirectory* fs)
   h420_in_zplus = fs->make<TH1D>( "h420_in_zplus", "PXB2 residuals #Deltax, p_{t} > 12, inward-facing modules, z+;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h420_in_zminus = fs->make<TH1D>( "h420_in_zminus", "PXB2 residuals #Deltax, p_{t} > 12, inward-facing modules, z-;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h421 = fs->make<TH1D>( "h421", "PXB2 residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
- 
+
   h420_x_plus = fs->make<TH1D>( "h420_x_plus", "PXB2 residuals #Deltax, p_{t} > 12, local x>0 ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h420_x_minus = fs->make<TH1D>( "h420_x_minus", "PXB2 residuals #Deltax, p_{t} > 12, local x<0 ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h421_x_plus = fs->make<TH1D>( "h421_x_plus", "PXB2 residuals #Deltaz, p_{t} > 12, local x>0 ;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
@@ -1022,9 +1023,9 @@ void Histos::init(TFileDirectory* fs)
   h421_in_xplus_zminus = fs->make<TH1D>( "h421_in_xplus_zminus", "PXB2 residuals #Deltaz, p_{t} > 12, local x>0 z-minus in facing modules ;PXB2 #Deltaz [#mum];hits", 100,-300, 300);
   h421_in_xminus_zminus = fs->make<TH1D>( "h421_in_xminus_zminus", "PXB2 residuals #Deltaz, p_{t} > 12, local x<0 z-minus in facing modules ;PXB2 #Deltaz [#mum];hits", 100,-300, 300);
 
- 
+
   h_cluster_prob =fs->make<TH1D>( "h_cluster_prob", "cluster probability", 150,0, 1.5);
-  
+
   h420_cluster_prob_0_010= fs->make<TH1D>( "h420_cluster_prob_0_010", "PXB2 residuals #Deltax, p_{t} > 12, prob 0-0.010;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h420_cluster_prob_010_075= fs->make<TH1D>( "h420_cluster_prob_010_075", "PXB2 residuals #Deltax, p_{t} > 12, prob 0.10-0.75;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h420_cluster_prob_075_090= fs->make<TH1D>( "h420_cluster_prob_075_090", "PXB2 residuals #Deltax, p_{t} > 12, prob 0.75-0.90;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
@@ -1034,7 +1035,7 @@ void Histos::init(TFileDirectory* fs)
   h421_cluster_prob_010_075= fs->make<TH1D>( "h421_cluster_prob_010_075", "PXB2 residuals #Deltaz, p_{t} > 12, prob 0.10-0.75;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
   h421_cluster_prob_075_090= fs->make<TH1D>( "h421_cluster_prob_075_090", "PXB2 residuals #Deltaz, p_{t} > 12, prob 0.75-0.90;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
   h421_cluster_prob_090_101= fs->make<TH1D>( "h421_cluster_prob_090_101", "PXB2 residuals #Deltaz, p_{t} > 12, prob 0.90-1.01;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
- 
+
 
   h420_cluster_prob_0_010_etaL0p8= fs->make<TH1D>( "h420_cluster_prob_0_010_etaL0p8", "PXB2 residuals #Deltax, p_{t} > 12, prob 0-0.010 etaL0p8 ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h420_cluster_prob_010_075_etaL0p8= fs->make<TH1D>( "h420_cluster_prob_010_075_etaL0p8", "PXB2 residuals #Deltax, p_{t} > 12, prob 0.10-0.75 etaL0p8 ;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
@@ -1055,8 +1056,8 @@ void Histos::init(TFileDirectory* fs)
   h421_cluster_prob_010_075_etaM0p8= fs->make<TH1D>( "h421_cluster_prob_010_075_etaM0p8", "PXB2 residuals #Deltaz, p_{t} > 12, prob 0.10-0.75 etaM0p8 ;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
   h421_cluster_prob_075_090_etaM0p8= fs->make<TH1D>( "h421_cluster_prob_075_090_etaM0p8", "PXB2 residuals #Deltaz, p_{t} > 12, prob 0.75-0.90 etaM0p8 ;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
   h421_cluster_prob_090_101_etaM0p8= fs->make<TH1D>( "h421_cluster_prob_090_101_etaM0p8", "PXB2 residuals #Deltaz, p_{t} > 12, prob 0.90-1.01 etaM0p8 ;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
- 
- 
+
+
   h420_1 = fs->make<TH1D>( "h420_1", "PXB2 residuals #Deltax, p_{t} > 12, lever 1;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h420_2 = fs->make<TH1D>( "h420_2", "PXB2 residuals #Deltax, p_{t} > 12, lever 2;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h420_3 = fs->make<TH1D>( "h420_3", "PXB2 residuals #Deltax, p_{t} > 12, lever 3;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
@@ -1069,7 +1070,7 @@ void Histos::init(TFileDirectory* fs)
   h420_mod6 = fs->make<TH1D>( "h420_mod6", "PXB2 Module 6 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
   h420_mod7 = fs->make<TH1D>( "h420_mod7", "PXB2 Module 7 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
   h420_mod8 = fs->make<TH1D>( "h420_mod8", "PXB2 Module 8 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
-  
+
   h421_mod1 = fs->make<TH1D>( "h421_mod1", "PXB2 Module 1  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
   h421_mod2 = fs->make<TH1D>( "h421_mod2", "PXB2 Module 2  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
   h421_mod3 = fs->make<TH1D>( "h421_mod3", "PXB2 Module 3  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
@@ -1095,7 +1096,7 @@ void Histos::init(TFileDirectory* fs)
 
   h430 = fs->make<TH1D>( "h430", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h431 = fs->make<TH1D>( "h431", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
-				      
+
   h432 = fs->make<TH1D>( "h432", "PXB2 residuals #Deltaz, 18 < |dip| < 50;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
   h433 = fs->make<TProfile>( "h433", "PXB2 #sigma_{z} vs p_{t}, best dip;log(p_{t} [GeV]);PXB2 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
 
@@ -1111,7 +1112,7 @@ void Histos::init(TFileDirectory* fs)
 
   h440 = fs->make<TH1D>( "h440", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h441 = fs->make<TH1D>( "h441", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
-				      
+
   h442 = fs->make<TH1D>( "h442", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h443 = fs->make<TH1D>( "h443", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h444 = fs->make<TH1D>( "h444", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
@@ -1173,7 +1174,7 @@ void Histos::init(TFileDirectory* fs)
 
   h480 = fs->make<TH1D>( "h480", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h481 = fs->make<TH1D>( "h481", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
-				      
+
   h482 = fs->make<TH1D>( "h482", "PXB2 residuals #Deltaz, 18 < |dip| < 50;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
   h483 = fs->make<TProfile>( "h483", "PXB2 #sigma_{z} vs p_{t}, best dip;log(p_{t} [GeV]);PXB2 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
 
@@ -1183,7 +1184,7 @@ void Histos::init(TFileDirectory* fs)
 
   h490 = fs->make<TH1D>( "h490", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h491 = fs->make<TH1D>( "h491", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
-				      
+
   h492 = fs->make<TH1D>( "h492", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h493 = fs->make<TH1D>( "h493", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h494 = fs->make<TH1D>( "h494", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
@@ -1354,7 +1355,7 @@ void Histos::init(TFileDirectory* fs)
   h635 = fs->make<TProfile>( "h635", "PXB1 #sigma_{x} vs #phi at 1 GeV;PXB1 #phi [deg];PXB1 rms(#Deltax) [#mum]", 360, -180, 180, 0, 499 );
 
   h650 = fs->make<TH1D>( "h650", "PXB1 residuals #Deltax;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
-				      
+
   h652 = fs->make<TH1D>( "h652", "PXB1 residuals #Deltax;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
   h653 = fs->make<TH1D>( "h653", "PXB1 residuals #Deltax;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
   h654 = fs->make<TH1D>( "h654", "PXB1 residuals #Deltax;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
@@ -2215,14 +2216,14 @@ void Pxl::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 	else
 	{
 	  edm::Service<TFileService> fs;
-	  
+
 	  std::stringstream runstr;
 	  runstr << "Run" << run;
 	  TFileDirectory subdir = fs->mkdir(runstr.str().c_str());
-	  
+
 	  runmap[run].init(&subdir);
 	  static_cast<Histos&>(*this) = runmap[run];
-	}	
+	}
 
 	bool hltSetupChanged = false;
 	std::cout<<_triggerSrc<<" "<<_triggerSrc.label()<<" "<<_triggerSrc.process()<<" "
@@ -2230,7 +2231,7 @@ void Pxl::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 
 	//const bool showTrigger = false;
 
-	if(_triggerSrc.label()!="") { 
+	if(_triggerSrc.label()!="") {
 	  if(!HLTConfig.init(iRun, iSetup, _triggerSrc.process(), hltSetupChanged))
 		throw cms::Exception("Failed to init HLT config");
 	}
@@ -2243,7 +2244,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
   using namespace edm;
   using namespace reco;
   using namespace math;
-  
+
   const double pi = 4*atan(1);
   const double wt = 180/pi;
   const double twopi = 2*pi;
@@ -2280,11 +2281,11 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
   //----------------- HLT -------------------------------------------
 
   // // Trigger information, do only if the container is defined
-  if(_triggerSrc.label()!="" && idbg==1 ) { 
+  if(_triggerSrc.label()!="" && idbg==1 ) {
     edm::Handle<edm::TriggerResults> triggerResults;
-    
+
     iEvent.getByToken( t_triggerSrc_ , triggerResults);
-    
+
     //   iEvent.getByLabel(_triggerSrc, triggerResults);
     assert(triggerResults->size() == HLTConfig.size());
 
@@ -2295,7 +2296,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	// this does not work in 74X
 	//std::pair<int, int> prescale = HLTConfig.prescaleValues(iEvent, iSetup, triggerName);
 	// this compiles&runs but I am not sure how to use it?
-	// std::pair<std::vector<std::pair<std::basic_string<char>, int> >, int> 
+	// std::pair<std::vector<std::pair<std::basic_string<char>, int> >, int>
 	// 	prescale = HLTConfig.prescaleValuesInDetail(iEvent, iSetup, triggerName);
 	// std::cout << i << ": " << triggerName << ", " << prescale.second << std::endl;
       }
@@ -2303,13 +2304,13 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
   //--------------------------------------------------------------------
   // beam spot:
-  //CMSSW 74 
+  //CMSSW 74
   // edm::Handle<reco::BeamSpot> rbs;
   // iEvent.getByLabel( "offlineBeamSpot", rbs );
 
   edm::Handle<reco::BeamSpot> rbs;
   iEvent.getByToken( t_offlineBeamSpot_, rbs );
-  
+
 
 
 
@@ -2384,7 +2385,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
     else {
 
-      if( iVertex->isFake() ) 
+      if( iVertex->isFake() )
 	h012->Fill( iVertex->z() );
 
       else{
@@ -2455,7 +2456,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
     iEvent.getByToken(t_pfMet_, pfMEThandle );
 
     if( !pfMEThandle.failedToGet() && pfMEThandle.isValid()){
-      
+
       h026->Fill( pfMEThandle->front().sumEt() );
       h027->Fill( pfMEThandle->front().et() );
     }
@@ -2475,7 +2476,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
   edm::ESHandle<TrajectoryFitter> aFitter;
   iSetup.get<TrajectoryFitter::Record>().get("KFFittingSmootherWithOutliersRejectionAndRK",aFitter);
   std::unique_ptr<TrajectoryFitter> theFitter = aFitter->clone();
-  
+
   //----------------------------------------------------------------------------
   // Transient Rechit Builders
   edm::ESHandle<TransientTrackBuilder> theB;
@@ -2486,15 +2487,15 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
   iSetup.get<TransientRecHitRecord>().get( _ttrhBuilder, hitBuilder );
 
   // Cloner, New from 71Xpre7
-  const TkTransientTrackingRecHitBuilder * builder = 
+  const TkTransientTrackingRecHitBuilder * builder =
     static_cast<TkTransientTrackingRecHitBuilder const *>(hitBuilder.product());
   //dynamic_cast<TkTransientTrackingRecHitBuilder const *>(hitBuilder.product());
   auto hitCloner = builder->cloner();
   //static_cast<TkTransientTrackingRecHitBuilder const *>(hitBuilder.product())->cloner();
-  
+
   theFitter->setHitCloner(&hitCloner);
 
-#else 
+#else
 
   // old
   ESHandle<TrajectoryFitter> TF;
@@ -2545,7 +2546,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
   }
 
   // loop over tracker detectors:
-  // This is just to test some parameters 
+  // This is just to test some parameters
 #if 0
   for( TrackerGeometry::DetContainer::const_iterator idet = pTG->dets().begin();
        idet != pTG->dets().end(); ++idet ) {
@@ -2553,7 +2554,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
     DetId mydetId = (*idet)->geographicalId();
     uint32_t mysubDet = mydetId.subdetId();
 
-    if( mysubDet == PixelSubdetector::PixelBarrel || 
+    if( mysubDet == PixelSubdetector::PixelBarrel ||
 	mysubDet == PixelSubdetector::PixelEndcap ) {
 
     //TEST
@@ -2670,7 +2671,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 #endif
 
 #if 0
-  edm::ESHandle<SiPixelLorentzAngle> SiPixelLorentzAngle_; 
+  edm::ESHandle<SiPixelLorentzAngle> SiPixelLorentzAngle_;
   iSetup.get<SiPixelLorentzAngleRcd>().get(SiPixelLorentzAngle_);
   std::map<unsigned int,float> detid_la= SiPixelLorentzAngle_->getLorentzAngles();
   std::map<unsigned int,float>::const_iterator it;
@@ -2684,11 +2685,11 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
   //----------------------------------------------------------------------------
   // Tracks:
- 
+
   double sumpt = 0;
   double sumq = 0;
   Surface::GlobalPoint origin = Surface::GlobalPoint(0,0,0);
-  const TrackerGeomDet * geomDet2 = NULL;
+  // const TrackerGeomDet * geomDet2 = NULL;
   for( TrackCollection::const_iterator iTrack = tracks->begin();
       iTrack != tracks->end(); ++iTrack ) {
 
@@ -2697,7 +2698,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
     // calo: D = 1.3 m => pt = 0.74 GeV/c
 
     double pt = iTrack->pt();
-    double pp = iTrack->p();
+    // double pp = iTrack->p();
 
     //if( pt < 0.75 ) continue;// curls up
     //if( pt < 1.75 ) continue;// want sharper image
@@ -2708,7 +2709,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
     h090->Fill( (iTrack->dxy(vtxP))*1E4 );
     h091->Fill( (iTrack->dxyError())*1E4 );
 
-    if(!singleParticleMC && 
+    if(!singleParticleMC &&
        (abs( iTrack->dxy(vtxP) ) > 5*iTrack->dxyError()) ) continue; // not prompt
 
 
@@ -2744,8 +2745,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
     }
 
     double phi = iTrack->phi();
-    double dca = iTrack->d0(); // w.r.t. origin                               
-    //double dca = -iTrack->dxy(); // dxy = -d0                               
+    double dca = iTrack->d0(); // w.r.t. origin
+    //double dca = -iTrack->dxy(); // dxy = -d0
     double dip = iTrack->lambda();
     double z0  = iTrack->dz();
     double tet = pihalf - dip;
@@ -2769,7 +2770,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
     // if( hp.hasValidHitInFirstPixelBarrel() &&
     // 	hp.trackerLayersWithMeasurement() > 7 ) {
-    if( hp.hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1) && hp.trackerLayersWithMeasurement() > 7 ) { 
+    if( hp.hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1) && hp.trackerLayersWithMeasurement() > 7 ) {
       if( pt > 8 ) {
 
 	h040->Fill( bcap*1E4 );//26 um in Oct 2011, 21 um Apr 2012
@@ -2780,7 +2781,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
       // vs logpt:
       // profile of abs(dca) gives mean abs(dca):
-      // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2) 
+      // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
       // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
 
       h043->Fill( logpt, ebca*1E4 );
@@ -2827,7 +2828,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
     //double tt = tan(tet);
 
-    double rinv = -kap; // Karimaki                                           
+    double rinv = -kap; // Karimaki
     double rho = 1/kap;
     double erd = 1.0 - kap*dca;
     double drd = dca * ( 0.5*kap*dca - 1.0 ); // 0.5 * kap * dca**2 - dca;
@@ -2908,7 +2909,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	cout << endl;
       */
 
-      if(// PXBDetId(mydetId).layer() 
+      if(// PXBDetId(mydetId).layer()
 	 tTopo->pxbLayer(mydetId) == 1 ) {
 
 	double dz = zR1 - (*idet)->position().z();
@@ -3029,7 +3030,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
     double uPXB2 = 0;
     double vPXB2 = 0;
     double ePXB2 = 0;
-    double fPXB2 = 0;
+    // double fPXB2 = 0;
 
     double xPXB3 = 0;
     double yPXB3 = 0;
@@ -3071,80 +3072,80 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
     int zmin2 = 0;
     int zmax2 = 0;
 
-    int nTIB1 = 0;
-    double xTIB1 = 0;
-    double yTIB1 = 0;
+    // int nTIB1 = 0;
+    // double xTIB1 = 0;
+    // double yTIB1 = 0;
     //double zTIB1 = 0;
     //double phiNTIB1 = 0;
 
-    int nTIB2 = 0;
-    double xTIB2 = 0;
-    double yTIB2 = 0;
-    double zTIB2 = 0;
-    double phiNTIB2 = 0;
+    // int nTIB2 = 0;
+    // double xTIB2 = 0;
+    // double yTIB2 = 0;
+    // double zTIB2 = 0;
+    // double phiNTIB2 = 0;
 
-    int nTIB3 = 0;
-    double xTIB3 = 0;
-    double yTIB3 = 0;
-    double zTIB3 = 0;
-    double phiNTIB3 = 0;
+    // int nTIB3 = 0;
+    // double xTIB3 = 0;
+    // double yTIB3 = 0;
+    // double zTIB3 = 0;
+    // double phiNTIB3 = 0;
 
-    int nTIB4 = 0;
-    double xTIB4 = 0;
-    double yTIB4 = 0;
+    // int nTIB4 = 0;
+    // double xTIB4 = 0;
+    // double yTIB4 = 0;
     //double zTIB4 = 0;
     //double phiNTIB4 = 0;
 
-    int nTOB1 = 0;
+    // int nTOB1 = 0;
     //double xTOB1 = 0;
     //double yTOB1 = 0;
     //double zTOB1 = 0;
     //double phiNTOB1 = 0;
 
-    int nTOB2 = 0;
+    // int nTOB2 = 0;
     //double xTOB2 = 0;
     //double yTOB2 = 0;
     //double zTOB2 = 0;
     //double phiNTOB2 = 0;
 
-    int nTOB3 = 0;
-    double xTOB3 = 0;
-    double yTOB3 = 0;
+    // int nTOB3 = 0;
+    // double xTOB3 = 0;
+    // double yTOB3 = 0;
     //double zTOB3 = 0;
     //double phiNTOB3 = 0;
 
-    int nTOB4 = 0;
-    double xTOB4 = 0;
-    double yTOB4 = 0;
-    double zTOB4 = 0;
-    double phiNTOB4 = 0;
+    // int nTOB4 = 0;
+    // double xTOB4 = 0;
+    // double yTOB4 = 0;
+    // double zTOB4 = 0;
+    // double phiNTOB4 = 0;
 
-    int nTOB5 = 0;
-    double xTOB5 = 0;
-    double yTOB5 = 0;
-    double zTOB5 = 0;
-    double phiNTOB5 = 0;
+    // int nTOB5 = 0;
+    // double xTOB5 = 0;
+    // double yTOB5 = 0;
+    // double zTOB5 = 0;
+    // double phiNTOB5 = 0;
 
-    int nTOB6 = 0;
-    double xTOB6 = 0;
-    double yTOB6 = 0;
+    // int nTOB6 = 0;
+    // double xTOB6 = 0;
+    // double yTOB6 = 0;
     //double zTOB6 = 0;
     //double phiNTOB6 = 0;
 
     int imod = 0;
     // std::cout << " imod 0 "<< imod<< std::endl;
 
-    int nTEC[3][10];// initialized to 0 by default
+    // int nTEC[3][10];// initialized to 0 by default
     for( int is = 0; is < 3; ++is ){
       for( int iw = 0; iw < 10; ++iw ){
-	nTEC[is][iw] = 0;
+	// nTEC[is][iw] = 0;
       }
     }
-    double xTEC[3][10];
-    double yTEC[3][10];
-    double zTEC[3][10];
+    // double xTEC[3][10];
+    // double yTEC[3][10];
+    // double zTEC[3][10];
     //double phiNTEC[3][10];
-    DetId detTEC[3][10];
+    // DetId detTEC[3][10];
 
     edm::OwnVector<TrackingRecHit> recHitVector; // for seed
 
@@ -3191,7 +3192,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
       double Q_f_Y = 0.0;//first
       double Q_l_Y = 0.0;//last
       double Q_m_Y = 0.0;//middle
-     
+
 
       if( (*irecHit)->isValid() ) {
 
@@ -3240,12 +3241,12 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    cout << ", module " << tTopo->pxbModule(detId);//PXBDetId(detId).module();
 	    cout << endl;
 	  }
-	 
+
 	  const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( &*(*irecHit) );
 	  // cout << transRecHit->localPositionError().xx()<< endl;
 
 	  if( pixhit->hasFilledProb() ){
-	   
+
 	    float  clusProb = pixhit->clusterProbability(0);
 	    if( ilay ==1) PXB1_clusProb = pixhit->clusterProbability(0);
 	    if( ilay ==2) PXB2_clusProb = pixhit->clusterProbability(0);
@@ -3311,7 +3312,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	      if( pixelsVec[i].x == xmin )
 		Q_f_X += pix_adc;
 	      else{
-		if( pixelsVec[i].x == xmax ) 
+		if( pixelsVec[i].x == xmax )
 		  Q_l_X += pix_adc;
 		else
 		  Q_m_X += pix_adc;
@@ -3324,12 +3325,12 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	      }
 
 	      // Y projection:
-	      if( pixelsVec[i].y == ymin ) 
+	      if( pixelsVec[i].y == ymin )
 		Q_f_Y += pix_adc;
 	      else{
-		if( pixelsVec[i].y == ymax ) 
+		if( pixelsVec[i].y == ymax )
 		  Q_l_Y += pix_adc;
-		else 
+		else
 		  Q_m_Y += pix_adc;
 	      }
 
@@ -3388,7 +3389,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    //dip -7.E+01, layer  2, ladder 10, module 2, x 139 - 140, z 408 - 415
 	    //row 139    50   397   107   100    71     0     0     0
 	    //row 140     0     0     0     0    48   130   246   239
- 
+
 	    h070->Fill( clch/1E3 );
 	    h071->Fill( clch/1E3*cos(dip) );
 	    h072->Fill( ncol );
@@ -3406,11 +3407,11 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
       // build transient hit:
 #ifdef NEW_TRACKINGRECHITS
       // for pre7
-      auto tmprh = 
+      auto tmprh =
 	(*irecHit)->cloneForFit(*builder->geometry()->idToDet((**irecHit).geographicalId()));
-      auto transRecHit = 
+      auto transRecHit =
 	hitCloner.makeShared(tmprh, initialTSOS);
-#else 
+#else
 
       TransientTrackingRecHit::RecHitPointer transRecHit = hitBuilder->build( &*(*irecHit), initialTSOS);
 
@@ -3426,7 +3427,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
       //double zloc = transRecHit->localPosition().z();// up, always zero, unused
 
       double vxloc = transRecHit->localPositionError().xx();//covariance
-      double vyloc = transRecHit->localPositionError().yy();//covariance
+      // double vyloc = transRecHit->localPositionError().yy();//covariance
 
       double gX = transRecHit->globalPosition().x();
       double gY = transRecHit->globalPosition().y();
@@ -3436,7 +3437,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	//if( idbg ) cout << "  try to improve\n";
 
-	TrajectoryStateOnSurface propTSOS = 
+	TrajectoryStateOnSurface propTSOS =
 	  thePropagator->propagate( initialTSOS, transRecHit->det()->surface() );
 
 	if( propTSOS.isValid() ){
@@ -3677,7 +3678,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  vPXB2 = yloc;
 	  phiN2 = phiN;
 	  ePXB2 = sqrt( vxloc );
-	  fPXB2 = sqrt( vyloc );
+	  // fPXB2 = sqrt( vyloc );
 	  clch2 = clch; // cluster charge [e]
 	  //ncol2 = ncol;
 	  nrow2 = nrow;
@@ -3770,7 +3771,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
     std::vector<Trajectory> refitTrajectoryCollection = theFitter->fit( seed, coTTRHvec, initialTSOS );
 
-    if( refitTrajectoryCollection.size() > 0 ) { // should be either 0 or 1            
+    if( refitTrajectoryCollection.size() > 0 ) { // should be either 0 or 1
 
       const Trajectory& refitTrajectory = refitTrajectoryCollection.front();
 
@@ -3827,7 +3828,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	if( detId.subdetId() == 1 ){
 	  ilay = PXBDetId( detId ).layer();
 	}
-	
+
 	if( subDet == 1 && idbg ){//1=PXB
 	  cout << "  PXB layer " << ilay << endl;
 	}
@@ -3858,7 +3859,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	double Z = combinedPredictedState.globalPosition().z();
 
 	double xptch;
-	double yptch;	
+	double yptch;
 
 	if( subDet <  3 ){//1,2=pixel
 	  PixelTopology & pixelTopol = (PixelTopology&) iTM->recHit()->detUnit()->topology();
@@ -3870,12 +3871,27 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  xptch = stripTopol.localPitch( combinedPredictedState.localPosition() );
 	  yptch = stripTopol.localStripLength( combinedPredictedState.localPosition() );
 	}
-
-	if( subDet == 4 && idbg ){//4=TID
-	  cout << "  TID side " << TIDDetId(detId).side();
-	  cout << ", disk " << TIDDetId(detId).diskNumber();
-	  cout << ", ring " << TIDDetId(detId).ringNumber();
-	  cout << ", stereo " << TIDDetId(detId).isStereo();
+  // before CMSSW_10_X
+	// if( subDet == 4 && idbg ){//4=TID
+	//   cout << "  TID side " << TIDDetId(detId).side();
+	//   cout << ", disk " << TIDDetId(detId).diskNumber();
+	//   cout << ", ring " << TIDDetId(detId).ringNumber();
+	//   cout << ", stereo " << TIDDetId(detId).isStereo();
+	//   cout << endl;
+	//   cout << setprecision(4);
+	//   cout << "  xHit " << xHit;
+	//   cout << ", yHit " << yHit;
+	//   cout << setprecision(1);
+	//   cout << ", pitch " << xptch*1E4 << " um";
+	//   cout << setprecision(4);
+	//   cout << endl;
+	// }
+  // CMSSW_10_X
+  if( subDet == 4 && idbg ){//4=TID
+	  cout << "  TID side " << tTopo->tidSide(detId);
+	  //cout << ", disk " << tTopo->tidWheel(detId);
+	  cout << ", ring " << tTopo->tidRing(detId);
+	  cout << ", stereo " << tTopo->tidIsStereo(detId);
 	  cout << endl;
 	  cout << setprecision(4);
 	  cout << "  xHit " << xHit;
@@ -3885,7 +3901,6 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  cout << setprecision(4);
 	  cout << endl;
 	}
-
 	dx = xHit - combinedPredictedState.localPosition().x(); //x = primary measurement
 	dy = yHit - combinedPredictedState.localPosition().y(); //
 	vxh = iTM->recHit()->localPositionError().xx();//covariance
@@ -4069,7 +4084,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	  }//layer
 
-	  if(// PXBDetId( detId ).layer() 
+	  if(// PXBDetId( detId ).layer()
 	     tTopo->pxbLayer(detId)== 3 ) {
 
 	    if( pt >  4 ) k140->Fill( dx*1E4 );
@@ -4136,7 +4151,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  if( pt > 4 ) k308->Fill( alf_inc*wt );
 
 	  if(// TIBDetId( detId ).layer()
-	     tTopo->tibLayer(detId) == 1 && TIBDetId(detId).isRPhi() ) {
+	     // tTopo->tibLayer(detId) == 1 && TIBDetId(detId).isRPhi() ) { // before CMSSW_10_X
+      tTopo->tibLayer(detId) == 1 && tTopo->tibIsRPhi(detId) ) { // CMSSW_10_X
 	    k310->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
 	      k311->Fill( dx*1E4 );
@@ -4151,8 +4167,9 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k319->Fill( dx*1E4 );
 	  }//layer
 
-	  if( //TIBDetId( detId ).layer() 
-	      tTopo->tibLayer(detId) == 1 && TIBDetId(detId).isStereo() ) {
+	  if( //TIBDetId( detId ).layer()
+	    // tTopo->tibLayer(detId) == 1 && TIBDetId(detId).isStereo() ) { // before CMSSW_10_X
+      tTopo->tibLayer(detId) == 1 && tTopo->tibIsStereo(detId) ) { // CMSSW_10_X
 	    k320->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
 	      k321->Fill( dx*1E4 );
@@ -4168,7 +4185,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  }//layer
 
 	  if( //TIBDetId( detId ).layer()
-	      tTopo->tibLayer(detId) == 2 && TIBDetId(detId).isRPhi() ) {
+	      // tTopo->tibLayer(detId) == 2 && TIBDetId(detId).isRPhi() ) {  // before CMSSW_10_X
+          tTopo->tibLayer(detId) == 2 && tTopo->tibIsRPhi(detId) ) { // CMSSW_10_X
 	    k330->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
 	      k331->Fill( dx*1E4 );
@@ -4184,7 +4202,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  }//layer
 
 	  if( //TIBDetId( detId ).layer()
-	      tTopo->tibLayer(detId) == 2 && TIBDetId(detId).isStereo() ) {
+	      // tTopo->tibLayer(detId) == 2 && TIBDetId(detId).isStereo() ) { // before CMSSW_10_X
+          tTopo->tibLayer(detId) == 2 && tTopo->tibIsStereo(detId) ) { // CMSSW_10_X
 	    k340->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
 	      k341->Fill( dx*1E4 );
@@ -4199,7 +4218,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k349->Fill( dx*1E4 );
 	  }//layer
 
-	  if( //TIBDetId( detId ).layer() 
+	  if( //TIBDetId( detId ).layer()
 	     tTopo->tibLayer(detId)== 3 ) {
 	    k350->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
@@ -4215,7 +4234,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k359->Fill( dx*1E4 );
 	  }//layer
 
-	  if( //TIBDetId( detId ).layer() 
+	  if( //TIBDetId( detId ).layer()
 	     tTopo->tibLayer(detId)== 4 ) {
 	    k360->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
@@ -4248,10 +4267,12 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    k406->Fill( xptch*1E4, abs(dx)*1E4 );
 	  }
 
-	  if( TIDDetId(detId).ringNumber() == 1 ) {
+	  // if( TIDDetId(detId).ringNumber() == 1 ) { // before CMSSW_10_X
+      if( tTopo->tidRing(detId) == 1 ) { // CMSSW_10_X
 	    k410->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
-	      if( TIDDetId(detId).isRPhi() )
+	      // if( TIDDetId(detId).isRPhi() ) // before CMSSW_10_X
+            if( tTopo->tidIsRPhi(detId) ) // CMSSW_10_X
 		k411->Fill( dx*1E4 );
 	      else
 		k412->Fill( dx*1E4 );
@@ -4260,10 +4281,12 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    }
 	  }
 
-	  if( TIDDetId(detId).ringNumber() == 2 ) {
+	  // if( TIDDetId(detId).ringNumber() == 2 ) { // before CMSSW_10_X
+      if( tTopo->tidRing(detId) == 2 ) { // CMSSW_10_X
 	    k420->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
-	      if( TIDDetId(detId).isRPhi() )
+	      // if( TIDDetId(detId).isRPhi() ) // before CMSSW_10_X
+            if( tTopo->tidIsRPhi(detId) ) // CMSSW_10_X
 		k421->Fill( dx*1E4 );
 	      else
 		k422->Fill( dx*1E4 );
@@ -4272,10 +4295,12 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    }
 	  }
 
-	  if( TIDDetId(detId).ringNumber() == 3 ) {
+	  // if( TIDDetId(detId).ringNumber() == 3 ) { // before CMSSW_10_X
+      if( tTopo->tidRing(detId) == 3 ) { // CMSSW_10_X
 	    k430->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
-	      if( TIDDetId(detId).isRPhi() )
+	      // if( TIDDetId(detId).isRPhi() ) // before CMSSW_10_X
+            if( tTopo->tidIsRPhi(detId) ) // CMSSW_10_X
 		k431->Fill( dx*1E4 );
 	      else
 		k432->Fill( dx*1E4 );
@@ -4299,7 +4324,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  }//pt
 	  if( pt > 4 ) k508->Fill( alf_inc*wt ); //at 0, +-180
 
-	  if( TOBDetId( detId ).layer() == 1 && TOBDetId(detId).isRPhi() ) {
+	  // if( TOBDetId( detId ).layer() == 1 && TOBDetId(detId).isRPhi() ) { // before CMSSW_10_X
+    if( tTopo->tobLayer(detId) == 1 && tTopo->tobIsRPhi(detId) ) { // CMSSW_10_X
 	    k510->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
 	      k511->Fill( dx*1E4 );
@@ -4314,7 +4340,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k519->Fill( dx*1E4 );
 	  }//layer
 
-	  if( TOBDetId( detId ).layer() == 1 && TOBDetId(detId).isStereo() ) {
+	  // if( TOBDetId( detId ).layer() == 1 && TOBDetId(detId).isStereo() ) { // before CMSSW_10_X
+    if( tTopo->tobLayer(detId) == 1 && tTopo->tobIsStereo(detId) ) { // CMSSW_10_X
 	    k520->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
 	      k521->Fill( dx*1E4 );
@@ -4329,7 +4356,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k529->Fill( dx*1E4 );
 	  }//layer
 
-	  if( TOBDetId( detId ).layer() == 2 && TOBDetId(detId).isRPhi() ) {
+	  // if( TOBDetId( detId ).layer() == 2 && TOBDetId(detId).isRPhi() ) { // before CMSSW_10_X
+    if( tTopo->tobLayer(detId) == 2 && tTopo->tobIsRPhi(detId) ) { // CMSSW_10_X
 	    k530->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
 	      k531->Fill( dx*1E4 );
@@ -4344,7 +4372,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k539->Fill( dx*1E4 );
 	  }//layer
 
-	  if( TOBDetId( detId ).layer() == 2 && TOBDetId(detId).isStereo() ) {
+	  // if( TOBDetId( detId ).layer() == 2 && TOBDetId(detId).isStereo() ) { // before CMSSW_10_X
+    if( tTopo->tobLayer(detId) == 2 && tTopo->tobIsStereo(detId) ) { // CMSSW_10_X
 	    k540->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
 	      k541->Fill( dx*1E4 );
@@ -4359,7 +4388,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k549->Fill( dx*1E4 );
 	  }//layer
 
-	  if( TOBDetId( detId ).layer() == 3 ) {
+	  // if( TOBDetId( detId ).layer() == 3 ) { // before CMSSW_10_X
+    if( tTopo->tobLayer(detId) == 3 ) { // CMSSW_10_X
 	    k550->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
 	      k551->Fill( dx*1E4 );
@@ -4374,7 +4404,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k559->Fill( dx*1E4 );
 	  }//layer
 
-	  if( TOBDetId( detId ).layer() == 4 ) {
+	  // if( TOBDetId( detId ).layer() == 4 ) { // before CMSSW_10_X
+    if( tTopo->tobLayer(detId) == 4 ) { // CMSSW_10_X
 	    k560->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
 	      k561->Fill( dx*1E4 );
@@ -4389,7 +4420,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k569->Fill( dx*1E4 );
 	  }//layer
 
-	  if( TOBDetId( detId ).layer() == 5 ) {
+	  // if( TOBDetId( detId ).layer() == 5 ) { // before CMSSW_10_X
+    if( tTopo->tobLayer(detId) == 5 ) { // CMSSW_10_X
 	    k570->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
 	      k571->Fill( dx*1E4 );
@@ -4404,7 +4436,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k579->Fill( dx*1E4 );
 	  }//layer
 
-	  if( TOBDetId( detId ).layer() == 6 ) {
+	  // if( TOBDetId( detId ).layer() == 6 ) { // before CMSSW_10_X
+    if( tTopo->tobLayer(detId) == 6 ) { // CMSSW_10_X
 	    k580->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
 	      k581->Fill( dx*1E4 );
@@ -4432,19 +4465,23 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    k604->Fill( dx*1E4 );
 	    k605->Fill( R, abs(dx)*1E4 );
 	    k606->Fill( R, xptch*1E4 );
-	    if( TECDetId(detId).ringNumber() < 7 )
+	    // if( TECDetId(detId).ringNumber() < 7 ) // before CMSSW_10_X
+        if( tTopo->tecRing(detId) < 7 ) // CMSSW_10_X
 	      k607->Fill( xptch*1E4, abs(dx)*1E4 );
 	  }//pt
 
-	  if( TECDetId(detId).isBackPetal() )
+	  // if( TECDetId(detId).isBackPetal() ) // before CMSSW_10_X
+    if( tTopo->tecIsBackPetal(detId) ) // CMSSW_10_X
 	    k608->Fill( combinedPredictedState.globalPosition().x(), combinedPredictedState.globalPosition().y() );
 	  else
 	    k609->Fill( combinedPredictedState.globalPosition().x(), combinedPredictedState.globalPosition().y() );
 
-	  if( TECDetId(detId).ringNumber() == 1 ) {
+	  // if( TECDetId(detId).ringNumber() == 1 ) { // before CMSSW_10_X
+      if( tTopo->tecRing(detId) == 1 ) { // CMSSW_10_X
 	    k610->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
-	      if( TECDetId(detId).isRPhi() )
+	      // if( TECDetId(detId).isRPhi() ) // before CMSSW_10_X
+            if( tTopo->tecIsRPhi(detId) ) // CMSSW_10_X
 		k611->Fill( dx*1E4 );
 	      else
 		k612->Fill( dx*1E4 );
@@ -4454,10 +4491,12 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k615->Fill( dx*1E4 );
 	  }//ring
 
-	  if( TECDetId(detId).ringNumber() == 2 ) {
+	  // if( TECDetId(detId).ringNumber() == 2 ) { // before CMSSW_10_X
+      if( tTopo->tecRing(detId) == 2 ) { // CMSSW_10_X
 	    k620->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
-	      if( TECDetId(detId).isRPhi() )
+	      // if( TECDetId(detId).isRPhi() ) // before CMSSW_10_X
+            if( tTopo->tecIsRPhi(detId) ) // CMSSW_10_X
 		k621->Fill( dx*1E4 );
 	      else
 		k622->Fill( dx*1E4 );
@@ -4467,10 +4506,12 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k625->Fill( dx*1E4 );
 	  }//ring
 
-	  if( TECDetId(detId).ringNumber() == 3 ) {
+	  // if( TECDetId(detId).ringNumber() == 3 ) { // before CMSSW_10_X
+      if( tTopo->tecRing(detId) == 3 ) { // CMSSW_10_X
 	    k630->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
-	      if( TECDetId(detId).isRPhi() )
+	      // if( TECDetId(detId).isRPhi() ) // before CMSSW_10_X
+            if( tTopo->tecIsRPhi(detId) ) // CMSSW_10_X
 		k631->Fill( dx*1E4 );
 	      else
 		k632->Fill( dx*1E4 );
@@ -4480,10 +4521,12 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k635->Fill( dx*1E4 );
 	  }//ring
 
-	  if( TECDetId(detId).ringNumber() == 4 ) {
+	  // if( TECDetId(detId).ringNumber() == 4 ) { // before CMSSW_10_X
+      if( tTopo->tecRing(detId) == 4 ) { // CMSSW_10_X
 	    k640->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
-	      if( TECDetId(detId).isRPhi() )
+	      // if( TECDetId(detId).isRPhi() ) // before CMSSW_10_X
+            if( tTopo->tecIsRPhi(detId) ) // CMSSW_10_X
 		k641->Fill( dx*1E4 );
 	      else
 		k642->Fill( dx*1E4 );
@@ -4493,10 +4536,12 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k645->Fill( dx*1E4 );
 	  }//ring
 
-	  if( TECDetId(detId).ringNumber() == 5 ) {
+	  // if( TECDetId(detId).ringNumber() == 5 ) { // before CMSSW_10_X
+      if( tTopo->tecRing(detId) == 5 ) { // CMSSW_10_X
 	    k650->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
-	      if( TECDetId(detId).isRPhi() )
+	      // if( TECDetId(detId).isRPhi() ) // before CMSSW_10_X
+            if( tTopo->tecIsRPhi(detId) ) // CMSSW_10_X
 		k651->Fill( dx*1E4 );
 	      else
 		k652->Fill( dx*1E4 );
@@ -4506,10 +4551,12 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k655->Fill( dx*1E4 );
 	  }//ring
 
-	  if( TECDetId(detId).ringNumber() == 6 ) {
+	  // if( TECDetId(detId).ringNumber() == 6 ) { // before CMSSW_10_X
+      if( tTopo->tecRing(detId) == 6 ) { // CMSSW_10_X
 	    k660->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
-	      if( TECDetId(detId).isRPhi() )
+	      // if( TECDetId(detId).isRPhi() ) // before CMSSW_10_X
+            if( tTopo->tecIsRPhi(detId) ) // CMSSW_10_X
 		k661->Fill( dx*1E4 );
 	      else
 		k662->Fill( dx*1E4 );
@@ -4519,10 +4566,12 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k665->Fill( dx*1E4 );
 	  }//ring
 
-	  if( TECDetId(detId).ringNumber() == 7 ) {
+	  // if( TECDetId(detId).ringNumber() == 7 ) { // before CMSSW_10_X
+      if( tTopo->tecRing(detId) == 7 ) { // CMSSW_10_X
 	    k670->Fill( logpt, abs(dx)*1E4 );
 	    if( pt > 4 ) {
-	      if( TECDetId(detId).isRPhi() )
+	      // if( TECDetId(detId).isRPhi() ) // before CMSSW_10_X
+            if( tTopo->tecIsRPhi(detId) ) // CMSSW_10_X
 		k671->Fill( dx*1E4 );
 	      else
 		k672->Fill( dx*1E4 );
@@ -4532,17 +4581,30 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    if( pt > 12 ) k675->Fill( dx*1E4 );
 	  }//ring
 
-	  if( pt > 4 && TECDetId(detId).ringNumber() < 7 ) {
+	  // if( pt > 4 && TECDetId(detId).ringNumber() < 7 ) { // before CMSSW_10_X
+    if( pt > 4 && tTopo->tecRing(detId) < 7 ) { // CMSSW_10_X
 
-	    if( TECDetId(detId).wheelNumber() == 1 ) k681->Fill( dx*1E4 );
-	    if( TECDetId(detId).wheelNumber() == 2 ) k682->Fill( dx*1E4 );
-	    if( TECDetId(detId).wheelNumber() == 3 ) k683->Fill( dx*1E4 );
-	    if( TECDetId(detId).wheelNumber() == 4 ) k684->Fill( dx*1E4 );
-	    if( TECDetId(detId).wheelNumber() == 5 ) k685->Fill( dx*1E4 );
-	    if( TECDetId(detId).wheelNumber() == 6 ) k686->Fill( dx*1E4 );
-	    if( TECDetId(detId).wheelNumber() == 7 ) k687->Fill( dx*1E4 );
-	    if( TECDetId(detId).wheelNumber() == 8 ) k688->Fill( dx*1E4 );
-	    if( TECDetId(detId).wheelNumber() == 9 ) k689->Fill( dx*1E4 );
+      // before CMSSW_10_X
+	    // if( TECDetId(detId).wheelNumber() == 1 ) k681->Fill( dx*1E4 );
+	    // if( TECDetId(detId).wheelNumber() == 2 ) k682->Fill( dx*1E4 );
+	    // if( TECDetId(detId).wheelNumber() == 3 ) k683->Fill( dx*1E4 );
+	    // if( TECDetId(detId).wheelNumber() == 4 ) k684->Fill( dx*1E4 );
+	    // if( TECDetId(detId).wheelNumber() == 5 ) k685->Fill( dx*1E4 );
+	    // if( TECDetId(detId).wheelNumber() == 6 ) k686->Fill( dx*1E4 );
+	    // if( TECDetId(detId).wheelNumber() == 7 ) k687->Fill( dx*1E4 );
+	    // if( TECDetId(detId).wheelNumber() == 8 ) k688->Fill( dx*1E4 );
+	    // if( TECDetId(detId).wheelNumber() == 9 ) k689->Fill( dx*1E4 );
+
+      // CMSSW_10_X
+	    if( tTopo->tecWheel(detId) == 1 ) k681->Fill( dx*1E4 );
+	    if( tTopo->tecWheel(detId) == 2 ) k682->Fill( dx*1E4 );
+	    if( tTopo->tecWheel(detId) == 3 ) k683->Fill( dx*1E4 );
+	    if( tTopo->tecWheel(detId) == 4 ) k684->Fill( dx*1E4 );
+	    if( tTopo->tecWheel(detId) == 5 ) k685->Fill( dx*1E4 );
+	    if( tTopo->tecWheel(detId) == 6 ) k686->Fill( dx*1E4 );
+	    if( tTopo->tecWheel(detId) == 7 ) k687->Fill( dx*1E4 );
+	    if( tTopo->tecWheel(detId) == 8 ) k688->Fill( dx*1E4 );
+	    if( tTopo->tecWheel(detId) == 9 ) k689->Fill( dx*1E4 );
 	  }
 
 	}//TEC
@@ -4598,27 +4660,36 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	double gZ = gp.z();
 
  	//double phiN = myGeomDet->surface().normalVector().barePhi();//normal vector
- 	double phiN = iTM->recHit()->det()->surface().normalVector().barePhi();//normal vector
+ 	// double phiN = iTM->recHit()->det()->surface().normalVector().barePhi();//normal vector
 
-	if( idbg && subDet == StripSubdetector::TEC ) {
-	  cout << "  TEC hit ";
-	  cout << ", side " << TECDetId(detId).side();
-	  cout << ", wheel " << TECDetId(detId).wheel();
-	  cout << ", ring " << TECDetId(detId).ring();
-	  cout << ", petal " << TECDetId(detId).petalNumber();
-	  cout << ", order " << TECDetId(detId).order();//1=back or 2=front
-	  cout << ", module " << TECDetId(detId).module();
-	  cout << ", stereo " << TECDetId(detId).isStereo();
-	  cout << ", comp " << myGeomDet->components().size(); //always 0
-	  cout << endl;
-	}
+	// if( idbg && subDet == StripSubdetector::TEC ) {
+	//   cout << "  TEC hit ";
+  //   // before CMSSW_10_X
+	//   // cout << ", side " << TECDetId(detId).side();
+	//   // cout << ", wheel " << TECDetId(detId).wheel();
+	//   // cout << ", ring " << TECDetId(detId).ring();
+	//   // cout << ", petal " << TECDetId(detId).petalNumber();
+	//   // cout << ", order " << TECDetId(detId).order();//1=back or 2=front
+	//   // cout << ", module " << TECDetId(detId).module();
+	//   // cout << ", stereo " << TECDetId(detId).isStereo();
+  //   //CMSSW_10_X
+  //   cout << ", side " << tTopo->tecSide(detId);
+  //   cout << ", wheel " << tTopo->tecWheel(detId);
+  //   cout << ", ring " << tTopo->tecRing(detId);
+  //   cout << ", petal " << tTopo->tecPetalNumber(detId);
+  //   cout << ", order " << tTopo->tecOrder(detId);//1=back or 2=front
+  //   cout << ", module " << tTopo->tecModule(detId);
+  //   cout << ", stereo " << tTopo->tecIsStereo(detId);
+	//   cout << ", comp " << myGeomDet->components().size(); //always 0
+	//   cout << endl;
+	// }
 
 	//2012: overwrite PXB global coordinates once more, using topology:
 
 	if( subDet == PixelSubdetector::PixelBarrel ) {
 
 	  int ilay = tTopo->pxbLayer(detId); //PXBDetId(detId).layer();
-  
+
 	  if( ilay == 1 ) {
 	    xPXB1 = gX;
 	    yPXB1 = gY;
@@ -4629,7 +4700,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    xPXB2 = gX;
 	    yPXB2 = gY;
 	    zPXB2 = gZ;
-	    geomDet2 = (TrackerGeomDet*) myGeomDet;
+	    // geomDet2 = (TrackerGeomDet*) myGeomDet;
 	  }
 
 	  else if( ilay == 3 ) {
@@ -4640,130 +4711,145 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	}//PXB
 
-	if( subDet == StripSubdetector::TIB ) {
-
-	  if(TIBDetId(detId).isRPhi() ){
-
-	    if( tTopo->tibLayer(detId) == 1 ) {
-
-	      nTIB1++;
-	      xTIB1 = gX;
-	      yTIB1 = gY;
-	      //zTIB1 = gZ;
-	      //phiNTIB1 = phiN;
-	    }
-
-	    if( tTopo->tibLayer(detId) == 2 ) {
-
-	      nTIB2++;
-	      xTIB2 = gX;
-	      yTIB2 = gY;
-	      zTIB2 = gZ;
-	      phiNTIB2 = phiN;
-	    }
-
-	    if( tTopo->tibLayer(detId)  == 3 ) {
-
-	      nTIB3++;
-	      xTIB3 = gX;
-	      yTIB3 = gY;
-	      zTIB3 = gZ;
-	      phiNTIB3 = phiN;
-	    }
-
-	    if(  tTopo->tibLayer(detId) == 4 ) {
-
-	      nTIB4++;
-	      xTIB4 = gX;
-	      yTIB4 = gY;
-	      //zTIB4 = gZ;
-	      //phiNTIB4 = phiN;
-	    }
-
-	  }// rphi
-
-	}//TIB
-
-	if( subDet == StripSubdetector::TOB ) {
-
-	  if( TOBDetId(detId).isRPhi() ){
-
-	    if( TOBDetId(detId).layer() == 1 ) {
-
-	      nTOB1++;
-	      //xTOB1 = gX;
-	      //yTOB1 = gY;
-	      //zTOB1 = gZ;
-	      //phiNTOB1 = phiN;
-	    }
-
-	    if( TOBDetId(detId).layer() == 2 ) {
-
-	      nTOB2++;
-	      //xTOB2 = gX;
-	      //yTOB2 = gY;
-	      //zTOB2 = gZ;
-	      //phiNTOB2 = phiN;
-	    }
-
-	    if( TOBDetId(detId).layer() == 3 ) {
-
-	      nTOB3++;
-	      xTOB3 = gX;
-	      yTOB3 = gY;
-	      //zTOB3 = gZ;
-	      //phiNTOB3 = phiN;
-	    }
-
-	    if( TOBDetId(detId).layer() == 4 ) {
-
-	      nTOB4++;
-	      xTOB4 = gX;
-	      yTOB4 = gY;
-	      zTOB4 = gZ;
-	      phiNTOB4 = phiN;
-	    }
-
-	    if( TOBDetId(detId).layer() == 5 ) {
-
-	      nTOB5++;
-	      xTOB5 = gX;
-	      yTOB5 = gY;
-	      zTOB5 = gZ;
-	      phiNTOB5 = phiN;
-	    }
-
-	    if( TOBDetId(detId).layer() == 6 ) {
-
-	      nTOB6++;
-	      xTOB6 = gX;
-	      yTOB6 = gY;
-	      //zTOB6 = gZ;
-	      //phiNTOB6 = phiN;
-	    }
-
-	  }// rphi
-
-	}//TOB
-
-	if( subDet == StripSubdetector::TEC ) {
-
-	  if( TECDetId(detId).isRPhi() ){
-
-	    int is = TECDetId(detId).side();//1..2
-	    int iw = TECDetId(detId).wheel();//1..9
-
-	    if( nTEC[is][iw] == 0 ) {//take first hit per wheel
-	      nTEC[is][iw]++;
-	      xTEC[is][iw] = gX;
-	      yTEC[is][iw] = gY;
-	      zTEC[is][iw] = gZ;
-	      //phiNTEC[is][iw] = phiN;
-	      detTEC[is][iw] = detId;
-	    }
-	  }// rphi
-
-	}//TEC
+	// if( subDet == StripSubdetector::TIB ) {
+  //
+	//   // if(TIBDetId(detId).isRPhi() ){ // before CMSSW_10_X
+  //   if (tTopo->tibIsRPhi(detId) ){ // CMSSW_10_X
+  //
+	//     // if( tTopo->tibLayer(detId) == 1 ) { // before CMSSW_10_X
+  //     if( tTopo->tibLayer(detId) == 1 ) { // CMSSW_10_X
+  //
+	//       nTIB1++;
+	//       xTIB1 = gX;
+	//       yTIB1 = gY;
+	//       //zTIB1 = gZ;
+	//       //phiNTIB1 = phiN;
+	//     }
+  //
+	//     // if( tTopo->tibLayer(detId) == 2 ) { // before CMSSW_10_X
+  //     if( tTopo->tibLayer(detId) == 2 ) { // CMSSW_10_X
+  //
+	//       nTIB2++;
+	//       xTIB2 = gX;
+	//       yTIB2 = gY;
+	//       zTIB2 = gZ;
+	//       phiNTIB2 = phiN;
+	//     }
+  //
+	//     // if( tTopo->tibLayer(detId)  == 3 ) { // before CMSSW_10_X
+  //     if( tTopo->tibLayer(detId)  == 3 ) { // CMSSW_10_X
+  //
+	//       nTIB3++;
+	//       xTIB3 = gX;
+	//       yTIB3 = gY;
+	//       zTIB3 = gZ;
+	//       phiNTIB3 = phiN;
+	//     }
+  //
+	//     // if(  tTopo->tibLayer(detId) == 4 ) { // before CMSSW_10_X
+  //     if(  tTopo->tibLayer(detId) == 4 ) { // CMSSW_10_X
+  //
+	//       nTIB4++;
+	//       xTIB4 = gX;
+	//       yTIB4 = gY;
+	//       //zTIB4 = gZ;
+	//       //phiNTIB4 = phiN;
+	//     }
+  //
+	//   }// rphi
+  //
+	// }//TIB
+  //
+	// if( subDet == StripSubdetector::TOB ) {
+  //
+	//   // if( TOBDetId(detId).isRPhi() ){ // before CMSSW_10_X
+  //   if ( tTopo->tobIsRPhi(detId) ){ // CMSSW_10_X
+  //
+	//     // if( TOBDetId(detId).layer() == 1 ) { // before CMSSW_10_X
+  //     if( tTopo->tobLayer(detId) == 1 ) { // CMSSW_10_X
+  //
+	//       nTOB1++;
+	//       //xTOB1 = gX;
+	//       //yTOB1 = gY;
+	//       //zTOB1 = gZ;
+	//       //phiNTOB1 = phiN;
+	//     }
+  //
+	//     // if( TOBDetId(detId).layer() == 2 ) { // before CMSSW_10_X
+  //     if( tTopo->tobLayer(detId) == 2 ) { // CMSSW_10_X
+  //
+	//       nTOB2++;
+	//       //xTOB2 = gX;
+	//       //yTOB2 = gY;
+	//       //zTOB2 = gZ;
+	//       //phiNTOB2 = phiN;
+	//     }
+  //
+	//     // if( TOBDetId(detId).layer() == 3 ) { // before CMSSW_10_X
+  //     if( tTopo->tobLayer(detId) == 3 ) { // CMSSW_10_X
+  //
+	//       nTOB3++;
+	//       xTOB3 = gX;
+	//       yTOB3 = gY;
+	//       //zTOB3 = gZ;
+	//       //phiNTOB3 = phiN;
+	//     }
+  //
+	//     // if( TOBDetId(detId).layer() == 4 ) { // before CMSSW_10_X
+  //     if( tTopo->tobLayer(detId) == 4 ) { // CMSSW_10_X
+  //
+	//       nTOB4++;
+	//       xTOB4 = gX;
+	//       yTOB4 = gY;
+	//       zTOB4 = gZ;
+	//       phiNTOB4 = phiN;
+	//     }
+  //
+	//     // if( TOBDetId(detId).layer() == 5 ) { // before CMSSW_10_X
+  //     if( tTopo->tobLayer(detId) == 5 ) { // CMSSW_10_X
+  //
+	//       nTOB5++;
+	//       xTOB5 = gX;
+	//       yTOB5 = gY;
+	//       zTOB5 = gZ;
+	//       phiNTOB5 = phiN;
+	//     }
+  //
+	//     // if( TOBDetId(detId).layer() == 6 ) { // before CMSSW_10_X
+  //     if( tTopo->tobLayer(detId) == 6 ) { // CMSSW_10_X
+  //
+	//       nTOB6++;
+	//       xTOB6 = gX;
+	//       yTOB6 = gY;
+	//       //zTOB6 = gZ;
+	//       //phiNTOB6 = phiN;
+	//     }
+  //
+	//   }// rphi
+  //
+	// }//TOB
+  //
+	// if( subDet == StripSubdetector::TEC ) {
+  //
+	//   // if( TECDetId(detId).isRPhi() ){ // before CMSSW_10_X
+  //   if( tTopo->tecIsRPhi(detId) ){ // CMSSW_10_X
+  //
+	//     // int is = TECDetId(detId).side();//1..2 // before CMSSW_10_X
+  //     int is = tTopo->tecSide(detId);//1..2 // CMSSW_10_X
+	//     // int iw = TECDetId(detId).wheel();//1..9 // before CMSSW_10_X
+  //     int iw = tTopo->tecWheel(detId);//1..9 // CMSSW_10_X
+  //
+	//     if( nTEC[is][iw] == 0 ) {//take first hit per wheel
+	//       nTEC[is][iw]++;
+	//       xTEC[is][iw] = gX;
+	//       yTEC[is][iw] = gY;
+	//       zTEC[is][iw] = gZ;
+	//       //phiNTEC[is][iw] = phiN;
+	//       detTEC[is][iw] = detId;
+	//     }
+	//   }// rphi
+  //
+	// }//TEC
 
       }//loop iTM
 
@@ -4789,7 +4875,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  if( (*iTTRH)->hit()->isValid() ){
 	    cout << ": subdet " << (*iTTRH)->hit()->geographicalId().subdetId();
 	    cout << ", weight " << (*iTTRH)->weight(); // default weight is 1
-	  
+
 	    cout << endl;
 	  }
 	  else cout << " not valid\n";
@@ -4814,7 +4900,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
       std::vector<Trajectory> refitTrajectoryVec2 = theFitter->fit( seed, nyTTRHvec, initialTSOS );
 
-      if( refitTrajectoryVec2.size() > 0 ) { // should be either 0 or 1            
+      if( refitTrajectoryVec2.size() > 0 ) { // should be either 0 or 1
 
 	const Trajectory& refitTrajectory2 = refitTrajectoryVec2.front();
 
@@ -4830,7 +4916,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	     iTM != refitTMvec2.end(); iTM++ ) {
 
 	  TransientTrackingRecHit::ConstRecHitPointer iTTRH = iTM->recHit();
-	 
+
 	  if( iTTRH->hit()->isValid() ){
 	    // const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( iTTRH->hit() );
 	    // if (pixhit->hasFilledProb()){
@@ -4869,7 +4955,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	// now use it!
 
       }//refit2
-      else 
+      else
 	if( idbg ) cout << "  no refit\n";
 
     }// n2 > 0
@@ -4916,7 +5002,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	double r1 = sqrt( xPXB1*xPXB1 + yPXB1*yPXB1 );
 	double r3 = sqrt( xPXB3*xPXB3 + yPXB3*yPXB3 );
-	
+
 	//	cout << "!!!warn r1 = " << r1 << ", r3 = " << r3 << endl;
 
 	if( r3-r1 < 2.0 ) cout << "warn r1 = " << r1 << ", r3 = " << r3 << endl;
@@ -4929,7 +5015,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	// we already have kap and rho = 1/kap
 
-	double lam = sqrt( -0.25 + 
+	double lam = sqrt( -0.25 +
 			   rho*rho / ( ( xPXB1 - xPXB3 )*( xPXB1 - xPXB3 ) + ( yPXB1 - yPXB3 )*( yPXB1 - yPXB3 ) ) );
 
 	// There are two solutions, the sign of kap gives the information
@@ -5031,7 +5117,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	Surface::GlobalPoint gp2( xx, yy, uz2 );
 	Surface::LocalPoint lp2 = det2->toLocal( gp2 );
 
-	if( idbg ) {	
+	if( idbg ) {
 	  std::cout <<"**** local  Point coord ****" <<std::endl;
 	  std::cout <<"gp2.x() "<< gp2.x() <<std::endl;
 	  std::cout <<"gp2.y() "<< gp2.y() <<std::endl;
@@ -5061,7 +5147,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	double lpix = fmod( lp2.x() + 0.82, 0.01 ); // lpix = 0..0.01 predicted
 	double tpix = fmod( lp2.x() + 0.82, 0.02 ); // tpix = 0..0.02 predicted
-
+  //
 	double zpix = fmod( lp2.y() + 3.24, 0.015 ); // zpix = 0..0.015 predicted
 	double spix = fmod( lp2.y() + 3.24, 0.03  ); // spix = 0..0.03  predicted
 
@@ -5078,8 +5164,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	// hybrid method:
 
 	double hybx = uPXB2; // template
-	if( mpix*1E4 < 20 ) hybx = cogx; // COG
-	if( mpix*1E4 > 75 ) hybx = cogx;
+	// if( mpix*1E4 < 20 ) hybx = cogx; // COG
+	// if( mpix*1E4 > 75 ) hybx = cogx;
 	//double hpix = fmod( hybx + 0.82, 0.01 ); // hpix = 0..0.01 from cluster hybrid method
 	double hybdx = hybx - lp2.x(); // residual
 
@@ -5098,23 +5184,23 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	  // pile up study Summer 2011:
 
-	  if( nvertex < 3 ) {
-	    h310->Fill( dca2*1E4 );
-	    h311->Fill( dz2*1E4 );
-	  }
-	  else if( nvertex < 6 ) {
-	    h312->Fill( dca2*1E4 );
-	    h313->Fill( dz2*1E4 );
-	  }
-	  else if( nvertex < 10 ) {
-	    h314->Fill( dca2*1E4 );
-	    h315->Fill( dz2*1E4 );
-	  }
-	  else {
-	    h316->Fill( dca2*1E4 );
-	    h317->Fill( dz2*1E4 );
-	    h318->Fill( nvertex );
-	  } // pile up
+	  // if( nvertex < 3 ) {
+	  //   h310->Fill( dca2*1E4 );
+	  //   h311->Fill( dz2*1E4 );
+	  // }
+	  // else if( nvertex < 6 ) {
+	  //   h312->Fill( dca2*1E4 );
+	  //   h313->Fill( dz2*1E4 );
+	  // }
+	  // else if( nvertex < 10 ) {
+	  //   h314->Fill( dca2*1E4 );
+	  //   h315->Fill( dz2*1E4 );
+	  // }
+	  // else {
+	  //   h316->Fill( dca2*1E4 );
+	  //   h317->Fill( dz2*1E4 );
+	  //   h318->Fill( nvertex );
+	  // } // pile up
 
 	} // pt > 4
 
@@ -5136,7 +5222,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    else if( PXB2_clusProb<0.75) h421_cluster_prob_010_075->Fill(dz2*1E4 );
 	    else if( PXB2_clusProb<0.90) h421_cluster_prob_075_090->Fill(dz2*1E4 );
 	    else h421_cluster_prob_090_101->Fill(dz2*1E4 );
-	    if  ( fabs(iTrack->eta() )<0.8) { 
+	    if  ( fabs(iTrack->eta() )<0.8) {
 
 	      if( PXB2_clusProb<0.10) h420_cluster_prob_0_010_etaL0p8->Fill(dca2*1E4 );
 	      else if( PXB2_clusProb<0.75) h420_cluster_prob_010_075_etaL0p8->Fill(dca2*1E4 );
@@ -5149,7 +5235,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	      else h421_cluster_prob_090_101_etaL0p8->Fill(dz2*1E4 );
 	    }
 	    else{
-	      
+
 
 	      if( PXB2_clusProb<0.10) h420_cluster_prob_0_010_etaM0p8->Fill(dca2*1E4 );
 	      else if( PXB2_clusProb<0.75) h420_cluster_prob_010_075_etaM0p8->Fill(dca2*1E4 );
@@ -5168,37 +5254,37 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 
 	  h420->Fill( dca2*1E4 ); // 12.7 um
-	 
-	
+
+
 	  h421->Fill( dz2*1E4 );
 
-	  // Add errors and pulls
-          h077->Fill( ePXB2*1E4 );
-          h078->Fill( fPXB2*1E4 );
-          if(idbg) cout<<" residuals "<<dca2*1E4<<" "<<ePXB2*1E4<<" "<<dz2*1E4
-		       <<" "<<fPXB2*1E4<<endl;
-          double pulx=0., puly=0.;
-          if(ePXB2!=0.0) pulx = dca2/ePXB2;
-          if(fPXB2!=0.0) puly = dz2/fPXB2;
-          h079->Fill( pulx );
-          h069->Fill( puly );
-
-	  // Alignment errors 
-	  //LocalError lape = det2->localAlignmentError();
-	  //cout<<geomDet2<<endl;
-	  if(geomDet2 != NULL) {
-	    LocalError lape = geomDet2->localAlignmentError();
-	    //cout<< lape.valid() <<endl;
-	    if (lape.valid()) {
-	      float tmp11= 0.;
-	      if(lape.xx()>0.) tmp11= sqrt(lape.xx())*1E4;
-	      float tmp13= 0.;
-	      if(lape.yy()>0.) tmp13= sqrt(lape.yy())*1E4;
-	      //cout<<" layer 2 "<<tmp11<<" "<<tmp13<<endl;
-	      h088->Fill( tmp11 );
-	      h089->Fill( tmp13 );
-	    } else {   if( myCounters::neve < 10 ) cout<<" lape invalid?"<<endl;}
-	  }
+	  // // Add errors and pulls
+    //       h077->Fill( ePXB2*1E4 );
+    //       h078->Fill( fPXB2*1E4 );
+    //       if(idbg) cout<<" residuals "<<dca2*1E4<<" "<<ePXB2*1E4<<" "<<dz2*1E4
+		//        <<" "<<fPXB2*1E4<<endl;
+    //       double pulx=0., puly=0.;
+    //       if(ePXB2!=0.0) pulx = dca2/ePXB2;
+    //       if(fPXB2!=0.0) puly = dz2/fPXB2;
+    //       h079->Fill( pulx );
+    //       h069->Fill( puly );
+    //
+	  // // Alignment errors
+	  // //LocalError lape = det2->localAlignmentError();
+	  // //cout<<geomDet2<<endl;
+	  // if(geomDet2 != NULL) {
+	  //   LocalError lape = geomDet2->localAlignmentError();
+	  //   //cout<< lape.valid() <<endl;
+	  //   if (lape.valid()) {
+	  //     float tmp11= 0.;
+	  //     if(lape.xx()>0.) tmp11= sqrt(lape.xx())*1E4;
+	  //     float tmp13= 0.;
+	  //     if(lape.yy()>0.) tmp13= sqrt(lape.yy())*1E4;
+	  //     //cout<<" layer 2 "<<tmp11<<" "<<tmp13<<endl;
+	  //     h088->Fill( tmp11 );
+	  //     h089->Fill( tmp13 );
+	  //   } else {   if( myCounters::neve < 10 ) cout<<" lape invalid?"<<endl;}
+	  // }
 
           if(bb/aa < 0.015) h420_1->Fill(dca2*1E4);
           else if(bb/aa >= 0.015 && bb/aa < 0.065) h420_2->Fill(dca2*1E4);
@@ -5217,24 +5303,24 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	      h420_in_zminus->Fill( dca2*1E4 );
 
 	  //local x>0 ,local x<0
-	  if( uPXB2>0 ){ 
-            
+	  if( uPXB2>0 ){
+
 	    h420_x_plus->Fill( dca2*1E4 );
 	    h421_x_plus->Fill( dz2*1E4 );
 
 	  } else{
 	    h420_x_minus->Fill( dca2*1E4 );
 	    h421_x_minus->Fill( dz2*1E4 );
-	  }    
+	  }
 
 
 	  ////check for bias dot flip, unflipped, zplus,zminus,xplu,xminus combination
 
-	  
+
 	  if( abs( phi2 - phiN2 ) < pihalf ) {// outward facing module
 	    if(zPXB2 > 0){
-	      if( uPXB2>0 ){ 
-		
+	      if( uPXB2>0 ){
+
 		h420_out_xplus_zplus->Fill( dca2*1E4 );
 		h421_out_xplus_zplus->Fill( dz2*1E4 );
 
@@ -5243,8 +5329,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	   	h421_out_xminus_zplus->Fill( dz2*1E4 );
 	      }
 	    } else{
-	      if( uPXB2>0 ){ 
-		
+	      if( uPXB2>0 ){
+
 		h420_out_xplus_zminus->Fill( dca2*1E4 );
 		h421_out_xplus_zminus->Fill( dz2*1E4 );
 
@@ -5255,8 +5341,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	    }
 	  }  else {
 	    if(zPXB2 > 0){
-	      if( uPXB2>0 ){ 
-		
+	      if( uPXB2>0 ){
+
 		h420_in_xplus_zplus->Fill( dca2*1E4 );
 		h421_in_xplus_zplus->Fill( dz2*1E4 );
 
@@ -5265,8 +5351,8 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	   	h421_in_xminus_zplus->Fill( dz2*1E4 );
 	      }
 	    } else{
-	      if( uPXB2>0 ){ 
-		
+	      if( uPXB2>0 ){
+
 		h420_in_xplus_zminus->Fill( dca2*1E4 );
 		h421_in_xplus_zminus->Fill( dz2*1E4 );
 
@@ -5275,13 +5361,13 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 		h421_in_xminus_zminus->Fill( dz2*1E4 );
 	      }
 	    }
-	  } 
+	  }
 
 
 
 
 	  // //////// Modules:1-8
-	
+
 	  if( imod==1  ){// innermost  module
 	    h420_mod1->Fill( dca2*1E4 );
 	    h421_mod1->Fill( dz2*1E4 );
@@ -5305,17 +5391,17 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  if( imod==6 ){
 	    h420_mod6->Fill( dca2*1E4 );
 	    h421_mod6->Fill( dz2*1E4 );
-	  }	  
+	  }
 	  if( imod==7  ){
 	    h420_mod7->Fill( dca2*1E4 );
 	    h421_mod7->Fill( dz2*1E4 );
 	  }
 	  if( imod==8  ){// outermost  module
-	    h420_mod8->Fill( dca2*1E4 );     
+	    h420_mod8->Fill( dca2*1E4 );
 	     h421_mod8->Fill( dz2*1E4 );
 	  }
-	  
-	  
+
+
 	  // versus number o ftracker hits
 	  if( hp.trackerLayersWithMeasurement() > 8 ) {
 	    h430->Fill( dca2*1E4 );
@@ -5364,7 +5450,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	else h419->Fill( logpt, dca2*1E4 );
 
 	// profile of abs(dca) gives mean abs(dca):
-	// mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2) 
+	// mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
 	// => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
 	// point resolution = 1/sqrt(3/2) * triplet middle residual width
 	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
@@ -5383,14 +5469,14 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  if( abs(dip)*wt > 18 && abs(dip)*wt < 50 ) h432->Fill( dz2*1E4 );
 
 	  h434->Fill( phiinc*wt, abs(dca2)*1E4 );
-	  h334->Fill( phiinc*wt, abs(cogdx)*1E4 );//similar
+	  // h334->Fill( phiinc*wt, abs(cogdx)*1E4 );//similar
 
 	  if( abs( phi2 - phiN2 ) < pihalf ) // outward facing module
 	    h436->Fill( phiinc*wt, abs(dca2)*1E4 );
 	  else
 	    h437->Fill( phiinc*wt, abs(dca2)*1E4 );//similar
 
-	  if(  lpix*1E4 > 30 && lpix*1E4 < 70 ) h319->Fill( phiinc*wt, abs(dca2)*1E4 );//flat
+	  // if(  lpix*1E4 > 30 && lpix*1E4 < 70 ) h319->Fill( phiinc*wt, abs(dca2)*1E4 );//flat
 
 	} // pt > 4
 
@@ -5534,13 +5620,13 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	      // study split:
 
 	      if( lpix*1E4 < 20 || lpix*1E4 > 80 ){
-
+  //
 		if( abs( phi2 - phiN2 ) < pihalf )
 		  h293->Fill( dca2*1E4 ); // split
 		else
 		  h294->Fill( dca2*1E4 ); // split
 
-		if( zPXB2 > 0 ) 
+		if( zPXB2 > 0 )
 		  h295->Fill( dca2*1E4 ); // split
 		else
 		  h296->Fill( dca2*1E4 ); // split
@@ -5706,7 +5792,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	// LAMBDA is the distance between the point in the middle of
 	// the two spacepoints and the centre of the helix.
 
-	double lam = sqrt( -0.25 + 
+	double lam = sqrt( -0.25 +
 			   rho2*rho2 / ( ( xPXB1 - xPXB3 )*( xPXB1 - xPXB3 ) + ( yPXB1 - yPXB3 )*( yPXB1 - yPXB3 ) ) );
 
 	// There are two solutions, the sign of kap gives the information
@@ -5845,7 +5931,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	if( pt > 4 ) {
 	  h462->Fill( f2*wt, dca2*1E4 );
 	  h463->Fill( f2*wt, dz2*1E4 );
-	  
+
 	  h464->Fill( zPXB2, dca2*1E4 );
 	  h465->Fill( zPXB2, dz2*1E4 );
 	}
@@ -5855,7 +5941,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	else h469->Fill( logpt, dca2*1E4 );
 
 	// profile of abs(dca) gives mean abs(dca):
-	// mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2) 
+	// mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
 	// => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
 	// point resolution = 1/sqrt(3/2) * triplet middle residual width
 	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
@@ -5911,7 +5997,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	// we already have kap and rho = 1/kap
 
-	double lam = sqrt( -0.25 + 
+	double lam = sqrt( -0.25 +
 			   rho*rho / ( ( xPXB2 - xPXB3 )*( xPXB2 - xPXB3 ) + ( yPXB2 - yPXB3 )*( yPXB2 - yPXB3 ) ) );
 
 	// There are two solutions, the sign of kap gives the information
@@ -6062,7 +6148,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	else h519->Fill( logpt, dca1*1E4 );
 
 	// profile of abs(dca) gives mean abs(dca):
-	// mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2) 
+	// mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
 	// => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
 	// point resolution = 1/sqrt(3/2) * triplet middle residual width
 	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
@@ -6117,7 +6203,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	// we already have kap and rho = 1/kap
 
-	double lam = sqrt( -0.25 + 
+	double lam = sqrt( -0.25 +
 			   rho*rho / ( ( xPXB1 - xPXB2 )*( xPXB1 - xPXB2 ) + ( yPXB1 - yPXB2 )*( yPXB1 - yPXB2 ) ) );
 
 	// There are two solutions, the sign of kap gives the information
@@ -6291,7 +6377,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	else i519->Fill( logpt, dca3*1E4 );
 
 	// profile of abs(dca) gives mean abs(dca):
-	// mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2) 
+	// mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
 	// => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
 	// point resolution = 1/sqrt(3/2) * triplet middle residual width
 	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
@@ -6300,7 +6386,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
 	  i522->Fill( f3*wt, abs(dca3)*1E4 );
 	  i523->Fill( f3*wt, abs(dz3)*1E4 );
-	  
+
 	  i524->Fill( zPXB3, abs(dca3)*1E4 );
 	  i525->Fill( zPXB3, abs(dz3)*1E4 );
 
@@ -6720,7 +6806,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  double resid = hitMeasurement.x() - predictedPosition.x();//[pitch]
 
 	  double xptch;
-	  //double yptch;	
+	  //double yptch;
 
 	  if( subDet <  3 ){//1,2=pixel
 	    PixelTopology & pixelTopol = (PixelTopology&) (*iTTRH)->detUnit()->topology();
@@ -6789,7 +6875,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 	  double resid = hitMeasurement.x() - predictedPosition.x();//[pitch]
 
 	  double xptch;
-	  //double yptch;	
+	  //double yptch;
 
 	  if( subDet <  3 ){//1,2=pixel
 	    PixelTopology & pixelTopol = (PixelTopology&) (*iTTRH)->detUnit()->topology();
@@ -6882,7 +6968,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
 
       // we already have kap and rho = 1/kap
 
-      double lam = sqrt( -0.25 + 
+      double lam = sqrt( -0.25 +
 			 rho*rho / ( ( xb - xPXB2 )*( xb - xPXB2 ) + ( yb - yPXB2 )*( yb - yPXB2 ) ) );
 
       // There are two solutions, the sign of kap gives the information
@@ -7003,7 +7089,7 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
       else h619->Fill( logpt, dca1*1E4 );
 
       // profile of abs(dca) gives mean abs(dca):
-      // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2) 
+      // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
       // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
       // point resolution = 1/sqrt(3/2) * triplet middle residual width
       // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
@@ -7030,1319 +7116,1319 @@ void Pxl::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , e
     //------------------------------------------------------------------------
     // TIB triplet 1+3 -> 2:
 
-    if( nTIB1*nTIB2*nTIB3 > 0 ) {
-
-      if( jdbg ) cout << "  TIB triplet 3+1 -> 2\n";
-
-      double f2 = atan2( yTIB2, xTIB2 );//position angle
-
-      double ax = xTIB3 - xTIB1;
-      double ay = yTIB3 - yTIB1;
-      double aa = sqrt( ax*ax + ay*ay ); // from 1 to 3
-
-      double xmid = 0.5 * ( xTIB1 + xTIB3 );
-      double ymid = 0.5 * ( yTIB1 + yTIB3 );
-      double bx = xTIB2 - xmid;
-      double by = yTIB2 - ymid;
-      double bb = sqrt( bx*bx + by*by ); // from mid point to point 2
-
-      // Calculate the centre of the helix in xy-projection that
-      // transverses the two spacepoints. The points with the same
-      // distance from the two points are lying on a line.
-      // LAMBDA is the distance between the point in the middle of
-      // the two spacepoints and the centre of the helix.
-
-      // we already have kap and rho = 1/kap
-
-      double lam = sqrt( -0.25 + 
-			 rho*rho / ( ( xTIB1 - xTIB3 )*( xTIB1 - xTIB3 ) + ( yTIB1 - yTIB3 )*( yTIB1 - yTIB3 ) ) );
-
-      // There are two solutions, the sign of kap gives the information
-      // which of them is correct:
-
-      if( kap > 0 ) lam = -lam;
-
-      // ( X0, Y0 ) is the centre of the circle
-      // that describes the helix in xy-projection:
-
-      double x0 =  0.5*( xTIB1 + xTIB3 ) + lam * ( -yTIB1 + yTIB3 );
-      double y0 =  0.5*( yTIB1 + yTIB3 ) + lam * (  xTIB1 - xTIB3 );
-
-      // To get phi0 in the right interval one must distinguish
-      // two cases with positve and negative kap:
-
-      double uphi;
-      if( kap > 0 ) uphi = atan2( -x0,  y0 );
-      else          uphi = atan2(  x0, -y0 );
-
-      // The distance of the closest approach DCA depends on the sign
-      // of kappa:
-
-      double udca;
-      if( kap > 0 ) udca = rho - sqrt( x0*x0 + y0*y0 );
-      else          udca = rho + sqrt( x0*x0 + y0*y0 );
-
-      h701->Fill( zTIB2 );
-      h702->Fill( uphi - iTrack->phi() );
-      h703->Fill( udca - iTrack->d0() );
-
-      // interpolate to hit 2:
-      // cirmov
-      // we already have rinv = -kap
-
-      double cosphi = cos(uphi);
-      double sinphi = sin(uphi);
-      double dp = -xTIB2*sinphi + yTIB2*cosphi + udca;
-      double dl = -xTIB2*cosphi - yTIB2*sinphi;
-      double sa = 2*dp + rinv * ( dp*dp + dl*dl );
-      double dca2 = sa / ( 1 + sqrt(1 + rinv*sa) );// distance to hit 2
-      double ud = 1 + rinv*udca;
-      double phi2 = atan2( -rinv*xTIB2 + ud*sinphi, rinv*yTIB2 + ud*cosphi );//direction
-
-      double phiinc = phi2 - phiNTIB2;//angle of incidence in rphi w.r.t. normal vector
-
-      // phiN alternates inward/outward
-      // reduce phiinc
-
-      if( phiinc > pihalf ) phiinc -= pi;
-      else if( phiinc < -pihalf ) phiinc += pi;
-
-      if( pt > 4 ) {
-	h708->Fill( bb/aa );//lever arm
-	h709->Fill( f2*wt, phiinc*wt );
-	h710->Fill( dca2*1E4 );
-      }
-
-      if( pt > 12 ) {
-
-	h720->Fill( dca2*1E4 );
-
-	// 2010B: sigma(resid) = 25.6 in TIB2, 33.6 in TIB3
-	// => sigma(TIB2) = 18.9
-	// => sigma(TIB3) = 28.8
-
-	if( hp.trackerLayersWithMeasurement() > 8 ) {
-	  h730->Fill( dca2*1E4 );
-	}
-
-	if( phiinc*wt > -1 && phiinc*wt < 7 ){
-	  h740->Fill( dca2*1E4 );
-	}
-
-      }//pt>12
-
-      // residual profiles: alignment check
-
-      if( pt > 4 ) {
-	h712->Fill( f2*wt, dca2*1E4 );
-	h714->Fill( zTIB2, dca2*1E4 );
-      }
-      h716->Fill( logpt, dca2*1E4 );
-      if( iTrack->charge() > 0 ) h718->Fill( logpt, dca2*1E4 );
-      else h719->Fill( logpt, dca2*1E4 );
-
-      // profile of abs(dca) gives mean abs(dca):
-      // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2) 
-      // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
-      // point resolution = 1/sqrt(3/2) * triplet middle residual width
-      // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
-
-      if( pt > 4 ) {
-
-	h722->Fill( f2*wt, abs(dca2)*1E4 );
-
-	h724->Fill( zTIB2, abs(dca2)*1E4 );
-
-	h728->Fill( dip*wt, abs(dca2)*1E4 );
-
-	h734->Fill( phiinc*wt, abs(dca2)*1E4 );
-
-      }//pt
-
-      if( pt > 0.8 && pt < 1.2 ) { // low pt
-	h735->Fill( f2*wt, abs(dca2)*1E4 );
-      }
-      h726->Fill( logpt, abs(dca2)*1E4 );
-
-    }//TIB 1,2,3
-
-    //------------------------------------------------------------------------
-    // TIB triplet 2+4 -> 3:
-
-    if( nTIB2*nTIB3*nTIB4 > 0 ) {
-
-      if( jdbg ) cout << "  TIB triplet 4+2 -> 3\n";
-
-      double f3 = atan2( yTIB3, xTIB3 );//position angle
-
-      double ax = xTIB4 - xTIB2;
-      double ay = yTIB4 - yTIB2;
-      double aa = sqrt( ax*ax + ay*ay ); // from 2 to 4
-
-      double xmid = 0.5 * ( xTIB2 + xTIB4 );
-      double ymid = 0.5 * ( yTIB2 + yTIB4 );
-      double bx = xTIB3 - xmid;
-      double by = yTIB3 - ymid;
-      double bb = sqrt( bx*bx + by*by ); // from mid point to point 3
-
-      // Calculate the centre of the helix in xy-projection that
-      // transverses the two spacepoints. The points with the same
-      // distance from the two points are lying on a line.
-      // LAMBDA is the distance between the point in the middle of
-      // the two spacepoints and the centre of the helix.
-
-      // we already have kap and rho = 1/kap
-
-      double lam = sqrt( -0.25 + 
-			 rho*rho / ( ( xTIB2 - xTIB4 )*( xTIB2 - xTIB4 ) + ( yTIB2 - yTIB4 )*( yTIB2 - yTIB4 ) ) );
-
-      // There are two solutions, the sign of kap gives the information
-      // which of them is correct:
-
-      if( kap > 0 ) lam = -lam;
-
-      // ( X0, Y0 ) is the centre of the circle
-      // that describes the helix in xy-projection:
-
-      double x0 =  0.5*( xTIB2 + xTIB4 ) + lam * ( -yTIB2 + yTIB4 );
-      double y0 =  0.5*( yTIB2 + yTIB4 ) + lam * (  xTIB2 - xTIB4 );
-
-      // To get phi0 in the right interval one must distinguish
-      // two cases with positve and negative kap:
-
-      double uphi;
-      if( kap > 0 ) uphi = atan2( -x0,  y0 );
-      else          uphi = atan2(  x0, -y0 );
-
-      // The distance of the closest approach DCA depends on the sign
-      // of kappa:
-
-      double udca;
-      if( kap > 0 ) udca = rho - sqrt( x0*x0 + y0*y0 );
-      else          udca = rho + sqrt( x0*x0 + y0*y0 );
-
-      h751->Fill( zTIB2 );
-      h752->Fill( uphi - iTrack->phi() );
-      h753->Fill( udca - iTrack->d0() );
-
-      // interpolate to hit 2:
-      // cirmov
-      // we already have rinv = -kap
-
-      double cosphi = cos(uphi);
-      double sinphi = sin(uphi);
-      double dp = -xTIB3*sinphi + yTIB3*cosphi + udca;
-      double dl = -xTIB3*cosphi - yTIB3*sinphi;
-      double sa = 2*dp + rinv * ( dp*dp + dl*dl );
-      double dca3 = sa / ( 1 + sqrt(1 + rinv*sa) );// distance to hit 2
-      double ud = 1 + rinv*udca;
-      double phi3 = atan2( -rinv*xTIB3 + ud*sinphi, rinv*yTIB3 + ud*cosphi );//direction
-
-      double phiinc = phi3 - phiNTIB3;//angle of incidence in rphi w.r.t. normal vector
-
-      // phiN alternates inward/outward
-      // reduce phiinc
-
-      if( phiinc > pihalf ) phiinc -= pi;
-      else if( phiinc < -pihalf ) phiinc += pi;
-
-      if( pt > 4 ) {
-	h758->Fill( bb/aa );//lever arm
-	h759->Fill( f3*wt, phiinc*wt );
-	h760->Fill( dca3*1E4 );
-      }
-
-      if( pt > 12 ) {
-
-	h770->Fill( dca3*1E4 );
-
-	if( hp.trackerLayersWithMeasurement() > 8 ) {
-	  h780->Fill( dca3*1E4 );
-	}
-
-	if( phiinc*wt > -1 && phiinc*wt < 7 ){
-	  h790->Fill( dca3*1E4 );
-	}
-
-      }//pt>12
-
-      // residual profiles: alignment check
-
-      if( pt > 4 ) {
-	h762->Fill( f3*wt, dca3*1E4 );
-	h764->Fill( zTIB3, dca3*1E4 );
-      }
-      h766->Fill( logpt, dca3*1E4 );
-      if( iTrack->charge() > 0 ) h768->Fill( logpt, dca3*1E4 );
-      else h769->Fill( logpt, dca3*1E4 );
-
-      // profile of abs(dca) gives mean abs(dca):
-      // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2) 
-      // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
-      // point resolution = 1/sqrt(3/2) * triplet middle residual width
-      // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
-
-      if( pt > 4 ) {
-
-	h772->Fill( f3*wt, abs(dca3)*1E4 );
-
-	h774->Fill( zTIB3, abs(dca3)*1E4 );
-
-	h778->Fill( dip*wt, abs(dca3)*1E4 );
-
-	h784->Fill( phiinc*wt, abs(dca3)*1E4 );
-
-      }//pt
-
-      if( pt > 0.8 && pt < 1.2 ) { // low pt
-	h785->Fill( f3*wt, abs(dca3)*1E4 );
-      }
-      h776->Fill( logpt, abs(dca3)*1E4 );
-
-    }//TIB 2,3,4
-
-    //------------------------------------------------------------------------
-    // TOB triplet 3+5 -> 4:
-
-    if( nTOB3*nTOB4*nTOB5 > 0 ) {
-
-      if( jdbg ) cout << "  TOB triplet 5+3 -> 4\n";
-
-      double f4 = atan2( yTOB4, xTOB4 );//position angle
-
-      double ax = xTOB5 - xTOB3;
-      double ay = yTOB5 - yTOB3;
-      double aa = sqrt( ax*ax + ay*ay ); // from 3 to 5
-
-      double xmid = 0.5 * ( xTOB3 + xTOB5 );
-      double ymid = 0.5 * ( yTOB3 + yTOB5 );
-      double bx = xTOB4 - xmid;
-      double by = yTOB4 - ymid;
-      double bb = sqrt( bx*bx + by*by ); // from mid point to point 4
-
-      // Calculate the centre of the helix in xy-projection that
-      // transverses the two spacepoints. The points with the same
-      // distance from the two points are lying on a line.
-      // LAMBDA is the distance between the point in the middle of
-      // the two spacepoints and the centre of the helix.
-
-      // we already have kap and rho = 1/kap
-
-      double lam = sqrt( -0.25 + 
-			 rho*rho / ( ( xTOB3 - xTOB5 )*( xTOB3 - xTOB5 ) + ( yTOB3 - yTOB5 )*( yTOB3 - yTOB5 ) ) );
-
-      // There are two solutions, the sign of kap gives the information
-      // which of them is correct:
-
-      if( kap > 0 ) lam = -lam;
-
-      // ( X0, Y0 ) is the centre of the circle
-      // that describes the helix in xy-projection:
-
-      double x0 =  0.5*( xTOB3 + xTOB5 ) + lam * ( -yTOB3 + yTOB5 );
-      double y0 =  0.5*( yTOB3 + yTOB5 ) + lam * (  xTOB3 - xTOB5 );
-
-      // To get phi0 in the right interval one must distinguish
-      // two cases with positve and negative kap:
-
-      double uphi;
-      if( kap > 0 ) uphi = atan2( -x0,  y0 );
-      else          uphi = atan2(  x0, -y0 );
-
-      // The distance of the closest approach DCA depends on the sign
-      // of kappa:
-
-      double udca;
-      if( kap > 0 ) udca = rho - sqrt( x0*x0 + y0*y0 );
-      else          udca = rho + sqrt( x0*x0 + y0*y0 );
-
-      h801->Fill( zTOB4 );
-      h802->Fill( uphi - iTrack->phi() );
-      h803->Fill( udca - iTrack->d0() );
-
-      // interpolate to hit 2:
-      // cirmov
-      // we already have rinv = -kap
-
-      double cosphi = cos(uphi);
-      double sinphi = sin(uphi);
-      double dp = -xTOB4*sinphi + yTOB4*cosphi + udca;
-      double dl = -xTOB4*cosphi - yTOB4*sinphi;
-      double sa = 2*dp + rinv * ( dp*dp + dl*dl );
-      double dca2 = sa / ( 1 + sqrt(1 + rinv*sa) );// distance to hit 2
-      double ud = 1 + rinv*udca;
-      double phi2 = atan2( -rinv*xTOB4 + ud*sinphi, rinv*yTOB4 + ud*cosphi );//direction
-
-      double phiinc = phi2 - phiNTOB4;//angle of incidence in rphi w.r.t. normal vector
-
-      // phiN alternates inward/outward
-      // reduce phiinc
-
-      if( phiinc > pihalf ) phiinc -= pi;
-      else if( phiinc < -pihalf ) phiinc += pi;
-
-      if( pt > 4 ) {
-	h808->Fill( bb/aa );//lever arm
-	h809->Fill( f4*wt, phiinc*wt );
-	h810->Fill( dca2*1E4 );
-      }
-
-      if( pt > 12 ) {
-
-	h820->Fill( dca2*1E4 );
-
-	// 2010B: sigma(resid) = 50.3 in TOB4, 39.0 in TOB5
-	// => sigma(TOB4) = 43.0
-	// => sigma(TOB4) = 29.1
-
-	if( hp.trackerLayersWithMeasurement() > 8 ) {
-	  h830->Fill( dca2*1E4 );
-	}
-
-	if( phiinc*wt > -1 && phiinc*wt < 7 ){
-	  h840->Fill( dca2*1E4 );
-	}
-
-      }//pt>12
-
-      // residual profiles: alignment check
-
-      if( pt > 4 ) {
-	h812->Fill( f4*wt, dca2*1E4 );
-	h814->Fill( zTOB4, dca2*1E4 );
-      }
-      h816->Fill( logpt, dca2*1E4 );
-      if( iTrack->charge() > 0 ) h818->Fill( logpt, dca2*1E4 );
-      else h819->Fill( logpt, dca2*1E4 );
-
-      // profile of abs(dca) gives mean abs(dca):
-      // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2) 
-      // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
-      // point resolution = 1/sqrt(3/2) * triplet middle residual width
-      // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
-
-      if( pt > 4 ) {
-
-	h822->Fill( f4*wt, abs(dca2)*1E4 );
-
-	h824->Fill( zTOB4, abs(dca2)*1E4 );
-
-	h828->Fill( dip*wt, abs(dca2)*1E4 );
-
-	h834->Fill( phiinc*wt, abs(dca2)*1E4 );
-
-      }//pt
-
-      if( pt > 0.8 && pt < 1.2 ) { // low pt
-	h835->Fill( f4*wt, abs(dca2)*1E4 );
-      }
-      h826->Fill( logpt, abs(dca2)*1E4 );
-
-    }//TOB 1,2,3
-
-    //------------------------------------------------------------------------
-    // TOB triplet 4+6 -> 5:
-
-    if( nTOB4*nTOB5*nTOB6 > 0 ) {
-
-      if( jdbg ) cout << "  TOB triplet 6+4 -> 5\n";
-
-      double f5 = atan2( yTOB5, xTOB5 );//position angle
-
-      double ax = xTOB6 - xTOB4;
-      double ay = yTOB6 - yTOB4;
-      double aa = sqrt( ax*ax + ay*ay ); // from 4 to 6
-
-      double xmid = 0.5 * ( xTOB4 + xTOB6 );
-      double ymid = 0.5 * ( yTOB4 + yTOB6 );
-      double bx = xTOB5 - xmid;
-      double by = yTOB5 - ymid;
-      double bb = sqrt( bx*bx + by*by ); // from mid point to point 5
-
-      // Calculate the centre of the helix in xy-projection that
-      // transverses the two spacepoints. The points with the same
-      // distance from the two points are lying on a line.
-      // LAMBDA is the distance between the point in the middle of
-      // the two spacepoints and the centre of the helix.
-
-      // we already have kap and rho = 1/kap
-
-      double lam = sqrt( -0.25 + 
-			 rho*rho / ( ( xTOB4 - xTOB6 )*( xTOB4 - xTOB6 ) + ( yTOB4 - yTOB6 )*( yTOB4 - yTOB6 ) ) );
-
-      // There are two solutions, the sign of kap gives the information
-      // which of them is correct:
-
-      if( kap > 0 ) lam = -lam;
-
-      // ( X0, Y0 ) is the centre of the circle
-      // that describes the helix in xy-projection:
-
-      double x0 =  0.5*( xTOB4 + xTOB6 ) + lam * ( -yTOB4 + yTOB6 );
-      double y0 =  0.5*( yTOB4 + yTOB6 ) + lam * (  xTOB4 - xTOB6 );
-
-      // To get phi0 in the right interval one must distinguish
-      // two cases with positve and negative kap:
-
-      double uphi;
-      if( kap > 0 ) uphi = atan2( -x0,  y0 );
-      else          uphi = atan2(  x0, -y0 );
-
-      // The distance of the closest approach DCA depends on the sign
-      // of kappa:
-
-      double udca;
-      if( kap > 0 ) udca = rho - sqrt( x0*x0 + y0*y0 );
-      else          udca = rho + sqrt( x0*x0 + y0*y0 );
-
-      h851->Fill( zTOB4 );
-      h852->Fill( uphi - iTrack->phi() );
-      h853->Fill( udca - iTrack->d0() );
-
-      // interpolate to hit 2:
-      // cirmov
-      // we already have rinv = -kap
-
-      double cosphi = cos(uphi);
-      double sinphi = sin(uphi);
-      double dp = -xTOB5*sinphi + yTOB5*cosphi + udca;
-      double dl = -xTOB5*cosphi - yTOB5*sinphi;
-      double sa = 2*dp + rinv * ( dp*dp + dl*dl );
-      double dca3 = sa / ( 1 + sqrt(1 + rinv*sa) );// distance to hit 2
-      double ud = 1 + rinv*udca;
-      double phi3 = atan2( -rinv*xTOB5 + ud*sinphi, rinv*yTOB5 + ud*cosphi );//direction
-
-      double phiinc = phi3 - phiNTOB5;//angle of incidence in rphi w.r.t. normal vector
-
-      // phiN alternates inward/outward
-      // reduce phiinc:
-
-      if( phiinc > pihalf ) phiinc -= pi;
-      else if( phiinc < -pihalf ) phiinc += pi;
-
-      if( pt > 4 ) {
-	h858->Fill( bb/aa );//lever arm
-	h859->Fill( f5*wt, phiinc*wt );
-	h860->Fill( dca3*1E4 );
-      }
-
-      if( pt > 12 ) {
-
-	h870->Fill( dca3*1E4 );
-
-	if( hp.trackerLayersWithMeasurement() > 8 ) {
-	  h880->Fill( dca3*1E4 );
-	}
-
-	if( phiinc*wt > -1 && phiinc*wt < 7 ){
-	  h890->Fill( dca3*1E4 );
-	}
-
-      }//pt>12
-
-      // residual profiles: alignment check
-
-      if( pt > 4 ) {
-	h862->Fill( f5*wt, dca3*1E4 );
-	h864->Fill( zTOB5, dca3*1E4 );
-      }
-      h866->Fill( logpt, dca3*1E4 );
-      if( iTrack->charge() > 0 ) h868->Fill( logpt, dca3*1E4 );
-      else h869->Fill( logpt, dca3*1E4 );
-
-      // profile of abs(dca) gives mean abs(dca):
-      // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2) 
-      // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
-      // point resolution = 1/sqrt(3/2) * triplet middle residual width
-      // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
-
-      if( pt > 4 ) {
-
-	h872->Fill( f5*wt, abs(dca3)*1E4 );
-
-	h874->Fill( zTOB5, abs(dca3)*1E4 );
-
-	h878->Fill( dip*wt, abs(dca3)*1E4 );
-
-	h884->Fill( phiinc*wt, abs(dca3)*1E4 );
-
-      }//pt
-
-      if( pt > 0.8 && pt < 1.2 ) { // low pt
-	h885->Fill( f5*wt, abs(dca3)*1E4 );
-      }
-      h876->Fill( logpt, abs(dca3)*1E4 );
-
-    }//TOB 2,3,4
-
-    //------------------------------------------------------------------------
-    // TEC: 2 sides, 9 wheels
-
-    for( int is = 1; is < 3; ++is ){
-
-      for( int i2 = 2; i2 < 9; ++i2 ){//middle plane = wheels 2..8
-
-	if( nTEC[is][i2] == 0 ) continue;
-
-	int i1 = i2 - 1;
-	if( nTEC[is][i1] == 0 ) continue;
-
-	int i3 = i2 + 1;
-	if( nTEC[is][i3] == 0 ) continue;
-
-	if( jdbg ) cout << "  TEC side " << is << " triplet " << i2 << endl;
-
-	double x1 = xTEC[is][i1];
-	double y1 = yTEC[is][i1];
-	double z1 = zTEC[is][i1];
-	//DetId detId1 = detTEC[is][i1];
-
-	double x2 = xTEC[is][i2];
-	double y2 = yTEC[is][i2];
-	double z2 = zTEC[is][i2];
-	DetId detId2 = detTEC[is][i2];
-
-	const GeomDet * myGeomDet = pTG->idToDet( detId2 );
-	Surface::GlobalPoint gp = Surface::GlobalPoint(x2,y2,z2);
-	Surface::LocalPoint lp = myGeomDet->toLocal( gp );
-
-	const GeomDetUnit * myGeomDetUnit = pTG->idToDetUnit( detId2 );
-	StripTopology & stripTopol = (StripTopology&) myGeomDetUnit->topology();
-	double xptch = stripTopol.localPitch( lp );
-
-	double x3 = xTEC[is][i3];
-	double y3 = yTEC[is][i3];
-	double z3 = zTEC[is][i3];
-	//DetId detId3 = detTEC[is][i3];
-
-	double f2 = atan2( y2, x2 );//position angle
-	double R2 = sqrt( x2*x2 + y2*y2 );
-
-	double ax = x3 - x1;
-	double ay = y3 - y1;
-	double aa = sqrt( ax*ax + ay*ay ); // from 1 to 3
-	double az = z3 - z1;
-
-	double xmid = 0.5 * ( x1 + x3 );
-	double ymid = 0.5 * ( y1 + y3 );
-	double bx = x2 - xmid;
-	double by = y2 - ymid;
-	double bb = sqrt( bx*bx + by*by ); // from mid point to point 2
-
-	// Calculate the centre of the helix in xy-projection that
-	// transverses the two spacepoints. The points with the same
-	// distance from the two points are lying on a line.
-	// LAMBDA is the distance between the point in the middle of
-	// the two spacepoints and the centre of the helix.
-
-	// we already have kap and rho = 1/kap
-
-	double lam = sqrt( -0.25 + 
-			   rho*rho / ( ( x1 - x3 )*( x1 - x3 ) + ( y1 - y3 )*( y1 - y3 ) ) );
-
-	// There are two solutions, the sign of kap gives the information
-	// which of them is correct:
-
-	if( kap > 0 ) lam = -lam;
-
-	// ( X0, Y0 ) is the centre of the circle
-	// that describes the helix in xy-projection:
-
-	double x0 =  0.5*( x1 + x3 ) + lam * ( -y1 + y3 );
-	double y0 =  0.5*( y1 + y3 ) + lam * (  x1 - x3 );
-
-	// To get phi0 in the right interval one must distinguish
-	// two cases with positve and negative kap:
-
-	double uphi;
-	if( kap > 0 ) uphi = atan2( -x0,  y0 );
-	else          uphi = atan2(  x0, -y0 );
-
-	// The distance of the closest approach DCA depends on the sign
-	// of kappa:
-
-	double udca;
-	if( kap > 0 ) udca = rho - sqrt( x0*x0 + y0*y0 );
-	else          udca = rho + sqrt( x0*x0 + y0*y0 );
-
-	h901->Fill( R2 );
-	h902->Fill( uphi - iTrack->phi() );
-	h903->Fill( udca - iTrack->d0() );
-	h904->Fill( xptch*1E4 );
-	h905->Fill( R2, xptch*1E4 );
-	h906->Fill( z2 );
-
-	// interpolate to hit 2:
-	// cirmov
-	// we already have rinv = -kap
-
-	double cosphi = cos(uphi);
-	double sinphi = sin(uphi);
-	double dp = -x2*sinphi + y2*cosphi + udca;
-	double dl = -x2*cosphi - y2*sinphi;
-	double sa = 2*dp + rinv * ( dp*dp + dl*dl );
-	double dca2 = sa / ( 1 + sqrt(1 + rinv*sa) );// distance to hit 2
-	//double ud = 1 + rinv*udca;
-	//double phi2 = atan2( -rinv*x2 + ud*sinphi, rinv*y2 + ud*cosphi );//direction
-
-	if( pt > 4 ) {
-
-	  h908->Fill( bb/aa );//lever arm
-	  h909->Fill( az );//base length in z
-	  h910->Fill( dca2*1E4 );
-
-	}//pt
-
-	if( pt > 12 ) {
-
-	  h920->Fill( dca2*1E4 );
-
-	  if( hp.trackerLayersWithMeasurement() > 8 ) {
-	    h921->Fill( dca2*1E4 );
-	  }
-
-	}//pt>12
-
-	if( pp > 12 ) {
-
-	  h930->Fill( dca2*1E4 );
-
-	  if(      xptch < 0.0091 ) 
-	    h931->Fill( dca2*1E4 );
-	  else if( xptch < 0.0102 ) 
-	    h932->Fill( dca2*1E4 );
-	  else if( xptch < 0.0113 ) 
-	    h933->Fill( dca2*1E4 );
-	  else if( xptch < 0.0123 ) 
-	    h934->Fill( dca2*1E4 );
-	  else if( xptch < 0.0133 ) 
-	    h935->Fill( dca2*1E4 );
-	  else if( xptch < 0.0144 ) 
-	    h936->Fill( dca2*1E4 );
-	  else if( xptch < 0.0158 ) 
-	    h937->Fill( dca2*1E4 );
-	  else if( xptch < 0.0184 ) 
-	    h938->Fill( dca2*1E4 );
-	  else
-	    h939->Fill( dca2*1E4 );
-	}// p > 12
-
-	// residual profiles: alignment check
-
-	if( pt > 4 ) {
-	  h912->Fill( f2*wt, dca2*1E4 );
-	  h914->Fill( R2, dca2*1E4 );
-	}
-	h916->Fill( logpt, dca2*1E4 );
-	if( iTrack->charge() > 0 ) h918->Fill( logpt, dca2*1E4 );
-	else h919->Fill( logpt, dca2*1E4 );
-
-	// profile of abs(dca) gives mean abs(dca):
-	// mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2) 
-	// => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
-	// point resolution = 1/sqrt(3/2) * triplet middle residual width
-	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
-
-	if( pt > 4 ) {
-
-	  h922->Fill( f2*wt, abs(dca2)*1E4 );
-
-	  h924->Fill( R2, abs(dca2)*1E4 );
-	  h925->Fill( xptch*1E4, abs(dca2)*1E4 );
-
-	  h928->Fill( dip*wt, abs(dca2)*1E4 );
-
-	}//pt
-
-	if( pt > 0.8 && pt < 1.2 ) { // low pt
-	  h929->Fill( f2*wt, abs(dca2)*1E4 );
-	}
-	h926->Fill( logpt, abs(dca2)*1E4 );
-
-      }//TEC wheels
-
-    }//TEC sides
-
-    //------------------------------------------------------------------------
-    // unbiased residuals:
-
-    if( pt > 4 ) {
-
-      // loop over hits on this track:
-
-      for( vector<TransientTrackingRecHit::RecHitPointer>::iterator jTTRH = myTTRHvec.begin();
-	   jTTRH != myTTRHvec.end(); ++jTTRH ) {
-
-	if( ! (*jTTRH)->hit()->isValid() ) continue;
-
-	Surface::GlobalPoint gp = (*jTTRH)->globalPosition();
-
-	Trajectory::RecHitContainer nyTTRHvec; // for fit
-
-	for( vector<TransientTrackingRecHit::RecHitPointer>::iterator iTTRH = myTTRHvec.begin();
-	     iTTRH != myTTRHvec.end(); ++iTTRH ) {
-
-	  if( iTTRH == jTTRH ) continue;//skip hit i
-
-	  nyTTRHvec.push_back( *iTTRH );//copy all others
-
-	}//copy
-
-	// re-fit without hit i:
-
-	std::vector<Trajectory> refitTrajectoryVec2 = theFitter->fit( seed, nyTTRHvec, initialTSOS );
-
-	if( refitTrajectoryVec2.size() > 0 ) { // should be either 0 or 1            
-
-	  const Trajectory& refitTrajectory2 = refitTrajectoryVec2.front();
-
-	  // Trajectory.measurements:
-
-	  const TrajectoryMeasurement closestTM = refitTrajectory2.closestMeasurement( gp );
-
-	  TrajectoryStateOnSurface closestTSOS = closestTM.updatedState();
-
-	  TrajectoryStateOnSurface propTSOS = thePropagator->propagate( closestTSOS, (*jTTRH)->det()->surface() );
-
-	  if( propTSOS.isValid() ){
-
-	    const Topology* theTopology = &( (*jTTRH)->detUnit()->topology() );
-
-	    // MeasurementPoint [pitch] (like channel number)
-
-	    MeasurementPoint hitMeasurement = theTopology->measurementPosition( (*jTTRH)->localPosition() );
-
-	    // TID and TEC have trapezoidal detectors:
-	    // translation from channel number into local x depends on local y
-	    // track prediction has local x,y => can convert into proper channel number MeasurementPoint:
-
-	    MeasurementPoint predictedPosition = theTopology->measurementPosition( propTSOS.localPosition() );
-
-	    double resid = hitMeasurement.x() - predictedPosition.x();//[pitch]
-
-	    DetId detId = (*jTTRH)->hit()->geographicalId();
-	    uint32_t subDet = detId.subdetId();
-
-	    double xptch;
-	    //double yptch;
-
-	    if( subDet <  3 ){//1,2=pixel
-	      PixelTopology & pixelTopol = (PixelTopology&) (*jTTRH)->detUnit()->topology();
-	      xptch = pixelTopol.pitch().first;
-	      //yptch = pixelTopol.pitch().second;
-	    }
-	    else {//strip
-	      StripTopology & stripTopol = (StripTopology&) (*jTTRH)->detUnit()->topology();
-	      xptch = stripTopol.localPitch( propTSOS.localPosition() );
-	      //yptch = stripTopol.localStripLength( propTSOS.localPosition() );
-	    }
-
-	    resid = resid * xptch;//[cm]
-
-	    if( subDet == PixelSubdetector::PixelBarrel ) {
-
-	      if( PXBDetId( detId ).layer() == 1 ) {
-		u110->Fill( resid*1E4 );
-	      }//layer
-
-	      if( PXBDetId( detId ).layer() == 2 ) {
-		u120->Fill( resid*1E4 );
-	      }//layer
-
-	      if( PXBDetId( detId ).layer() == 3 ) {
-		u130->Fill( resid*1E4 );
-	      }//layer
-
-	    }//PXB
-
-	    if( subDet == StripSubdetector::TIB ) {
-
-	      if( TIBDetId( detId ).layer() == 1 && TIBDetId(detId).isRPhi() ) {
-		u310->Fill( resid*1E4 );
-	      }//layer
-
-	      if( TIBDetId( detId ).layer() == 1 && TIBDetId(detId).isStereo() ) {
-		u320->Fill( resid*1E4 );
-	      }//layer
-
-	      if( TIBDetId( detId ).layer() == 2 && TIBDetId(detId).isRPhi() ) {
-		u330->Fill( resid*1E4 );
-	      }//layer
-
-	      if( TIBDetId( detId ).layer() == 2 && TIBDetId(detId).isStereo() ) {
-		u340->Fill( resid*1E4 );
-	      }//layer
-
-	      if( TIBDetId( detId ).layer() == 3 ) {
-		u350->Fill( resid*1E4 );
-	      }//layer
-
-	      if( TIBDetId( detId ).layer() == 4 ) {
-		u360->Fill( resid*1E4 );
-	      }//layer
-
-	    }//TIB
-
-	    if( subDet == StripSubdetector::TID ) {
-
-	      if( TIDDetId(detId).side() == 1 ){
-
-		if( TIDDetId(detId).diskNumber() == 1 ){
-		  if( TIDDetId(detId).isRPhi() ) {
-		    u410->Fill( resid*1E4 );
-		  }
-		  else {
-		    u411->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TIDDetId(detId).diskNumber() == 2 ){
-		  if( TIDDetId(detId).isRPhi() ) {
-		    u412->Fill( resid*1E4 );
-		  }
-		  else {
-		    u413->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TIDDetId(detId).diskNumber() == 3 ){
-		  if( TIDDetId(detId).isRPhi() ) {
-		    u414->Fill( resid*1E4 );
-		  }
-		  else {
-		    u415->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TIDDetId(detId).ringNumber() == 1 ) {
-		  if( TIDDetId(detId).isRPhi() ) {
-		    u430->Fill( resid*1E4 );
-		  }
-		  else {
-		    u431->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TIDDetId(detId).ringNumber() == 2 ) {
-		  if( TIDDetId(detId).isRPhi() ) {
-		    u432->Fill( resid*1E4 );
-		  }
-		  else {
-		    u433->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TIDDetId(detId).ringNumber() == 3 ) {
-		  if( TIDDetId(detId).isRPhi() ) {
-		    u434->Fill( resid*1E4 );
-		  }
-		  else {
-		    u435->Fill( resid*1E4 );
-		  }
-		}
-
-	      }//z side 1
-	      else { // other z side
-
-		if( TIDDetId(detId).diskNumber() == 1 ){
-		  if( TIDDetId(detId).isRPhi() ) {
-		    u420->Fill( resid*1E4 );
-		  }
-		  else {
-		    u421->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TIDDetId(detId).diskNumber() == 2 ){
-		  if( TIDDetId(detId).isRPhi() ) {
-		    u422->Fill( resid*1E4 );
-		  }
-		  else {
-		    u423->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TIDDetId(detId).diskNumber() == 3 ){
-		  if( TIDDetId(detId).isRPhi() ) {
-		    u424->Fill( resid*1E4 );
-		  }
-		  else {
-		    u425->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TIDDetId(detId).ringNumber() == 1 ) {
-		  if( TIDDetId(detId).isRPhi() ) {
-		    u440->Fill( resid*1E4 );
-		  }
-		  else {
-		    u441->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TIDDetId(detId).ringNumber() == 2 ) {
-		  if( TIDDetId(detId).isRPhi() ) {
-		    u442->Fill( resid*1E4 );
-		  }
-		  else {
-		    u443->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TIDDetId(detId).ringNumber() == 3 ) {
-		  if( TIDDetId(detId).isRPhi() ) {
-		    u444->Fill( resid*1E4 );
-		  }
-		  else {
-		    u445->Fill( resid*1E4 );
-		  }
-		}
-	      }// z side
-	    }//TID
-
-	    if( subDet == StripSubdetector::TOB ) {
-
-	      if( TOBDetId( detId ).layer() == 1 && TOBDetId(detId).isRPhi() ) {
-		u510->Fill( resid*1E4 );
-	      }//layer
-
-	      if( TOBDetId( detId ).layer() == 1 && TOBDetId(detId).isStereo() ) {
-		u520->Fill( resid*1E4 );
-	      }//layer
-
-	      if( TOBDetId( detId ).layer() == 2 && TOBDetId(detId).isRPhi() ) {
-		u530->Fill( resid*1E4 );
-	      }//layer
-
-	      if( TOBDetId( detId ).layer() == 2 && TOBDetId(detId).isStereo() ) {
-		u540->Fill( resid*1E4 );
-	      }//layer
-
-	      if( TOBDetId( detId ).layer() == 3 ) {
-		u550->Fill( resid*1E4 );
-	      }//layer
-
-	      if( TOBDetId( detId ).layer() == 4 ) {
-		u560->Fill( resid*1E4 );
-	      }//layer
-
-	      if( TOBDetId( detId ).layer() == 5 ) {
-		u570->Fill( resid*1E4 );
-	      }//layer
-
-	      if( TOBDetId( detId ).layer() == 6 ) {
-		u580->Fill( resid*1E4 );
-	      }//layer
-
-	    }//TOB
-
-	    if( subDet == StripSubdetector::TEC ) {
-
-	      if( TECDetId(detId).side() == 1 ){
-
-		if( TECDetId(detId).wheelNumber() == 1 ){
-		  if( TECDetId(detId).isRPhi() ) {
-		    u610->Fill( resid*1E4 );
-		  }
-		  else {
-		    u611->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).wheelNumber() == 2 ){
-		  if( TECDetId(detId).isRPhi() ) {
-		    u612->Fill( resid*1E4 );
-		  }
-		  else {
-		    u613->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).wheelNumber() == 3 ){
-		  if( TECDetId(detId).isRPhi() ) {
-		    u614->Fill( resid*1E4 );
-		  }
-		  else {
-		    u615->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).wheelNumber() == 4 ){
-		  if( TECDetId(detId).isRPhi() ) {
-		    u616->Fill( resid*1E4 );
-		  }
-		  else {
-		    u617->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).wheelNumber() == 5 ){
-		  if( TECDetId(detId).isRPhi() ) {
-		    u618->Fill( resid*1E4 );
-		  }
-		  else {
-		    u619->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).wheelNumber() == 6 ){
-		  if( TECDetId(detId).isRPhi() ) {
-		    u620->Fill( resid*1E4 );
-		  }
-		  else {
-		    u621->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).wheelNumber() == 7 ){
-		  if( TECDetId(detId).isRPhi() ) {
-		    u622->Fill( resid*1E4 );
-		  }
-		  else {
-		    u623->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).wheelNumber() == 8 ){
-		  if( TECDetId(detId).isRPhi() ) {
-		    u624->Fill( resid*1E4 );
-		  }
-		  else {
-		    u625->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).wheelNumber() == 9 ){
-		  if( TECDetId(detId).isRPhi() ) {
-		    u626->Fill( resid*1E4 );
-		  }
-		  else {
-		    u627->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).ringNumber() == 1 ) {
-		  if( TECDetId(detId).isRPhi() ) {
-		    u630->Fill( resid*1E4 );
-		  }
-		  else {
-		    u631->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).ringNumber() == 2 ) {
-		  if( TECDetId(detId).isRPhi() ) {
-		    u632->Fill( resid*1E4 );
-		  }
-		  else {
-		    u633->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).ringNumber() == 3 ) {
-		  if( TECDetId(detId).isRPhi() ) {
-		    u634->Fill( resid*1E4 );
-		  }
-		  else {
-		    u635->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).ringNumber() == 4 ) {
-		  if( TECDetId(detId).isRPhi() ) {
-		    u636->Fill( resid*1E4 );
-		  }
-		  else {
-		    u637->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).ringNumber() == 5 ) {
-		  if( TECDetId(detId).isRPhi() ) {
-		    u638->Fill( resid*1E4 );
-		  }
-		  else {
-		    u639->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).ringNumber() == 6 ) {
-		  if( TECDetId(detId).isRPhi() ) {
-		    u640->Fill( resid*1E4 );
-		  }
-		  else {
-		    u641->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).ringNumber() == 7 ) {
-		  if( TECDetId(detId).isRPhi() ) {
-		    u642->Fill( resid*1E4 );
-		  }
-		  else {
-		    u643->Fill( resid*1E4 );
-		  }
-		}
-
-	      } // z side 1
-
-	      else { // other z side
-
-		if( TECDetId(detId).wheelNumber() == 1 ){
-		  if( TECDetId(detId).isRPhi() ) {
-		    u650->Fill( resid*1E4 );
-		  }
-		  else {
-		    u651->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).wheelNumber() == 2 ){
-		  if( TECDetId(detId).isRPhi() ) {
-		    u652->Fill( resid*1E4 );
-		  }
-		  else {
-		    u653->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).wheelNumber() == 3 ){
-		  if( TECDetId(detId).isRPhi() ) {
-		    u654->Fill( resid*1E4 );
-		  }
-		  else {
-		    u655->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).wheelNumber() == 4 ){
-		  if( TECDetId(detId).isRPhi() ) {
-		    u656->Fill( resid*1E4 );
-		  }
-		  else {
-		    u657->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).wheelNumber() == 5 ){
-		  if( TECDetId(detId).isRPhi() ) {
-		    u658->Fill( resid*1E4 );
-		  }
-		  else {
-		    u659->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).wheelNumber() == 6 ){
-		  if( TECDetId(detId).isRPhi() ) {
-		    u660->Fill( resid*1E4 );
-		  }
-		  else {
-		    u661->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).wheelNumber() == 7 ){
-		  if( TECDetId(detId).isRPhi() ) {
-		    u662->Fill( resid*1E4 );
-		  }
-		  else {
-		    u663->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).wheelNumber() == 8 ){
-		  if( TECDetId(detId).isRPhi() ) {
-		    u664->Fill( resid*1E4 );
-		  }
-		  else {
-		    u665->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).wheelNumber() == 9 ){
-		  if( TECDetId(detId).isRPhi() ) {
-		    u666->Fill( resid*1E4 );
-		  }
-		  else {
-		    u667->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).ringNumber() == 1 ) {
-		  if( TECDetId(detId).isRPhi() ) {
-		    u670->Fill( resid*1E4 );
-		  }
-		  else {
-		    u671->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).ringNumber() == 2 ) {
-		  if( TECDetId(detId).isRPhi() ) {
-		    u672->Fill( resid*1E4 );
-		  }
-		  else {
-		    u673->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).ringNumber() == 3 ) {
-		  if( TECDetId(detId).isRPhi() ) {
-		    u674->Fill( resid*1E4 );
-		  }
-		  else {
-		    u675->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).ringNumber() == 4 ) {
-		  if( TECDetId(detId).isRPhi() ) {
-		    u676->Fill( resid*1E4 );
-		  }
-		  else {
-		    u677->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).ringNumber() == 5 ) {
-		  if( TECDetId(detId).isRPhi() ) {
-		    u678->Fill( resid*1E4 );
-		  }
-		  else {
-		    u679->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).ringNumber() == 6 ) {
-		  if( TECDetId(detId).isRPhi() ) {
-		    u680->Fill( resid*1E4 );
-		  }
-		  else {
-		    u681->Fill( resid*1E4 );
-		  }
-		}
-
-		if( TECDetId(detId).ringNumber() == 7 ) {
-		  if( TECDetId(detId).isRPhi() ) {
-		    u682->Fill( resid*1E4 );
-		  }
-		  else {
-		    u683->Fill( resid*1E4 );
-		  }
-		}
-
-	      }//side
-
-	    }//TEC
-
-	  }//valid propTSOS
-
-	}//refit2 OK
-
-      }//loop hit i left out in refit for unbiased residual
-
-    }//pt cut
+  //   if( nTIB1*nTIB2*nTIB3 > 0 ) {
+  //
+  //     if( jdbg ) cout << "  TIB triplet 3+1 -> 2\n";
+  //
+  //     double f2 = atan2( yTIB2, xTIB2 );//position angle
+  //
+  //     double ax = xTIB3 - xTIB1;
+  //     double ay = yTIB3 - yTIB1;
+  //     double aa = sqrt( ax*ax + ay*ay ); // from 1 to 3
+  //
+  //     double xmid = 0.5 * ( xTIB1 + xTIB3 );
+  //     double ymid = 0.5 * ( yTIB1 + yTIB3 );
+  //     double bx = xTIB2 - xmid;
+  //     double by = yTIB2 - ymid;
+  //     double bb = sqrt( bx*bx + by*by ); // from mid point to point 2
+  //
+  //     // Calculate the centre of the helix in xy-projection that
+  //     // transverses the two spacepoints. The points with the same
+  //     // distance from the two points are lying on a line.
+  //     // LAMBDA is the distance between the point in the middle of
+  //     // the two spacepoints and the centre of the helix.
+  //
+  //     // we already have kap and rho = 1/kap
+  //
+  //     double lam = sqrt( -0.25 +
+	// 		 rho*rho / ( ( xTIB1 - xTIB3 )*( xTIB1 - xTIB3 ) + ( yTIB1 - yTIB3 )*( yTIB1 - yTIB3 ) ) );
+  //
+  //     // There are two solutions, the sign of kap gives the information
+  //     // which of them is correct:
+  //
+  //     if( kap > 0 ) lam = -lam;
+  //
+  //     // ( X0, Y0 ) is the centre of the circle
+  //     // that describes the helix in xy-projection:
+  //
+  //     double x0 =  0.5*( xTIB1 + xTIB3 ) + lam * ( -yTIB1 + yTIB3 );
+  //     double y0 =  0.5*( yTIB1 + yTIB3 ) + lam * (  xTIB1 - xTIB3 );
+  //
+  //     // To get phi0 in the right interval one must distinguish
+  //     // two cases with positve and negative kap:
+  //
+  //     double uphi;
+  //     if( kap > 0 ) uphi = atan2( -x0,  y0 );
+  //     else          uphi = atan2(  x0, -y0 );
+  //
+  //     // The distance of the closest approach DCA depends on the sign
+  //     // of kappa:
+  //
+  //     double udca;
+  //     if( kap > 0 ) udca = rho - sqrt( x0*x0 + y0*y0 );
+  //     else          udca = rho + sqrt( x0*x0 + y0*y0 );
+  //
+  //     h701->Fill( zTIB2 );
+  //     h702->Fill( uphi - iTrack->phi() );
+  //     h703->Fill( udca - iTrack->d0() );
+  //
+  //     // interpolate to hit 2:
+  //     // cirmov
+  //     // we already have rinv = -kap
+  //
+  //     double cosphi = cos(uphi);
+  //     double sinphi = sin(uphi);
+  //     double dp = -xTIB2*sinphi + yTIB2*cosphi + udca;
+  //     double dl = -xTIB2*cosphi - yTIB2*sinphi;
+  //     double sa = 2*dp + rinv * ( dp*dp + dl*dl );
+  //     double dca2 = sa / ( 1 + sqrt(1 + rinv*sa) );// distance to hit 2
+  //     double ud = 1 + rinv*udca;
+  //     double phi2 = atan2( -rinv*xTIB2 + ud*sinphi, rinv*yTIB2 + ud*cosphi );//direction
+  //
+  //     double phiinc = phi2 - phiNTIB2;//angle of incidence in rphi w.r.t. normal vector
+  //
+  //     // phiN alternates inward/outward
+  //     // reduce phiinc
+  //
+  //     if( phiinc > pihalf ) phiinc -= pi;
+  //     else if( phiinc < -pihalf ) phiinc += pi;
+  //
+  //     if( pt > 4 ) {
+	// h708->Fill( bb/aa );//lever arm
+	// h709->Fill( f2*wt, phiinc*wt );
+	// h710->Fill( dca2*1E4 );
+  //     }
+  //
+  //     if( pt > 12 ) {
+  //
+	// h720->Fill( dca2*1E4 );
+  //
+	// // 2010B: sigma(resid) = 25.6 in TIB2, 33.6 in TIB3
+	// // => sigma(TIB2) = 18.9
+	// // => sigma(TIB3) = 28.8
+  //
+	// if( hp.trackerLayersWithMeasurement() > 8 ) {
+	//   h730->Fill( dca2*1E4 );
+	// }
+  //
+	// if( phiinc*wt > -1 && phiinc*wt < 7 ){
+	//   h740->Fill( dca2*1E4 );
+	// }
+  //
+  //     }//pt>12
+  //
+  //     // residual profiles: alignment check
+  //
+  //     if( pt > 4 ) {
+	// h712->Fill( f2*wt, dca2*1E4 );
+	// h714->Fill( zTIB2, dca2*1E4 );
+  //     }
+  //     h716->Fill( logpt, dca2*1E4 );
+  //     if( iTrack->charge() > 0 ) h718->Fill( logpt, dca2*1E4 );
+  //     else h719->Fill( logpt, dca2*1E4 );
+  //
+  //     // profile of abs(dca) gives mean abs(dca):
+  //     // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
+  //     // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
+  //     // point resolution = 1/sqrt(3/2) * triplet middle residual width
+  //     // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
+  //
+  //     if( pt > 4 ) {
+  //
+	// h722->Fill( f2*wt, abs(dca2)*1E4 );
+  //
+	// h724->Fill( zTIB2, abs(dca2)*1E4 );
+  //
+	// h728->Fill( dip*wt, abs(dca2)*1E4 );
+  //
+	// h734->Fill( phiinc*wt, abs(dca2)*1E4 );
+  //
+  //     }//pt
+  //
+  //     if( pt > 0.8 && pt < 1.2 ) { // low pt
+	// h735->Fill( f2*wt, abs(dca2)*1E4 );
+  //     }
+  //     h726->Fill( logpt, abs(dca2)*1E4 );
+  //
+  //   }//TIB 1,2,3
+  //
+  //   //------------------------------------------------------------------------
+  //   // TIB triplet 2+4 -> 3:
+  //
+  //   if( nTIB2*nTIB3*nTIB4 > 0 ) {
+  //
+  //     if( jdbg ) cout << "  TIB triplet 4+2 -> 3\n";
+  //
+  //     double f3 = atan2( yTIB3, xTIB3 );//position angle
+  //
+  //     double ax = xTIB4 - xTIB2;
+  //     double ay = yTIB4 - yTIB2;
+  //     double aa = sqrt( ax*ax + ay*ay ); // from 2 to 4
+  //
+  //     double xmid = 0.5 * ( xTIB2 + xTIB4 );
+  //     double ymid = 0.5 * ( yTIB2 + yTIB4 );
+  //     double bx = xTIB3 - xmid;
+  //     double by = yTIB3 - ymid;
+  //     double bb = sqrt( bx*bx + by*by ); // from mid point to point 3
+  //
+  //     // Calculate the centre of the helix in xy-projection that
+  //     // transverses the two spacepoints. The points with the same
+  //     // distance from the two points are lying on a line.
+  //     // LAMBDA is the distance between the point in the middle of
+  //     // the two spacepoints and the centre of the helix.
+  //
+  //     // we already have kap and rho = 1/kap
+  //
+  //     double lam = sqrt( -0.25 +
+	// 		 rho*rho / ( ( xTIB2 - xTIB4 )*( xTIB2 - xTIB4 ) + ( yTIB2 - yTIB4 )*( yTIB2 - yTIB4 ) ) );
+  //
+  //     // There are two solutions, the sign of kap gives the information
+  //     // which of them is correct:
+  //
+  //     if( kap > 0 ) lam = -lam;
+  //
+  //     // ( X0, Y0 ) is the centre of the circle
+  //     // that describes the helix in xy-projection:
+  //
+  //     double x0 =  0.5*( xTIB2 + xTIB4 ) + lam * ( -yTIB2 + yTIB4 );
+  //     double y0 =  0.5*( yTIB2 + yTIB4 ) + lam * (  xTIB2 - xTIB4 );
+  //
+  //     // To get phi0 in the right interval one must distinguish
+  //     // two cases with positve and negative kap:
+  //
+  //     double uphi;
+  //     if( kap > 0 ) uphi = atan2( -x0,  y0 );
+  //     else          uphi = atan2(  x0, -y0 );
+  //
+  //     // The distance of the closest approach DCA depends on the sign
+  //     // of kappa:
+  //
+  //     double udca;
+  //     if( kap > 0 ) udca = rho - sqrt( x0*x0 + y0*y0 );
+  //     else          udca = rho + sqrt( x0*x0 + y0*y0 );
+  //
+  //     h751->Fill( zTIB2 );
+  //     h752->Fill( uphi - iTrack->phi() );
+  //     h753->Fill( udca - iTrack->d0() );
+  //
+  //     // interpolate to hit 2:
+  //     // cirmov
+  //     // we already have rinv = -kap
+  //
+  //     double cosphi = cos(uphi);
+  //     double sinphi = sin(uphi);
+  //     double dp = -xTIB3*sinphi + yTIB3*cosphi + udca;
+  //     double dl = -xTIB3*cosphi - yTIB3*sinphi;
+  //     double sa = 2*dp + rinv * ( dp*dp + dl*dl );
+  //     double dca3 = sa / ( 1 + sqrt(1 + rinv*sa) );// distance to hit 2
+  //     double ud = 1 + rinv*udca;
+  //     double phi3 = atan2( -rinv*xTIB3 + ud*sinphi, rinv*yTIB3 + ud*cosphi );//direction
+  //
+  //     double phiinc = phi3 - phiNTIB3;//angle of incidence in rphi w.r.t. normal vector
+  //
+  //     // phiN alternates inward/outward
+  //     // reduce phiinc
+  //
+  //     if( phiinc > pihalf ) phiinc -= pi;
+  //     else if( phiinc < -pihalf ) phiinc += pi;
+  //
+  //     if( pt > 4 ) {
+	// h758->Fill( bb/aa );//lever arm
+	// h759->Fill( f3*wt, phiinc*wt );
+	// h760->Fill( dca3*1E4 );
+  //     }
+  //
+  //     if( pt > 12 ) {
+  //
+	// h770->Fill( dca3*1E4 );
+  //
+	// if( hp.trackerLayersWithMeasurement() > 8 ) {
+	//   h780->Fill( dca3*1E4 );
+	// }
+  //
+	// if( phiinc*wt > -1 && phiinc*wt < 7 ){
+	//   h790->Fill( dca3*1E4 );
+	// }
+  //
+  //     }//pt>12
+  //
+  //     // residual profiles: alignment check
+  //
+  //     if( pt > 4 ) {
+	// h762->Fill( f3*wt, dca3*1E4 );
+	// h764->Fill( zTIB3, dca3*1E4 );
+  //     }
+  //     h766->Fill( logpt, dca3*1E4 );
+  //     if( iTrack->charge() > 0 ) h768->Fill( logpt, dca3*1E4 );
+  //     else h769->Fill( logpt, dca3*1E4 );
+  //
+  //     // profile of abs(dca) gives mean abs(dca):
+  //     // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
+  //     // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
+  //     // point resolution = 1/sqrt(3/2) * triplet middle residual width
+  //     // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
+  //
+  //     if( pt > 4 ) {
+  //
+	// h772->Fill( f3*wt, abs(dca3)*1E4 );
+  //
+	// h774->Fill( zTIB3, abs(dca3)*1E4 );
+  //
+	// h778->Fill( dip*wt, abs(dca3)*1E4 );
+  //
+	// h784->Fill( phiinc*wt, abs(dca3)*1E4 );
+  //
+  //     }//pt
+  //
+  //     if( pt > 0.8 && pt < 1.2 ) { // low pt
+	// h785->Fill( f3*wt, abs(dca3)*1E4 );
+  //     }
+  //     h776->Fill( logpt, abs(dca3)*1E4 );
+  //
+  //   }//TIB 2,3,4
+  //
+  //   //------------------------------------------------------------------------
+  //   // TOB triplet 3+5 -> 4:
+  //
+  //   if( nTOB3*nTOB4*nTOB5 > 0 ) {
+  //
+  //     if( jdbg ) cout << "  TOB triplet 5+3 -> 4\n";
+  //
+  //     double f4 = atan2( yTOB4, xTOB4 );//position angle
+  //
+  //     double ax = xTOB5 - xTOB3;
+  //     double ay = yTOB5 - yTOB3;
+  //     double aa = sqrt( ax*ax + ay*ay ); // from 3 to 5
+  //
+  //     double xmid = 0.5 * ( xTOB3 + xTOB5 );
+  //     double ymid = 0.5 * ( yTOB3 + yTOB5 );
+  //     double bx = xTOB4 - xmid;
+  //     double by = yTOB4 - ymid;
+  //     double bb = sqrt( bx*bx + by*by ); // from mid point to point 4
+  //
+  //     // Calculate the centre of the helix in xy-projection that
+  //     // transverses the two spacepoints. The points with the same
+  //     // distance from the two points are lying on a line.
+  //     // LAMBDA is the distance between the point in the middle of
+  //     // the two spacepoints and the centre of the helix.
+  //
+  //     // we already have kap and rho = 1/kap
+  //
+  //     double lam = sqrt( -0.25 +
+	// 		 rho*rho / ( ( xTOB3 - xTOB5 )*( xTOB3 - xTOB5 ) + ( yTOB3 - yTOB5 )*( yTOB3 - yTOB5 ) ) );
+  //
+  //     // There are two solutions, the sign of kap gives the information
+  //     // which of them is correct:
+  //
+  //     if( kap > 0 ) lam = -lam;
+  //
+  //     // ( X0, Y0 ) is the centre of the circle
+  //     // that describes the helix in xy-projection:
+  //
+  //     double x0 =  0.5*( xTOB3 + xTOB5 ) + lam * ( -yTOB3 + yTOB5 );
+  //     double y0 =  0.5*( yTOB3 + yTOB5 ) + lam * (  xTOB3 - xTOB5 );
+  //
+  //     // To get phi0 in the right interval one must distinguish
+  //     // two cases with positve and negative kap:
+  //
+  //     double uphi;
+  //     if( kap > 0 ) uphi = atan2( -x0,  y0 );
+  //     else          uphi = atan2(  x0, -y0 );
+  //
+  //     // The distance of the closest approach DCA depends on the sign
+  //     // of kappa:
+  //
+  //     double udca;
+  //     if( kap > 0 ) udca = rho - sqrt( x0*x0 + y0*y0 );
+  //     else          udca = rho + sqrt( x0*x0 + y0*y0 );
+  //
+  //     h801->Fill( zTOB4 );
+  //     h802->Fill( uphi - iTrack->phi() );
+  //     h803->Fill( udca - iTrack->d0() );
+  //
+  //     // interpolate to hit 2:
+  //     // cirmov
+  //     // we already have rinv = -kap
+  //
+  //     double cosphi = cos(uphi);
+  //     double sinphi = sin(uphi);
+  //     double dp = -xTOB4*sinphi + yTOB4*cosphi + udca;
+  //     double dl = -xTOB4*cosphi - yTOB4*sinphi;
+  //     double sa = 2*dp + rinv * ( dp*dp + dl*dl );
+  //     double dca2 = sa / ( 1 + sqrt(1 + rinv*sa) );// distance to hit 2
+  //     double ud = 1 + rinv*udca;
+  //     double phi2 = atan2( -rinv*xTOB4 + ud*sinphi, rinv*yTOB4 + ud*cosphi );//direction
+  //
+  //     double phiinc = phi2 - phiNTOB4;//angle of incidence in rphi w.r.t. normal vector
+  //
+  //     // phiN alternates inward/outward
+  //     // reduce phiinc
+  //
+  //     if( phiinc > pihalf ) phiinc -= pi;
+  //     else if( phiinc < -pihalf ) phiinc += pi;
+  //
+  //     if( pt > 4 ) {
+	// h808->Fill( bb/aa );//lever arm
+	// h809->Fill( f4*wt, phiinc*wt );
+	// h810->Fill( dca2*1E4 );
+  //     }
+  //
+  //     if( pt > 12 ) {
+  //
+	// h820->Fill( dca2*1E4 );
+  //
+	// // 2010B: sigma(resid) = 50.3 in TOB4, 39.0 in TOB5
+	// // => sigma(TOB4) = 43.0
+	// // => sigma(TOB4) = 29.1
+  //
+	// if( hp.trackerLayersWithMeasurement() > 8 ) {
+	//   h830->Fill( dca2*1E4 );
+	// }
+  //
+	// if( phiinc*wt > -1 && phiinc*wt < 7 ){
+	//   h840->Fill( dca2*1E4 );
+	// }
+  //
+  //     }//pt>12
+  //
+  //     // residual profiles: alignment check
+  //
+  //     if( pt > 4 ) {
+	// h812->Fill( f4*wt, dca2*1E4 );
+	// h814->Fill( zTOB4, dca2*1E4 );
+  //     }
+  //     h816->Fill( logpt, dca2*1E4 );
+  //     if( iTrack->charge() > 0 ) h818->Fill( logpt, dca2*1E4 );
+  //     else h819->Fill( logpt, dca2*1E4 );
+  //
+  //     // profile of abs(dca) gives mean abs(dca):
+  //     // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
+  //     // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
+  //     // point resolution = 1/sqrt(3/2) * triplet middle residual width
+  //     // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
+  //
+  //     if( pt > 4 ) {
+  //
+	// h822->Fill( f4*wt, abs(dca2)*1E4 );
+  //
+	// h824->Fill( zTOB4, abs(dca2)*1E4 );
+  //
+	// h828->Fill( dip*wt, abs(dca2)*1E4 );
+  //
+	// h834->Fill( phiinc*wt, abs(dca2)*1E4 );
+  //
+  //     }//pt
+  //
+  //     if( pt > 0.8 && pt < 1.2 ) { // low pt
+	// h835->Fill( f4*wt, abs(dca2)*1E4 );
+  //     }
+  //     h826->Fill( logpt, abs(dca2)*1E4 );
+  //
+  //   }//TOB 1,2,3
+  //
+  //   //------------------------------------------------------------------------
+  //   // TOB triplet 4+6 -> 5:
+  //
+  //   if( nTOB4*nTOB5*nTOB6 > 0 ) {
+  //
+  //     if( jdbg ) cout << "  TOB triplet 6+4 -> 5\n";
+  //
+  //     double f5 = atan2( yTOB5, xTOB5 );//position angle
+  //
+  //     double ax = xTOB6 - xTOB4;
+  //     double ay = yTOB6 - yTOB4;
+  //     double aa = sqrt( ax*ax + ay*ay ); // from 4 to 6
+  //
+  //     double xmid = 0.5 * ( xTOB4 + xTOB6 );
+  //     double ymid = 0.5 * ( yTOB4 + yTOB6 );
+  //     double bx = xTOB5 - xmid;
+  //     double by = yTOB5 - ymid;
+  //     double bb = sqrt( bx*bx + by*by ); // from mid point to point 5
+  //
+  //     // Calculate the centre of the helix in xy-projection that
+  //     // transverses the two spacepoints. The points with the same
+  //     // distance from the two points are lying on a line.
+  //     // LAMBDA is the distance between the point in the middle of
+  //     // the two spacepoints and the centre of the helix.
+  //
+  //     // we already have kap and rho = 1/kap
+  //
+  //     double lam = sqrt( -0.25 +
+	// 		 rho*rho / ( ( xTOB4 - xTOB6 )*( xTOB4 - xTOB6 ) + ( yTOB4 - yTOB6 )*( yTOB4 - yTOB6 ) ) );
+  //
+  //     // There are two solutions, the sign of kap gives the information
+  //     // which of them is correct:
+  //
+  //     if( kap > 0 ) lam = -lam;
+  //
+  //     // ( X0, Y0 ) is the centre of the circle
+  //     // that describes the helix in xy-projection:
+  //
+  //     double x0 =  0.5*( xTOB4 + xTOB6 ) + lam * ( -yTOB4 + yTOB6 );
+  //     double y0 =  0.5*( yTOB4 + yTOB6 ) + lam * (  xTOB4 - xTOB6 );
+  //
+  //     // To get phi0 in the right interval one must distinguish
+  //     // two cases with positve and negative kap:
+  //
+  //     double uphi;
+  //     if( kap > 0 ) uphi = atan2( -x0,  y0 );
+  //     else          uphi = atan2(  x0, -y0 );
+  //
+  //     // The distance of the closest approach DCA depends on the sign
+  //     // of kappa:
+  //
+  //     double udca;
+  //     if( kap > 0 ) udca = rho - sqrt( x0*x0 + y0*y0 );
+  //     else          udca = rho + sqrt( x0*x0 + y0*y0 );
+  //
+  //     h851->Fill( zTOB4 );
+  //     h852->Fill( uphi - iTrack->phi() );
+  //     h853->Fill( udca - iTrack->d0() );
+  //
+  //     // interpolate to hit 2:
+  //     // cirmov
+  //     // we already have rinv = -kap
+  //
+  //     double cosphi = cos(uphi);
+  //     double sinphi = sin(uphi);
+  //     double dp = -xTOB5*sinphi + yTOB5*cosphi + udca;
+  //     double dl = -xTOB5*cosphi - yTOB5*sinphi;
+  //     double sa = 2*dp + rinv * ( dp*dp + dl*dl );
+  //     double dca3 = sa / ( 1 + sqrt(1 + rinv*sa) );// distance to hit 2
+  //     double ud = 1 + rinv*udca;
+  //     double phi3 = atan2( -rinv*xTOB5 + ud*sinphi, rinv*yTOB5 + ud*cosphi );//direction
+  //
+  //     double phiinc = phi3 - phiNTOB5;//angle of incidence in rphi w.r.t. normal vector
+  //
+  //     // phiN alternates inward/outward
+  //     // reduce phiinc:
+  //
+  //     if( phiinc > pihalf ) phiinc -= pi;
+  //     else if( phiinc < -pihalf ) phiinc += pi;
+  //
+  //     if( pt > 4 ) {
+	// h858->Fill( bb/aa );//lever arm
+	// h859->Fill( f5*wt, phiinc*wt );
+	// h860->Fill( dca3*1E4 );
+  //     }
+  //
+  //     if( pt > 12 ) {
+  //
+	// h870->Fill( dca3*1E4 );
+  //
+	// if( hp.trackerLayersWithMeasurement() > 8 ) {
+	//   h880->Fill( dca3*1E4 );
+	// }
+  //
+	// if( phiinc*wt > -1 && phiinc*wt < 7 ){
+	//   h890->Fill( dca3*1E4 );
+	// }
+  //
+  //     }//pt>12
+  //
+  //     // residual profiles: alignment check
+  //
+  //     if( pt > 4 ) {
+	// h862->Fill( f5*wt, dca3*1E4 );
+	// h864->Fill( zTOB5, dca3*1E4 );
+  //     }
+  //     h866->Fill( logpt, dca3*1E4 );
+  //     if( iTrack->charge() > 0 ) h868->Fill( logpt, dca3*1E4 );
+  //     else h869->Fill( logpt, dca3*1E4 );
+  //
+  //     // profile of abs(dca) gives mean abs(dca):
+  //     // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
+  //     // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
+  //     // point resolution = 1/sqrt(3/2) * triplet middle residual width
+  //     // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
+  //
+  //     if( pt > 4 ) {
+  //
+	// h872->Fill( f5*wt, abs(dca3)*1E4 );
+  //
+	// h874->Fill( zTOB5, abs(dca3)*1E4 );
+  //
+	// h878->Fill( dip*wt, abs(dca3)*1E4 );
+  //
+	// h884->Fill( phiinc*wt, abs(dca3)*1E4 );
+  //
+  //     }//pt
+  //
+  //     if( pt > 0.8 && pt < 1.2 ) { // low pt
+	// h885->Fill( f5*wt, abs(dca3)*1E4 );
+  //     }
+  //     h876->Fill( logpt, abs(dca3)*1E4 );
+  //
+  //   }//TOB 2,3,4
+  //
+  //   //------------------------------------------------------------------------
+  //   // TEC: 2 sides, 9 wheels
+  //
+  //   for( int is = 1; is < 3; ++is ){
+  //
+  //     for( int i2 = 2; i2 < 9; ++i2 ){//middle plane = wheels 2..8
+  //
+	// if( nTEC[is][i2] == 0 ) continue;
+  //
+	// int i1 = i2 - 1;
+	// if( nTEC[is][i1] == 0 ) continue;
+  //
+	// int i3 = i2 + 1;
+	// if( nTEC[is][i3] == 0 ) continue;
+  //
+	// if( jdbg ) cout << "  TEC side " << is << " triplet " << i2 << endl;
+  //
+	// double x1 = xTEC[is][i1];
+	// double y1 = yTEC[is][i1];
+	// double z1 = zTEC[is][i1];
+	// //DetId detId1 = detTEC[is][i1];
+  //
+	// double x2 = xTEC[is][i2];
+	// double y2 = yTEC[is][i2];
+	// double z2 = zTEC[is][i2];
+	// DetId detId2 = detTEC[is][i2];
+  //
+	// const GeomDet * myGeomDet = pTG->idToDet( detId2 );
+	// Surface::GlobalPoint gp = Surface::GlobalPoint(x2,y2,z2);
+	// Surface::LocalPoint lp = myGeomDet->toLocal( gp );
+  //
+	// const GeomDetUnit * myGeomDetUnit = pTG->idToDetUnit( detId2 );
+	// StripTopology & stripTopol = (StripTopology&) myGeomDetUnit->topology();
+	// double xptch = stripTopol.localPitch( lp );
+  //
+	// double x3 = xTEC[is][i3];
+	// double y3 = yTEC[is][i3];
+	// double z3 = zTEC[is][i3];
+	// //DetId detId3 = detTEC[is][i3];
+  //
+	// double f2 = atan2( y2, x2 );//position angle
+	// double R2 = sqrt( x2*x2 + y2*y2 );
+  //
+	// double ax = x3 - x1;
+	// double ay = y3 - y1;
+	// double aa = sqrt( ax*ax + ay*ay ); // from 1 to 3
+	// double az = z3 - z1;
+  //
+	// double xmid = 0.5 * ( x1 + x3 );
+	// double ymid = 0.5 * ( y1 + y3 );
+	// double bx = x2 - xmid;
+	// double by = y2 - ymid;
+	// double bb = sqrt( bx*bx + by*by ); // from mid point to point 2
+  //
+	// // Calculate the centre of the helix in xy-projection that
+	// // transverses the two spacepoints. The points with the same
+	// // distance from the two points are lying on a line.
+	// // LAMBDA is the distance between the point in the middle of
+	// // the two spacepoints and the centre of the helix.
+  //
+	// // we already have kap and rho = 1/kap
+  //
+	// double lam = sqrt( -0.25 +
+	// 		   rho*rho / ( ( x1 - x3 )*( x1 - x3 ) + ( y1 - y3 )*( y1 - y3 ) ) );
+  //
+	// // There are two solutions, the sign of kap gives the information
+	// // which of them is correct:
+  //
+	// if( kap > 0 ) lam = -lam;
+  //
+	// // ( X0, Y0 ) is the centre of the circle
+	// // that describes the helix in xy-projection:
+  //
+	// double x0 =  0.5*( x1 + x3 ) + lam * ( -y1 + y3 );
+	// double y0 =  0.5*( y1 + y3 ) + lam * (  x1 - x3 );
+  //
+	// // To get phi0 in the right interval one must distinguish
+	// // two cases with positve and negative kap:
+  //
+	// double uphi;
+	// if( kap > 0 ) uphi = atan2( -x0,  y0 );
+	// else          uphi = atan2(  x0, -y0 );
+  //
+	// // The distance of the closest approach DCA depends on the sign
+	// // of kappa:
+  //
+	// double udca;
+	// if( kap > 0 ) udca = rho - sqrt( x0*x0 + y0*y0 );
+	// else          udca = rho + sqrt( x0*x0 + y0*y0 );
+  //
+	// h901->Fill( R2 );
+	// h902->Fill( uphi - iTrack->phi() );
+	// h903->Fill( udca - iTrack->d0() );
+	// h904->Fill( xptch*1E4 );
+	// h905->Fill( R2, xptch*1E4 );
+	// h906->Fill( z2 );
+  //
+	// // interpolate to hit 2:
+	// // cirmov
+	// // we already have rinv = -kap
+  //
+	// double cosphi = cos(uphi);
+	// double sinphi = sin(uphi);
+	// double dp = -x2*sinphi + y2*cosphi + udca;
+	// double dl = -x2*cosphi - y2*sinphi;
+	// double sa = 2*dp + rinv * ( dp*dp + dl*dl );
+	// double dca2 = sa / ( 1 + sqrt(1 + rinv*sa) );// distance to hit 2
+	// //double ud = 1 + rinv*udca;
+	// //double phi2 = atan2( -rinv*x2 + ud*sinphi, rinv*y2 + ud*cosphi );//direction
+  //
+	// if( pt > 4 ) {
+  //
+	//   h908->Fill( bb/aa );//lever arm
+	//   h909->Fill( az );//base length in z
+	//   h910->Fill( dca2*1E4 );
+  //
+	// }//pt
+  //
+	// if( pt > 12 ) {
+  //
+	//   h920->Fill( dca2*1E4 );
+  //
+	//   if( hp.trackerLayersWithMeasurement() > 8 ) {
+	//     h921->Fill( dca2*1E4 );
+	//   }
+  //
+	// }//pt>12
+  //
+	// if( pp > 12 ) {
+  //
+	//   h930->Fill( dca2*1E4 );
+  //
+	//   if(      xptch < 0.0091 )
+	//     h931->Fill( dca2*1E4 );
+	//   else if( xptch < 0.0102 )
+	//     h932->Fill( dca2*1E4 );
+	//   else if( xptch < 0.0113 )
+	//     h933->Fill( dca2*1E4 );
+	//   else if( xptch < 0.0123 )
+	//     h934->Fill( dca2*1E4 );
+	//   else if( xptch < 0.0133 )
+	//     h935->Fill( dca2*1E4 );
+	//   else if( xptch < 0.0144 )
+	//     h936->Fill( dca2*1E4 );
+	//   else if( xptch < 0.0158 )
+	//     h937->Fill( dca2*1E4 );
+	//   else if( xptch < 0.0184 )
+	//     h938->Fill( dca2*1E4 );
+	//   else
+	//     h939->Fill( dca2*1E4 );
+	// }// p > 12
+  //
+	// // residual profiles: alignment check
+  //
+	// if( pt > 4 ) {
+	//   h912->Fill( f2*wt, dca2*1E4 );
+	//   h914->Fill( R2, dca2*1E4 );
+	// }
+	// h916->Fill( logpt, dca2*1E4 );
+	// if( iTrack->charge() > 0 ) h918->Fill( logpt, dca2*1E4 );
+	// else h919->Fill( logpt, dca2*1E4 );
+  //
+	// // profile of abs(dca) gives mean abs(dca):
+	// // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
+	// // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
+	// // point resolution = 1/sqrt(3/2) * triplet middle residual width
+	// // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
+  //
+	// if( pt > 4 ) {
+  //
+	//   h922->Fill( f2*wt, abs(dca2)*1E4 );
+  //
+	//   h924->Fill( R2, abs(dca2)*1E4 );
+	//   h925->Fill( xptch*1E4, abs(dca2)*1E4 );
+  //
+	//   h928->Fill( dip*wt, abs(dca2)*1E4 );
+  //
+	// }//pt
+  //
+	// if( pt > 0.8 && pt < 1.2 ) { // low pt
+	//   h929->Fill( f2*wt, abs(dca2)*1E4 );
+	// }
+	// h926->Fill( logpt, abs(dca2)*1E4 );
+  //
+  //     }//TEC wheels
+  //
+  //   }//TEC sides
+  //
+  //   //------------------------------------------------------------------------
+  //   // unbiased residuals:
+  //
+  //   if( pt > 4 ) {
+  //
+  //     // loop over hits on this track:
+  //
+  //     for( vector<TransientTrackingRecHit::RecHitPointer>::iterator jTTRH = myTTRHvec.begin();
+	//    jTTRH != myTTRHvec.end(); ++jTTRH ) {
+  //
+	// if( ! (*jTTRH)->hit()->isValid() ) continue;
+  //
+	// Surface::GlobalPoint gp = (*jTTRH)->globalPosition();
+  //
+	// Trajectory::RecHitContainer nyTTRHvec; // for fit
+  //
+	// for( vector<TransientTrackingRecHit::RecHitPointer>::iterator iTTRH = myTTRHvec.begin();
+	//      iTTRH != myTTRHvec.end(); ++iTTRH ) {
+  //
+	//   if( iTTRH == jTTRH ) continue;//skip hit i
+  //
+	//   nyTTRHvec.push_back( *iTTRH );//copy all others
+  //
+	// }//copy
+  //
+	// // re-fit without hit i:
+  //
+	// std::vector<Trajectory> refitTrajectoryVec2 = theFitter->fit( seed, nyTTRHvec, initialTSOS );
+  //
+	// if( refitTrajectoryVec2.size() > 0 ) { // should be either 0 or 1
+  //
+	//   const Trajectory& refitTrajectory2 = refitTrajectoryVec2.front();
+  //
+	//   // Trajectory.measurements:
+  //
+	//   const TrajectoryMeasurement closestTM = refitTrajectory2.closestMeasurement( gp );
+  //
+	//   TrajectoryStateOnSurface closestTSOS = closestTM.updatedState();
+  //
+	//   TrajectoryStateOnSurface propTSOS = thePropagator->propagate( closestTSOS, (*jTTRH)->det()->surface() );
+  //
+	//   if( propTSOS.isValid() ){
+  //
+	//     const Topology* theTopology = &( (*jTTRH)->detUnit()->topology() );
+  //
+	//     // MeasurementPoint [pitch] (like channel number)
+  //
+	//     MeasurementPoint hitMeasurement = theTopology->measurementPosition( (*jTTRH)->localPosition() );
+  //
+	//     // TID and TEC have trapezoidal detectors:
+	//     // translation from channel number into local x depends on local y
+	//     // track prediction has local x,y => can convert into proper channel number MeasurementPoint:
+  //
+	//     MeasurementPoint predictedPosition = theTopology->measurementPosition( propTSOS.localPosition() );
+  //
+	//     double resid = hitMeasurement.x() - predictedPosition.x();//[pitch]
+  //
+	//     DetId detId = (*jTTRH)->hit()->geographicalId();
+	//     uint32_t subDet = detId.subdetId();
+  //
+	//     double xptch;
+	//     //double yptch;
+  //
+	//     if( subDet <  3 ){//1,2=pixel
+	//       PixelTopology & pixelTopol = (PixelTopology&) (*jTTRH)->detUnit()->topology();
+	//       xptch = pixelTopol.pitch().first;
+	//       //yptch = pixelTopol.pitch().second;
+	//     }
+	//     else {//strip
+	//       StripTopology & stripTopol = (StripTopology&) (*jTTRH)->detUnit()->topology();
+	//       xptch = stripTopol.localPitch( propTSOS.localPosition() );
+	//       //yptch = stripTopol.localStripLength( propTSOS.localPosition() );
+	//     }
+  //
+	//     resid = resid * xptch;//[cm]
+  //
+	//     if( subDet == PixelSubdetector::PixelBarrel ) {
+  //
+	//       if( PXBDetId( detId ).layer() == 1 ) {
+	// 	u110->Fill( resid*1E4 );
+	//       }//layer
+  //
+	//       if( PXBDetId( detId ).layer() == 2 ) {
+	// 	u120->Fill( resid*1E4 );
+	//       }//layer
+  //
+	//       if( PXBDetId( detId ).layer() == 3 ) {
+	// 	u130->Fill( resid*1E4 );
+	//       }//layer
+  //
+	//     }//PXB
+  //
+	//     if( subDet == StripSubdetector::TIB ) {
+  //
+	//       if( TIBDetId( detId ).layer() == 1 && TIBDetId(detId).isRPhi() ) {
+	// 	u310->Fill( resid*1E4 );
+	//       }//layer
+  //
+	//       if( TIBDetId( detId ).layer() == 1 && TIBDetId(detId).isStereo() ) {
+	// 	u320->Fill( resid*1E4 );
+	//       }//layer
+  //
+	//       if( TIBDetId( detId ).layer() == 2 && TIBDetId(detId).isRPhi() ) {
+	// 	u330->Fill( resid*1E4 );
+	//       }//layer
+  //
+	//       if( TIBDetId( detId ).layer() == 2 && TIBDetId(detId).isStereo() ) {
+	// 	u340->Fill( resid*1E4 );
+	//       }//layer
+  //
+	//       if( TIBDetId( detId ).layer() == 3 ) {
+	// 	u350->Fill( resid*1E4 );
+	//       }//layer
+  //
+	//       if( TIBDetId( detId ).layer() == 4 ) {
+	// 	u360->Fill( resid*1E4 );
+	//       }//layer
+  //
+	//     }//TIB
+  //
+	//     if( subDet == StripSubdetector::TID ) {
+  //
+	//       if( TIDDetId(detId).side() == 1 ){
+  //
+	// 	if( TIDDetId(detId).diskNumber() == 1 ){
+	// 	  if( TIDDetId(detId).isRPhi() ) {
+	// 	    u410->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u411->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TIDDetId(detId).diskNumber() == 2 ){
+	// 	  if( TIDDetId(detId).isRPhi() ) {
+	// 	    u412->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u413->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TIDDetId(detId).diskNumber() == 3 ){
+	// 	  if( TIDDetId(detId).isRPhi() ) {
+	// 	    u414->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u415->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TIDDetId(detId).ringNumber() == 1 ) {
+	// 	  if( TIDDetId(detId).isRPhi() ) {
+	// 	    u430->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u431->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TIDDetId(detId).ringNumber() == 2 ) {
+	// 	  if( TIDDetId(detId).isRPhi() ) {
+	// 	    u432->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u433->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TIDDetId(detId).ringNumber() == 3 ) {
+	// 	  if( TIDDetId(detId).isRPhi() ) {
+	// 	    u434->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u435->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	//       }//z side 1
+	//       else { // other z side
+  //
+	// 	if( TIDDetId(detId).diskNumber() == 1 ){
+	// 	  if( TIDDetId(detId).isRPhi() ) {
+	// 	    u420->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u421->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TIDDetId(detId).diskNumber() == 2 ){
+	// 	  if( TIDDetId(detId).isRPhi() ) {
+	// 	    u422->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u423->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TIDDetId(detId).diskNumber() == 3 ){
+	// 	  if( TIDDetId(detId).isRPhi() ) {
+	// 	    u424->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u425->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TIDDetId(detId).ringNumber() == 1 ) {
+	// 	  if( TIDDetId(detId).isRPhi() ) {
+	// 	    u440->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u441->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TIDDetId(detId).ringNumber() == 2 ) {
+	// 	  if( TIDDetId(detId).isRPhi() ) {
+	// 	    u442->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u443->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TIDDetId(detId).ringNumber() == 3 ) {
+	// 	  if( TIDDetId(detId).isRPhi() ) {
+	// 	    u444->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u445->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+	//       }// z side
+	//     }//TID
+  //
+	//     if( subDet == StripSubdetector::TOB ) {
+  //
+	//       if( TOBDetId( detId ).layer() == 1 && TOBDetId(detId).isRPhi() ) {
+	// 	u510->Fill( resid*1E4 );
+	//       }//layer
+  //
+	//       if( TOBDetId( detId ).layer() == 1 && TOBDetId(detId).isStereo() ) {
+	// 	u520->Fill( resid*1E4 );
+	//       }//layer
+  //
+	//       if( TOBDetId( detId ).layer() == 2 && TOBDetId(detId).isRPhi() ) {
+	// 	u530->Fill( resid*1E4 );
+	//       }//layer
+  //
+	//       if( TOBDetId( detId ).layer() == 2 && TOBDetId(detId).isStereo() ) {
+	// 	u540->Fill( resid*1E4 );
+	//       }//layer
+  //
+	//       if( TOBDetId( detId ).layer() == 3 ) {
+	// 	u550->Fill( resid*1E4 );
+	//       }//layer
+  //
+	//       if( TOBDetId( detId ).layer() == 4 ) {
+	// 	u560->Fill( resid*1E4 );
+	//       }//layer
+  //
+	//       if( TOBDetId( detId ).layer() == 5 ) {
+	// 	u570->Fill( resid*1E4 );
+	//       }//layer
+  //
+	//       if( TOBDetId( detId ).layer() == 6 ) {
+	// 	u580->Fill( resid*1E4 );
+	//       }//layer
+  //
+	//     }//TOB
+  //
+	//     if( subDet == StripSubdetector::TEC ) {
+  //
+	//       if( TECDetId(detId).side() == 1 ){
+  //
+	// 	if( TECDetId(detId).wheelNumber() == 1 ){
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u610->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u611->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).wheelNumber() == 2 ){
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u612->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u613->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).wheelNumber() == 3 ){
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u614->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u615->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).wheelNumber() == 4 ){
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u616->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u617->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).wheelNumber() == 5 ){
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u618->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u619->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).wheelNumber() == 6 ){
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u620->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u621->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).wheelNumber() == 7 ){
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u622->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u623->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).wheelNumber() == 8 ){
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u624->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u625->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).wheelNumber() == 9 ){
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u626->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u627->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).ringNumber() == 1 ) {
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u630->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u631->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).ringNumber() == 2 ) {
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u632->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u633->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).ringNumber() == 3 ) {
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u634->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u635->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).ringNumber() == 4 ) {
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u636->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u637->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).ringNumber() == 5 ) {
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u638->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u639->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).ringNumber() == 6 ) {
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u640->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u641->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).ringNumber() == 7 ) {
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u642->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u643->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	//       } // z side 1
+  //
+	//       else { // other z side
+  //
+	// 	if( TECDetId(detId).wheelNumber() == 1 ){
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u650->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u651->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).wheelNumber() == 2 ){
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u652->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u653->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).wheelNumber() == 3 ){
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u654->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u655->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).wheelNumber() == 4 ){
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u656->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u657->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).wheelNumber() == 5 ){
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u658->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u659->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).wheelNumber() == 6 ){
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u660->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u661->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).wheelNumber() == 7 ){
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u662->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u663->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).wheelNumber() == 8 ){
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u664->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u665->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).wheelNumber() == 9 ){
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u666->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u667->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).ringNumber() == 1 ) {
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u670->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u671->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).ringNumber() == 2 ) {
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u672->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u673->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).ringNumber() == 3 ) {
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u674->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u675->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).ringNumber() == 4 ) {
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u676->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u677->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).ringNumber() == 5 ) {
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u678->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u679->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).ringNumber() == 6 ) {
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u680->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u681->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	// 	if( TECDetId(detId).ringNumber() == 7 ) {
+	// 	  if( TECDetId(detId).isRPhi() ) {
+	// 	    u682->Fill( resid*1E4 );
+	// 	  }
+	// 	  else {
+	// 	    u683->Fill( resid*1E4 );
+	// 	  }
+	// 	}
+  //
+	//       }//side
+  //
+	//     }//TEC
+  //
+	//   }//valid propTSOS
+  //
+	// }//refit2 OK
+  //
+  //     }//loop hit i left out in refit for unbiased residual
+  //
+  //   }//pt cut
 
   }// loop over tracks
 

@@ -9,7 +9,7 @@
 #include "TDirectory.h"
 #include "TString.h"
 
-TString Run="1";
+TString Run="300558";//"1";
 
 // Student's t function:
 
@@ -134,7 +134,7 @@ int fittp0(const char* hs , float & sigma_res,float & sigma_res_err , float & me
 
     cout << hs << " " << dx << ", " << nn << ", " << xmax << endl;
 
-    tp0Fcn->SetParameter( 0, xmax ); // peak position
+    tp0Fcn->SetParameter( 0, 0.1);//xmax ); // peak position
     tp0Fcn->SetParameter( 1, 4*dx ); // width
     tp0Fcn->SetParameter( 2, 2.2 ); // nu
     tp0Fcn->SetParameter( 3, nn ); // N
@@ -161,7 +161,24 @@ int fittp0(const char* hs , float & sigma_res,float & sigma_res_err , float & me
     pl2->SetTextSize(0.04); 
     pl2->SetFillColor(0);
     pl2->SetBorderSize(0);
-    pl2->SetHeader("Barrel Pixel Layer 2");
+
+    TString name =  (TString) hs ;
+
+    TString header_text;
+    // if ( name.Contains("h52") )  pl2->SetHeader("Barrel Pixel Layer 1");
+    // if ( name.Contains("f52") || name.Contains("g52") )  pl2->SetHeader("Barrel Pixel Layer 4");
+    // if ( name.Contains("h42") || name.Contains("hf42") )  pl2->SetHeader("Barrel Pixel Layer 2");
+    // if ( name.Contains("hg42") || name.Contains("i52") )  pl2->SetHeader("Barrel Pixel Layer 3");
+    if ( name.Contains("h52") )  header_text="Barrel Pixel Layer 1";
+    if ( name.Contains("f52") || name.Contains("g52") )  header_text="Barrel Pixel Layer 4";
+    if ( name.Contains("h42") || name.Contains("hf42") )  header_text="Barrel Pixel Layer 2";
+    if ( name.Contains("hg42") || name.Contains("i52") )   header_text="Barrel Pixel Layer 3";
+
+    if ( name.Contains("in")) header_text+=" in";
+    else header_text+=" out";
+
+    pl2->SetHeader(header_text);
+
     // pl2->SetHeaderSize(0.045);
     TLegendEntry *ple2 = pl2->AddEntry(h, "Triplet Residuals",  "P");
     ple2 =pl2->AddEntry(tp0Fcn, "Student-t function fit",  "L");
@@ -178,6 +195,8 @@ int fittp0(const char* hs , float & sigma_res,float & sigma_res_err , float & me
    
     h->GetYaxis()->SetTitle("Number of hits / "+ TString::Format("%.0f",dx) +" #mum");
     h->GetXaxis()->SetTitle("#Deltax [#mum]");
+    if ( name.Contains("21"))  h->GetXaxis()->SetTitle("#Deltaz [#mum]");
+
     h->GetXaxis()->SetTitleSize(0.05);
     h->GetYaxis()->SetTitleSize(0.05);
     h->GetYaxis()->SetTitleOffset(0.85); 
@@ -244,13 +263,12 @@ int fittp0(const char* hs , float & sigma_res,float & sigma_res_err , float & me
 
     c->Update();
 
-    TString name =  (TString) hs ;
+   
     TString name_root =  (TString) hs ;
     name +=(TString) "_"+Run+(TString)".pdf" ;
     name_root +=(TString) "_"+Run+(TString)".root" ;
   
-    if ( name.Contains("421"))  h->GetXaxis()->SetTitle("#Deltaz [#mum]");
-
+   
 
 
     c->SaveAs("file_niceplots/Generic/"+name_root);
@@ -260,27 +278,115 @@ int fittp0(const char* hs , float & sigma_res,float & sigma_res_err , float & me
  return 0;
  
 }
-int run_new(const char* file ){
+int run_new_layer4_in_out_cumulative(const char* file ){
   
   TFile *_file0 = new TFile(file);
 
   _file0->cd((TString)"Histos/Run"+Run);
-
   //Get resolution along x
-  TH1F*  h420= (TH1F*) _file0->Get((TString)"Histos/Run"+Run+(TString)"/h420");
-  h420->SetDirectory(0); // "detach" the histogram from the file
-  float sigma_x,sigma_x_err,mean_x,mean_x_err ;
-  fittp0("h420",sigma_x,sigma_x_err,mean_x,mean_x_err);
+  TH1F*  h420_in= (TH1F*) _file0->Get((TString)"Histos/Run"+Run+(TString)"/h420_in");
+  h420_in->SetDirectory(0); // "detach" the histogram from the file
+  float sigma_x_in,sigma_x_err_in,mean_x_in,mean_x_err_in ;
+  fittp0("h420_in",sigma_x_in,sigma_x_err_in,mean_x_in,mean_x_err_in);
  
   //Get resolution along y
-  TH1F*  h421= (TH1F*) _file0 ->Get((TString)"Histos/Run"+Run+(TString)"/h421");
-  h421->SetDirectory(0); // "detach" the histogram from the file
-  float sigma_y,sigma_y_err, mean_y, mean_y_err ;
-  fittp0("h421", sigma_y, sigma_y_err, mean_y, mean_y_err);
+  TH1F*  h421_in= (TH1F*) _file0 ->Get((TString)"Histos/Run"+Run+(TString)"/h421_in");
+  h421_in->SetDirectory(0); // "detach" the histogram from the file
+  float sigma_y_in,sigma_y_err_in, mean_y_in, mean_y_err_in ;
+  fittp0("h421_in", sigma_y_in, sigma_y_err_in, mean_y_in, mean_y_err_in);
+
+ 
+  //Get resolution along x
+  TH1F*  h520_in= (TH1F*) _file0->Get((TString)"Histos/Run"+Run+(TString)"/h520_in");
+  h520_in->SetDirectory(0); // "detach" the histogram from the file
+  float sigma_x_l231_in,sigma_x_err_l231_in,mean_x_l231_in,mean_x_err_l231_in ;
+  fittp0("h520_in",sigma_x_l231_in,sigma_x_err_l231_in,mean_x_l231_in,mean_x_err_l231_in);
+ 
+  //Get resolution along y
+  TH1F*  h521_in= (TH1F*) _file0 ->Get((TString)"Histos/Run"+Run+(TString)"/h521_in");
+  h521_in->SetDirectory(0); // "detach" the histogram from the file
+  float sigma_y_l231_in,sigma_y_err_l231_in, mean_y_l231_in, mean_y_err_l231_in ;
+  fittp0("h521_in", sigma_y_l231_in, sigma_y_err_l231_in, mean_y_l231_in, mean_y_err_l231_in);
+
+   //Get resolution along x
+  TH1F*  g520_in= (TH1F*) _file0->Get((TString)"Histos/Run"+Run+(TString)"/g520_in");
+  g520_in->SetDirectory(0); // "detach" the histogram from the file
+  float sigma_x_l234_in,sigma_x_err_l234_in,mean_x_l234_in,mean_x_err_l234_in ;
+  fittp0("g520_in",sigma_x_l234_in,sigma_x_err_l234_in,mean_x_l234_in,mean_x_err_l234_in);
+ 
+  //Get resolution along y
+  TH1F*  g521_in= (TH1F*) _file0 ->Get((TString)"Histos/Run"+Run+(TString)"/g521_in");
+  g521_in->SetDirectory(0); // "detach" the histogram from the file
+  float sigma_y_l234_in,sigma_y_err_l234_in, mean_y_l234_in, mean_y_err_l234_in ;
+  fittp0("g521_in", sigma_y_l234_in, sigma_y_err_l234_in, mean_y_l234_in, mean_y_err_l234_in);
+
+  //Get resolution along x
+  TH1F*  hg420_in= (TH1F*) _file0->Get((TString)"Histos/Run"+Run+(TString)"/hg420_in");
+  hg420_in->SetDirectory(0); // "detach" the histogram from the file
+  float sigma_x_l243_in,sigma_x_err_l243_in,mean_x_l243_in,mean_x_err_l243_in ;
+  fittp0("hg420_in",sigma_x_l243_in,sigma_x_err_l243_in,mean_x_l243_in,mean_x_err_l243_in);
+ 
+  //Get resolution along y
+  TH1F*  hg421_in= (TH1F*) _file0 ->Get((TString)"Histos/Run"+Run+(TString)"/hg421_in");
+  hg421_in->SetDirectory(0); // "detach" the histogram from the file
+  float sigma_y_l243_in,sigma_y_err_l243_in, mean_y_l243_in, mean_y_err_l243_in ;
+  fittp0("hg421_in", sigma_y_l243_in, sigma_y_err_l243_in, mean_y_l243_in, mean_y_err_l243_in);
+
 
  
 
+  
+  //Get resolution along x
+  TH1F*  h420_out= (TH1F*) _file0->Get((TString)"Histos/Run"+Run+(TString)"/h420_out");
+  h420_out->SetDirectory(0); // "detach" the histogram from the file
+  float sigma_x_out,sigma_x_err_out,mean_x_out,mean_x_err_out ;
+  fittp0("h420_out",sigma_x_out,sigma_x_err_out,mean_x_out,mean_x_err_out);
  
+  //Get resolution along y
+  TH1F*  h421_out= (TH1F*) _file0 ->Get((TString)"Histos/Run"+Run+(TString)"/h421_out");
+  h421_out->SetDirectory(0); // "detach" the histogram from the file
+  float sigma_y_out,sigma_y_err_out, mean_y_out, mean_y_err_out ;
+  fittp0("h421_out", sigma_y_out, sigma_y_err_out, mean_y_out, mean_y_err_out);
+
+ 
+  //Get resolution along x
+  TH1F*  h520_out= (TH1F*) _file0->Get((TString)"Histos/Run"+Run+(TString)"/h520_out");
+  h520_out->SetDirectory(0); // "detach" the histogram from the file
+  float sigma_x_l231_out,sigma_x_err_l231_out,mean_x_l231_out,mean_x_err_l231_out ;
+  fittp0("h520_out",sigma_x_l231_out,sigma_x_err_l231_out,mean_x_l231_out,mean_x_err_l231_out);
+ 
+  //Get resolution along y
+  TH1F*  h521_out= (TH1F*) _file0 ->Get((TString)"Histos/Run"+Run+(TString)"/h521_out");
+  h521_out->SetDirectory(0); // "detach" the histogram from the file
+  float sigma_y_l231_out,sigma_y_err_l231_out, mean_y_l231_out, mean_y_err_l231_out ;
+  fittp0("h521_out", sigma_y_l231_out, sigma_y_err_l231_out, mean_y_l231_out, mean_y_err_l231_out);
+
+   //Get resolution along x
+  TH1F*  g520_out= (TH1F*) _file0->Get((TString)"Histos/Run"+Run+(TString)"/g520_out");
+  g520_out->SetDirectory(0); // "detach" the histogram from the file
+  float sigma_x_l234_out,sigma_x_err_l234_out,mean_x_l234_out,mean_x_err_l234_out ;
+  fittp0("g520_out",sigma_x_l234_out,sigma_x_err_l234_out,mean_x_l234_out,mean_x_err_l234_out);
+ 
+  //Get resolution along y
+  TH1F*  g521_out= (TH1F*) _file0 ->Get((TString)"Histos/Run"+Run+(TString)"/g521_out");
+  g521_out->SetDirectory(0); // "detach" the histogram from the file
+  float sigma_y_l234_out,sigma_y_err_l234_out, mean_y_l234_out, mean_y_err_l234_out ;
+  fittp0("g521_out", sigma_y_l234_out, sigma_y_err_l234_out, mean_y_l234_out, mean_y_err_l234_out);
+
+  //Get resolution along x
+  TH1F*  hg420_out= (TH1F*) _file0->Get((TString)"Histos/Run"+Run+(TString)"/hg420_out");
+  hg420_out->SetDirectory(0); // "detach" the histogram from the file
+  float sigma_x_l243_out,sigma_x_err_l243_out,mean_x_l243_out,mean_x_err_l243_out ;
+  fittp0("hg420_out",sigma_x_l243_out,sigma_x_err_l243_out,mean_x_l243_out,mean_x_err_l243_out);
+ 
+  //Get resolution along y
+  TH1F*  hg421_out= (TH1F*) _file0 ->Get((TString)"Histos/Run"+Run+(TString)"/hg421_out");
+  hg421_out->SetDirectory(0); // "detach" the histogram from the file
+  float sigma_y_l243_out,sigma_y_err_l243_out, mean_y_l243_out, mean_y_err_l243_out ;
+  fittp0("hg421_out", sigma_y_l243_out, sigma_y_err_l243_out, mean_y_l243_out, mean_y_err_l243_out);
+
+
+
   _file0->Close();
   return 0;
 
