@@ -1820,7 +1820,7 @@ PixelEfficiency::beginJob(const edm::EventSetup& iSetup)
  for (int p=0;p<=ptranges;p++)
    windowSearch_pT.push_back(0);
  for (int p=0;p<=ptranges;p++){
-   char basename[20];
+   char basename[256];
    sprintf (basename,"windowSearch_pT_range%i",p) ;
    std::string m_baseName = basename ;
    windowSearch_pT[p]= new TH1F( (m_baseName).c_str(),(m_baseName).c_str(), 500,0,0.50);;
