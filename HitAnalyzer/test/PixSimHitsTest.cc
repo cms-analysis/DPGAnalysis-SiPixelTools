@@ -99,7 +99,8 @@ private:
     *hz1id,*hz2id,*hz3id,*hz4id;
   //TH1F *hladder1idUp, *hladder2idUp, *hladder3idUp;
   TH1F* hthick1,*hthick2,*hthick3,*hthick4,
-    *hypos1,*hypos2,*hypos3,*hypos4;
+    *hypos1,*hypos2,*hypos3,*hypos4,
+    *hpath1,*hpath2,*hpath3,*hpath4;
   TH1F *hxpos1,*hxpos2,*hxpos3,*hxpos4;
   TH1F *hsimHitsPerDet1,*hsimHitsPerDet2,*hsimHitsPerDet3,*hsimHitsPerDet4;
   TH1F *hsimHitsPerLay1,*hsimHitsPerLay2,*hsimHitsPerLay3,*hsimHitsPerLay4;
@@ -118,6 +119,10 @@ private:
   TH2F *hzr, *hxy11, *hxy12, *hxy21, *hxy22, *hxy31, *hxy32;  // fpix 
   //TH2F *htest, *htest2, *htest3, *htest4, *htest5;
   //TProfile *hp1, *hp2, *hp3, *hp4, *hp5;
+
+  TH1D *henergy1, *henergy2, *henergy3, *henergy4; 
+  TProfile *henergyP1, *henergyP2, *henergyP3, *henergyP4; 
+
 
 #ifdef CHECK_GEOM
   float modulePositionZ[4][64][8];
@@ -171,10 +176,10 @@ void PixSimHitsTest::beginJob() {
 
    hdetunit = fs->make<TH1F>( "hdetunit", "Det unit", 1000,
                               302000000.,302300000.);
-    hpabs = fs->make<TH1F>( "hpabs", "Pabs", 100, 0., 110.);
-    htof = fs->make<TH1F>( "htof", "TOF", 400, -50., 150.);
-    hpid = fs->make<TH1F>( "hpid", "PID", 6000, 0., 6000.);
-    htid = fs->make<TH1F>( "htid", "Track id", 100, 0., 100.);
+   hpabs = fs->make<TH1F>( "hpabs", "Pabs", 100, 0., 110.);
+   htof = fs->make<TH1F>( "htof", "TOF", 400, -50., 150.);
+   hpid = fs->make<TH1F>( "hpid", "PID", 6000, 0., 6000.);
+   htid = fs->make<TH1F>( "htid", "Track id", 100, 0., 100.);
  
     hpixid = fs->make<TH1F>( "hpixid", "Pix det id", 10, 0., 10.);
     hpixsubid = fs->make<TH1F>( "hpixsubid", "Pix Barrel id", 10, 0., 10.);
@@ -193,6 +198,11 @@ void PixSimHitsTest::beginJob() {
     hthick2 = fs->make<TH1F>( "hthick2", "Det 2 Thinckess", 400, 0.,0.04);
     hthick3 = fs->make<TH1F>( "hthick3", "Det 3 Thinckess", 400, 0.,0.04);
     hthick4 = fs->make<TH1F>( "hthick4", "Det 4 Thinckess", 400, 0.,0.04);
+                                                                                
+    hpath1 = fs->make<TH1F>( "hpath1", "Det 1 Path", 200, 0.,0.2);
+    hpath2 = fs->make<TH1F>( "hpath2", "Det 2 Path", 200, 0.,0.2);
+    hpath3 = fs->make<TH1F>( "hpath3", "Det 3 Path", 200, 0.,0.2);
+    hpath4 = fs->make<TH1F>( "hpath4", "Det 4 Path", 200, 0.,0.2);
                                                                                 
     hypos1 = fs->make<TH1F>( "hypos1", "Det 1 y pos", 700,-3.5,3.5);
     hypos2 = fs->make<TH1F>( "hypos2", "Det 2 y pos", 700,-3.5,3.5);
@@ -294,6 +304,17 @@ void PixSimHitsTest::beginJob() {
       hphiz3 = fs->make<TH2F>("hphiz3"," ",108,-27.,27.,140,-3.5,3.5);
       hphiz4 = fs->make<TH2F>("hphiz4"," ",108,-27.,27.,140,-3.5,3.5);
     }
+
+
+   henergy1 = fs->make<TH1D>( "henergy1", "Eloss l1", 64,-26.0,26.0);
+   henergyP1 = fs->make<TProfile>( "henergyP1", "Eloss l1", 64,-26.0,26.0,0.,10000.);
+   henergy2 = fs->make<TH1D>( "henergy2", "Eloss l2", 64,-26.0,26.0);
+   henergyP2 = fs->make<TProfile>( "henergyP2", "Eloss l2", 64,-26.0,26.0,0.,10000.);
+   henergy3 = fs->make<TH1D>( "henergy3", "Eloss l3", 64,-26.0,26.0);
+   henergyP3 = fs->make<TProfile>( "henergyP3", "Eloss l3", 64,-26.0,26.0,0.,10000.);
+   henergy4 = fs->make<TH1D>( "henergy4", "Eloss l4", 64,-26.0,26.0);
+   henergyP4 = fs->make<TProfile>( "henergyP4", "Eloss l4", 64,-26.0,26.0,0.,10000.);
+
 #ifdef CHECK_GEOM
     // To get the module position
     for(int i=0;i<4;i++) {
@@ -483,7 +504,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 #endif
 
      // SimHit information 
-     float eloss = (*isim).energyLoss() * 1000000/3.7;//convert GeV to ke 
+     float eloss = (*isim).energyLoss() * 1000000/3.61;//convert GeV to ke 
      float tof = (*isim).timeOfFlight();
      float p = (*isim).pabs();
      float pt= (*isim).momentumAtEntry().perp();
@@ -503,6 +524,9 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 
      float dz = abs(z-z2); // should be the sensor thickness 285um
      bool moduleDirectionUp = ( z < z2 ); // for positive direction z2>z
+
+     float path = sqrt(pow((x-x2),2) + pow((y-y2),2) + pow((z-z2),2)); // total path of the track
+     float factor = 0.001/dz; // normalize to 1mm
 
      float xpos = (x+x2)/2.;
      float ypos = (y+y2)/2.;
@@ -555,6 +579,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 hladder1id->Fill(float(blade));
 	 hz1id->Fill(float(zindex));
 	 hthick1->Fill(dz);
+	 hpath1->Fill(path);
 	 hypos1->Fill(ypos);
 	 hxpos1->Fill(xpos);
 	 if(gloZ<0.) hxy11->Fill(gloX,gloY);
@@ -573,7 +598,9 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 else heloss2mu->Fill(eloss);	 
 	 hladder2id->Fill(float(blade));
 	 hz2id->Fill(float(zindex));
-	 hthick2->Fill(dz);
+	 hthick2->Fill(dz);	 
+	 hpath2->Fill(path);
+
 	 hypos2->Fill(ypos);
 	 hxpos2->Fill(xpos);
 	 if(gloZ<0.) hxy21->Fill(gloX,gloY);
@@ -594,6 +621,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 hladder3id->Fill(float(blade));
 	 hz3id->Fill(float(zindex));
 	 hthick3->Fill(dz);
+	 hpath3->Fill(path);
 	 hypos3->Fill(ypos);
 	 hxpos3->Fill(xpos);
 	 if(gloZ<0.) hxy31->Fill(gloX,gloY);
@@ -616,10 +644,13 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 totalNumOfSimHits1++;
 	 heloss1->Fill(eloss);
 	 if(abs(pid)==11) heloss1e->Fill(eloss);
-	 else heloss1mu->Fill(eloss);	 
+	 else heloss1mu->Fill(eloss);
+	 henergy1->Fill(gloZ,eloss*3.61);
+	 henergyP1->Fill(gloZ,eloss*3.61);
 	 hladder1id->Fill(float(ladder));
 	 hz1id->Fill(float(module));
 	 hthick1->Fill(dz);
+	 hpath1->Fill(path);
 	 hypos1->Fill(ypos);
 	 hxpos1->Fill(xpos);
 	 hphiz1->Fill(gloZ,gloPhi);
@@ -657,9 +688,12 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 heloss2->Fill(eloss);
 	 if(abs(pid)==11) heloss2e->Fill(eloss);
 	 else heloss2mu->Fill(eloss);	 
+	 henergy2->Fill(gloZ,eloss*3.61);
+	 henergyP2->Fill(gloZ,eloss*3.61);
 	 hladder2id->Fill(float(ladder));
 	 hz2id->Fill(float(module));
 	 hthick2->Fill(dz);
+	 hpath2->Fill(path);
 	 hypos2->Fill(ypos);
 	 hxpos2->Fill(xpos);
 	 hphiz2->Fill(gloZ,gloPhi);
@@ -687,10 +721,13 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 heloss3->Fill(eloss);
 	 if(abs(pid)==11) heloss3e->Fill(eloss);
 	 else heloss3mu->Fill(eloss);	 
+	 henergy3->Fill(gloZ,eloss*3.61);
+	 henergyP3->Fill(gloZ,eloss*3.61);
 	 
 	 hladder3id->Fill(float(ladder));
 	 hz3id->Fill(float(module));
 	 hthick3->Fill(dz);
+	 hpath3->Fill(path);
 	 hypos3->Fill(ypos);
 	 hxpos3->Fill(xpos); 
 	 hphiz3->Fill(gloZ,gloPhi);
@@ -717,10 +754,13 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 heloss4->Fill(eloss);
 	 if(abs(pid)==11) heloss4e->Fill(eloss);
 	 else heloss4mu->Fill(eloss);	 
+	 henergy4->Fill(gloZ,eloss*3.61);
+	 henergyP4->Fill(gloZ,eloss*3.61);
 	 
 	 hladder4id->Fill(float(ladder));
 	 hz4id->Fill(float(module));
 	 hthick4->Fill(dz);
+	 hpath4->Fill(path);
 	 hypos4->Fill(ypos);
 	 hxpos4->Fill(xpos); 
 	 hphiz4->Fill(gloZ,gloPhi);
@@ -812,7 +852,7 @@ void PixSimHitsTest::endJob(){
   numSimHits = numSimHits/float(numEvents);
   numSimHitsGood = numSimHitsGood/float(numEvents);
 
-  cout<<" Events "<<numEvents<<" simhits "<<numSimHits<<" simhits > 0.1gev "<<numSimHitsGood<<endl;
+  cout<<" Events (used for rescaling) "<<numEvents<<" simhits "<<numSimHits<<" simhits > 0.1gev "<<numSimHitsGood<<endl;
 
 #ifdef CHECK_GEOM
   // To get module positions
@@ -833,6 +873,18 @@ void PixSimHitsTest::endJob(){
     }
   }
 #endif
+
+  // renormalise the energy histos
+  float norm = 1.0; //
+  norm = 1./(float(numEvents)*4160); 
+  henergy1->Scale(norm/(22.4)); // 12*2 almost
+  henergy2->Scale(norm/(52.4)); // 28*2
+  henergy3->Scale(norm/(84.2)); // 44*2
+  henergy4->Scale(norm/(124.1)); // 64*2
+  //henergyP1->Scale(norm/(22.4)); // 12*2 almost
+  //henergyP2->Scale(norm/(52.4)); // 28*2
+  //henergyP3->Scale(norm/(84.2)); // 44*2
+  //henergyP4->Scale(norm/(124.1)); // 64*2
 
 }
 

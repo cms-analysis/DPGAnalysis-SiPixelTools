@@ -1743,7 +1743,8 @@ void PixDigisTest::endJob(){
     cout<<" events "<<count0<<" full events "<<count3<<" dets per event "<<count1/count0
 	<<" digis per event "<<count2/count0<<endl;
   else 
-    cout<<count0<<" "<<count1<<" "<<count2<<" "<<count3<<endl;
+    cout<<count0<<" "<<count1<<" "<<count2<<" "<<count3<<" (used for rescaling)"
+	<<endl;
 
   cout<<" Cols with many hits "<<countFullDcols<<endl;
 
@@ -1813,7 +1814,7 @@ void PixDigisTest::endJob(){
   hpixMapFPix31->Scale(norm);
   hpixMapFPix32->Scale(norm);
 
-  float normPixel = norm/4096.;
+  float normPixel = norm/4160.;
   hrocMapS1->Scale(normPixel);
   hrocMapS2->Scale(normPixel);
   hrocMapS3->Scale(normPixel);

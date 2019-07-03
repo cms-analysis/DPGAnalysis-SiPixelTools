@@ -48,12 +48,8 @@ process.FEVTDEBUGoutput = cms.OutputModule("PoolOutputModule",
         filterName = cms.untracked.string('')
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits1.root'),
-#    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits2.root'),
-#    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits3.root'),
-#    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits4.root'),
-#    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits5.root'),
-#    fileName = cms.untracked.string('sim.root'),
+    fileName = cms.untracked.string('simHits1_eta0p1.root'),
+
     outputCommands = process.FEVTDEBUGEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
 )
@@ -66,10 +62,12 @@ process.genstepfilter.triggerConditions=cms.vstring("generation_step")
 process.generator = cms.EDProducer("FlatRandomPtGunProducer",
     AddAntiParticle = cms.bool(False),
     PGunParameters = cms.PSet(
-        MaxEta = cms.double(3.0),
+        #MaxEta = cms.double(3.0),
+        MaxEta = cms.double(0.1),
         MaxPhi = cms.double(3.14159265359),
         MaxPt = cms.double(100.01),
-        MinEta = cms.double(-3.0),
+        #MinEta = cms.double(-3.0),
+        MinEta = cms.double(-0.1),
         MinPhi = cms.double(-3.14159265359),
         MinPt = cms.double(99.99),
         PartID = cms.vint32(-13,-13,-13,-13)
