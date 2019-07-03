@@ -26,7 +26,7 @@ public:
 
 private:
 
-  SiPixelQuality* getNewObject();
+  SiPixelQuality* getNewObject_();
   void algoBeginJob(const edm::EventSetup& es) {
     edm::ESHandle<TrackerTopology> htopo;
     es.get<TrackerTopologyRcd>().get(htopo);

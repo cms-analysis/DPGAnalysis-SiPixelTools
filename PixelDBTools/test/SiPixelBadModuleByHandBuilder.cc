@@ -18,7 +18,7 @@ SiPixelBadModuleByHandBuilder::SiPixelBadModuleByHandBuilder(const edm::Paramete
 SiPixelBadModuleByHandBuilder::~SiPixelBadModuleByHandBuilder(){
 }
 
-SiPixelQuality* SiPixelBadModuleByHandBuilder::getNewObject(){
+SiPixelQuality* SiPixelBadModuleByHandBuilder::getNewObject_(){
   
   SiPixelQuality* obj = new SiPixelQuality();
 
