@@ -52,10 +52,10 @@
 // To convert detId to subdet/layer number:
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
-#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TECDetId.h"
-#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+//#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+//#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+//#include "DataFormats/SiStripDetId/interface/TECDetId.h"
+//#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
 #include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
 #include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
@@ -585,7 +585,7 @@ void Pixel::getResiduals(const edm::Event & iEvent, const edm::EventSetup& iSetu
 
   double sumpt = 0;     // total pt of tracks from vtx
   double sumq = 0;      // total charge from vtx
-  Surface::GlobalPoint origin = Surface::GlobalPoint(0,0,0);
+  //Surface::GlobalPoint origin = Surface::GlobalPoint(0,0,0);
   for( TrackCollection::const_iterator iTrack = tracks->begin();
        iTrack != tracks->end(); ++iTrack ) {
     // cpt = cqRB = 0.3*R[m]*B[T] = 1.14*R[m] for B=3.8T

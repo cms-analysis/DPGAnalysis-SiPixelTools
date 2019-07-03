@@ -52,12 +52,13 @@
 // To convert detId to subdet/layer number:
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
-#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TECDetId.h"
-#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+//#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+//#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+//#include "DataFormats/SiStripDetId/interface/TECDetId.h"
+//#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
 #include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
 #include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
+#include "DataFormats/DetId/interface/DetId.h"
 
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
 //#include "DataFormats/GeometryVector/interface/GlobalPoint.h"
@@ -66,7 +67,7 @@
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 
 #include "FWCore/Framework/interface/ESHandle.h"
-#include "Geometry/CommonDetUnit/interface/GeomDet.h"
+#include "Geometry/CommonDetUnit/interface/GlobalTrackingGeometry.h" //GeomDetUnit.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "Geometry/CommonTopologies/interface/Topology.h"
@@ -192,8 +193,8 @@ struct Histos{
   TProfile                                                                *h409;
   TH1D     *h410, *h411;
   TProfile               *h412, *h412_out_zplus, *h412_out_zminus, *h412_in_zplus, *h412_in_zminus, *h413, *h414, *h415, *h416, *h417, *h418, *h419;
-  TH1D     *h420, *h420_out_zplus, *h420_out_zminus, *h420_in_zplus, *h420_in_zminus, *h421; 
-  TH1D     *h420_mod1, *h420_mod2, *h420_mod3, *h420_mod4, *h420_mod5, *h420_mod6, *h420_mod7, *h420_mod8; 
+  TH1D     *h420, *h420_out_zplus, *h420_out_zminus, *h420_in_zplus, *h420_in_zminus, *h421;
+  TH1D     *h420_mod1, *h420_mod2, *h420_mod3, *h420_mod4, *h420_mod5, *h420_mod6, *h420_mod7, *h420_mod8;
   TH1D     *h421_mod1, *h421_mod2, *h421_mod3, *h421_mod4, *h421_mod5, *h421_mod6, *h421_mod7, *h421_mod8;
   TH1D     *h420_1, *h420_2, *h420_3;
   TH1D     *h422, *h423, *h424, *h425, *h426, *h427; // *h428, *h429, *h429_eta;
@@ -542,11 +543,11 @@ struct Histos{
 
 };
 
-} //  end namespace 
+} //  end namespace
 
 
 class PxlBPix : public edm::EDAnalyzer, public Histos {
-  
+
 public:
   explicit PxlBPix(const edm::ParameterSet&);
   ~PxlBPix();
@@ -591,12 +592,12 @@ PxlBPix::PxlBPix(const edm::ParameterSet& iConfig)
   singleParticleMC  = iConfig.getUntrackedParameter<bool>("singleParticleMC",false);
   std::cout<<_triggerSrc<<" "<<_triggerSrc.label()<<" "<<_triggerSrc.process()<<" "
 	   <<_triggerSrc.instance()<<" "<<std::endl;
-  
+
   t_triggerSrc_ = consumes<edm::TriggerResults> (iConfig.getParameter<edm::InputTag>("triggerSource"));
   t_offlineBeamSpot_ =    consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
   t_offlinePrimaryVertices_ =   consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
   t_generalTracks_= consumes<reco::TrackCollection> (edm::InputTag("generalTracks"));
- 
+
 }
 //
 // destructor:
@@ -998,7 +999,7 @@ void Histos::init(TFileDirectory* fs) {
   h420_mod6 = fs->make<TH1D>( "h420_mod6", "PXB2 Module 6 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
   h420_mod7 = fs->make<TH1D>( "h420_mod7", "PXB2 Module 7 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
   h420_mod8 = fs->make<TH1D>( "h420_mod8", "PXB2 Module 8 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits ", 100, -150, 150 );
-  
+
   h421_mod1 = fs->make<TH1D>( "h421_mod1", "PXB2 Module 1  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
   h421_mod2 = fs->make<TH1D>( "h421_mod2", "PXB2 Module 2  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
   h421_mod3 = fs->make<TH1D>( "h421_mod3", "PXB2 Module 3  residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
@@ -1029,7 +1030,7 @@ void Histos::init(TFileDirectory* fs) {
 
   h430 = fs->make<TH1D>( "h430", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h431 = fs->make<TH1D>( "h431", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
-				      
+
   h432 = fs->make<TH1D>( "h432", "PXB2 residuals #Deltaz, 18 < |dip| < 50;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
   h433 = fs->make<TProfile>( "h433", "PXB2 #sigma_{z} vs p_{t}, best dip;log(p_{t} [GeV]);PXB2 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
 
@@ -1045,7 +1046,7 @@ void Histos::init(TFileDirectory* fs) {
 
   h440 = fs->make<TH1D>( "h440", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h441 = fs->make<TH1D>( "h441", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
-				      
+
   h442 = fs->make<TH1D>( "h442", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h443 = fs->make<TH1D>( "h443", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h444 = fs->make<TH1D>( "h444", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
@@ -1107,7 +1108,7 @@ void Histos::init(TFileDirectory* fs) {
 
   h480 = fs->make<TH1D>( "h480", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h481 = fs->make<TH1D>( "h481", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
-				      
+
   h482 = fs->make<TH1D>( "h482", "PXB2 residuals #Deltaz, 18 < |dip| < 50;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
   h483 = fs->make<TProfile>( "h483", "PXB2 #sigma_{z} vs p_{t}, best dip;log(p_{t} [GeV]);PXB2 rms(#Deltaz) [#mum]", 20, 0, 2, 0, 199 );
 
@@ -1117,7 +1118,7 @@ void Histos::init(TFileDirectory* fs) {
 
   h490 = fs->make<TH1D>( "h490", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h491 = fs->make<TH1D>( "h491", "PXB2 residuals #Deltaz;PXB2 #Deltaz [#mum];hits", 100, -300, 300 );
-				      
+
   h492 = fs->make<TH1D>( "h492", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h493 = fs->make<TH1D>( "h493", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h494 = fs->make<TH1D>( "h494", "PXB2 residuals #Deltax;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
@@ -1289,7 +1290,7 @@ void Histos::init(TFileDirectory* fs) {
   h635 = fs->make<TProfile>( "h635", "PXB1 #sigma_{x} vs #phi at 1 GeV;PXB1 #phi [deg];PXB1 rms(#Deltax) [#mum]", 360, -180, 180, 0, 499 );
 
   h650 = fs->make<TH1D>( "h650", "PXB1 residuals #Deltax;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
-				      
+
   h652 = fs->make<TH1D>( "h652", "PXB1 residuals #Deltax;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
   h653 = fs->make<TH1D>( "h653", "PXB1 residuals #Deltax;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
   h654 = fs->make<TH1D>( "h654", "PXB1 residuals #Deltax;PXB1 #Deltax [#mum];hits", 100, -150, 150 );
@@ -2150,14 +2151,14 @@ void PxlBPix::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 	else
 	{
 	  edm::Service<TFileService> fs;
-	  
+
 	  std::stringstream runstr;
 	  runstr << "Run" << run;
 	  TFileDirectory subdir = fs->mkdir(runstr.str().c_str());
-	  
+
 	  runmap[run].init(&subdir);
 	  static_cast<Histos&>(*this) = runmap[run];
-	}	
+	}
 
 	bool hltSetupChanged = false;
 	std::cout<<_triggerSrc<<" "<<_triggerSrc.label()<<" "<<_triggerSrc.process()<<" "
@@ -2165,7 +2166,7 @@ void PxlBPix::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 
 	//const bool showTrigger = false;
 
-	if(_triggerSrc.label()!="") { 
+	if(_triggerSrc.label()!="") {
 	  if(!HLTConfig.init(iRun, iSetup, _triggerSrc.process(), hltSetupChanged))
 		throw cms::Exception("Failed to init HLT config");
 	}
@@ -2177,7 +2178,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   using namespace edm;
   using namespace reco;
   using namespace math;
-  
+
   const bool useTriplet12_3 = false;
   const bool useTriplet23_1 = false;
   const bool useTriplet13_2 = true;
@@ -2218,7 +2219,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   //------------------------------------------------------
   // Trigger information, do only if the container is defined
-  if(_triggerSrc.label()!="" && idbg==1 ) { 
+  if(_triggerSrc.label()!="" && idbg==1 ) {
     edm::Handle<edm::TriggerResults> triggerResults;
     //iEvent.getByLabel(_triggerSrc, triggerResults);
     iEvent.getByToken( t_triggerSrc_ , triggerResults);
@@ -2227,7 +2228,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     for(unsigned int i = 0; i < triggerResults->size(); ++i) {
       std::string triggerName = triggerNames.triggerName(i);
       //std::pair<int, int> prescale = HLTConfig.prescaleValues(iEvent, iSetup, triggerName);
-      //std::pair<std::vector<std::pair<std::basic_string<char>, int> >, int> 
+      //std::pair<std::vector<std::pair<std::basic_string<char>, int> >, int>
 	//prescale = HLTConfig.prescaleValuesInDetail(iEvent, iSetup, triggerName);
 	//std::cout << i << ": " << triggerName << ", " << prescale.second << std::endl;
     }
@@ -2308,7 +2309,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
       h011->Fill( iVertex->z() );
     else {
 
-      if( iVertex->isFake() ) 
+      if( iVertex->isFake() )
 	h012->Fill( iVertex->z() );
       else{
 	h013->Fill( iVertex->z() );
@@ -2345,7 +2346,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	}
 
 	h021->Fill( iVertex->p4().pt() );
-#endif 
+#endif
       }// non-fake
     }//valid
 
@@ -2387,7 +2388,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   edm::ESHandle<TrajectoryFitter> aFitter;
   iSetup.get<TrajectoryFitter::Record>().get("KFFittingSmootherWithOutliersRejectionAndRK",aFitter);
   std::unique_ptr<TrajectoryFitter> theFitter = aFitter->clone();
-  
+
   //----------------------------------------------------------------------------
   // Transient Rechit Builders
   edm::ESHandle<TransientTrackBuilder> theB;
@@ -2398,15 +2399,15 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   iSetup.get<TransientRecHitRecord>().get( _ttrhBuilder, hitBuilder );
 
   // Cloner, New from 71Xpre7
-  const TkTransientTrackingRecHitBuilder * builder = 
+  const TkTransientTrackingRecHitBuilder * builder =
     static_cast<TkTransientTrackingRecHitBuilder const *>(hitBuilder.product());
   //dynamic_cast<TkTransientTrackingRecHitBuilder const *>(hitBuilder.product());
   auto hitCloner = builder->cloner();
   //static_cast<TkTransientTrackingRecHitBuilder const *>(hitBuilder.product())->cloner();
-  
+
   theFitter->setHitCloner(&hitCloner);
 
-#else 
+#else
 
   // old
   ESHandle<TrajectoryFitter> TF;
@@ -2453,7 +2454,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   //----------------------------------------------------------------------------
   // Tracks:
-  // Main track loop 
+  // Main track loop
 
   Surface::GlobalPoint origin = Surface::GlobalPoint(0,0,0);
   const TrackerGeomDet * geomDet2 = NULL;
@@ -2475,7 +2476,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 #endif
 
     // Skip tracks with far imp. paramater. Ignore for single particle MC
-    if(!singleParticleMC && 
+    if(!singleParticleMC &&
        (abs( iTrack->dxy(vtxP) ) > 5*iTrack->dxyError()) ) continue; // not prompt
 
     const reco::HitPattern& hp = iTrack->hitPattern();
@@ -2491,8 +2492,8 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 #endif // DO_TEST
 
     double phi = iTrack->phi();
-    double dca = iTrack->d0(); // w.r.t. origin                               
-    //double dca = -iTrack->dxy(); // dxy = -d0                               
+    double dca = iTrack->d0(); // w.r.t. origin
+    //double dca = -iTrack->dxy(); // dxy = -d0
     double dip = iTrack->lambda();
     double z0  = iTrack->dz();
     double tet = pihalf - dip;
@@ -2552,7 +2553,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 #endif
     }//tscp valid
 
-    double rinv = -kap; // Karimaki                                           
+    double rinv = -kap; // Karimaki
     double rho = 1/kap;
 
 #ifdef NOT_USED
@@ -2570,7 +2571,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     double dcap = sa / ( 1 + sqrt(1 + rinv*sa) );// distance to beam
     double ud = 1 + rinv*dca;
     double phip = atan2( -rinv*xBS + ud*sf, rinv*yBS + ud*cf );//direction
-#endif 
+#endif
 #ifdef NOT_USED
     // track at R(PXB1), from FUNPHI, FUNLEN:
     double R1 = 4.4; // PXB1
@@ -2654,7 +2655,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     edm::OwnVector<TrackingRecHit> recHitVector; // for seed
     std::vector<TransientTrackingRecHit::RecHitPointer> myTTRHvec;
     Trajectory::RecHitContainer coTTRHvec; // for fit, constant
-    
+
     // loop over recHits on this track:
     for( trackingRecHit_iterator irecHit = iTrack->recHitsBegin();
 	 irecHit != iTrack->recHitsEnd(); ++irecHit ) {
@@ -2678,23 +2679,23 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
       // build transient hit:
 #ifdef NEW_TRACKINGRECHITS
       // for pre7
-      //auto tmprh = 
+      //auto tmprh =
       // (*irecHit)->cloneForFit(*builder->geometry()->idToDet((**irecHit).geographicalId()));
       //auto transRecHit = hitCloner.makeShared(tmprh, initialTSOS);
-      auto transRecHit = 
+      auto transRecHit =
 	(*irecHit)->cloneForFit(*builder->geometry()->idToDet((**irecHit).geographicalId()));
-      // need this to have a defined position 
+      // need this to have a defined position
       auto transRecHit1 = hitCloner.makeShared(transRecHit, initialTSOS);
-#else 
+#else
       TransientTrackingRecHit::RecHitPointer transRecHit = hitBuilder->build( &*(*irecHit), initialTSOS);
 #endif
 
       // Save rechits for refits
       myTTRHvec.push_back( transRecHit );
       coTTRHvec.push_back( transRecHit );
-      
-      // 
-      if( subDet == PixelSubdetector::PixelBarrel ) {  // bpix only 
+
+      //
+      if( subDet == PixelSubdetector::PixelBarrel ) {  // bpix only
 
 	const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( (*irecHit)->hit() );
 	//const SiPixelRecHit *pixhit1 = dynamic_cast<const SiPixelRecHit*>( (transRecHit)->hit() );
@@ -2705,7 +2706,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	// cout<<hit->localPositionError().yy()<<" ";
 	//if( pixhit->hasFilledProb() ){
 	//cout<<pixhit->clusterProbability(0)<<" ";   // XY
-	//cout<<pixhit->clusterProbability(1)<<" "; // XY*Q 
+	//cout<<pixhit->clusterProbability(1)<<" "; // XY*Q
 	//cout<<pixhit->clusterProbability(2)<<" ";   // Q
 	//cout<<pixhit1->clusterProbability(0)<<" ";  // XY
 	//cout<<pixhit1->clusterProbability(2)<<" ";  // Q
@@ -2715,12 +2716,12 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	//cout<<endl;
 	double probabilityXY = pixhit->clusterProbability(0);
 	double probabilityQ  = pixhit->clusterProbability(2);
-	
+
 	// 	  if( pixhit->hasFilledProb() ){
 	// 	  // pixel cluster:
 	// 	  // TrackingRecHit -> RecHit2DLocalPos -> BaseSiTrackerRecHit2DLocalPos -> SiPixelRecHit -> SiPixelCluster
 	// 	  edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster> const & clust = pixhit->cluster();
-     	    
+
 
 	int ilay = PXBDetId(detId).layer();
 
@@ -2733,18 +2734,18 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 	double vxloc = transRecHit1->localPositionError().xx();//covariance
 	double vyloc = transRecHit1->localPositionError().yy();//covariance
-	
+
 	double gX = transRecHit1->globalPosition().x();
 	double gY = transRecHit1->globalPosition().y();
 	double gZ = transRecHit1->globalPosition().z();
 
 	if( fdbg ) cout << gX<<" "<<gY<<" "<<gZ<<endl;
 	if(jdbg) cout<<" position l1 "<<gX<<" "<<gY<<" "<<gZ<<" "<<xloc<<" "<<yloc<<endl;
-	
-	// Now try to improve 
+
+	// Now try to improve
 	if( transRecHit->canImproveWithTrack() ) { //use z from track to apply alignment
-	  
-	  TrajectoryStateOnSurface propTSOS = 
+
+	  TrajectoryStateOnSurface propTSOS =
 	    thePropagator->propagate( initialTSOS, transRecHit->det()->surface() );
 
 	  if( propTSOS.isValid() ) {
@@ -2759,7 +2760,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	    xloc = preciseHit->localPosition().x();// 1st meas coord
 	    yloc = preciseHit->localPosition().y();// 2nd meas coord or zero
 	    // zloc = preciseHit->localPosition().z();// up, always zero
-	    
+
 	    vxloc = preciseHit->localPositionError().xx();//covariance
 	    vyloc = preciseHit->localPositionError().yy();//covariance
 
@@ -2781,18 +2782,18 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	      //cout<<vxloc<<" "<<vyloc<<endl;
 	    }
 
-	    // compare simple and precise position 
+	    // compare simple and precise position
 	    double tmp1=xloc1 -xloc;
 	    double tmp2=yloc1 -yloc;
 	    h420_mod4->Fill( tmp1*1E4 );
 	    h421_mod4->Fill( tmp2*1E4 );
-	    
+
 	    gX = preciseHit->globalPosition().x();
 	    gY = preciseHit->globalPosition().y();
 	    gZ = preciseHit->globalPosition().z();
 	    if( fdbg ) cout << gX<<" "<<gY<<" "<<gZ<<endl;
 	    if(jdbg) cout<<" precise position  "<<gX<<" "<<gY<<" "<<gZ<<" "<<xloc<<" "<<yloc<<endl;
-	    
+
 	  } //valid propTSOS
 	  else{
 	    if( idbg ) cout << "  propTSOS not valid\n";
@@ -2801,14 +2802,14 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	} else {
 	  cout<<" hit cannot be imporved "<<endl;
 	}//canImprove
-	
+
 	//double gF = atan2( gY, gX );
 	double gR = sqrt( gX*gX + gY*gY );
 	if( gR < rmin ) {
 	  rmin = gR;
 	  innerDetId = detId.rawId();
 	}
-	
+
 #ifdef DO_TESTS
 	h061->Fill( xloc );
 	h062->Fill( yloc );
@@ -2816,8 +2817,8 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	h064->Fill( gF*wt );
 	h065->Fill( gZ );
 	h066->Fill( gX, gY );
-#endif  
-	
+#endif
+
 	double phiN = transRecHit->det()->surface().normalVector().barePhi();//normal vector
 	double xmid = transRecHit->det()->position().x();
 	double ymid = transRecHit->det()->position().y();
@@ -2826,7 +2827,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 	// PXB:
 	//if( subDet == PixelSubdetector::PixelBarrel ) {
-	
+
 	//double df = phiN - gF;//normal vector vs position vector: inwards or outwards
 	// take care of cut at +180/-180:
 	//if( df > pi ) df -= twopi;
@@ -2836,15 +2837,15 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	//int imod = PXBDetId(detId).module();
 	//if( fdbg ) cout << ilay<<" "<<ilad<<endl;
 
-	// Save hits for later analysis 
+	// Save hits for later analysis
 	if( ilay == 1 ) {  // layer 1
 	  n1++;
 	  xPXB1 = gX;
 	  yPXB1 = gY;
 	  zPXB1 = gZ;
 	  if(jdbg) cout<<" lay 1 "<<n1<<" "<<xPXB1<<" "<<yPXB1<<" "<<zPXB1<<endl;
-	  probabilityXY1 = probabilityXY; 
-	  probabilityQ1  = probabilityQ; 
+	  probabilityXY1 = probabilityXY;
+	  probabilityQ1  = probabilityQ;
 	  //uPXB1 = xloc;
 	  //vPXB1 = yloc;
 	  //ePXB1 = sqrt( vxloc );
@@ -2869,7 +2870,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  det2 = transRecHit->det();
 	  geomDet2 = (TrackerGeomDet*) det2;
 
-	  probabilityXY2 = probabilityXY; 
+	  probabilityXY2 = probabilityXY;
 	  probabilityQ2 = probabilityQ;
 
 	  if(jdbg) cout<<" lay 2 "<<n2<<" "<<xPXB2<<" "<<yPXB2<<" "<<zPXB2<<" "
@@ -2893,7 +2894,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  xPXB3 = gX;
 	  yPXB3 = gY;
 	  zPXB3 = gZ;
-	  probabilityXY3 = probabilityXY; 
+	  probabilityXY3 = probabilityXY;
 	  probabilityQ3 = probabilityQ;
 	  if(jdbg) cout<<" lay 3 "<<n3<<" "<<xPXB3<<" "<<yPXB3<<" "<<zPXB3<<endl;
 	  //uPXB3 = xloc;
@@ -2910,121 +2911,121 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
       }//PXB
     }//loop rechits
-    
+
     //----------------------------------------------------------------------------------------
 
-    // Needed for track refitting 
+    // Needed for track refitting
     PTrajectoryStateOnDet PTraj = trajectoryStateTransform::persistentState( initialTSOS, innerDetId );
     const TrajectorySeed seed( PTraj, recHitVector, alongMomentum );
-  
+
     //------------------------------------------------------------------------
     // 1-2-3 pixel triplets
-    // the triplet method from Daniel. 
+    // the triplet method from Daniel.
     // Uses an analytical formula. Does not need a track refit and propagation.
 
-    // Do the 1+3->2 triplet    
+    // Do the 1+3->2 triplet
     if( useTriplet13_2 && (n1*n2*n3 > 0) ) {
-      
+
       if( jdbg ) cout << "  triplet 1+3 -> 2\n";
 
       if(jdbg) cout<<" lay 1 final  "<<n1<<" "<<xPXB1<<" "<<yPXB1<<" "<<zPXB1<<endl;
-      
-      double f2 = atan2( yPXB2, xPXB2 );//position angle in layer 2      
+
+      double f2 = atan2( yPXB2, xPXB2 );//position angle in layer 2
       double ax = xPXB3 - xPXB1;
       double ay = yPXB3 - yPXB1;
       double aa = sqrt( ax*ax + ay*ay ); // from 1 to 3
-      
+
       double xmid = 0.5 * ( xPXB1 + xPXB3 );
       double ymid = 0.5 * ( yPXB1 + yPXB3 );
       double bx = xPXB2 - xmid;
       double by = yPXB2 - ymid;
       double bb = sqrt( bx*bx + by*by ); // from mid point to point 2
-      
+
       h406->Fill( hp.numberOfValidTrackerHits() );
       h407->Fill( hp.numberOfValidPixelBarrelHits() );
       h408->Fill( hp.trackerLayersWithMeasurement() );
-      
+
       // Author: Johannes Gassner (15.11.1996)
       // Make track from 2 space points and kappa (cmz98/ftn/csmktr.f)
       // Definition of the Helix :
-      
+
       // x( t ) = X0 + KAPPA^-1 * SIN( PHI0 + t )
       // y( t ) = Y0 - KAPPA^-1 * COS( PHI0 + t )          t > 0
       // z( t ) = Z0 + KAPPA^-1 * TAN( DIP ) * t
-      
+
       // Center of the helix in the xy-projection:
-      
+
       // X0 = + ( DCA - KAPPA^-1 ) * SIN( PHI0 )
       // Y0 = - ( DCA - KAPPA^-1 ) * COS( PHI0 )
-      
+
       // Point 1 must be in the inner layer, 3 in the outer:
-      
+
       double r1 = sqrt( xPXB1*xPXB1 + yPXB1*yPXB1 );
       double r3 = sqrt( xPXB3*xPXB3 + yPXB3*yPXB3 );
-      
+
       if( r3-r1 < 2.0 ) cout << "warn r1 = " << r1 << ", r3 = " << r3 << endl;
-      
+
       // Calculate the centre of the helix in xy-projection that
       // transverses the two spacepoints. The points with the same
       // distance from the two points are lying on a line.
       // LAMBDA is the distance between the point in the middle of
       // the two spacepoints and the centre of the helix.
-      
+
       // we already have kap and rho = 1/kap
-      
-      double lam = sqrt( -0.25 + 
+
+      double lam = sqrt( -0.25 +
 			 rho*rho / ( ( xPXB1 - xPXB3 )*( xPXB1 - xPXB3 ) + ( yPXB1 - yPXB3 )*( yPXB1 - yPXB3 ) ) );
-      
+
       // There are two solutions, the sign of kap gives the information
       // which of them is correct:
-      
+
       if( kap > 0 ) lam = -lam;
-      
+
       // ( X0, Y0 ) is the centre of the circle
       // that describes the helix in xy-projection:
-      
+
       double x0 =  0.5*( xPXB1 + xPXB3 ) + lam * ( -yPXB1 + yPXB3 );
       double y0 =  0.5*( yPXB1 + yPXB3 ) + lam * (  xPXB1 - xPXB3 );
-      
+
       // Calculate theta:
-      
+
       double num = ( yPXB3 - y0 ) * ( xPXB1 - x0 ) - ( xPXB3 - x0 ) * ( yPXB1 - y0 );
       double den = ( xPXB1 - x0 ) * ( xPXB3 - x0 ) + ( yPXB1 - y0 ) * ( yPXB3 - y0 );
       double tandip = kap * ( zPXB3 - zPXB1 ) / atan( num / den );
       double udip = atan(tandip);
       //double utet = pihalf - udip;
-      
+
       // To get phi0 in the right interval one must distinguish
       // two cases with positve and negative kap:
-      
+
       double uphi;
       if( kap > 0 ) uphi = atan2( -x0,  y0 );
       else          uphi = atan2(  x0, -y0 );
-      
+
       // The distance of the closest approach DCA depends on the sign
       // of kappa:
-      
+
       double udca;
       if( kap > 0 ) udca = rho - sqrt( x0*x0 + y0*y0 );
       else          udca = rho + sqrt( x0*x0 + y0*y0 );
-      
+
       // angle from first hit to dca point:
-      
+
       double dphi = atan( ( ( xPXB1 - x0 ) * y0 - ( yPXB1 - y0 ) * x0 )
 			  / ( ( xPXB1 - x0 ) * x0 + ( yPXB1 - y0 ) * y0 ) );
-      
+
       double uz0 = zPXB1 + tandip * dphi * rho;
-      
+
       h401->Fill( zPXB2 );
       h402->Fill( uphi - iTrack->phi() );
       h403->Fill( udca - iTrack->d0() );
       h404->Fill( udip - iTrack->lambda() );
       h405->Fill( uz0  - iTrack->dz() );
-      
+
       // interpolate to middle hit:
       // cirmov
       // we already have rinv = -kap
-      
+
       double cosphi = cos(uphi);
       double sinphi = sin(uphi);
       double dp = -xPXB2*sinphi + yPXB2*cosphi + udca;
@@ -3033,52 +3034,52 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
       double dca2 = sa / ( 1 + sqrt(1 + rinv*sa) );// distance to hit 2
       double ud = 1 + rinv*udca;
       double phi2 = atan2( -rinv*xPXB2 + ud*sinphi, rinv*yPXB2 + ud*cosphi );//direction
-      
+
       double phiinc = phi2 - phiN2;//angle of incidence in rphi w.r.t. normal vector
-      
+
       // phiN alternates inward/outward
       // reduce phiinc:
-      
+
       if( phiinc > pihalf ) phiinc -= pi;
       else if( phiinc < -pihalf ) phiinc += pi;
-      
+
       // arc length:
       double xx = xPXB2 + dca2 * sin(phi2); // point on track
       double yy = yPXB2 - dca2 * cos(phi2);
-      
+
       //double vx = xx - xmid2;//from module center
       //double vy = yy - ymid2;
       //double vv = sqrt( vx*vx + vy*vy );
-      
+
       double f0 = uphi;//
       double kx = kap*xx;
       double ky = kap*yy;
       double kd = kap*udca;
-      
+
       // Solve track equation for s:
-      
+
       double dx = kx - (kd-1)*sin(f0);
       double dy = ky + (kd-1)*cos(f0);
       double ks = atan2( dx, -dy ) - f0;// turn angle
-      
+
       // Limit to half-turn:
-      
+
       if(      ks >  pi ) ks = ks - twopi;
       else if( ks < -pi ) ks = ks + twopi;
-      
+
       double s = ks*rho; // signed
       double uz2 = uz0 + s*tandip; // track z at R2
       double dz2 = zPXB2 - uz2;
-      
+
       if(idbg) cout<<" residuals "<<dca2<<" "<<dz2<<endl;
-      
+
       if( pt > 4 ) {
-	
+
 	h308->Fill( bb/aa ); // lever arm
 	h409->Fill( f2*wt, phiinc*wt );
 	h410->Fill( dca2*1E4 );
 	h411->Fill( dz2*1E4 );
-	
+
 	// pile up study Summer 2011:
 	// if( nvertex < 3 ) {
 	//   h310->Fill( dca2*1E4 );
@@ -3097,14 +3098,14 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	//   h317->Fill( dz2*1E4 );
 	//   h318->Fill( nvertex );
 	// } // pile up
-	
+
       } // pt > 4
 
       if( pt > 12 ) {
-	  
+
 	h420->Fill( dca2*1E4 ); // 12.7 um
 	h421->Fill( dz2*1E4 );
-	
+
 	// Add errors and pulls
 	h077->Fill( ePXB2*1E4 );
 	h078->Fill( fPXB2*1E4 );
@@ -3116,13 +3117,13 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	h079->Fill( pulx );
 	h069->Fill( puly );
 
-	h422->Fill(probabilityXY2); 
-	h423->Fill(probabilityQ2); 
-	h426->Fill(probabilityXY1*probabilityXY2*probabilityXY3); 
-	h427->Fill(probabilityQ1*probabilityQ2*probabilityQ3); 
+	h422->Fill(probabilityXY2);
+	h423->Fill(probabilityQ2);
+	h426->Fill(probabilityXY1*probabilityXY2*probabilityXY3);
+	h427->Fill(probabilityQ1*probabilityQ2*probabilityQ3);
 
-	
-	// Alignment errors 
+
+	// Alignment errors
 	//LocalError lape = det2->localAlignmentError();
 	//cout<<geomDet2<<endl;
 	if(geomDet2 != NULL) {
@@ -3140,11 +3141,11 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	    h089->Fill( tmp13 );
 	  } else {   if( myCounters::neve < 10 ) cout<<" lape invalid?"<<endl;}
 	}
-	
+
 	//if(bb/aa < 0.015) h420_1->Fill(dca2*1E4);
 	//else if(bb/aa >= 0.015 && bb/aa < 0.065) h420_2->Fill(dca2*1E4);
 	//else h420_3->Fill(dca2*1E4);
-	
+
 	//Flipped/non-flipped
 	if( abs( phi2 - phiN2 ) < pihalf ) // outward facing module
 	  if(zPXB2 > 0)
@@ -3157,10 +3158,10 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  else
 	    h420_in_zminus->Fill( dca2*1E4 );
       } // pt12
-      
+
 #ifdef DO_TESTS
       Surface::GlobalPoint gp2( xx, yy, uz2 );
-      Surface::LocalPoint lp2 = det2->toLocal( gp2 );
+      // Surface::LocalPoint lp2 = det2->toLocal( gp2 );
       // local x = phi
       // local y = z in barrel
       // local z = radial in barrel (thickness)
@@ -3168,41 +3169,41 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
       double xpx2 = fmod( uPXB2 + 0.82, 0.02 ); // xpix = 0..0.02 reconstructed
       double xpx1 = fmod( uPXB1 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed
       double xpx3 = fmod( uPXB3 + 0.82, 0.01 ); // xpix = 0..0.01 reconstructed
-      
+
       //double dpix = fmod( uPXB2 + dca2 + 0.82, 0.01 ); // dpix = 0..0.01 predicted
-      
+
       double vpix = fmod( vv, 0.01 ); // vpix = 0..0.01 predicted
       if( uPXB2 < 0 ) vpix = -vpix; // vv is unsigned distance from module center
-      
+
       double lpix = fmod( lp2.x() + 0.82, 0.01 ); // lpix = 0..0.01 predicted
       double tpix = fmod( lp2.x() + 0.82, 0.02 ); // tpix = 0..0.02 predicted
-      
+
       double zpix = fmod( lp2.y() + 3.24, 0.015 ); // zpix = 0..0.015 predicted
       double spix = fmod( lp2.y() + 3.24, 0.03  ); // spix = 0..0.03  predicted
-      
+
       int smin = zmin2%52; // 0..51 column along z
       int smax = zmax2%52; // 0..51 column along z
-      
+
       double cogx = (cogp2 + 0.5 - 80) * 0.01 - 0.0054; // Lorentz shift
       if( cogp2 < 79 ) cogx -= 0.01; // big pix
       if( cogp2 > 80 ) cogx += 0.01; // big pix
-      
+
       double mpix = fmod( cogx + 0.82, 0.01 ); // mpix = 0..0.01 from cluster COG
       double cogdx = cogx - lp2.x(); // residual
-      
+
       // hybrid method:
       double hybx = uPXB2; // template
       if( mpix*1E4 < 20 ) hybx = cogx; // COG
       if( mpix*1E4 > 75 ) hybx = cogx;
       //double hpix = fmod( hybx + 0.82, 0.01 ); // hpix = 0..0.01 from cluster hybrid method
       double hybdx = hybx - lp2.x(); // residual
-      
+
       bool halfmod = 0;
       if(      ilad2 ==  8 ) halfmod = 1;
       else if( ilad2 ==  9 ) halfmod = 1;
       else if( ilad2 == 24 ) halfmod = 1;
       else if( ilad2 == 25 ) halfmod = 1;
-      
+
       // versus number o ftracker hits
       if( hp.trackerLayersWithMeasurement() > 8 ) {
 	h430->Fill( dca2*1E4 );
@@ -3218,18 +3219,18 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
       else if( nrow2 == 2 ) h443->Fill( dca2*1E4 ); // 12.7
       else if( nrow2 == 3 ) h444->Fill( dca2*1E4 ); // 19.7 um
       else                  h445->Fill( dca2*1E4 ); // two peaks
-      
+
       if( nrow1 == 2 && nrow2 == 2 && nrow3 == 2 ) h446->Fill( dca2*1E4 ); // 12.2 um
-      
+
       h447->Fill( nrow2 );
-      
+
     } // pt > 12
-    
+
     // residual profiles: alignment check
     if( pt > 4 ) {
       h412->Fill( f2*wt, dca2*1E4 );
       h413->Fill( f2*wt, dz2*1E4 );
-      
+
       if( abs( phi2 - phiN2 ) < pihalf ) // outward facing module
 	if(zPXB2 > 0)
 	  h412_out_zplus->Fill( f2*wt, dca2*1E4 );
@@ -3240,7 +3241,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  h412_in_zplus->Fill( f2*wt, dca2*1E4 );
 	else
 	  h412_in_zminus->Fill( f2*wt, dca2*1E4 );
-      
+
       h414->Fill( zPXB2, dca2*1E4 );
       h415->Fill( zPXB2, dz2*1E4 );
     }
@@ -3248,45 +3249,45 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     h417->Fill( logpt, dz2*1E4 );
     if( iTrack->charge() > 0 ) h418->Fill( logpt, dca2*1E4 );
     else h419->Fill( logpt, dca2*1E4 );
-    
+
     // // profile of abs(dca) gives mean abs(dca):
-    // // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2) 
+    // // mean of abs(Gauss) = 0.7979 * RMS = 1/sqrt(pi/2)
     // // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
     // // point resolution = 1/sqrt(3/2) * triplet middle residual width
-    // // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one    
+    // // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
     // if( pt > 4 ) {
     //   h422->Fill( f2*wt, abs(dca2)*1E4 );
     //   h423->Fill( f2*wt, abs(dz2)*1E4 );
-    
+
     //   h424->Fill( zPXB2, abs(dca2)*1E4 );
     //   h425->Fill( zPXB2, abs(dz2)*1E4 );
-    
+
     //   h428->Fill( udip*wt, abs(dca2)*1E4 );
     //   h429->Fill( udip*wt, abs(dz2)*1E4 );
     //   h429_eta->Fill(iTrack->eta(), abs(dz2)*1E4);
     //   if( abs(dip)*wt > 18 && abs(dip)*wt < 50 ) h432->Fill( dz2*1E4 );
-    
+
     //   h434->Fill( phiinc*wt, abs(dca2)*1E4 );
     //   h334->Fill( phiinc*wt, abs(cogdx)*1E4 );//similar
-    
+
     //   if( abs( phi2 - phiN2 ) < pihalf ) // outward facing module
     //     h436->Fill( phiinc*wt, abs(dca2)*1E4 );
     //   else
     //     h437->Fill( phiinc*wt, abs(dca2)*1E4 );//similar
-    
+
     //   if(  lpix*1E4 > 30 && lpix*1E4 < 70 ) h319->Fill( phiinc*wt, abs(dca2)*1E4 );//flat
-    
+
     // } // pt > 4
-    
+
     // h426->Fill( logpt, abs(dca2)*1E4 );
     // h427->Fill( logpt, abs(dz2)*1E4 );
     // if( abs(dip)*wt > 18 && abs(dip)*wt < 50 ) h433->Fill( logpt, abs(dz2)*1E4 );
-    
+
     // // pt bins:
     // // uPXB2 = local x
     // // vPXB2 = local z
     // // low pt: material
-    
+
     // if( pt > 0.8 && pt < 1.2 ) {
     //   h435->Fill( f2*wt, abs(dca2)*1E4 );
     //   if( ! halfmod ) {
@@ -3304,155 +3305,155 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     //   h220->Fill( vPXB2, abs(dca2)*1E4 );
     //   h230->Fill( vPXB2, abs(dz2)*1E4 );
     // } // pt
-    
+
     // if( pt > 1.2 && pt < 1.6 ) {
     //   if( ! halfmod ) h211->Fill( uPXB2, abs(dca2)*1E4 );
     //   h221->Fill( vPXB2, abs(dca2)*1E4 );
     //   h231->Fill( vPXB2, abs(dz2)*1E4 );
     // }
-    
+
     // if( pt > 1.6 && pt < 2.2 ) {
     //   if( ! halfmod ) h212->Fill( uPXB2, abs(dca2)*1E4 );
     //   h222->Fill( vPXB2, abs(dca2)*1E4 );
     //   h232->Fill( vPXB2, abs(dz2)*1E4 );
     // }
-    
+
     // if( pt > 2.2 && pt < 4.0 ) {
     //   if( ! halfmod ) h213->Fill( uPXB2, abs(dca2)*1E4 );
     //   h223->Fill( vPXB2, abs(dca2)*1E4 );
     //   h233->Fill( vPXB2, abs(dz2)*1E4 );
     // }
-    
+
     // if( pt > 4.0 ) {
     //   if( ! halfmod ) h214->Fill( uPXB2, abs(dca2)*1E4 );
     //   h224->Fill( vPXB2, abs(dca2)*1E4 );
     //   h234->Fill( vPXB2, abs(dz2)*1E4 );
     // }
-    
+
     // // full modules:
-    
+
     // if( pt > 4.0 &&
     //     ! halfmod &&
     //     xmin2 > 0 && xmax2 < 159 && // skip edges
     //     xmin2 != 79 && xmax2 != 79 &&  // skip wide pixels
     //     xmin2 != 80 && xmax2 != 80 ) { // skip wide pixels
-    
+
     //   h235->Fill( xpix*1E4 ); // from cluster
     //   h236->Fill( lpix*1E4 ); // from track: flat
-    
+
     //   h285->Fill( mpix*1E4 ); // from cluster mixed
     //   h286->Fill( uPXB2, (cogx - uPXB2)*1E4 ); // flat
-    
+
     //   if( nrow2 == 1 ) h237->Fill( lpix*1E4 );
     //   if( nrow2 == 2 ) h238->Fill( lpix*1E4 );
     //   if( nrow2 == 3 ) h239->Fill( lpix*1E4 );
-    
+
     //   if( nrow2 == 1 ) h227->Fill( xpix*1E4 );
     //   if( nrow2 == 2 ) h228->Fill( xpix*1E4 );
     //   if( nrow2 == 3 ) h229->Fill( xpix*1E4 );
-    
+
     //   h240->Fill( tpix*1E4, nrow2 );
     //   h322->Fill( tpix*1E4, clch2*1E-3*cos(dip) );
     //   if( nrow2 < 3 ) h330->Fill( tpix*1E4, etaX2 );
     //   h331->Fill( tpix*1E4, ePXB2*1E4 );//hit error
     //   h332->Fill( ePXB2*1E4 );//hit error
-    
+
     //   h241->Fill( xpix*1E4, dca2*1E4 ); // flat at zero
-    
+
     //   h242->Fill( xpx2*1E4, abs(dca2)*1E4 ); // xpix = from cluster
-    
+
     //   h243->Fill( lpix*1E4, dca2*1E4 ); // no bias
     //   h244->Fill( tpix*1E4, abs(dca2)*1E4 ); // tpix = from track, sine
-    
+
     //   // dca w.r.t. cluster COG cogx:
-    
+
     //   h287->Fill( lp2.x(), cogdx*1E4 ); // zero
     //   h288->Fill( lpix*1E4, cogdx*1E4 ); // +-2 um
     //   h289->Fill( tpix*1E4, abs(cogdx)*1E4 ); // cogx = COG
-    
+
     //   // hybrid method:
-    
+
     //   h283->Fill( tpix*1E4, abs(hybdx)*1E4 ); // similar to dca2
-    
+
     //   if( nrow2 == 2 ) {
     //     h343->Fill( lpix*1E4, dca2*1E4 ); // bias? no.
     //     h267->Fill( tpix*1E4, abs(dca2)*1E4 ); // U-shaped
     //   }
-    
+
     //   h268->Fill( lpix*1E4, abs(dca2)*1E4 ); // one-pixel wide resolution
     //   h320->Fill( zpix*1E4, abs(dca2)*1E4 );//flat
     //   h321->Fill( spix*1E4, abs(dca2)*1E4 );//two-pixel z, flat
-    
+
     //   // in-pixel map:
-    
+
     //   if( smin > 0 && smax < 51 ) { // skip long pixels in z
     //     h323->Fill( spix*1E4, tpix*1E4 ); // 2x2 flat
     //     if( abs(dip)*wt < 10 ) h324->Fill( spix*1E4, tpix*1E4 );
     //   }
-    
+
     //   // highest pt:
-    
+
     //   if( pt > 12 ) {
-    
+
     //     if(      lpix*1E4 > 30 && lpix*1E4 < 70 ) h438->Fill( dca2*1E4 ); // 9.1 um
     //     else if( lpix*1E4 < 20 || lpix*1E4 > 80 ) h439->Fill( dca2*1E4 ); // 17.0, two peaks
     //     if( nrow2 == 1 ) h290->Fill( dca2*1E4 ); // single 13.1
-    
+
     //     h379->Fill( dca2 *1E4 ); // dca from templates
     //     h380->Fill( cogdx*1E4 ); // dca from COG: 12.8
     //     h284->Fill( hybdx*1E4 ); // hybrid 12.6
-    
+
     //     // nrow = 1 and nrow = 2 are related
     //     // might expect shifts and biases if analyzed separately
-    
+
     //     if( nrow2 == 2 ) {
-    
+
     //       if( lpix*1E4 < 20 ) h291->Fill( dca2*1E4 ); // split
     //       if( lpix*1E4 > 80 ) h292->Fill( dca2*1E4 ); // split
-    
+
     //       h381->Fill( cogdx*1E4 );
-    
+
     //       if( lpix*1E4 < 20 ) h382->Fill( cogdx*1E4 );//right
     //       if( lpix*1E4 > 80 ) h383->Fill( cogdx*1E4 );//left
-    
+
     //       // study split:
-    
+
     //       if( lpix*1E4 < 20 || lpix*1E4 > 80 ){
-    
+
     // 	if( abs( phi2 - phiN2 ) < pihalf )
     // 	  h293->Fill( dca2*1E4 ); // split
     // 	else
     // 	  h294->Fill( dca2*1E4 ); // split
-    
-    // 	if( zPXB2 > 0 ) 
+
+    // 	if( zPXB2 > 0 )
     // 	  h295->Fill( dca2*1E4 ); // split
     // 	else
     // 	  h296->Fill( dca2*1E4 ); // split
-    
+
     // 	if( iTrack->charge() > 0 )
     // 	  h297->Fill( dca2*1E4 ); // split
     // 	else
     // 	  h298->Fill( dca2*1E4 ); // split
-    
+
     // 	if( phiinc > 0 )
     // 	  h299->Fill( dca2*1E4 ); // split
     // 	else
     // 	  h300->Fill( dca2*1E4 ); // split
-    
+
     // 	if( uPXB2 > 0 )
     // 	  h390->Fill( dca2*1E4 ); // split
     // 	else
     // 	  h391->Fill( dca2*1E4 ); // split
-    
+
     // 	if( clch2 < 40E3 )
     // 	  h392->Fill( dca2*1E4 ); // split
     // 	else
     // 	  h393->Fill( dca2*1E4 );//
-    
+
     //       }//pixel edges
-    
+
     //       // 4-Felder test (Claus Kleinwort):
-    
+
     //       if( lpix*1E4 < 20 ) {
     // 	if( abs( phi2 - phiN2 ) < pihalf )
     // 	  h394->Fill( dca2*1E4 );//left
@@ -3465,12 +3466,12 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     // 	else
     // 	  h397->Fill( dca2*1E4 );//left
     //       }
-    
+
     //     }//nrow=2
-    
+
     //     // study split for all nrow:
     //     // 4-Felder test (Claus Kleinwort):
-    
+
     //     if( lpix*1E4 < 20 ) {
     //       if( abs( phi2 - phiN2 ) < pihalf )
     // 	h374->Fill( dca2*1E4 ); // left
@@ -3483,7 +3484,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     //       else
     // 	h377->Fill( dca2*1E4 ); // left
     //     }
-    
+
     //     if( lpix*1E4 > 30 &&
     // 	lpix*1E4 < 70 &&
     // 	xpx1*1E4 > 25 &&
@@ -3491,25 +3492,25 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     // 	xpx3*1E4 > 25 &&
     // 	xpx3*1E4 < 75 )
     //       h448->Fill( dca2*1E4 ); // 9.1 um
-    
+
     //   }//pt > 12
-    
+
     //   // study eta:
-    
+
     //   //if( nrow2 == 2 ) {
     //   if( nrow2 < 3 ) {
-    
+
     //     if( pt > 12 && lpix*1E4 > 30 && lpix*1E4 < 70 ) h449->Fill( dca2*1E4 );//9.2
-    
+
     //     h245->Fill( tpix*1E4, etaX2 ); // x from track
-    
+
     //     if( abs( phi2 - phiN2 ) < pihalf ) // outward module
     //       h246->Fill( tpix*1E4, etaX2 ); // identical
     //     else
     //       h247->Fill( tpix*1E4, etaX2 ); // identical
-    
+
     //     h248->Fill( xpx2*1E4, etaX2 ); // x from cluster
-    
+
     //     if(      lpix < 0.0000 ) h249->Fill( etaX2 );
     //     else if( lpix < 0.0010 ) h250->Fill( etaX2 );
     //     else if( lpix < 0.0020 ) h251->Fill( etaX2 );
@@ -3521,11 +3522,11 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     //     else if( lpix < 0.0080 ) h257->Fill( etaX2 );
     //     else if( lpix < 0.0090 ) h258->Fill( etaX2 );
     //     else if( lpix < 0.0100 ) h259->Fill( etaX2 );
-    
+
     //     // angle of incidence:
-    
+
     //     h260->Fill( phiinc*wt ); // +-10 deg
-    
+
     //     if(      phiinc*wt  < -10 )
     //       h261->Fill( tpix*1E4, etaX2 );
     //     else if( phiinc*wt  <  -5 )
@@ -3538,9 +3539,9 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     //       h265->Fill( tpix*1E4, etaX2 );
     //     else
     //       h266->Fill( tpix*1E4, etaX2 );
-    
+
     //     // understand xpix algorithm:
-    
+
     //     if(      xpix < 0.0000 ) h269->Fill( etaX2 );
     //     else if( xpix < 0.0010 ) h270->Fill( etaX2 );
     //     else if( xpix < 0.0020 ) h271->Fill( etaX2 );
@@ -3552,97 +3553,97 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     //     else if( xpix < 0.0080 ) h277->Fill( etaX2 );
     //     else if( xpix < 0.0090 ) h278->Fill( etaX2 );
     //     else if( xpix < 0.0100 ) h279->Fill( etaX2 );
-    
+
     //     if(      etaX2 < -0.3 ) h280->Fill( xpix*1E4 );
     //     else if( etaX2 <  0.3 ) h281->Fill( xpix*1E4 );
     //     else                    h282->Fill( xpix*1E4 );
-    
+
     //}//nrow = 2
-    
+
     //}//pt > 4, ! halfmod
 #endif // DO_TESTS
-    
+
   } //triplet 1+3 -> 2
-  
+
   //------------------------------------------------------------------------
   // triplet 3+2 -> 1:
-  
+
   if(useTriplet23_1 && (n1*n2*n3 > 0) ) {
     if( jdbg ) cout << "  triplet 3+2 -> 1\n";
-    
+
     double f1 = atan2( yPXB1, xPXB1 );//position angle in layer 1
-    
+
     double ax = xPXB3 - xPXB2;
     double ay = yPXB3 - yPXB2;
     double aa = sqrt( ax*ax + ay*ay ); // from 2 to 3
-    
+
     double xmid = 0.5 * ( xPXB2 + xPXB3 );
     double ymid = 0.5 * ( yPXB2 + yPXB3 );
     double bx = xPXB1 - xmid;
     double by = yPXB1 - ymid;
     double bb = sqrt( bx*bx + by*by ); // from mid point to point 1
-    
+
     // Calculate the centre of the helix in xy-projection that
     // transverses the two spacepoints. The points with the same
     // distance from the two points are lying on a line.
     // LAMBDA is the distance between the point in the middle of
     // the two spacepoints and the centre of the helix.
-    
+
     // we already have kap and rho = 1/kap
-    
-    double lam = sqrt( -0.25 + 
+
+    double lam = sqrt( -0.25 +
 		       rho*rho / ( ( xPXB2 - xPXB3 )*( xPXB2 - xPXB3 ) + ( yPXB2 - yPXB3 )*( yPXB2 - yPXB3 ) ) );
-    
+
     // There are two solutions, the sign of kap gives the information
     // which of them is correct:
-    
+
     if( kap > 0 ) lam = -lam;
-    
+
     // ( X0, Y0 ) is the centre of the circle
     // that describes the helix in xy-projection:
-    
+
     double x0 =  0.5*( xPXB2 + xPXB3 ) + lam * ( -yPXB2 + yPXB3 );
     double y0 =  0.5*( yPXB2 + yPXB3 ) + lam * (  xPXB2 - xPXB3 );
-    
+
     // Calculate theta:
-    
+
     double num = ( yPXB3 - y0 ) * ( xPXB2 - x0 ) - ( xPXB3 - x0 ) * ( yPXB2 - y0 );
     double den = ( xPXB2 - x0 ) * ( xPXB3 - x0 ) + ( yPXB2 - y0 ) * ( yPXB3 - y0 );
     double tandip = kap * ( zPXB3 - zPXB2 ) / atan( num / den );
     double udip = atan(tandip);
     //double utet = pihalf - udip;
-    
+
     // To get phi0 in the right interval one must distinguish
     // two cases with positve and negative kap:
-    
+
     double uphi;
     if( kap > 0 ) uphi = atan2( -x0,  y0 );
     else          uphi = atan2(  x0, -y0 );
-    
+
     // The distance of the closest approach DCA depends on the sign
     // of kappa:
-    
+
     double udca;
     if( kap > 0 ) udca = rho - sqrt( x0*x0 + y0*y0 );
     else          udca = rho + sqrt( x0*x0 + y0*y0 );
-    
+
     // angle from first hit to dca point:
-    
+
     double dphi = atan( ( ( xPXB2 - x0 ) * y0 - ( yPXB2 - y0 ) * x0 )
 			/ ( ( xPXB2 - x0 ) * x0 + ( yPXB2 - y0 ) * y0 ) );
-    
+
     double uz0 = zPXB2 + tandip * dphi * rho;
-    
+
     h501->Fill( zPXB1 );
     h502->Fill( uphi - iTrack->phi() );
     h503->Fill( udca - iTrack->d0() );
     h504->Fill( udip - iTrack->lambda() );
     h505->Fill( uz0  - iTrack->dz() );
-    
+
     // extrapolate to inner hit:
     // cirmov
     // we already have rinv = -kap
-    
+
     double cosphi = cos(uphi);
     double sinphi = sin(uphi);
     double dp = -xPXB1*sinphi + yPXB1*cosphi + udca;
@@ -3651,68 +3652,68 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     double dca1 = sa / ( 1 + sqrt(1 + rinv*sa) );// distance to hit 1
     double ud = 1 + rinv*udca;
     double phi1 = atan2( -rinv*xPXB1 + ud*sinphi, rinv*yPXB1 + ud*cosphi );//direction
-    
+
     double phiinc = phi1 - phiN1;//angle of incidence in rphi w.r.t. normal vector
-    
+
     // phiN alternates inward/outward
     // reduce phiinc:
-    
+
     if( phiinc > pihalf ) phiinc -= pi;
     else if( phiinc < -pihalf ) phiinc += pi;
-    
+
     // arc length:
-    
+
     double xx = xPXB1 + dca1 * sin(phi1); // point on track
     double yy = yPXB1 - dca1 * cos(phi1);
-    
+
     double f0 = uphi;//
     double kx = kap*xx;
     double ky = kap*yy;
     double kd = kap*udca;
-    
+
     // Solve track equation for s:
-    
+
     double dx = kx - (kd-1)*sin(f0);
     double dy = ky + (kd-1)*cos(f0);
     double ks = atan2( dx, -dy ) - f0;// turn angle
-    
+
     //---  Limit to half-turn:
-    
+
     if(      ks >  pi ) ks = ks - twopi;
     else if( ks < -pi ) ks = ks + twopi;
-    
+
     double s = ks*rho;// signed
     double uz1 = uz0 + s*tandip; //track z at R1
     double dz1 = zPXB1 - uz1;
-    
+
     if( pt > 4 ) {
       h508->Fill( bb/aa );//lever arm
       h509->Fill( f1*wt, phiinc*wt );
       h510->Fill( dca1*1E4 );
       h511->Fill( dz1*1E4 );
     }
-    
+
     if( pt > 12 ) {
-      
+
       h520->Fill( dca1*1E4 );
       h521->Fill( dz1*1E4 );
-      
+
       if(bb/aa >= 1.10 && bb/aa < 1.27) h520_1->Fill(dca1*1E4);
       else if(bb/aa >= 1.27 && bb/aa < 1.43) h520_2->Fill(dca1*1E4);
       else if(bb/aa >= 1.43 && bb/aa < 1.57) h520_3->Fill(dca1*1E4);
       else if(bb/aa >= 1.57 && bb/aa < 1.80) h520_4->Fill(dca1*1E4);
       else if(bb/aa >= 1.80 && bb/aa < 2.00) h520_5->Fill(dca1*1E4);
-      
+
       if( hp.trackerLayersWithMeasurement() > 8 ) {
 	h530->Fill( dca1*1E4 );
 	h531->Fill( dz1*1E4 );
       }
-      
+
       if( phiinc*wt > -1 && phiinc*wt < 7 ){
 	h540->Fill( dca1*1E4 );
 	h541->Fill( dz1*1E4 );
       }
-      
+
       if( nrow1 == 1 ) h542->Fill( dca1*1E4 );
       else {
 	if( nrow1 == 2 ) h543->Fill( dca1*1E4 );
@@ -3721,11 +3722,11 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  else h545->Fill( dca1*1E4 );
 	}
       }
-      
+
       if( nrow1 == 2 && nrow2 == 2 && nrow3 == 2 ) h546->Fill( dca1*1E4 );
-      
+
     }//pt>12
-    
+
   }
 
   //------------------------------------------------------------------------
@@ -3733,80 +3734,80 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   if(useTriplet12_3 && (n1*n2*n3 > 0)) {
     if( jdbg ) cout << "  triplet 1+2 -> 3\n";
-    
+
     double f3 = atan2( yPXB3, xPXB3 );//position angle in layer 3
-    
+
     double ax = xPXB2 - xPXB1;
     double ay = yPXB2 - yPXB1;
     double aa = sqrt( ax*ax + ay*ay ); // from 1 to 2
-    
+
     double xmid = 0.5 * ( xPXB1 + xPXB2 );
     double ymid = 0.5 * ( yPXB1 + yPXB2 );
     double bx = xPXB3 - xmid;
     double by = yPXB3 - ymid;
     double bb = sqrt( bx*bx + by*by ); // from mid point to point 3
-    
+
     // Calculate the centre of the helix in xy-projection that
     // transverses the two spacepoints. The points with the same
     // distance from the two points are lying on a line.
     // LAMBDA is the distance between the point in the middle of
     // the two spacepoints and the centre of the helix.
-    
+
     // we already have kap and rho = 1/kap
-    
-    double lam = sqrt( -0.25 + 
+
+    double lam = sqrt( -0.25 +
 		       rho*rho / ( ( xPXB1 - xPXB2 )*( xPXB1 - xPXB2 ) + ( yPXB1 - yPXB2 )*( yPXB1 - yPXB2 ) ) );
-    
+
     // There are two solutions, the sign of kap gives the information
     // which of them is correct:
-    
+
     if( kap > 0 ) lam = -lam;
-    
+
     // ( X0, Y0 ) is the centre of the circle
     // that describes the helix in xy-projection:
-    
+
     double x0 =  0.5*( xPXB1 + xPXB2 ) + lam * ( -yPXB1 + yPXB2 );
     double y0 =  0.5*( yPXB1 + yPXB2 ) + lam * (  xPXB1 - xPXB2 );
-    
+
     // Calculate theta:
-    
+
     double num = ( yPXB2 - y0 ) * ( xPXB1 - x0 ) - ( xPXB2 - x0 ) * ( yPXB1 - y0 );
     double den = ( xPXB1 - x0 ) * ( xPXB2 - x0 ) + ( yPXB1 - y0 ) * ( yPXB2 - y0 );
     double tandip = kap * ( zPXB2 - zPXB1 ) / atan( num / den );
     double udip = atan(tandip);
     //double utet = pihalf - udip;
-    
+
     // To get phi0 in the right interval one must distinguish
     // two cases with positve and negative kap:
-    
+
     double uphi;
     if( kap > 0 ) uphi = atan2( -x0,  y0 );
     else          uphi = atan2(  x0, -y0 );
-    
+
     // The distance of the closest approach DCA depends on the sign
     // of kappa:
-    
+
     double udca;
     if( kap > 0 ) udca = rho - sqrt( x0*x0 + y0*y0 );
     else          udca = rho + sqrt( x0*x0 + y0*y0 );
-    
+
     // angle from first hit to dca point:
-    
+
     double dphi = atan( ( ( xPXB1 - x0 ) * y0 - ( yPXB1 - y0 ) * x0 )
 			/ ( ( xPXB1 - x0 ) * x0 + ( yPXB1 - y0 ) * y0 ) );
-    
+
     double uz0 = zPXB1 + tandip * dphi * rho;
-    
+
     i501->Fill( zPXB3 );
     i502->Fill( uphi - iTrack->phi() );
     i503->Fill( udca - iTrack->d0() );
     i504->Fill( udip - iTrack->lambda() );
     i505->Fill( uz0  - iTrack->dz() );
-    
+
     // extrapolate to outer hit:
     // cirmov
     // we already have rinv = -kap
-    
+
     double cosphi = cos(uphi);
     double sinphi = sin(uphi);
     double dp = -xPXB3*sinphi + yPXB3*cosphi + udca;
@@ -3815,40 +3816,40 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     double dca3 = sa / ( 1 + sqrt(1 + rinv*sa) );// distance to hit 3
     double ud = 1 + rinv*udca;
     double phi3 = atan2( -rinv*xPXB3 + ud*sinphi, rinv*yPXB3 + ud*cosphi );//track direction
-    
+
     double phiinc = phi3 - phiN3;//angle of incidence in rphi w.r.t. normal vector
-    
+
     // phiN alternates inward/outward
     // reduce phiinc:
-    
+
     if( phiinc > pihalf ) phiinc -= pi;
     else if( phiinc < -pihalf ) phiinc += pi;
-    
+
     // arc length:
-    
+
     double xx = xPXB3 + dca3 * sin(phi3); // point on track
     double yy = yPXB3 - dca3 * cos(phi3);
-    
+
     double f0 = uphi;//
     double kx = kap*xx;
     double ky = kap*yy;
     double kd = kap*udca;
-    
+
     // Solve track equation for s:
-    
+
     double dx = kx - (kd-1)*sin(f0);
     double dy = ky + (kd-1)*cos(f0);
     double ks = atan2( dx, -dy ) - f0;// turn angle
-    
+
     //---  Limit to half-turn:
-    
+
     if(      ks >  pi ) ks = ks - twopi;
     else if( ks < -pi ) ks = ks + twopi;
-    
+
     double s = ks*rho;// signed
     double uz3 = uz0 + s*tandip; //track z at R3
     double dz3 = zPXB3 - uz3;
-    
+
     if( pt > 4 ) {
       i507->Fill( bb/aa );//lever arm
       i508->Fill( f3*wt, bb/aa );//lever arm
@@ -3856,18 +3857,18 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
       i510->Fill( dca3*1E4 );
       i511->Fill( dz3*1E4 );
     }
-    
+
     if( pt > 12 ) {
-      
+
       i520->Fill( dca3*1E4 );
       i521->Fill( dz3*1E4 );
-      
+
       if(bb/aa >= 1.10 && bb/aa < 1.27) i520_1->Fill(dca3*1E4);
       else if(bb/aa >= 1.27 && bb/aa < 1.43) i520_2->Fill(dca3*1E4);
       else if(bb/aa >= 1.43 && bb/aa < 1.57) i520_3->Fill(dca3*1E4);
       else if(bb/aa >= 1.57 && bb/aa < 1.80) i520_4->Fill(dca3*1E4);
       else if(bb/aa >= 1.80 && bb/aa < 2.00) i520_5->Fill(dca3*1E4);
-      
+
       if( abs( phi3 - phiN3 ) < pihalf ) // outward facing module
 	if(zPXB3 > 0)
 	  i520_out_zplus->Fill(dca3*1E4);
@@ -3878,7 +3879,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  i520_in_zplus->Fill(dca3*1E4);
 	else
 	  i520_in_zminus->Fill(dca3*1E4);
-      
+
     }//pt>12
 
   } // end if useTriplet12_3
@@ -3896,7 +3897,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     for( vector<TransientTrackingRecHit::RecHitPointer>::iterator iTTRH = myTTRHvec.begin();
 	 iTTRH != myTTRHvec.end(); ++iTTRH ) {
-      
+
       if( idbg == 9 ) {
 	cout << "  hit " << distance( (vector<TransientTrackingRecHit::RecHitPointer>::iterator)myTTRHvec.begin(), iTTRH );
 	if( (*iTTRH)->hit()->isValid() ){
@@ -3906,7 +3907,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	}
 	else cout << " not valid\n";
       }
-      
+
       int iuse = 1;
       if( (*iTTRH)->hit()->isValid() ){
 	if( (*iTTRH)->hit()->geographicalId().subdetId() == 1 ){ //PXB
@@ -3915,22 +3916,22 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
       }
       if( iuse ) nyTTRHvec.push_back( *iTTRH );
     }//copy
-    
+
     if( idbg ) {
       cout << "  all hits " << myTTRHvec.size();
       cout << ", without PXB2 " << nyTTRHvec.size();
       cout << endl;
     }
-    
+
     // re-fit without PXB2:
     std::vector<Trajectory> refitTrajectoryVec2 = theFitter->fit( seed, nyTTRHvec, initialTSOS );
-    
-    if( refitTrajectoryVec2.size() > 0 ) { // should be either 0 or 1            
-      
+
+    if( refitTrajectoryVec2.size() > 0 ) { // should be either 0 or 1
+
       refit2valid = 1;
       const Trajectory& refitTrajectory2 = refitTrajectoryVec2.front();
       kap2 = refitTrajectory2.geometricalInnermostState().transverseCurvature();
-      
+
       if( idbg ) {
 	// Trajectory.measurements:
 	Trajectory::DataContainer refitTMvec2 = refitTrajectory2.measurements();
@@ -3941,7 +3942,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  if( iTTRH->hit()->isValid() ){
 	    cout << "  " << iTTRH->geographicalId().subdetId();
 	  }
-	} 
+	}
 	cout << endl;
 	cout << "  ndof " << refitTrajectory2.ndof();
 	cout << ", found " << refitTrajectory2.foundHits();
@@ -3957,86 +3958,86 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	cout << ", phi " << refitTrajectory2.geometricalInnermostState().globalPosition().barePhi()*wt;
 	cout << endl;
       } // idbg
-      
+
     } // size>0
     else  if( idbg ) cout << "  no refit\n";
-    
+
     if(refit2valid ){
-    
+
       if( jdbg ) cout << "  triplet 1+3 -> 2 refitted\n";
-    
+
       double f2 = atan2( yPXB2, xPXB2 );//position angle in layer 2
-      
+
       double ax = xPXB3 - xPXB1;
       double ay = yPXB3 - yPXB1;
       double aa = sqrt( ax*ax + ay*ay ); // from 1 to 3
-    
+
       double xmid = 0.5 * ( xPXB1 + xPXB3 );
       double ymid = 0.5 * ( yPXB1 + yPXB3 );
       double bx = xPXB2 - xmid;
       double by = yPXB2 - ymid;
       double bb = sqrt( bx*bx + by*by ); // from mid point to point 2
-      
+
       double rho2 = 1/kap2;
-      
+
       // Calculate the centre of the helix in xy-projection that
       // transverses the two spacepoints. The points with the same
       // distance from the two points are lying on a line.
       // LAMBDA is the distance between the point in the middle of
       // the two spacepoints and the centre of the helix.
-      
-      double lam = sqrt( -0.25 + 
+
+      double lam = sqrt( -0.25 +
 			 rho2*rho2 / ( ( xPXB1 - xPXB3 )*( xPXB1 - xPXB3 ) + ( yPXB1 - yPXB3 )*( yPXB1 - yPXB3 ) ) );
-      
+
       // There are two solutions, the sign of kap gives the information
       // which of them is correct:
-      
+
       if( kap2 > 0 ) lam = -lam;
-      
+
       // ( X0, Y0 ) is the centre of the circle
       // that describes the helix in xy-projection:
-      
+
       double x0 =  0.5*( xPXB1 + xPXB3 ) + lam * ( -yPXB1 + yPXB3 );
       double y0 =  0.5*( yPXB1 + yPXB3 ) + lam * (  xPXB1 - xPXB3 );
-      
+
       // Calculate theta:
-      
+
       double num = ( yPXB3 - y0 ) * ( xPXB1 - x0 ) - ( xPXB3 - x0 ) * ( yPXB1 - y0 );
       double den = ( xPXB1 - x0 ) * ( xPXB3 - x0 ) + ( yPXB1 - y0 ) * ( yPXB3 - y0 );
       double tandip = kap2 * ( zPXB3 - zPXB1 ) / atan( num / den );
       double udip = atan(tandip);
       //double utet = pihalf - udip;
-      
+
       // To get phi0 in the right interval one must distinguish
       // two cases with positve and negative kap:
-      
+
       double uphi;
       if( kap2 > 0 ) uphi = atan2( -x0,  y0 );
       else          uphi = atan2(  x0, -y0 );
-      
+
       // The distance of the closest approach DCA depends on the sign
       // of kappa:
-      
+
       double udca;
       if( kap2 > 0 ) udca = rho2 - sqrt( x0*x0 + y0*y0 );
       else          udca = rho2 + sqrt( x0*x0 + y0*y0 );
-      
+
       // angle from first hit to dca point:
-      
+
       double dphi = atan( ( ( xPXB1 - x0 ) * y0 - ( yPXB1 - y0 ) * x0 )
 			  / ( ( xPXB1 - x0 ) * x0 + ( yPXB1 - y0 ) * y0 ) );
-      
+
       double uz0 = zPXB1 + tandip * dphi * rho2;
-      
+
       h451->Fill( zPXB2 );
       h452->Fill( uphi - iTrack->phi() );
       h453->Fill( udca - iTrack->d0() );
       h454->Fill( udip - iTrack->lambda() );
       h455->Fill( uz0  - iTrack->dz() );
-      
+
       // interpolate to middle hit:
       // cirmov
-      
+
       double rinv2 = -kap2;
       double cosphi = cos(uphi);
       double sinphi = sin(uphi);
@@ -4046,89 +4047,89 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
       double dca2 = sa / ( 1 + sqrt(1 + rinv2*sa) );// distance to hit 2
       double ud = 1 + rinv2*udca;
       double phi2 = atan2( -rinv2*xPXB2 + ud*sinphi, rinv2*yPXB2 + ud*cosphi );//direction
-      
+
       double phiinc = phi2 - phiN2;//angle of incidence in rphi w.r.t. normal vector
-      
+
       // phiN alternates inward/outward
       // reduce phiinc:
-      
+
       if( phiinc > pihalf ) phiinc -= pi;
       else if( phiinc < -pihalf ) phiinc += pi;
-      
+
       // arc length:
-      
+
       double xx = xPXB2 + dca2 * sin(phi2); // point on track
       double yy = yPXB2 - dca2 * cos(phi2);
-      
+
       double f0 = uphi;//
       double kx = kap2*xx;
       double ky = kap2*yy;
       double kd = kap2*udca;
-      
+
       // Solve track equation for s:
-      
+
       double dx = kx - (kd-1)*sin(f0);
       double dy = ky + (kd-1)*cos(f0);
       double ks = atan2( dx, -dy ) - f0;// turn angle
-      
+
       //---  Limit to half-turn:
-      
+
       if(      ks >  pi ) ks = ks - twopi;
       else if( ks < -pi ) ks = ks + twopi;
-      
+
       double s = ks*rho2;// signed
       double uz2 = uz0 + s*tandip; //track z at R2
       double dz2 = zPXB2 - uz2;
-      
+
       if( pt > 4 ) {
 	h456->Fill( (kap2 - kap) / kap );
 	h459->Fill( f2*wt, phiinc*wt );
 	h460->Fill( dca2*1E4 );
 	h461->Fill( dz2*1E4 );
       }
-      
+
       if( pt > 12 ) {
-	
+
 	h470->Fill( dca2*1E4 );
 	h471->Fill( dz2*1E4 );
-	
+
 	if(bb/aa < 0.015) h470_1->Fill(dca2*1E4);
 	else if(bb/aa >= 0.015 && bb/aa < 0.065) h470_2->Fill(dca2*1E4);
 	else h470_3->Fill(dca2*1E4);
-	
+
 	if( hp.trackerLayersWithMeasurement() > 8 ) {
 	  h480->Fill( dca2*1E4 );
 	  h481->Fill( dz2*1E4 );
 	}
-	
+
 	if( phiinc*wt > -1 && phiinc*wt < 7 ){
 	  h490->Fill( dca2*1E4 );
 	  h491->Fill( dz2*1E4 );
 	}
-      
+
       }//pt>12
-    
-    } // 
-   
+
+    } //
+
   } //triplet 1+3 -> 2 refitted
 
 
   //-------------------------------------------------------------------------------
   // This is the main track refit using all rechits
-  // The refit is needed to propaget hits to the surface 
+  // The refit is needed to propaget hits to the surface
   // refit the track:
-  // Use this part to compare recHits with the propagated hit 
+  // Use this part to compare recHits with the propagated hit
 
-  // Refit  
+  // Refit
   std::vector<Trajectory> refitTrajectoryCollection = theFitter->fit( seed, coTTRHvec, initialTSOS );
 
   if( refitTrajectoryCollection.size() <= 0) {
-    if(jdbg || idbg) cout<<" refitcollection is empyt "<<endl;            
-  } else { // should be either 0 or 1            
+    if(jdbg || idbg) cout<<" refitcollection is empyt "<<endl;
+  } else { // should be either 0 or 1
     const Trajectory& refitTrajectory = refitTrajectoryCollection.front();
     // Trajectory.measurements:
     Trajectory::DataContainer refitTMs = refitTrajectory.measurements();
-    
+
     // hits in subDet:
     if( idbg ) {
       cout << "  refitTrajectory has " << refitTMs.size() <<" hits, layers in bpix ";
@@ -4137,7 +4138,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  TransientTrackingRecHit::ConstRecHitPointer iTTRH = iTM->recHit();
 	  auto detId = iTTRH->geographicalId();
 	  auto subDet = detId.subdetId();
-	  if(subDet==1) { // pixels 
+	  if(subDet==1) { // pixels
 	    if( iTTRH->hit()->isValid() ) cout << "  " << PXBDetId(detId).layer();
 	  }
 	}
@@ -4152,7 +4153,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
       }//dbg
 
 
-      // Loop over trajectory hits. 
+      // Loop over trajectory hits.
       for( Trajectory::DataContainer::iterator iTM = refitTMs.begin();
 	   iTM != refitTMs.end(); iTM++ ) {
 
@@ -4170,7 +4171,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 	int ilay = PXBDetId( detId ).layer();
 
-	// Here we start with comparisons 
+	// Here we start with comparisons
 	// Comparison I, rehit versus predicatedState
 	Surface::LocalPoint lpHit = iTM->recHit()->localPosition();
 	double xHit = lpHit.x(); // primary measurement direction
@@ -4184,7 +4185,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	}
 
 	// HERE
-	const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( iTM->recHit()->hit() ); 
+	const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( iTM->recHit()->hit() );
 	h424->Fill(pixhit->clusterProbability(0));
 	h425->Fill(pixhit->clusterProbability(2));
 
@@ -4199,18 +4200,18 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	// Try a better prediction. For bpix it gives the same or even worse predictions.
 	TrajectoryStateOnSurface combinedPredictedState =
 	  TrajectoryStateCombiner().combine( iTM->forwardPredictedState(), iTM->backwardPredictedState() );
-	
+
 	if( !combinedPredictedState.isValid() ) {
 	  cout<<" combinedpredicted state not valid"<<endl;
 	  continue;
-	} 
+	}
 
-	// Use better hit predictions 
+	// Use better hit predictions
 	// use Topology. no effect in PXB, essential in TID, TEC
 	const Topology* theTopology = &(iTM->recHit()->detUnit()->topology() );
-	MeasurementPoint combinedPredictedMeasurement = 
+	MeasurementPoint combinedPredictedMeasurement =
 	  theTopology->measurementPosition( combinedPredictedState.localPosition() );
-	
+
 	// Comaprision II
 	dx = xHit - combinedPredictedState.localPosition().x(); //x = primary measurement
 	dy = yHit - combinedPredictedState.localPosition().y(); //
@@ -4237,7 +4238,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	PixelTopology & pixelTopol = (PixelTopology&) iTM->recHit()->detUnit()->topology();
 	double xptch = pixelTopol.pitch().first;
 	double yptch = pixelTopol.pitch().second;
-	
+
 #ifdef NOT_USED
 	double R = combinedPredictedState.globalPosition().perp();
 	double F = combinedPredictedState.globalPosition().barePhi();
@@ -4252,7 +4253,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  cout << setprecision(4);
 	  cout << endl;
 	}
-#endif 
+#endif
 
 	// Comparison III, GO THROUGH MEASUREMENT
 	double xx = hitMeasurement.x();
@@ -4260,9 +4261,9 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	dx = xx - combinedPredictedMeasurement.x(); //in units of pitch
 	dy = yy - combinedPredictedMeasurement.y(); //in units of pitch
 	MeasurementPoint mp( xx, yy );
-	Surface::LocalPoint lp = theTopology->localPosition( mp );  // must be the same as lpHit
-	const GeomDet * myGeomDet = iTM->recHit()->det(); // makes no difference in TEC
-	Surface::GlobalPoint gp1 = myGeomDet->toGlobal( lp );
+	// Surface::LocalPoint lp = theTopology->localPosition( mp );  // must be the same as lpHit
+	// const GeomDet * myGeomDet = iTM->recHit()->det(); // makes no difference in TEC
+	//Surface::GlobalPoint gp1 = myGeomDet->toGlobal( lp );
 	//dx = dx * xptch;//convert back into [cm] using local pitch
 	//dy = dy * yptch;//[cm]
 	if(jdbg && ilay==1) cout<<" comparison III "<<hitMeasurement.x()*xptch<<" "<<hitMeasurement.x()*yptch
@@ -4292,7 +4293,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	double gY = gp.y();
 	double gZ = gp.z();
 
-	if(jdbg && ilay==1) 
+	if(jdbg && ilay==1)
 	  cout<<" from measurement "<<lp.x()<<" "<<lp.y()<<" "<<gX<<" "<<gY<<" "<<gZ<<endl;
 
 	double tmp1 = xHit - lp.x();
@@ -4300,15 +4301,15 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	h420_mod5->Fill( tmp1*1E4 );
 	h421_mod5->Fill( tmp2*1E4 );
 
-	
-	tmp1 = sqrt( (gp.x() - gp1.x()) * (gp.x() - gp1.x()) + 
-		     (gp.y() - gp1.y()) * (gp.y() - gp1.y()) );	
+
+	tmp1 = sqrt( (gp.x() - gp1.x()) * (gp.x() - gp1.x()) +
+		     (gp.y() - gp1.y()) * (gp.y() - gp1.y()) );
 	tmp2 = gp.z() - gp1.z();
 	h420_mod6->Fill( tmp1*1E4 );
 	h421_mod6->Fill( tmp2*1E4 );
 
 
- 	double phiN = iTM->recHit()->det()->surface().normalVector().barePhi();//normal vector	
+ 	double phiN = iTM->recHit()->det()->surface().normalVector().barePhi();//normal vector
 	//2012: overwrite PXB global coordinates once more, using topology:
 	// This is the main place where the hit measurements are defined
 
@@ -4317,12 +4318,12 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  xPXB1 = gX;
 	  yPXB1 = gY;
 	  zPXB1 = gZ;
-	  if(jdbg ) 
+	  if(jdbg )
 	    cout<<" lay 1 after refit "<<n11<<" "<<xPXB1<<" "<<yPXB1<<" "<<zPXB1<<" "<<phiN<<endl;
-	  
+
 	} else if( ilay == 2 ) {
 	  //n12++;
-	  if(jdbg) 
+	  if(jdbg)
 	    cout<<" lay 2 before refit "<<n2<<" "<<xPXB2<<" "<<yPXB2<<" "<<zPXB2<<" "<<phiN<<endl;
 	  if(n2==1) {  // do only if one hit in layer 2
 	    if(fabs(gX-xPXB2)>0.0001) cout<<" refitted point is different x "<<gX<<" "<<xPXB2<<endl;
@@ -4335,24 +4336,24 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  geomDet2 = (TrackerGeomDet*) myGeomDet;
 	  //geomDet2 = (TrackerGeomDet*) det2;
 	  det2 = myGeomDet;
-	  phiN2=phiN; 
-	  if(jdbg) 
+	  phiN2=phiN;
+	  if(jdbg)
 	    cout<<" lay 2 after refit "<<n12<<" "<<xPXB2<<" "<<yPXB2<<" "<<zPXB2<<" "<<phiN<<endl;
 	} else if( ilay == 3 ) {
 	  //n13++;
 	  xPXB3 = gX;
 	  yPXB3 = gY;
 	  zPXB3 = gZ;
-	  if(jdbg) 
+	  if(jdbg)
 	    cout<<" lay 3 after refit "<<n13<<" "<<xPXB3<<" "<<yPXB3<<" "<<zPXB3<<" "<<phiN<<endl;
-	} // layer 
+	} // layer
 #endif // DO_TESTS
 
-      } //loop iTM, end the tracjectory hit conatiner 
+      } //loop iTM, end the tracjectory hit conatiner
 
   } // if refitted trajectory
-    
-  // Keep the code below for special tests 
+
+  // Keep the code below for special tests
 
 #ifdef NOT_USED
   //------------------------------------------------------------------------
@@ -4385,7 +4386,7 @@ void PxlBPix::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
       // we already have kap and rho = 1/kap
 
-      double lam = sqrt( -0.25 + 
+      double lam = sqrt( -0.25 +
 			 rho*rho / ( ( xb - xPXB2 )*( xb - xPXB2 ) + ( yb - yPXB2 )*( yb - yPXB2 ) ) );
 
       // There are two solutions, the sign of kap gives the information
