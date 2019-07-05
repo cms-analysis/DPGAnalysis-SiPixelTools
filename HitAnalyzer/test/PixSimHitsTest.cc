@@ -121,7 +121,7 @@ private:
   //TProfile *hp1, *hp2, *hp3, *hp4, *hp5;
 
   TH1D *henergy1, *henergy2, *henergy3, *henergy4; 
-  TProfile *henergyP1, *henergyP2, *henergyP3, *henergyP4; 
+  TH1D *henergyP1, *henergyP2, *henergyP3, *henergyP4; 
 
 
 #ifdef CHECK_GEOM
@@ -307,13 +307,13 @@ void PixSimHitsTest::beginJob() {
 
 
    henergy1 = fs->make<TH1D>( "henergy1", "Eloss l1", 64,-26.0,26.0);
-   henergyP1 = fs->make<TProfile>( "henergyP1", "Eloss l1", 64,-26.0,26.0,0.,10000.);
    henergy2 = fs->make<TH1D>( "henergy2", "Eloss l2", 64,-26.0,26.0);
-   henergyP2 = fs->make<TProfile>( "henergyP2", "Eloss l2", 64,-26.0,26.0,0.,10000.);
    henergy3 = fs->make<TH1D>( "henergy3", "Eloss l3", 64,-26.0,26.0);
-   henergyP3 = fs->make<TProfile>( "henergyP3", "Eloss l3", 64,-26.0,26.0,0.,10000.);
    henergy4 = fs->make<TH1D>( "henergy4", "Eloss l4", 64,-26.0,26.0);
-   henergyP4 = fs->make<TProfile>( "henergyP4", "Eloss l4", 64,-26.0,26.0,0.,10000.);
+   henergyP1 = fs->make<TH1D>( "henergyP1", "Eloss l1",100,0.,4000.);
+   henergyP2 = fs->make<TH1D>( "henergyP2", "Eloss l2",100,0.,4000.);
+   henergyP3 = fs->make<TH1D>( "henergyP3", "Eloss l3",100,0.,4000.);
+   henergyP4 = fs->make<TH1D>( "henergyP4", "Eloss l4",100,0.,4000.);
 
 #ifdef CHECK_GEOM
     // To get the module position
@@ -347,14 +347,15 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
   iSetup.get<TrackerTopologyRcd>().get(tTopo);
   const TrackerTopology* tt = tTopo.product();
 
-  // Get input data
   int totalNumOfSimHits = 0;
   int totalNumOfSimHits1 = 0;
   int totalNumOfSimHits2 = 0;
   int totalNumOfSimHits3 = 0;
   int totalNumOfSimHits4 = 0;
   int goodHits = 0; // above pt=0.1GeV
+  float energy1=0,energy2=0,energy3=0,energy4=0; 
 
+  // Get input data
    // To count simhits per det module 
    //typedef std::map<unsigned int, std::vector<PSimHit>,
    //std::less<unsigned int>> simhit_map;
@@ -526,7 +527,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
      bool moduleDirectionUp = ( z < z2 ); // for positive direction z2>z
 
      float path = sqrt(pow((x-x2),2) + pow((y-y2),2) + pow((z-z2),2)); // total path of the track
-     float factor = 0.001/dz; // normalize to 1mm
+     //float factor = 0.001/dz; // normalize to 1mm
 
      float xpos = (x+x2)/2.;
      float ypos = (y+y2)/2.;
@@ -645,8 +646,8 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 heloss1->Fill(eloss);
 	 if(abs(pid)==11) heloss1e->Fill(eloss);
 	 else heloss1mu->Fill(eloss);
-	 henergy1->Fill(gloZ,eloss*3.61);
-	 henergyP1->Fill(gloZ,eloss*3.61);
+	 henergy1->Fill(gloZ,(eloss*3.61));
+	 energy1 += eloss*3.61;
 	 hladder1id->Fill(float(ladder));
 	 hz1id->Fill(float(module));
 	 hthick1->Fill(dz);
@@ -689,7 +690,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 if(abs(pid)==11) heloss2e->Fill(eloss);
 	 else heloss2mu->Fill(eloss);	 
 	 henergy2->Fill(gloZ,eloss*3.61);
-	 henergyP2->Fill(gloZ,eloss*3.61);
+	 energy2 += eloss*3.61;
 	 hladder2id->Fill(float(ladder));
 	 hz2id->Fill(float(module));
 	 hthick2->Fill(dz);
@@ -722,7 +723,8 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 if(abs(pid)==11) heloss3e->Fill(eloss);
 	 else heloss3mu->Fill(eloss);	 
 	 henergy3->Fill(gloZ,eloss*3.61);
-	 henergyP3->Fill(gloZ,eloss*3.61);
+	 energy3 += eloss*3.61;
+	 //henergyP3->Fill(gloZ,eloss*3.61);
 	 
 	 hladder3id->Fill(float(ladder));
 	 hz3id->Fill(float(module));
@@ -755,7 +757,7 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
 	 if(abs(pid)==11) heloss4e->Fill(eloss);
 	 else heloss4mu->Fill(eloss);	 
 	 henergy4->Fill(gloZ,eloss*3.61);
-	 henergyP4->Fill(gloZ,eloss*3.61);
+	 energy4 += eloss*3.61;
 	 
 	 hladder4id->Fill(float(ladder));
 	 hz4id->Fill(float(module));
@@ -791,6 +793,12 @@ void PixSimHitsTest::analyze(const edm::Event& iEvent,
    hsimHitsPerLay4 ->Fill(float(totalNumOfSimHits4));
    hsimHits->Fill(float(totalNumOfSimHits));
    hsimHitsGood->Fill(float(goodHits));
+
+   henergyP1->Fill(energy1);
+   henergyP2->Fill(energy2);
+   henergyP3->Fill(energy3);
+   henergyP4->Fill(energy4);
+
 
    int numberOfDetUnits1 = SimHitMap1.size();
    int numberOfDetUnits2 = SimHitMap2.size();
