@@ -9,5 +9,5 @@ https://github.com/cms-analysis/DPGAnalysis-SiPixelTools/blob/master/PixelDBTool
 so the first step is to overwrite these files in the CMSSW CondTools/SiPixel/test/
 then modify
 https://github.com/cms-analysis/DPGAnalysis-SiPixelTools/blob/master/PixelDBTools/test/0SiPixelBadModuleByHandBuilder_cfg_Run305064.py
-ines 30 (sqlite filename, make sure that this didnt exists in the folder where you're working), line 33 (tagname), line 45 (input file list) in yourFileName.py
-and then you have to have filelist similar to SiPixelQuality_phase1_Run3Beginning_forDigitizer_fixed.txt which I believe is actually the DQM naming convention where there is a whitespace between the ROC and it's number. This will then create an sqlite file which contains the bad components you put in the txt file.
+lines 30 (sqlite filename, make sure that this didnt exists in the folder where you're working), line 33 (tagname), line 45 (input file list) in 0SiPixelBadModuleByHandBuilder_cfg_Run305064.py
+and then you have to have filelist similar to SiPixelQuality_phase1_Run3Beginning_forDigitizer_fixed.txt which is a list according to the DQM naming convention where there is a whitespace between the ROC and its number.
