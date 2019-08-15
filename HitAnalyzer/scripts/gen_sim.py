@@ -48,8 +48,8 @@ process.FEVTDEBUGoutput = cms.OutputModule("PoolOutputModule",
         filterName = cms.untracked.string('')
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-    fileName = cms.untracked.string('simHits1_eta0p1.root'),
-
+    #fileName = cms.untracked.string('simHits2_eta0p1.root'),
+    fileName = cms.untracked.string('s.root'),
     outputCommands = process.FEVTDEBUGEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
 )
@@ -82,12 +82,12 @@ process.generator = cms.EDProducer("FlatRandomPtGunProducer",
 #process.Realistic25ns13TeVEarly2017CollisionSmearingParameters.SigmaZ = 0.0
 
 # Init random numbers - 1st file    
-process.RandomNumberGeneratorService.generator.initialSeed = 1
+#process.RandomNumberGeneratorService.generator.initialSeed = 1
 # next files 
 #process.RandomNumberGeneratorService.generator.initialSeed = 2
 #process.RandomNumberGeneratorService.generator.initialSeed = 3
 #process.RandomNumberGeneratorService.generator.initialSeed = 4
-#process.RandomNumberGeneratorService.generator.initialSeed = 5
+process.RandomNumberGeneratorService.generator.initialSeed = 5
 
 
 # Path and EndPath definitions

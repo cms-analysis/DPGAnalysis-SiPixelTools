@@ -31,7 +31,7 @@ process.load("Configuration.StandardSequences.Reconstruction_cff")
 # Refitter
 process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -48,8 +48,9 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
 
 
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
- '/store/user/kotlinski/MC/mu_pt100/simhits/simHits1.root'
+# '/store/user/kotlinski/MC/mu_pt100/simhits/simHits1.root'
 # '/store/user/kotlinski/MC/mu_pt100/simhits/simHits1_2018design.root'
+ '/store/user/kotlinski/MC/mu_pt100/simhits/simHits2_eta0p1.root'
 
 # '/store/user/kotlinski/MC/n/simhits/simHits_n_100MeV.root'
 # '/store/user/kotlinski/MC/n/simhits/simHits_n_10MeV.root'
@@ -265,12 +266,16 @@ process.TFileService = cms.Service("TFileService",
 
 # go through raw
 #process.p1 = cms.Path(process.b*process.bf)
-
-#process.p1 = cms.Path(process.b*process.bf*process.pdigi_valid*process.a0)
-
+#process.p1 = cms.Path(process.b*process.bf*process.pdigi_valid)
+process.p1 = cms.Path(process.b*process.bf*process.pdigi_valid*process.a0)
+#process.p1 = cms.Path(process.b*process.bf*process.pdigi_valid*process.SimL1Emulator)
+#process.p1 = cms.Path(process.b*process.bf*process.pdigi_valid*process.SimL1Emulator*process.DigiToRaw)
 #process.p1 = cms.Path(process.b*process.bf*process.pdigi_valid*process.SimL1Emulator*process.DigiToRaw*process.RawToDigi*process.a)
 
-process.p1 = cms.Path(process.b*process.bf*process.pdigi_valid*process.SimL1Emulator*process.DigiToRaw*process.RawToDigi*process.a*process.reconstruction*process.d*process.c)
+#process.p1 = cms.Path(process.b*process.bf*process.pdigi_valid*process.SimL1Emulator*process.DigiToRaw*process.RawToDigi*process.a*process.reconstruction*process.d*process.c)
+
+# no histograming 
+#process.p1 = cms.Path(process.pdigi_valid*process.SimL1Emulator*process.DigiToRaw*process.RawToDigi*process.reconstruction)
 
 #process.outpath = cms.EndPath(process.o1)
 

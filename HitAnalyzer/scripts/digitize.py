@@ -31,11 +31,12 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
     dropDescendantsOfDroppedBranches = cms.untracked.bool(False),
     fileNames = cms.untracked.vstring(
-        'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits1.root'
-        #'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits2.root'
-#        'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits3.root'
-#        'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits4.root'
-#        'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits5.root'
+#        '/store/user/kotlinski/MC/mu_pt100/simhits/simHits1_eta0p1.root'
+#        '/store/user/kotlinski/MC/mu_pt100/simhits/simHits2_eta0p1.root'
+#        '/store/user/kotlinski/MC/mu_pt100/simhits/simHits3_eta0p1.root'
+#        '/store/user/kotlinski/MC/mu_pt100/simhits/simHits4_eta0p1.root'
+        '/store/user/kotlinski/MC/mu_pt100/simhits/simHits5_eta0p1.root'
+#        'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits1.root'
         ),
     inputCommands = cms.untracked.vstring('keep *', 
         'drop *_genParticles_*_*', 
@@ -77,15 +78,9 @@ process.output = cms.OutputModule("PoolOutputModule",
         filterName = cms.untracked.string('')
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(1048576),
-    #fileName = cms.untracked.string('digis4.root'),
-    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/tmp.root'),
+    fileName = cms.untracked.string('d.root'),
 #    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw1_thr1k.root'),
 #    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw1.root'),
-    #fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw2.root'),
-#    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw3.root'),
-#    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw4.root'),
-#    fileName = cms.untracked.string('/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw5.root'),
-    #outputCommands = process.FEVTDEBUGHLTEventContent.outputCommands,
     outputCommands = process.FEVTDEBUGEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
 )

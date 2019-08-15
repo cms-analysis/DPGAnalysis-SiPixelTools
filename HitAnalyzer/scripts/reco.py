@@ -28,8 +28,14 @@ process.maxEvents = cms.untracked.PSet(
 # Input source
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
+#       '/store/user/kotlinski/MC/mu_pt100/raw/raw1_eta0p1.root'
+#       '/store/user/kotlinski/MC/mu_pt100/raw/raw2_eta0p1.root'
+       '/store/user/kotlinski/MC/mu_pt100/raw/raw3_eta0p1.root'
+#       '/store/user/kotlinski/MC/mu_pt100/raw/raw4_eta0p1.root'
+#       '/store/user/kotlinski/MC/mu_pt100/raw/raw5_eta0p1.root'
+
         #'file:digis4.root'
-       'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw1_thr1k.root'
+#       'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw1_thr1k.root'
 #       'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw1.root'
 #       'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw2.root'
 #       'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw3.root'
@@ -59,7 +65,8 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
     fileName = cms.untracked.string(
-        '/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/reco/reco1_thr1kclu10.root'
+        'r.root'
+#        '/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/reco/reco1_thr1kclu10.root'
 #        '/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/reco/reco1_clu10.root'
 #        '/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/reco/reco1.root'
 #        '/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/reco/reco2.root'

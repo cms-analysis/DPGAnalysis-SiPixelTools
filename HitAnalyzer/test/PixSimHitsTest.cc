@@ -310,10 +310,10 @@ void PixSimHitsTest::beginJob() {
    henergy2 = fs->make<TH1D>( "henergy2", "Eloss l2", 64,-26.0,26.0);
    henergy3 = fs->make<TH1D>( "henergy3", "Eloss l3", 64,-26.0,26.0);
    henergy4 = fs->make<TH1D>( "henergy4", "Eloss l4", 64,-26.0,26.0);
-   henergyP1 = fs->make<TH1D>( "henergyP1", "Eloss l1",100,0.,4000.);
-   henergyP2 = fs->make<TH1D>( "henergyP2", "Eloss l2",100,0.,4000.);
-   henergyP3 = fs->make<TH1D>( "henergyP3", "Eloss l3",100,0.,4000.);
-   henergyP4 = fs->make<TH1D>( "henergyP4", "Eloss l4",100,0.,4000.);
+   henergyP1 = fs->make<TH1D>( "henergyP1", "Eloss l1",100,0.,50000.);
+   henergyP2 = fs->make<TH1D>( "henergyP2", "Eloss l2",100,0.,50000.);
+   henergyP3 = fs->make<TH1D>( "henergyP3", "Eloss l3",100,0.,50000.);
+   henergyP4 = fs->make<TH1D>( "henergyP4", "Eloss l4",100,0.,50000.);
 
 #ifdef CHECK_GEOM
     // To get the module position
