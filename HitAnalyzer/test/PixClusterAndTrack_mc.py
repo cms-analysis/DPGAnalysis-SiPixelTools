@@ -5,6 +5,7 @@
 import FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
 process = cms.Process("cluTest",eras.Run2_2017)
+#process = cms.Process("cluTest",eras.Run3)
                    
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_38T_cff")
@@ -13,7 +14,7 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
 # 
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '') # no misalignment 
-process.GlobalTag = GlobalTag(process.GlobalTag, '102X_upgrade2018_realistic_v10', '') # no misalignment 
+#process.GlobalTag = GlobalTag(process.GlobalTag, '102X_upgrade2018_realistic_v10', '') # no misalignment 
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '') # with misalignment 
 # AUTO conditions 
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
@@ -22,6 +23,10 @@ process.GlobalTag = GlobalTag(process.GlobalTag, '102X_upgrade2018_realistic_v10
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
 
+process.GlobalTag.globaltag = '106X_upgrade2018_realistic_v9'
+#process.GlobalTag.globaltag = '110X_mcRun3_2021_realistic_v3'
+#process.GlobalTag.globaltag = '110X_mcRun3_2023_realistic_v3'
+#process.GlobalTag.globaltag = '110X_mcRun3_2024_realistic_v3'
 
 import HLTrigger.HLTfilters.hltHighLevel_cfi as hlt
 # accept if 'path_1' succeeds
@@ -70,7 +75,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 # ----------------------------------------------------------------------
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(10)
 )
 
 myfilelist = cms.untracked.vstring()
@@ -82,9 +87,15 @@ process.source = cms.Source("PoolSource",
 #)
 
   fileNames = cms.untracked.vstring(    
+
+"/store/relval/CMSSW_10_6_1_patch3/RelValTTbar_13/GEN-SIM-RECO/PU25ns_106X_upgrade2018_realistic_v6-v1/20000/FF0A1ADF-8ECA-514A-A177-2723BCCABDE0.root",
+#" /store/relval/CMSSW_10_6_1_patch3/RelValTTbar_13/GEN-SIM-RECO/PU25ns_106X_upgrade2018_realistic_v6-v1/20000/FBD352C0-28D6-9049-B3E9-C0DFF01658C8.root",
+
+
+
 #     'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/reco/reco2.root',
 
-"/store/relval/CMSSW_10_2_0_pre6//RelValQCD_Pt-20toInf_MuEnrichedPt15_13TeV/GEN-SIM-RECO/PU25ns_102X_upgrade2018_realistic_v10_HS-v1/10000/005CD7BF-7192-E811-9DD2-D067E5F914D3.root",
+#"/store/relval/CMSSW_10_2_0_pre6//RelValQCD_Pt-20toInf_MuEnrichedPt15_13TeV/GEN-SIM-RECO/PU25ns_102X_upgrade2018_realistic_v10_HS-v1/10000/005CD7BF-7192-E811-9DD2-D067E5F914D3.root",
 
   )   # end the list "by-hand"
 )
@@ -175,8 +186,8 @@ process.c2 = cms.EDAnalyzer("PixClustersWithTracks",
 #     trajectoryInput = cms.string("TrackRefitterP5")
 #     trajectoryInput = cms.string('cosmictrackfinderP5')
 # additional selections
-    Select1 = cms.untracked.int32(14),  # select the cut type, o no cut
-    Select2 = cms.untracked.int32(1),  # select the cut value   
+                            Select1 = cms.untracked.int32(9998),  # select the cut type, o no cut
+                            Select2 = cms.untracked.int32(0),  # select the cut value   
 )
 
 

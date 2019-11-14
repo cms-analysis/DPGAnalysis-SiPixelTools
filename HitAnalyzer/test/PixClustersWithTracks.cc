@@ -129,11 +129,10 @@
 //#define SINGLE_MODULES
 //#define CLU_SHAPE    // L1, use one or the other but not both
 //#define CLU_SHAPE_L2  // same for L2 
-#define PHI_PROFILES
-//#define USE_PROFILES
+//#define PHI_PROFILES
+#define USE_PROFILES
 //#define STUDY_ONEMOD
-
-#define TRAJECTORY // needs a track refit
+//#define TRAJECTORY // needs a track refit, does not work from RECO
 
 #ifdef TRAJECTORY
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
@@ -311,10 +310,10 @@ class PixClustersWithTracks : public edm::EDAnalyzer {
   TH1D *hstatus;
 
 #ifdef USE_PROFILES
-  TProfile *hclumult1,  *hclumult2,  *hclumult3;
-  TProfile *hclumultx1, *hclumultx2, *hclumultx3;
-  TProfile *hclumulty1, *hclumulty2, *hclumulty3;
-  TProfile *hcluchar1,  *hcluchar2,  *hcluchar3;
+  TProfile *hclumult1,  *hclumult2, *hclumult3, *hclumult4;
+  TProfile *hclumultx1, *hclumultx2,*hclumultx3,*hclumultx4;
+  TProfile *hclumulty1, *hclumulty2,*hclumulty3,*hclumulty4;
+  TProfile *hcluchar1,  *hcluchar2, *hcluchar3, *hcluchar4;
 
   TProfile *hclumultld1,  *hclumultld2,  *hclumultld3;
   TProfile *hclumultxld1, *hclumultxld2, *hclumultxld3;
@@ -324,6 +323,23 @@ class PixClustersWithTracks : public edm::EDAnalyzer {
   TProfile *htracksls,  *hpvsls, *htrackslsn,  *hpvslsn;
   TProfile *hmult1,  *hmult2,  *hmult3;
   TProfile *hclusPerTrkVsEta,*hclusPerTrkVsPt,*hclusPerTrkVsls,*hclusPerTrkVsEtaB,*hclusPerTrkVsEtaF; 
+
+  TProfile2D *hcharProf1,  *hcharProf2, *hcharProf3, *hcharProf4;
+  TProfile2D *hcharProf11, *hcharProf21, *hcharProf31, *hcharProf41;
+  TProfile2D *hcharProf12, *hcharProf22, *hcharProf32, *hcharProf42;
+
+  TProfile2D *hcharProfX1,  *hcharProfX2, *hcharProfX3, *hcharProfX4;
+  TProfile2D *hcharProfX11, *hcharProfX21;
+  TProfile2D *hcharProfX12, *hcharProfX22;
+
+  TProfile *hchar1D1,  *hchar1D2, *hchar1D3, *hchar1D4;
+  TProfile *hchar1D11, *hchar1D21;
+  TProfile *hchar1D12, *hchar1D22;
+
+  TProfile *hchar1DX1,  *hchar1DX2, *hchar1DX3, *hchar1DX4;
+  TProfile *hchar1DX11, *hchar1DX21;
+  TProfile *hchar1DX12, *hchar1DX22;
+
 #endif 
 
 #ifdef PHI_PROFILES
@@ -889,6 +905,111 @@ void PixClustersWithTracks::beginJob() {
    hclusPerTrkVsls = fs->make<TProfile>("hclusPerTrkVsls","clus per trk vs.ls",300,0.,3000.,0.0,100.);
    hclusPerTrkVsEtaF = fs->make<TProfile>("hclusPerTrkVsEtaF","F clus per trk vs.eta",60,-3.,3.,0.0,100.);
    hclusPerTrkVsEtaB = fs->make<TProfile>("hclusPerTrkVsEtaB","B clus per trk vs.eta",60,-3.,3.,0.0,100.);
+
+   // charge profiles in z (eta)
+  hcharProf1 = fs->make<TProfile2D>("hcharProf1","clu charge profile L1",
+				50,-2.5,2.5,16,0.,16.,0.,10000.);
+  hcharProf1->SetOption("colz");
+  hcharProf2 = fs->make<TProfile2D>("hcharProf2","clu charge profile L2",
+				50,-2.5,2.5,16,0.,16.,0.,10000.);
+  hcharProf2->SetOption("colz");
+  hcharProf3 = fs->make<TProfile2D>("hcharProf3","clu charge profile L3",
+				50,-2.5,2.5,16,0.,16.,0.,10000.);
+  hcharProf3->SetOption("colz");
+  hcharProf4 = fs->make<TProfile2D>("hcharProf4","clu charge profile L4",
+				50,-2.5,2.5,16,0.,16.,0.,10000.);
+  hcharProf4->SetOption("colz");
+
+  hcharProf11 = fs->make<TProfile2D>("hcharProf11","clu charge profile L1",
+				50,-2.5,2.5,16,0.,16.,0.,10000.);
+  hcharProf11->SetOption("colz");
+  hcharProf21 = fs->make<TProfile2D>("hcharProf21","clu charge profile L2",
+				50,-2.5,2.5,16,0.,16.,0.,10000.);
+  hcharProf21->SetOption("colz");
+  hcharProf31 = fs->make<TProfile2D>("hcharProf31","clu charge profile L3",
+				50,-2.5,2.5,16,0.,16.,0.,10000.);
+  hcharProf31->SetOption("colz");
+  hcharProf41 = fs->make<TProfile2D>("hcharProf41","clu charge profile L4",
+				50,-2.5,2.5,16,0.,16.,0.,10000.);
+  hcharProf41->SetOption("colz");
+
+  hcharProf12 = fs->make<TProfile2D>("hcharProf12","clu charge profile L1",
+				50,-2.5,2.5,16,0.,16.,0.,10000.);
+  hcharProf12->SetOption("colz");
+  hcharProf22 = fs->make<TProfile2D>("hcharProf22","clu charge profile L2",
+				50,-2.5,2.5,16,0.,16.,0.,10000.);
+  hcharProf22->SetOption("colz");
+  hcharProf32 = fs->make<TProfile2D>("hcharProf32","clu charge profile L3",
+				50,-2.5,2.5,16,0.,16.,0.,10000.);
+  hcharProf32->SetOption("colz");
+  hcharProf42 = fs->make<TProfile2D>("hcharProf42","clu charge profile L4",
+				50,-2.5,2.5,16,0.,16.,0.,10000.);
+  hcharProf42->SetOption("colz");
+
+  hchar1D1 = fs->make<TProfile>("hchar1D1","clu charge profile L1",
+				16,0.,16.,0.,10000.);
+  hchar1D2 = fs->make<TProfile>("hchar1D2","clu charge profile L2",
+				16,0.,16.,0.,10000.);
+  hchar1D3 = fs->make<TProfile>("hchar1D3","clu charge profile L3",
+				16,0.,16.,0.,10000.);
+  hchar1D4 = fs->make<TProfile>("hchar1D4","clu charge profile L4",
+				16,0.,16.,0.,10000.);
+
+  hchar1D11 = fs->make<TProfile>("hchar1D11","clu charge profile L1",
+				16,0.,16.,0.,10000.);
+  hchar1D12 = fs->make<TProfile>("hchar1D12","clu charge profile L1",
+				16,0.,16.,0.,10000.);
+  hchar1D21 = fs->make<TProfile>("hchar1D21","clu charge profile L2",
+				16,0.,16.,0.,10000.);
+  hchar1D22 = fs->make<TProfile>("hchar1D22","clu charge profile L2",
+				16,0.,16.,0.,10000.);
+
+  // in x 
+  hcharProfX1 = fs->make<TProfile2D>("hcharProfX1","clu charge profileX L1",
+				16,-0.8,0.8,3,0.,3.,0.,10000.);
+  hcharProfX1->SetOption("colz");
+  hcharProfX2 = fs->make<TProfile2D>("hcharProfX2","clu charge profileX L2",
+				16,-0.8,0.8,3,0.,3.,0.,10000.);
+  hcharProfX2->SetOption("colz");
+  hcharProfX3 = fs->make<TProfile2D>("hcharProfX3","clu charge profileX L3",
+				16,-0.8,0.8,3,0.,3.,0.,10000.);
+  hcharProfX3->SetOption("colz");
+  hcharProfX4 = fs->make<TProfile2D>("hcharProfX4","clu charge profileX L4",
+				16,-0.8,0.8,3,0.,3.,0.,10000.);
+  hcharProfX4->SetOption("colz");
+
+  hcharProfX11 = fs->make<TProfile2D>("hcharProfX11","clu charge profileX L1",
+				16,-0.8,0.8,3,0.,3.,0.,10000.);
+  hcharProfX11->SetOption("colz");
+  hcharProfX21 = fs->make<TProfile2D>("hcharProfX21","clu charge profileX L2",
+				16,-0.8,0.8,3,0.,3.,0.,10000.);
+  hcharProfX21->SetOption("colz");
+
+  hcharProfX12 = fs->make<TProfile2D>("hcharProfX12","clu charge profileX L1",
+				16,-0.8,0.8,3,0.,3.,0.,10000.);
+  hcharProfX12->SetOption("colz");
+  hcharProfX22 = fs->make<TProfile2D>("hcharProfX22","clu charge profileX L2",
+				16,-0.8,0.8,3,0.,3.,0.,10000.);
+  hcharProfX22->SetOption("colz");
+
+  hchar1DX1 = fs->make<TProfile>("hchar1DX1","clu charge profileX L1",
+				3,0.,3.,0.,10000.);
+  hchar1DX2 = fs->make<TProfile>("hchar1DX2","clu charge profileX L2",
+				3,0.,3.,0.,10000.);
+  hchar1DX3 = fs->make<TProfile>("hchar1DX3","clu charge profileX L3",
+				3,0.,3.,0.,10000.);
+  hchar1DX4 = fs->make<TProfile>("hchar1DX4","clu charge profileX L4",
+				3,0.,3.,0.,10000.);
+
+  hchar1DX11 = fs->make<TProfile>("hchar1DX11","clu charge profileX L1",
+				3,0.,3.,0.,10000.);
+  hchar1DX12 = fs->make<TProfile>("hchar1DX12","clu charge profileX L1",
+				3,0.,3.,0.,10000.);
+  hchar1DX21 = fs->make<TProfile>("hchar1DX21","clu charge profileX L2",
+				3,0.,3.,0.,10000.);
+  hchar1DX22 = fs->make<TProfile>("hchar1DX22","clu charge profileX L2",
+				3,0.,3.,0.,10000.);
+
 #endif // USE_PROFILES
 
 #ifdef PHI_PROFILES
@@ -1237,10 +1358,8 @@ void PixClustersWithTracks::beginJob() {
 #ifdef TRAJECTORY
   ht1 = fs->make<TH2F>( "ht1", "th1",70,-3.5,3.5,162,-0.81,0.81);
   ht2 = fs->make<TH2F>( "ht2", "th2",90,1.1,2.0,162,-0.81,0.81);
-
   ht3 = fs->make<TProfile>( "ht3", "th3",162,-0.81,0.81,-1000.,1000.);
   ht4 = fs->make<TProfile>( "ht4", "th4",162,-0.81,0.81,-1000.,1000.);
-
   ht5 = fs->make<TProfile>( "ht5", "th5",400,-2.0,2.0,-1000.,1000.);
   ht6 = fs->make<TProfile>( "ht6", "th6",400,-2.0,2.0,-1000.,1000.);
   ht7 = fs->make<TProfile>( "ht7", "th7",162,-0.81,0.81,-1000.,1000.);
@@ -1462,7 +1581,9 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
   using namespace reco;
   static int lumiBlockOld = -9999;
   const bool TrackCuts = false;
+#ifdef PHI_PROFILES
   const float CLU_SIZE_ETA_CUT = 0.5;
+#endif
   //const float CLU_SIZE_PT_CUT = 0.;
   const float CLU_SIZE_PT_CUT_MULT = 1.;
 
@@ -1901,6 +2022,7 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
     // Loop over rechits
     for ( trackingRecHit_iterator recHit = t->recHitsBegin();
 	  recHit != t->recHitsEnd(); ++recHit ) {
+
       
       if ( !((*recHit)->isValid()) ) continue;
 
@@ -1917,10 +2039,8 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
       //auto tmprh =
       //(*recHit)->cloneForFit(*builder->geometry()->idToDet((**recHit).geographicalId()));
       //auto transRecHit = hitCloner.makeShared(tmprh, initialTSOS);
-
       //myTTRHvec.push_back( transRecHit );
       //coTTRHvec.push_back( transRecHit );
-
       //double xloc = transRecHit->localPosition().x();// 1st meas coord
       //double yloc = transRecHit->localPosition().y();// 2nd meas coord or zero
       //if(PRINT) cout<<" loc "<<xloc<<" "<<yloc<<endl;
@@ -1968,10 +2088,10 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	// find inner and outer modules for layer 1 onl
 	if(ladderOn>0) {  // +x ladders
 	  if(ladderOn%2 ==0 ) inner=true;  // even
-	  else inner=false;
+	  else inner=false; // odd
 	} else { // -x ladders 
 	  if( abs(ladderOn)%2 ==1 ) inner=true; // odd
-	  else inner=false;
+	  else inner=false; // even
 	}
 
 	//if( (ladderOn==2) || (ladderOn==4) || (ladderOn==6) ||
@@ -2039,7 +2159,6 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
       if(select1==201) { // select a specific module 
 	if( (layer!=selectLayer) || (ladderOn!=selectLadder) || (module!=selectModule) ) continue; // skip module 
       }
-
       hstatus->Fill(8.);
 
       // Get the geom-detector
@@ -2054,7 +2173,7 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 
       const SiPixelRecHit* hit = dynamic_cast<const SiPixelRecHit*>((*recHit)->hit());
 
-      if(hit) {
+      if(!hit) continue;  // skip invalid hits 
 
 	//if(hit->clusterProbability(0)>1.) {
 	  // cout<<hit->localPosition().x()<<" ";
@@ -2218,7 +2337,8 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	
 	if(PRINT) cout<<" CLU GLOBAL "<<gX<<" "<<gY<<" "<<gZ<<" "<<gR<<" "<<gPhi<<endl;
 
-#if defined(CLU_SHAPE) || defined(CLU_SHAPE_L2) 
+
+#if defined(CLU_SHAPE) || defined(CLU_SHAPE_L2) || defined(USE_PROFILES)
 	int maxPixelCol = clust->maxPixelCol();
 	int maxPixelRow = clust->maxPixelRow();
 	int minPixelCol = clust->minPixelCol();
@@ -2233,7 +2353,6 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	//int edgeHitY = (int) ( topol->isItEdgePixelInY( minPixelCol ) || topol->isItEdgePixelInY( maxPixelCol ) );
 	
 #ifdef TRAJECTORY
-	const double PI = 3.14159265 ;
 	// calculate alpha and beta from cluster position
 	LocalTrajectoryParameters ltp = initialTSOS.localParameters();
 	LocalVector localDir = ltp.momentum()/ltp.momentum().mag();
@@ -2263,6 +2382,7 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	  } // inner
 	}
 
+	//const double PI = 3.14159265 ;
 	//if(alpha<0.) alpha= PI + alpha; // shift
 #endif
 
@@ -2336,11 +2456,12 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    hclumultyld1->Fill(float(ladderOn),sizeY);
 	    hclucharld1->Fill(float(ladderOn),charge);
 #endif
+
 #ifdef PHI_PROFILES
 	    hclumultxPhi1->Fill(phi,float(sizeX));
 	    hclumultyPhi1->Fill(phi,float(sizeY));
 	    hclucharPhi1->Fill(phi,float(charge));
-#endif // PHI_PROFILES
+
 #ifdef TRAJECTORY
 	    if(abs(eta)<CLU_SIZE_ETA_CUT) {
 	      hclumultxX1->Fill(llx,float(sizeX));
@@ -2360,11 +2481,12 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 		if     (sizeX==1) hclumultxX12_1->Fill(llx);
 		else if(sizeX==2) hclumultxX12_2->Fill(llx);
 		else if(sizeX==3) hclumultxX12_3->Fill(llx);
-	      }
-	    }
-#endif // TRAJECTORY
-	    
-	  } //if MULT
+	      } //inner
+	    } // eta cut
+#endif // TRAJECTORY	    
+#endif // PHI_PROFILES
+
+	  } //if pt cut
  	  
 #ifdef CLU_SHAPE 
 	  if( (minPixelCol%2)==0 ) { // event col
@@ -2485,13 +2607,13 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    hclumultxPhi2->Fill(phi,float(sizeX));
 	    hclumultyPhi2->Fill(phi,float(sizeY));
 	    hclucharPhi2->Fill(phi,float(charge));
-#endif
 #ifdef TRAJECTORY
 	    if(abs(eta)<CLU_SIZE_ETA_CUT) {
 	    hclumultxX2->Fill(llx,float(sizeX));
 	    hclumultyX2->Fill(llx,float(sizeY));
 	    hclucharX2->Fill(llx,float(charge));
 	    }
+#endif
 #endif
 	    
 #ifdef USE_PROFILES
@@ -2590,7 +2712,6 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    //hclumultxPhi3->Fill(phi,float(sizeX));
 	    //hclumultyPhi3->Fill(phi,float(sizeY));
 	    //hclucharPhi3->Fill(phi,float(charge));
-#endif
 #ifdef TRAJECTORY
 	    if(abs(eta)<CLU_SIZE_ETA_CUT) {
 	      hclumultxX3->Fill(llx,float(sizeX));
@@ -2598,8 +2719,10 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	      hclucharX3->Fill(llx,float(charge));
 	    }
 #endif
+#endif
+
 	  }
-	    
+	  
 #ifdef LS_STUDIES
 	  hcharCluls->Fill(lumiBlock,charge);
 	  hsizeCluls->Fill(lumiBlock,size);
@@ -2619,29 +2742,29 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	  numOfClustersPerLay3++;
 	  numOfPixelsPerLay3 += size;     
 	  
-	  } else if(layer==4) {
+	} else if(layer==4) {
 	    
-	    hDetMap4->Fill(float(module),float(ladderOn));
-	    hcluDetMap4->Fill(col,row);
-	    hsizeDets4->Fill(float(module),float(ladderOn),float(size));
-	    hchargeDets4->Fill(float(module),float(ladderOn),charge);
-	    hcharge4->Fill(charge);
-	    hladder4id->Fill(float(ladderOn));
-	    hz4id->Fill(float(module));
-	    hcols4->Fill(col);
-	    hrows4->Fill(row);
-	    //hPhi4->Fill(phi);
-	    hbpixXY->Fill(gX,gY);
-	    hzphi4->Fill(gZ,gPhi);
-	    hetaphiMap4->Fill(eta,phi);
-	    hstatus->Fill(15.);
-	    
-	    hsize4->Fill(float(size));
-	    hsizex4->Fill(float(sizeX));
-	    hsizey4->Fill(float(sizeY));
-	    
+	  hDetMap4->Fill(float(module),float(ladderOn));
+	  hcluDetMap4->Fill(col,row);
+	  hsizeDets4->Fill(float(module),float(ladderOn),float(size));
+	  hchargeDets4->Fill(float(module),float(ladderOn),charge);
+	  hcharge4->Fill(charge);
+	  hladder4id->Fill(float(ladderOn));
+	  hz4id->Fill(float(module));
+	  hcols4->Fill(col);
+	  hrows4->Fill(row);
+	  //hPhi4->Fill(phi);
+	  hbpixXY->Fill(gX,gY);
+	  hzphi4->Fill(gZ,gPhi);
+	  hetaphiMap4->Fill(eta,phi);
+	  hstatus->Fill(15.);
+	  
+	  hsize4->Fill(float(size));
+	  hsizex4->Fill(float(sizeX));
+	  hsizey4->Fill(float(sizeY));
+	  
 #ifdef PHI_PROFILES
-	    if(pt>CLU_SIZE_PT_CUT_MULT) {
+	  if(pt>CLU_SIZE_PT_CUT_MULT) {
 	    //hclumultxPhi4->Fill(phi,float(sizeX));
 	    //hclumultyPhi4->Fill(phi,float(sizeY));
 	    //hclucharPhi4->Fill(phi,float(charge));
@@ -2652,8 +2775,8 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	      hclucharX4->Fill(llx,float(charge));
 	    }
 #endif
-#endif
 	  }
+#endif
 	  
 	  hsizeyz4->Fill(eta,float(sizeY));
 	  htest3->Fill(charge,float(sizeY));
@@ -2696,9 +2819,9 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	  
 	  hcharge6->Fill(charge);
 
-	    hsize6->Fill(float(size));
-	    hsizex6->Fill(float(sizeX));
-	    hsizey6->Fill(float(sizeY));
+	  hsize6->Fill(float(size));
+	  hsizex6->Fill(float(sizeX));
+	  hsizey6->Fill(float(sizeY));
 	  
 	  hfpixXY2->Fill(gX,gY);
 	  
@@ -2717,9 +2840,9 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	  //hPhi7->Fill(phi);
 	  
 	  hcharge7->Fill(charge);
-	    hsize7->Fill(float(size));
-	    hsizex7->Fill(float(sizeX));
-	    hsizey7->Fill(float(sizeY));
+	  hsize7->Fill(float(size));
+	  hsizex7->Fill(float(sizeX));
+	  hsizey7->Fill(float(sizeY));
 	  
 	  hfpixXY3->Fill(gX,gY);
 	  
@@ -2733,7 +2856,11 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	  cout<<" which layer is this? "<<layer<<" "<< disk<<endl;
 	} // if layer
 
-
+#ifdef USE_PROFILES
+	double yProfile[20], xProfile[3];
+	for(int i=0;i<20;++i) yProfile[i]=0.;
+	for(int i=0;i<3; ++i) xProfile[i]=0.;
+#endif
 	// Get the pixels in the Cluster
 	const vector<SiPixelCluster::Pixel>& pixelsVec = clust->pixels();
 	if(PRINT) cout<<" Pixels in this cluster (i/x/y/char)"<<endl;
@@ -2745,57 +2872,55 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	  float adc = (float(pixelsVec[i].adc)/1000.);
 	  int ladder = ladderOn;  //to mimic the code from CluAna
 
-	  if(layer==1) {
+
+#ifdef USE_PROFILES
+	  int indexY=-1;
+	  if(inner) indexY=pixy-minPixelCol;
+	  else      indexY=maxPixelCol-pixy;
+	  if(indexY>=0 && indexY<=20) yProfile[indexY] += adc;
+
+	  int indexX=-1;
+	  if(inner) indexX=pixx-minPixelRow;
+	  else      indexX=maxPixelRow-pixx;
+	  if(indexX>=0 && indexX<=3) xProfile[indexX] += adc;
+
+#endif
+	  if(layer==1) {  // Layer 1
 	    if(select) cout<<i<<" "<<pixx<<" "<<pixy<<" "<<adc<<endl;
 
 	    if(newL1Modules) hpixcharge1n->Fill(adc);
 	    else             hpixcharge1->Fill(adc);
 	    hpixDetMap1->Fill(pixy,pixx);
-	    hpixchargeDets1->Fill(float(module),float(ladderOn),adc);
+	    hpixchargeDets1->Fill(float(module),float(ladder),adc);
  	    htest2->Fill(adc,float(sizeY));
-	    hpladder1id->Fill(float(ladderOn));
+	    hpladder1id->Fill(float(ladder));
 	    hpz1id->Fill(float(module));
 	    hpcols1->Fill(pixy);
 	    hprows1->Fill(pixx);
-
+	    
 #ifdef PHI_PROFILES
-	  if(pt>CLU_SIZE_PT_CUT_MULT) {
-	    hpixcharPhi1->Fill(phi,adc);
+	    if(pt>CLU_SIZE_PT_CUT_MULT) {
+	      hpixcharPhi1->Fill(phi,adc);
 #ifdef TRAJECTORY
-	    if(abs(eta)<CLU_SIZE_ETA_CUT) {
-	      hpixcharX1->Fill(llx,adc);
-	      if(inner) {
-		hpixcharX11->Fill(llx,adc);
-	      } else {
-		hpixcharX12->Fill(llx,adc);
+	      if(abs(eta)<CLU_SIZE_ETA_CUT) {
+	        hpixcharX1->Fill(llx,adc);
+		if(inner) hpixcharX11->Fill(llx,adc);
+		else hpixcharX12->Fill(llx,adc);
 	      }
+#endif
 	    }
 #endif
-	  }
-#endif
-
+	    
 #ifdef CLU_SHAPE 
 	    histogramPix(adc, size, sizeX, sizeY, same, corner);
 #endif
 
 #ifdef STUDY_LAY1
-	    if(abs(module)==4) {
-	      hpixcharge14->Fill(adc);
-	    } else if(abs(module)==1) {
-	      hpixcharge11->Fill(adc);
-	    }
-	    if(pt>1.) {
-	      hpixcharge15->Fill(adc);
-	    }
-
-	    //if(sizeY==1)      hpixDetMap35->Fill(pixy,pixx);
-	    //else if(sizeY==2) hpixDetMap36->Fill(pixy,pixx);
-	    //else if(sizeY==3) hpixDetMap37->Fill(pixy,pixx);
-	    //else if(sizeY==4) hpixDetMap38->Fill(pixy,pixx);
-	    //else              hpixDetMap39->Fill(pixy,pixx);
-
+	    if(abs(module)==4) hpixcharge14->Fill(adc);
+	    else if(abs(module)==1) hpixcharge11->Fill(adc);
+	    if(pt>1.) hpixcharge15->Fill(adc);
 #endif 
-
+	    
 #ifdef SINGLE_MODULES
 	    float weight=1.;
 	    if     (ladder==-6 && module==-1) hpixDetMap10->Fill(pixy,pixx,weight); //  BmO1,2
@@ -2818,29 +2943,20 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    hpladder2id->Fill(float(ladderOn));
 	    hpz2id->Fill(float(module));
 
-	    if( badL2Modules) {
-	      hpixcharge2b->Fill(adc);
+	    if( badL2Modules)      {hpixcharge2b->Fill(adc); continue;}
+	    else if(goodL2Modules) {hpixcharge2g->Fill(adc); continue;}
 
-	    } else if(goodL2Modules) {
-	      hpixcharge2g->Fill(adc);
-
-	    } else { // really good modules 
-
-	      hpixcharge2->Fill(adc);
-
-	      hpixDetMap2->Fill(pixy,pixx);
-	      hpcols2->Fill(pixy);
-	      hprows2->Fill(pixx);
-	      
+	    hpixcharge2->Fill(adc);
+	    hpixDetMap2->Fill(pixy,pixx);
+	    hpcols2->Fill(pixy);
+	    hprows2->Fill(pixx);
+	   
 #ifdef PHI_PROFILES
-	      if(pt>CLU_SIZE_PT_CUT_MULT) {
-		hpixcharPhi2->Fill(phi,adc);
-#ifdef TRAJECTORY
-		if(abs(eta)<CLU_SIZE_ETA_CUT) hpixcharX2->Fill(llx,adc);
+	    if(pt>CLU_SIZE_PT_CUT_MULT) hpixcharPhi2->Fill(phi,adc);
 #endif
-	      }
+#if defined(PHI_PROFILES) && defined(TRAJECTORY)
+	    if(pt>CLU_SIZE_PT_CUT_MULT && (abs(eta)<CLU_SIZE_ETA_CUT) hpixcharX2->Fill(llx,adc);
 #endif
-	      
 #ifdef CLU_SHAPE_L2
 	    histogramPix(adc, size, sizeX, sizeY, same, corner);
 #endif
@@ -2856,10 +2972,10 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    else if(ladder==  6 && module== 4) hpixDetMap27->Fill(pixy,pixx); // dcdc
 	    else if(ladder==  7 && module== 1) hpixDetMap28->Fill(pixy,pixx); // dcdc
 	    else if(ladder==  1 && module== 1) hpixDetMap29->Fill(pixy,pixx); //  '
-	    // this is bad I use layer 3,4 for layer 2 modules 
+	       // this is bad I use layer 3,4 for layer 2 modules 
 	    else if(ladder==  1 && module== 2) hpixDetMap30->Fill(pixy,pixx); // fed errors
 	    else if(ladder==  1 && module== 3) hpixDetMap31->Fill(pixy,pixx); // bad caldel
-	    
+	       
 	    else if(ladder== -5 && module==-1) hpixDetMap32->Fill(pixy,pixx); // pix 0,0
 	    else if(ladder== -5 && module==-2) hpixDetMap33->Fill(pixy,pixx); // unmaskable pixel
 	    else if(ladder== -1 && module== 1) hpixDetMap34->Fill(pixy,pixx); // noisy
@@ -2870,8 +2986,6 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    else if(ladder== 12 && module==-1) hpixDetMap39->Fill(pixy,pixx); // fed errors, masked 1/2
 	    else if(ladder== 11 && module==-4) hpixDetMap40->Fill(pixy,pixx); // fed errors, masked 1/2	    
 #endif	    
-	    } // bad modules
- 
 	  } else if(layer==3) {
 	    
 	    hpixcharge3->Fill(adc);
@@ -2896,13 +3010,8 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    // else if(ladder==-22 && module==-2) hpixDetMap39->Fill(pixy,pixx); // fed errors, masked 1/2
 #endif
 
-#ifdef PHI_PROFILES
-	      if(pt>CLU_SIZE_PT_CUT_MULT) {
-		//hpixcharPhi3->Fill(phi,adc);
-#ifdef TRAJECTORY
-		if(abs(eta)<CLU_SIZE_ETA_CUT) hpixcharX3->Fill(llx,adc);
-#endif
-	      }
+#if defined(PHI_PROFILES) && defined(TRAJECTORY)
+	    if(pt>CLU_SIZE_PT_CUT_MULT && (abs(eta)<CLU_SIZE_ETA_CUT) hpixcharX3->Fill(llx,adc);
 #endif
 	    
 	  } else if(layer==4) {
@@ -2928,25 +3037,105 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    //else if(ladder==-22 && module== 2) hpixDetMap48->Fill(pixy,pixx); //  
 	    //else if(ladder== 32 && module== 2) hpixDetMap49->Fill(pixy,pixx); //  
 #endif
-	    
-#ifdef PHI_PROFILES
-	    if(pt>CLU_SIZE_PT_CUT_MULT) {
-	      //hpixcharPhi4->Fill(phi,adc);
-#ifdef TRAJECTORY
-	      if(abs(eta)<CLU_SIZE_ETA_CUT) hpixcharX4->Fill(llx,adc);
-#endif
-	    }
-#endif
-
+	    	    
+#if defined(PHI_PROFILES) && defined(TRAJECTORY)
+	    if( (pt>CLU_SIZE_PT_CUT_MULT) && (abs(eta)<CLU_SIZE_ETA_CUT) ) hpixcharX4->Fill(llx,adc);
+#endif	    
 	  } // if layer 
 	  	  
-	} // for loop 
-	  
-      } // if valid
-      
-    } // clusters
-    
-    if(pixelHits>0) countPixTracks++;
+	} // pixels, for loop 
+
+#ifdef USE_PROFILES
+	// Do the charge cluster profiles 
+	if( (pt>CLU_SIZE_PT_CUT_MULT) && (sizeX<=3) && (sizeY<=20) ) {
+	  for(int i=0; i<sizeY; ++i) {	   
+	    if(layer==1) {
+	      hcharProf1->Fill(eta,i,yProfile[i]);
+	      if(inner) {hcharProf11->Fill(eta,i,yProfile[i]);}
+	      else      {hcharProf12->Fill(eta,i,yProfile[i]);}
+	      if(eta>1.7 && eta<1.8) {
+		hchar1D1->Fill(i,yProfile[i]);
+		if(inner) {hchar1D11->Fill(i,yProfile[i]);}
+		else      {hchar1D12->Fill(i,yProfile[i]);}
+	      }		       
+	    } else if(layer==2) {
+	      hcharProf2->Fill(eta,i,yProfile[i]);
+	      if(inner) {hcharProf21->Fill(eta,i,yProfile[i]);}
+	      else      {hcharProf22->Fill(eta,i,yProfile[i]);}
+	      if(eta>1.7 && eta<1.8) {
+		hchar1D2->Fill(i,yProfile[i]);
+		if(inner) {hchar1D21->Fill(i,yProfile[i]);}
+		else      {hchar1D22->Fill(i,yProfile[i]);}
+	      }		       
+	    } else if(layer==3) {
+	      hcharProf3->Fill(eta,i,yProfile[i]);
+	      if(inner) {hcharProf31->Fill(eta,i,yProfile[i]);}
+	      else      {hcharProf32->Fill(eta,i,yProfile[i]);}
+	      if(eta>1.7 && eta<1.8) {
+		hchar1D3->Fill(i,yProfile[i]);
+		//if(inner) {hchar1D11->Fill(i,yProfile[i]);}
+		//else      {hchar1D12->Fill(i,yProfile[i]);}
+	      }		       
+	    } else if(layer==4) {
+	      hcharProf4->Fill(eta,i,yProfile[i]);
+	      if(inner) {hcharProf41->Fill(eta,i,yProfile[i]);}
+	      else      {hcharProf42->Fill(eta,i,yProfile[i]);}
+	      if(eta>1.0 && eta<1.8) {
+		hchar1D4->Fill(i,yProfile[i]);
+		//if(inner) {hchar1D11->Fill(i,yProfile[i]);}
+		//else      {hchar1D12->Fill(i,yProfile[i]);}
+	      }		       
+	    } // layer
+	  } // column index 
+
+	  // X
+	  for(int i=0; i<sizeX; ++i) {	   
+	    if(layer==1) {
+	      hcharProfX1->Fill(lx,i,xProfile[i]);
+	      if(inner) {hcharProfX11->Fill(lx,i,xProfile[i]);}
+	      else      {hcharProfX12->Fill(lx,i,xProfile[i]);}
+	      if(lx>0.40 && lx<0.41) {
+		hchar1DX1->Fill(i,xProfile[i]);
+		if(inner) {hchar1DX11->Fill(i,xProfile[i]);}
+		else      {hchar1DX12->Fill(i,xProfile[i]);}
+	      }		       
+	    } else if(layer==2) {
+	      hcharProfX2->Fill(lx,i,xProfile[i]);
+	      if(inner) {hcharProfX21->Fill(lx,i,xProfile[i]);}
+	      else      {hcharProfX22->Fill(lx,i,xProfile[i]);}
+	      if(lx>0.40 && lx<0.41) {
+		hchar1DX2->Fill(i,xProfile[i]);
+		if(inner) {hchar1DX21->Fill(i,xProfile[i]);}
+		else      {hchar1DX22->Fill(i,xProfile[i]);}
+	      }		       
+	    } else if(layer==3) {
+	      hcharProfX3->Fill(lx,i,xProfile[i]);
+	      //if(inner) {hcharProfX31->Fill(lx,i,xProfile[i]);}
+	      //else      {hcharProfX32->Fill(lx,i,xProfile[i]);}
+	      if(lx>0.40 && lx<0.41) {
+		hchar1DX3->Fill(i,xProfile[i]);
+		//if(inner) {hchar1DX11->Fill(i,xProfile[i]);}
+		//else      {hchar1DX12->Fill(i,xProfile[i]);}
+	      }		       
+	    } else if(layer==4) {
+	      hcharProfX4->Fill(lx,i,xProfile[i]);
+	      //if(inner) {hcharProfX41->Fill(lx,i,xProfile[i]);}
+	      //else      {hcharProfX42->Fill(lx,i,xProfile[i]);}
+	      if(lx>0.40 && lx<0.41) {
+		hchar1DX4->Fill(i,xProfile[i]);
+		//if(inner) {hchar1DX11->Fill(i,xProfile[i]);}
+		//else      {hchar1DX12->Fill(i,xProfile[i]);}
+	      }		       
+	    } // layer
+	  } // column index 
+
+	} // pt, size 
+#endif
+
+
+  } // clusters, rechits 
+
+     if(pixelHits>0) countPixTracks++;
 
     if(PRINT) cout<<" Clusters for track "<<trackNumber<<" num of clusters "<<numberOfClusters
 		  <<" num of pixels "<<pixelHits<<endl;
@@ -3007,7 +3196,8 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
       hclusPerTrkVsPt->Fill(pt,clusPerTrk);
       hclusPerTrkVsls->Fill(lumiBlock,clusPerTrk);
 #endif 
-    } // numOf clustres 
+
+    } // numOf clustres
 
   } // tracks
 
@@ -3017,14 +3207,11 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
     hclusPerLay2->Fill(float(numOfClustersPerLay2));
     hclusPerLay3->Fill(float(numOfClustersPerLay3));
     hclusPerLay4->Fill(float(numOfClustersPerLay4));
-    
     hclusPerDisk1->Fill(float(numOfClustersPerDisk3+numOfClustersPerDisk4));
     hclusPerDisk2->Fill(float(numOfClustersPerDisk2+numOfClustersPerDisk5));
     hclusPerDisk3->Fill(float(numOfClustersPerDisk1+numOfClustersPerDisk6));
-
     hclusBpix->Fill(float(numberOfClusters));
     hpixBpix->Fill(float(numberOfPixels));
-
   }
   htracksGood->Fill(float(countNiceTracks));
   htracksGoodInPix->Fill(float(countPixTracks));
@@ -3082,10 +3269,7 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
     lumiBlockOld = lumiBlock;
   }
 
-
   if(PRINT) cout<<" event with tracks = "<<trackNumber<<" "<<countNiceTracks<<endl;
-  //cout<<" event with tracks = "<<trackNumber<<" "<<countGoodTracks<<endl;
-
   return;
   
 } // end 
@@ -3093,135 +3277,3 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 //define this as a plug-in
 DEFINE_FWK_MODULE(PixClustersWithTracks);
   
-
-
-  
-// #ifdef USE_TRAJ
-//   // Not used 
-  
-//   //----------------------------------------------------------------------------
-//   // Use Trajectories
-
-//   edm::Handle<TrajTrackAssociationCollection> trajTrackCollectionHandle;
-//   e.getByLabel(conf_.getParameter<std::string>("trajectoryInput"),trajTrackCollectionHandle);
-
-//   TrajectoryStateCombiner tsoscomb;
- 
-//   int NbrTracks =  trajTrackCollectionHandle->size();
-//   std::cout << " track measurements " << trajTrackCollectionHandle->size()  << std::endl;
-
-//   int trackNumber = 0;
-//   int numberOfClusters = 0;
-
-//   for(TrajTrackAssociationCollection::const_iterator it = trajTrackCollectionHandle->begin(), itEnd = trajTrackCollectionHandle->end(); it!=itEnd;++it){
-
-//     int pixelHits = 0;
-//     int stripHits = 0;
-//     const Track&      track = *it->val;
-//     const Trajectory& traj  = *it->key;
-   
-//     std::vector<TrajectoryMeasurement> checkColl = traj.measurements();
-//     for(std::vector<TrajectoryMeasurement>::const_iterator checkTraj = checkColl.begin();
-// 	checkTraj != checkColl.end(); ++checkTraj) {
-
-//       if(! checkTraj->updatedState().isValid()) continue;
-//       TransientTrackingRecHit::ConstRecHitPointer testhit = checkTraj->recHit();
-//       if(! testhit->isValid() || testhit->geographicalId().det() != DetId::Tracker ) continue;
-//       uint testSubDetID = (testhit->geographicalId().subdetId());
-//       if(testSubDetID == PixelSubdetector::PixelBarrel || testSubDetID == PixelSubdetector::PixelEndcap) pixelHits++;
-//       else if (testSubDetID == StripSubdetector::TIB || testSubDetID == StripSubdetector::TOB ||
-// 	       testSubDetID == StripSubdetector::TID || testSubDetID == StripSubdetector::TEC) stripHits++;
-
-//     }
-
-
-//     if (pixelHits == 0) continue;
-
-//     trackNumber++;
-//     std::cout << " track " << trackNumber <<" has pixelhits "<<pixelHits << std::endl;
-//     pixelHits = 0;
-
-//     //std::vector<TrajectoryMeasurement> tmColl = traj.measurements();
-//     for(std::vector<TrajectoryMeasurement>::const_iterator itTraj = checkColl.begin();
-// 	itTraj != checkColl.end(); ++itTraj) {
-//       if(! itTraj->updatedState().isValid()) continue;
-
-//       TrajectoryStateOnSurface tsos = tsoscomb( itTraj->forwardPredictedState(), itTraj->backwardPredictedState() );
-//       TransientTrackingRecHit::ConstRecHitPointer hit = itTraj->recHit();
-//       if(! hit->isValid() || hit->geographicalId().det() != DetId::Tracker ) continue; 
-
-//       const DetId & hit_detId = hit->geographicalId();
-//       uint IntSubDetID = (hit_detId.subdetId());
-	
-//       if(IntSubDetID == 0 ) continue;  // Select ??
-//       if(IntSubDetID != PixelSubdetector::PixelBarrel) continue; // look only at bpix || IntSubDetID == PixelSubdetector::PixelEndcap) {
-
-
-// //       const GeomDetUnit* detUnit = hit->detUnit();
-// //       if(detUnit) {
-// // 	const Surface& surface = hit->detUnit()->surface();
-// // 	const TrackerGeometry& theTracker(*tkGeom_);
-// // 	const PixelGeomDetUnit* theGeomDet = dynamic_cast<const PixelGeomDetUnit*> (theTracker.idToDet(hit_detId) );
-// // 	const RectangularPixelTopology * topol = dynamic_cast<const RectangularPixelTopology*>(&(theGeomDet->specificTopology()));
-// //       }
-
-
-//       // get the enclosed persistent hit
-//       const TrackingRecHit *persistentHit = hit->hit();
-//       // check if it's not null, and if it's a valid pixel hit
-//       if ((persistentHit != 0) && (typeid(*persistentHit) == typeid(SiPixelRecHit))) {
-// 	// tell the C++ compiler that the hit is a pixel hit
-// 	const SiPixelRecHit* pixhit = dynamic_cast<const SiPixelRecHit*>( hit->hit() );
-// 	// get the edm::Ref to the cluster
-// 	edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster> const& clust = (*pixhit).cluster();
-// 	//  check if the ref is not null
-// 	if (clust.isNonnull()) {
-
-// 	  numberOfClusters++;
-// 	  pixelHits++;
-// 	  float charge = (clust->charge())/1000.0; // convert electrons to kilo-electrons
-// 	  int size = clust->size();
-// 	  int size_x = clust->sizeX();
-// 	  int size_y = clust->sizeY();
-// 	  float row = clust->x();
-// 	  float col = clust->y();
-  
-// 	  //LocalPoint lp = topol->localPosition(MeasurementPoint(clust_.row,clust_.col));
-// 	  //float x = lp.x();
-// 	  //float y = lp.y();
-  
-// 	  int maxPixelCol = clust->maxPixelCol();
-// 	  int maxPixelRow = clust->maxPixelRow();
-// 	  int minPixelCol = clust->minPixelCol();
-// 	  int minPixelRow = clust->minPixelRow();
-  
-// 	  //int geoId = PixGeom->geographicalId().rawId();
-
-// 	  // Replace with the topology methods
-// 	  // edge method moved to topologi class
-// 	  //int edgeHitX = (int) ( topol->isItEdgePixelInX( minPixelRow ) || topol->isItEdgePixelInX( maxPixelRow ) );
-// 	  //int edgeHitY = (int) ( topol->isItEdgePixelInY( minPixelCol ) || topol->isItEdgePixelInY( maxPixelCol ) );
-
-// 	  // calculate alpha and beta from cluster position
-// 	  //LocalTrajectoryParameters ltp = tsos.localParameters();
-// 	  //LocalVector localDir = ltp.momentum()/ltp.momentum().mag();
-
-// 	  //float locx = localDir.x();
-// 	  //float locy = localDir.y();
-// 	  //float locz = localDir.z();
-// 	  //float loctheta = localDir.theta(); // currently unused
-
-// 	  //float alpha = atan2( locz, locx );
-// 	  //float beta = atan2( locz, locy );
-
-// 	  //clust_.normalized_charge = clust_.charge*sqrt(1.0/(1.0/pow(tan(clust_.clust_alpha),2)+1.0/pow(tan(clust_.clust_beta),2)+1.0));
-// 	}  // valid cluster
-//       } // valid peristant hit
-
-//     } // loop over trajectory meas.
-
-//     if(PRINT) cout<<" Cluster for track "<<trackNumber<<" cluaters "<<numberOfClusters<<" "<<pixelHits<<endl;
-    
-//   } // loop over tracks
-  
-// #endif // USE_TRAJ

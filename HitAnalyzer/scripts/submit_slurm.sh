@@ -26,7 +26,9 @@ mkdir -p /scratch/$USER/${SLURM_JOB_ID}
 sleep 10
 #
 cd /scratch/$USER/${SLURM_JOB_ID}
-cmsRun $MYPWD/SimsToClus.py
+#cmsRun $MYPWD/SimsToClus.py
+cmsRun $MYPWD/SimsToRec.py
+#cmsRun $MYPWD/RawToRec.py
 #cmsRun $MYPWD/gen_sim.py
 # 
 pwd
@@ -35,6 +37,7 @@ cd $MYPWD
 pwd
 ls /scratch/$USER/${SLURM_JOB_ID}
 cp /scratch/$USER/${SLURM_JOB_ID}/simtorec.root $MYPWD/.
+#cp /scratch/$USER/${SLURM_JOB_ID}/rawtoreco.root $MYPWD/.
 
 # xrdcp -d 1 -f s.root root://t3se01.psi.ch:1094//store/user/kotlinski/MC/test/s.root  # is OK,
 # xrdcp      -f s.root root://t3dcachedb.psi.ch:1094//pnfs/psi.ch/cms/trivcat/store/user/kotlinski/MC/test/. # OK

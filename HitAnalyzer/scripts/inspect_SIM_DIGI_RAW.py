@@ -2,7 +2,8 @@
 # start from simhits, do trackerlocal, compare sim and rec-hits
 import FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
-process = cms.Process("TestValid",eras.Run2_2017)
+#process = cms.Process("TestValid",eras.Run2_2017)
+process = cms.Process("TestValid",eras.Run3)
 
 process.load("Configuration.Geometry.GeometryDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
@@ -32,8 +33,6 @@ process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
 
 
-
-
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(1000)
 )
@@ -49,11 +48,24 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_design', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_realistic', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_realistic', '')
 
+#process.GlobalTag.globaltag = '110X_mcRun3_2021_realistic_v3'
+#process.GlobalTag.globaltag = '110X_mcRun3_2023_realistic_v3'
+process.GlobalTag.globaltag = '110X_mcRun3_2024_realistic_v3'
 
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
-#  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits1.root',
+
+#"/store/mc/Run3Summer19DR/TTbar_14TeV_TuneCP5_Pythia8/GEN-SIM-DIGI-RAW/106X_mcRun3_2021_realistic_v3-v2/130000/FF1B6F7B-55F6-2A42-A85B-654E59172A1E.root",
+
+#"/store/mc/Run3Summer19DR/TTbar_14TeV_TuneCP5_Pythia8/GEN-SIM-DIGI-RAW/106X_mcRun3_2023_realistic_v3-v2/50000/FF819EB4-7243-1640-9F3A-21553B718CA9.root",
+
+"/store/mc/Run3Summer19DR/TTbar_14TeV_TuneCP5_Pythia8/GEN-SIM-DIGI-RAW/106X_mcRun3_2024_realistic_v4-v2/270000/C0FD668E-2D90-4F4A-A607-9E8FF11B0A9F.root",
+
+
+
+
+
 
 # mb
 #"/store/relval/CMSSW_10_4_0/RelValMinBias_13/GEN-SIM/103X_upgrade2018_design_v4-v1/20000/C9CE0381-F732-4A4F-A263-D445DF99148C.root"
@@ -61,12 +73,11 @@ process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
 #"/store/relval/CMSSW_10_4_0/RelValMinBias_13/GEN-SIM/103X_mc2017_realistic_v2-v1/20000/F0FF4DFA-613B-4749-BBC3-FB29AD691FA5.root"
 
 # PU
-"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_upgrade2018_design_v4-v1/20000/193FB1CE-333D-E540-995E-1BA38BA1CE3C.root"
+#"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_upgrade2018_design_v4-v1/20000/193FB1CE-333D-E540-995E-1BA38BA1CE3C.root"
 
 #"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_upgrade2018_realistic_v8-v1/20000/0D388168-67C8-A544-8A75-8A96D40C396B.root"
 
 #"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_mc2017_realistic_v2-v1/20000/222AF93E-CE66-6342-A266-E78F6FCDD8EC.root"
-
 
   )
 )
@@ -194,6 +205,7 @@ process.c = cms.EDAnalyzer("PixClustersWithTracks",
 )
 
 
+# direct digis
 process.a0 = cms.EDAnalyzer("PixDigisTest",
     Verbosity = cms.untracked.bool(False),
     phase1 = cms.untracked.bool(True),
@@ -203,6 +215,7 @@ process.a0 = cms.EDAnalyzer("PixDigisTest",
 #    src = cms.InputTag("siPixelDigis"),
 )
 
+# digis from raw
 process.a = cms.EDAnalyzer("PixDigisTest",
     Verbosity = cms.untracked.bool(False),
     phase1 = cms.untracked.bool(True),
@@ -243,7 +256,10 @@ process.TFileService = cms.Service("TFileService",
 
 # go through raw
 #process.p1 = cms.Path(process.pdigi_valid*process.SimL1Emulator*process.DigiToRaw*process.RawToDigi*process.reconstruction*process.TrackRefitter*process.pixRecHitsValid)
+
 process.p1 = cms.Path(process.b*process.r)   # digis not stored in SIM-DIGI-RAW
+#process.p1 = cms.Path(process.b)   # digis not stored in SIM-DIGI-RAW
+
 #process.p1 = cms.Path(process.pdigi_valid*process.a)
 
 # go directly - fails for muons 

@@ -63,7 +63,11 @@
 
 # 2018
 # MC
-/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/RelValQCD_Pt-20toInf_MuEnrichedPt15_13TeV/CMSSW_10_2_0_pre6-PU25ns_102X_upgrade2018_realistic_v10_HS-v1/GEN-SIM-RECO'
+#/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/RelValQCD_Pt-20toInf_MuEnrichedPt15_13TeV/CMSSW_10_2_0_pre6-PU25ns_102X_upgrade2018_realistic_v10_HS-v1/GEN-SIM-RECO'
+#/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/TTbar_14TeV_TuneCP5_Pythia8/Run3Summer19DR-106X_mcRun3_2021_realistic_v3-v2/GEN-SIM-DIGI-RAW'
+# gives
+# /store/mc/Run3Summer19DR/TTbar_14TeV_TuneCP5_Pythia8/GEN-SIM-DIGI-RAW/106X_mcRun3_2021_realistic_v3-v2/130000/F37978B0-7657-4845-B84A-918A4C91652E.root
+/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/TTbar/tsusa-TTbar_DR_2021-0fcc4a658c4b4be62580af6dd37685d4/USER'
 
 
 #/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/ExpressCosmics/Commissioning2018-Express-v1/FEVT run=312220' 
