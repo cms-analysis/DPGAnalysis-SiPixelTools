@@ -42,9 +42,8 @@
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 #include "Geometry/Records/interface/IdealGeometryRecord.h"
 
-
-#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
-#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetType.h"
+#include "Geometry/CommonDetUnit/interface/PixelGeomDetUnit.h"
+#include "Geometry/CommonDetUnit/interface/PixelGeomDetType.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "Geometry/CommonDetUnit/interface/GeomDetType.h"
@@ -2763,8 +2762,18 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	  hsizex4->Fill(float(sizeX));
 	  hsizey4->Fill(float(sizeY));
 	  
-#ifdef PHI_PROFILES
 	  if(pt>CLU_SIZE_PT_CUT_MULT) {
+#ifdef USE_PROFILES
+	    hclumult4->Fill(eta,float(size));
+	    hclumultx4->Fill(eta,float(sizeX));
+	    hclumulty4->Fill(eta,float(sizeY));
+	    hcluchar4->Fill(eta,float(charge));
+	    //hclumultld3->Fill(float(ladderOn),size);
+	    //hclumultxld3->Fill(float(ladderOn),sizeX);
+	    //hclumultyld3->Fill(float(ladderOn),sizeY);
+	    //hclucharld3->Fill(float(ladderOn),charge);
+#endif
+#ifdef PHI_PROFILES
 	    //hclumultxPhi4->Fill(phi,float(sizeX));
 	    //hclumultyPhi4->Fill(phi,float(sizeY));
 	    //hclucharPhi4->Fill(phi,float(charge));
@@ -2775,8 +2784,8 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	      hclucharX4->Fill(llx,float(charge));
 	    }
 #endif
-	  }
 #endif
+	  }
 	  
 	  hsizeyz4->Fill(eta,float(sizeY));
 	  htest3->Fill(charge,float(sizeY));

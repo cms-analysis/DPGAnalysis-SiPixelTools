@@ -63,7 +63,7 @@
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHitCollection.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 
-#include "DQM/SiStripCommon/interface/SiStripFolderOrganizer.h"
+//#include "DQM/SiStripCommon/interface/SiStripFolderOrganizer.h"
 
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
