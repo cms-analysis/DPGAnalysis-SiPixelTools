@@ -108,7 +108,7 @@
 
 // For ROOT
 //#include <TROOT.h>
-//#include <TChain.h>
+#include <TTree.h>
 //#include <TFile.h>
 //#include <TF1.h>
 #include <TH2.h>
@@ -116,6 +116,8 @@
 #include <TProfile.h>
 #include <TProfile2D.h>
 #include <TVector3.h>
+
+//#define USE_TREE  // use the simple tree storing clusters in a flat structure 
 
 //#define L1
 //#define HLT
@@ -150,9 +152,6 @@
 //#include "TrackingTools/TrajectoryState/interface/TrajectoryStateTransform.h"
 //#include "DataFormats/TrackerRecHit2D/interface/TkCloner.h"
 #endif
-
-
-const bool isData = true; // set false for MC
 
 using namespace std;
 
@@ -253,6 +252,17 @@ class PixClustersWithTracks : public edm::EDAnalyzer {
   TH1D *hpixcharge1n,*hpixcharge2b,*hpixcharge2g;
   TH2F *hpixDetMap1, *hpixDetMap2, *hpixDetMap3, *hpixDetMap4;  // in a  modules
 
+#ifdef USE_TREE
+  TTree *tree;
+  int runT, eventT, lumiBlockT, bxT;
+  //int pV, pVfake, pVnotfake;
+  float etaT, phiT, ptT;
+  int layerT,ladderOnT, moduleT;
+  int diskT, bladeT, zindexT, sideT, panelT;
+  int chargeT, sizeT, sizeXT, sizeYT;
+  float gZT, gPhiT, gRT;
+#endif
+
 #if defined(CLU_SHAPE) || defined(CLU_SHAPE_L2) 
   TH1D *hcharge111, *hpixcharge111;
   TH1D *hcharge111_1, *hcharge111_2, *hcharge111_3, *hcharge111_4 ;
@@ -323,21 +333,18 @@ class PixClustersWithTracks : public edm::EDAnalyzer {
   TProfile *hmult1,  *hmult2,  *hmult3;
   TProfile *hclusPerTrkVsEta,*hclusPerTrkVsPt,*hclusPerTrkVsls,*hclusPerTrkVsEtaB,*hclusPerTrkVsEtaF; 
 
-  TProfile2D *hcharProf1,  *hcharProf2, *hcharProf3, *hcharProf4;
-  TProfile2D *hcharProf11, *hcharProf21, *hcharProf31, *hcharProf41;
-  TProfile2D *hcharProf12, *hcharProf22, *hcharProf32, *hcharProf42;
-
-  TProfile2D *hcharProfX1,  *hcharProfX2, *hcharProfX3, *hcharProfX4;
-  TProfile2D *hcharProfX11, *hcharProfX21;
-  TProfile2D *hcharProfX12, *hcharProfX22;
-
-  TProfile *hchar1D1,  *hchar1D2, *hchar1D3, *hchar1D4;
-  TProfile *hchar1D11, *hchar1D21;
-  TProfile *hchar1D12, *hchar1D22;
-
-  TProfile *hchar1DX1,  *hchar1DX2, *hchar1DX3, *hchar1DX4;
-  TProfile *hchar1DX11, *hchar1DX21;
-  TProfile *hchar1DX12, *hchar1DX22;
+  // TProfile2D *hcharProf1,  *hcharProf2, *hcharProf3, *hcharProf4;
+  // TProfile2D *hcharProf11, *hcharProf21, *hcharProf31, *hcharProf41;
+  // TProfile2D *hcharProf12, *hcharProf22, *hcharProf32, *hcharProf42;
+  // TProfile2D *hcharProfX1,  *hcharProfX2, *hcharProfX3, *hcharProfX4;
+  // TProfile2D *hcharProfX11, *hcharProfX21;
+  // TProfile2D *hcharProfX12, *hcharProfX22;
+  // TProfile *hchar1D1,  *hchar1D2, *hchar1D3, *hchar1D4;
+  // TProfile *hchar1D11, *hchar1D21;
+  // TProfile *hchar1D12, *hchar1D22;
+  // TProfile *hchar1DX1,  *hchar1DX2, *hchar1DX3, *hchar1DX4;
+  // TProfile *hchar1DX11, *hchar1DX21;
+  // TProfile *hchar1DX12, *hchar1DX22;
 
 #endif 
 
@@ -466,6 +473,33 @@ void PixClustersWithTracks::beginJob() {
   count1=0.; count2=0.; count3=0.; count4=0.; 
   countTracks1=0; countTracks2=0; countTracks3=0; countTracks4=0, countTracks5=0; 
   edm::Service<TFileService> fs;
+
+#ifdef USE_TREE
+       tree = fs->make<TTree>("MyTree","MyTree");
+        tree->Branch("run",&runT,"run/I");
+        tree->Branch("event",&eventT,"event/I");
+        tree->Branch("lumiBlock",&lumiBlockT,"lumiBlock/I");
+        tree->Branch("bx",&bxT,"bx/I");
+        tree->Branch("eta",&etaT,"eta/F");
+        tree->Branch("phi",&phiT,"phi/F");
+        tree->Branch("pt",&ptT,"pt/F");
+        tree->Branch("module",&moduleT,"module/I");
+        tree->Branch("ladder",&ladderOnT,"ladder/I");
+        tree->Branch("layer",&layerT,"layer/I");
+        tree->Branch("disk",&diskT,"disk/I");
+        tree->Branch("blade",&bladeT,"blade/I");
+        tree->Branch("zindex",&zindexT,"zindex/I");
+        tree->Branch("side",&sideT,"side/I");
+        tree->Branch("panel",&panelT,"panel/I");
+        tree->Branch("charge",&chargeT,"charge/F");
+        tree->Branch("size",&sizeT,"size/I");
+        tree->Branch("sizeX",&sizeXT,"sizeX/I");
+        tree->Branch("sizeY",&sizeYT,"sizeY/I");
+        tree->Branch("globalZ",&gZT,"globalZ/F");
+        tree->Branch("globalPhi",&gPhiT,"globalPhi/F");
+        tree->Branch("globalR",&gRT,"globalR/F");        
+#endif
+
 
   int sizeH=20;
   float lowH = -0.5;
@@ -906,108 +940,108 @@ void PixClustersWithTracks::beginJob() {
    hclusPerTrkVsEtaB = fs->make<TProfile>("hclusPerTrkVsEtaB","B clus per trk vs.eta",60,-3.,3.,0.0,100.);
 
    // charge profiles in z (eta)
-  hcharProf1 = fs->make<TProfile2D>("hcharProf1","clu charge profile L1",
-				50,-2.5,2.5,16,0.,16.,0.,10000.);
-  hcharProf1->SetOption("colz");
-  hcharProf2 = fs->make<TProfile2D>("hcharProf2","clu charge profile L2",
-				50,-2.5,2.5,16,0.,16.,0.,10000.);
-  hcharProf2->SetOption("colz");
-  hcharProf3 = fs->make<TProfile2D>("hcharProf3","clu charge profile L3",
-				50,-2.5,2.5,16,0.,16.,0.,10000.);
-  hcharProf3->SetOption("colz");
-  hcharProf4 = fs->make<TProfile2D>("hcharProf4","clu charge profile L4",
-				50,-2.5,2.5,16,0.,16.,0.,10000.);
-  hcharProf4->SetOption("colz");
+  // hcharProf1 = fs->make<TProfile2D>("hcharProf1","clu charge profile L1",
+  // 				50,-2.5,2.5,16,0.,16.,0.,10000.);
+  // hcharProf1->SetOption("colz");
+  // hcharProf2 = fs->make<TProfile2D>("hcharProf2","clu charge profile L2",
+  // 				50,-2.5,2.5,16,0.,16.,0.,10000.);
+  // hcharProf2->SetOption("colz");
+  // hcharProf3 = fs->make<TProfile2D>("hcharProf3","clu charge profile L3",
+  // 				50,-2.5,2.5,16,0.,16.,0.,10000.);
+  // hcharProf3->SetOption("colz");
+  // hcharProf4 = fs->make<TProfile2D>("hcharProf4","clu charge profile L4",
+  // 				50,-2.5,2.5,16,0.,16.,0.,10000.);
+  // hcharProf4->SetOption("colz");
 
-  hcharProf11 = fs->make<TProfile2D>("hcharProf11","clu charge profile L1",
-				50,-2.5,2.5,16,0.,16.,0.,10000.);
-  hcharProf11->SetOption("colz");
-  hcharProf21 = fs->make<TProfile2D>("hcharProf21","clu charge profile L2",
-				50,-2.5,2.5,16,0.,16.,0.,10000.);
-  hcharProf21->SetOption("colz");
-  hcharProf31 = fs->make<TProfile2D>("hcharProf31","clu charge profile L3",
-				50,-2.5,2.5,16,0.,16.,0.,10000.);
-  hcharProf31->SetOption("colz");
-  hcharProf41 = fs->make<TProfile2D>("hcharProf41","clu charge profile L4",
-				50,-2.5,2.5,16,0.,16.,0.,10000.);
-  hcharProf41->SetOption("colz");
+  // hcharProf11 = fs->make<TProfile2D>("hcharProf11","clu charge profile L1",
+  // 				50,-2.5,2.5,16,0.,16.,0.,10000.);
+  // hcharProf11->SetOption("colz");
+  // hcharProf21 = fs->make<TProfile2D>("hcharProf21","clu charge profile L2",
+  // 				50,-2.5,2.5,16,0.,16.,0.,10000.);
+  // hcharProf21->SetOption("colz");
+  // hcharProf31 = fs->make<TProfile2D>("hcharProf31","clu charge profile L3",
+  // 				50,-2.5,2.5,16,0.,16.,0.,10000.);
+  // hcharProf31->SetOption("colz");
+  // hcharProf41 = fs->make<TProfile2D>("hcharProf41","clu charge profile L4",
+  // 				50,-2.5,2.5,16,0.,16.,0.,10000.);
+  // hcharProf41->SetOption("colz");
 
-  hcharProf12 = fs->make<TProfile2D>("hcharProf12","clu charge profile L1",
-				50,-2.5,2.5,16,0.,16.,0.,10000.);
-  hcharProf12->SetOption("colz");
-  hcharProf22 = fs->make<TProfile2D>("hcharProf22","clu charge profile L2",
-				50,-2.5,2.5,16,0.,16.,0.,10000.);
-  hcharProf22->SetOption("colz");
-  hcharProf32 = fs->make<TProfile2D>("hcharProf32","clu charge profile L3",
-				50,-2.5,2.5,16,0.,16.,0.,10000.);
-  hcharProf32->SetOption("colz");
-  hcharProf42 = fs->make<TProfile2D>("hcharProf42","clu charge profile L4",
-				50,-2.5,2.5,16,0.,16.,0.,10000.);
-  hcharProf42->SetOption("colz");
+  // hcharProf12 = fs->make<TProfile2D>("hcharProf12","clu charge profile L1",
+  // 				50,-2.5,2.5,16,0.,16.,0.,10000.);
+  // hcharProf12->SetOption("colz");
+  // hcharProf22 = fs->make<TProfile2D>("hcharProf22","clu charge profile L2",
+  // 				50,-2.5,2.5,16,0.,16.,0.,10000.);
+  // hcharProf22->SetOption("colz");
+  // hcharProf32 = fs->make<TProfile2D>("hcharProf32","clu charge profile L3",
+  // 				50,-2.5,2.5,16,0.,16.,0.,10000.);
+  // hcharProf32->SetOption("colz");
+  // hcharProf42 = fs->make<TProfile2D>("hcharProf42","clu charge profile L4",
+  // 				50,-2.5,2.5,16,0.,16.,0.,10000.);
+  // hcharProf42->SetOption("colz");
 
-  hchar1D1 = fs->make<TProfile>("hchar1D1","clu charge profile L1",
-				16,0.,16.,0.,10000.);
-  hchar1D2 = fs->make<TProfile>("hchar1D2","clu charge profile L2",
-				16,0.,16.,0.,10000.);
-  hchar1D3 = fs->make<TProfile>("hchar1D3","clu charge profile L3",
-				16,0.,16.,0.,10000.);
-  hchar1D4 = fs->make<TProfile>("hchar1D4","clu charge profile L4",
-				16,0.,16.,0.,10000.);
+  // hchar1D1 = fs->make<TProfile>("hchar1D1","clu charge profile L1",
+  // 				16,0.,16.,0.,10000.);
+  // hchar1D2 = fs->make<TProfile>("hchar1D2","clu charge profile L2",
+  // 				16,0.,16.,0.,10000.);
+  // hchar1D3 = fs->make<TProfile>("hchar1D3","clu charge profile L3",
+  // 				16,0.,16.,0.,10000.);
+  // hchar1D4 = fs->make<TProfile>("hchar1D4","clu charge profile L4",
+  // 				16,0.,16.,0.,10000.);
 
-  hchar1D11 = fs->make<TProfile>("hchar1D11","clu charge profile L1",
-				16,0.,16.,0.,10000.);
-  hchar1D12 = fs->make<TProfile>("hchar1D12","clu charge profile L1",
-				16,0.,16.,0.,10000.);
-  hchar1D21 = fs->make<TProfile>("hchar1D21","clu charge profile L2",
-				16,0.,16.,0.,10000.);
-  hchar1D22 = fs->make<TProfile>("hchar1D22","clu charge profile L2",
-				16,0.,16.,0.,10000.);
+  // hchar1D11 = fs->make<TProfile>("hchar1D11","clu charge profile L1",
+  // 				16,0.,16.,0.,10000.);
+  // hchar1D12 = fs->make<TProfile>("hchar1D12","clu charge profile L1",
+  // 				16,0.,16.,0.,10000.);
+  // hchar1D21 = fs->make<TProfile>("hchar1D21","clu charge profile L2",
+  // 				16,0.,16.,0.,10000.);
+  // hchar1D22 = fs->make<TProfile>("hchar1D22","clu charge profile L2",
+  // 				16,0.,16.,0.,10000.);
 
-  // in x 
-  hcharProfX1 = fs->make<TProfile2D>("hcharProfX1","clu charge profileX L1",
-				16,-0.8,0.8,3,0.,3.,0.,10000.);
-  hcharProfX1->SetOption("colz");
-  hcharProfX2 = fs->make<TProfile2D>("hcharProfX2","clu charge profileX L2",
-				16,-0.8,0.8,3,0.,3.,0.,10000.);
-  hcharProfX2->SetOption("colz");
-  hcharProfX3 = fs->make<TProfile2D>("hcharProfX3","clu charge profileX L3",
-				16,-0.8,0.8,3,0.,3.,0.,10000.);
-  hcharProfX3->SetOption("colz");
-  hcharProfX4 = fs->make<TProfile2D>("hcharProfX4","clu charge profileX L4",
-				16,-0.8,0.8,3,0.,3.,0.,10000.);
-  hcharProfX4->SetOption("colz");
+  // // in x 
+  // hcharProfX1 = fs->make<TProfile2D>("hcharProfX1","clu charge profileX L1",
+  // 				16,-0.8,0.8,3,0.,3.,0.,10000.);
+  // hcharProfX1->SetOption("colz");
+  // hcharProfX2 = fs->make<TProfile2D>("hcharProfX2","clu charge profileX L2",
+  // 				16,-0.8,0.8,3,0.,3.,0.,10000.);
+  // hcharProfX2->SetOption("colz");
+  // hcharProfX3 = fs->make<TProfile2D>("hcharProfX3","clu charge profileX L3",
+  // 				16,-0.8,0.8,3,0.,3.,0.,10000.);
+  // hcharProfX3->SetOption("colz");
+  // hcharProfX4 = fs->make<TProfile2D>("hcharProfX4","clu charge profileX L4",
+  // 				16,-0.8,0.8,3,0.,3.,0.,10000.);
+  // hcharProfX4->SetOption("colz");
 
-  hcharProfX11 = fs->make<TProfile2D>("hcharProfX11","clu charge profileX L1",
-				16,-0.8,0.8,3,0.,3.,0.,10000.);
-  hcharProfX11->SetOption("colz");
-  hcharProfX21 = fs->make<TProfile2D>("hcharProfX21","clu charge profileX L2",
-				16,-0.8,0.8,3,0.,3.,0.,10000.);
-  hcharProfX21->SetOption("colz");
+  // hcharProfX11 = fs->make<TProfile2D>("hcharProfX11","clu charge profileX L1",
+  // 				16,-0.8,0.8,3,0.,3.,0.,10000.);
+  // hcharProfX11->SetOption("colz");
+  // hcharProfX21 = fs->make<TProfile2D>("hcharProfX21","clu charge profileX L2",
+  // 				16,-0.8,0.8,3,0.,3.,0.,10000.);
+  // hcharProfX21->SetOption("colz");
 
-  hcharProfX12 = fs->make<TProfile2D>("hcharProfX12","clu charge profileX L1",
-				16,-0.8,0.8,3,0.,3.,0.,10000.);
-  hcharProfX12->SetOption("colz");
-  hcharProfX22 = fs->make<TProfile2D>("hcharProfX22","clu charge profileX L2",
-				16,-0.8,0.8,3,0.,3.,0.,10000.);
-  hcharProfX22->SetOption("colz");
+  // hcharProfX12 = fs->make<TProfile2D>("hcharProfX12","clu charge profileX L1",
+  // 				16,-0.8,0.8,3,0.,3.,0.,10000.);
+  // hcharProfX12->SetOption("colz");
+  // hcharProfX22 = fs->make<TProfile2D>("hcharProfX22","clu charge profileX L2",
+  // 				16,-0.8,0.8,3,0.,3.,0.,10000.);
+  // hcharProfX22->SetOption("colz");
 
-  hchar1DX1 = fs->make<TProfile>("hchar1DX1","clu charge profileX L1",
-				3,0.,3.,0.,10000.);
-  hchar1DX2 = fs->make<TProfile>("hchar1DX2","clu charge profileX L2",
-				3,0.,3.,0.,10000.);
-  hchar1DX3 = fs->make<TProfile>("hchar1DX3","clu charge profileX L3",
-				3,0.,3.,0.,10000.);
-  hchar1DX4 = fs->make<TProfile>("hchar1DX4","clu charge profileX L4",
-				3,0.,3.,0.,10000.);
+  // hchar1DX1 = fs->make<TProfile>("hchar1DX1","clu charge profileX L1",
+  // 				3,0.,3.,0.,10000.);
+  // hchar1DX2 = fs->make<TProfile>("hchar1DX2","clu charge profileX L2",
+  // 				3,0.,3.,0.,10000.);
+  // hchar1DX3 = fs->make<TProfile>("hchar1DX3","clu charge profileX L3",
+  // 				3,0.,3.,0.,10000.);
+  // hchar1DX4 = fs->make<TProfile>("hchar1DX4","clu charge profileX L4",
+  // 				3,0.,3.,0.,10000.);
 
-  hchar1DX11 = fs->make<TProfile>("hchar1DX11","clu charge profileX L1",
-				3,0.,3.,0.,10000.);
-  hchar1DX12 = fs->make<TProfile>("hchar1DX12","clu charge profileX L1",
-				3,0.,3.,0.,10000.);
-  hchar1DX21 = fs->make<TProfile>("hchar1DX21","clu charge profileX L2",
-				3,0.,3.,0.,10000.);
-  hchar1DX22 = fs->make<TProfile>("hchar1DX22","clu charge profileX L2",
-				3,0.,3.,0.,10000.);
+  // hchar1DX11 = fs->make<TProfile>("hchar1DX11","clu charge profileX L1",
+  // 				3,0.,3.,0.,10000.);
+  // hchar1DX12 = fs->make<TProfile>("hchar1DX12","clu charge profileX L1",
+  // 				3,0.,3.,0.,10000.);
+  // hchar1DX21 = fs->make<TProfile>("hchar1DX21","clu charge profileX L2",
+  // 				3,0.,3.,0.,10000.);
+  // hchar1DX22 = fs->make<TProfile>("hchar1DX22","clu charge profileX L2",
+  // 				3,0.,3.,0.,10000.);
 
 #endif // USE_PROFILES
 
@@ -1369,10 +1403,10 @@ void PixClustersWithTracks::beginJob() {
 }
 //-------------------------------------------------------------------------
 #if defined(CLU_SHAPE) || defined(CLU_SHAPE_L2) 
-void PixClustersWithTracks::histogramClus(float cha, int size, int sizex, int sizey, 
+void PixClustersWithTracks::histogramClus(float cha, int sizet, int sizex, int sizey, 
 					  bool same, int corner) {
 
-  if(size==1) {
+  if(sizet==1) {
     hcharge111->Fill(cha); 
     if(corner==1) hcharge111_1->Fill(cha); 
     else if(corner==2) hcharge111_2->Fill(cha); 
@@ -1427,10 +1461,10 @@ void PixClustersWithTracks::histogramClus(float cha, int size, int sizex, int si
     
   }
 }
-void PixClustersWithTracks::histogramPix(float cha, int size, int sizex, int sizey, 
+void PixClustersWithTracks::histogramPix(float cha, int sizet, int sizex, int sizey, 
 					 bool same, int corner) {
 
-  if(size==1) {
+  if(sizet==1) {
     hpixcharge111->Fill(cha); 
 
   } else {
@@ -1637,21 +1671,14 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 
   if(PRINT) cout<<"Run "<<run<<" Event "<<event<<" LS "<<lumiBlock<<" bx "<<bx<<endl;
 
-  bool select = false;
+#ifdef USE_TREE
+  runT=run; eventT=event; lumiBlockT=lumiBlock; bxT=bx;
+#endif 
 
-  //if(lumiBlock==21) {
-  ////if(event==20659585) cout<<" Event "<<event<<" LS "<<lumiBlock<<endl;
-  //for(int i=0;i<19;++i) {
-  //  if(event==badBx[i]) {select=true; break;}
-  //}      
-  //} else {return;}
-  //if(!select) return;
-  //cout<<"Run "<<run<<" Event "<<event<<" LS "<<lumiBlock<<" bx "<<bx<<endl;
+  bool select = false;
 
   hbx0->Fill(float(bx));
   hls0->Fill(float(lumiBlock));
-
-
 
 #ifdef LUMI
   edm::LuminosityBlock const& iLumi = e.getLuminosityBlock();
@@ -1896,7 +1923,7 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
     numOfClusPerTrk5=0;        
     int pixelHits=0;
     
-    int size = t->recHitsSize();
+    int sizer = t->recHitsSize();
     float pt = t->pt();
     float eta = t->eta(); // track eta
     float phi = t->phi();  
@@ -1909,8 +1936,12 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 
     
     if(PRINT) cout<<"Track "<<trackNumber<<" Pt "<<pt<<" Eta "<<eta<<" d0/dz "<<d0<<" "<<dz
-		  <<" Hits "<<size<<" cuts "<<etaCut<<" "<<ptCut<<endl;
+		  <<" Hits "<<sizer<<" cuts "<<etaCut<<" "<<ptCut<<endl;
     
+#ifdef USE_TREE
+    etaT=eta; phiT=phi; ptT=pt;
+#endif
+
     // applay special select cuts
     if( (select1==13) || (select1==15) )  {
       if(pt<ptCut) continue;   // cut on min pt
@@ -1999,7 +2030,7 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
       if( !goodTrack ||  (abs(zpv)>1.) ) continue; 
     }
 
-    if(isData && TrackCuts && !goodTrack) continue;
+    if(TrackCuts && !goodTrack) continue;
     countNiceTracks++;      
     hPt->Fill(pt);
         
@@ -2127,6 +2158,10 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
       
 	if(PRINT) cout<<"barrel layer/ladder/module: "<<layer<<"/"<<ladderIndex<<"/"<<zindex<<endl;
 	
+#ifdef USE_TREE
+	layerT=layer; ladderOnT=ladderOn; moduleT=module;
+#endif
+
       } else if(IntSubDetID == PixelSubdetector::PixelEndcap) {  // fpix
 
 	if(PRINT) cout<<" a pixel f rechit "<<endl;
@@ -2149,6 +2184,9 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	if(PRINT) cout<<" forward det, disk "<<disk<<", blade "
 		      <<blade<<", module "<<zindexF<<", side "<<side<<", panel "
 		      <<panel<<endl;
+#ifdef USE_TREE
+	diskT=disk; bladeT=blade; zindexT=zindexF;sizeT=side; panelT=panel;
+#endif
 
       } else { // nothings
 	continue; // skip non pixel hits 
@@ -2319,15 +2357,19 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	//select = (abs(eta)>2.)&&(abs(module)==4); 
 	if(PRINT) cout<<" cluster "<<numberOfClusters<<" charge = "<<charge<<" size = "<<size<<endl;
 	
+#ifdef USE_TREE
+	chargeT=charge; sizeT=size; sizeXT=sizeX; sizeYT=sizeY;
+#endif
+
 	LocalPoint lp = topol->localPosition( MeasurementPoint( clust->x(), clust->y() ) );
 	float lx = lp.x();
 	float ly = lp.y();
 	//cout<<" clu loc "<<x<<" "<<y<<endl;
 	
 	GlobalPoint clustgp = theGeomDet->surface().toGlobal( lp );
-	double gX = clustgp.x();
-	double gY = clustgp.y();
-	double gZ = clustgp.z();
+	float gX = clustgp.x();
+	float gY = clustgp.y();
+	float gZ = clustgp.z();
 	
 	
 	TVector3 v(gX,gY,gZ);
@@ -2336,15 +2378,26 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	
 	if(PRINT) cout<<" CLU GLOBAL "<<gX<<" "<<gY<<" "<<gZ<<" "<<gR<<" "<<gPhi<<endl;
 
+#ifdef USE_TREE
+	gZT=gZ; gPhiT=gPhi; gRT=gR;
+#endif
 
-#if defined(CLU_SHAPE) || defined(CLU_SHAPE_L2) || defined(USE_PROFILES)
+#ifdef USE_TREE
+	tree->Fill();
+#endif // USE_TREE
+
+
+#ifdef USE_PROFILES 
 	int maxPixelCol = clust->maxPixelCol();
 	int maxPixelRow = clust->maxPixelRow();
 	int minPixelCol = clust->minPixelCol();
 	int minPixelRow = clust->minPixelRow();
+#if defined(CLU_SHAPE) || defined(CLU_SHAPE_L2)
 	bool same = false;
 	int corner=0;
 #endif
+#endif
+
 	//int geoId = PixGeom->geographicalId().rawId();
 	// Replace with the topology methods
 	// edge method moved to topologi class
@@ -3056,89 +3109,87 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 
 #ifdef USE_PROFILES
 	// Do the charge cluster profiles 
-	if( (pt>CLU_SIZE_PT_CUT_MULT) && (sizeX<=3) && (sizeY<=20) ) {
-	  for(int i=0; i<sizeY; ++i) {	   
-	    if(layer==1) {
-	      hcharProf1->Fill(eta,i,yProfile[i]);
-	      if(inner) {hcharProf11->Fill(eta,i,yProfile[i]);}
-	      else      {hcharProf12->Fill(eta,i,yProfile[i]);}
-	      if(eta>1.7 && eta<1.8) {
-		hchar1D1->Fill(i,yProfile[i]);
-		if(inner) {hchar1D11->Fill(i,yProfile[i]);}
-		else      {hchar1D12->Fill(i,yProfile[i]);}
-	      }		       
-	    } else if(layer==2) {
-	      hcharProf2->Fill(eta,i,yProfile[i]);
-	      if(inner) {hcharProf21->Fill(eta,i,yProfile[i]);}
-	      else      {hcharProf22->Fill(eta,i,yProfile[i]);}
-	      if(eta>1.7 && eta<1.8) {
-		hchar1D2->Fill(i,yProfile[i]);
-		if(inner) {hchar1D21->Fill(i,yProfile[i]);}
-		else      {hchar1D22->Fill(i,yProfile[i]);}
-	      }		       
-	    } else if(layer==3) {
-	      hcharProf3->Fill(eta,i,yProfile[i]);
-	      if(inner) {hcharProf31->Fill(eta,i,yProfile[i]);}
-	      else      {hcharProf32->Fill(eta,i,yProfile[i]);}
-	      if(eta>1.7 && eta<1.8) {
-		hchar1D3->Fill(i,yProfile[i]);
-		//if(inner) {hchar1D11->Fill(i,yProfile[i]);}
-		//else      {hchar1D12->Fill(i,yProfile[i]);}
-	      }		       
-	    } else if(layer==4) {
-	      hcharProf4->Fill(eta,i,yProfile[i]);
-	      if(inner) {hcharProf41->Fill(eta,i,yProfile[i]);}
-	      else      {hcharProf42->Fill(eta,i,yProfile[i]);}
-	      if(eta>1.0 && eta<1.8) {
-		hchar1D4->Fill(i,yProfile[i]);
-		//if(inner) {hchar1D11->Fill(i,yProfile[i]);}
-		//else      {hchar1D12->Fill(i,yProfile[i]);}
-	      }		       
-	    } // layer
-	  } // column index 
-
-	  // X
-	  for(int i=0; i<sizeX; ++i) {	   
-	    if(layer==1) {
-	      hcharProfX1->Fill(lx,i,xProfile[i]);
-	      if(inner) {hcharProfX11->Fill(lx,i,xProfile[i]);}
-	      else      {hcharProfX12->Fill(lx,i,xProfile[i]);}
-	      if(lx>0.40 && lx<0.41) {
-		hchar1DX1->Fill(i,xProfile[i]);
-		if(inner) {hchar1DX11->Fill(i,xProfile[i]);}
-		else      {hchar1DX12->Fill(i,xProfile[i]);}
-	      }		       
-	    } else if(layer==2) {
-	      hcharProfX2->Fill(lx,i,xProfile[i]);
-	      if(inner) {hcharProfX21->Fill(lx,i,xProfile[i]);}
-	      else      {hcharProfX22->Fill(lx,i,xProfile[i]);}
-	      if(lx>0.40 && lx<0.41) {
-		hchar1DX2->Fill(i,xProfile[i]);
-		if(inner) {hchar1DX21->Fill(i,xProfile[i]);}
-		else      {hchar1DX22->Fill(i,xProfile[i]);}
-	      }		       
-	    } else if(layer==3) {
-	      hcharProfX3->Fill(lx,i,xProfile[i]);
-	      //if(inner) {hcharProfX31->Fill(lx,i,xProfile[i]);}
-	      //else      {hcharProfX32->Fill(lx,i,xProfile[i]);}
-	      if(lx>0.40 && lx<0.41) {
-		hchar1DX3->Fill(i,xProfile[i]);
-		//if(inner) {hchar1DX11->Fill(i,xProfile[i]);}
-		//else      {hchar1DX12->Fill(i,xProfile[i]);}
-	      }		       
-	    } else if(layer==4) {
-	      hcharProfX4->Fill(lx,i,xProfile[i]);
-	      //if(inner) {hcharProfX41->Fill(lx,i,xProfile[i]);}
-	      //else      {hcharProfX42->Fill(lx,i,xProfile[i]);}
-	      if(lx>0.40 && lx<0.41) {
-		hchar1DX4->Fill(i,xProfile[i]);
-		//if(inner) {hchar1DX11->Fill(i,xProfile[i]);}
-		//else      {hchar1DX12->Fill(i,xProfile[i]);}
-	      }		       
-	    } // layer
-	  } // column index 
-
-	} // pt, size 
+	//if( (pt>CLU_SIZE_PT_CUT_MULT) && (sizeX<=3) && (sizeY<=20) ) {
+	//   for(int i=0; i<sizeY; ++i) {	   
+	//     if(layer==1) {
+	//       hcharProf1->Fill(eta,i,yProfile[i]);
+	//       if(inner) {hcharProf11->Fill(eta,i,yProfile[i]);}
+	//       else      {hcharProf12->Fill(eta,i,yProfile[i]);}
+	//       if(eta>1.7 && eta<1.8) {
+	// 	hchar1D1->Fill(i,yProfile[i]);
+	// 	if(inner) {hchar1D11->Fill(i,yProfile[i]);}
+	// 	else      {hchar1D12->Fill(i,yProfile[i]);}
+	//       }		       
+	//     } else if(layer==2) {
+	//       hcharProf2->Fill(eta,i,yProfile[i]);
+	//       if(inner) {hcharProf21->Fill(eta,i,yProfile[i]);}
+	//       else      {hcharProf22->Fill(eta,i,yProfile[i]);}
+	//       if(eta>1.7 && eta<1.8) {
+	// 	hchar1D2->Fill(i,yProfile[i]);
+	// 	if(inner) {hchar1D21->Fill(i,yProfile[i]);}
+	// 	else      {hchar1D22->Fill(i,yProfile[i]);}
+	//       }		       
+	//     } else if(layer==3) {
+	//       hcharProf3->Fill(eta,i,yProfile[i]);
+	//       if(inner) {hcharProf31->Fill(eta,i,yProfile[i]);}
+	//       else      {hcharProf32->Fill(eta,i,yProfile[i]);}
+	//       if(eta>1.7 && eta<1.8) {
+	// 	hchar1D3->Fill(i,yProfile[i]);
+	// 	//if(inner) {hchar1D11->Fill(i,yProfile[i]);}
+	// 	//else      {hchar1D12->Fill(i,yProfile[i]);}
+	//       }		       
+	//     } else if(layer==4) {
+	//       hcharProf4->Fill(eta,i,yProfile[i]);
+	//       if(inner) {hcharProf41->Fill(eta,i,yProfile[i]);}
+	//       else      {hcharProf42->Fill(eta,i,yProfile[i]);}
+	//       if(eta>1.0 && eta<1.8) {
+	// 	hchar1D4->Fill(i,yProfile[i]);
+	// 	//if(inner) {hchar1D11->Fill(i,yProfile[i]);}
+	// 	//else      {hchar1D12->Fill(i,yProfile[i]);}
+	//       }		       
+	//     } // layer
+	//   } // column index 
+	//   // X
+	//   for(int i=0; i<sizeX; ++i) {	   
+	//     if(layer==1) {
+	//       hcharProfX1->Fill(lx,i,xProfile[i]);
+	//       if(inner) {hcharProfX11->Fill(lx,i,xProfile[i]);}
+	//       else      {hcharProfX12->Fill(lx,i,xProfile[i]);}
+	//       if(lx>0.40 && lx<0.41) {
+	// 	hchar1DX1->Fill(i,xProfile[i]);
+	// 	if(inner) {hchar1DX11->Fill(i,xProfile[i]);}
+	// 	else      {hchar1DX12->Fill(i,xProfile[i]);}
+	//       }		       
+	//     } else if(layer==2) {
+	//       hcharProfX2->Fill(lx,i,xProfile[i]);
+	//       if(inner) {hcharProfX21->Fill(lx,i,xProfile[i]);}
+	//       else      {hcharProfX22->Fill(lx,i,xProfile[i]);}
+	//       if(lx>0.40 && lx<0.41) {
+	// 	hchar1DX2->Fill(i,xProfile[i]);
+	// 	if(inner) {hchar1DX21->Fill(i,xProfile[i]);}
+	// 	else      {hchar1DX22->Fill(i,xProfile[i]);}
+	//       }		       
+	//     } else if(layer==3) {
+	//       hcharProfX3->Fill(lx,i,xProfile[i]);
+	//       //if(inner) {hcharProfX31->Fill(lx,i,xProfile[i]);}
+	//       //else      {hcharProfX32->Fill(lx,i,xProfile[i]);}
+	//       if(lx>0.40 && lx<0.41) {
+	// 	hchar1DX3->Fill(i,xProfile[i]);
+	// 	//if(inner) {hchar1DX11->Fill(i,xProfile[i]);}
+	// 	//else      {hchar1DX12->Fill(i,xProfile[i]);}
+	//       }		       
+	//     } else if(layer==4) {
+	//       hcharProfX4->Fill(lx,i,xProfile[i]);
+	//       //if(inner) {hcharProfX41->Fill(lx,i,xProfile[i]);}
+	//       //else      {hcharProfX42->Fill(lx,i,xProfile[i]);}
+	//       if(lx>0.40 && lx<0.41) {
+	// 	hchar1DX4->Fill(i,xProfile[i]);
+	// 	//if(inner) {hchar1DX11->Fill(i,xProfile[i]);}
+	// 	//else      {hchar1DX12->Fill(i,xProfile[i]);}
+	//       }		       
+	//     } // layer
+	//   } // column index 
+	// } // pt, size 
 #endif
 
 
