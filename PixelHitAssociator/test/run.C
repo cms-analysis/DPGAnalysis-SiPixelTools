@@ -1,40 +1,40 @@
 {
   const bool lookAtAlignmentErrors = false;
 
-  _file0->cd("DQMData/TrackerRecHitsV/TrackerRecHits/Pixel/recHitBPIX");
+  _file0->cd("pixRecHitsValid");
   //gROOT->ProcessLine(".L macros/fittp0.C");
   //fittp0("h420");
 
-  RecHit_XRes_Layer1->Fit("gaus");
-  float rms = RecHit_XRes_Layer1->GetRMS();
+  recHitXResLayer1->Fit("gaus");
+  float rms = recHitXResLayer1->GetRMS();
   cout<<" layer 1 x RMS = "<<rms<<endl;
 
-  RecHit_XRes_Layer2->Fit("gaus");
-  rms = RecHit_XRes_Layer2->GetRMS();
+  recHitXResLayer2->Fit("gaus");
+  rms = recHitXResLayer2->GetRMS();
   cout<<" layer 2 x RMS = "<<rms<<endl;
 
-  RecHit_XRes_Layer3->Fit("gaus");
-  rms = RecHit_XRes_Layer3->GetRMS();
+  recHitXResLayer3->Fit("gaus");
+  rms = recHitXResLayer3->GetRMS();
   cout<<" layer 3 x RMS = "<<rms<<endl;
 
-  RecHit_XRes_Layer4->Fit("gaus");
-  rms = RecHit_XRes_Layer4->GetRMS();
+  recHitXResLayer4->Fit("gaus");
+  rms = recHitXResLayer4->GetRMS();
   cout<<" layer 4 x RMS = "<<rms<<endl;
 
-  RecHit_YRes_Layer1->Fit("gaus");
-  rms = RecHit_YRes_Layer1->GetRMS();
+  recHitYResLayer1->Fit("gaus");
+  rms = recHitYResLayer1->GetRMS();
   cout<<" layer 1 y RMS = "<<rms<<endl;
 
-  RecHit_YRes_Layer2->Fit("gaus");
-  rms = RecHit_YRes_Layer2->GetRMS();
+  recHitYResLayer2->Fit("gaus");
+  rms = recHitYResLayer2->GetRMS();
   cout<<" layer 2 y RMS = "<<rms<<endl;
 
-  RecHit_YRes_Layer3->Fit("gaus");
-  rms = RecHit_YRes_Layer3->GetRMS();
+  recHitYResLayer3->Fit("gaus");
+  rms = recHitYResLayer3->GetRMS();
   cout<<" layer 3 y RMS = "<<rms<<endl;
 
-  RecHit_YRes_Layer4->Fit("gaus");
-  rms = RecHit_YRes_Layer4->GetRMS();
+  recHitYResLayer4->Fit("gaus");
+  rms = recHitYResLayer4->GetRMS();
   cout<<" layer 4 y RMS = "<<rms<<endl;
 
   if(lookAtAlignmentErrors) {

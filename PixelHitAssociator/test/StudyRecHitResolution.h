@@ -25,8 +25,12 @@
 #include "DataFormats/DetId/interface/DetId.h"
 
 #include "Geometry/CommonTopologies/interface/PixelTopology.h"
-#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
-#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetType.h"
+
+//#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
+//#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetType.h"
+#include "Geometry/CommonDetUnit/interface/PixelGeomDetUnit.h"
+#include "Geometry/CommonDetUnit/interface/PixelGeomDetType.h"
+
 #include "Geometry/CommonDetUnit/interface/GeomDetType.h"
 #include "Geometry/CommonDetUnit/interface/GeomDet.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
@@ -34,8 +38,19 @@
 #include "Geometry/TrackerNumberingBuilder/interface/GeometricDet.h"
 
 //DWM histogram services
-#include "DQMServices/Core/interface/DQMStore.h"
-#include "DQMServices/Core/interface/MonitorElement.h"
+//#include "DQMServices/Core/interface/DQMStore.h"
+//#include "DQMServices/Core/interface/MonitorElement.h"
+
+// For ROOT
+#include <TROOT.h>
+#include <TChain.h>
+#include <TFile.h>
+#include <TF1.h>
+#include <TH2F.h>
+#include <TH1F.h>
+#include <TProfile.h>
+#include <TProfile2D.h>
+#include <TVector3.h>
 
 #include <string>
 
@@ -66,7 +81,7 @@ class StudyRecHitResolution : public edm::EDAnalyzer {
 	void endJob();
 
    private:
-	DQMStore* dbe_;
+	//DQMStore* dbe_;
 	std::string outputFile_;
 	bool verbose_;
 	edm::EDGetTokenT<edmNew::DetSetVector<SiPixelRecHit>> tPixelRecHit;
@@ -88,166 +103,108 @@ class StudyRecHitResolution : public edm::EDAnalyzer {
 #endif
         int PhaseIBladeOfflineToOnline(const int&);
 
-	//Clusters BPIX
-	MonitorElement* clustYSizeModule[8];
-	//MonitorElement* clustXSizeLayer[4];
-	MonitorElement* clustChargeLayer1Modules[8];
-	MonitorElement* clustChargeLayer2Modules[8];
-	MonitorElement* clustChargeLayer3Modules[8];
-	MonitorElement* clustChargeLayer4Modules[8];
 
-	//Cluster FPIX
-	MonitorElement* clustXSizeDisk1Plaquettes[7];
-	MonitorElement* clustXSizeDisk2Plaquettes[7];
-	MonitorElement* clustXSizeDisk3Plaquettes[7];
-	MonitorElement* clustYSizeDisk1Plaquettes[7];
-	MonitorElement* clustYSizeDisk2Plaquettes[7];
-	MonitorElement* clustYSizeDisk3Plaquettes[7];
-	MonitorElement* clustChargeDisk1Plaquettes[7];
-	MonitorElement* clustChargeDisk2Plaquettes[7];
-	MonitorElement* clustChargeDisk3Plaquettes[7];
+	TH1D*hptTrack, *hphiTrack, *hetaTrack;
 
 	//RecHits BPIX
-	MonitorElement* recHitXResAllB;
-	MonitorElement* recHitYResAllB;
-	//MonitorElement* recHitXFullModules;
-	//MonitorElement* recHitXHalfModules;
-	MonitorElement* recHitYAllModules;
-	MonitorElement* recHitXResFlippedLadderLayers[4];
-	MonitorElement* recHitXResNonFlippedLadderLayers[4];
-        MonitorElement *recHitXResFlippedLadderLayersSide[4][2];
-        MonitorElement *recHitXResNonFlippedLadderLayersSide[4][2];
-
-	MonitorElement *recHitL1XResSize1,*recHitL1XResSize2,*recHitL1XResSize3;   
-	MonitorElement *recHitL2XResSize1,*recHitL2XResSize2,*recHitL2XResSize3;   
-	MonitorElement *recHitL3XResSize1,*recHitL3XResSize2,*recHitL3XResSize3;   
-	MonitorElement *recHitL4XResSize1,*recHitL4XResSize2,*recHitL4XResSize3;   
-
-	MonitorElement* recHitYResLayer1Modules[8];
-	MonitorElement* recHitYResLayer2Modules[8];
-	MonitorElement* recHitYResLayer3Modules[8];
-	MonitorElement* recHitYResLayer4Modules[8];
-
-	MonitorElement* recHitXResLayers[4];
-	MonitorElement* recHitYResLayers[4];
-	MonitorElement* recHitXResLayersP[4];
-	MonitorElement* recHitYResLayersP[4];
-	MonitorElement* recHitXResLayersP1[4];
-	MonitorElement* recHitXResLayersP2[4];
-	MonitorElement* recHitXResLayersP3[4];
-	MonitorElement* recHitYResLayersP1[4];
-	MonitorElement* recHitYResLayersP2[4];
-	MonitorElement* recHitYResLayersP3[4];
-	MonitorElement* recHitYResLayersP4[4];
-
-	MonitorElement* recHitXResVsPhiP[4];
-	MonitorElement* recHitXResVsPhiP1[4];
-	MonitorElement* recHitXResVsPhiP2[4];
-	MonitorElement* recHitXResVsPhiP3[4];
-
-	MonitorElement* recHitXResLayer1Eta[25];
-	MonitorElement* recHitXResLayer2Eta[25];
-	MonitorElement* recHitXResLayer3Eta[25];
-	MonitorElement* recHitXResLayer4Eta[25];
-	MonitorElement* recHitYResLayer1Eta[25];
-	MonitorElement* recHitYResLayer2Eta[25];
-	MonitorElement* recHitYResLayer3Eta[25];
-	MonitorElement* recHitYResLayer4Eta[25];
-
-  	MonitorElement *htheta1,*hbeta1,*hphi1;
-  	MonitorElement *htheta2,*hbeta2,*hphi2;
-	MonitorElement *heta1, *heta2, *heta3, *heta4;
-	MonitorElement *hz1, *hz1_1, *hz1_2, *hz1_3, *hz1_4, *hz1_5;
-	MonitorElement *hz1_11, *hz1_12, *hz1_13,*hz1_14,*hz1_15,*hz1_16,*hz1_17;	
-
-	//MonitorElement *recHitX11, *recHitX12; // *recHitX21, *recHitX22;
-	MonitorElement *hptTrack, *hphiTrack, *hetaTrack;
+	TH1D* recHitXResAllB;
+	TH1D* recHitYResAllB;
+	TH1D* recHitXPullAllB;
+	TH1D* recHitYPullAllB;
+	TH1D* recHitXErrorAllB;
+	TH1D* recHitYErrorAllB;
 
 	//RecHits FPIX
-	MonitorElement* recHitXResAllF;
-	MonitorElement* recHitXResPosZF;
-	MonitorElement* recHitXResNegZF;
-	MonitorElement* recHitYResAllF;
-	MonitorElement* recHitYResPosZF;
-	MonitorElement* recHitYResNegZF;
-	//MonitorElement* recHitXPlaquetteSize1;
-	//MonitorElement* recHitXPlaquetteSize2;
-	//MonitorElement* recHitYPlaquetteSize2;
-	//MonitorElement* recHitYPlaquetteSize3;
-	//MonitorElement* recHitYPlaquetteSize4;
-	//MonitorElement* recHitYPlaquetteSize5;
-	MonitorElement* recHitXResDisk1[7];
-	MonitorElement* recHitYResDisk1[7];
-	MonitorElement* recHitXResDisk2[7];
-	MonitorElement* recHitYResDisk2[7];
-	MonitorElement* recHitXResDisk3[7];
-	MonitorElement* recHitYResDisk3[7];
-	MonitorElement* recHitXResRingSidePanel[2][2][2];
-	MonitorElement* recHitYResRingSidePanel[2][2][2];
-	MonitorElement* recHitXResRingSide[2][2];
-	MonitorElement* recHitYResRingPanel[2][2];
+	TH1D* recHitXResAllF;
+	TH1D* recHitYResAllF;
+	TH1D* recHitXPullAllF;
+	TH1D* recHitYPullAllF;
+	TH1D* recHitXErrorAllF;
+	TH1D* recHitYErrorAllF;
+	TH1D* recHitXResPosZF;
+	TH1D* recHitXResNegZF;
+	TH1D* recHitYResPosZF;
+	TH1D* recHitYResNegZF;
 
-	// Pull distributions
-	//RecHits BPIX
-	MonitorElement* recHitXPullAllB;
-	MonitorElement* recHitYPullAllB;
-	MonitorElement *recHitXError1B,*recHitXError2B,*recHitXError3B,*recHitXError4B;
-	MonitorElement *recHitYError1B,*recHitYError2B,*recHitYError3B,*recHitYError4B;
+	// Unused 
+	//TH1D*hdist1, *hdist2, *hdist3, *hdist4;
+	//TH1D*hcount1,*hcount2,*hcount3,*hcount4,*hcount5,*hcount6,*hcount7,*hcount8,*hcount9;
+	//TH1D*hParticleType1,*hTrackId1,*hProcessType1,
+	//*hParticleType2,*hTrackId2,*hProcessType2,
+	//*hParticleType3,*hTrackId3,*hProcessType3,
+	//*hParticleType4,*hTrackId4,*hProcessType4,
+	//*hParticleType5,*hTrackId5,*hProcessType5;
 
-	MonitorElement* recHitXPullFlippedLadderLayers[4];
-	MonitorElement* recHitXPullNonFlippedLadderLayers[4];
-	MonitorElement* recHitYPullLayer1Modules[8];
-	MonitorElement* recHitYPullLayer2Modules[8];
-	MonitorElement* recHitYPullLayer3Modules[8];
-	MonitorElement* recHitYPullLayer4Modules[8];
+	TH1D* recHitXResLayer[4];
+	TH1D* recHitYResLayer[4];
+	TH1D* recHitXResLayerP[4];
+	TH1D* recHitYResLayerP[4];
+	TH1D* recHitXResLayerP1[4];
+	TH1D* recHitXResLayerP2[4];
+	TH1D* recHitXResLayerP3[4];
+	TH1D* recHitYResLayerP1[4];
+	TH1D* recHitYResLayerP2[4];
+	TH1D* recHitYResLayerP3[4];
+	TH1D* recHitYResLayerP4[4];
 
-	//RecHits FPIX
-	MonitorElement* recHitXPullAllF;
-	MonitorElement* recHitYPullAllF;
-	MonitorElement* recHitXErrorAllF;
-	MonitorElement* recHitYErrorAllF;
+	TH1D* recHitXResVsPhiP[4];
+	TH1D* recHitXResVsPhiP1[4];
+	TH1D* recHitXResVsPhiP2[4];
+	TH1D* recHitXResVsPhiP3[4];
 
-	MonitorElement* recHitXPullDisk1Plaquettes[7];
-	MonitorElement* recHitYPullDisk1Plaquettes[7];
-	MonitorElement* recHitXPullDisk2Plaquettes[7];
-	MonitorElement* recHitYPullDisk2Plaquettes[7];
-	MonitorElement* recHitXPullDisk3Plaquettes[7];
-	MonitorElement* recHitYPullDisk3Plaquettes[7];
+	TH1D* recHitXResFlippedLadderLayers[4];
+	TH1D* recHitXResNonFlippedLadderLayers[4];
+        TH1D*recHitXResFlippedLadderLayersSide[4][2];
+        TH1D*recHitXResNonFlippedLadderLayersSide[4][2];
 
-	// Alignment errors 
-	MonitorElement *recHitXAlignError1, *recHitXAlignError2, *recHitXAlignError3;
-	MonitorElement *recHitXAlignError4, *recHitXAlignError5, *recHitXAlignError6, *recHitXAlignError7;
-	MonitorElement *recHitYAlignError1, *recHitYAlignError2, *recHitYAlignError3;
-	MonitorElement *recHitYAlignError4, *recHitYAlignError5, *recHitYAlignError6, *recHitYAlignError7;
+	TH1D* recHitYResLayer1Modules[8];
+	TH1D* recHitYResLayer2Modules[8];
+	TH1D* recHitYResLayer3Modules[8];
+	TH1D* recHitYResLayer4Modules[8];
 
 	// cluster size vs phi
-	MonitorElement* clusizeXVsX[4];
-	MonitorElement* clusizeXVsPhi[4];
-	MonitorElement* clusizeX1VsPhi[4];
-	MonitorElement* clusizeX2VsPhi[4];
-	MonitorElement* clusizeX3VsPhi[4];
+	TH1D* clusizeXVsX[4];
+	TH1D* clusizeXVsPhi[4];
+	TH1D* clusizeX1VsPhi[4];
+	TH1D* clusizeX2VsPhi[4];
+	TH1D* clusizeX3VsPhi[4];
+	TH1D*cluSizeXVsPhi1; // large scale ,*clusizeX22VsPhi,*clusizeX23VsPhi,*clusizeX24VsPhi ;
 
-	MonitorElement *cluSizeXVsPhi1; // large scale ,*clusizeX22VsPhi,*clusizeX23VsPhi,*clusizeX24VsPhi ;
-	MonitorElement *size1_mz_f,*size1_mz_nf,*size1_pz_f,*size1_pz_nf;
-	MonitorElement *size2_mz_f,*size2_mz_nf,*size2_pz_f,*size2_pz_nf;
-	MonitorElement *size3_mz_f,*size3_mz_nf,*size3_pz_f,*size3_pz_nf;
+	TH1D*recHitL1XResSize1,*recHitL1XResSize2,*recHitL1XResSize3;   
+	TH1D*recHitL2XResSize1,*recHitL2XResSize2,*recHitL2XResSize3;   
+	TH1D*recHitL3XResSize1,*recHitL3XResSize2,*recHitL3XResSize3;   
+	TH1D*recHitL4XResSize1,*recHitL4XResSize2,*recHitL4XResSize3;   
 
-	MonitorElement *hdist1, *hdist2, *hdist3, *hdist4;
-	MonitorElement *hcount1,*hcount2,*hcount3,*hcount4,*hcount5,*hcount6,*hcount7,*hcount8,*hcount9;
-	MonitorElement *test;
-	MonitorElement *htest1, *htest2, *htest3, *htest4, *htest5;
-	MonitorElement *hParticleType1,*hTrackId1,*hProcessType1,
-	  *hParticleType2,*hTrackId2,*hProcessType2,
-	  *hParticleType3,*hTrackId3,*hProcessType3,
-	  *hParticleType4,*hTrackId4,*hProcessType4,
-	  *hParticleType5,*hTrackId5,*hProcessType5;
+	TH1D* recHitXResLayer1Eta[25];
+	TH1D* recHitXResLayer2Eta[25];
+	TH1D* recHitXResLayer3Eta[25];
+	TH1D* recHitXResLayer4Eta[25];
+	TH1D* recHitYResLayer1Eta[25];
+	TH1D* recHitYResLayer2Eta[25];
+	TH1D* recHitYResLayer3Eta[25];
+	TH1D* recHitYResLayer4Eta[25];
 
-	MonitorElement *phiPerDet1,*phiPerDet2,*phiPerDet3,*phiPerDet4 ;
-	MonitorElement *cluXPerDet1,*cluXPerDet2,*cluXPerDet3,*cluXPerDet4;
-	MonitorElement *cluYPerDet1,*cluYPerDet2,*cluYPerDet3,*cluYPerDet4;
-	//MonitorElement *simsXPerDet1,*simsXPerDet2,*simsXPerDet3,*simsXPerDet4;
-	//MonitorElement *simsYPerDet1,*simsYPerDet2,*simsYPerDet3,*simsYPerDet4;
+	//TH1D*size1_mz_f,*size1_mz_nf,*size1_pz_f,*size1_pz_nf;
+	//TH1D*size2_mz_f,*size2_mz_nf,*size2_pz_f,*size2_pz_nf;
+	//TH1D*size3_mz_f,*size3_mz_nf,*size3_pz_f,*size3_pz_nf;
 
+#ifdef NOT
+	//Clusters BPIX
+	TH1D* clustYSizeModule[8];
+	//TH1D* clustXSizeLayer[4];
+	TH1D* clustChargeLayer1Modules[8];
+	TH1D* clustChargeLayer2Modules[8];
+	TH1D* clustChargeLayer3Modules[8];
+	TH1D* clustChargeLayer4Modules[8];
+
+	TH1D*hz1, *hz1_1, *hz1_2, *hz1_3, *hz1_4, *hz1_5;
+	TH1D*hz1_11, *hz1_12, *hz1_13,*hz1_14,*hz1_15,*hz1_16,*hz1_17;	
+
+	TH1D*phiPerDet1,*phiPerDet2,*phiPerDet3,*phiPerDet4 ;
+	TH1D*cluXPerDet1,*cluXPerDet2,*cluXPerDet3,*cluXPerDet4;
+	TH1D*cluYPerDet1,*cluYPerDet2,*cluYPerDet3,*cluYPerDet4;
+
+#endif // NOT
 
 
 

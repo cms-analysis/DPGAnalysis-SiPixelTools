@@ -21,18 +21,17 @@
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 #include "DataFormats/Common/interface/Ref.h"
 #include "DataFormats/Common/interface/DetSetVector.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include <math.h>
-
-#include "DQMServices/Core/interface/DQMStore.h"
 
 using namespace std;
 using namespace edm;
 
 //#define DO_SIMHITS
 
+//---------------------------------------------------------------------------------
 StudyRecHitResolution::StudyRecHitResolution(const ParameterSet& ps): 
-  dbe_(0), 
   conf_(ps),
   trackerHitAssociatorConfig_(ps, consumesCollector() ),
   src_( ps.getParameter<edm::InputTag>( "src" ) ),
@@ -56,486 +55,11 @@ StudyRecHitResolution::StudyRecHitResolution(const ParameterSet& ps):
 #endif
   cout<<" source = "<<(useTracks_? tracks_ : src_)<<endl; //dk
   
-  dbe_ = Service<DQMStore>().operator->();
-  //dbe_->showDirStructure();
-  //dbe_->setCurrentFolder("TrackerRecHitsV/TrackerRecHits/Pixel/clustBPIX");  
-
-  // BPIX 
-  dbe_->setCurrentFolder("recHitBPIX");
-  Char_t histo[200], title[200];
-  //quick_=true;
-  quick_=false;
-
-  // ---------------------------------------------------------------
-  // All histograms that depend on plaquette number have 7 indexes.
-  // The first 4 (0-3) correspond to Panel 1 plaquettes 1-4.
-  // The last 3 (4-6) correspond to Panel 2 plaquettes 1-3.
-  // ---------------------------------------------------------------
-  const int NumLayers=4;
-
-  //  if(!quick_) {
-  hphiTrack = dbe_->book1D("hphiTrack","track phi",70,-3.5,3.5);
-  hetaTrack = dbe_->book1D("hetaTrack","track eta",50,-2.5,2.5);
-  hptTrack  = dbe_->book1D("hptTrack","track pt",150,0.0,150.);
-  
-  hphi1 = dbe_->book1D("hphi1","phi1",70,-3.5,3.5);
-  htheta1 = dbe_->book1D("htheta1","theta1",70,-3.5,3.5);
-  hbeta1  = dbe_->book1D("beta1","beta1",70,-3.5,3.5);
-  
-  hphi2 = dbe_->book1D("hphi2","phi2",70,-3.5,3.5);
-  htheta2 = dbe_->book1D("htheta2","theta2",70,-3.5,3.5);
-  hbeta2  = dbe_->book1D("beta2","beta2",70,-3.5,3.5);
-  
-  heta1 = dbe_->book1D("heta1","eta",60,-3.0,3.0);
-  heta2 = dbe_->book1D("heta2","eta",50,-2.5,2.5);
-  heta3 = dbe_->book1D("heta3","eta",50,-2.5,2.5);
-  heta4 = dbe_->book1D("heta4","eta",50,-2.5,2.5);
-
-  hz1 = dbe_->book1D("hz1","gz layer 1",26,0.,26.);
-
-  hz1_1 = dbe_->book1D("hz1_1","gz pid group1",26,0.,26.);
-  hz1_2 = dbe_->book1D("hz1_2","gz pid group2",26,0.,26.);
-  hz1_3 = dbe_->book1D("hz1_3","gz pid group3",26,0.,26.);
-  hz1_4 = dbe_->book1D("hz1_4","gz pid group4",26,0.,26.);
-  hz1_5 = dbe_->book1D("hz1_5","eta pid group5",26,0.,26.);
-
-  hz1_11 = dbe_->book1D("hz1_11","gz process group1",26,0.,26.);
-  hz1_12 = dbe_->book1D("hz1_12","gz process group2",26,0.,26.);
-  hz1_13 = dbe_->book1D("hz1_13","gz process group3",26,0.,26.);
-  hz1_14 = dbe_->book1D("hz1_14","gz process group4",26,0.,26.);
-  hz1_15 = dbe_->book1D("hz1_15","gz process group5",26,0.,26.);
-  hz1_16 = dbe_->book1D("hz1_16","gz process group6",26,0.,26.);
-  hz1_17 = dbe_->book1D("hz1_17","gz process group7",26,0.,26.);
-  
-  htest1 = dbe_->book2D("htest1","test1",50,0.0,2.5,70,-3.5,3.5);
-  htest2 = dbe_->book2D("htest2","test2",50,0.0,2.5,70,-3.5,3.5);
-  htest3 = dbe_->book2D("htest3","test3",120,-0.3,0.3,162,-0.81,0.81);
-  htest4 = dbe_->book2D("htest4","eta T vs eta H",50,-2.5,2.5,50,-2.5,2.5);
-  htest5 = dbe_->book2D("htest5","phi T vs phi H",70,-3.5,3.5,70,-3.5,3.5);
-  //} // end if quick
-  
-  
-  hcount1 = dbe_->book1D("hcount1","tracks (or detunits)",2000,-0.5,1999.5);
-  hcount2 = dbe_->book1D("hcount2","selected tracks",2000,-0.5,1999.5);
-  hcount3 = dbe_->book1D("hcount3","rechits",2000,-0.5,1999.5);
-  hcount4 = dbe_->book1D("hcount4","rechits <100um",2000,-0.5,1999.5);
-  hcount5 = dbe_->book1D("hcount5","simhits compared",2000,-0.5,1999.5);
-  hcount6 = dbe_->book1D("hcount6","simhits <100um",2000,-0.5,1999.5);
-  hcount7 = dbe_->book1D("hcount7","close simhits per rechit",20,-0.5,19.5);
-  hcount8 = dbe_->book1D("hcount8","matched simhits per rechit",20,-0.5,19.5);
-  hcount9 = dbe_->book1D("hcount9","all simhits",2000,-0.5,1995.5);
-  
-  hdist1 = dbe_->book1D("hdist1","matched",100,0.,0.1);
-  hdist2 = dbe_->book1D("hdist2","number of bpix matched rechits",100,0.,0.1);
-  hdist3 = dbe_->book1D("hdist3","selected matched",100,0.,0.1);
-  hdist4 = dbe_->book1D("hdist4","selected match, close",100,0.,0.1);
-
-  hParticleType1 = dbe_->book1D("hParticleType1","partcile type close",2500,0.,2500.);
-  hTrackId1 = dbe_->book1D("hTrackId1","trackid close",1000,0.,1000.);
-  hProcessType1 = dbe_->book1D("hProcessType1","process type close",500,0.,500.);
-  hParticleType2 = dbe_->book1D("hParticleType2","partcile type best",2500,0.,2500.);
-  hTrackId2 = dbe_->book1D("hTrackId2","trackid best",1000,0.,1000.);
-  hProcessType2 = dbe_->book1D("hProcessType2","process type best",500,0.,500.);
-  hParticleType3 = dbe_->book1D("hParticleType3","partcile type major",2500,0.,2500.);
-  hTrackId3 = dbe_->book1D("hTrackId3","trackid major",1000,0.,1000.);
-  hProcessType3 = dbe_->book1D("hProcessType3","process type major",500,0.,500.);
-  hParticleType4 = dbe_->book1D("hParticleType4","partcile type major",2500,0.,2500.);
-  hTrackId4 = dbe_->book1D("hTrackId4","trackid major",1000,0.,1000.);
-  hProcessType4 = dbe_->book1D("hProcessType4","process type major",500,0.,500.);
-  hParticleType5 = dbe_->book1D("hParticleType5","partcile type major",2500,0.,2500.);
-  hTrackId5 = dbe_->book1D("hTrackId5","trackid major",1000,0.,1000.);
-  hProcessType5 = dbe_->book1D("hProcessType5","process type major",500,0.,500.);
-  
-  if(!quick_) {
-    
-      // special histos for layer 1
-      recHitL1XResSize1    = dbe_->book1D("recHitL1XSize1","XRes size 1 L1", 100, -200., 200.);   
-      recHitL1XResSize2    = dbe_->book1D("recHitL1XSize2","XRes size 2 L1", 100, -200., 200.);   
-      recHitL1XResSize3    = dbe_->book1D("recHitL1XSize3","XRes size 3 L1", 100, -200., 200.);   
-      recHitL2XResSize1    = dbe_->book1D("recHitL2XSize1","XRes size 1 L2", 100, -200., 200.);   
-      recHitL2XResSize2    = dbe_->book1D("recHitL2XSize2","XRes size 2 L2", 100, -200., 200.);   
-      recHitL2XResSize3    = dbe_->book1D("recHitL2XSize3","XRes size 3 L2", 100, -200., 200.);   
-      recHitL3XResSize1    = dbe_->book1D("recHitL3XSize1","XRes size 1 L3", 100, -200., 200.);   
-      recHitL3XResSize2    = dbe_->book1D("recHitL3XSize2","XRes size 2 L3", 100, -200., 200.);   
-      recHitL3XResSize3    = dbe_->book1D("recHitL3XSize3","XRes size 3 L3", 100, -200., 200.);   
-      recHitL4XResSize1    = dbe_->book1D("recHitL4XSize1","XRes size 1 L4", 100, -200., 200.);   
-      recHitL4XResSize2    = dbe_->book1D("recHitL4XSize2","XRes size 2 L4", 100, -200., 200.);   
-      recHitL4XResSize3    = dbe_->book1D("recHitL4XSize3","XRes size 3 L4", 100, -200., 200.);   
-
-      // alignment errors
-      recHitXAlignError1 = 
-	dbe_->book1D("RecHitXAlignError1","RecHit X  Alignment errors bpix 1", 100, 0., 100.);
-      recHitXAlignError2 = 
-	dbe_->book1D("RecHitXAlignError2","RecHit X  Alignment errors bpix 2", 100, 0., 100.);
-      recHitXAlignError3 = 
-	dbe_->book1D("RecHitXAlignError3","RecHit X  Alignment errors bpix 3", 100, 0., 100.);
-      recHitXAlignError4 = 
-	dbe_->book1D("RecHitXAlignError4","RecHit X  Alignment errors bpix 4", 100, 0., 100.);
-      recHitYAlignError1 = 
-	dbe_->book1D("RecHitYAlignError1","RecHit Y  Alignment errors bpix 1", 100, 0., 100.);
-      recHitYAlignError2 = 
-	dbe_->book1D("RecHitYAlignError2","RecHit Y  Alignment errors bpix 2", 100, 0., 100.);
-      recHitYAlignError3 = 
-	dbe_->book1D("RecHitYAlignError3","RecHit Y  Alignment errors bpix 3", 100, 0., 100.);
-      recHitYAlignError4 = 
-	dbe_->book1D("RecHitYAlignError4","RecHit Y  Alignment errors bpix 4", 100, 0., 100.);
-
-      // eta plots
-      for (int j=0; j<25; j++) {
-	//RecHit X resolution per layer
-	sprintf(histo, "RecHit_XRes_Layer1_Eta%d", j+1);
-	recHitXResLayer1Eta[j] = dbe_->book1D(histo, "RecHit XRes Layer1, eta", 100, -200., 200.);
-	sprintf(histo, "RecHit_XRes_Layer2_Eta%d", j+1);
-	recHitXResLayer2Eta[j] = dbe_->book1D(histo, "RecHit XRes Layer2, eta", 100, -200., 200.);
-	sprintf(histo, "RecHit_XRes_Layer3_Eta%d", j+1);
-	recHitXResLayer3Eta[j] = dbe_->book1D(histo, "RecHit XRes Layer3, eta", 100, -200., 200.);
-	sprintf(histo, "RecHit_XRes_Layer4_Eta%d", j+1);
-	recHitXResLayer4Eta[j] = dbe_->book1D(histo, "RecHit XRes Layer4, eta", 100, -200., 200.);
-	
-	//RecHit Y resolution per layer
-	sprintf(histo, "RecHit_YRes_Layer1_Eta%d", j+1);
-	recHitYResLayer1Eta[j] = dbe_->book1D(histo, "RecHit YRes Layer1, eta", 100, -200., 200.);
-	sprintf(histo, "RecHit_YRes_Layer2_Eta%d", j+1);
-	recHitYResLayer2Eta[j] = dbe_->book1D(histo, "RecHit YRes Layer2, eta", 100, -200., 200.);
-	sprintf(histo, "RecHit_YRes_Layer3_Eta%d", j+1);
-	recHitYResLayer3Eta[j] = dbe_->book1D(histo, "RecHit YRes Layer3, eta", 100, -200., 200.);
-	sprintf(histo, "RecHit_YRes_Layer4_Eta%d", j+1);
-	recHitYResLayer4Eta[j] = dbe_->book1D(histo, "RecHit YRes Layer4, eta", 100, -200., 200.);
-      }  // j, eta
-      
-     
-      // For each layer 
-      for (int i=0; i<NumLayers; i++) {
-	//RecHit X resolution per layer
-	sprintf(histo, "RecHit_XRes_Layer%d", i+1);
-	sprintf(title, "RecHit XRes Layer %d", i+1);
-	recHitXResLayers[i] = dbe_->book1D(histo,title, 100, -200., 200.);
-	
-	//RecHit Y resolution per layer
-	sprintf(histo, "RecHit_YRes_Layer%d", i+1);
-	sprintf(title, "RecHit YRes Layer %d", i+1);
-	recHitYResLayers[i] = dbe_->book1D(histo,title, 100, -200., 200.);
-	
-	
-	//RecHit X resolution per layer Profile vs eta
-	sprintf(histo, "RecHit_XRes_LayerP%d", i+1);
-	sprintf(title, "RecHit XRes Layer %d", i+1);
-	recHitXResLayersP[i] = dbe_->bookProfile(histo,title, 25, 0., 2.5,0.,1000.," ");
-	sprintf(histo, "RecHit_XRes_LayerP1%d", i+1);
-	sprintf(title, "RecHit XRes Layer %d, size 1", i+1);
-	recHitXResLayersP1[i] = dbe_->bookProfile(histo,title, 25, 0., 2.5,0.,1000.," ");
-	sprintf(histo, "RecHit_XRes_LayerP2%d", i+1);
-	sprintf(title, "RecHit XRes Layer %d, size 2", i+1);
-	recHitXResLayersP2[i] = dbe_->bookProfile(histo,title, 25, 0., 2.5,0.,1000.," ");
-	sprintf(title, "RecHit XRes Layer %d, size 3", i+1);
-	sprintf(histo, "RecHit_XRes_LayerP3%d", i+1);
-	recHitXResLayersP3[i] = dbe_->bookProfile(histo,title, 25, 0., 2.5,0.,1000.," ");
-	
-	//RecHit Y resolution per layer Profile vs eta
-	sprintf(histo, "RecHit_YRes_LayerP%d", i+1);
-	sprintf(title, "RecHit YRes Layer %d", i+1);
-	recHitYResLayersP[i] = dbe_->bookProfile(histo,title, 25, 0., 2.5,0.,1000.," ");
-	sprintf(histo, "RecHit_YRes_LayerP1%d", i+1);
-	sprintf(title, "RecHit YRes Layer %d, size 1", i+1);
-	recHitYResLayersP1[i] = dbe_->bookProfile(histo,title, 25, 0., 2.5,0.,1000.," ");
-	sprintf(histo, "RecHit_YRes_LayerP2%d", i+1);
-	sprintf(title, "RecHit YRes Layer %d, size 2", i+1);
-	recHitYResLayersP2[i] = dbe_->bookProfile(histo,title, 25, 0., 2.5,0.,1000.," ");
-	sprintf(histo, "RecHit_YRes_LayerP3%d", i+1);
-	sprintf(title, "RecHit YRes Layer %d, size 3", i+1);
-	recHitYResLayersP3[i] = dbe_->bookProfile(histo,title, 25, 0., 2.5,0.,1000.," ");
-	sprintf(histo, "RecHit_YRes_LayerP4%d", i+1);
-	sprintf(title, "RecHit YRes Layer %d, size 4", i+1);
-	recHitYResLayersP4[i] = dbe_->bookProfile(histo,title, 25, 0., 2.5,0.,1000.," ");
-	
-	//RecHit X resolution per layer Profile vs phi 
-	sprintf(histo, "RecHit_XRes_VsPhi_%dP", i+1);
-	sprintf(title, "RecHit XRes Vs Phi Layer %d", i+1);
-	recHitXResVsPhiP[i] = dbe_->bookProfile(histo,title, 162, -0.81,0.81,0.,100.," ");
-	sprintf(histo, "RecHit_XRes_VsPhi_%dP1", i+1);
-	sprintf(title, "RecHit XRes Vs Phi Layer %d size 1", i+1);
-	recHitXResVsPhiP1[i] = dbe_->bookProfile(histo,title, 162, -0.81,0.81,0.,100.," ");
-	sprintf(histo, "RecHit_XRes_VsPhi_%dP2", i+1);
-	sprintf(title, "RecHit XRes Vs Phi Layer %d size 2", i+1);
-	recHitXResVsPhiP2[i] = dbe_->bookProfile(histo,title, 162, -0.81,0.81,0.,100.," ");
-	sprintf(histo, "RecHit_XRes_VsPhi_%dP3", i+1);
-	sprintf(title, "RecHit XRes Vs Phi Layer %d size 3", i+1);
-	recHitXResVsPhiP3[i] = dbe_->bookProfile(histo,title, 162, -0.81,0.81,0.,100.," ");
-
-	//RecHit X resolution for flipped ladders by layer
-	sprintf(histo, "RecHit_XRes_FlippedLadder_Layer%d", i+1);
-	sprintf(title, "RecHit XRes FlippedLadder Layer%d", i+1);
-	recHitXResFlippedLadderLayers[i] = dbe_->book1D(histo,title, 100, -200., 200.);
-	
-	//RecHit X resolution for unflipped ladders by layer
-	sprintf(histo, "RecHit_XRes_NonFlippedLadder_Layer%d", i+1);
-	sprintf(title, "RecHit XRes NonFlippedLadder Layer%d", i+1);
-	recHitXResNonFlippedLadderLayers[i] = dbe_->book1D(histo,title, 100, -200., 200.);
-	// Same plots for -Z/+Z
-	sprintf(histo, "RecHit_XRes_FlippedLadder_Layer%d_mZ", i+1);
-	sprintf(title, "RecHit XRes FlippedLadder Layer%d -Z", i+1);
-	recHitXResFlippedLadderLayersSide[i][0] = dbe_->book1D(histo,title, 100, -200., 200.);
-	sprintf(histo, "RecHit_XRes_NonFlippedLadder_Layer%d_mZ", i+1);
-	sprintf(title, "RecHit XRes NonFlippedLadder Layer%d -Z", i+1);
-	recHitXResNonFlippedLadderLayersSide[i][0] = dbe_->book1D(histo,title, 100, -200., 200.);
-	sprintf(histo, "RecHit_XRes_FlippedLadder_Layer%d_pZ", i+1);
-	sprintf(title, "RecHit XRes FlippedLadder Layer%d +Z", i+1);
-	recHitXResFlippedLadderLayersSide[i][1] = dbe_->book1D(histo,title, 100, -200., 200.);
-	sprintf(histo, "RecHit_XRes_NonFlippedLadder_Layer%d_pZ", i+1);
-	sprintf(title, "RecHit XRes NonFlippedLadder Layer%d +Z", i+1);
-	recHitXResNonFlippedLadderLayersSide[i][1] = dbe_->book1D(histo,title, 100, -200., 200.);
-	
-	//RecHit Y resolutions for layers by module for barrel
-	for (int ii=0; ii<8; ii++) {
-	  //Rec Hit Y resolution by module for Layer1
-	  sprintf(histo, "RecHit_YRes_Layer%d_Module%d",i+1, ii+1);
-	  sprintf(title, "RecHit YRes Layer%d z-Module%d",i+1, ii+1);
-	  if     (i==0) recHitYResLayer1Modules[ii] = dbe_->book1D(histo,title, 100, -200., 200.);
-	  else if(i==1) recHitYResLayer2Modules[ii] = dbe_->book1D(histo,title, 100, -200., 200.);
-	  else if(i==2) recHitYResLayer3Modules[ii] = dbe_->book1D(histo,title, 100, -200., 200.);
-	  else if(i==3) recHitYResLayer4Modules[ii] = dbe_->book1D(histo,title, 100, -200., 200.);	  
-	} // end for ii, modules 
-	
-	// size versus phi
-	sprintf(histo, "clusizeXVsX_%d", i+1);
-	sprintf(title, "Clu sizeX Vs X Layer %d", i+1);
-	clusizeXVsX[i] = dbe_->bookProfile(histo,title, 162, -0.81,0.81,0.,100.," ");
-
-	sprintf(histo, "clusizeX_VsPhi_%d", i+1);
-	sprintf(title, "clu sizeX Vs Phi Layer %d", i+1);
-	clusizeXVsPhi[i] = dbe_->book1D(histo,title, 162, -0.81,0.81);  // alll sizes 
-
-	sprintf(histo, "clusizeX1_VsPhi_%d", i+1);
-	sprintf(title, "clu sizeX Vs Phi Layer %d size 1", i+1);
-	clusizeX1VsPhi[i] = dbe_->book1D(histo,title, 162, -0.81,0.81); // size 1
-	sprintf(histo, "clusizeX2_VsPhi_%d", i+1);
-	sprintf(title, "clu sizeX Vs Phi Layer %d size 2", i+1);
-	clusizeX2VsPhi[i] = dbe_->book1D(histo,title, 162, -0.81,0.81);  // size 2
-	sprintf(histo, "clusizeX3_VsPhi_%d", i+1);
-	sprintf(title, "clu sizeX Vs Phi Layer %d size 3", i+1);
-	clusizeX3VsPhi[i] = dbe_->book1D(histo,title, 162, -0.81,0.81);  //size 3
-	
-	if(i==0) {
-	  cluSizeXVsPhi1 = dbe_->bookProfile("cluSizeXVsPhi1","clus sizeX vs phi layer1",1620,-0.81,0.81,0.,100.," ");
-
-	  size1_mz_f = dbe_->book1D("size1_mz_f", "size1 -z flip",162,-0.81,0.81);
-	  size1_mz_nf= dbe_->book1D("size1_mz_nf","size1 -z nfli",162,-0.81,0.81);
-	  size1_pz_f = dbe_->book1D("size1_pz_f", "size1 +z flip",162,-0.81,0.81);
-	  size1_pz_nf= dbe_->book1D("size1_pz_nf","size1 +z nfli",162,-0.81,0.81);
-	  size2_mz_f = dbe_->book1D("size2_mz_f", "size2 -z flip",162,-0.81,0.81);
-	  size2_mz_nf= dbe_->book1D("size2_mz_nf","size2 -z nfli",162,-0.81,0.81);
-	  size2_pz_f = dbe_->book1D("size2_pz_f", "size2 +z flip",162,-0.81,0.81);
-	  size2_pz_nf= dbe_->book1D("size2_pz_nf","size2 +z nfli",162,-0.81,0.81);
-	  size3_mz_f = dbe_->book1D("size3_mz_f", "size3 -z flip",162,-0.81,0.81);
-	  size3_mz_nf= dbe_->book1D("size3_mz_nf","size3 -z nfli",162,-0.81,0.81);
-	  size3_pz_f = dbe_->book1D("size3_pz_f", "size3 +z flip",162,-0.81,0.81);
-	  size3_pz_nf= dbe_->book1D("size3_pz_nf","size3 +z nfli",162,-0.81,0.81);
-	}
-      } // end i, layers
-    } // end if quick
-    
-    // Test histos 
-    phiPerDet1 = dbe_->book1D("phiPerDet1","clus vs phi-det1",100,-0.4,0.4);
-    //phiPerDet2 = dbe_->book1D("phiPerDet2","clus vs phi-det2",100,-0.4,0.4);
-    //phiPerDet3 = dbe_->book1D("phiPerDet3","clus vs phi-det3",100,-0.4,0.4);
-    //phiPerDet4 = dbe_->book1D("phiPerDet4","clus vs phi-det4",100,-0.4,0.4);
-    
-    cluXPerDet1 = dbe_->book1D("cluXPerDet1","clus vs x-det1",162,-0.81,0.81);
-    cluYPerDet1 = dbe_->book1D("cluYPerDet1","clus vs y-det1",100,-3.2,3.2);
-    //simsXPerDet1 = dbe_->book1D("simsXPerDet1","sims vs x-det1",162,-0.81,0.81);
-    //simsYPerDet1 = dbe_->book1D("simsYPerDet1","sims vs y-det1",100,-3.2,3.2);
-    
-    // FPix 
-    dbe_->setCurrentFolder("recHitFPIX");
-
-    test = dbe_->book2D("test","Alignment errors fpix", 100, 0., 100.,20,12.,32.);
-
-    //RecHit X resolution all plaquettes
-    recHitXResAllF = dbe_->book1D("RecHit_xres_f_All", "RecHit X Res All in Forward", 100, -200., 200.);
-    recHitXResPosZF = dbe_->book1D("RecHit_xres_f_posZ", "RecHit X Res All in Forward Disks +Z", 100, -200., 200.);
-    recHitXResNegZF = dbe_->book1D("RecHit_xres_f_negZ", "RecHit X Res All in Forward Disks -Z", 100, -200., 200.);
-    
-    //RecHit Y resolution all plaquettes
-    recHitYResAllF = dbe_->book1D("RecHit_yres_f_All", "RecHit Y Res All in Forward", 100, -200., 200.);
-    recHitYResPosZF = dbe_->book1D("RecHit_yres_f_posZ", "RecHit Y Res All in Forward Disks +Z", 100, -200., 200.);
-    recHitYResNegZF = dbe_->book1D("RecHit_yres_f_negZ", "RecHit Y Res All in Forward Disks -Z", 100, -200., 200.);
-    
-    // histograms per disk, side, panel, ring  
-    for (int i=0; i<7; i++) { // 0 all, 1 -z, 2 +z, 3 panel 1, 4 panel 2, 5 ring 1, 6 ring 2
-      //X resolution for Disk1 
-    sprintf(histo, "RecHit_XRes_Disk1%d", i+1);
-    recHitXResDisk1[i] = dbe_->book1D(histo, "RecHit XRes Disk1", 100, -200., 200.); 
-    //X resolution for Disk2 
-    sprintf(histo, "RecHit_XRes_Disk2%d", i+1);
-    recHitXResDisk2[i] = dbe_->book1D(histo, "RecHit XRes Disk2", 100, -200., 200.);  
-    //X resolution for Disk=3 
-    sprintf(histo, "RecHit_XRes_Disk3%d", i+1);
-    recHitXResDisk3[i] = dbe_->book1D(histo, "RecHit XRes Disk3", 100, -200., 200.);  
-    
-    //Y resolution for Disk1
-    sprintf(histo, "RecHit_YRes_Disk1%d", i+1);
-    recHitYResDisk1[i] = dbe_->book1D(histo, "RecHit YRes Disk1", 100, -200., 200.);
-    //Y resolution for Disk2 
-    sprintf(histo, "RecHit_YRes_Disk2%d", i+1);
-    recHitYResDisk2[i] = dbe_->book1D(histo, "RecHit YRes Disk2", 100, -200., 200.);
-    //Y resolution for Disk3 
-    sprintf(histo, "RecHit_YRes_Disk3%d", i+1);
-    recHitYResDisk3[i] = dbe_->book1D(histo, "RecHit YRes Disk3", 100, -200., 200.);
-  }
-
-  if(!quick_) {
-    // jk 18 Feb 2017
-    for (int ring=0; ring<2; ring++) {
-      for (int side=0; side<2; side++) for (int panel=0; panel<2; panel++) {
-	sprintf(histo, "RecHit_XRes_Ring%d_Side%d_Panel%d", ring+1, side+1, panel+1);
-	recHitXResRingSidePanel[ring][side][panel] = dbe_->book1D(histo, histo, 100, -200., 200.); 
-	sprintf(histo, "RecHit_YRes_Ring%d_Side%d_Panel%d", ring+1, side+1, panel+1);
-	recHitYResRingSidePanel[ring][side][panel] = dbe_->book1D(histo, histo, 100, -200., 200.);
-      }
-      for (int side=0; side<2; side++) {
-	sprintf(histo, "RecHit_XRes_Ring%d_Side%d", ring+1, side+1);
-	recHitXResRingSide[ring][side] = dbe_->book1D(histo, histo, 100, -200., 200.); 
-      }
-      for (int panel=0; panel<2; panel++) {
-	sprintf(histo, "RecHit_YRes_Ring%d_Panel%d", ring+1, panel+1);
-	recHitYResRingPanel[ring][panel] = dbe_->book1D(histo, histo, 100, -200., 200.);
-      }
-    }
-
-    //recHitXAlignError4 = 
-    //dbe_->book1D("RecHitXAlignError4","RecHit X  Alignment errors fpix 1", 100, 0., 100.);
-    recHitXAlignError5 = 
-      dbe_->book1D("RecHitXAlignError5","RecHit X  Alignment errors fpix 2", 100, 0., 100.);
-    //recHitYAlignError4 = 
-    //dbe_->book1D("RecHitYAlignError4","RecHit Y  Alignment errors fpix 1", 100, 0., 100.);
-    recHitYAlignError5 = 
-      dbe_->book1D("RecHitYAlignError5","RecHit Y  Alignment errors fpix 2", 100, 0., 100.);
-    recHitXAlignError6 = 
-      dbe_->book1D("RecHitXAlignError6","RecHit X  Alignment errors fpix 1", 100, 0., 100.);
-    recHitXAlignError7 = 
-      dbe_->book1D("RecHitXAlignError7","RecHit X  Alignment errors fpix 2", 100, 0., 100.);
-    recHitYAlignError6 = 
-      dbe_->book1D("RecHitYAlignError6","RecHit Y  Alignment errors fpix 1", 100, 0., 100.);
-    recHitYAlignError7 = 
-      dbe_->book1D("RecHitYAlignError7","RecHit Y  Alignment errors fpix 2", 100, 0., 100.);
-
-    
-  //RecHit X distribution for plaquette with x-size 1 in forward
-  // recHitXPlaquetteSize1 = dbe_->book1D("RecHit_x_Plaquette_xsize1", "RecHit X Distribution for plaquette x-size1", 100, -2., 2.);
-  
-  // //RecHit X distribution for plaquette with x-size 2 in forward
-  // recHitXPlaquetteSize2 = dbe_->book1D("RecHit_x_Plaquette_xsize2", "RecHit X Distribution for plaquette x-size2", 100, -2., 2.);
-  
-  // //RecHit Y distribution for plaquette with y-size 2 in forward
-  // recHitYPlaquetteSize2 = dbe_->book1D("RecHit_y_Plaquette_ysize2", "RecHit Y Distribution for plaquette y-size2", 100, -4., 4.);
-  
-  // //RecHit Y distribution for plaquette with y-size 3 in forward
-  // recHitYPlaquetteSize3 = dbe_->book1D("RecHit_y_Plaquette_ysize3", "RecHit Y Distribution for plaquette y-size3", 100, -4., 4.);
-  
-  // //RecHit Y distribution for plaquette with y-size 4 in forward
-  // recHitYPlaquetteSize4 = dbe_->book1D("RecHit_y_Plaquette_ysize4", "RecHit Y Distribution for plaquette y-size4", 100, -4., 4.);
-  
-  // //RecHit Y distribution for plaquette with y-size 5 in forward
-  // recHitYPlaquetteSize5 = dbe_->book1D("RecHit_y_Plaquette_ysize5", "RecHit Y Distribution for plaquette y-size5", 100, -4., 4.);
-  
-  //X and Y resolutions for both disks by plaquette in forward
-
-  } // end if quick 
-
-  if(!quick_) {
-    // PULLS
-    dbe_->setCurrentFolder("recHitPullsBPIX");
-    recHitXPullAllB = dbe_->book1D("RecHit_xpull_b_All"       , 
-				   "RecHit X Pull All Modules in Barrel"        , 100, -10.0, 10.0);
-    recHitYPullAllB = dbe_->book1D("RecHit_ypull_b_All"       , 
-				   "RecHit Y Pull All Modules in Barrel"        , 100, -10.0, 10.0);
-    //recHitXErrorAllB = dbe_->book1D("RecHit_xerr_b_All"       , 
-    //				 "RecHit X Error All Modules in Barrel"        , 100, 0, 0.1);
-    //recHitYErrorAllB = dbe_->book1D("RecHit_yerr_b_All"       , 
-    //				 "RecHit Y Error All Modules in Barrel"        , 100, 0, 0.1);
-    recHitXError1B = dbe_->book1D("recHitXError1B"       , 
-				  "RecHit X Error in Barrel Layer 1"        , 100, 0, 0.1);
-    recHitYError1B = dbe_->book1D("recHitYError1B"       , 
-				  "RecHit Y Error in Barrel Layer 1"        , 100, 0, 0.1);
-    recHitXError2B = dbe_->book1D("recHitXError2B"       , 
-				  "RecHit X Error in Barrel Layer 2"        , 100, 0, 0.1);
-    recHitYError2B = dbe_->book1D("recHitYError2B"       , 
-				  "RecHit Y Error in Barrel Layer 2"        , 100, 0, 0.1);
-    recHitXError3B = dbe_->book1D("recHitXError3B"       , 
-				  "RecHit X Error in Barrel Layer 3"        , 100, 0, 0.1);
-    recHitYError3B = dbe_->book1D("recHitYError3B"       , 
-				  "RecHit Y Error in Barrel Layer 3"        , 100, 0, 0.1);
-    recHitXError4B = dbe_->book1D("recHitXError4B"       , 
-				  "RecHit X Error in Barrel Layer 4"        , 100, 0, 0.1);
-    recHitYError4B = dbe_->book1D("recHitYError4B"       , 
-				  "RecHit Y Error in Barrel Layer 4"        , 100, 0, 0.1);
-    
-    for (int i=0; i<NumLayers; i++) {
-      sprintf(histo, "RecHit_XPull_FlippedLadder_Layer%d", i+1);
-      recHitXPullFlippedLadderLayers[i] = dbe_->book1D(histo, "RecHit XPull Flipped Ladders by Layer", 100, -10.0, 10.0);
-      
-      sprintf(histo, "RecHit_XPull_NonFlippedLadder_Layer%d", i+1);
-      recHitXPullNonFlippedLadderLayers[i] = dbe_->book1D(histo, "RecHit XPull NonFlipped Ladders by Layer", 100, -10.0, 10.0);
-    }
-    
-    for (int i=0; i<8; i++) {
-      sprintf(histo, "RecHit_YPull_Layer1_Module%d", i+1);
-      recHitYPullLayer1Modules[i] = dbe_->book1D(histo, "RecHit YPull Layer1 by module", 100, -10.0, 10.0);
-      
-      sprintf(histo, "RecHit_YPull_Layer2_Module%d", i+1);
-      recHitYPullLayer2Modules[i] = dbe_->book1D(histo, "RecHit YPull Layer2 by module", 100, -10.0, 10.0);
-      
-      sprintf(histo, "RecHit_YPull_Layer3_Module%d", i+1);
-      recHitYPullLayer3Modules[i] = dbe_->book1D(histo, "RecHit YPull Layer3 by module", 100, -10.0, 10.0); 
-      
-      sprintf(histo, "RecHit_YPull_Layer4_Module%d", i+1);
-      recHitYPullLayer4Modules[i] = dbe_->book1D(histo, "RecHit YPull Layer4 by module", 100, -10.0, 10.0); 
-    }
-    
-    /// 
-    dbe_->setCurrentFolder("recHitPullsFPIX");
-    recHitXPullAllF = dbe_->book1D("RecHit_XPull_f_All", "RecHit X Pull All in Forward", 100, -10.0, 10.0);  
-    recHitYPullAllF = dbe_->book1D("RecHit_YPull_f_All", "RecHit Y Pull All in Forward", 100, -10.0, 10.0);
-    recHitXErrorAllF = dbe_->book1D("RecHit_XError_f_All", "RecHit X Error All in Forward", 100, 0.0, 0.1);  
-    recHitYErrorAllF = dbe_->book1D("RecHit_YError_f_All", "RecHit Y Error All in Forward", 100, 0.0, 0.1);
-    
-    for (int i=0; i<7; i++) {
-      sprintf(histo, "RecHit_XPull_Disk1_Plaquette%d", i+1);
-      recHitXPullDisk1Plaquettes[i] = dbe_->book1D(histo, "RecHit XPull Disk1 by plaquette", 100, -10.0, 10.0); 
-      sprintf(histo, "RecHit_XPull_Disk2_Plaquette%d", i+1);
-      recHitXPullDisk2Plaquettes[i] = dbe_->book1D(histo, "RecHit XPull Disk2 by plaquette", 100, -10.0, 10.0);  
-      sprintf(histo, "RecHit_XPull_Disk3_Plaquette%d", i+1);
-      recHitXPullDisk3Plaquettes[i] = dbe_->book1D(histo, "RecHit XPull Disk3 by plaquette", 100, -10.0, 10.0);  
-      
-      sprintf(histo, "RecHit_YPull_Disk1_Plaquette%d", i+1);
-      recHitYPullDisk1Plaquettes[i] = dbe_->book1D(histo, "RecHit YPull Disk1 by plaquette", 100, -10.0, 10.0);      
-      sprintf(histo, "RecHit_YPull_Disk2_Plaquette%d", i+1);
-      recHitYPullDisk2Plaquettes[i] = dbe_->book1D(histo, "RecHit YPull Disk2 by plaquette", 100, -10.0, 10.0);
-      sprintf(histo, "RecHit_YPull_Disk3_Plaquette%d", i+1);
-      recHitYPullDisk3Plaquettes[i] = dbe_->book1D(histo, "RecHit YPull Disk3 by plaquette", 100, -10.0, 10.0);
-    }
-    
-  } // end if quick
-  
-  
 }
-
+//-------------------------------------------------------------------------------
 StudyRecHitResolution::~StudyRecHitResolution() {
 }
-
-void StudyRecHitResolution::beginJob() {
-  
-}
-
-void StudyRecHitResolution::endJob() {
-  if ( outputFile_.size() != 0 && dbe_ ) {
-    cout<<" Save file "<<endl;
-    dbe_->save(outputFile_);
-  } else {
-    cout<<" not saved "<<outputFile_.size()<<endl;
-  }
-}
-
+//------------------------------------------------------------------------------
 void StudyRecHitResolution::analyze(const edm::Event& e, const edm::EventSetup& es) {
   double etaMax=2.5;
 
@@ -624,7 +148,7 @@ void StudyRecHitResolution::analyze(const edm::Event& e, const edm::EventSetup& 
       hptTrack->Fill(pt);
       hetaTrack->Fill(eta);
       hphiTrack->Fill(phi);
-      
+
       if(pt<ptCut_ || abs(eta)>etaMax) continue; // skip tracks 
       count2++;
       if (verbose_) cout<<" track "<<pt<<" "<<eta<<" "<<trackref->d0()<<" "<<trackref->dz()<<" "
@@ -645,7 +169,7 @@ void StudyRecHitResolution::analyze(const edm::Event& e, const edm::EventSetup& 
 	count3++;
 	
 	float distance = matchToSims(associate, (*irecHit), detId, theGeomDet,tTopo,pt,eta,phi);
-	hdist1->Fill(distance);
+	//hdist1->Fill(distance);
 	if(distance<0.01) count4++;
 	
 	//const edm::Ref<std::vector<Trajectory> > refTraj = it->key;
@@ -694,7 +218,7 @@ void StudyRecHitResolution::analyze(const edm::Event& e, const edm::EventSetup& 
 	count3++;
        	distance = matchToSims(associate, &(*pixeliter), detId, theGeomDet,tTopo,-1.,-1.,-1.);
 	if(distance<0.01) count4++;
-	hdist1->Fill(distance);
+	//hdist1->Fill(distance);
        	//cout<<distance<<endl;
       }
 
@@ -703,6 +227,7 @@ void StudyRecHitResolution::analyze(const edm::Event& e, const edm::EventSetup& 
     
   }  // use track?
 
+#ifdef NOT
   hcount1->Fill(count1);
   hcount2->Fill(count2);
   hcount3->Fill(count3);
@@ -710,9 +235,11 @@ void StudyRecHitResolution::analyze(const edm::Event& e, const edm::EventSetup& 
   hcount5->Fill(count5);
   hcount6->Fill(count6);
   hcount9->Fill(count9);
+#endif
 
 }
 
+//--------------------------------------------------------------------------------
 #ifdef PIXEL_ASSOCIATOR
 
 float StudyRecHitResolution::matchToSims(const PixelHitAssociator& associate, const TrackingRecHit* hit, 
@@ -735,7 +262,7 @@ float StudyRecHitResolution::matchToSims(const TrackerHitAssociator& associate, 
   float closest = 9999.;
   
   //if(matched.size()>1) cout<<" matched size greater than 1 "<<matched.size()<<endl;
-  hcount8->Fill(float(matched.size()));
+  //hcount8->Fill(float(matched.size()));
   count9 += matched.size();
 
   if ( !matched.empty() ) {
@@ -744,7 +271,6 @@ float StudyRecHitResolution::matchToSims(const TrackerHitAssociator& associate, 
     float rechit_x = lp.x();
     float rechit_y = lp.y();
     int countClose=0;
-    int majorProcess=-1., majorPid=-1, majorTrack=-1;
     
     //loop over sim hits and fill closet
     for (std::vector<PSimHit>::const_iterator m = matched.begin(); m<matched.end(); m++) {
@@ -761,24 +287,12 @@ float StudyRecHitResolution::matchToSims(const TrackerHitAssociator& associate, 
       
       float dist = sqrt(x_res*x_res + y_res*y_res); // in cm
       count5++;
-      if(dist<0.01) {
-	count6++;
-	countClose++;
-	// This is just to check if among several matching simhits there is one from the org.gen.
-	if( (*m).processType() == 0 ) {
-	  majorProcess=0; majorPid=abs((*m).particleType()); majorTrack=(*m).trackId();
-	}
-	hParticleType1->Fill(float(abs((*m).particleType())));
-	hTrackId1->Fill(float((*m).trackId()));
-	hProcessType1->Fill(float((*m).processType()));
-      }
+      if(dist<0.01) {count6++;countClose++;}
 
       if ( dist < closest ) {
 	//closest = x_res;
 	closest = dist;
 	closestit = m;
-	if(majorProcess==-1) 
-	  {majorProcess=(*m).processType();majorPid=abs((*m).particleType()); majorTrack=(*m).trackId();}
 	if(verbose_) 
 	  std::cout<<" simhit "
 		   <<(*m).pabs()<<" "
@@ -794,10 +308,7 @@ float StudyRecHitResolution::matchToSims(const TrackerHitAssociator& associate, 
     } // end sim hit loop
     
     if(verbose_) cout<<" closest "<<closest<<" "<<detId.subdetId()<<endl;
-    hcount7->Fill(float(countClose));
-    hParticleType3->Fill(float(majorPid));
-    hTrackId3->Fill(float(majorTrack));
-    hProcessType3->Fill(float(majorProcess));
+    //hcount7->Fill(float(countClose));
 
     if (detId.subdetId() == PixelSubdetector::PixelBarrel)
       fillBarrel(hit, *closestit, detId, theGeomDet,tTopo,pt,eta,phi);
@@ -815,7 +326,6 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
   const float cmtomicron = 10000.0; 
   //const bool muOnly = true;
   const float PI = 3.1416;
-  const int NumLayers = 4;
   bool PRINT = verbose_;
 
   float phiH = simHit.phiAtEntry();
@@ -838,15 +348,14 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
   //float pt  = simHit.momentumAtEntry().perp(); // crap, not real pt
   float p  = simHit.pabs();
   int pid = abs(simHit.particleType());
-  int process = simHit.processType();
+  //int process = simHit.processType();
 
-  // cout<<"pid "<<pid<<endl;
+  if(verbose_) cout<<"pid "<<pid<<" "<<eta<<endl;
 
-  hParticleType2->Fill(float((pid)));
-  hTrackId2->Fill(float(simHit.trackId()));
-  hProcessType2->Fill(float(process));
+  //hParticleType2->Fill(float((pid)));
+  //hTrackId2->Fill(float(simHit.trackId()));
+  //hProcessType2->Fill(float(process));
 
-  hdist2->Fill(0.001);
   // skip secondaries
   if(muOnly_ && ( (pid) != 13 || p<10.) ) 
     {if(PRINT||(pid)==13 ) cout<<" skip "<<p<<" "<<pid<<endl; return;}
@@ -856,6 +365,7 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
   unsigned int module = tTopo->pxbModule(detId);
   bool negZ = false;
   if(module<5) negZ=true;
+
   // The inner ladder (in the smaller radius) are flipped
   // unsigned int ladder = tTopo->pxbLadder(detId);
   // bool odd_lad = ladder % 2;
@@ -868,7 +378,7 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
   else        phi = (PI/2.) - phi;
 
   //std::cout<<"Flipped (Surface): "<<(tmp2<tmp1)<<" Flipped (Inner): "<<inner<<std::endl;
-  if(PRINT) cout<<" layer "<<layer<<" eta "<<eta<<" phi "<<phi<<endl;
+  if(PRINT) cout<<" layer "<<layer<<" eta "<<eta<<" phi "<<phi<<" "<<negZ<<endl;
 
 
   // skip, for tests only
@@ -884,43 +394,13 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
 		     <<" track pt/eta/phi "<<ptT<<"/"<<etaT<<"/"<<phiT
 		     <<std::endl;
 
-  if(!quick_) {
-
-    if(layer==1) {
-      htest1->Fill(eta,phi);
-      hphi1->Fill(phi);
-      htheta1->Fill(theta);
-      hbeta1->Fill(beta);
-      heta1->Fill(eta);
-      htest4->Fill(etaH,etaT);
-      htest5->Fill(phiH,phiT);
-
- 
-      hParticleType4->Fill(float((pid)));
-      hTrackId4->Fill(float(simHit.trackId()));
-      hProcessType4->Fill(float(process));
-    } else if(layer==2) {
-      htest2->Fill(eta,phi);
-      hphi2->Fill(phi);
-      htheta2->Fill(theta);
-      hbeta2->Fill(beta);
-      heta2->Fill(eta);
-    } else if(layer==3) {
-      heta3->Fill(eta);
-    } else if(layer==4) {
-      heta4->Fill(eta);
-      hParticleType5->Fill(float((pid)));
-      hTrackId5->Fill(float(simHit.trackId()));
-      hProcessType5->Fill(float(process));
-    }
-  }
 
   LocalPoint lp = recHit->localPosition();
   float lp_y = lp.y();  
   float lp_x = lp.x();
 
-  GlobalPoint gp = recHit->globalPosition();
-  float gp_z = abs(gp.z());
+  //GlobalPoint gp = recHit->globalPosition();
+  //float gp_z = abs(gp.z());  // global position 
 
   LocalError lerr = recHit->localPositionError();
   float lerr_x = sqrt(lerr.xx());
@@ -939,9 +419,9 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
   float sim_ypos = 0.5*(sim_y1 + sim_y2);
   float res_y = (lp_y - sim_ypos)*cmtomicron;
   
-  float distance = sqrt(res_x*res_x + res_y*res_y)/cmtomicron; // in cm
-  hdist3->Fill(distance);
-  if(distance<0.01) hdist4->Fill(distance);  // matched within 100um
+  //float distance = sqrt(res_x*res_x + res_y*res_y)/cmtomicron; // in cm
+  //hdist3->Fill(distance);
+  //if(distance<0.01) hdist4->Fill(distance);  // matched within 100um
 
   if(PRINT)  
     cout<<" det "<<detId.rawId()<<" "<<lp_x<<" "<<lp_y<<" "<<lerr_x<<" "<<lerr_y<<" "
@@ -955,118 +435,48 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
   float lpx = lp_x, simx=sim_xpos;
   if(flipped) {lpx=-lpx; simx=-simx;} // flip the corrdinate for flipped ladders
 
-
-  if(layer==1) {
-
-    hz1->Fill(gp_z);
-    if( (pid==2212)||(pid==321)||(pid==211)||(pid==13)) hz1_1->Fill(gp_z);
-    else if( (pid==11) ) hz1_2->Fill(gp_z);
-    else if( (pid==22) ) hz1_3->Fill(gp_z);
-    else if( (pid==2112) ) hz1_4->Fill(gp_z);
-    else hz1_5->Fill(gp_z);
+  recHitXResAllB->Fill(res_x);
+  recHitYResAllB->Fill(res_y);
+  recHitXPullAllB->Fill(pull_x);  
+  recHitYPullAllB->Fill(pull_y);
+  recHitXErrorAllB->Fill(lerr_x);  
+  recHitYErrorAllB->Fill(lerr_y);
     
-    if( (process==0) ) hz1_11->Fill(gp_z);
-    else if( (process==201) ) hz1_12->Fill(gp_z);
-    else if( (process==2) ) hz1_13->Fill(gp_z);
-    else if( (process==121) ) hz1_14->Fill(gp_z);
-    else if( (process==201) ) hz1_15->Fill(gp_z);
-    else if( (process==4)||(process==3)||(process==12)||(process==13)||(process==14)) hz1_16->Fill(gp_z);
-    else  hz1_17->Fill(gp_z);
-  }
+  if (flipped) {
+    recHitXResFlippedLadderLayers[layer-1]->Fill(res_x);
+    recHitXResFlippedLadderLayersSide[layer-1][module>4]->Fill(res_x);
+  } else {
+    recHitXResNonFlippedLadderLayers[layer-1]->Fill(res_x);
+    recHitXResNonFlippedLadderLayersSide[layer-1][module>4]->Fill(res_x);
+  } // end if
 
-  if(!quick_) {
-
-    //recHitXResAllB->Fill(res_x);
-    //recHitYResAllB->Fill(res_y);
-    recHitXPullAllB->Fill(pull_x);  
-    recHitYPullAllB->Fill(pull_y);
-    
-    if( layer == 1) {
-      recHitXError1B->Fill(lerr_x); recHitYError1B->Fill(lerr_y);
-      //if(phi<0.) recHitX11->Fill((phi),res_x); else recHitX12->Fill((phi),res_x);
-    } else if( layer == 2) {recHitXError2B->Fill(lerr_x); recHitYError2B->Fill(lerr_y);
-      //if(phi<0.) recHitX21->Fill((phi),res_x); else recHitX22->Fill((phi),res_x);
-    } else if( layer == 3) {recHitXError3B->Fill(lerr_x); recHitYError3B->Fill(lerr_y);
-    } else if( layer == 4) {recHitXError4B->Fill(lerr_x); recHitYError4B->Fill(lerr_y);}
-
-    //int rows = theGeomDet->specificTopology().nrows(); 
-    //if (rows == 160) recHitXFullModules->Fill(lp_x);
-    //else if (rows == 80) recHitXHalfModules->Fill(lp_x);
-    
-    LocalError lape = theGeomDet->localAlignmentError();
-    if (lape.valid()) {
-      float tmp11= 0.;
-      if(lape.xx()>0.) tmp11= sqrt(lape.xx())*1E4;
-      //float tmp12= sqrt(lape.xy())*1E4;
-      float tmp13= 0.;
-      if(lape.yy()>0.) tmp13= sqrt(lape.yy())*1E4;
-      //bool tmp14=tmp2<tmp1;
-      if( (layer) == 1) 
-	{recHitXAlignError1->Fill(tmp11); recHitYAlignError1->Fill(tmp13);}
-      else if( (layer) == 2) 
-	{recHitXAlignError2->Fill(tmp11); recHitYAlignError2->Fill(tmp13);}
-      else if( (layer) == 3) 
-	{recHitXAlignError3->Fill(tmp11); recHitYAlignError3->Fill(tmp13);}
-      else if( (layer) == 4) 
-	{recHitXAlignError4->Fill(tmp11); recHitYAlignError4->Fill(tmp13);}
-      else {cout<<" unknown layer "<< layer<<endl;}
-      //cout<<layer<<" "<<tTopo->pxbModule(detId)<<" "<<rows<<" "<<tmp14<<" "
-      //  <<tmp11<<" "<<tmp13<<endl;
-    }  // if lape
-    
-
-    // Some test histos 
-    if(layer==1) {
-      phiPerDet1->Fill(phi);
-      cluXPerDet1->Fill(lpx);cluYPerDet1->Fill(lp_y);
-      //simsXPerDet1->Fill(simx);simsYPerDet1->Fill(sim_ypos);
-      //if(flipped) cluXPerDetFL1->Fill(lp_x);
-      //else        cluXPerDetNF1->Fill(lp_x);
-      htest3->Fill(phi,lpx);
-      //htest4->Fill(simx,lpx);
-
-    }
-
-    //int module = tTopo->pxbModule(detId);
-    if (flipped) {
-      recHitXResFlippedLadderLayers[layer-1]->Fill(res_x);
-      recHitXResFlippedLadderLayersSide[layer-1][module>4]->Fill(res_x);
-      recHitXPullFlippedLadderLayers[layer-1]->Fill(pull_x);
-    } else {
-      recHitXResNonFlippedLadderLayers[layer-1]->Fill(res_x);
-      recHitXResNonFlippedLadderLayersSide[layer-1][module>4]->Fill(res_x);
-      recHitXPullNonFlippedLadderLayers[layer-1]->Fill(pull_x);
-    } // end if
-
-  } // end if quick 
- 
   // as a function of layer
-  recHitXResLayers[layer-1]->Fill(res_x);  //QUICK
-  recHitYResLayers[layer-1]->Fill(res_y);  //QUICK
-  //
+  recHitXResLayer[layer-1]->Fill(res_x); 
+  recHitYResLayer[layer-1]->Fill(res_y);
 
   //get cluster
   SiPixelRecHit::ClusterRef const& clust = ((SiPixelRecHit*)recHit)->cluster();
   int sizeX = (*clust).sizeX();
 
   // tests only for layer 1
-  if(layer==1) {
-    if       (sizeX==1) {
-      if     (negZ && flipped) size1_mz_f->Fill((lp_x)); 
-      else if(negZ &&!flipped) size1_mz_nf->Fill((lp_x));
-      else if(!negZ&& flipped) size1_pz_f->Fill((lp_x)); 
-      else if(!negZ&&!flipped) size1_pz_nf->Fill((lp_x)); 
-    } else if(sizeX==2) {
-      if     (negZ && flipped) size2_mz_f->Fill((lp_x)); 
-      else if(negZ &&!flipped) size2_mz_nf->Fill((lp_x));
-      else if(!negZ&& flipped) size2_pz_f->Fill((lp_x)); 
-      else if(!negZ&&!flipped) size2_pz_nf->Fill((lp_x)); 
-    } else if(sizeX==3) {
-      if     (negZ && flipped) size3_mz_f->Fill((lp_x)); 
-      else if(negZ &&!flipped) size3_mz_nf->Fill((lp_x));
-      else if(!negZ&& flipped) size3_pz_f->Fill((lp_x)); 
-      else if(!negZ&&!flipped) size3_pz_nf->Fill((lp_x)); 
-    }
+  if(0 && layer==1) { // switch off 
+
+    //   if       (sizeX==1) {
+    //     if     (negZ && flipped) size1_mz_f->Fill((lp_x)); 
+    //     else if(negZ &&!flipped) size1_mz_nf->Fill((lp_x));
+    //     else if(!negZ&& flipped) size1_pz_f->Fill((lp_x)); 
+    //     else if(!negZ&&!flipped) size1_pz_nf->Fill((lp_x)); 
+    //   } else if(sizeX==2) {
+    //     if     (negZ && flipped) size2_mz_f->Fill((lp_x)); 
+    //     else if(negZ &&!flipped) size2_mz_nf->Fill((lp_x));
+    //     else if(!negZ&& flipped) size2_pz_f->Fill((lp_x)); 
+    //     else if(!negZ&&!flipped) size2_pz_nf->Fill((lp_x)); 
+    //   } else if(sizeX==3) {
+    //     if     (negZ && flipped) size3_mz_f->Fill((lp_x)); 
+    //     else if(negZ &&!flipped) size3_mz_nf->Fill((lp_x));
+    //     else if(!negZ&& flipped) size3_pz_f->Fill((lp_x)); 
+    //     else if(!negZ&&!flipped) size3_pz_nf->Fill((lp_x)); 
+    //   }
     
     cluSizeXVsPhi1->Fill((lpx),float(sizeX)); // all size 
     //if     (negZ && flipped) clusizeX21VsPhi->Fill((lp_x),float(sizeX)); // all size 
@@ -1078,8 +488,8 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
   } // layer 1 only 
 
   // eta plots 
-  recHitXResLayersP[layer-1]->Fill(eta,std::abs(res_x)); // all size 
-  recHitYResLayersP[layer-1]->Fill(eta,std::abs(res_y));
+  recHitXResLayerP[layer-1]->Fill(eta,std::abs(res_x)); // all size 
+  recHitYResLayerP[layer-1]->Fill(eta,std::abs(res_y));
 
   // phi plots 
   recHitXResVsPhiP[layer-1]->Fill((lpx),std::abs(res_x)); // all size 
@@ -1088,7 +498,7 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
 
   if(sizeX==1) {   // size 1
     
-    recHitXResLayersP1[layer-1]->Fill(eta,std::abs(res_x)); 
+    recHitXResLayerP1[layer-1]->Fill(eta,std::abs(res_x)); 
     recHitXResVsPhiP1[layer-1]->Fill((lpx),std::abs(res_x));  
     clusizeX1VsPhi[layer-1]->Fill((lpx));  
     if     (layer==1) recHitL1XResSize1->Fill(res_x);  // layer 1
@@ -1097,7 +507,7 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
     else if(layer==4) recHitL4XResSize1->Fill(res_x);
 
   } else if(sizeX==2) {
-    recHitXResLayersP2[layer-1]->Fill(eta,std::abs(res_x));
+    recHitXResLayerP2[layer-1]->Fill(eta,std::abs(res_x));
     recHitXResVsPhiP2[layer-1]->Fill((lpx),std::abs(res_x));  
     clusizeX2VsPhi[layer-1]->Fill((lpx));  
     if     (layer==1) recHitL1XResSize2->Fill(res_x);
@@ -1106,7 +516,7 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
     else if(layer==4) recHitL4XResSize2->Fill(res_x);
 
   } else if(sizeX>=3) {
-    recHitXResLayersP3[layer-1]->Fill(eta,std::abs(res_x));
+    recHitXResLayerP3[layer-1]->Fill(eta,std::abs(res_x));
     recHitXResVsPhiP3[layer-1]->Fill((lpx),std::abs(res_x));  
     clusizeX3VsPhi[layer-1]->Fill((lpx));  
     if     (layer==1) recHitL1XResSize3->Fill(res_x);
@@ -1116,70 +526,41 @@ void StudyRecHitResolution::fillBarrel(const TrackingRecHit* recHit, const PSimH
   }
   
   int sizeY = (*clust).sizeY();
-  if(sizeY==1)      recHitYResLayersP1[layer-1]->Fill(eta,std::abs(res_y)); // size 1
-  else if(sizeY==2) recHitYResLayersP2[layer-1]->Fill(eta,std::abs(res_y));
-  else if(sizeY==3) recHitYResLayersP3[layer-1]->Fill(eta,std::abs(res_y));
-  else if(sizeY>=4) recHitYResLayersP4[layer-1]->Fill(eta,std::abs(res_y));
+  if(sizeY==1)      recHitYResLayerP1[layer-1]->Fill(eta,std::abs(res_y)); // size 1
+  else if(sizeY==2) recHitYResLayerP2[layer-1]->Fill(eta,std::abs(res_y));
+  else if(sizeY==3) recHitYResLayerP3[layer-1]->Fill(eta,std::abs(res_y));
+  else if(sizeY>=4) recHitYResLayerP4[layer-1]->Fill(eta,std::abs(res_y));
   
-
-  // // fill module dependent info
-  // for (unsigned int i=0; i<8; i++) {
-  //   if (tTopo->pxbModule(detId) == i+1) {
-  //     int sizeY = (*clust).sizeY();
-  //     clustYSizeModule[i]->Fill(sizeY);
-      
-  //     float charge = (*clust).charge();
-  //     if (layer == 1) clustChargeLayer1Modules[i]->Fill(charge);
-  //     else if (layer == 2) clustChargeLayer2Modules[i]->Fill(charge);
-  //     else if (layer == 3) clustChargeLayer3Modules[i]->Fill(charge);
-  //     } // end if
-  // } // end for
-
-  //if(quick_) return; // skip the rest 
-
   // as a function of eta
   for (unsigned int i=0; i<25; i++) {
     float eta1=float(i)*0.1;
     float eta2=eta1+0.1;
     if(eta>=eta1 && eta<eta2) {
- 
       if      (layer == 1) {recHitXResLayer1Eta[i]->Fill(res_x);recHitYResLayer1Eta[i]->Fill(res_y);}
       else if (layer == 2) {recHitXResLayer2Eta[i]->Fill(res_x);recHitYResLayer2Eta[i]->Fill(res_y);}
       else if (layer == 3) {recHitXResLayer3Eta[i]->Fill(res_x);recHitYResLayer3Eta[i]->Fill(res_y);}
       else if (layer == 4) {recHitXResLayer4Eta[i]->Fill(res_x);recHitYResLayer4Eta[i]->Fill(res_y);}
-      
     } // eta 
   } // i (eta)
   
   // fill module dependent info, z dependence 
   for (unsigned int i=0; i<8; i++) {
-    if (tTopo->pxbModule(detId) == i+1) {
-      
+    if (tTopo->pxbModule(detId) == i+1) {      
       if (layer == 1) {
 	recHitYResLayer1Modules[i]->Fill(res_y);
-	recHitYPullLayer1Modules[i]->Fill(pull_y);
       } else if (layer == 2)  {
 	recHitYResLayer2Modules[i]->Fill(res_y);
-	recHitYPullLayer2Modules[i]->Fill(pull_y);
       } else if (layer == 3) {
 	recHitYResLayer3Modules[i]->Fill(res_y);
-	recHitYPullLayer3Modules[i]->Fill(pull_y);
       } else if (layer == 4) {
 	recHitYResLayer4Modules[i]->Fill(res_y);
-	recHitYPullLayer4Modules[i]->Fill(pull_y);
       } // end if
     } // end if
   } // end for
 
-  //int sizeX = (*clust).sizeX();
-  //if (layer == 1) clustXSizeLayer[0]->Fill(sizeX);
-  //if (layer == 2) clustXSizeLayer[1]->Fill(sizeX);
-  //if (layer == 3) clustXSizeLayer[2]->Fill(sizeX);
-
 }
-
-int StudyRecHitResolution::PhaseIBladeOfflineToOnline(const int& blade)
-{
+//-------------------------------------------------------------------------
+int StudyRecHitResolution::PhaseIBladeOfflineToOnline(const int& blade) {
   int blade_online = -999;
   if(1  <= blade && blade < 6)  blade_online = 6  - blade; // 5 on 1st quarter
   if(6  <= blade && blade < 17) blade_online = 5  - blade; // 11 on 2nd half
@@ -1225,7 +606,13 @@ void StudyRecHitResolution::fillForward(const TrackingRecHit* recHit, const PSim
   // integrated fpix results 
   recHitXResAllF->Fill(res_x);
   recHitYResAllF->Fill(res_y);  
-  
+  recHitXErrorAllF->Fill(lerr_x);
+  recHitYErrorAllF->Fill(lerr_y);
+  recHitXPullAllF->Fill(pull_x);
+  recHitYPullAllF->Fill(pull_y);
+
+#ifdef NOT // skip for the moment 
+
   // spliy into disks etc.
   int disk = tTopo->pxfDisk(detId);
   int panel = tTopo->pxfPanel(detId);      // Phase 1: Forward 1, Backward 2
@@ -1237,17 +624,11 @@ void StudyRecHitResolution::fillForward(const TrackingRecHit* recHit, const PSim
   //int phase1_online_blade = PhaseIBladeOfflineToOnline(blade); // Phase 1: Ring1 +-1-11, Ring2 +-1-17
   //int xside = 1 + (phase1_online_blade>0); // Phase 1: -X 1, +X 2
 
-  //int iii=0;
-  //cout<<(iii++)<<endl;
 
-  if (!quick_) {
-    recHitXResRingSidePanel[ring-1][side-1][panel-1]->Fill(res_x);
-    recHitYResRingSidePanel[ring-1][side-1][panel-1]->Fill(res_y);
-    recHitXResRingSide[ring-1][side-1]->Fill(res_x);
-    recHitYResRingPanel[ring-1][panel-1]->Fill(res_y);
-  }
-
-  //cout<<(iii++)<<endl;
+  recHitXResRingSidePanel[ring-1][side-1][panel-1]->Fill(res_x);
+  recHitYResRingSidePanel[ring-1][side-1][panel-1]->Fill(res_y);
+  recHitXResRingSide[ring-1][side-1]->Fill(res_x);
+  recHitYResRingPanel[ring-1][panel-1]->Fill(res_y);
 
   if (side==1) {
     recHitXResNegZF->Fill(res_x);
@@ -1256,34 +637,6 @@ void StudyRecHitResolution::fillForward(const TrackingRecHit* recHit, const PSim
     recHitXResPosZF->Fill(res_x);
     recHitYResPosZF->Fill(res_y);  
   }
-
-  //cout<<(iii++)<<endl;
-
-  // get cluster
-  //SiPixelRecHit::ClusterRef const& clust = ((SiPixelRecHit*)recHit)->cluster();
-  //int sizeX = (*clust).sizeX(), sizeY = (*clust).sizeY();
-  //float charge = (*clust).charge();
-  // if(disk==1) {
-  //   if(!quick_) {
-  //     clustXSizeDisk1Plaquettes[0]->Fill(sizeX);
-  //     clustYSizeDisk1Plaquettes[0]->Fill(sizeY);
-  //     clustChargeDisk1Plaquettes[0]->Fill(charge);
-  //   }
-  // } else if (disk==2) {
-  //   if(!quick_) {
-  //     clustXSizeDisk2Plaquettes[0]->Fill(sizeX);	
-  //     clustYSizeDisk2Plaquettes[0]->Fill(sizeY);
-  //     clustChargeDisk2Plaquettes[0]->Fill(charge);
-  //   }
-  // } else if (disk==3) {
-  //   if(!quick_) {
-  //     clustXSizeDisk3Plaquettes[0]->Fill(sizeX);	
-  //     clustYSizeDisk3Plaquettes[0]->Fill(sizeY);	
-  //     clustChargeDisk3Plaquettes[0]->Fill(charge);
-  //   } 
-  // }
-
-  //cout<<(iii++)<<endl;
 
   if(disk==1) {
 
@@ -1316,15 +669,6 @@ void StudyRecHitResolution::fillForward(const TrackingRecHit* recHit, const PSim
 
     }
 
-    ///cout<<(iii++)<<endl;
-
-    if(!quick_) {
-      recHitXPullDisk1Plaquettes[0]->Fill(pull_x);
-      recHitYPullDisk1Plaquettes[0]->Fill(pull_y);
-    }
-    
-    //cout<<(iii++)<<endl;
-
 
   } else if (disk==2) {
 
@@ -1354,17 +698,7 @@ void StudyRecHitResolution::fillForward(const TrackingRecHit* recHit, const PSim
       }
     }
 
-    //cout<<(iii++)<<endl;
-
-    if(!quick_) {
-      recHitXPullDisk2Plaquettes[0]->Fill(pull_x);
-      recHitYPullDisk2Plaquettes[0]->Fill(pull_y);
-    }
-
-
   } else if (disk==3) {
-
-    //cout<<(iii++)<<endl;
 
     recHitXResDisk3[0]->Fill(res_x);
     recHitYResDisk3[0]->Fill(res_y);
@@ -1392,77 +726,382 @@ void StudyRecHitResolution::fillForward(const TrackingRecHit* recHit, const PSim
       }
     }
 
-    if(!quick_) {
-      recHitXPullDisk3Plaquettes[0]->Fill(pull_x);
-      recHitYPullDisk3Plaquettes[0]->Fill(pull_y);
-    }
-    //cout<<(iii++)<<endl;
-
-
   } // end disk 
+    
+#endif  // NOT 
+
+}
 
 
-  ///cout<<(iii++)<<endl;
+void StudyRecHitResolution::endJob() {
 
-  if(quick_) return; // skip the rest
+}
 
-  recHitXErrorAllF->Fill(lerr_x);
-  recHitYErrorAllF->Fill(lerr_y);
-  recHitXPullAllF->Fill(pull_x);
-  recHitYPullAllF->Fill(pull_y);
 
-  // if (rows == 80)       recHitXPlaquetteSize1->Fill(lp_x);
-  // else if (rows == 160) recHitXPlaquetteSize2->Fill(lp_x);  
-  // if (cols == 104) 
-  //   {
-  //     recHitYPlaquetteSize2->Fill(lp_y);
-  //   } 
-  // else if (cols == 156) 
-  //   {
-  //     recHitYPlaquetteSize3->Fill(lp_y);
-  //   } 
-  // else if (cols == 208) 
-  //   {
-  //     recHitYPlaquetteSize4->Fill(lp_y);
-  //   } 
-  // else if (cols == 260) 
-  //   {
-  //     recHitYPlaquetteSize5->Fill(lp_y);
-  //   }
+void StudyRecHitResolution::beginJob() {
   
-  LocalError lape = theGeomDet->localAlignmentError();
-  if (lape.valid()) {
-    float tmp11= 0.;
-    if(lape.xx()>0.) tmp11= sqrt(lape.xx())*1E4;
-    //float tmp12= sqrt(lape.xy())*1E4;
-    float tmp13= 0.;
-    if(lape.yy()>0.) tmp13= sqrt(lape.yy())*1E4;
-    //if( (tTopo->pxfDisk(detId)) == 1)  { // disk 1
-    if( (tTopo->pxfSide(detId)) == 1)  // -z
-      {recHitXAlignError5->Fill(tmp11); recHitYAlignError5->Fill(tmp13);}
-    else if( (tTopo->pxfSide(detId)) == 2)  // +z
-      {recHitXAlignError6->Fill(tmp11); recHitYAlignError6->Fill(tmp13);}
-    //} else if( (tTopo->pxfDisk(detId)) == 2) {  // disk 2
-    // if( (tTopo->pxfSide(detId)) == 1)  
-    //	{recHitXAlignError6->Fill(tmp11); recHitYAlignError6->Fill(tmp13);}
-    //else if( (tTopo->pxfSide(detId)) == 2)  
-    //	{recHitXAlignError7->Fill(tmp11); recHitYAlignError7->Fill(tmp13);}
-    //}
-    //else {cout<<" unkown disk "<<tTopo->pxfDisk(detId)<<endl;}
-    //if(tmp11>0.) cout<<tTopo->pxfDisk(detId)<<" "
-    //		     <<tTopo->pxfSide(detId)<<" "<<tTopo->pxfBlade(detId)<<" "
-    //		     <<tTopo->pxfPanel(detId)<<" "<<tTopo->pxfModule(detId)<<" "
-    //		     <<rows<<" "<<cols<<" "
-    //		     <<tmp11<<" "<<tmp13<<endl;
+  edm::Service<TFileService> fs;
 
-    float tmp14=float(tTopo->pxfBlade(detId));
-    if( (tTopo->pxfDisk(detId)) == 2) tmp14 += 50.;
-    if( (tTopo->pxfSide(detId)) == 2) tmp14 += 25.; 
-    test->Fill(tmp14,tmp13);
+  // BPIX 
+  Char_t histo[200], title[200];
 
-  } // if lape 
+  // ---------------------------------------------------------------
+  // All histograms that depend on plaquette number have 7 indexes.
+  // The first 4 (0-3) correspond to Panel 1 plaquettes 1-4.
+  // The last 3 (4-6) correspond to Panel 2 plaquettes 1-3.
+  // ---------------------------------------------------------------
+
+  hphiTrack = fs->make<TH1D>("hphiTrack","track phi",70,-3.5,3.5);
+  hetaTrack = fs->make<TH1D>("hetaTrack","track eta",50,-2.5,2.5);
+  hptTrack  = fs->make<TH1D>("hptTrack","track pt",150,0.0,150.);
+
+  // BPix 
+  recHitXResAllB = fs->make<TH1D>("recHitXResAllB","RecHit X Res All Modules in Barrel", 100, -200., 200.);
+  recHitYResAllB = fs->make<TH1D>("recHitYResAllB","RecHit Y Res All Modules in Barrel", 100, -200., 200.);
+  recHitXPullAllB = fs->make<TH1D>("recHitXPullAllB", 
+				   "RecHit X Pull All Modules in Barrel"        , 100, -10.0, 10.0);
+  recHitYPullAllB = fs->make<TH1D>("recHitYPullAllB", 
+				   "RecHit Y Pull All Modules in Barrel"        , 100, -10.0, 10.0);
+  recHitXErrorAllB = fs->make<TH1D>("recHitXErrorAllB", "RecHit X Error All in Barrel", 100, 0.0, 0.1);  
+  recHitYErrorAllB = fs->make<TH1D>("recHitYErrorAllB", "RecHit Y Error All in Barrel", 100, 0.0, 0.1);
+
+
+  // For each layer 
+  for (int i=0; i<4; i++) {
+    //RecHit X resolution per layer
+    sprintf(histo, "recHitXResLayer%d", i+1);
+    sprintf(title, "RecHit XRes Layer %d", i+1);
+    recHitXResLayer[i] = fs->make<TH1D>(histo,title, 100, -200., 200.);
+    
+    //RecHit Y resolution per layer
+    sprintf(histo, "recHitYResLayer%d", i+1);
+    sprintf(title, "RecHit YRes Layer %d", i+1);
+    recHitYResLayer[i] = fs->make<TH1D>(histo,title, 100, -200., 200.);
+    
+    //RecHit X resolution per layer Profile vs eta
+    sprintf(histo, "recHitXResLayerP%d", i+1);
+    sprintf(title, "RecHit XRes Layer %d", i+1);
+    recHitXResLayerP[i] = fs->make<TProfile>(histo,title, 25, 0., 2.5,0.,1000.," ");
+    sprintf(histo, "recHitXResLayerP1%d", i+1);
+    sprintf(title, "RecHit XRes Layer %d, size 1", i+1);
+    recHitXResLayerP1[i] = fs->make<TProfile>(histo,title, 25, 0., 2.5,0.,1000.," ");
+    sprintf(histo, "recHitXResLayerP2%d", i+1);
+    sprintf(title, "RecHit XRes Layer %d, size 2", i+1);
+    recHitXResLayerP2[i] = fs->make<TProfile>(histo,title, 25, 0., 2.5,0.,1000.," ");
+    sprintf(title, "recHitXResLayer %d, size 3", i+1);
+    sprintf(histo, "RecHit_XRes_LayerP3%d", i+1);
+    recHitXResLayerP3[i] = fs->make<TProfile>(histo,title, 25, 0., 2.5,0.,1000.," ");
+    
+    //RecHit Y resolution per layer Profile vs eta
+    sprintf(histo, "recHitYResLayerP%d", i+1);
+    sprintf(title, "RecHit YRes Layer %d", i+1);
+    recHitYResLayerP[i] = fs->make<TProfile>(histo,title, 25, 0., 2.5,0.,1000.," ");
+    sprintf(histo, "recHitYResLayerP1%d", i+1);
+    sprintf(title, "RecHit YRes Layer %d, size 1", i+1);
+    recHitYResLayerP1[i] = fs->make<TProfile>(histo,title, 25, 0., 2.5,0.,1000.," ");
+    sprintf(histo, "recHitYResLayerP2%d", i+1);
+    sprintf(title, "RecHit YRes Layer %d, size 2", i+1);
+    recHitYResLayerP2[i] = fs->make<TProfile>(histo,title, 25, 0., 2.5,0.,1000.," ");
+    sprintf(histo, "recHitYResLayerP3%d", i+1);
+    sprintf(title, "RecHit YRes Layer %d, size 3", i+1);
+    recHitYResLayerP3[i] = fs->make<TProfile>(histo,title, 25, 0., 2.5,0.,1000.," ");
+    sprintf(histo, "recHitYResLayerP4%d", i+1);
+    sprintf(title, "RecHit YRes Layer %d, size 4", i+1);
+    recHitYResLayerP4[i] = fs->make<TProfile>(histo,title, 25, 0., 2.5,0.,1000.," ");
+    
+    //RecHit X resolution per layer Profile vs phi 
+    sprintf(histo, "recHitXResVsPhi_%dP", i+1);
+    sprintf(title, "RecHit XRes Vs Phi Layer %d", i+1);
+    recHitXResVsPhiP[i] = fs->make<TProfile>(histo,title, 162, -0.81,0.81,0.,100.," ");
+    sprintf(histo, "recHitXResVsPhi_%dP1", i+1);
+    sprintf(title, "RecHit XRes Vs Phi Layer %d size 1", i+1);
+    recHitXResVsPhiP1[i] = fs->make<TProfile>(histo,title, 162, -0.81,0.81,0.,100.," ");
+    sprintf(histo, "recHitXResVsPhi_%dP2", i+1);
+    sprintf(title, "RecHit XRes Vs Phi Layer %d size 2", i+1);
+    recHitXResVsPhiP2[i] = fs->make<TProfile>(histo,title, 162, -0.81,0.81,0.,100.," ");
+    sprintf(histo, "recHitXResVsPhi_%dP3", i+1);
+    sprintf(title, "RecHit XRes Vs Phi Layer %d size 3", i+1);
+    recHitXResVsPhiP3[i] = fs->make<TProfile>(histo,title, 162, -0.81,0.81,0.,100.," ");
+    
+    //RecHit X resolution for flipped ladders by layer
+    sprintf(histo, "recHit_XRes_FlippedLadder_Layer%d", i+1);
+    sprintf(title, "RecHit XRes FlippedLadder Layer%d", i+1);
+    recHitXResFlippedLadderLayers[i] = fs->make<TH1D>(histo,title, 100, -200., 200.);
+    
+    //RecHit X resolution for unflipped ladders by layer
+    sprintf(histo, "recHitXResNonFlippedLadderLayer%d", i+1);
+    sprintf(title, "RecHit XRes NonFlippedLadder Layer%d", i+1);
+    recHitXResNonFlippedLadderLayers[i] = fs->make<TH1D>(histo,title, 100, -200., 200.);
+    // Same plots for -Z/+Z
+    sprintf(histo, "recHitXResFlippedLadderLayer%d_mZ", i+1);
+    sprintf(title, "RecHit XRes FlippedLadder Layer%d -Z", i+1);
+    recHitXResFlippedLadderLayersSide[i][0] = fs->make<TH1D>(histo,title, 100, -200., 200.);
+    sprintf(histo, "recHitXResNonFlippedLadderLayer%d_mZ", i+1);
+    sprintf(title, "RecHit XRes NonFlippedLadder Layer%d -Z", i+1);
+    recHitXResNonFlippedLadderLayersSide[i][0] = fs->make<TH1D>(histo,title, 100, -200., 200.);
+    sprintf(histo, "recHitXResFlippedLadder_Layer%d_pZ", i+1);
+    sprintf(title, "RecHit XRes FlippedLadderLayer%d +Z", i+1);
+    recHitXResFlippedLadderLayersSide[i][1] = fs->make<TH1D>(histo,title, 100, -200., 200.);
+    sprintf(histo, "recHitXResNonFlippedLadderLayer%d_pZ", i+1);
+    sprintf(title, "RecHit XRes NonFlippedLadder Layer%d +Z", i+1);
+    recHitXResNonFlippedLadderLayersSide[i][1] = fs->make<TH1D>(histo,title, 100, -200., 200.);
+    
+    //RecHit Y resolutions for layers by module for barrel
+    for (int ii=0; ii<8; ii++) {
+      //Rec Hit Y resolution by module for Layer1
+      sprintf(histo, "recHitYResLayer%dModule%d",i+1, ii+1);
+      sprintf(title, "RecHit YRes Layer%d z-Module%d",i+1, ii+1);
+      if     (i==0) recHitYResLayer1Modules[ii] = fs->make<TH1D>(histo,title, 100, -200., 200.);
+      else if(i==1) recHitYResLayer2Modules[ii] = fs->make<TH1D>(histo,title, 100, -200., 200.);
+      else if(i==2) recHitYResLayer3Modules[ii] = fs->make<TH1D>(histo,title, 100, -200., 200.);
+      else if(i==3) recHitYResLayer4Modules[ii] = fs->make<TH1D>(histo,title, 100, -200., 200.);	  
+    } // end for ii, modules 
+    
+    // size versus phi
+    sprintf(histo, "clusizeXVsX%d", i+1);
+    sprintf(title, "Clu sizeX Vs X Layer %d", i+1);
+    clusizeXVsX[i] = fs->make<TProfile>(histo,title, 162, -0.81,0.81,0.,100.," ");
+    
+    sprintf(histo, "clusizeXVsPhi%d", i+1);
+    sprintf(title, "clu sizeX Vs Phi Layer %d", i+1);
+    clusizeXVsPhi[i] = fs->make<TH1D>(histo,title, 162, -0.81,0.81);  // alll sizes 
+    
+    sprintf(histo, "clusizeX1VsPhi%d", i+1);
+    sprintf(title, "clu sizeX Vs Phi Layer %d size 1", i+1);
+    clusizeX1VsPhi[i] = fs->make<TH1D>(histo,title, 162, -0.81,0.81); // size 1
+    sprintf(histo, "clusizeX2VsPhi%d", i+1);
+    sprintf(title, "clu sizeX Vs Phi Layer %d size 2", i+1);
+    clusizeX2VsPhi[i] = fs->make<TH1D>(histo,title, 162, -0.81,0.81);  // size 2
+    sprintf(histo, "clusizeX3VsPhi%d", i+1);
+    sprintf(title, "clu sizeX Vs Phi Layer %d size 3", i+1);
+    clusizeX3VsPhi[i] = fs->make<TH1D>(histo,title, 162, -0.81,0.81);  //size 3
+    
+  } // end i, layers
+  
+  //Only for layer 1
+  if(0) {  // switch off
+      cluSizeXVsPhi1 = fs->make<TProfile>("cluSizeXVsPhi1","clus sizeX vs phi layer1",1620,-0.81,0.81,0.,100.," ");
+      
+      // size1_mz_f = fs->make<TH1D>("size1_mz_f", "size1 -z flip",162,-0.81,0.81);
+      // size1_mz_nf= fs->make<TH1D>("size1_mz_nf","size1 -z nfli",162,-0.81,0.81);
+      // size1_pz_f = fs->make<TH1D>("size1_pz_f", "size1 +z flip",162,-0.81,0.81);
+      // size1_pz_nf= fs->make<TH1D>("size1_pz_nf","size1 +z nfli",162,-0.81,0.81);
+      // size2_mz_f = fs->make<TH1D>("size2_mz_f", "size2 -z flip",162,-0.81,0.81);
+      // size2_mz_nf= fs->make<TH1D>("size2_mz_nf","size2 -z nfli",162,-0.81,0.81);
+      // size2_pz_f = fs->make<TH1D>("size2_pz_f", "size2 +z flip",162,-0.81,0.81);
+      // size2_pz_nf= fs->make<TH1D>("size2_pz_nf","size2 +z nfli",162,-0.81,0.81);
+      // size3_mz_f = fs->make<TH1D>("size3_mz_f", "size3 -z flip",162,-0.81,0.81);
+      // size3_mz_nf= fs->make<TH1D>("size3_mz_nf","size3 -z nfli",162,-0.81,0.81);
+      // size3_pz_f = fs->make<TH1D>("size3_pz_f", "size3 +z flip",162,-0.81,0.81);
+      // size3_pz_nf= fs->make<TH1D>("size3_pz_nf","size3 +z nfli",162,-0.81,0.81);
+  }
+
+  // hz1 = fs->make<TH1D>("hz1","gz layer 1",26,0.,26.);
+  // hz1_1 = fs->make<TH1D>("hz1_1","gz pid group1",26,0.,26.);
+  // hz1_2 = fs->make<TH1D>("hz1_2","gz pid group2",26,0.,26.);
+  // hz1_3 = fs->make<TH1D>("hz1_3","gz pid group3",26,0.,26.);
+  // hz1_4 = fs->make<TH1D>("hz1_4","gz pid group4",26,0.,26.);
+  // hz1_5 = fs->make<TH1D>("hz1_5","eta pid group5",26,0.,26.);
+
+  // hz1_11 = fs->make<TH1D>("hz1_11","gz process group1",26,0.,26.);
+  // hz1_12 = fs->make<TH1D>("hz1_12","gz process group2",26,0.,26.);
+  // hz1_13 = fs->make<TH1D>("hz1_13","gz process group3",26,0.,26.);
+  // hz1_14 = fs->make<TH1D>("hz1_14","gz process group4",26,0.,26.);
+  // hz1_15 = fs->make<TH1D>("hz1_15","gz process group5",26,0.,26.);
+  // hz1_16 = fs->make<TH1D>("hz1_16","gz process group6",26,0.,26.);
+  // hz1_17 = fs->make<TH1D>("hz1_17","gz process group7",26,0.,26.);
+    
+  // hcount1 = fs->make<TH1D>("hcount1","tracks (or detunits)",2000,-0.5,1999.5);
+  // hcount2 = fs->make<TH1D>("hcount2","selected tracks",2000,-0.5,1999.5);
+  // hcount3 = fs->make<TH1D>("hcount3","rechits",2000,-0.5,1999.5);
+  // hcount4 = fs->make<TH1D>("hcount4","rechits <100um",2000,-0.5,1999.5);
+  // hcount5 = fs->make<TH1D>("hcount5","simhits compared",2000,-0.5,1999.5);
+  // hcount6 = fs->make<TH1D>("hcount6","simhits <100um",2000,-0.5,1999.5);
+  // hcount7 = fs->make<TH1D>("hcount7","close simhits per rechit",20,-0.5,19.5);
+  // hcount8 = fs->make<TH1D>("hcount8","matched simhits per rechit",20,-0.5,19.5);
+  // hcount9 = fs->make<TH1D>("hcount9","all simhits",2000,-0.5,1995.5);
+  
+  // hdist1 = fs->make<TH1D>("hdist1","matched",100,0.,0.1);
+  // hdist2 = fs->make<TH1D>("hdist2","number of bpix matched rechits",100,0.,0.1);
+  // hdist3 = fs->make<TH1D>("hdist3","selected matched",100,0.,0.1);
+  // hdist4 = fs->make<TH1D>("hdist4","selected match, close",100,0.,0.1);
+
+  // hParticleType1 = fs->make<TH1D>("hParticleType1","partcile type close",2500,0.,2500.);
+  // hTrackId1 = fs->make<TH1D>("hTrackId1","trackid close",1000,0.,1000.);
+  // hProcessType1 = fs->make<TH1D>("hProcessType1","process type close",500,0.,500.);
+  // hParticleType2 = fs->make<TH1D>("hParticleType2","partcile type best",2500,0.,2500.);
+  // hTrackId2 = fs->make<TH1D>("hTrackId2","trackid best",1000,0.,1000.);
+  // hProcessType2 = fs->make<TH1D>("hProcessType2","process type best",500,0.,500.);
+
+      // special histos for layer 1
+  recHitL1XResSize1    = fs->make<TH1D>("recHitL1XSize1","XRes size 1 L1", 100, -200., 200.);   
+  recHitL1XResSize2    = fs->make<TH1D>("recHitL1XSize2","XRes size 2 L1", 100, -200., 200.);   
+  recHitL1XResSize3    = fs->make<TH1D>("recHitL1XSize3","XRes size 3 L1", 100, -200., 200.);   
+  recHitL2XResSize1    = fs->make<TH1D>("recHitL2XSize1","XRes size 1 L2", 100, -200., 200.);   
+  recHitL2XResSize2    = fs->make<TH1D>("recHitL2XSize2","XRes size 2 L2", 100, -200., 200.);   
+  recHitL2XResSize3    = fs->make<TH1D>("recHitL2XSize3","XRes size 3 L2", 100, -200., 200.);   
+  recHitL3XResSize1    = fs->make<TH1D>("recHitL3XSize1","XRes size 1 L3", 100, -200., 200.);   
+  recHitL3XResSize2    = fs->make<TH1D>("recHitL3XSize2","XRes size 2 L3", 100, -200., 200.);   
+  recHitL3XResSize3    = fs->make<TH1D>("recHitL3XSize3","XRes size 3 L3", 100, -200., 200.);   
+  recHitL4XResSize1    = fs->make<TH1D>("recHitL4XSize1","XRes size 1 L4", 100, -200., 200.);   
+  recHitL4XResSize2    = fs->make<TH1D>("recHitL4XSize2","XRes size 2 L4", 100, -200., 200.);   
+  recHitL4XResSize3    = fs->make<TH1D>("recHitL4XSize3","XRes size 3 L4", 100, -200., 200.);   
+  
+  // eta plots
+  for (int j=0; j<25; j++) {
+    //RecHit X resolution per layer
+    sprintf(histo, "recHitXResLayer1Eta%d", j+1);
+    recHitXResLayer1Eta[j] = fs->make<TH1D>(histo, "RecHit XRes Layer1, eta", 100, -200., 200.);
+    sprintf(histo, "recHitXResLayer2Eta%d", j+1);
+    recHitXResLayer2Eta[j] = fs->make<TH1D>(histo, "RecHit XRes Layer2, eta", 100, -200., 200.);
+    sprintf(histo, "recHitXResLayer3Eta%d", j+1);
+    recHitXResLayer3Eta[j] = fs->make<TH1D>(histo, "RecHit XRes Layer3, eta", 100, -200., 200.);
+    sprintf(histo, "recHitXResLayer4Eta%d", j+1);
+    recHitXResLayer4Eta[j] = fs->make<TH1D>(histo, "RecHit XRes Layer4, eta", 100, -200., 200.);
+    
+    //RecHit Y resolution per layer
+    sprintf(histo, "recHitYResLayer1Eta%d", j+1);
+    recHitYResLayer1Eta[j] = fs->make<TH1D>(histo, "RecHit YRes Layer1, eta", 100, -200., 200.);
+    sprintf(histo, "recHitYResLayer2Eta%d", j+1);
+    recHitYResLayer2Eta[j] = fs->make<TH1D>(histo, "RecHit YRes Layer2, eta", 100, -200., 200.);
+    sprintf(histo, "recHitYResLayer3Eta%d", j+1);
+    recHitYResLayer3Eta[j] = fs->make<TH1D>(histo, "RecHit YRes Layer3, eta", 100, -200., 200.);
+    sprintf(histo, "recHitYResLayer4Eta%d", j+1);
+    recHitYResLayer4Eta[j] = fs->make<TH1D>(histo, "RecHit YRes Layer4, eta", 100, -200., 200.);
+  }  // j, eta
+  
+#ifdef NOT
+    recHitXPullAllB = fs->make<TH1D>("recHitXPullAllB"       , 
+				   "RecHit X Pull All Modules in Barrel"        , 100, -10.0, 10.0);
+    recHitYPullAllB = fs->make<TH1D>("recHitYPullAllB"       , 
+				   "RecHit Y Pull All Modules in Barrel"        , 100, -10.0, 10.0);
+    //recHitXErrorAllB = fs->make<TH1D>("RecHit_xerr_b_All"       , 
+    //				 "RecHit X Error All Modules in Barrel"        , 100, 0, 0.1);
+    //recHitYErrorAllB = fs->make<TH1D>("RecHit_yerr_b_All"       , 
+    //				 "RecHit Y Error All Modules in Barrel"        , 100, 0, 0.1);
+
+    recHitXError1B = fs->make<TH1D>("recHitXError1B"       , 
+				  "RecHit X Error in Barrel Layer 1"        , 100, 0, 0.1);
+    recHitYError1B = fs->make<TH1D>("recHitYError1B"       , 
+				  "RecHit Y Error in Barrel Layer 1"        , 100, 0, 0.1);
+    recHitXError2B = fs->make<TH1D>("recHitXError2B"       , 
+				  "RecHit X Error in Barrel Layer 2"        , 100, 0, 0.1);
+    recHitYError2B = fs->make<TH1D>("recHitYError2B"       , 
+				  "RecHit Y Error in Barrel Layer 2"        , 100, 0, 0.1);
+    recHitXError3B = fs->make<TH1D>("recHitXError3B"       , 
+				  "RecHit X Error in Barrel Layer 3"        , 100, 0, 0.1);
+    recHitYError3B = fs->make<TH1D>("recHitYError3B"       , 
+				  "RecHit Y Error in Barrel Layer 3"        , 100, 0, 0.1);
+    recHitXError4B = fs->make<TH1D>("recHitXError4B"       , 
+				  "RecHit X Error in Barrel Layer 4"        , 100, 0, 0.1);
+    recHitYError4B = fs->make<TH1D>("recHitYError4B"       , 
+				  "RecHit Y Error in Barrel Layer 4"        , 100, 0, 0.1);
+#endif
     
 
+    // FPix 
+    //RecHit X resolution all plaquettes
+    recHitXResAllF = fs->make<TH1D>("recHitXResAllF", "RecHit X Res All in Forward", 100, -200., 200.);
+    recHitXResPosZF = fs->make<TH1D>("recHitXResPosZF", "RecHit X Res All in Forward Disks +Z", 100, -200., 200.);
+    recHitXResNegZF = fs->make<TH1D>("recHitXResNegZF", "RecHit X Res All in Forward Disks -Z", 100, -200., 200.);
+    
+    //RecHit Y resolution all plaquettes
+    recHitYResAllF = fs->make<TH1D>("recHitYResAllF", "RecHit Y Res All in Forward", 100, -200., 200.);
+    recHitYResPosZF = fs->make<TH1D>("recHitYResPosZF", "RecHit Y Res All in Forward Disks +Z", 100, -200., 200.);
+    recHitYResNegZF = fs->make<TH1D>("recHitYResNegZF", "RecHit Y Res All in Forward Disks -Z", 100, -200., 200.);
+
+    recHitXPullAllF = fs->make<TH1D>("recHitXPullAllF", "RecHit X Pull All in Forward", 100, -10.0, 10.0);  
+    recHitYPullAllF = fs->make<TH1D>("recHitYPullAllF", "RecHit Y Pull All in Forward", 100, -10.0, 10.0);
+    recHitXErrorAllF = fs->make<TH1D>("recHitXErrorAllF", "RecHit X Error All in Forward", 100, 0.0, 0.1);  
+    recHitYErrorAllF = fs->make<TH1D>("recHitYErrorAllF", "RecHit Y Error All in Forward", 100, 0.0, 0.1);
+
+#ifdef NOT
+
+    // histograms per disk, side, panel, ring  
+    for (int i=0; i<7; i++) { // 0 all, 1 -z, 2 +z, 3 panel 1, 4 panel 2, 5 ring 1, 6 ring 2
+      //X resolution for Disk1 
+    sprintf(histo, "recHitXResDisk1%d", i+1);
+    recHitXResDisk1[i] = fs->make<TH1D>(histo, "RecHit XRes Disk1", 100, -200., 200.); 
+    //X resolution for Disk2 
+    sprintf(histo, "recHitXResDisk2%d", i+1);
+    recHitXResDisk2[i] = fs->make<TH1D>(histo, "RecHit XRes Disk2", 100, -200., 200.);  
+    //X resolution for Disk=3 
+    sprintf(histo, "recHitXResDisk3%d", i+1);
+    recHitXResDisk3[i] = fs->make<TH1D>(histo, "RecHit XRes Disk3", 100, -200., 200.);  
+    
+    //Y resolution for Disk1
+    sprintf(histo, "recHitYResDisk1%d", i+1);
+    recHitYResDisk1[i] = fs->make<TH1D>(histo, "RecHit YRes Disk1", 100, -200., 200.);
+    //Y resolution for Disk2 
+    sprintf(histo, "recHitYResDisk2%d", i+1);
+    recHitYResDisk2[i] = fs->make<TH1D>(histo, "RecHit YRes Disk2", 100, -200., 200.);
+    //Y resolution for Disk3 
+    sprintf(histo, "recHitYResDisk3%d", i+1);
+    recHitYResDisk3[i] = fs->make<TH1D>(histo, "RecHit YRes Disk3", 100, -200., 200.);
+  }
+
+    // jk 18 Feb 2017
+    for (int ring=0; ring<2; ring++) {
+      for (int side=0; side<2; side++) for (int panel=0; panel<2; panel++) {
+	sprintf(histo, "recHitXResRing%dSide%d_Panel%d", ring+1, side+1, panel+1);
+	recHitXResRingSidePanel[ring][side][panel] = fs->make<TH1D>(histo, histo, 100, -200., 200.); 
+	sprintf(histo, "recHitYResRing%dSide%d_Panel%d", ring+1, side+1, panel+1);
+	recHitYResRingSidePanel[ring][side][panel] = fs->make<TH1D>(histo, histo, 100, -200., 200.);
+      }
+      for (int side=0; side<2; side++) {
+	sprintf(histo, "recHitXResRing%dSide%d", ring+1, side+1);
+	recHitXResRingSide[ring][side] = fs->make<TH1D>(histo, histo, 100, -200., 200.); 
+      }
+      for (int panel=0; panel<2; panel++) {
+	sprintf(histo, "recHitYResRing%dPanel%d", ring+1, panel+1);
+	recHitYResRingPanel[ring][panel] = fs->make<TH1D>(histo, histo, 100, -200., 200.);
+      }
+    }
+
+  //RecHit X distribution for plaquette with x-size 1 in forward
+  // recHitXPlaquetteSize1 = fs->make<TH1D>("RecHit_x_Plaquette_xsize1", "RecHit X Distribution for plaquette x-size1", 100, -2., 2.);
+  
+  // //RecHit X distribution for plaquette with x-size 2 in forward
+  // recHitXPlaquetteSize2 = fs->make<TH1D>("RecHit_x_Plaquette_xsize2", "RecHit X Distribution for plaquette x-size2", 100, -2., 2.);
+  
+  // //RecHit Y distribution for plaquette with y-size 2 in forward
+  // recHitYPlaquetteSize2 = fs->make<TH1D>("RecHit_y_Plaquette_ysize2", "RecHit Y Distribution for plaquette y-size2", 100, -4., 4.);
+  
+  // //RecHit Y distribution for plaquette with y-size 3 in forward
+  // recHitYPlaquetteSize3 = fs->make<TH1D>("RecHit_y_Plaquette_ysize3", "RecHit Y Distribution for plaquette y-size3", 100, -4., 4.);
+  
+  // //RecHit Y distribution for plaquette with y-size 4 in forward
+  // recHitYPlaquetteSize4 = fs->make<TH1D>("RecHit_y_Plaquette_ysize4", "RecHit Y Distribution for plaquette y-size4", 100, -4., 4.);
+  
+  // //RecHit Y distribution for plaquette with y-size 5 in forward
+  // recHitYPlaquetteSize5 = fs->make<TH1D>("RecHit_y_Plaquette_ysize5", "RecHit Y Distribution for plaquette y-size5", 100, -4., 4.);
+  
+  //X and Y resolutions for both disks by plaquette in forward
+
+    
+    recHitXPullAllF = fs->make<TH1D>("recHitXPullAllF", "RecHit X Pull All in Forward", 100, -10.0, 10.0);  
+    recHitYPullAllF = fs->make<TH1D>("recHitYPullAllF", "RecHit Y Pull All in Forward", 100, -10.0, 10.0);
+    recHitXErrorAllF = fs->make<TH1D>("recHitXErrorAllF", "RecHit X Error All in Forward", 100, 0.0, 0.1);  
+    recHitYErrorAllF = fs->make<TH1D>("recHitYErrorAllF", "RecHit Y Error All in Forward", 100, 0.0, 0.1);
+    
+    for (int i=0; i<7; i++) {
+      sprintf(histo, "recHitXPullDisk1Plaquette%d", i+1);
+      recHitXPullDisk1Plaquettes[i] = fs->make<TH1D>(histo, "RecHit XPull Disk1 by plaquette", 100, -10.0, 10.0); 
+      sprintf(histo, "recHitXPullDisk2Plaquette%d", i+1);
+      recHitXPullDisk2Plaquettes[i] = fs->make<TH1D>(histo, "RecHit XPull Disk2 by plaquette", 100, -10.0, 10.0);  
+      sprintf(histo, "recHitXPullDisk3Plaquette%d", i+1);
+      recHitXPullDisk3Plaquettes[i] = fs->make<TH1D>(histo, "RecHit XPull Disk3 by plaquette", 100, -10.0, 10.0);  
+      
+      sprintf(histo, "recHitYPullDisk1Plaquette%d", i+1);
+      recHitYPullDisk1Plaquettes[i] = fs->make<TH1D>(histo, "RecHit YPull Disk1 by plaquette", 100, -10.0, 10.0);      
+      sprintf(histo, "recHitYPullDisk2Plaquette%d", i+1);
+      recHitYPullDisk2Plaquettes[i] = fs->make<TH1D>(histo, "RecHit YPull Disk2 by plaquette", 100, -10.0, 10.0);
+      sprintf(histo, "recHitYPullDisk3Plaquette%d", i+1);
+      recHitYPullDisk3Plaquettes[i] = fs->make<TH1D>(histo, "RecHit YPull Disk3 by plaquette", 100, -10.0, 10.0);
+    }
+    
+#endif //NOT
+  
 }
 
 //define this as a plug-in

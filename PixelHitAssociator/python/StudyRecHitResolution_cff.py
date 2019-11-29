@@ -19,6 +19,6 @@ pixRecHitsValid = cms.EDAnalyzer("StudyRecHitResolution",
     associateStrip = cms.bool(False),
     associateRecoTracks = cms.bool(False),
     verbose = cms.untracked.bool(False),
-    muOnly = cms.untracked.bool(True),
-    ptCut = cms.untracked.double(10.0)
+    muOnly = cms.untracked.bool(False),
+    ptCut = cms.untracked.double(1.0)
 )

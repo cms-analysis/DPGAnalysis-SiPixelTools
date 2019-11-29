@@ -2,7 +2,8 @@
 # start from simhits, do trackerlocal, compare sim and rec-hits
 import FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
-process = cms.Process("TestValid",eras.Run2_2017)
+#process = cms.Process("TestValid",eras.Run2_2017)
+process = cms.Process("TestValid",eras.Run3)
 
 process.load("Configuration.Geometry.GeometryDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
@@ -32,7 +33,7 @@ process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1)
+    input = cms.untracked.int32(10)
 )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
@@ -43,14 +44,34 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
 
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_realistic', '')
 
+#process.GlobalTag.globaltag = '106X_upgrade2018_realistic_v9'
+#process.GlobalTag.globaltag = '110X_mcRun3_2021_realistic_v3'
+#process.GlobalTag.globaltag = '110X_mcRun3_2023_realistic_v3'
+#process.GlobalTag.globaltag = '110X_mcRun3_2024_realistic_v3'
+
+#process.GlobalTag.globaltag = '110X_mcRun3_2021_realistic_Candidate_2019_10_31_12_09_00' # 2000e
+process.GlobalTag.globaltag = '110X_mcRun3_2023_realistic_Candidate_2019_11_04_22_24_44' # 2000e
+#process.GlobalTag.globaltag = '110X_mcRun3_2024_realistic_Candidate_2019_10_31_12_18_03' # 2000e
+
 
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
- '/store/user/kotlinski/MC/mu_pt100/simhits/simHits1.root'
+# '/store/user/kotlinski/MC/mu_pt100/simhits/simHits1.root'
+
+# Run3 MC
+#"/store/mc/Run3Summer19DR/TTbar_14TeV_TuneCP5_Pythia8/GEN-SIM-DIGI-RAW/106X_mcRun3_2021_realistic_v3-v2/130000/FF1B6F7B-55F6-2A42-A85B-654E59172A1E.root",
+"/store/mc/Run3Summer19DR/TTbar_14TeV_TuneCP5_Pythia8/GEN-SIM-DIGI-RAW/106X_mcRun3_2023_realistic_v3-v2/50000/FF819EB4-7243-1640-9F3A-21553B718CA9.root",
+#"/store/mc/Run3Summer19DR/TTbar_14TeV_TuneCP5_Pythia8/GEN-SIM-DIGI-RAW/106X_mcRun3_2024_realistic_v4-v2/270000/C0FD668E-2D90-4F4A-A607-9E8FF11B0A9F.root",
+
+# 2018
+#"/store/relval/CMSSW_10_6_1_patch3/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_106X_upgrade2018_realistic_v6-v1/20000/FE7FDB90-CC19-244B-B7CE-DDEB9500B5CB.root",
+
+# PU (GEN-SIM-DIGI-RAW)  used in 2/2019
+#"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_upgrade2018_design_v4-v1/20000/193FB1CE-333D-E540-995E-1BA38BA1CE3C.root"
 
 # mb
 #"/store/relval/CMSSW_10_4_0/RelValMinBias_13/GEN-SIM/103X_mc2017_realistic_v2-v1/20000/F0FF4DFA-613B-4749-BBC3-FB29AD691FA5.root"
@@ -62,7 +83,6 @@ process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
 #"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_upgrade2018_realistic_v8-v1/20000/0D388168-67C8-A544-8A75-8A96D40C396B.root"
 
 #"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_mc2017_realistic_v2-v1/20000/222AF93E-CE66-6342-A266-E78F6FCDD8EC.root"
-
 
   )
 )
@@ -139,7 +159,7 @@ process.g4SimHits.Generator.HepMCProductLabel = 'source'
 #process.mix.digitizers.pixel.TofLowerCut =-9999.5  # -12.5
 #process.mix.digitizers.pixel.ThresholdInElectrons_FPix    = cms.double(1500.0)
 #process.mix.digitizers.pixel.ThresholdInElectrons_BPix    = cms.double(1500.0)
-#process.mix.digitizers.pixel.ThresholdInElectrons_BPix_L1 = cms.double(1500.0)
+#process.mix.digitizers.pixel.ThresholdInElectrons_BPix_L1 = cms.double(2000.0)
 #process.mix.digitizers.pixel.ThresholdInElectrons_BPix_L2 = cms.double(1500.0)
 #process.mix.digitizers.pixel.ThresholdSmearing_FPix    = cms.double(1.0)
 #process.mix.digitizers.pixel.ThresholdSmearing_BPix    = cms.double(1.0)
@@ -147,20 +167,18 @@ process.g4SimHits.Generator.HepMCProductLabel = 'source'
 #process.mix.digitizers.pixel.ThresholdSmearing_BPix_L2 = cms.double(1.0)
 
 
-
 # to run rechit "official" validation
 #process.load("Validation.TrackerRecHits.trackerRecHitsValidation_cff")
 #process.load("Validation.TrackerRecHits.SiPixelRecHitsValid_cfi")
 
 # my rec-sim hit compare 
-#process.load("DPGAnalysis-SiPixelTools.PixelHitAssociator.SiPixelRecHitsValid_cff")
-process.load("DPGAnalysis-SiPixelTools.PixelHitAssociator.StudyRecHitResolution_cff")
-
+process.load("DPGAnalysis-SiPixelTools.PixelHitAssociator.SiPixelRecHitsValid_cff")
+#process.load("DPGAnalysis-SiPixelTools.PixelHitAssociator.StudyRecHitResolution_cff")
 # not on track 
 process.pixRecHitsValid.outputFile="pixelrechits.root"
-process.pixRecHitsValid.verbose=False
-process.pixRecHitsValid.muOnly=False
-process.pixRecHitsValid.ptCut=1.
+process.pixRecHitsValid.verbose=False 
+#process.pixRecHitsValid.muOnly=True  # 
+process.pixRecHitsValid.ptCut=1.      #  
 process.pixRecHitsValid.src="siPixelRecHitsPreSplitting"
 #process.pixRecHitsValid.src="siPixelRecHits"
 #process.pixRecHitsValid.associatePixel = True
@@ -168,13 +186,38 @@ process.pixRecHitsValid.src="siPixelRecHitsPreSplitting"
 #process.pixRecHitsValid.associateRecoTracks = False
 
 # on track 
-#process.pixRecHitsValid.useTracks = True
-process.pixRecHitsValid.useTracks = False
+process.pixRecHitsValid.useTracks = True  # use hits on tracks only, from track refit
+#process.pixRecHitsValid.useTracks = False # use all hits, from rechit containers 
 process.pixRecHitsValid.tracks = 'TrackRefitter'
 
+
+process.StudyRecHitMatching = cms.EDAnalyzer("StudyRecHitMatching",
+                                             outputFile=cms.untracked.string("rechitmatching.root"),
+                                             verbose=cms.untracked.bool(False),
+                                             muOnly=cms.untracked.bool(False),
+                                             ptCut=cms.untracked.double(1.),
+                                             src=cms.InputTag("siPixelRecHitsPreSplitting"),
+                                             #src = cms.InputTag("siPixelRecHits"),
+                                             # on track 
+                                             useTracks = cms.untracked.bool(True),
+                                             tracks = cms.untracked.InputTag('TrackRefitter'),
+                                             #tracks = cms.untracked.InputTag("generalTracks"),
+                                             pixelSimLinkSrc = cms.InputTag("simSiPixelDigis"),
+                                             ROUList = cms.vstring(
+                                                 'TrackerHitsPixelBarrelLowTof', 
+                                                 'TrackerHitsPixelBarrelHighTof', 
+                                                 'TrackerHitsPixelEndcapLowTof', 
+                                                 'TrackerHitsPixelEndcapHighTof'),
+                                             associatePixel = cms.bool(True),
+                                             associateStrip = cms.bool(False),
+                                             associateRecoTracks = cms.bool(False),
+)
+
+
+
 process.TrackRefitter.src = "generalTracks"
-#process.TrackRefitter.TTRHBuilder = 'WithAngleAndTemplate'
-process.TrackRefitter.TTRHBuilder = 'WithTrackAngle'
+process.TrackRefitter.TTRHBuilder = 'WithAngleAndTemplate'
+#process.TrackRefitter.TTRHBuilder = 'WithTrackAngle'
 
 
 process.d = cms.EDAnalyzer("PixClusterAna",
@@ -279,10 +322,13 @@ process.TFileService = cms.Service("TFileService",
 )
 
 
+#process.p1 = cms.Path(process.pdigi_valid*process.a)
 # go through raw
 #process.p1 = cms.Path(process.pdigi_valid*process.SimL1Emulator*process.DigiToRaw*process.RawToDigi*process.reconstruction*process.TrackRefitter*process.pixRecHitsValid)
-process.p1 = cms.Path(process.b*process.bf*process.pdigi_valid*process.a0*process.SimL1Emulator*process.DigiToRaw*process.RawToDigi*process.a*process.reconstruction*process.TrackRefitter*process.d*process.c*process.pixRecHitsValid)
-#process.p1 = cms.Path(process.pdigi_valid*process.a)
+
+#process.p1 = cms.Path(process.b*process.bf*process.pdigi_valid*process.a0*process.SimL1Emulator*process.DigiToRaw*process.RawToDigi*process.a*process.reconstruction*process.TrackRefitter*process.d*process.c*process.pixRecHitsValid)
+
+process.p1 = cms.Path(process.b*process.bf*process.pdigi_valid*process.a0*process.SimL1Emulator*process.DigiToRaw*process.RawToDigi*process.a*process.reconstruction*process.TrackRefitter*process.d*process.c*process.StudyRecHitMatching)
 
 # go directly - fails for muons 
 #process.p1 = cms.Path(process.pdigi_valid*process.SimL1Emulator*process.reconstruction*process.TrackRefitter*process.pixRecHitsValid)

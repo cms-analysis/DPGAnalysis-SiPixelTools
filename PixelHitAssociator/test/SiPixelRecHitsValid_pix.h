@@ -31,17 +31,26 @@
 #include "DataFormats/DetId/interface/DetId.h"
 
 #include "Geometry/CommonTopologies/interface/PixelTopology.h"
-#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
-#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetType.h"
+//#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
+//#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetType.h"
+#include "Geometry/CommonDetUnit/interface/PixelGeomDetUnit.h"
+#include "Geometry/CommonDetUnit/interface/PixelGeomDetType.h"
 #include "Geometry/CommonDetUnit/interface/GeomDetType.h"
 #include "Geometry/CommonDetUnit/interface/GeomDet.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "Geometry/TrackerNumberingBuilder/interface/GeometricDet.h"
 
-//DWM histogram services
-#include "DQMServices/Core/interface/DQMStore.h"
-#include "DQMServices/Core/interface/MonitorElement.h"
+// For ROOT
+#include <TROOT.h>
+#include <TChain.h>
+#include <TFile.h>
+#include <TF1.h>
+#include <TH2F.h>
+#include <TH1F.h>
+#include <TProfile.h>
+#include <TProfile2D.h>
+#include <TVector3.h>
 
 #include <string>
 
@@ -53,6 +62,11 @@
 #else 
 #include "SimTracker/TrackerHitAssociation/interface/TrackerHitAssociator.h"
 #endif
+
+//#define SPLIT_INTO_ETA  // make seperate eta histos 
+//#define SPLIT_INTO_Z // make seperate ihstos for module z
+//#define LOOK_AT_ERRORS // look at alignment errors 
+//#define SPLIT_INTO_PANELS // split forwatd disks in oanels 
 
 class TrackerTopology;
 
@@ -72,9 +86,11 @@ class SiPixelRecHitsValid_pix : public edm::EDAnalyzer {
 	void endJob();
 
    private:
-	DQMStore* dbe_;
+
 	std::string outputFile_;
 	bool verbose_;
+	bool muOnly_;
+	bool ptCut_;
 	edm::EDGetTokenT<edmNew::DetSetVector<SiPixelRecHit>> tPixelRecHit;
         edm::EDGetTokenT<TrajTrackAssociationCollection> tTracks;
 	edm::ParameterSet conf_;
@@ -94,123 +110,97 @@ class SiPixelRecHitsValid_pix : public edm::EDAnalyzer {
 #endif
         int PhaseIBladeOfflineToOnline(const int&);
 
-	//Clusters BPIX
-	MonitorElement* clustYSizeModule[8];
-	//MonitorElement* clustXSizeLayer[4];
-	MonitorElement* clustChargeLayer1Modules[8];
-	MonitorElement* clustChargeLayer2Modules[8];
-	MonitorElement* clustChargeLayer3Modules[8];
-	MonitorElement* clustChargeLayer4Modules[8];
-
-	//Cluster FPIX
-	MonitorElement* clustXSizeDisk1Plaquettes[7];
-	MonitorElement* clustXSizeDisk2Plaquettes[7];
-	MonitorElement* clustXSizeDisk3Plaquettes[7];
-	MonitorElement* clustYSizeDisk1Plaquettes[7];
-	MonitorElement* clustYSizeDisk2Plaquettes[7];
-	MonitorElement* clustYSizeDisk3Plaquettes[7];
-	MonitorElement* clustChargeDisk1Plaquettes[7];
-	MonitorElement* clustChargeDisk2Plaquettes[7];
-	MonitorElement* clustChargeDisk3Plaquettes[7];
+        TH1D* htheta1,*hbeta1,*hphi1, *heta1;
 
 	//RecHits BPIX
-	MonitorElement* recHitXResAllB;
-	MonitorElement* recHitYResAllB;
-	//MonitorElement* recHitXFullModules;
-	//MonitorElement* recHitXHalfModules;
-	MonitorElement* recHitYAllModules;
-	MonitorElement* recHitXResFlippedLadderLayers[4];
-	MonitorElement* recHitXResNonFlippedLadderLayers[4];
-        MonitorElement *recHitXResFlippedLadderLayersSide[4][2];
-        MonitorElement *recHitXResNonFlippedLadderLayersSide[4][2];
-	MonitorElement *recHitL1XResSize1,*recHitL1XResSize2,*recHitL1XResSize3;   
-	MonitorElement *recHitL2XResSize1,*recHitL2XResSize2,*recHitL2XResSize3;   
-	MonitorElement* recHitYResLayer1Modules[8];
-	MonitorElement* recHitYResLayer2Modules[8];
-	MonitorElement* recHitYResLayer3Modules[8];
-	MonitorElement* recHitYResLayer4Modules[8];
-
-	MonitorElement* recHitXResLayers[4];
-	MonitorElement* recHitYResLayers[4];
-	MonitorElement* recHitXResLayersP[4];
-	MonitorElement* recHitYResLayersP[4];
-	MonitorElement* recHitXResLayersP1[4];
-	MonitorElement* recHitXResLayersP2[4];
-	MonitorElement* recHitXResLayersP3[4];
-	MonitorElement* recHitYResLayersP1[4];
-	MonitorElement* recHitYResLayersP2[4];
-	MonitorElement* recHitYResLayersP3[4];
-	MonitorElement* recHitYResLayersP4[4];
-	MonitorElement* recHitXResLayer1Eta[25];
-	MonitorElement* recHitXResLayer2Eta[25];
-	MonitorElement* recHitXResLayer3Eta[25];
-	MonitorElement* recHitYResLayer1Eta[25];
-	MonitorElement* recHitYResLayer2Eta[25];
-	MonitorElement* recHitYResLayer3Eta[25];
-  	MonitorElement *htheta1,*hbeta1,*hphi1;
-  	MonitorElement *htheta2,*hbeta2,*hphi2;
-	MonitorElement* heta1, *heta2, *heta3;
-	MonitorElement* htest1, *htest2;
-	MonitorElement *recHitX11, *recHitX12, *recHitX21, *recHitX22;
-
-	//RecHits FPIX
-	MonitorElement* recHitXResAllF;
-	MonitorElement* recHitXResPosZF;
-	MonitorElement* recHitXResNegZF;
-	MonitorElement* recHitYResAllF;
-	MonitorElement* recHitYResPosZF;
-	MonitorElement* recHitYResNegZF;
-	//MonitorElement* recHitXPlaquetteSize1;
-	//MonitorElement* recHitXPlaquetteSize2;
-	//MonitorElement* recHitYPlaquetteSize2;
-	//MonitorElement* recHitYPlaquetteSize3;
-	//MonitorElement* recHitYPlaquetteSize4;
-	//MonitorElement* recHitYPlaquetteSize5;
-	MonitorElement* recHitXResDisk1[7];
-	MonitorElement* recHitYResDisk1[7];
-	MonitorElement* recHitXResDisk2[7];
-	MonitorElement* recHitYResDisk2[7];
-	MonitorElement* recHitXResDisk3[7];
-	MonitorElement* recHitYResDisk3[7];
-	MonitorElement* recHitXResRingSidePanel[2][2][2];
-	MonitorElement* recHitYResRingSidePanel[2][2][2];
-	MonitorElement* recHitXResRingSide[2][2];
-	MonitorElement* recHitYResRingPanel[2][2];
-
+	TH1D* recHitXResAllB;
+	TH1D* recHitYResAllB;
 	// Pull distributions
-	//RecHits BPIX
-	MonitorElement* recHitXPullAllB;
-	MonitorElement* recHitYPullAllB;
-	MonitorElement *recHitXError1B,*recHitXError2B,*recHitXError3B,*recHitXError4B;
-	MonitorElement *recHitYError1B,*recHitYError2B,*recHitYError3B,*recHitYError4B;
+	TH1D* recHitXPullAllB;
+	TH1D* recHitYPullAllB;
 
-	MonitorElement* recHitXPullFlippedLadderLayers[4];
-	MonitorElement* recHitXPullNonFlippedLadderLayers[4];
-	MonitorElement* recHitYPullLayer1Modules[8];
-	MonitorElement* recHitYPullLayer2Modules[8];
-	MonitorElement* recHitYPullLayer3Modules[8];
-	MonitorElement* recHitYPullLayer4Modules[8];
+	TH1D* recHitXResLayer[4]; // versus layers 
+	TH1D* recHitYResLayer[4];
+	TH1D* recHitXResFlippedL[4];
+	TH1D* recHitXResNonFlippedL[4];
+        TH1D *recHitXResFlippedLpz[4],*recHitXResFlippedLmz[4];
+        TH1D *recHitXResNonFlippedLpz[4],*recHitXResNonFlippedLmz[4];
+	TH1D *recHitXErrorB[4], *recHitYErrorB[4];
 
+	TProfile* recHitXResLayerP[4];
+	TProfile* recHitYResLayerP[4];
+	TProfile* recHitXResLayerP1[4];
+	TProfile* recHitXResLayerP2[4];
+	TProfile* recHitXResLayerP3[4];
+	TProfile* recHitYResLayerP1[4];
+	TProfile* recHitYResLayerP2[4];
+	TProfile* recHitYResLayerP3[4];
+	TProfile* recHitYResLayerP4[4];
+
+#ifdef SPLIT_INTO_ETA
+	TH1D* recHitXResLayer1Eta[25];
+	TH1D* recHitXResLayer2Eta[25];
+	TH1D* recHitXResLayer3Eta[25];
+	TH1D* recHitXResLayer4Eta[25];
+	TH1D* recHitYResLayer1Eta[25];
+	TH1D* recHitYResLayer2Eta[25];
+	TH1D* recHitYResLayer3Eta[25];
+	TH1D* recHitYResLayer4Eta[25];
+#endif // SPLIT_INTO_ETA
+
+	// for the moment keep commened out
+	//TH1D *recHitL1XResSize1,*recHitL1XResSize2,*recHitL1XResSize3; // layer 1
+	//TH1D *recHitL2XResSize1,*recHitL2XResSize2,*recHitL2XResSize3; // layer 2
+
+#ifdef SPLIT_INTO_Z
+	TH1D* recHitYResLayer1Modules[8];
+	TH1D* recHitYResLayer2Modules[8];
+	TH1D* recHitYResLayer3Modules[8];
+	TH1D* recHitYResLayer4Modules[8];
+#endif
+	// skip the pulls
+	//TH1D* recHitXPullFlippedLadderLayers[4];
+	//TH1D* recHitXPullNonFlippedLadderLayers[4];
+	//TH1D* recHitYPullLayer1Modules[8];
+	//TH1D* recHitYPullLayer2Modules[8];
+	//TH1D* recHitYPullLayer3Modules[8];
+	//TH1D* recHitYPullLayer4Modules[8];
+ 
 	//RecHits FPIX
-	MonitorElement* recHitXPullAllF;
-	MonitorElement* recHitYPullAllF;
-	MonitorElement* recHitXErrorAllF;
-	MonitorElement* recHitYErrorAllF;
+	TH1D* recHitXResAllF;
+	TH1D* recHitXResPosZF;
+	TH1D* recHitXResNegZF;
+	TH1D* recHitYResAllF;
+	TH1D* recHitYResPosZF;
+	TH1D* recHitYResNegZF;
+	TH1D* recHitXPullAllF;
+	TH1D* recHitYPullAllF;
+	TH1D* recHitXErrorAllF;
+	TH1D* recHitYErrorAllF;
 
-	MonitorElement* recHitXPullDisk1Plaquettes[7];
-	MonitorElement* recHitYPullDisk1Plaquettes[7];
-	MonitorElement* recHitXPullDisk2Plaquettes[7];
-	MonitorElement* recHitYPullDisk2Plaquettes[7];
-	MonitorElement* recHitXPullDisk3Plaquettes[7];
-	MonitorElement* recHitYPullDisk3Plaquettes[7];
 
+	TH1D* recHitXResDisk1[7];
+	TH1D* recHitYResDisk1[7];
+	TH1D* recHitXResDisk2[7];
+	TH1D* recHitYResDisk2[7];
+	TH1D* recHitXResDisk3[7];
+	TH1D* recHitYResDisk3[7];
+
+	TH1D* recHitXResRingSide[2][2];
+	TH1D* recHitYResRingPanel[2][2];
+
+#ifdef SPLIT_INTO_PANELS
+	TH1D* recHitXResRingSidePanel[2][2][2];
+	TH1D* recHitYResRingSidePanel[2][2][2];
+#endif
+
+#ifdef LOOK_AT_ERRORS
 	// Alignment errors 
-	MonitorElement *recHitXAlignError1, *recHitXAlignError2, *recHitXAlignError3;
-	MonitorElement *recHitXAlignError4, *recHitXAlignError5, *recHitXAlignError6, *recHitXAlignError7;
-	MonitorElement *recHitYAlignError1, *recHitYAlignError2, *recHitYAlignError3;
-	MonitorElement *recHitYAlignError4, *recHitYAlignError5, *recHitYAlignError6, *recHitYAlignError7;
-
-	MonitorElement* test;
+	TH1D *recHitXAlignError1, *recHitXAlignError2, *recHitXAlignError3;
+	TH1D *recHitXAlignError4, *recHitXAlignError5, *recHitXAlignError6, *recHitXAlignError7;
+	TH1D *recHitYAlignError1, *recHitYAlignError2, *recHitYAlignError3;
+	TH1D *recHitYAlignError4, *recHitYAlignError5, *recHitYAlignError6, *recHitYAlignError7;
+#endif
 
         edm::InputTag src_;
         bool useTracks_;
