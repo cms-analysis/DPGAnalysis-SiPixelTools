@@ -56,7 +56,7 @@ SiPixelOfflineCalibAnalysisBase::SiPixelOfflineCalibAnalysisBase(const edm::Para
    siPixelCalibDigiProducer_ = iConfig.getParameter<edm::InputTag>("DetSetVectorSiPixelCalibDigiTag");
    createOutputFile_ = iConfig.getUntrackedParameter<bool>("saveFile",false);
    outputFileName_ = iConfig.getParameter<std::string>("outputFileName");
-   daqBE_ = &*edm::Service<DQMStore>();
+   //daqBE_ = &*edm::Service<DQMStore>();
    tPixelCalibDigi = consumes <edm::DetSetVector<SiPixelCalibDigi> > (siPixelCalibDigiProducer_);
    calibrationMode_ = iConfig.getParameter<std::string>("CalibMode");
    nTriggers_ =  iConfig.getParameter<int>("Repeat");
@@ -201,11 +201,11 @@ void
 SiPixelOfflineCalibAnalysisBase::endJob() {
   this->calibrationEnd();
    edm::LogInfo("SiPixelOfflineCalibAnalysisBase") << "Running end job... output file name is: " << outputFileName_;
-   if (!outputFileName_.empty() && createOutputFile_) 
-   {
-      edm::LogInfo("SiPixelOfflineCalibAnalysisBase") << "Writing ROOT file to: " << outputFileName_ << std::endl;
-      daqBE_->save(outputFileName_);
-   }
+   //if (!outputFileName_.empty() && createOutputFile_) 
+   //{
+   //   edm::LogInfo("SiPixelOfflineCalibAnalysisBase") << "Writing ROOT file to: " << outputFileName_ << std::endl;
+   //   daqBE_->save(outputFileName_);
+   //}
 }
 
 // ------------ helper functions ---------------------------------------------------------
@@ -337,19 +337,19 @@ TH2F* SiPixelOfflineCalibAnalysisBase::bookHistoPlaquetteSummary2D(uint32_t deti
   
 }
 
-bool
-SiPixelOfflineCalibAnalysisBase::setDQMDirectory(std::string dirName)
-{
-   daqBE_->setCurrentFolder(dirName);
-   return daqBE_->dirExists(dirName);
-}
-
-bool
-SiPixelOfflineCalibAnalysisBase::setDQMDirectory(uint32_t detID)
-{
-  return folderMaker_->setModuleFolder( &myTFileDirMap_,detID,tt_,0,phase1_ ); //Camilla da cambiare o da riscrivere quella vecchia
-;
-}
+//bool
+//SiPixelOfflineCalibAnalysisBase::setDQMDirectory(std::string dirName)
+//{
+//   daqBE_->setCurrentFolder(dirName);
+//   return daqBE_->dirExists(dirName);
+//}
+//
+//bool
+//SiPixelOfflineCalibAnalysisBase::setDQMDirectory(uint32_t detID)
+//{
+//  return folderMaker_->setModuleFolder( &myTFileDirMap_,detID,tt_,0,phase1_ ); //Camilla da cambiare o da riscrivere quella vecchia
+//;
+//}
 // bool
 // SiPixelOfflineCalibAnalysisBase::GetPixelDirectory(std::string dirName)
 // {
@@ -466,13 +466,14 @@ SiPixelOfflineCalibAnalysisBase::checkPixel(uint32_t detid,short row, short col)
   return false;
 }
 
-// function to add tf1's to ME's:
-void SiPixelOfflineCalibAnalysisBase::addTF1ToDQMMonitoringElement(MonitorElement *ele, TF1 *func){
-  
-  if(func){
-    ele->getTH1()->GetListOfFunctions()->Add(func);
-  }
-  return;
-}
+//// function to add tf1's to ME's:
+//void SiPixelOfflineCalibAnalysisBase::addTF1ToDQMMonitoringElement(MonitorElement *ele, TF1 *func){
+//  
+//  if(func){
+//    ele->getTH1()->GetListOfFunctions()->Add(func);
+//  }
+//  return;
+//}
+
 //define this as a plug-in
 DEFINE_FWK_MODULE(SiPixelOfflineCalibAnalysisBase);

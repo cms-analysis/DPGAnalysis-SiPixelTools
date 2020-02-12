@@ -37,7 +37,7 @@ Implementation:
 
 //#include "CalibTracker/SiPixelESProducers/interface/SiPixelGainCalibrationService.h"
 
-#include "DQMServices/Core/interface/MonitorElement.h"
+//#include "DQMServices/Core/interface/MonitorElement.h"
 #include "TLinearFitter.h"
 #include "TGraphErrors.h"
 #include <fstream>
@@ -70,8 +70,8 @@ private:
   // ----------member data --------------------------- 
   edm::ParameterSet conf_;
   // more class members used to keep track of the histograms
-  std::map<uint32_t,std::map<std::string, MonitorElement *> > bookkeeper_;
-  std::map<uint32_t,std::map<std::string, MonitorElement *> > bookkeeper_pixels_;
+  //std::map<uint32_t,std::map<std::string, MonitorElement *> > bookkeeper_;
+  //std::map<uint32_t,std::map<std::string, MonitorElement *> > bookkeeper_pixels_;
 
   std::map<uint32_t,std::map<std::string,TH1F *> > bookkeeper_1D_;
   std::map<uint32_t,std::map<std::string,TH1F *> > bookkeeper_pixels_1D_;

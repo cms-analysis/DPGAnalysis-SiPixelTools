@@ -51,10 +51,11 @@
 
 #include "TF1.h"
 #include "TH1F.h"
+#include "TH2F.h"
 #include "TGraphErrors.h"
 
-#include "DQMServices/Core/interface/DQMStore.h"
-#include "DQMServices/Core/interface/MonitorElement.h"
+//#include "DQMServices/Core/interface/DQMStore.h"
+//#include "DQMServices/Core/interface/MonitorElement.h"
 #include "DQM/SiPixelCommon/interface/SiPixelHistogramId.h"
 #include "SiPixelFolderOrganizerGC.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
@@ -91,11 +92,15 @@ public:
   
   //booking DQM histograms (for dynamic histogram creation)
   
-  MonitorElement* 			bookDQMHistogram1D(uint32_t detid, std::string name, std::string title, int nchX, double lowX, double highX);  
-  MonitorElement*			bookDQMHistogram1D(uint32_t detid, std::string name, std::string title, int nchX, float *xbinsize);  //variable size bins
-  MonitorElement* 			bookDQMHistogram2D(uint32_t detid, std::string name, std::string title, int nchX, double lowX, double highX, int nchY, double lowY, double highY);
+  //MonitorElement* bookDQMHistogram1D(uint32_t detid, std::string name, std::string title, int nchX, double lowX, double highX);  
+  //MonitorElement* bookDQMHistogram1D(uint32_t detid, std::string name, std::string title, int nchX, float *xbinsize);  //variable size bins
+  //MonitorElement* bookDQMHistogram2D(uint32_t detid, std::string name, std::string title, int nchX, double lowX, double highX, int nchY, double lowY, double highY);
+  //
+  //MonitorElement* bookDQMHistoPlaquetteSummary2D(uint32_t detid, std::string name,std::string title); // take the detid to determine the size of rows and columns, this saves looking up everything in the cabling map by the user. 
+  //void            addTF1ToDQMMonitoringElement(MonitorElement *ele, TF1 *func);
+  //bool            setDQMDirectory(std::string dirName);	
+  //bool            setDQMDirectory(uint32_t detID); //automatically create directory hierachy based on DetID
   
-  MonitorElement*                       bookDQMHistoPlaquetteSummary2D(uint32_t detid, std::string name,std::string title); // take the detid to determine the size of rows and columns, this saves looking up everything in the cabling map by the user. 
   TH1F* 			bookHistogram1D(uint32_t detid, std::string name, std::string title, int nchX, double lowX, double highX, std::string dir);  
   TH1F*  			bookHistogram1D(uint32_t detid, std::string name, std::string title, int nchX, float *xbinsize, std::string dir);  //variable size bins
   TH2F* 			bookHistogram2D(uint32_t detid, std::string name, std::string title, int nchX, double lowX, double highX, int nchY, double lowY, double highY, std::string dir);
@@ -104,10 +109,6 @@ public:
 
   TGraphErrors* bookTGraphs(uint32_t detid, std::string name, int points, double *x, double *y, double *xE, double *yE, std::string dir);
 
-  void                                  addTF1ToDQMMonitoringElement(MonitorElement *ele, TF1 *func);
-  
-  bool				        setDQMDirectory(std::string dirName);	
-  bool				        setDQMDirectory(uint32_t detID); //automatically create directory hierachy based on DetID
   static TF1*                           fitFunction_;
   // static const std::vector<short>*      getVcalValues();
   std::vector<uint32_t> &               getRunNumbers() { return runnumbers_;};
@@ -138,7 +139,7 @@ protected:
 private:
   
   SiPixelFolderOrganizerGC* folderMaker_;
-  DQMStore* daqBE_;
+  //DQMStore* daqBE_;
   edm::Service<TFileService> fs;
   std::map<std::string, TFileDirectory>  myTFileDirMap_;
   // TFile * file;

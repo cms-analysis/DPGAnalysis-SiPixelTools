@@ -39,8 +39,8 @@ using std::endl;
 SiPixelGainCalibrationAnalysis::SiPixelGainCalibrationAnalysis(const edm::ParameterSet& iConfig):
   SiPixelOfflineCalibAnalysisBase(iConfig),
   conf_(iConfig),
-  bookkeeper_(),
-  bookkeeper_pixels_(),
+  //bookkeeper_(),
+  //bookkeeper_pixels_(),
   bookkeeper_1D_(),
   bookkeeper_pixels_1D_(),
   bookkeeper_2D_(),
@@ -416,11 +416,10 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     graph_->SetPointError(ipointtemp,0,yerrvals[ipointtemp]);
   }
   Int_t tempresult = graph_->Fit("func","FQ0N");
-  if (makehistopersistent) 
-    {
-      //std::cout << "swdebug: saving TGraph." << std::endl;
-      TGraphErrors *savedGraph = bookTGraphs(detid, "savedGraph", npoints, xvals, yvals, 0, yerrvals, GetPixelDirectory(detid)) ;
-    }
+  if (makehistopersistent){
+    //std::cout << "swdebug: saving TGraph." << std::endl;
+    TGraphErrors *savedGraph = bookTGraphs(detid, "savedGraph", npoints, xvals, yvals, 0, yerrvals, GetPixelDirectory(detid)) ;
+  }
   slope=func_->GetParameter(1);
   slopeerror=func_->GetParError(1);
   intercept=func_->GetParameter(0);
