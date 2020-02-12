@@ -19,8 +19,8 @@
 
 #include "SiPixelOfflineCalibAnalysisBase.h"
 #include "CalibTracker/SiStripCommon/interface/Book.h"
-#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
-#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetType.h"
+#include "Geometry/CommonTopologies/interface/PixelGeomDetUnit.h"
+#include "Geometry/CommonTopologies/interface/PixelGeomDetType.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h" 
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 

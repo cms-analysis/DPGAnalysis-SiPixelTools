@@ -8,7 +8,7 @@
 
 #include "SiPixelCoordinates.h"
 
-#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
+#include "Geometry/CommonTopologies/interface/PixelGeomDetUnit.h"
 #include "Geometry/CommonTopologies/interface/PixelTopology.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "CondFormats/DataRecord/interface/SiPixelFedCablingMapRcd.h"
