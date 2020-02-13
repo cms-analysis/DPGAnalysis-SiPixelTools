@@ -3,14 +3,16 @@
 Prepare your working directory with CMSSW
 
 ```
-mkdir Pixels
-cd Pixels
-cmsrel CMSSW_10_0_3
-cd CMSSW_10_0_3/src
+export SCRAM_ARCH=slc7_amd64_gcc820
+mkdir pixels
+cd pixels
+cmsrel CMSSW_11_1_0_pre1
+cd CMSSW_11_1_0_pre1/src
 cmsenv
 git clone https://github.com/cms-analysis/DPGAnalysis-SiPixelTools
-rm -r DPGAnalysis-SiPixelTools/PixelDBTools/ # packages which do not compile...
-rm -r DPGAnalysis-SiPixelTools/PixelTriplets/ # packages which do not compile...
+rm -r DPGAnalysis-SiPixelTools/PixelDBTools/     # not needed, and does not compile...
+rm -r DPGAnalysis-SiPixelTools/PixelTriplets/    # not needed, and does not compile...
+rm -r DPGAnalysis-SiPixelTools/HitAnalyzerPhase2 # not needed, and does not compile...
 scram b -j 20
 cd DPGAnalysis-SiPixelTools/GainCalibration/test
 ```
