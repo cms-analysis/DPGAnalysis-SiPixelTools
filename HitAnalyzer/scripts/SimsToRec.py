@@ -2,8 +2,8 @@
 # start from simhits, do trackerlocal, compare sim and rec-hits
 import FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
-process = cms.Process("TestValid",eras.Run2_2017)
-#process = cms.Process("TestValid",eras.Run3)
+#process = cms.Process("TestValid",eras.Run2_2017)
+process = cms.Process("TestValid",eras.Run3)
 
 process.load("Configuration.Geometry.GeometryDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
@@ -32,11 +32,8 @@ process.load("Configuration.StandardSequences.Reconstruction_cff")
 # Refitter
 process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
 
-
-
-
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1)
+    input = cms.untracked.int32(10)
 )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
@@ -52,32 +49,48 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_realistic', '')
 
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2021_realistic', '') # for Run3
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2021_design', '') # for Run3
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2021_realistic', '') # for Run3
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2023_realistic', '') # for Run3
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2024_realistic', '') # for Run3
 
-#process.GlobalTag.globaltag = '106X_upgrade2018_realistic_v9'
-#process.GlobalTag.globaltag = '110X_mcRun3_2021_realistic_v3'
-#process.GlobalTag.globaltag = '110X_mcRun3_2023_realistic_v3'
-#process.GlobalTag.globaltag = '110X_mcRun3_2024_realistic_v3'
 
 #process.GlobalTag.globaltag = '106X_mcRun3_2023_realistic_Candidate_2019_10_11_19_29_18' #1300e
 #process.GlobalTag.globaltag = '106X_mcRun3_2023_realistic_Candidate_2019_10_11_19_43_54' #2000e
 
-process.GlobalTag.globaltag = '110X_mcRun3_2021_realistic_Candidate_2019_10_31_12_09_00' # 2000e
+#process.GlobalTag.globaltag = '110X_mcRun3_2021_realistic_Candidate_2019_10_31_12_09_00' # 2000e
 #process.GlobalTag.globaltag = '110X_mcRun3_2023_realistic_Candidate_2019_11_04_22_24_44' # 2000e
 #process.GlobalTag.globaltag = '110X_mcRun3_2024_realistic_Candidate_2019_10_31_12_18_03' # 2000e
 
+#process.GlobalTag.globaltag = '110X_upgrade2018_design_v3'
+#process.GlobalTag.globaltag = '110X_upgrade2018_realistic_v7'
 
+#process.GlobalTag.globaltag = '110X_mcRun3_2021_design_v5' # OK
+#process.GlobalTag.globaltag = '110X_mcRun3_2021_realistic_v6' # OK
+#process.GlobalTag.globaltag = '110X_mcRun3_2023_realistic_v6'
+#process.GlobalTag.globaltag = '110X_mcRun3_2024_realistic_v6' # OK
 
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
 
 #  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits1.root',
+'/store/user/kotlinski/MC11/mu_pt100/simhits/simHits1.root'
+#'/store/user/kotlinski/MC11/Run3/2021/Run3_2021_RECOSIM_1.root'
+#'/store/user/kotlinski/MC11/Run3/2023/Run3_2023_RECOSIM_1.root'
+#'/store/user/kotlinski/MC11/Run3/2024/Run3_2024_RECOSIM_1.root'
+
 
 # new run3 MC
 #'/store/user/tsusa/TTbar/Run3_RECOSIM-110X_mcRun3_2021_realistic_Candidate_2019_10_31_12_09_00_th2000_3/TTbar/TTbar_RECOSIM_2021/191113_211045/0001/Run3_2021_RECOSIM_1099.root',
 #'/store/user/tsusa/TTbar/Run3_RECOSIM-110X_mcRun3_2023_realistic_Candidate_2019_11_04_22_24_44_th2000/TTbar/TTbar_RECOSIM_2023/191113_133540/0001/Run3_2023_RECOSIM_1092.root',
 #'/store/user/tsusa/TTbar/Run3_RECOSIM-110X_mcRun3_2024_realistic_Candidate_2019_10_31_12_18_03_th2000/TTbar/TTbar_RECOSIM_2024/191113_133404/0001/Run3_2024_RECOSIM_1098.root',
+
+
+# raw
+#'/store/user/tsusa/TTbar/Run3_DR-110X_mcRun3_2021_realistic_Candidate_2019_10_31_12_09_00_th2000/TTbar/TTbar_DR_2021/191102_151901/0001/Run3_DR_2021_th2000_1100.root',
+#'/store/user/tsusa/TTbar/Run3_DR-110X_mcRun3_2023_realistic_Candidate_2019_10_31_12_16_57_th2000/TTbar/TTbar_DR_2023/191102_195230/0001/Run3_DR_2023_th2000_1100.root',
+#'/store/user/tsusa/TTbar/Run3_DR-110X_mcRun3_2024_realistic_Candidate_2019_10_31_12_18_03_th2000/TTbar/TTbar_DR_2024/191102_221436/0001/Run3_DR_2024_th2000_1100.root',
+
+
 
 # Run3 MC
 #"/store/mc/Run3Summer19DR/TTbar_14TeV_TuneCP5_Pythia8/GEN-SIM-DIGI-RAW/106X_mcRun3_2021_realistic_v3-v2/130000/FF1B6F7B-55F6-2A42-A85B-654E59172A1E.root",
@@ -237,20 +250,58 @@ process.g4SimHits.Generator.HepMCProductLabel = 'source'
 #process.mix.digitizers.pixel.TofLowerCut =-9999.5  # -12.5
 #process.mix.digitizers.pixel.ThresholdInElectrons_FPix    = cms.double(1500.0)
 #process.mix.digitizers.pixel.ThresholdInElectrons_BPix    = cms.double(1500.0)
-#process.mix.digitizers.pixel.ThresholdInElectrons_BPix_L1 = cms.double(1500.0) # 1300, 2000
+#process.mix.digitizers.pixel.ThresholdInElectrons_BPix_L1 = cms.double(2000.0) # 1300, 2000
 #process.mix.digitizers.pixel.ThresholdInElectrons_BPix_L2 = cms.double(1500.0)
 #process.mix.digitizers.pixel.ThresholdSmearing_FPix    = cms.double(1.0)
 #process.mix.digitizers.pixel.ThresholdSmearing_BPix    = cms.double(1.0)
 #process.mix.digitizers.pixel.ThresholdSmearing_BPix_L1 = cms.double(1.0)
 #process.mix.digitizers.pixel.ThresholdSmearing_BPix_L2 = cms.double(1.0)
+
+# switch off noise3  
+#process.mix.digitizers.pixel.NoiseInElectrons = cms.double(1.0) # 175., cannot be 0, makes than thr=0
+#process.mix.digitizers.pixel.ReadoutNoiseInElec = cms.double(0.0) # 350
+#process.mix.digitizers.pixel.AddNoise = cms.bool(False)
+#process.mix.digitizers.pixel.AddNoisyPixels = cms.bool(False)
+
 # switch off all inefficiencies 
-process.mix.digitizers.pixel.killModules = cms.bool(False) 
-process.mix.digitizers.pixel.KillBadFEDChannels = cms.bool(False) 
-process.mix.digitizers.pixel.AddPixelInefficiency = cms.bool(False) # dyn. ineff.
-process.mix.digitizers.pixel.useDB = cms.bool(False) # probably not needed 
-process.mix.digitizers.pixel.DeadModule_DB = cms.bool(False) # probably not needed 
+#process.mix.digitizers.pixel.killModules = cms.bool(False) 
+#process.mix.digitizers.pixel.KillBadFEDChannels = cms.bool(False) 
+#process.mix.digitizers.pixel.AddPixelInefficiency = cms.bool(False) # dyn. ineff.
+#process.mix.digitizers.pixel.useDB = cms.bool(False) # probably not needed 
+#process.mix.digitizers.pixel.DeadModule_DB = cms.bool(False) # probably not needed 
+
 #process.mix.digitizers.pixel.UseReweighting = cms.bool(False) # switches of the charge reweighting 
 #process.mix.digitizers.pixel.DoPixelAging = cms.bool(False) # does not do anything 
+
+#process.mix.digitizers.pixel.AddPixelInefficiency = cms.bool(False) # dyn. ineff. OFF
+
+doDynIneff = False
+if(doDynIneff) :
+    process.mix.digitizers.pixel.AddPixelInefficiency = cms.bool(True) # dyn. ineff. ON
+    process.mix.digitizers.pixel.theInstLumiScaleFactor = cms.double(1)
+    process.mix.digitizers.pixel.thePixelColEfficiency_BPix1 = cms.double(0.81)  #0.81
+    process.mix.digitizers.pixel.thePixelColEfficiency_BPix2 = cms.double(1)  #0.97
+    process.mix.digitizers.pixel.thePixelColEfficiency_BPix3 = cms.double(1)  #0.99
+    process.mix.digitizers.pixel.thePixelColEfficiency_BPix4 = cms.double(1)  #0.995
+    process.mix.digitizers.pixel.thePixelColEfficiency_FPix1 = cms.double(1)
+    process.mix.digitizers.pixel.thePixelColEfficiency_FPix2 = cms.double(1)
+    process.mix.digitizers.pixel.thePixelColEfficiency_FPix3 = cms.double(1)
+    process.mix.digitizers.pixel.thePixelColEfficiency_FPix4 = cms.double(1)
+    process.mix.digitizers.pixel.thePixelEfficiency_BPix1 = cms.double(1)
+    process.mix.digitizers.pixel.thePixelEfficiency_BPix2 = cms.double(1)
+    process.mix.digitizers.pixel.thePixelEfficiency_BPix3 = cms.double(1)
+    process.mix.digitizers.pixel.thePixelEfficiency_BPix4 = cms.double(1)
+    process.mix.digitizers.pixel.thePixelEfficiency_FPix1 = cms.double(1)
+    process.mix.digitizers.pixel.thePixelEfficiency_FPix2 = cms.double(1)
+    process.mix.digitizers.pixel.thePixelEfficiency_FPix3 = cms.double(1)
+    process.mix.digitizers.pixel.thePixelChipEfficiency_BPix1 = cms.double(1)
+    process.mix.digitizers.pixel.thePixelChipEfficiency_BPix2 = cms.double(1)
+    process.mix.digitizers.pixel.thePixelChipEfficiency_BPix3 = cms.double(1)
+    process.mix.digitizers.pixel.thePixelChipEfficiency_BPix4 = cms.double(1)
+    process.mix.digitizers.pixel.thePixelChipEfficiency_FPix1 = cms.double(1)
+    process.mix.digitizers.pixel.thePixelChipEfficiency_FPix2 = cms.double(1)
+    process.mix.digitizers.pixel.thePixelChipEfficiency_FPix3 = cms.double(1)
+# endif 
 
 
 # use the test from SiTracker
@@ -296,7 +347,7 @@ process.c = cms.EDAnalyzer("PixClustersWithTracks",
 
 
 process.a0 = cms.EDAnalyzer("PixDigisTest",
-    Verbosity = cms.untracked.bool(False),
+                            Verbosity = cms.untracked.bool(True),
     phase1 = cms.untracked.bool(True),
 # after the digitizer 
     src = cms.InputTag("mix"),
@@ -344,7 +395,6 @@ process.TFileService = cms.Service("TFileService",
 
 
 # go through raw
-#process.p1 = cms.Path(process.pdigi_valid*process.SimL1Emulator*process.DigiToRaw*process.RawToDigi*process.reconstruction*process.TrackRefitter*process.pixRecHitsValid)
 process.p1 = cms.Path(process.b*process.pdigi_valid*process.a0*process.SimL1Emulator*process.DigiToRaw*process.r*process.RawToDigi*process.a*process.reconstruction*process.d*process.c)
 #process.p1 = cms.Path(process.b*process.pdigi_valid*process.a0*process.SimL1Emulator*process.DigiToRaw*process.r*process.RawToDigi*process.a)
 #process.p1 = cms.Path(process.b*process.pdigi_valid*process.a0)

@@ -1,14 +1,14 @@
 #include "CondFormats/SiPixelObjects/interface/SiPixelLorentzAngle.h"
 #include "CondFormats/DataRecord/interface/SiPixelLorentzAngleRcd.h"
 #include "CondFormats/DataRecord/interface/SiPixelLorentzAngleSimRcd.h"
-#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
+#include "Geometry/CommonTopologies/interface/PixelGeomDetUnit.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 #include "DataFormats/DetId/interface/DetId.h"
 
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h" //???
 
-#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
+//#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 //#include "DataFormats/SiPixelDetId/interface/PixelBarrelName.h"

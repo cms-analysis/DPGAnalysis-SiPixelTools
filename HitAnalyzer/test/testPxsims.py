@@ -1,13 +1,14 @@
 #
 import FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
-process = cms.Process("simTest",eras.Run2_2017)
+#process = cms.Process("simTest",eras.Run2_2017)
+process = cms.Process("simTest",eras.Run3)
 
 #process.load("Configuration.Geometry.GeometryIdeal_cff")
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
 process.load('Configuration.StandardSequences.MagneticField_cff')
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
 
 process.MessageLogger = cms.Service("MessageLogger",
     debugModules = cms.untracked.vstring('PixSimHitsTest'),
@@ -24,9 +25,10 @@ process.MessageLogger = cms.Service("MessageLogger",
 process.source = cms.Source("PoolSource",
     fileNames =  cms.untracked.vstring(
 #    'file:../scripts/sim.root'
+
+'/store/user/kotlinski/MC11/mu_pt100/simhits/simHits1.root'
+
 #    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu_phase1/pt100/simhits/simHits1.root'
-#    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu_phase1/pt100/simhits/simHits1_neutron1gev.root'
-    'file:/afs/cern.ch/work/d/dkotlins/public//MC/mu_phase1/pt100/simhits/simHits1_neutron10mev.root'
 
 #"/store/relval/CMSSW_10_4_0/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_103X_upgrade2018_design_v4-v1/20000/193FB1CE-333D-E540-995E-1BA38BA1CE3C.root"
 
@@ -44,8 +46,19 @@ process.TFileService = cms.Service("TFileService",
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
 # to use no All 
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '') # phase 1 WRONG in 92X
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '') # phase 1 OK
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '') # 
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '') # 
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_design', '') # 
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_realistic', '') # 
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2021_realistic', '') # for Run3
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2023_realistic', '') # for Run3
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2024_realistic', '') # for Run3
+#process.GlobalTag.globaltag = '111X_mcRun3_2021_design_v1' # OK
+#process.GlobalTag.globaltag = '111X_mcRun3_2021_realistic_v1' # OK
+#process.GlobalTag.globaltag = '111X_mcRun3_2023_realistic_v1'
+#process.GlobalTag.globaltag = '111X_mcRun3_2024_realistic_v1' # OK
+
+
 
 # use the test from SiTracker
 #process.analysis =  cms.EDAnalyzer("PixelSimHitsTest",
