@@ -24,7 +24,8 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2021_realistic', '')
 
 process.source = cms.Source("EmptyIOVSource",
     firstValue = cms.uint64(1),
@@ -53,22 +54,26 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
     connect = cms.string('sqlite_file:gain.db'),
     toPut = cms.VPSet(
         cms.PSet(
+            record = cms.string('SiPixelGainCalibrationRcd'),
+            tag = cms.string('SiPixelGainCalibration_phase1_mc_v3')
+        ), 
+        cms.PSet(
             record = cms.string('SiPixelGainCalibrationOfflineRcd'),
-            #tag = cms.string('SiPixelGainCalibration_phase1_ideal')
-            tag = cms.string('SiPixelGainCalibration_phase1_mc_v2')
+            #tag = cms.string('SiPixelGainCalibration_phase1_ideal_v3')
+            tag = cms.string('SiPixelGainCalibration_phase1_mc_v3')
         ), 
         cms.PSet(
             record = cms.string('SiPixelGainCalibrationForHLTRcd'),
             #tag = cms.string('SiPixelGainCalibration_hlt_phase1_ideal')
-            tag = cms.string('SiPixelGainCalibration_hlt_phase1_mc_v2')
+            tag = cms.string('SiPixelGainCalibration_hlt_phase1_mc_v3')
         ),
         cms.PSet(
             record = cms.string('SiPixelGainCalibrationOfflineSimRcd'),
-            tag = cms.string('SiPixelGainCalibrationSim_phase1_ideal')
+            tag = cms.string('SiPixelGainCalibrationSim_phase1_ideal_v3')
         ), 
         cms.PSet(
             record = cms.string('SiPixelGainCalibrationForHLTSimRcd'),
-            tag = cms.string('SiPixelGainCalibrationSim_hlt_phase1_ideal')
+            tag = cms.string('SiPixelGainCalibrationSim_hlt_phase1_ideal_v3')
         ))
 )
 
@@ -100,7 +105,54 @@ process.SiPixelGainsOfflineBuilder = cms.EDAnalyzer("SiPixelCondObjOfflineBuilde
     secondRocRowGainOffset = cms.double(0.0),
     secondRocRowPedOffset = cms.double(0.0),
     deadFraction = cms.double(0.0),
-    noisyFraction = cms.double(0.0)
+    noisyFraction = cms.double(0.0),
+#    ElectronsPerVcal = cms.untracked.double(1.),
+#    ElectronsPerVcal_Offset = cms.untracked.double(0.),
+#    ElectronsPerVcal_L1 = cms.untracked.double(1.),
+#    ElectronsPerVcal_L1_Offset = cms.untracked.double(0.)
+    ElectronsPerVcal = cms.untracked.double(47.),
+    ElectronsPerVcal_Offset = cms.untracked.double(-60.),
+    ElectronsPerVcal_L1 = cms.untracked.double(50.),
+    ElectronsPerVcal_L1_Offset = cms.untracked.double(-670.)
+)
+
+# Full payload 
+process.SiPixelGainsBuilder = cms.EDAnalyzer("SiPixelCondObjBuilder",
+    process.SiPixelGainCalibrationServiceParameters,
+    numberOfModules = cms.int32(2000),
+    appendMode = cms.untracked.bool(False),
+                                                    meanGain = cms.double(3.19),
+                                                    meanPed = cms.double(16.5),
+    # realistic (mc)
+                                                    rmsGain = cms.double(0.054),
+                                                    rmsPed = cms.double(5.4),
+    # ideal payload
+    #rmsGain = cms.double(0.0),
+    #rmsPed = cms.double(0.0),
+    # separate input for the FPIX. If not entered the default values are used.
+                                                    meanGainFPix = cms.untracked.double(3.19),
+                                                    meanPedFPix = cms.untracked.double(16.5),
+    # realistic (mc) 
+                                                    rmsGainFPix = cms.untracked.double(0.054),
+                                                    rmsPedFPix = cms.untracked.double(5.4),
+    # ideal 
+    #rmsGainFPix = cms.untracked.double(0.0),
+    #rmsPedFPix = cms.untracked.double(0.0),
+    record = cms.string('SiPixelGainCalibrationRcd'),
+    fromFile = cms.bool(False),
+    fileName = cms.string(''),
+    secondRocRowGainOffset = cms.double(0.0),
+    secondRocRowPedOffset = cms.double(0.0),
+    deadFraction = cms.double(0.0),
+    noisyFraction = cms.double(0.0),
+#    ElectronsPerVcal = cms.untracked.double(1.),
+#    ElectronsPerVcal_Offset = cms.untracked.double(0.),
+#    ElectronsPerVcal_L1 = cms.untracked.double(1.),
+#    ElectronsPerVcal_L1_Offset = cms.untracked.double(0.)
+    ElectronsPerVcal = cms.untracked.double(47.),
+    ElectronsPerVcal_Offset = cms.untracked.double(-60.),
+    ElectronsPerVcal_L1 = cms.untracked.double(50.),
+    ElectronsPerVcal_L1_Offset = cms.untracked.double(-670.)
 )
 
 # offline sim
@@ -154,7 +206,15 @@ process.SiPixelGainsForHLTBuilder = cms.EDAnalyzer("SiPixelCondObjForHLTBuilder"
     secondRocRowGainOffset = cms.double(0.0),
     secondRocRowPedOffset = cms.double(0.0),
     deadFraction = cms.double(0.0),
-    noisyFraction = cms.double(0.0)
+    noisyFraction = cms.double(0.0),
+#    ElectronsPerVcal = cms.untracked.double(1.),
+#    ElectronsPerVcal_Offset = cms.untracked.double(0.),
+#    ElectronsPerVcal_L1 = cms.untracked.double(1.),
+#    ElectronsPerVcal_L1_Offset = cms.untracked.double(0.)
+    ElectronsPerVcal = cms.untracked.double(47.),
+    ElectronsPerVcal_Offset = cms.untracked.double(-60.),
+    ElectronsPerVcal_L1 = cms.untracked.double(50.),
+    ElectronsPerVcal_L1_Offset = cms.untracked.double(-670.)
 )
 
 # hlt sim
@@ -182,6 +242,7 @@ process.SiPixelGainsForHLTSimBuilder = cms.EDAnalyzer("SiPixelCondObjForHLTBuild
 
 process.p = cms.Path(process.SiPixelGainsOfflineBuilder)
 #process.p = cms.Path(process.SiPixelGainsForHLTBuilder)
+#process.p = cms.Path(process.SiPixelGainsBuilder)
 #process.p = cms.Path(process.SiPixelGainsOfflineBuilder*process.SiPixelGainsForHLTBuilder)
 
 #process.p = cms.Path(process.SiPixelGainsOfflineSimBuilder)

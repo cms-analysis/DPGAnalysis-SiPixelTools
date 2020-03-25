@@ -33,6 +33,8 @@ SiPixelGainsDBReader::SiPixelGainsDBReader(const edm::ParameterSet& conf): conf_
   std::string payloadType = conf_.getParameter<std::string>("payloadType");
   PRINT       = conf_.getParameter<bool>("verbose");
   bool simRcd = conf_.getParameter<bool>("useSimRcd");
+  vcalIncluded = conf_.getUntrackedParameter<bool>("vcalIncluded",true);
+
   cout<<" type = "<<payloadType<<" sim/reco = "<< simRcd<<" PRINT = "<<PRINT <<endl;
 
   if (strcmp(payloadType.c_str(), "HLT") == 0) { // HLT
@@ -87,6 +89,9 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   // Get the list of DetId's
   std::vector<uint32_t> vdetId_ = SiPixelGainCalibrationService_->getDetIds();
 
+  // range of gain histos 
+  float maxGain = 10.;
+  if(vcalIncluded) maxGain=500.;
   //Create histograms
   _TH1F_Dead_sum =  fs->make<TH1F>("Summary_dead","Dead pixel fraction (0=dead, 1=alive)",vdetId_.size()+1,0,vdetId_.size()+1);
   _TH1F_Dead_all =  fs->make<TH1F>("DeadAll","Dead pixel fraction (0=dead, 1=alive)",50,0.,conf_.getUntrackedParameter<double>("maxRangeDeadPixHist",0.001));
@@ -97,14 +102,14 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   _TH1F_Pedestals_all = fs->make<TH1F>("PedestalsAll","all Pedestals",500,-250,250);
   _TH1F_Pedestals_bpix = fs->make<TH1F>("PedestalsBpix","bpix Pedestals",500,-250,250);
   _TH1F_Pedestals_fpix = fs->make<TH1F>("PedestalsFpix","fpix Pedestals",500,-250,250);
-  _TH1F_Gains_all = fs->make<TH1F>("GainsAll","all Gains",100,0,10);
-  _TH1F_Gains_bpix = fs->make<TH1F>("GainsBpix", "bpix Gains", 100, 0, 10);
-  _TH1F_Gains_fpix = fs->make<TH1F>("GainsFpix", "fpix Gains", 100, 0, 10);
+  _TH1F_Gains_all = fs->make<TH1F>("GainsAll","all Gains",500,0,maxGain);
+  _TH1F_Gains_bpix = fs->make<TH1F>("GainsBpix", "bpix Gains", 500, 0, maxGain);
+  _TH1F_Gains_fpix = fs->make<TH1F>("GainsFpix", "fpix Gains", 500, 0, maxGain);
 
-  GainsL1 = fs->make<TH1D>("GainsL1", "Gains L1", 100, 0, 10);
-  GainsL2 = fs->make<TH1D>("GainsL2", "Gains L2", 100, 0, 10);
-  GainsL3 = fs->make<TH1D>("GainsL3", "Gains L3", 100, 0, 10);
-  GainsL4 = fs->make<TH1D>("GainsL4", "Gains L4", 100, 0, 10);
+  GainsL1 = fs->make<TH1D>("GainsL1", "Gains L1", 500, 0, maxGain);
+  GainsL2 = fs->make<TH1D>("GainsL2", "Gains L2", 500, 0, maxGain);
+  GainsL3 = fs->make<TH1D>("GainsL3", "Gains L3", 500, 0, maxGain);
+  GainsL4 = fs->make<TH1D>("GainsL4", "Gains L4", 500, 0, maxGain);
   PedsL1 = fs->make<TH1D>("PedsL1", "Pedestals L1", 500, -250, 250);
   PedsL2 = fs->make<TH1D>("PedsL2", "Pedestals L2", 500, -250, 250);
   PedsL3 = fs->make<TH1D>("PedsL3", "Pedestals L3", 500, -250, 250);
@@ -120,11 +125,11 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   VcalL4 = fs->make<TH1D>("VcalL4", "VCAL@adc=0 L4", 500, -250, 250);
   VcalF  = fs->make<TH1D>("VcalF", "VCAL@adc=0 FPix", 500, -250, 250);
 
-  GainsSumL1 = fs->make<TH1D>("GainsSumL1", "Gains av L1", 100, 0, 10);
-  GainsSumL2 = fs->make<TH1D>("GainsSumL2", "Gains av L2", 100, 0, 10);
-  GainsSumL3 = fs->make<TH1D>("GainsSumL3", "Gains av L3", 100, 0, 10);
-  GainsSumL4 = fs->make<TH1D>("GainsSumL4", "Gains av L4", 100, 0, 10);
-  GainsSumF = fs->make<TH1D>("GainsSumF", "Gains av FPix", 100, 0, 10);
+  GainsSumL1 = fs->make<TH1D>("GainsSumL1", "Gains av L1", 500, 0,maxGain);
+  GainsSumL2 = fs->make<TH1D>("GainsSumL2", "Gains av L2", 500, 0,maxGain);
+  GainsSumL3 = fs->make<TH1D>("GainsSumL3", "Gains av L3", 500, 0,maxGain);
+  GainsSumL4 = fs->make<TH1D>("GainsSumL4", "Gains av L4", 500, 0,maxGain);
+  GainsSumF = fs->make<TH1D>("GainsSumF", "Gains av FPix", 500, 0,maxGain);
   PedsSumL1 = fs->make<TH1D>("PedsSumL1", "Pedestals av L1", 500, -250, 250);
   PedsSumL2 = fs->make<TH1D>("PedsSumL2", "Pedestals av L2", 500, -250, 250);
   PedsSumL3 = fs->make<TH1D>("PedsSumL3", "Pedestals av L3", 500, -250, 250);
@@ -159,7 +164,7 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     sprintf(name,"Pedestals_%d",detid);
     _TH1F_Pedestals_m[detid] = subDirPed.make<TH1F>(name,name,350,-100.,250.);    
     sprintf(name,"Gains_%d",detid);
-    _TH1F_Gains_m[detid] = subDirGain.make<TH1F>(name,name,100,0.,10.); 
+    _TH1F_Gains_m[detid] = subDirGain.make<TH1F>(name,name,100,0.,maxGain); 
 
     DetId detIdObject(detid);
     const PixelGeomDetUnit* _PixelGeomDetUnit = dynamic_cast<const PixelGeomDetUnit*>(tkgeom->idToDetUnit(DetId(detid)));
@@ -291,6 +296,7 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 	 if (detIdObject.subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap))
 	   _TH1F_Pedestals_fpix->Fill(ped);
 
+	 // This needs updating 
 	 // ADC = VCAL(LOW) * 1/gain + pedestal
 	 // vcal for adc=0
 	 float vcal = -1. * ped * gain;
@@ -347,12 +353,10 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
       else if(layer==4) { GainsSumL4->Fill(gains); PedsSumL4->Fill(peds);ADCSumL4->Fill(adc);VcalSumL4->Fill(vcal);}
     } else { GainsSumF->Fill(gains);  PedsSumF->Fill(peds); ADCSumF->Fill(adc); VcalSumF->Fill(vcal);}
       
-    if( ((layer==1) && (gains<3.4||gains>4.3||peds<45||peds>63)) ||
-        ((layer>1)  && (gains<2.3||gains>3.0||peds<3.||peds>23)) ) {
-
-      std::cout <<" DetId "<<detid<<" "<<name<<" Ped "<<peds<<" Gains "<<gains<<std::endl;	 
-
-    }
+    //if( ((layer==1) && (gains<3.4||gains>4.3||peds<45||peds>63)) ||
+    //  ((layer>1)  && (gains<2.3||gains>3.0||peds<3.||peds>23)) ) {
+    //std::cout <<" DetId "<<detid<<" "<<name<<" Ped "<<peds<<" Gains "<<gains<<std::endl;	 
+    //}
  
 
     gainmeanfortree = _TH1F_Gains_m[detid]->GetMean();
@@ -381,6 +385,15 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   std::cout<<"The Ped Mean is "<<_TH1F_Pedestals_all->GetMean()<<" with rms "<<_TH1F_Pedestals_all->GetRMS()<<std::endl;
   std::cout<<"         in BPIX "<<_TH1F_Pedestals_bpix->GetMean()<<" with rms "<<_TH1F_Pedestals_bpix->GetRMS()<<std::endl;
   std::cout<<"         in FPIX "<<_TH1F_Pedestals_fpix->GetMean()<<" with rms "<<_TH1F_Pedestals_fpix->GetRMS()<<std::endl;
+
+  std::cout<<"BPIX1 Gain= "<<GainsL1->GetMean()<<" rms "<<GainsL1->GetRMS()
+	   <<" Ped ="<<PedsL1->GetMean()<<" rms "<<PedsL1->GetRMS()<<std::endl;
+  std::cout<<"BPIX2 Gain= "<<GainsL2->GetMean()<<" rms "<<GainsL2->GetRMS()
+	   <<" Ped ="<<PedsL2->GetMean()<<" rms "<<PedsL2->GetRMS()<<std::endl;
+  std::cout<<"BPIX3 Gain= "<<GainsL2->GetMean()<<" rms "<<GainsL3->GetRMS()
+	   <<" Ped ="<<PedsL3->GetMean()<<" rms "<<PedsL3->GetRMS()<<std::endl;
+  std::cout<<"BPIX4 Gain= "<<GainsL2->GetMean()<<" rms "<<GainsL4->GetRMS()
+	   <<" Ped ="<<PedsL4->GetMean()<<" rms "<<PedsL4->GetRMS()<<std::endl;
     
 }
 

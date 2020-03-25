@@ -33,7 +33,7 @@ process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10)
+    input = cms.untracked.int32(1000)
 )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
@@ -72,12 +72,11 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2021_realistic', '
 
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
 
-#  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits1.root',
 '/store/user/kotlinski/MC11/mu_pt100/simhits/simHits1.root'
 #'/store/user/kotlinski/MC11/Run3/2021/Run3_2021_RECOSIM_1.root'
 #'/store/user/kotlinski/MC11/Run3/2023/Run3_2023_RECOSIM_1.root'
 #'/store/user/kotlinski/MC11/Run3/2024/Run3_2024_RECOSIM_1.root'
-
+#  'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits1.root',
 
 # new run3 MC
 #'/store/user/tsusa/TTbar/Run3_RECOSIM-110X_mcRun3_2021_realistic_Candidate_2019_10_31_12_09_00_th2000_3/TTbar/TTbar_RECOSIM_2021/191113_211045/0001/Run3_2021_RECOSIM_1099.root',
@@ -125,7 +124,6 @@ process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
 # allow for events to have the same event number 
 process.source.duplicateCheckMode=cms.untracked.string("noDuplicateCheck")
 
-
 process.MessageLogger = cms.Service("MessageLogger",
     debugModules = cms.untracked.vstring('pixRecHitsValid'),
     destinations = cms.untracked.vstring('cout'),
@@ -139,14 +137,11 @@ process.MessageLogger = cms.Service("MessageLogger",
 #    )
 )
 
-
-
 process.o1 = cms.OutputModule("PoolOutputModule",
       outputCommands = cms.untracked.vstring('drop *','keep *_*_*_TestValid'),
 #      outputCommands = cms.untracked.vstring('keep *_*_*_*'),
       fileName = cms.untracked.string('file:dummy.root')
 )
-
 
 # DB stuff 
 # GenError
@@ -225,8 +220,39 @@ if useDynIneffDB :
     ) # end process
     process.DynIneffprefer = cms.ESPrefer("PoolDBESSource","DBReaderDynIneff")
 # endif
-
-
+useGainDB = True
+if useGainDB :
+    process.DBReaderGain = cms.ESSource("PoolDBESSource",
+     DBParameters = cms.PSet(
+         messageLevel = cms.untracked.int32(0),
+         authenticationPath = cms.untracked.string('')
+     ),
+     toGet = cms.VPSet(
+       cms.PSet(
+        record = cms.string('SiPixelGainCalibrationOfflineRcd'),
+#        record = cms.string('SiPixelGainCalibrationRcd'),
+#        tag = cms.string('SiPixelGainCalibration_2018_v3') 
+#        tag = cms.string('SiPixelGainCalibration_2018_v2_offline') 
+#        tag = cms.string('SiPixelGainCalibration_2018_v1_offline') 
+#        tag = cms.string('SiPixelGainCalibration_2018_v7') 
+#        tag = cms.string('SiPixelGainCalibration_2018_v8') 
+#        tag = cms.string('SiPixelGainCalibration_2018_v9') 
+#        tag = cms.string('SiPixelGainCalibration_2018_v9_offline') 
+        tag = cms.string('SiPixelGainCalibration_phase1_mc_v2')
+#        tag = cms.string('SiPixelGainCalibration_phase1_mc_v3')
+ 	),
+       ),
+#     connect = cms.string('sqlite_file:../../PixelDBTools/test/gain_mc_v3.db')
+     connect = cms.string('sqlite_file:../../PixelDBTools/test/gain_mc_v2.db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2018_v1_offline.db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2018_v2_offline. db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2018_v3_offline.db')
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dkotlins/WORK/DB/Gains/SiPixelGainCalibration_2018_v9_offline.db')
+#     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
+#     connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
+    ) # end process
+    process.myprefer = cms.ESPrefer("PoolDBESSource","DBReaderGain")
+# end 
 
 
 #
@@ -235,6 +261,20 @@ process.g4SimHits.Generator.HepMCProductLabel = 'source'
 # for direct digis
 #process.siPixelClustersPreSplitting.src = 'simSiPixelDigis' # for V5, direct
 # process.siPixelClusters.src = 'mix'
+# modify clusterisation parameters 
+#process.siPixelClustersPreSplitting.VCaltoElectronGain = 1  # default
+#process.siPixelClustersPreSplitting.VCaltoElectronOffset = 0
+#process.siPixelClustersPreSplitting.VCaltoElectronGain_L1 = 1  # default
+#process.siPixelClustersPreSplitting.VCaltoElectronOffset_L1 = 0
+process.siPixelClustersPreSplitting.VCaltoElectronGain = 47  # default
+process.siPixelClustersPreSplitting.VCaltoElectronOffset = -60
+process.siPixelClustersPreSplitting.VCaltoElectronGain_L1 = 47  # default
+process.siPixelClustersPreSplitting.VCaltoElectronOffset_L1 = -60
+#process.siPixelClustersPreSplitting.SeedThreshold = 1000 # def
+#process.siPixelClustersPreSplitting.ChannelThreshold = 10 #def, must be bigger than 1
+#process.siPixelClustersPreSplitting.ClusterThreshold = 4000    # def, integer
+#process.siPixelClustersPreSplitting.ClusterThreshold_L1 = 2000 # def, integer
+
 # modify digitizer parameters
 #process.simSiPixelDigis.digitizers.pixel.ThresholdInElectrons_BPix = 3500.0 
 # use inefficiency from DB Gain calibration payload?
@@ -395,7 +435,9 @@ process.TFileService = cms.Service("TFileService",
 
 
 # go through raw
-process.p1 = cms.Path(process.b*process.pdigi_valid*process.a0*process.SimL1Emulator*process.DigiToRaw*process.r*process.RawToDigi*process.a*process.reconstruction*process.d*process.c)
+#process.p1 = cms.Path(process.b*process.pdigi_valid*process.a0*process.SimL1Emulator*process.DigiToRaw*process.r*process.RawToDigi*process.a*process.reconstruction*process.d*process.c)
+# do not histogram raw  and histogram digis only once
+process.p1 = cms.Path(process.b*process.pdigi_valid*process.SimL1Emulator*process.DigiToRaw*process.RawToDigi*process.a*process.reconstruction*process.d*process.c)
 #process.p1 = cms.Path(process.b*process.pdigi_valid*process.a0*process.SimL1Emulator*process.DigiToRaw*process.r*process.RawToDigi*process.a)
 #process.p1 = cms.Path(process.b*process.pdigi_valid*process.a0)
 

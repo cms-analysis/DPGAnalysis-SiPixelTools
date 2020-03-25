@@ -3,8 +3,8 @@
 # start from simhits, do trackerlocal, compare sim and rec-hits
 import FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
-process = cms.Process("TestValid",eras.Run2_2017) # default 
-#process = cms.Process("TestValid",eras.Run3)
+#process = cms.Process("myRawToReco",eras.Run2_2017) # default 
+process = cms.Process("myRawToReco",eras.Run3)
 
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
@@ -20,28 +20,17 @@ process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_design', '') # crashes 
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_realistic', '')
-
-#process.GlobalTag = GlobalTag(process.GlobalTag, '104X_mc2017_realistic_Candv1', '')
-
-#process.GlobalTag.globaltag = '103X_mc2017_design_IdealBS_v2' # mc 2017
-#process.GlobalTag.globaltag = '103X_mc2017_realistic_v2'      # mc 2017
-#process.GlobalTag.globaltag = '103X_upgrade2018_design_v4'    # mc 2018
-#process.GlobalTag.globaltag = '103X_upgrade2018_realistic_v8' # mc 2018
 
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_realistic', '')
 
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2021_realistic', '') # for Run3
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2021_realistic', '') # for Run3
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2023_realistic', '') # for Run3
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2024_realistic', '') # for Run3
 
-process.GlobalTag.globaltag = '106X_upgrade2018_realistic_v9'
+#process.GlobalTag.globaltag = '106X_upgrade2018_realistic_v9'
 #process.GlobalTag.globaltag = '110X_mcRun3_2021_realistic_v3'
 #process.GlobalTag.globaltag = '110X_mcRun3_2023_realistic_v3'
 #process.GlobalTag.globaltag = '110X_mcRun3_2024_realistic_v3'
@@ -51,11 +40,11 @@ process.GlobalTag.globaltag = '106X_upgrade2018_realistic_v9'
 
 #
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(-1)
 )
 
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
-# '/store/user/kotlinski/MC/mu_pt100/raw/raw2_eta0p1.root',
+ '/store/user/kotlinski/MC11/mu_pt100/raw/raw1.root',
 
 # Run3 MC
 #"/store/mc/Run3Summer19DR/TTbar_14TeV_TuneCP5_Pythia8/GEN-SIM-DIGI-RAW/106X_mcRun3_2021_realistic_v3-v2/130000/FF1B6F7B-55F6-2A42-A85B-654E59172A1E.root",
@@ -64,7 +53,7 @@ process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
 #"/store/mc/Run3Summer19DRPremix/SingleNeutrino/GEN-SIM-RECO/2021ScenarioNZSRECO_106X_mcRun3_2021_realistic_v3-v2/270000/FF710887-FA64-F348-B870-C1A578545138.root",
 
 # 2018
-"/store/relval/CMSSW_10_6_1_patch3/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_106X_upgrade2018_realistic_v6-v1/20000/FE7FDB90-CC19-244B-B7CE-DDEB9500B5CB.root",
+#"/store/relval/CMSSW_10_6_1_patch3/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_106X_upgrade2018_realistic_v6-v1/20000/FE7FDB90-CC19-244B-B7CE-DDEB9500B5CB.root",
 #"/store/relval/CMSSW_10_6_1_patch3/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_106X_upgrade2018_realistic_v6-v1/20000/FE65C915-9009-C742-B10C-95A57202AE41.root",
 #"/store/relval/CMSSW_10_6_1_patch3/RelValTTbar_13/GEN-SIM-RECO/PU25ns_106X_upgrade2018_realistic_v6-v1/20000/FF0A1ADF-8ECA-514A-A177-2723BCCABDE0.root",
 #" /store/relval/CMSSW_10_6_1_patch3/RelValTTbar_13/GEN-SIM-RECO/PU25ns_106X_upgrade2018_realistic_v6-v1/20000/FBD352C0-28D6-9049-B3E9-C0DFF01658C8.root",
@@ -153,7 +142,7 @@ if useLocalLA :
 # endif
 
 # Gain 
-useLocalGain = False
+useLocalGain = True
 if useLocalGain :
   process.GainsReader = cms.ESSource("PoolDBESSource",
     DBParameters = cms.PSet(
@@ -164,12 +153,11 @@ if useLocalGain :
       cms.PSet(
         record = cms.string('SiPixelGainCalibrationOfflineRcd'),
         #tag = cms.string('SiPixelGainCalibration_phase1_ideal_v2')
-        tag = cms.string('SiPixelGainCalibration_phase1_mc_v2')
-        #tag = cms.string('SiPixelGainCalibration_phase1_mc_v3') # to test gains 
+        #tag = cms.string('SiPixelGainCalibration_phase1_mc_v2')
+        tag = cms.string('SiPixelGainCalibration_phase1_mc_v3') # gains with vcal
     )),
-    #connect = cms.string('sqlite_file:/afs/cern.ch/work/d/dkotlins/public/DB/Gains/MC/SiPixelGainCalibration_phase1_ideal_v2.db')
-    connect = cms.string('sqlite_file:/afs/cern.ch/work/d/dkotlins/public/DB/Gains/MC/SiPixelGainCalibration_phase1_mc_v2.db')
-
+#    connect = cms.string('sqlite_file:/t3home/kotlinski/CMSSW/CMSSW_11_1_0_pre4/src/DPGAnalysis-SiPixelTools/PixelDBTools/test/gain_mc_v3.db')
+#    connect = cms.string('sqlite_file:/t3home/kotlinski/CMSSW/CMSSW_11_1_0_pre4/src/DPGAnalysis-SiPixelTools/PixelDBTools/test/gain_mc_v2.db')
 #    connect = cms.string('sqlite_file:/afs//cern.ch/work/d/dkotlins/public/DB/Gains/MC/gain_ped_5p4.db')
 #    connect = cms.string('sqlite_file:/afs//cern.ch/work/d/dkotlins/public/DB/Gains/MC/gain_ped_10.db')
 #    connect = cms.string('sqlite_file:/afs//cern.ch/work/d/dkotlins/public/DB/Gains/MC/gain_ped_15.db')
@@ -181,7 +169,8 @@ if useLocalGain :
 #    connect = cms.string('sqlite_file:/afs//cern.ch/work/d/dkotlins/public/DB/Gains/MC/gain_slope_0p32.db')
 #    connect = cms.string('sqlite_file:/afs//cern.ch/work/d/dkotlins/public/DB/Gains/MC/gain_slope_0p64.db')
 #    connect = cms.string('sqlite_file:/afs//cern.ch/work/d/dkotlins/public/DB/Gains/MC/gain_slope_0p96.db')
-#     connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
+     connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
+#     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
   ) # end process
   process.Gainprefer = cms.ESPrefer("PoolDBESSource","GainsReader")
 # end if
@@ -211,10 +200,10 @@ if useLocalGenErr :
 # clus , label of digis 
 #process.siPixelClustersPreSplitting.src = 'simSiPixelDigis' <-- not needed 
 
-#process.siPixelClustersPreSplitting.VCaltoElectronGain = 94  # 47 default
-#process.siPixelClustersPreSplitting.VCaltoElectronOffset = -120 # -60 default 
-#process.siPixelClustersPreSplitting.VCaltoElectronGain_L1 = 100  # 50 default
-#process.siPixelClustersPreSplitting.VCaltoElectronOffset_L1 = -1340 # -670 default 
+#process.siPixelClustersPreSplitting.VCaltoElectronGain = 1  # 47 default
+#process.siPixelClustersPreSplitting.VCaltoElectronOffset = 0 # -60 default 
+#process.siPixelClustersPreSplitting.VCaltoElectronGain_L1 = 1  # 50 default
+#process.siPixelClustersPreSplitting.VCaltoElectronOffset_L1 = 0 # -670 default 
 
 # do 1000,1500,2000,2500,3000,3500,4000,5000
 #process.siPixelClustersPreSplitting.SeedThreshold = 3500 #1  def=1000
@@ -316,7 +305,7 @@ process.TFileService = cms.Service("TFileService",
     fileName = cms.string('rawtoreco.root')
 )
 
-# recoinbstruct all 
+# reconstruct all 
 process.p1 = cms.Path(process.RawToDigi*process.a*process.reconstruction*process.d*process.c)
 #process.p1 = cms.Path(process.r*process.RawToDigi*process.a*process.reconstruction*process.d*process.c)
 

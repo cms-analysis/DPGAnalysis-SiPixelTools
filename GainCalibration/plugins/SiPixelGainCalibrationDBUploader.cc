@@ -341,6 +341,21 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
 	float ped=peds[jrow];
 	float gain=gains[jrow];
 	
+	// This is probbaly a good place to insert the vcal calibration, 
+	// someting like this:
+	// include the vcal claibration already here 
+	//double newGain = 1, newPed  = 0.;
+	//if(layer==1) { 
+	//newGain = gain * electronsPerVcal_L1_;
+	//newPed  = ped  - (electronsPerVcal_L1_Offset_/newGain);
+	//} else {
+	//newGain = gain * electronsPerVcal_;
+	//newPed  = ped  - (electronsPerVcal_Offset_/newGain);
+	//}
+	//ped = newPed;
+	//gain = newGain;
+
+
 	if( ped>pedlow_ && gain>gainlow_ && ped<pedhi_ && gain<gainhi_ ){
 	  theGainCalibrationDbInput_->setData(ped, gain, theSiPixelGainCalibrationPerPixel);
 	  theGainCalibrationDbInputOffline_->setDataPedestal(ped, theSiPixelGainCalibrationGainPerColPedPerPixel);
