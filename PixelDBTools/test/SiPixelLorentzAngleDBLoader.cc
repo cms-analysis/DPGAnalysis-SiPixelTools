@@ -19,7 +19,8 @@
 #include "DataFormats/GeometryCommonDetAlgo/interface/MeasurementError.h"
 #include "DataFormats/GeometrySurface/interface/GloballyPositioned.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
-
+#include "DataFormats/SiPixelDetId/interface/PixelBarrelName.h"
+#include "DataFormats/SiPixelDetId/interface/PixelEndcapName.h"
 
 #include "SiPixelLorentzAngleDBLoader.h"
 
@@ -144,17 +145,27 @@ void SiPixelLorentzAngleDBLoader::analyze(const edm::Event& e, const edm::EventS
 	      // fill fpix values for LA (for phase2 fpix & epix)
 	    } else if(detid.subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap)) {
 	      
-	       int disk=tTopo->pxfDisk(detid); //1,2,3
-	       int blade=tTopo->pxfBlade(detid); //1-24
-	       int module=tTopo->pxfModule(detid); //
-	       int sidef=tTopo->pxfSide(detid); //size=1 for -z, 2 for +z
-	       int panel=tTopo->pxfPanel(detid); //panel=1
-	       int ring = 0;
+	      //int disk=tTopo->pxfDisk(detid); //1,2,3
+	      //int blade=tTopo->pxfBlade(detid); //1-56
+	       //int module=tTopo->pxfModule(detid); //
+	       //int sidef=tTopo->pxfSide(detid); //size=1 for -z, 2 for +z
+	       //int panel=tTopo->pxfPanel(detid); //panel=1
 
-	      // for phase2: ring=blade, panel==1 
+	       // For fpix we also need to find the ring number which is not available from topology
+
+	       // Convert to online 
+	       PixelEndcapName pen(detid,tTopo,true); // use det-id phaseq
+	       //PixelEndcapName::HalfCylinder sh = pen.halfCylinder(); //enum
+	       //string nameF = pen.name();
+	       int disk = pen.diskName();
+	       int blade = pen.bladeName();
+	       int panel = pen.pannelName();
+	       //int plaquetteName = pen.plaquetteName();
+	       int ring = pen.ringName();
+
 	      cout << " pixel endcap:" 
-		   <<" side="<<side<<"/"<<sidef<<" disk=" <<disk<<" blade(ring)="<<blade
-		   <<" panel="<< panel<< " module=" << module << "  rawId=" << rawId;
+		   <<" side="<<side<<" disk=" <<disk<<" blade ="<<blade
+		   <<" pannel="<< panel<< " ring=" << ring << "  rawId=" << rawId;
 	      
 	      // use a commmon value (e.g. for MC)
 	      if(fPixLorentzAnglePerTesla_ != -9999.) {  // use common value for all 
@@ -190,9 +201,9 @@ void SiPixelLorentzAngleDBLoader::analyze(const edm::Event& e, const edm::EventS
 		  if (it->exists("ring") )   if (it->getParameter<int>("ring")    != ring)   continue;
 		  if (it->exists("blade"))   if (it->getParameter<int>("blade")   != blade)  continue;
 		  if (it->exists("panel"))   if (it->getParameter<int>("panel")   != panel)  continue;
-		  if (it->exists("plq"))     if (it->getParameter<int>("plq")     != module) continue;
+		  //if (it->exists("plq"))     if (it->getParameter<int>("plq")     != module) continue;
 		  if (it->exists("HVgroup")) if (it->getParameter<int>("HVgroup") != 
-						 HVgroup(panel,module))    continue;
+						 HVgroup(panel,ring))    continue;
 		  if (!found) {
 		    float lorentzangle = (float)it->getParameter<double>("angle");
 		    LorentzAngle->putLorentzAngle(detid.rawId(),lorentzangle);

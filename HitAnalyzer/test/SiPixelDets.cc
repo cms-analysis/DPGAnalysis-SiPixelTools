@@ -30,8 +30,6 @@
 
 #include "SiPixelDets.h"
 
-#define NEW_NAMES
-//#define OLD_NAMES
 //#define CHECK_ORIENT
 
 using namespace std;
@@ -91,9 +89,7 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
   edm::ESHandle<TrackerTopology> tTopo;
   //es.get<IdealGeometryRecord>().get(tTopo);
   es.get<TrackerTopologyRcd>().get(tTopo);
-#ifdef NEW_NAMES
   const TrackerTopology* tt = tTopo.product();
-#endif
 
   // Mag field 
   edm::ESHandle<MagneticField> magfield;
@@ -155,9 +151,6 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       unsigned int rawId = detId.rawId();
       if(PRINT) 
 	cout<<"Det raw: "<<rawId<<" "<<detId.null()<<" "<<detId.det()<<" "<<detId.subdetId()<<endl;
-
-
-#ifdef NEW_NAMES 
       //cout<<" print det "<< tTopo->print(detId) <<endl; // does not seem to work in 752
 
      // Use new indecies 
@@ -242,73 +235,6 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
 	if(det2.rawId() != det.rawId()) cout<<" wrong rawid "<<endl;
       }
 
-#endif // NEW_ANMES
-	
-#ifdef OLD_NAMES
-      PXBDetId pxdetid = PXBDetId(detId);
-      if(PRINT) cout << "barrel:" << "  layer=" << pxdetid.layer() << "  ladder=" << pxdetid.ladder() 
-		     << "  module=" << pxdetid.module() << " "<<rawId<<endl;
-      // OLD indices 
-      // Barell layer = 1,2,3
-      unsigned int layerC1 = pxdetid.layer();
-      // Barrel ladder id 1-20,32,44.
-      unsigned int ladderC1 = pxdetid.ladder();
-      // Barrel Z-index=1,8
-      unsigned int zindex1 = pxdetid.module();
-
-      if(PRINT) cout<<" Barrel layer, ladder, module "
-		    <<layerC1<<" "<<ladderC1<<" "<<zindex1<<endl;
-
-
-      // Convert to online 
-      PixelBarrelName pbn1(detId); // use det-id
-      //PixelBarrelName pbn(pxdetid); // or pixel det id 
-      PixelBarrelName::Shell sh1 = pbn1.shell(); //enum
-      int sector1 = pbn1.sectorName();
-      int ladder1 = pbn1.ladderName();
-      int layer1  = pbn1.layerName();
-      int module1 = pbn1.moduleName();
-      bool half1  = pbn1.isHalfModule();
-      string name1= pbn1.name();
-      PXBDetId pxbdet1=pbn1.getDetId();
-
-      PixelModuleName::ModuleType moduleType1 = pbn1.moduleType();
-
-      // Sometimes we also use the additional sign convention 
-      int ladderSigned1=ladder1;
-      int moduleSigned1=module1;
-      // Shell { mO = 1, mI = 2 , pO =3 , pI =4 };
-      int shell1 = int(sh1);
-      // change the module sign for z<0
-      if(shell1==1 || shell1==2) moduleSigned1 = -module1;
-      // change ladeer sign for Outer )x<0)
-      if(shell1==1 || shell1==3) ladderSigned1 = -ladder1;
-
-      if(PRINT) cout<<" shell1 "<<sh1<<"("<<shell1<<") "<<sector1<<" "<<layer1<<" "
-		    <<ladderSigned1<<" "<<moduleSigned1
-		    <<" "<<half1<<" "<<name1<<" "<<moduleType1<<" "<<pxbdet1.rawId()<<endl;
-
-#endif // OLD_NAMES
-
-
-      // Compare OLD with NEW if needed 
-#if defined(OLD_NAMES) && defined(NEW_NAMES) 
-      if(layerC!=layerC1) cout<<" wrong layer "<<endl;
-      if(ladderC!=ladderC1) cout<<" wrong ladder "<<endl;
-      if(zindex!=zindex1) cout<<" wrong module "<<endl;
-
-      if(name !=name1)  cout<<" wrong  name "<<endl;
-      if(shell !=shell1)  cout<<" wrong shell "<<endl;
-      if(sector !=sector1)  cout<<" wrong sector "<<endl;
-      if(layer !=layer1)  cout<<" wrong layer "<<endl;
-      if(ladder!=ladder1) cout<<" wrong ladder "<<endl;
-      if(module!=module1) cout<<" wrong module "<<endl;
-      if(pxbdet.rawId() != pxbdet1.rawId()) cout<<" wrong rawid "<<endl;
-      if(pxbdet.rawId() != det.rawId()) cout<<" wrong rawid "<<endl;
-      if(rawId != det.rawId()) cout<<" wrong rawid "<<endl;
-#endif //NEW & OLD_NAMES
-
-
 #ifdef CHECK_ORIENT
     cout<<"     0-0:  "<<lp1.x()<<" "<<lp1.y()<<" "
 	<<gp1.x()<<" "<<gp1.y()<<" "<<gp1.z()<<" "
@@ -333,19 +259,16 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
       if(PRINT) 
 	cout<<"Det: "<<rawId<<" "<<detId.null()<<" "<<detId.det()<<" "<<detId.subdetId()<<endl;
 
-
-#ifdef NEW_NAMES
       // new ids 
       int disk=tTopo->pxfDisk(detId);   //1,2,3
-      int blade=tTopo->pxfBlade(detId); //1-24
-      int plaq=tTopo->pxfModule(detId); //
+      int blade=tTopo->pxfBlade(detId); // 1-56, goes over all blades for ring 1 and ring2 in sequence
+      int plaq=tTopo->pxfModule(detId); // always 1 for phase1
       int side=tTopo->pxfSide(detId);   //sizd=1 for -z, 2 for +z
-      int panel=tTopo->pxfPanel(detId); //panel=1
+      int panel=tTopo->pxfPanel(detId); //panel=1,2, the side of the blade
 
       if(PRINT) cout<<"endcap, side="<<side<<" disk="<<disk<<", blade="<<blade
-		    <<", panel="<<panel<<", plaq="<<plaq<<endl;
+		    <<", panel="<<panel<<endl;
  
-
       // Convert to online 
       PixelEndcapName pen(detId,tt,phase1_); // use det-id phase0
       //PixelEndcapName pen(detId,tt,false); // use det-id phase0
@@ -402,47 +325,6 @@ void SiPixelDets::analyze(const edm::Event& e, const edm::EventSetup& es) {
 	if(moduleType != moduleType2) cout<<" wrong module type "<<endl;
 	if(det.rawId() != det2.rawId()) cout<<" wrong rawid "<<endl;
       }
-
-#endif // NEW_NAMES 
-
-#ifdef OLD_NAMES
-      // old ids, does not work for phase1
-      if(!phase1_) {
-	PXFDetId pxdetid = PXFDetId(detId);
-	if(PRINT) 
-	  cout << "endcap:" << " side=" << pxdetid.side() << "  disk=" << pxdetid.disk() 
-	       << "  blade=" << pxdetid.blade() << "  panel=" << pxdetid.panel() 
-	       << "  plaq=" << pxdetid.module() << " "<<rawId<<endl;
-      }
-
-      // Convert to online 
-      PixelEndcapName pen1(detId); // use det-id
-      PixelEndcapName::HalfCylinder sh1 = pen1.halfCylinder(); //enum
-      string nameF1 = pen1.name();
-      int diskName1 = pen1.diskName();
-      int bladeName1 = pen1.bladeName();
-      int pannelName1 = pen1.pannelName();
-      int plaquetteName1 = pen1.plaquetteName();
-      PXFDetId pxfdet1=pen1.getDetId();
-      //PixelEndcapName::HalfCylinder part1 = pen1.halfCylinder();
-      PixelModuleName::ModuleType moduleType1 = pen1.moduleType();
-      if(PRINT) 
-	cout<<nameF1<<" "<<diskName1<<" "<<bladeName1<<" "<<pannelName1<<" "
-	    <<plaquetteName1<<" "<<moduleType1<<" "
-	    <<pxfdet1.rawId()<<" "<<sh1<<endl;
-#endif // OLD_NAMES
-
-      // Compare OLD with NEW if needed 
-#if defined(OLD_NAMES) && defined(NEW_NAMES) 
-      if(nameF != nameF1)  cout<<" wrong name "<<endl;
-      if(sh !=sh1)  cout<<" wrong shell "<<endl;
-      if(diskName  != diskName1)  cout<<" wrong disk "<<endl;
-      if(bladeName != bladeName1) cout<<" wrong blade "<<endl;
-      if(pannelName != pannelName1) cout<<" wrong panel "<<endl;
-      if(pxfdet.rawId() != pxfdet1.rawId()) cout<<" wrong rawid "<<endl;
-      if(pxfdet.rawId() != det.rawId()) cout<<" wrong rawid "<<endl;
-      if(rawId != det.rawId()) cout<<" wrong rawid "<<endl;
-#endif
 
 #ifdef CHECK_ORIENT
       cout<<"     0-0:  "<<lp1.x()<<" "<<lp1.y()<<" "<<gp1.perp()<<" "<<gp1.phi()<<" "<<gp1.z()
