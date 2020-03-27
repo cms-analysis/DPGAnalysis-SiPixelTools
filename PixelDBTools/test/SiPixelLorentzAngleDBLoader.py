@@ -1,11 +1,10 @@
 #
 import FWCore.ParameterSet.Config as cms
-process = cms.Process("SiPixelLorentzAngleLoader")
+from Configuration.StandardSequences.Eras import eras
+#process = cms.Process("SiPixelLorentzAngleLoader",eras.Run2_2017)
+process = cms.Process("SiPixelLorentzAngleLoader",eras.Run3)
 
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
-#process.load('Configuration.Geometry.GeometryExtended2017Reco_cff')
-#process.load('Configuration.Geometry.GeometryExtended2017_cff')
-
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -14,8 +13,15 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, '75X_upgrade2017_design_v4', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_design', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_realistic', '')
+
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2021_design', '') # for Run3
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2021_realistic', '') # for Run3
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2023_realistic', '') # for Run3
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2024_realistic', '') # for Run3
+
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.destinations = cms.untracked.vstring("cout")
@@ -47,18 +53,20 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
         enableReadOnlySessionOnUpdateConnection = cms.untracked.bool(False)
     ),
     timetype = cms.untracked.string('runnumber'),
+#    connect = cms.string("sqlite_file:SiPixelLorentzAngle_phase1_2017_v5.db"),
+#    connect = cms.string("sqlite_file:SiPixelLorentzAngle_phase1_mc_v1.db"),
 #    connect = cms.string("sqlite_file:SiPixelLorentzAngle_phase1_mc_v1.db"),
 #    connect = cms.string("sqlite_file:SiPixelLorentzAngle_phase1_mc_v2.db"),
-    connect = cms.string("sqlite_file:SiPixelLorentzAngle_phase1_2017_v5.db"),
 #    connect = cms.string("sqlite_file:SiPixelLorentzAngleSim_phase1_mc_v1.db"),
 #    connect = cms.string("sqlite_file:SiPixelLorentzAngleSim_phase1_mc_v2.db"),
-#    connect = cms.string("sqlite_file:SiPixelLorentzAngleSim_phase1_2017_v1_TESTONLY.db"),
+    connect = cms.string("sqlite_file:SiPixelLorentzAngle_phase1_mc_test.db"),
     toPut = cms.VPSet(
         cms.PSet(
             record = cms.string('SiPixelLorentzAngleRcd'),
+            tag = cms.string('SiPixelLorentzAngle_phase1_mc_test')
 #            tag = cms.string('SiPixelLorentzAngle_phase1_mc_v1')
 #            tag = cms.string('SiPixelLorentzAngle_phase1_mc_v2')
-            tag = cms.string('SiPixelLorentzAngle_phase1_2017_v5')
+#            tag = cms.string('SiPixelLorentzAngle_phase1_2017_v5')
 #	     tag = cms.string("SiPixelLorentzAngle_fromAlignment_v01_mc")	
 #	     tag = cms.string("SiPixelLorentzAngle_fromAlignment_v01")	
 #	     tag = cms.string("SiPixelLorentzAngle_forWidth_v01_mc")
@@ -68,7 +76,6 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
 #            record = cms.string('SiPixelLorentzAngleSimRcd'),
 #            tag = cms.string('SiPixelLorentzAngleSim_phase1_mc_v1')
 #            tag = cms.string('SiPixelLorentzAngleSim_phase1_mc_v2')
-#            tag = cms.string('SiPixelLorentzAngleSim_phase1_2017_v1_TESTONLY')
 #        ),
        )
 )
