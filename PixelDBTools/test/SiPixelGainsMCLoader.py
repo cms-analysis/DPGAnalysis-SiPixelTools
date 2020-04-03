@@ -1,6 +1,5 @@
 import FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
-#process = cms.Process("SiPixelGainsBuilder")
 process = cms.Process("SiPixelGainsBuilder",eras.Run3)
 
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
@@ -78,7 +77,8 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
 )
 
 # offline reco , can be ideal or mc
-process.SiPixelGainsOfflineBuilder = cms.EDAnalyzer("SiPixelCondObjOfflineBuilder",
+#process.SiPixelGainsOfflineBuilder = cms.EDAnalyzer("SiPixelCondObjOfflineBuilder",
+process.SiPixelGainsOfflineBuilder = cms.EDAnalyzer("SiPixelMCGainsOfflineBuilder",
     process.SiPixelGainCalibrationServiceParameters,
     numberOfModules = cms.int32(2000),
     appendMode = cms.untracked.bool(False),
@@ -117,7 +117,8 @@ process.SiPixelGainsOfflineBuilder = cms.EDAnalyzer("SiPixelCondObjOfflineBuilde
 )
 
 # Full payload 
-process.SiPixelGainsBuilder = cms.EDAnalyzer("SiPixelCondObjBuilder",
+#process.SiPixelGainsBuilder = cms.EDAnalyzer("SiPixelCondObjBuilder",
+process.SiPixelGainsBuilder = cms.EDAnalyzer("SiPixelMCGainsFullBuilder",
     process.SiPixelGainCalibrationServiceParameters,
     numberOfModules = cms.int32(2000),
     appendMode = cms.untracked.bool(False),
@@ -156,7 +157,8 @@ process.SiPixelGainsBuilder = cms.EDAnalyzer("SiPixelCondObjBuilder",
 )
 
 # offline sim
-process.SiPixelGainsOfflineSimBuilder = cms.EDAnalyzer("SiPixelCondObjOfflineBuilder",
+#process.SiPixelGainsOfflineSimBuilder = cms.EDAnalyzer("SiPixelCondObjOfflineBuilder",
+process.SiPixelGainsOfflineSimBuilder = cms.EDAnalyzer("SiPixelMCGainsOfflineBuilder",
     process.SiPixelGainCalibrationServiceParameters,
     numberOfModules = cms.int32(2000),
     appendMode = cms.untracked.bool(False),
@@ -179,7 +181,8 @@ process.SiPixelGainsOfflineSimBuilder = cms.EDAnalyzer("SiPixelCondObjOfflineBui
 )
 
 # hlt reco, can be ideal or not (mc)
-process.SiPixelGainsForHLTBuilder = cms.EDAnalyzer("SiPixelCondObjForHLTBuilder",
+#process.SiPixelGainsForHLTBuilder = cms.EDAnalyzer("SiPixelCondObjForHLTBuilder",
+process.SiPixelGainsForHLTBuilder = cms.EDAnalyzer("SiPixelMCGainsForHLTBuilder",
     process.SiPixelGainCalibrationServiceParameters,
     numberOfModules = cms.int32(2000),
     appendMode = cms.untracked.bool(False),
@@ -218,7 +221,8 @@ process.SiPixelGainsForHLTBuilder = cms.EDAnalyzer("SiPixelCondObjForHLTBuilder"
 )
 
 # hlt sim
-process.SiPixelGainsForHLTSimBuilder = cms.EDAnalyzer("SiPixelCondObjForHLTBuilder",
+#process.SiPixelGainsForHLTSimBuilder = cms.EDAnalyzer("SiPixelCondObjForHLTBuilder",
+process.SiPixelGainsForHLTSimBuilder = cms.EDAnalyzer("SiPixelMCGainsForHLTBuilder",
     process.SiPixelGainCalibrationServiceParameters,
     numberOfModules = cms.int32(2000),
     appendMode = cms.untracked.bool(False),
@@ -240,9 +244,9 @@ process.SiPixelGainsForHLTSimBuilder = cms.EDAnalyzer("SiPixelCondObjForHLTBuild
     noisyFraction = cms.double(0.0)                                                      
 )
 
-process.p = cms.Path(process.SiPixelGainsOfflineBuilder)
+#process.p = cms.Path(process.SiPixelGainsOfflineBuilder)
 #process.p = cms.Path(process.SiPixelGainsForHLTBuilder)
-#process.p = cms.Path(process.SiPixelGainsBuilder)
+process.p = cms.Path(process.SiPixelGainsBuilder)
 #process.p = cms.Path(process.SiPixelGainsOfflineBuilder*process.SiPixelGainsForHLTBuilder)
 
 #process.p = cms.Path(process.SiPixelGainsOfflineSimBuilder)

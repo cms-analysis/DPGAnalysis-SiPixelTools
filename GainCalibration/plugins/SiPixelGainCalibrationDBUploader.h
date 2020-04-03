@@ -95,5 +95,5 @@ class SiPixelGainCalibrationDBUploader : public edm::EDAnalyzer {
   double badchi2_;
   size_t nmaxcols;
   size_t nmaxrows;
-  
+  int countModulesFound;
 };

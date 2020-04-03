@@ -95,19 +95,19 @@ if useLocalDB:
     ),
     toGet = cms.VPSet(
       cms.PSet(
-#      record = cms.string('SiPixelGainCalibrationOfflineRcd'),
-       record = cms.string('SiPixelGainCalibrationForHLTRcd'),
+      record = cms.string('SiPixelGainCalibrationOfflineRcd'),
+#       record = cms.string('SiPixelGainCalibrationForHLTRcd'),
 #       record = cms.string('SiPixelGainCalibrationRcd'),
 #       record = cms.string('SiPixelGainCalibrationOfflineSimRcd'),  
 #       record = cms.string('SiPixelGainCalibrationForHLTSimRcd'),  
 
 #       Phase1-MC
-#       tag = cms.string('SiPixelGainCalibration_phase1_mc_v3')
+       tag = cms.string('SiPixelGainCalibration_phase1_mc_v3')
 #       tag = cms.string('SiPixelGainCalibration_phase1_mc_v2')
 #       tag = cms.string('SiPixelGainCalibration_phase1_ideal_v2')
 #       tag = cms.string('SiPixelGainCalibrationSim_phase1_ideal_v2')
 # hlt
-       tag = cms.string('SiPixelGainCalibration_hlt_phase1_mc_v3')
+#       tag = cms.string('SiPixelGainCalibration_hlt_phase1_mc_v3')
 #
 #       tag = cms.string('SiPixelGainCalibration_r203368_offline')
 #       tag = cms.string('SiPixelGainCalibration_r197749_offline')
@@ -147,13 +147,14 @@ if useLocalDB:
 #       tag = cms.string('SiPixelGainCalibration_2018_v9_offline') # tag for v9 
     )),
 #     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
-     connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
+#     connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
 #     connect = cms.string('sqlite_file:/afs//cern.ch/work/d/dkotlins/public/DB/Gains/MC/SiPixelGainCalibration_phase1_mc_v2.db')
 #     connect = cms.string('sqlite_file:/afs//cern.ch/work/d/dkotlins/public/DB/Gains/MC/SiPixelGainCalibration_phase1_ideal_v2.db')
 #     connect = cms.string('sqlite_file:/afs//cern.ch/work/d/dkotlins/public/DB/Gains/MC/SiPixelGainCalibrationSim_phase1_ideal_v2.db')
 #     connect = cms.string('sqlite_file:/afs//cern.ch/work/d/dkotlins/public/DB/Gains/MC/gain_slope_0p15.db')
 #     connect = cms.string('sqlite_file:gain_mc_v2.db')
-#     connect = cms.string('sqlite_file:gain_mc_v3.db')
+     connect = cms.string('sqlite_file:gain_mc_v3.db')
+#     connect = cms.string('sqlite_file:gain_mc_v3_old.db')
 #     connect = cms.string('sqlite_file:gain_hlt_mc_v3.db')
 #     connect = cms.string('sqlite_file:gain_full_mc_v3.db')
 #   2018
@@ -179,9 +180,9 @@ if useLocalDB:
 
 process.SiPixelGainsDBReader = cms.EDAnalyzer("SiPixelGainsDBReader",
     process.SiPixelGainCalibrationServiceParameters,
-    payloadType = cms.string('HLT'),
+#    payloadType = cms.string('HLT'),
 #    payloadType = cms.string('Full'),
-#    payloadType = cms.string('Offline'),
+    payloadType = cms.string('Offline'),
     useSimRcd = cms.bool(False),
 #    useSimRcd = cms.bool(True),
     verbose = cms.bool(False),

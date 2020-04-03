@@ -26,9 +26,10 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_realistic', '')
 
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2021_realistic', '') # for Run3
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2021_design', '') # for Run3
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2021_realistic', '') # for Run3
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2023_realistic', '') # for Run3
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2024_realistic', '') # for Run3
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2024_realistic', '') # for Run3
 
 #process.GlobalTag.globaltag = '106X_upgrade2018_realistic_v9'
 #process.GlobalTag.globaltag = '110X_mcRun3_2021_realistic_v3'
@@ -37,6 +38,11 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2021_realistic', '
 
 #process.GlobalTag.globaltag = '106X_mcRun3_2023_realistic_Candidate_2019_10_11_19_29_18' #1200e
 #process.GlobalTag.globaltag = '106X_mcRun3_2023_realistic_Candidate_2019_10_11_19_43_54' #2000e
+
+#process.GlobalTag.globaltag = '111X_mcRun3_2021_design_newPixelGain_v1'
+#process.GlobalTag.globaltag = '111X_mcRun3_2021_realistic_newPixelGain_v1'
+#process.GlobalTag.globaltag = '111X_mcRun3_2023_realistic_newPixelGain_v1'
+#process.GlobalTag.globaltag = '111X_mcRun3_2024_realistic_newPixelGain_v1'
 
 #
 process.maxEvents = cms.untracked.PSet(
@@ -142,7 +148,7 @@ if useLocalLA :
 # endif
 
 # Gain 
-useLocalGain = True
+useLocalGain = False
 if useLocalGain :
   process.GainsReader = cms.ESSource("PoolDBESSource",
     DBParameters = cms.PSet(
