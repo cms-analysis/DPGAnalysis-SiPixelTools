@@ -1,5 +1,7 @@
 import FWCore.ParameterSet.Config as cms
-process = cms.Process("Test")
+from Configuration.StandardSequences.Eras import eras
+#process = cms.Process("SiPixelLorentzAngleReader",eras.Run2_2017)
+process = cms.Process("SiPixelLorentzAngleReader",eras.Run3)
 
 process.load("Configuration.Geometry.GeometryRecoDB_cff") # works
 #process.load("Configuration.StandardSequences.GeometryDB_cff") # works
@@ -53,17 +55,23 @@ process.MessageLogger = cms.Service("MessageLogger",
 )
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
-#process.GlobalTag = GlobalTag(process.GlobalTag, '92X_dataRun2_Express_v7', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_realistic', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_realistic', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_design', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_realistic', '')
+
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2021_design', '') # for Run3
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2021_realistic', '') # for Run3
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2023_realistic', '') # for Run3
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2024_realistic', '') # for Run3
+
 
 
 # DB stuff 
-useLocalDB = False
+useLocalDB = True
 if useLocalDB :
   process.DBReader = cms.ESSource("PoolDBESSource",
     DBParameters = cms.PSet(
@@ -79,18 +87,13 @@ if useLocalDB :
 # 			label = cms.untracked.string("fromAlignment"),
 # 			label = cms.untracked.string("forWidth"),
 
-#			tag = cms.string("SiPixelLorentzAngle_2015_v1")
-#			tag = cms.string("SiPixelLorentzAngle_2015_v2")
-#			tag = cms.string("SiPixelLorentzAngle_2015_v3")
-#			tag = cms.string("SiPixelLorentzAngle_2015_v4")
-#			tag = cms.string("SiPixelLorentzAngle_2015_v2_hltvalidation")
 #			tag = cms.string("SiPixelLorentzAngle_2016_v1")
 #			tag = cms.string("SiPixelLorentzAngle_2016_v2")
 #			tag = cms.string("SiPixelLorentzAngle_2016_v3")
-			tag = cms.string("SiPixelLorentzAngle_2016_v4")
+#			tag = cms.string("SiPixelLorentzAngle_2016_v4")
 #			tag = cms.string("SiPixelLorentzAngle_test") 
 
-#			tag = cms.string("SiPixelLorentzAngle_v02_mc")
+			tag = cms.string("SiPixelLorentzAngle_phase1_mc_test")
 
 #			tag = cms.string("SiPixelLorentzAngle_forWidth_v01_mc")
 #			tag = cms.string("SiPixelLorentzAngle_forWidth_v01")
@@ -133,9 +136,6 @@ if useLocalDB :
                         #tag = cms.string("SiPixelLorentzAngle_2012_IOV7")
                         # phase 1
                         #tag = cms.string("SiPixelLorentzAngleSim_0_106_612_slhc1_mc")
-                        #tag = cms.string("SiPixelLorentzAngle_0_106_612_slhc1_mc")
-                        #tag = cms.string("SiPixelLorentzAngle_0_106_612_slhc1_offline")
-
 #			tag = cms.string("SiPixelLorentzAngleSim_test")
 #                       tag = cms.string("SiPixelLorentzAngleSim_0_106_612_slhc1_mc")
 #			tag = cms.string("SiPixelLorentzAngleSim_v02_mc")
@@ -156,12 +156,10 @@ if useLocalDB :
 #    connect = cms.string('sqlite_file:/afs/cern.ch/cms/CAF/CMSALCA/ALCA_TRACKERCALIB/Pixels/PixelDB2016/2SiPixelLorentzAngle/SiPixelLorentzAngle_2016_v2.db')
 #    connect = cms.string('sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase0/2016_11_20/SiPixelLorentzAngle_2016_v3.db')
 #    connect = cms.string('sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase0/2016_11_20/SiPixelLorentzAngle_2016_v4.db')
-#    connect = cms.string('sqlite_file:SiPixelLorentzAngle_test.db')
+    connect = cms.string('sqlite_file:SiPixelLorentzAngle_phase1_mc_test.db')
 #    connect = cms.string('sqlite_file:SiPixelLorentzAngleSim_test.db')
 
-#    connect = cms.string('frontier://FrontierProd/CMS_COND_31X_PIXEL')
-#    connect = cms.string('frontier://FrontierPrep/CMS_COND_PIXEL')
-    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
+#    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
 #    connect = cms.string('frontier://FrontierPrep/CMS_CONDITIONS')
   ) # end process
   process.es_prefer_DBReader = cms.ESPrefer("PoolDBESSource","DBReader")
@@ -172,7 +170,7 @@ process.LorentzAngleReader = cms.EDAnalyzer("SiPixelLorentzAngleDBReader",
     printDebug = cms.untracked.bool(False),
 #   use label to read labeled object from DB
 #    label = cms.untracked.string("fromAlignment"),
-    label = cms.untracked.string("forWidth"),
+#    label = cms.untracked.string("forWidth"),
     useSimRcd = cms.bool(False)                                    
 )
 
