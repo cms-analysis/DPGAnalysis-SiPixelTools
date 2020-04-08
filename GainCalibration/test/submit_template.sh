@@ -1,5 +1,6 @@
 #!/bin/bash
 source /afs/cern.ch/cms/cmsset_default.sh
+function peval { echo -e ">>> $@"; eval "$@"; }
 
 mydir=CFGDIR
 indir=INDIR
@@ -22,14 +23,17 @@ file=GainCalibration_NUM_RUN.EXT
 echo "(T2_CP $indir/$file $file)"
 T2_CP T2_PREFIX$indir/$file $file
 
-convfile=vcal-irradiation-factors.txt
-echo "(cp $mydir/../$convfile $convfile)"
-cp $mydir/../$convfile $convfile
+#convfile="vcal-irradiation-factors.txt"
+#echo "(cp $mydir/../$convfile $convfile)"
+#cp $mydir/../$convfile $convfile
+sqlite="siPixelVCal.db"
+echo "(cp $mydir/../$sqlite $sqlite)"
+cp $mydir/../$sqlite $sqlite
 echo -e "************************"
 echo -e "  => ls: \n`ls`"
 echo -e "************************\n\n"
 
-echo -e "\n\n Running CMSSW job:"
+echo -e "Running CMSSW job:"
 cmsRun gain_calib_NUM_cfg.py
 cat *.log
 

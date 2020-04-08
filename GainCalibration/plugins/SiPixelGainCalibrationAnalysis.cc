@@ -4,31 +4,14 @@
 // Class:      SiPixelGainCalibrationAnalysis
 // 
 /**\class SiPixelGainCalibrationAnalysis SiPixelGainCalibrationAnalysis.cc CalibTracker/SiPixelGainCalibrationAnalysis/src/SiPixelGainCalibrationAnalysis.cc
-
-Description: <one line class summary>
-
-Implementation:
-<Notes on implementation>
 */
 //
 // Original Author:  Freya Blekman
 //         Created:  Wed Nov 14 15:02:06 CET 2007
 //
-//
 
 // user include files
-#include "CondCore/DBOutputService/interface/PoolDBOutputService.h"
-
 #include "SiPixelGainCalibrationAnalysis.h"
-#include <sstream>
-#include <vector>
-#include <math.h>
-#include "TGraphErrors.h"
-#include "TMath.h"
-
-#include <iostream>
-#include <fstream>
-#include <string>
 
 using std::cout;
 using std::endl;
@@ -45,7 +28,6 @@ SiPixelGainCalibrationAnalysis::SiPixelGainCalibrationAnalysis(const edm::Parame
   bookkeeper_pixels_1D_(),
   bookkeeper_2D_(),
   bookkeeper_pixels_2D_(),
- 
 
   nfitparameters_(iConfig.getUntrackedParameter<int>("numberOfFitParameters",2)),
   fitfunction_(iConfig.getUntrackedParameter<std::string>("fitFunctionRootFormula","pol1")),
@@ -63,7 +45,6 @@ SiPixelGainCalibrationAnalysis::SiPixelGainCalibrationAnalysis(const edm::Parame
   maxGainInHist_(iConfig.getUntrackedParameter<double>("maxGainInHist",10)),
   maxChi2InHist_(iConfig.getUntrackedParameter<double>("maxChi2InHist",25)),
   saveALLHistograms_(iConfig.getUntrackedParameter<bool>("saveAllHistograms",false)),
- 
 
   filldb_(iConfig.getUntrackedParameter<bool>("writeDatabase",false)),
   writeSummary_(iConfig.getUntrackedParameter<bool>("writeSummary",true)),
@@ -76,8 +57,7 @@ SiPixelGainCalibrationAnalysis::SiPixelGainCalibrationAnalysis(const edm::Parame
   theGainCalibrationDbInputService_(iConfig),*/
   gainlow_(10.),gainhi_(0.),pedlow_(255.),pedhi_(0.),
   useVcalHigh_(conf_.getParameter<bool>("useVCALHIGH")),
-  scalarVcalHigh_VcalLow_(conf_.getParameter<double>("vcalHighToLowConversionFac")),
-  vCalToEleConvFactors_(conf_.getParameter<std::string>("vCalToEleConvFactors"))
+  scalarVcalHigh_VcalLow_(conf_.getParameter<double>("vcalHighToLowConversionFac"))
 {
   if(reject_single_entries_)
     min_nentries_=1;
@@ -94,40 +74,11 @@ SiPixelGainCalibrationAnalysis::SiPixelGainCalibrationAnalysis(const edm::Parame
   statusNumbers_ = new int[10];
   for(int ii=0;ii<10;ii++)
     statusNumbers_[ii]=0;
-  
-  
-  //Define VCal to ele conversion factors
-  std::ifstream fin;
-  fin.open(vCalToEleConvFactors_);
-  if(fin.is_open()){
-     std::cout << "File ./" << vCalToEleConvFactors_ << " is open.\n";
-     for(std::string line; std::getline(fin, line); ) {
-       std::istringstream in(line);      //make a stream for the line itself
-       std::string type;
-       double VCslope_, VCoffset_;
-       in >> type;
-       
-       in >> VCslope_ >> VCoffset_; 
-       VcalToEleMap[type] = std::make_pair(VCslope_,VCoffset_);
-     }
-     fin.close();
-   }
-   else
-    std::cout << "Error opening " << vCalToEleConvFactors_ << ". Are you sure you passed it correctly?\n";
-  
-   std::map<std::string, std::pair<double, double>>::iterator it = VcalToEleMap.begin();
-   std::cout << "Using the following VCal to electron conversion factors per layer/ring (Rp = ring plus, Rm = ring minus, L = Layer):\n";
-   while(it != VcalToEleMap.end()){
-     std::pair<double, double> val = it->second;
-     std::cout<<it->first<<" : Slope =  "<<val.first<<"  Offset = "<<val.second<<" "<<std::endl;
-     it++;
-   } 
-      
+
 }
 
-SiPixelGainCalibrationAnalysis::~SiPixelGainCalibrationAnalysis()
-{
-}
+SiPixelGainCalibrationAnalysis::~SiPixelGainCalibrationAnalysis(){ }
+
 // member functions
 //
 // ------------ method called once each job just before starting event loop  ------------
@@ -143,38 +94,30 @@ std::vector<float> SiPixelGainCalibrationAnalysis::CalculateAveragePerColumn(uin
       val+= bookkeeper_2D_[detid][label]->GetBinContent(icol,irow);
       ntimes++;
     }
-    val/= ntimes;
+    val /= ntimes;
     result.push_back(val);
   }
   return result;
-
-
 }
 
-bool
-SiPixelGainCalibrationAnalysis::checkCorrectCalibrationType()
-{
+bool SiPixelGainCalibrationAnalysis::checkCorrectCalibrationType(){
   if(calibrationMode_=="GainCalibration")
     return true;
   else if(ignoreMode_==true)
     return true;
   else if(calibrationMode_=="unknown"){
     edm::LogInfo("SiPixelGainCalibrationAnalysis") <<  "calibration mode is: " << calibrationMode_ << ", continuing anyway..." ;
-
     return true;
-  }
-  else{
+  }else{
     //    edm::LogError("SiPixelGainCalibrationAnalysis") << "unknown calibration mode for Gain calibration, should be \"Gain\" and is \"" << calibrationMode_ << "\"";
   }
   return false;
 }
 
-void SiPixelGainCalibrationAnalysis::calibrationSetup(const edm::EventSetup&)
-{
-}
+void SiPixelGainCalibrationAnalysis::calibrationSetup(const edm::EventSetup&) { }
+
 //------- summary printing method. Very verbose.
-void
-SiPixelGainCalibrationAnalysis::printSummary(){
+void SiPixelGainCalibrationAnalysis::printSummary(){
 
   uint32_t detid=0;
   for(std::map<uint32_t,std::map<std::string,TH2F *> >::const_iterator idet = bookkeeper_2D_.begin(); idet != bookkeeper_2D_.end(); ++idet){
@@ -213,9 +156,7 @@ SiPixelGainCalibrationAnalysis::printSummary(){
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
-
-void 
-SiPixelGainCalibrationAnalysis::calibrationEnd() {
+void SiPixelGainCalibrationAnalysis::calibrationEnd(){
 
   if(writeSummary_) printSummary();
   
@@ -223,29 +164,26 @@ SiPixelGainCalibrationAnalysis::calibrationEnd() {
   if(filldb_)
     fillDatabase();
 }
+
 //-----------method to fill the database
 void SiPixelGainCalibrationAnalysis::fillDatabase(){
  // only create when necessary.
   // process the minimum and maximum gain & ped values...
   edm::LogError("SiPixelGainCalibration::fillDatabase()") << "PLEASE do not fill the database directly from the gain calibration analyzer. This function is currently disabled and no DB payloads will be produced!" << std::endl;
-
 }
+
 // ------------ method called to do fits to all objects available  ------------
-bool
-SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibDigi>::const_iterator ipix,std::string layerString)
-{
- 
-  double VcalToEle_slope  ;
-  double VcalToEle_offset ;
-  
-  if (!layerString.empty()){
-    VcalToEle_slope  = VcalToEleMap[layerString].first;
-    VcalToEle_offset = VcalToEleMap[layerString].second;
+bool SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibDigi>::const_iterator ipix){ //,std::string layerString)
+
+  double VcalToEle_slope = 47.;
+  double VcalToEle_offset = -60.;
+  SiPixelVCalDB::PixelId pixid = SiPixelVCalDB::detIdToPixelId(detid,tt_,phase1_);
+  if(VcalToEleMap_.find(pixid)!=VcalToEleMap_.end()){
+    VcalToEle_slope = VcalToEleMap_[pixid].slope;
+    VcalToEle_offset = VcalToEleMap_[pixid].offset;
   }
-  else{
-    VcalToEle_slope  = 1.;
-    VcalToEle_offset = 0.;
-  }
+  else
+    std::cerr << "Did not find offset for pixid " << pixid << "! Setting slope=" << VcalToEle_slope << ", offset=" << VcalToEle_offset << std::endl;
   
   std::string currentDir = GetPixelDirectory(detid);
   float lowmeanval=255;
@@ -271,18 +209,13 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     currentDetID_ = detid;
     summary_<<endl<<"DetId_"<<currentDetID_<<endl;
   }
-
-
-
-  
   
   for(uint32_t ii=0; ii< ipix->getnpoints() && ii<200; ii++){
     //    std::cout << ipix->getsum(ii) << " " << ipix->getnentries(ii) << " " << ipix->getsumsquares(ii) << std::endl;
     nallpoints++;
     use_point=true;
-    if(useVcalHigh_){
+    if(useVcalHigh_)
       xvalsall[ii]=vCalValues_[ii]*scalarVcalHigh_VcalLow_;
-    }
     else
       xvalsall[ii]=vCalValues_[ii];
     
@@ -296,9 +229,9 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
       yerrvalsall[ii]=sqrt(yerrvalsall[ii])/sqrt(ipix->getnentries(ii));
       
       if(yvalsall[ii]<lowmeanval)
-	lowmeanval=yvalsall[ii];
+        lowmeanval=yvalsall[ii];
       if(yvalsall[ii]>highmeanval)
-	highmeanval=yvalsall[ii];
+        highmeanval=yvalsall[ii];
     }
   }
   
@@ -311,7 +244,7 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     for(int ii=nallpoints-1; ii>nallpoints-5; --ii){
       if(fabs(yvalsall[ii]-plateauval)>5){
         plateauval=255;
-	noPlateau=1;
+        noPlateau=1;
         continue;
       }
     }
@@ -325,13 +258,13 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
       bookkeeper_2D_[detid]["status_2d"]->SetBinContent(ipix->col()+1,ipix->row()+1,status);
       if(writeSummary_){
         summary_<<"row_"<<ipix->row()<<" col_"<<ipix->col()<<" status_"<<status<<endl;
-	statusNumbers_[abs(status)]++;
+        statusNumbers_[abs(status)]++;
       }
       return false;
     }
   }
   else plateauval=255;
-    
+
   double maxgoodvalinfit=plateauval*(1.-reject_badpoints_frac_);
   npoints=0;
   for(int ii=0; ii<nallpoints; ++ii){
@@ -370,12 +303,12 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     npoints=0;
     for(int ii=0; ii<nallpoints && npoints<4 && yvalsall[ii]<plateauval*0.97; ++ii){
       if(yvalsall[ii]>0){
-	if(ii>0 && yvalsall[ii]-yvalsall[ii-1]<0.1)
-	  continue;
-	xvals[npoints]=xvalsall[ii];
-	yvals[npoints]=yvalsall[ii];
-	yerrvals[npoints]=yerrvalsall[ii];
-	npoints++;
+        if(ii>0 && yvalsall[ii]-yvalsall[ii-1]<0.1)
+          continue;
+        xvals[npoints]=xvalsall[ii];
+        yvals[npoints]=yvalsall[ii];
+        yerrvals[npoints]=yerrvalsall[ii];
+        npoints++;
       }
     }
   }
@@ -405,10 +338,9 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
       bookkeeper_pixels_1D_[detid][pixelinfo.str()]->Fill(xvalsall[ii],yvalsall[ii]);
     return false;
   }
-    
+
   //  std::cout << "starting fit!" << std::endl;
   graph_->Set(npoints);
-  
   func_->SetParameter(0,50.);
   func_->SetParameter(1,0.25);
   for(int ipointtemp=0; ipointtemp<npoints; ++ipointtemp){
@@ -472,7 +404,6 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
   if(status!=1) makehistopersistent=true;
   statusNumbers_[abs(status)]++;
 
-
   if(slope<gainlow_)
     gainlow_=slope;
   if(slope>gainhi_)
@@ -519,7 +450,6 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     // and book the histo
     // fill the last value of the vcal array...   
 
-
     //bookkeeper_pixels_[detid][pixelinfo.str()] =  bookDQMHistogram1D(detid,pixelinfo.str(),tempname,105*nallpoints,xvalsall[0],xvalsall[nallpoints-1]*1.05);
     //TH1D* h = new TH1D("h","h",105*nallpoints,xvalsall[0],xvalsall[nallpoints-1]*1.05);
     //bookkeeper_pixels_[detid][pixelinfo.str()] =  bookDQMHistogram1D(detid,pixelinfo.str(),tempname,(xvalsall[nallpoints-1]-xvalsall[0])/binwidth+1,xvalsall[0]-binwidth/2.0,xvalsall[nallpoints-1]+binwidth/2.0);
@@ -530,7 +460,6 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     // std::cout << "tempname " << tempname << " 105* nallpoints " << 105*nallpoints << " xvalsall[0] " <<  xvalsall[0] << " xvalsall[nallpoints-1]*1.05 " << xvalsall[nallpoints-1]*1.05 <<std::endl;
     // std::cout << "tempname " << tempname << " (xvalsall[nallpoints-1]-xvalsall[0])/binwidth+1 " << (xvalsall[nallpoints-1]-xvalsall[0])/binwidth+1 << " xvalsall[0]-binwidth/2.0 "<< xvalsall[0]-binwidth/2.0 << " xvalsall[nallpoints-1]+binwidth/2.0 " << xvalsall[nallpoints-1]+binwidth/2.0 << std::endl;
 
-
     edm::LogInfo("SiPixelGainCalibrationAnalysis") << "now saving histogram for pixel " << tempname << ", gain = " << slope << ", pedestal = " << intercept << ", chi2/NDF=" << chi2 << "(prob:" << prob << "), fit status " << status;
     //for(int ii=0; ii<nallpoints; ++ii){
     //  //      std::cout << xvalsall[ii]<<","<<yvalsall[ii]<< " " << tempfloats[ii] << std::endl;
@@ -539,7 +468,6 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
     //}
     
     //    addTF1ToDQMMonitoringElement(bookkeeper_pixels_[detid][pixelinfo.str()],func_); ////adding func_ to the list of functions of the hist
-    
     
     if(writeSummary_){
       summary_<<"row_"<<ipix->row()<<" col_"<<ipix->col();
@@ -551,13 +479,11 @@ SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibD
   } 
   return true;
 }
+
 // ------------ method called to do fill new detids  ------------
-void 
-SiPixelGainCalibrationAnalysis::newDetID(uint32_t detid)
-{
+void SiPixelGainCalibrationAnalysis::newDetID(uint32_t detid){
   // setDQMDirectory(detid);
-  std::string correntDir = GetPixelDirectory( detid// , myTFileDirMap
-					      );
+  std::string correntDir = GetPixelDirectory(detid); // , myTFileDirMap
   std::string tempname=translateDetIdToString(detid);
   bookkeeper_1D_[detid]["gain_1d"] = bookHistogram1D(detid,"Gain1d","gain for "+tempname,100,0.,maxGainInHist_,correntDir);
   bookkeeper_2D_[detid]["gain_2d"] = bookHistoPlaquetteSummary2D(detid, "Gain2d","gain for "+tempname, correntDir);
@@ -580,5 +506,6 @@ SiPixelGainCalibrationAnalysis::newDetID(uint32_t detid)
   bookkeeper_2D_[detid]["plateau_2d"]=bookHistoPlaquetteSummary2D(detid,"GainSaturate2d","Highest points on gain curve for "+tempname, correntDir);
 
 }
+
 //define this as a plug-in
 DEFINE_FWK_MODULE(SiPixelGainCalibrationAnalysis);

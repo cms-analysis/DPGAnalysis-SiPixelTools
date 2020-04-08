@@ -64,7 +64,7 @@ set_eos_specifics(){
   T2_RM='rm -r /eos/cms' # Do not add space before next argument when using this cmd
   #T2_CP='cmsStage'
   #T2_CP='/afs/cern.ch/project/eos/installation/cms/bin/eos.select cp'
-  T2_CP='xrdcp'
+  T2_CP='xrdcp -f'
   T2_PREFIX='root://eoscms.cern.ch//eos/cms/'
   T2_MKDIR='mkdir -p /eos/cms' # Do not add space before next argument when using this cmd
   T2_CHMOD=' chmod 2777 /eos/cms' # Do not add space before next argument when using this cmd

@@ -1,40 +1,71 @@
 #! /usr/bin/env cmsRun
+print ">>> %s start gain_calib.py %s"%('-'*16,'-'*15)
+import os
 import FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
-process = cms.Process("PIXEL",eras.Run2_2017)
 
 # SETTINGS
+from FWCore.ParameterSet.VarParsing import VarParsing
+options   = VarParsing('analysis')
+options.register('run', 323203, mytype=VarParsing.varType.int)
+options.register('fed', 1200,   mytype=VarParsing.varType.int)
+options.parseArguments()
+fed       = options.fed
+run       = options.run
+era       = eras.Run2_2017
+globaltag = '100X_dataRun2_Express_v2'
+ext       = 'dmp'
+#convfile  = "vcal-irradiation-factors.txt"
+dbfile    = "siPixelVCal.db"
+sqlfile   = "sqlite_file:%s"%(dbfile)
+outfile   = "file:GainCalibration_%s_%s.%s"%(fed,run,ext)
+
+# PRINT
+print ">>> %-10s = '%s'"%('era',era)
+print ">>> %-10s = '%s'"%('globaltag',globaltag)
+print ">>> %-10s = '%s'"%('sqlfile',sqlfile)
+print ">>> %-10s = '%s'"%('outfile',outfile)
+
+# CHECK
+#if not os.path.isfile(convfile):
+#  raise IOError("VCal irradiation conversion file '%s' does not exist!"%convfile)
+if not os.path.isfile(dbfile):
+  raise IOError("VCal database object '%s' does not exist! cwd=%s"%(dbfile,os.getcwd()))
+
+# SERVICES
+process = cms.Process('PIXEL',era)
 process.load('Configuration.StandardSequences.Services_cff')
-process.TFileService = cms.Service("TFileService", fileName = cms.string('GainCalibration.root'))
-process.MessageLogger = cms.Service("MessageLogger",
+process.TFileService = cms.Service('TFileService', fileName = cms.string('GainCalibration.root'))
+process.MessageLogger = cms.Service('MessageLogger',
     text_output = cms.untracked.PSet(threshold = cms.untracked.string('ERROR')),
     destinations = cms.untracked.vstring('text_output')
 )
 
 # GLOBAL TAG
 # Phase0
-# process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
-# from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-# process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
+#process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
+#from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 # Phase1
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
-process.GlobalTag.globaltag = '100X_dataRun2_Express_v2'
+process.GlobalTag.globaltag = globaltag
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
 )
 
 # SLINK DATA --> DIGIS
+lumiblocks = [cms.LuminosityBlockID(1,1)]
 process.load('Configuration.StandardSequences.RawToDigi_Data_cff')
-# process.source = cms.Source("PixelSLinkDataInputSource",
+#process.source = cms.Source("PixelSLinkDataInputSource",
 process.source = cms.Source("PixelDumpDataInputSource",
     fedid = cms.untracked.int32(-1),
     runNumber = cms.untracked.int32(500000),
-    fileNames = cms.untracked.vstring('FILENAME'),
+    fileNames = cms.untracked.vstring(outfile),
     firstLuminosityBlock = cms.untracked.uint32(1),
-    firstLuminosityBlockForEachRun = cms.untracked.VLuminosityBlockID(*[cms.LuminosityBlockID(1,1)]),
+    firstLuminosityBlockForEachRun = cms.untracked.VLuminosityBlockID(*lumiblocks),
 )
 process.siPixelDigis.InputLabel = 'source'
 process.siPixelDigis.UsePhase1 = cms.bool(True)
@@ -82,8 +113,7 @@ process.siPixelCalibDigis.calibcols_Int = cms.vint32(
     15 , 19 , 23 , 27 , 31 , 35 , -1,
     39 , 43 , 47 , 51, -1,  
 )
-    
-# --> have to add -1 (as a separator) after every row
+# -1 as a separator after every row
 process.siPixelCalibDigis.calibrows_Int = cms.vint32(
      0, -1,  1, -1,  2, -1,  3, -1,  4, -1,  5, -1,  6, -1,  7, -1,  8, -1,  9, -1,
     10, -1, 11, -1, 12, -1, 13, -1, 14, -1, 15, -1, 16, -1, 17, -1, 18, -1, 19, -1,
@@ -107,11 +137,9 @@ process.siPixelGainCalibrationAnalysis.calibrows_Int = process.siPixelCalibDigis
 process.siPixelGainCalibrationAnalysis.Repeat = process.siPixelCalibDigis.Repeat
 process.siPixelGainCalibrationAnalysis.CalibMode = process.siPixelCalibDigis.CalibMode
 process.siPixelGainCalibrationAnalysis.phase1 = True
-#process.siPixelGainCalibrationAnalysis.vCalToEleConvFactors = cms.string("vcal-irradiation-factors.txt")            
+#process.siPixelGainCalibrationAnalysis.vCalToEleConvFactors = cms.string(convfile)            
 
 # VCAL DB
-sqlfile = "sqlite_file:siPixelVCal.db"
-print ">>> sqlfile = %s"%sqlfile
 process.VCalReader = cms.ESSource("PoolDBESSource",
     #BlobStreamerName = cms.untracked.string('TBufferBlobStreamingService'),
     DBParameters = cms.PSet(
@@ -130,5 +158,7 @@ process.VCalReader = cms.ESSource("PoolDBESSource",
 )
 process.myprefer = cms.ESPrefer("PoolDBESSource","VCalReader")
 
-# Path
+# PATH
 process.p = cms.Path(process.siPixelDigis * process.siPixelCalibDigis * process.siPixelGainCalibrationAnalysis )
+
+print ">>> %s done gain_calib.py %s"%('-'*16,'-'*16)
