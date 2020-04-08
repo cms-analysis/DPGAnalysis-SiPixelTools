@@ -24,7 +24,7 @@ import FWCore.ParameterSet.Config as cms
 #
 siPixelGainCalibrationAnalysis = cms.EDAnalyzer("SiPixelGainCalibrationAnalysis",
     saveFile = cms.untracked.bool(True),
-    maxChi2InHist = cms.untracked.double(50.0),
+    maxChi2InHist = cms.untracked.double(100.0),
     savePixelLevelHists = cms.untracked.bool(False),
     saveAllHistograms = cms.untracked.bool(False),
     listOfDetIDs = cms.untracked.vuint32(),                                         
@@ -38,7 +38,7 @@ siPixelGainCalibrationAnalysis = cms.EDAnalyzer("SiPixelGainCalibrationAnalysis"
     suppressZeroAndPlateausInFitFrac = cms.untracked.double(0.2),
     suppressPlateauInFit = cms.untracked.bool(True),
     minChi2NDFforHistSave = cms.untracked.double(25.0),
-    minChi2ProbforHistSave = cms.untracked.double(0.001),
+                                                minChi2ProbforHistSave = cms.untracked.double(0.05),
     plateauSlopeMax = cms.untracked.double(1.0),
     appendDatabaseMode = cms.untracked.bool(False),
     prova = cms.string('Funziona'),
@@ -58,6 +58,7 @@ siPixelGainCalibrationAnalysis = cms.EDAnalyzer("SiPixelGainCalibrationAnalysis"
     # use this mode if you want to analyze S-Curve data with the Gain analysis
     ignoreMode = cms.untracked.bool(False),
     phase1 = cms.untracked.bool(False),
+    writeSummary = cms.untracked.bool(False),
     vCalToEleConvFactors = cms.string("vcal-irradiation-factors.txt")                                   
 )
 

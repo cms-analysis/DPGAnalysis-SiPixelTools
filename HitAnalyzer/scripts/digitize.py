@@ -1,7 +1,8 @@
 #
 import FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
-process = cms.Process("MyRaw",eras.Run2_2017)
+#process = cms.Process("MyRaw",eras.Run2_2017)
+process = cms.Process("TestValid",eras.Run3)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -20,8 +21,27 @@ process.load('Configuration.StandardSequences.L1Reco_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '') # no misalignment 
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '') # no misalignment 
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '') # with misalignment 
+
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_design', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_realistic', '')
+
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2021_design', '') # for Run3
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2021_realistic', '') # for Run3
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2023_realistic', '') # for Run3
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2024_realistic', '') # for Run3
+
+
+#process.GlobalTag.globaltag = '110X_upgrade2018_design_v3'
+#process.GlobalTag.globaltag = '110X_upgrade2018_realistic_v7'
+
+#process.GlobalTag.globaltag = '110X_mcRun3_2021_design_v5' # OK
+#process.GlobalTag.globaltag = '110X_mcRun3_2021_realistic_v6' # OK
+#process.GlobalTag.globaltag = '110X_mcRun3_2023_realistic_v6'
+#process.GlobalTag.globaltag = '110X_mcRun3_2024_realistic_v6' # OK
+
+
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
@@ -31,11 +51,7 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
     dropDescendantsOfDroppedBranches = cms.untracked.bool(False),
     fileNames = cms.untracked.vstring(
-#        '/store/user/kotlinski/MC/mu_pt100/simhits/simHits1_eta0p1.root'
-#        '/store/user/kotlinski/MC/mu_pt100/simhits/simHits2_eta0p1.root'
-#        '/store/user/kotlinski/MC/mu_pt100/simhits/simHits3_eta0p1.root'
-#        '/store/user/kotlinski/MC/mu_pt100/simhits/simHits4_eta0p1.root'
-        '/store/user/kotlinski/MC/mu_pt100/simhits/simHits5_eta0p1.root'
+        '/store/user/kotlinski/MC11/mu_pt100/simhits/simHits1.root'
 #        'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/simhits/simHits1.root'
         ),
     inputCommands = cms.untracked.vstring('keep *', 

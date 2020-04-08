@@ -1,7 +1,7 @@
 #!/bin/bash
 # 
 #SBATCH -p wn
-#SBATCH --time 04:00:00
+#SBATCH --time 10:00:00 # 4h not enough for digis
 #SBATCH -w t3wn60
 #SBATCH -e cn-test.err 
 #SBATCH -o cn-test.out  # replace default slurm-SLURM_JOB_ID.out
@@ -27,22 +27,26 @@ sleep 10
 #
 cd /scratch/$USER/${SLURM_JOB_ID}
 #cmsRun $MYPWD/SimsToClus.py
-cmsRun $MYPWD/SimsToRec.py
-#cmsRun $MYPWD/RawToRec.py
+#cmsRun $MYPWD/SimsToRec.py
+cmsRun $MYPWD/RawToRec.py
 #cmsRun $MYPWD/gen_sim.py
+#cmsRun $MYPWD/digitize.py
+#cmsRun $MYPWD/reco.py
 # 
 pwd
 ls 
 cd $MYPWD
 pwd
 ls /scratch/$USER/${SLURM_JOB_ID}
-cp /scratch/$USER/${SLURM_JOB_ID}/simtorec.root $MYPWD/.
-#cp /scratch/$USER/${SLURM_JOB_ID}/rawtoreco.root $MYPWD/.
+#cp /scratch/$USER/${SLURM_JOB_ID}/simtorec.root $MYPWD/.
+cp /scratch/$USER/${SLURM_JOB_ID}/rawtoreco.root $MYPWD/.
 
 # xrdcp -d 1 -f s.root root://t3se01.psi.ch:1094//store/user/kotlinski/MC/test/s.root  # is OK,
 # xrdcp      -f s.root root://t3dcachedb.psi.ch:1094//pnfs/psi.ch/cms/trivcat/store/user/kotlinski/MC/test/. # OK
 # xrdcp -f /scratch/$USER/${SLURM_JOB_ID}/s.root root://t3dcachedb.psi.ch:1094//pnfs/psi.ch/cms/trivcat/store/user/kotlinski/MC/test/s.root   # OK
-# xrdcp -f /scratch/$USER/${SLURM_JOB_ID}/s.root root://t3se01.psi.ch:1094//store/user/kotlinski/MC/mu_pt100/simhits/simHits2_eta0p1.root # OK
+#xrdcp -f /scratch/$USER/${SLURM_JOB_ID}/s.root root://t3se01.psi.ch:1094//store/user/kotlinski/MC/mu_pt100/simhits/simHits2_eta0p1.root # OK
+#xrdcp -f /scratch/$USER/${SLURM_JOB_ID}/d.root root://t3se01.psi.ch:1094//store/user/kotlinski/MC11/mu_pt100/raw/raw1.root # OK
+#xrdcp -f /scratch/$USER/${SLURM_JOB_ID}/r.root root://t3se01.psi.ch:1094//store/user/kotlinski/MC11/mu_pt100/reco/reco1.root # OK
 
 #  rmdir  /scratch/$USER/${SLURM_JOB_ID}
 rm -rf  /scratch/$USER/${SLURM_JOB_ID}

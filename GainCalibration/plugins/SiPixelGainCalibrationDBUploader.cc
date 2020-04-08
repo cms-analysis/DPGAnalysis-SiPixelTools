@@ -36,7 +36,6 @@ Implementation:
 #include "CondFormats/SiPixelObjects/interface/SiPixelCalibConfiguration.h"
 #include "CondFormats/SiPixelObjects/interface/SiPixelGainCalibration.h"
 #include "CondFormats/SiPixelObjects/interface/SiPixelGainCalibrationOffline.h"
-//#include "CondFormats/SiPixelObjects/interface/SiPixelGainCalibrationPhase1Offline.h"
 #include "CondFormats/SiPixelObjects/interface/SiPixelGainCalibrationForHLT.h"
 #include "CalibTracker/SiPixelESProducers/interface/SiPixelGainCalibrationService.h"
 #include "CondCore/DBOutputService/interface/PoolDBOutputService.h"
@@ -58,10 +57,12 @@ Implementation:
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 
+//#define Tree    # fill the tree
+//#define TreeOffline # fill the offline tree
+
 //
 // class decleration
 //
-
 
 void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetup){
   // only create when necessary.
@@ -73,12 +74,14 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
   edm::Service<TFileService> fs;
 
   TH1F *VCAL_endpoint = fs->make<TH1F>("VCAL_endpoint","value where response = 255 ( x = (255 - ped)/gain )",256,0,256);
-  TH1F *goodgains = fs->make<TH1F>("goodgains","gain values",100,0,10);
+  TH1F *goodgains = fs->make<TH1F>("goodgains","gain values",500,0,gainmax_);
   TH1F *goodpeds = fs->make<TH1F>("goodpeds","pedestal values",356,-100,256); //512,-256,256 original value: 356,-100,256
-  TH1F *totgains = fs->make<TH1F>("totgains","gain values",200,0,10);
+  TH1F *totgains = fs->make<TH1F>("totgains","gain values",500,0,gainmax_);
   TH1F *totpeds = fs->make<TH1F>("totpeds","pedestal values",356,-100,256);
+  int useddefaultfortree;
+#ifdef Tree
   TTree *tree = new TTree("tree","tree");
-  int detidfortree,rowfortree,colfortree,useddefaultfortree;
+  int detidfortree,rowfortree,colfortree;
   float pedfortree, gainfortree,chi2fortree;
   tree->Branch("detid",&detidfortree,"detid/I");
   tree->Branch("row",&rowfortree,"row/I");
@@ -87,7 +90,8 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
   tree->Branch("ped",&pedfortree,"ped/F");
   tree->Branch("gain",&gainfortree,"gain/F");
   tree->Branch("chi2",&chi2fortree,"chi2/F");
-
+#endif // Tree
+#ifdef TreeOffline 
   TTree *treeOffline = new TTree("treeOffline","treeOffline");
   int TOrow(0),TOcol(0),TOdetid(0);
   double TOped(0),TOgain(0);
@@ -96,15 +100,9 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
   treeOffline->Branch("col",&TOcol,"col/I");
   treeOffline->Branch("ped",&TOped,"ped/D");
   treeOffline->Branch("gain",&TOgain,"gain/D");
+#endif // TreeOffline
 
-  // TTree *treePhase1Offline = new TTree("treePhase1Offline","treePhase1Offline");
-  // int TP1Orow(0),TP1Ocol(0),TP1Odetid(0);
-  // double TP1Oped(0),TP1Ogain(0);
-  // treePhase1Offline->Branch("detid",&TP1Odetid,"detid/I");
-  // treePhase1Offline->Branch("row",&TP1Orow,"row/I");
-  // treePhase1Offline->Branch("col",&TP1Ocol,"col/I");
-  // treePhase1Offline->Branch("ped",&TP1Oped,"ped/D");
-  // treePhase1Offline->Branch("gain",&TP1Ogain,"gain/D");
+  int countModulesMissing=0, countModulesWithHistos=0, lookAtModules=0;
 
   size_t ntimes=0;
   std::cout << "Filling record " << record_ << std::endl;
@@ -113,29 +111,17 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
     std::cout << "you passed record " << record_ << ", which I have no idea what to do with!" << std::endl;
     return;
   }
-  if(gainlow_>gainhi_){  
-    float temp=gainhi_;
-    gainhi_=gainlow_;
-    gainlow_=temp;
-  }
-  // if(pedlow_>pedhi_){
-//     float temp=pedhi_;
-//     pedhi_=pedlow_;
-//     pedlow_=temp;
-//   }
-  if(gainhi_>gainmax_)
-    gainhi_=gainmax_;
-  // if(pedhi_>pedmax_)
- //    pedhi_=pedmax_;
+
+  int npixEmpty=0, npixUsed=0, npixGood=0, npixGood2=0, npixBad=0; 
   float badpedval=pedlow_-200;
   float badgainval=gainlow_-200;
   float meangain= meanGainHist_->GetMean();
   float meanped = meanPedHist_->GetMean();
+
   std::cout << "pedestals low: " << pedlow_ << " high: " << pedhi_ << " gains low: " << gainlow_ << " high: " << gainhi_
 	    << ", and mean gain " << meangain<< ", ped " << meanped << std::endl;
-  // exit (EXIT_FAILURE);
-  // and fill the dummy histos:
-  
+
+  // and fill the dummy histos:  
   for(size_t icol=0; icol<nmaxcols;++icol){
     for(size_t irow=0; irow<nmaxrows; ++irow){
       defaultGain_->SetBinContent(icol+1,irow+1,meangain);
@@ -160,22 +146,22 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
   therootfile_->cd();
   edm::ESHandle<TrackerGeometry> pDD;
   iSetup.get<TrackerDigiGeometryRecord>().get( pDD );     
-  edm::LogInfo("SiPixelCondObjOfflineBuilder") <<" There are "<<pDD->dets().size() <<" detectors"<<std::endl;
+  std::cout<<"SiPixelCondObjOfflineBuilder" <<" There are "<<pDD->dets().size() <<" detectors"<<std::endl;
   std::cout << "Start looping on detids, there are " << bookkeeper_.size() << " histograms to consider..." << std::endl;
   
   int NDetid = 0;
-  for(TrackerGeometry::DetContainer::const_iterator it = pDD->dets().begin(); it != pDD->dets().end(); it++){
-    ++nmodules;
+  size_t nemptypixels=0;
+  for(TrackerGeometry::DetContainer::const_iterator it = pDD->dets().begin(); 
+      it != pDD->dets().end(); it++) {
     detid=0;
-    if( dynamic_cast<PixelGeomDetUnit const*>((*it))!=0)
-      detid=((*it)->geographicalId()).rawId();
-    if(detid==0)
-      continue;
+    if( dynamic_cast<PixelGeomDetUnit const*>((*it))!=0) detid=((*it)->geographicalId()).rawId();
+    if(detid==0) continue;
+    ++nmodules;
     NDetid++;
     int badDetId=0;
-    ntimes=0;
+    //ntimes=0;
     useddefaultfortree=0;
-    
+
     // Get the module sizes.
     TH2F *tempchi2;
     TH2F *tempfitresult;
@@ -183,13 +169,13 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
     TH2F *tempped;
     TString tempgainstring;
 
-    if(!badDetId){
+    if(!badDetId) {
     
       TString tempchi2string = bookkeeper_[detid]["chi2prob_2d"];
       tempchi2 = (TH2F*)therootfile_->Get(tempchi2string);
       if(tempchi2==0 || badDetId){
 	tempchi2=defaultChi2_;
-	useddefaultfortree=1;
+	useddefaultfortree=1; // histo does not exits use default
       }
       TString tempfitresultstring = bookkeeper_[detid]["fitresult_2d"];
       tempfitresult = (TH2F*)therootfile_->Get(tempfitresultstring);
@@ -203,7 +189,6 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
 	std::cout <<"WARNING, gain histo " << bookkeeper_[detid]["gain_2d"] << " does not exist, using default instead" << std::endl;
 	tempgain=defaultGain_;  
 	useddefaultfortree=1;
-      
       }
       TString temppedstring = bookkeeper_[detid]["ped_2d"];
       tempped = (TH2F*) therootfile_->Get(temppedstring);
@@ -214,8 +199,11 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
 	tempped=defaultPed_;
 	useddefaultfortree=1;
       }
-    }
-    else {
+      if(useddefaultfortree==1) countModulesMissing++;
+      else countModulesWithHistos++;
+
+    } else { // does this ever happen
+      std::cout<<" does this ever happen "<<std::endl;
       tempchi2=defaultChi2_;
       tempgain=defaultGain_; 
       tempfitresult=defaultFitResult_;  
@@ -231,11 +219,8 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
     // Get the module sizes.
     size_t nrows = topol.nrows();      // rows in x
     size_t ncols = topol.ncolumns();   // cols in y
-    
-    // int nrows=tempgain->GetNbinsY();
-    // int ncols=tempgain->GetNbinsX();
-    // std::cout << "next histo " << tempgain->GetTitle() << " has nrow,ncol:" << nrows << ","<< ncols << std::endl;
     size_t nrowsrocsplit = theGainCalibrationDbInputHLT_->getNumberOfRowsToAverageOver();
+
     if(theGainCalibrationDbInputOffline_->getNumberOfRowsToAverageOver()!=nrowsrocsplit)
       throw  cms::Exception("GainCalibration Payload configuration error")
 	<< "[SiPixelGainCalibrationAnalysis::fillDatabase] ERROR the SiPixelGainCalibrationOffline and SiPixelGainCalibrationForHLT database payloads have different settings for the number of rows per roc: " << theGainCalibrationDbInputHLT_->getNumberOfRowsToAverageOver() << "(HLT), " << theGainCalibrationDbInputOffline_->getNumberOfRowsToAverageOver() << "(offline)";
@@ -253,10 +238,11 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
     for(size_t icol=1; icol<=ncols; icol++){
       for(size_t jrow=1; jrow<=nrows; jrow++){
 	if(tempfitresult->GetBinContent(icol,jrow)>0){
-          npix++;
+          npix++; if(useddefaultfortree==0) npixUsed++;
           meanGainForThisModule+=tempgain->GetBinContent(icol,jrow);
           meanPedForThisModule+=tempped->GetBinContent(icol,jrow);
-	}
+	} else { if(useddefaultfortree==0) npixEmpty++;}
+	
       }
     }
     if(npix!=0) meanPedForThisModule/=npix;
@@ -266,6 +252,7 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
       if(meanPedForThisModule>pedlow_   && meanPedForThisModule<pedhi_   && npix>100) meanped  = meanPedForThisModule;
     }
     
+    lookAtModules++;
     // Loop over columns and rows of this DetID
     float peds[160];
     float gains[160];
@@ -273,7 +260,6 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
     float gainforthiscol[2];
     float gainClusterCol[2][2];
     int nusedrows[2];
-    size_t nemptypixels=0;
     for(size_t icol=1; icol<=ncols; icol++) {
       nusedrows[0]=nusedrows[1]=0;
       pedforthiscol[0]=pedforthiscol[1]=0;
@@ -282,29 +268,29 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
       gainClusterCol[1][0]=gainClusterCol[1][1]=0;
       for(size_t jrow=1; jrow<=nrows; jrow++) {
 	size_t iglobalrow=0;
-	if(jrow>nrowsrocsplit)
-	  iglobalrow=1;
+	if(jrow>nrowsrocsplit) iglobalrow=1;
 	peds[jrow]=badpedval;
 	gains[jrow]=badgainval;
 	float ped = tempped->GetBinContent(icol,jrow);
 	float gain = tempgain->GetBinContent(icol,jrow);
 	float chi2 = tempchi2->GetBinContent(icol,jrow);
 	float fitresult = tempfitresult->GetBinContent(icol,jrow);
-
+	if(gain>500.) std::cout<<gain<<" "<<fitresult<<std::endl;
 	if(ped>pedlow_ && gain>gainlow_ && ped<pedhi_ && gain<gainhi_ && (fitresult>0)){
-	  ntimes++;
+	  ntimes++; if(useddefaultfortree==0) npixGood++;
 	  VCAL_endpoint->Fill((255 - ped)/gain);
 	  peds[jrow]=ped;
 	  gains[jrow]=gain;
 	  pedforthiscol[iglobalrow]+=ped;
 	  gainforthiscol[iglobalrow]+=gain;
 	  gainClusterCol[iglobalrow][(jrow+1)%2] += gain;
-	  if (detid==303050776) {std::cout << "adding gain for col " << icol << " and row " << jrow << ": " << gain << " to iglobalrow[row]: "<< iglobalrow << "[" << (jrow+1)%2 << "]" << std::endl;}
+	  //if (detid==303050776) {std::cout << "adding gain for col " << icol << " and row " << jrow << ": " << gain << " to iglobalrow[row]: "<< iglobalrow << "[" << (jrow+1)%2 << "]" << std::endl;}
 
 	  nusedrows[iglobalrow]++;
 	  goodpeds->Fill(ped);
 	  goodgains->Fill(gain);
 
+#ifdef Tree
 	  //filling the tree
 	  detidfortree=detid;
 	  rowfortree=jrow-1;
@@ -313,17 +299,19 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
 	  pedfortree=ped;
 	  chi2fortree=chi2;
 	  tree->Fill();
+#endif
 	  
-	} else{  
-	  nemptypixels++;
+	} else {  
+
+	  nemptypixels++; if(useddefaultfortree==0) npixBad++;
 	  if(usemeanwhenempty_){
 	    peds[jrow]=meanped;
 	    gains[jrow]=meangain;
 	    std::pair<TString,int> tempval(tempgainstring,1);
-	    badresults[detid]=tempval;
+	    if(useddefaultfortree==0) badresults[detid]=tempval;
 	  } else{
 	    std::pair<TString,int> tempval(tempgainstring,2);
-	    badresults[detid]=tempval;
+	    if(useddefaultfortree==0) badresults[detid]=tempval;
 	    // if everything else fails: set the gain & ped now to dead
 	    peds[jrow]=badpedval;
 	    gains[jrow]=badgainval;
@@ -341,7 +329,23 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
 	float ped=peds[jrow];
 	float gain=gains[jrow];
 	
+	// This is probbaly a good place to insert the vcal calibration, 
+	// someting like this:
+	// include the vcal claibration already here 
+	//double newGain = 1, newPed  = 0.;
+	//if(layer==1) { 
+	//newGain = gain * electronsPerVcal_L1_;
+	//newPed  = ped  - (electronsPerVcal_L1_Offset_/newGain);
+	//} else {
+	//newGain = gain * electronsPerVcal_;
+	//newPed  = ped  - (electronsPerVcal_Offset_/newGain);
+	//}
+	//ped = newPed;
+	//gain = newGain;
+
+
 	if( ped>pedlow_ && gain>gainlow_ && ped<pedhi_ && gain<gainhi_ ){
+	  if(useddefaultfortree==0) npixGood2++;
 	  theGainCalibrationDbInput_->setData(ped, gain, theSiPixelGainCalibrationPerPixel);
 	  theGainCalibrationDbInputOffline_->setDataPedestal(ped, theSiPixelGainCalibrationGainPerColPedPerPixel);
 	  //	  theGainCalibrationDbInputPhase1Offline_->setDataPedestal(ped, theSiPixelGainCalibrationGainPerClusterColPedPerPixel);
@@ -360,51 +364,39 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
 	    gainClusterCol[iglobalrow][0]/=((float)nusedrows[iglobalrow]/2);
 	    gainClusterCol[iglobalrow][1]/=((float)nusedrows[iglobalrow]/2);
 
+#ifdef TreeOffline
+	    // This tree has cols & rows in module units 
 	    int startingRow(1);
 	    if ( jrow==160 ) {startingRow=81;}
 	    //filling the offline tree
 	    TOdetid = detid;
-	    for(size_t row_tmp=startingRow; row_tmp<=jrow; row_tmp++) 
-	      {
-		float ped_tmp = peds[row_tmp];
-		TOrow = row_tmp-1;
-		TOcol = icol-1;
-		TOped = ped_tmp;
-		int globalrow_tmp(0);
-		if(row_tmp>nrowsrocsplit) {globalrow_tmp=1;}
-		TOgain = gainforthiscol[globalrow_tmp];
-		treeOffline->Fill();
-	      }
-	  
-	    //filling the phase1 offline tree
-	    // TP1Odetid = detid;
-	    // for(size_t row_tmp=startingRow; row_tmp<=jrow; row_tmp++) 
-	    //   {
-	    // 	float ped_tmp = peds[row_tmp];
-	    // 	TP1Orow = row_tmp-1;
-	    // 	TP1Ocol = icol-1;
-	    // 	TP1Oped = ped_tmp;
-	    // 	int globalrow_tmp(0);
-	    // 	if(row_tmp>nrowsrocsplit) {globalrow_tmp=1;}
-	    // 	TP1Ogain = gainClusterCol[globalrow_tmp][(row_tmp+1)%2];
-	    // 	treePhase1Offline->Fill();
-	    //   }
+	    for(size_t row_tmp=startingRow; row_tmp<=jrow; row_tmp++) {
+	      float ped_tmp = peds[row_tmp];
+	      TOrow = row_tmp-1;
+	      TOcol = icol-1;
+	      TOped = ped_tmp;
+	      int globalrow_tmp(0);
+	      if(row_tmp>nrowsrocsplit) {globalrow_tmp=1;}
+	      TOgain = gainforthiscol[globalrow_tmp];
+	      treeOffline->Fill();
+	    }
+#endif // TreeOffline
 
-	    if (detid==303050776) {std::cout << "detid: " << detid << " gain to be filled: [0]: " << gainClusterCol[iglobalrow][0] << " [1] : " << gainClusterCol[iglobalrow][1] << std::endl << "  gainforthiscol: " << gainforthiscol[iglobalrow] << std::endl;}
+	    //if (detid==303050776) {std::cout << "detid: " << detid << " gain to be filled: [0]: " << gainClusterCol[iglobalrow][0] << " [1] : " << gainClusterCol[iglobalrow][1] << std::endl << "  gainforthiscol: " << gainforthiscol[iglobalrow] << std::endl;}
 	  } 
 	  if(gainforthiscol[iglobalrow]>gainlow_ && gainforthiscol[iglobalrow]<gainhi_ && pedforthiscol[iglobalrow]>pedlow_ && pedforthiscol[iglobalrow]<pedhi_ ){// good 
 	    //	    std::cout << "setting ped & col aves: " << pedforthiscol[iglobalrow] << " " <<  gainforthiscol[iglobalrow]<< std::endl;
-	  } else{	
-	    if(usemeanwhenempty_){
+	  } else {	
+	    if(usemeanwhenempty_) {
 	      pedforthiscol[iglobalrow]=meanped;
 	      gainforthiscol[iglobalrow]=meangain;
 	      std::pair<TString,int> tempval(tempgainstring,3);
-	      badresults[detid]=tempval;
-	    } else{ //make dead
+	      if(useddefaultfortree==0) badresults[detid]=tempval;
+	    } else { //make dead
 	      pedforthiscol[iglobalrow]=badpedval;
 	      gainforthiscol[iglobalrow]=badgainval;
 	      std::pair<TString,int> tempval(tempgainstring,4);
-	      badresults[detid]=tempval;
+	      if(useddefaultfortree==0) badresults[detid]=tempval;
 	    }
 	  }
 
@@ -415,17 +407,17 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
 	      gainClusterCol[iglobalrow][0]=meangain;
 	      gainClusterCol[iglobalrow][1]=meangain;
 	      std::pair<TString,int> tempval(tempgainstring,3);
-	      badresults[detid]=tempval;
+	      if(useddefaultfortree==0) badresults[detid]=tempval;
 	    } else{ //make dead
 	      gainClusterCol[iglobalrow][0]=badgainval;
 	      gainClusterCol[iglobalrow][1]=badgainval;
 	      std::pair<TString,int> tempval(tempgainstring,4);
-	      badresults[detid]=tempval;
+	      if(useddefaultfortree==0) badresults[detid]=tempval;
 	    }
 	  }
 
 	  if(gainforthiscol[iglobalrow]>gainlow_ && gainforthiscol[iglobalrow]<gainhi_ && pedforthiscol[iglobalrow]>pedlow_ && pedforthiscol[iglobalrow]<pedhi_ ){
-	    if (detid==303050776) {std::cout << "filling offline gain: " << gainforthiscol[iglobalrow] << std::endl;}
+	    //if (detid==303050776) {std::cout << "filling offline gain: " << gainforthiscol[iglobalrow] << std::endl;}
 	    theGainCalibrationDbInputOffline_->setDataGain(gainforthiscol[iglobalrow],nrowsrocsplit,theSiPixelGainCalibrationGainPerColPedPerPixel);
 	    theGainCalibrationDbInputHLT_->setData(pedforthiscol[iglobalrow],gainforthiscol[iglobalrow],theSiPixelGainCalibrationPerColumn);
 	  } else{
@@ -467,24 +459,22 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
   size_t ncoldead=0;
   for(std::map<uint32_t,std::pair<TString,int> >::const_iterator ibad= badresults.begin(); ibad!=badresults.end(); ++ibad){
     uint32_t detid = ibad->first;
-    if(badresults[detid].second==0){
+    //std::cout<<detid<<" "<<badresults[detid].first<<" "<<badresults[detid].second<<std::endl;
+    if(badresults[detid].second==0) {
+      //std::cout << detid << " empty module, use default "<< std::endl;
       nempty++;
-    } else if(badresults[detid].second==1){
+    } else if(badresults[detid].second==1) {
       ndefault++;
-    } else if(badresults[detid].second==2){
-      std::cout << badresults[detid].first  ;
-      std::cout << " has one or more dead pixels";
-      std::cout << std::endl;
+      std::cout << detid << " has one or more dead pixels, use default "<< std::endl;
+    } else if(badresults[detid].second==2) {
+      std::cout << detid << " has one or more dead pixels"<< std::endl;
       ndead++;
-    }
-    else if(badresults[detid].second==3){
+    } else if(badresults[detid].second==3) {
+      std::cout << detid << " has one or more dead columns, use default"<<std::endl;
       ncoldefault++;
-    }
-    else if(badresults[detid].second==4){
-      std::cout << badresults[detid].first  ;
-      std::cout << " has one or more dead columns";
+    } else if(badresults[detid].second==4) {
+      std::cout << detid << " has one or more dead columns"<<std::endl;
       ncoldead++;
-      std::cout << std::endl;
     }
   }
   std::cout << nempty << " modules were empty and now have pixels filled with default values." << std::endl;
@@ -494,71 +484,65 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
   std::cout << ncoldead << " modules have columns filled with dead values." << std::endl;
   std::cout << " ---> PIXEL Modules  " << nmodules  << "\n"
 	    << " ---> PIXEL Channels " << nchannels << std::endl;
+  //std::cout << " "<<ntimes<<" "<<nemptypixels<<" "<<NDetid<<std::endl;
+  std::cout << " modules missing "<<countModulesMissing<<" modules with data "<<countModulesWithHistos
+	    <<" all modules"<<lookAtModules<<std::endl;
+  std::cout <<" empty pixels (no entry in histos) "<<npixEmpty<<" pixels with data entries "<<npixGood<<std::endl;
+  std::cout<<npixUsed<<" "<<npixGood2<<" "<<npixBad<<std::endl;
 
   std::cout << " --- writing to DB!" << std::endl;
   edm::Service<cond::service::PoolDBOutputService> mydbservice;
   if(!mydbservice.isAvailable() ){
     edm::LogError("db service unavailable");
     return;
-  }
-  else{
-    if(record_=="SiPixelGainCalibrationForHLTRcd"){
+  } else {
+    if(record_=="SiPixelGainCalibrationForHLTRcd") {
       std::cout << "now doing SiPixelGainCalibrationForHLTRcd payload..." << std::endl;
-      if( mydbservice->isNewTagRequest(record_) ){
+      if( mydbservice->isNewTagRequest(record_) ) {
 	mydbservice->createNewIOV<SiPixelGainCalibrationForHLT>(
-								theGainCalibrationDbInputHLT_,
-								mydbservice->beginOfTime(),
-								mydbservice->endOfTime(),
-								"SiPixelGainCalibrationForHLTRcd");
-      }
-      else{
-
+				    theGainCalibrationDbInputHLT_,
+      				    mydbservice->beginOfTime(),
+				    mydbservice->endOfTime(),
+				    "SiPixelGainCalibrationForHLTRcd");
+      } else {
 	mydbservice->appendSinceTime<SiPixelGainCalibrationForHLT>(
-								   theGainCalibrationDbInputHLT_, 
-								   mydbservice->currentTime(),
-								   "SiPixelGainCalibrationForHLTRcd");
+				   theGainCalibrationDbInputHLT_, 
+				   mydbservice->currentTime(),
+				   "SiPixelGainCalibrationForHLTRcd");
       
       }
-    }
-    else if (record_=="SiPixelGainCalibrationOfflineRcd"){
+    } else if (record_=="SiPixelGainCalibrationOfflineRcd") {
       std::cout << "now doing SiPixelGainCalibrationOfflineRcd payload..." << std::endl; 
-      if( mydbservice->isNewTagRequest(record_) ){
+      if( mydbservice->isNewTagRequest(record_) ) {
 	mydbservice->createNewIOV<SiPixelGainCalibrationOffline>(
-								 theGainCalibrationDbInputOffline_,
-								 mydbservice->beginOfTime(),
-								 mydbservice->endOfTime(),
-								 "SiPixelGainCalibrationOfflineRcd");
-      }
-      else{
+				  theGainCalibrationDbInputOffline_,
+				  mydbservice->beginOfTime(),
+				  mydbservice->endOfTime(),
+				  "SiPixelGainCalibrationOfflineRcd");
+      } else {
 	mydbservice->appendSinceTime<SiPixelGainCalibrationOffline>(
-								    theGainCalibrationDbInputOffline_, 
-								    mydbservice->currentTime(),
-								    "SiPixelGainCalibrationOfflineRcd");
-	
+				 theGainCalibrationDbInputOffline_, 
+				 mydbservice->currentTime(),
+				 "SiPixelGainCalibrationOfflineRcd");
       }
-    }
-    else if (record_=="SiPixelGainCalibrationRcd"){
+    } else if (record_=="SiPixelGainCalibrationRcd") {
       std::cout << "now doing SiPixelGainCalibrationRcd payload..." << std::endl; 
-      if( mydbservice->isNewTagRequest(record_) ){
+      if( mydbservice->isNewTagRequest(record_) ) {
 	mydbservice->createNewIOV<SiPixelGainCalibration>(
-								 theGainCalibrationDbInput_,
-								 mydbservice->beginOfTime(),
-								 mydbservice->endOfTime(),
-								 "SiPixelGainCalibrationRcd");
-      }
-      else{
+							     theGainCalibrationDbInput_,
+						             mydbservice->beginOfTime(),
+							     mydbservice->endOfTime(),
+							     "SiPixelGainCalibrationRcd");
+      } else {
 	mydbservice->appendSinceTime<SiPixelGainCalibration>(
-								    theGainCalibrationDbInput_, 
-								    mydbservice->currentTime(),
-								    "SiPixelGainCalibrationRcd");
-	
+							     theGainCalibrationDbInput_, 
+							     mydbservice->currentTime(),
+							     "SiPixelGainCalibrationRcd");
       }
     }
 
     // else if (record_=="SiPixelGainCalibrationPhase1OfflineRcd"){
-
     //   std::cout << "now doing SiPixelGainCalibrationPhase1OfflineRcd payload..." << std::endl; 
-
     //   if( mydbservice->isNewTagRequest(record_) ){
     // 	std::cout << "new tag request" << std::endl;
     // 	mydbservice->createNewIOV<SiPixelGainCalibrationPhase1Offline>(
@@ -566,15 +550,13 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
     // 								       mydbservice->beginOfTime(),
     // 								       mydbservice->endOfTime(),
     // 								       "SiPixelGainCalibrationPhase1OfflineRcd");
-
     //   }
     //   else{
     // 	std::cout << "NO new tag request" << std::endl;//confirmed
     //   	mydbservice->appendSinceTime<SiPixelGainCalibrationPhase1Offline>(
     //   								    theGainCalibrationDbInputPhase1Offline_, 
     //   								    mydbservice->currentTime(),
-    //   								    "SiPixelGainCalibrationPhase1OfflineRcd");
-	
+    //   								    "SiPixelGainCalibrationPhase1OfflineRcd");	
     //   }
     //}
 
@@ -591,13 +573,14 @@ SiPixelGainCalibrationDBUploader::SiPixelGainCalibrationDBUploader(const edm::Pa
   theGainCalibrationDbInputHLT_(0),
   theGainCalibrationDbInputService_(iConfig),
   record_(conf_.getUntrackedParameter<std::string>("record","SiPixelGainCalibrationOfflineRcd")),
-  //gainlow_(10.),gainhi_(0.),pedlow_(255.),pedhi_(-256),
-  gainlow_(10.),gainhi_(0.),pedlow_(conf_.getUntrackedParameter<double>("pedlow")),pedhi_(conf_.getUntrackedParameter<double>("pedhigh")),
+  gainlow_(0.),gainhi_(1000.),pedlow_(conf_.getUntrackedParameter<double>("pedlow")),pedhi_(conf_.getUntrackedParameter<double>("pedhigh")),
   usemeanwhenempty_(conf_.getUntrackedParameter<bool>("useMeanWhenEmpty",false)),
   rootfilestring_(conf_.getUntrackedParameter<std::string>("inputrootfile","inputfile.root")),
-  // gainmax_(6),pedmax_(250),badchi2_(conf_.getUntrackedParameter<double>("badChi2Prob",0.01)),nmaxcols(10*52),nmaxrows(160)
-  gainmax_(6),pedmax_(conf_.getUntrackedParameter<double>("pedmax")),badchi2_(conf_.getUntrackedParameter<double>("badChi2Prob",0.01)),nmaxcols(10*52),nmaxrows(160)
-
+					    //gainmax_(6),
+  gainmax_(conf_.getUntrackedParameter<double>("gainmax",6.)),
+  pedmax_(conf_.getUntrackedParameter<double>("pedmax")),
+  badchi2_(conf_.getUntrackedParameter<double>("badChi2Prob",0.01)), // not used
+  nmaxcols(10*52),nmaxrows(160)
 {
   //now do what ever initialization is needed
   ::putenv((char*)"CORAL_AUTH_USER=me");
@@ -608,6 +591,24 @@ SiPixelGainCalibrationDBUploader::SiPixelGainCalibrationDBUploader(const edm::Pa
   defaultPed_=new TH2F("defaultPed","default pedestal, contains mean",nmaxcols,0,nmaxcols,nmaxrows,0,nmaxrows);// using dummy (largest) module size
   defaultFitResult_=new TH2F("defaultFitResult","default fitresult, contains '0'",nmaxcols,0,nmaxcols,nmaxrows,0,nmaxrows);// using dummy (largest) module size
   defaultChi2_=new TH2F("defaultChi2","default chi2 probability, contains '1'",nmaxcols,0,nmaxcols,nmaxrows,0,nmaxrows);// using dummy (largest) module size
+
+  if(gainlow_>gainhi_){  
+    float temp=gainhi_;
+    gainhi_=gainlow_;
+    gainlow_=temp;
+  }
+  // if(pedlow_>pedhi_){
+  //     float temp=pedhi_;
+  //     pedhi_=pedlow_;
+  //     pedlow_=temp;
+  //   }
+  if(gainhi_>gainmax_) gainhi_=gainmax_;
+  // if(pedhi_>pedmax_)
+  //    pedhi_=pedmax_;
+
+  std::cout<<" max gain "<<gainmax_<<" hi/low gain "<<gainhi_<<"/"<<gainlow_
+	   <<" max ped "<<pedmax_<<" hi/low ped "<<pedhi_<<"/"<<pedlow_
+	   <<" chi2 cut "<<badchi2_<<" fill empty with mean "<<usemeanwhenempty_<<std::endl;
 }
 
 
@@ -628,13 +629,19 @@ SiPixelGainCalibrationDBUploader::analyze(const edm::Event& iEvent, const edm::E
 }
 
 void SiPixelGainCalibrationDBUploader::beginRun(const edm::EventSetup& iSetup){
- 
 }
 // ------------ method called once each job just before starting event loop  ------------
-void SiPixelGainCalibrationDBUploader::beginJob() {}
+void SiPixelGainCalibrationDBUploader::beginJob() {
+  countModulesFound=0;
+  emptyPed_=emptyGain_=badPed_=badGain_=0;
+}
 
 // ------------ method called once each job just after ending the event loop  ------------
-void SiPixelGainCalibrationDBUploader::endJob() {}
+void SiPixelGainCalibrationDBUploader::endJob() {
+  std::cout<<"Found modules in the root file "<<countModulesFound<<std::endl;
+  std::cout<<" pixels with: empty pedestal "<<emptyPed_<<" pedestal off range "<<badPed_
+	   <<" empty gain "<<emptyGain_<<" gain off range "<<badGain_<<std::endl;
+}
 
 bool SiPixelGainCalibrationDBUploader::getHistograms() {
   std::cout <<"Parsing file " << rootfilestring_ << std::endl;
@@ -656,7 +663,6 @@ bool SiPixelGainCalibrationDBUploader::getHistograms() {
   int ikey=0;
   int num_dir_list=list->GetEntries() ;
 
-  
   for(ikey=0;ikey<num_dir_list;  ikey++){
     TKey *thekey = (TKey*)list->At(ikey);
     if(thekey==0)
@@ -778,28 +784,29 @@ bool SiPixelGainCalibrationDBUploader::getHistograms() {
     TH2F *temphistogain = (TH2F*)therootfile_->Get(bookkeeper_[detid]["gain_2d"]);
     TH2F *temphistofitresult = (TH2F*)therootfile_->Get(bookkeeper_[detid]["gain_2d"]);
 	
+    //std::cout<<std::endl<<" found det "<<detid<<std::endl;
+    countModulesFound++;
+
     for(int xbin=1; xbin<=temphistoped->GetNbinsX(); ++xbin){
       for(int ybin=1; ybin<=temphistoped->GetNbinsY(); ++ybin){
-	if(temphistofitresult->GetBinContent(xbin,ybin)<=0)
-	  continue;
+	if(temphistofitresult->GetBinContent(xbin,ybin)<=0) {emptyPed_++;continue;}
 	float val = temphistoped->GetBinContent(xbin,ybin);
-	if(val>pedmax_)
-	  continue;
+	if(val>pedmax_) {badPed_++; continue;}  // skip large pedestals
+	//std::cout<<val<<" ";
 	// if(pedlow_>val)
-//     pedlow_=val;
-//   if(pedhi_<val)
-//     pedhi_=val;
+	//     pedlow_=val;
+	//   if(pedhi_<val)
+	//     pedhi_=val;
 	meanPedHist_->Fill(val);
       }
     }
 	  
     for(int xbin=1; xbin<=temphistogain->GetNbinsX(); ++xbin){
       for(int ybin=1; ybin<=temphistogain->GetNbinsY(); ++ybin){
-	if(temphistofitresult->GetBinContent(xbin,ybin)<=0)
-	  continue;
+	if(temphistofitresult->GetBinContent(xbin,ybin)<=0) {emptyGain_++;continue;}
 	float val = temphistogain->GetBinContent(xbin,ybin);
-	if(val<=0.0001)
-	  continue;
+	if(val<=0.0001 || val>gainmax_) {badGain_++;continue;} // skip low gains
+	//std::cout<<val<<",";
 	if(gainlow_>val)
 	  gainlow_=val;
 	if(gainhi_<val)

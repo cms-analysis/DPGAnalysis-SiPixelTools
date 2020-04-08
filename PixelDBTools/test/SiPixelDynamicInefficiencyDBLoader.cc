@@ -3,9 +3,11 @@
 #include <iostream>
 #include <fstream>
 #include <limits>
+
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "CondCore/DBOutputService/interface/PoolDBOutputService.h"
-#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
+
+#include "Geometry/CommonTopologies/interface/PixelGeomDetUnit.h"
 #include "CondFormats/SiPixelObjects/interface/SiPixelDynamicInefficiency.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 

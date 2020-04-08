@@ -1,8 +1,7 @@
-
-
 import FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
-process = cms.Process("MyRECO",eras.Run2_2017)
+#process = cms.Process("MyRECO",eras.Run2_2017)
+process = cms.Process("MyRECO",eras.Run3)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -18,8 +17,17 @@ process.load('Configuration.StandardSequences.Reconstruction_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '') # no misalignment 
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '') # no misalignment 
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '') # with misalignment 
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_design', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_realistic', '')
+
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2021_design', '') # for Run3
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2021_realistic', '') # for Run3
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2023_realistic', '') # for Run3
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2024_realistic', '') # for Run3
+
+
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
@@ -28,11 +36,7 @@ process.maxEvents = cms.untracked.PSet(
 # Input source
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-#       '/store/user/kotlinski/MC/mu_pt100/raw/raw1_eta0p1.root'
-#       '/store/user/kotlinski/MC/mu_pt100/raw/raw2_eta0p1.root'
-       '/store/user/kotlinski/MC/mu_pt100/raw/raw3_eta0p1.root'
-#       '/store/user/kotlinski/MC/mu_pt100/raw/raw4_eta0p1.root'
-#       '/store/user/kotlinski/MC/mu_pt100/raw/raw5_eta0p1.root'
+       '/store/user/kotlinski/MC11/mu_pt100/raw/raw1.root'
 
         #'file:digis4.root'
 #       'file:/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/raw/raw1_thr1k.root'
@@ -66,13 +70,6 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
     fileName = cms.untracked.string(
         'r.root'
-#        '/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/reco/reco1_thr1kclu10.root'
-#        '/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/reco/reco1_clu10.root'
-#        '/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/reco/reco1.root'
-#        '/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/reco/reco2.root'
-#        '/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/reco/reco3.root'
-#        '/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/reco/reco4.root'
-#        '/afs/cern.ch/work/d/dkotlins/public/MC/mu_phase1/pt100/reco/reco5.root'
     ),
     outputCommands = process.RECOSIMEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
@@ -83,10 +80,10 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
 #process.siPixelClustersPreSplitting.VCaltoElectronOffset = -60
 #process.siPixelClustersPreSplitting.VCaltoElectronGain_L1 = 47  # default
 #process.siPixelClustersPreSplitting.VCaltoElectronOffset_L1 = -60
-process.siPixelClustersPreSplitting.SeedThreshold = 10 #  def=1000
-process.siPixelClustersPreSplitting.ChannelThreshold = 2 # must be bigger than 1, def=10
-process.siPixelClustersPreSplitting.ClusterThreshold = 10 # def =4000    # integer?
-process.siPixelClustersPreSplitting.ClusterThreshold_L1 = 10 # def=2000 # integer?
+#process.siPixelClustersPreSplitting.SeedThreshold = 10 #  def=1000
+#process.siPixelClustersPreSplitting.ChannelThreshold = 2 # must be bigger than 1, def=10
+#process.siPixelClustersPreSplitting.ClusterThreshold = 10 # def =4000    # integer?
+#process.siPixelClustersPreSplitting.ClusterThreshold_L1 = 10 # def=2000 # integer?
 
 process.a = cms.EDAnalyzer("PixDigisTest",
     Verbosity = cms.untracked.bool(False),

@@ -278,7 +278,7 @@ bool PixelDumpDataInputSource::setRunAndEventInfo(edm::EventID& id, edm::TimeVal
     //std::cout<< " previous event number " << eventnumber << " next event number " << m_currenteventnumber << std::endl;
 
     if(m_currenteventnumber<eventnumber)
-      std::cout<< " Error, the previous event number (" << eventnumber << ") is LARGER than the next event number (" << m_currenteventnumber << ")" << std::endl;
+      std::cout<< "Warning, the previous event number (" << eventnumber << ") is LARGER than the next event number (" << m_currenteventnumber << ")" << std::endl;
 
   } while( eventnumber == m_currenteventnumber);
   

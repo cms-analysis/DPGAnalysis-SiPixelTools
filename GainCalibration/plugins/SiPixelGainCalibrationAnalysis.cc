@@ -55,17 +55,20 @@ SiPixelGainCalibrationAnalysis::SiPixelGainCalibrationAnalysis(const edm::Parame
   theGainCalibrationDbInputOffline_(0),
   theGainCalibrationDbInputHLT_(0),
   theGainCalibrationDbInputService_(iConfig),*/
-  gainlow_(10.),gainhi_(0.),pedlow_(255.),pedhi_(0.),
+  gainlow_(999.),gainhi_(0.),pedlow_(255.),pedhi_(0.),  // just to find max and min settings
   useVcalHigh_(conf_.getParameter<bool>("useVCALHIGH")),
   scalarVcalHigh_VcalLow_(conf_.getParameter<double>("vcalHighToLowConversionFac"))
 {
+
+  std::cout<<writeSummary_<<" "<<chi2Threshold_<<" "<<chi2ProbThreshold_<<" "<<maxGainInHist_<<" "<<maxChi2InHist_<<std::endl;
+
   if(reject_single_entries_)
     min_nentries_=1;
   else
     min_nentries_=0;
   ::putenv((char*)"CORAL_AUTH_USER=me");
   ::putenv((char*)"CORAL_AUTH_PASSWORD=test");   
-  edm::LogInfo("SiPixelGainCalibrationAnalysis") << "now using fit function " << fitfunction_ << ", which has " << nfitparameters_ << " free parameters. " << std::endl;
+  std::cout<<"SiPixelGainCalibrationAnalysis, now using fit function " << fitfunction_ << ", which has " << nfitparameters_ << " free parameters. " << std::endl;
  
   func_= new TF1("func",fitfunction_.c_str(),0,256*scalarVcalHigh_VcalLow_);
   graph_ = new TGraphErrors();
@@ -118,7 +121,7 @@ void SiPixelGainCalibrationAnalysis::calibrationSetup(const edm::EventSetup&) { 
 
 //------- summary printing method. Very verbose.
 void SiPixelGainCalibrationAnalysis::printSummary(){
-
+  std::cout<<" write summary "<<std::endl;
   uint32_t detid=0;
   for(std::map<uint32_t,std::map<std::string,TH2F *> >::const_iterator idet = bookkeeper_2D_.begin(); idet != bookkeeper_2D_.end(); ++idet){
     if(detid==idet->first)
@@ -138,7 +141,7 @@ void SiPixelGainCalibrationAnalysis::printSummary(){
     
     for(std::map<std::string, TH1F *>::const_iterator ipix = bookkeeper_pixels_1D_[detid].begin(); ipix!=bookkeeper_pixels_1D_[detid].end(); ++ipix)
       summarytext << "\t " << ipix->first << "\n";
-    edm::LogInfo("SiPixelGainCalibrationAnalysis") << summarytext.str() << std::endl;
+    std::cout<<"SiPixelGainCalibrationAnalysis" << summarytext.str() << std::endl;
     
   }
   if(summary_.is_open()){
@@ -256,9 +259,11 @@ bool SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelC
     if(NbofPointsInPlateau>=(nallpoints-2)){
       status=-2;
       bookkeeper_2D_[detid]["status_2d"]->SetBinContent(ipix->col()+1,ipix->row()+1,status);
+      statusNumbers_[abs(status)]++;
       if(writeSummary_){
-        summary_<<"row_"<<ipix->row()<<" col_"<<ipix->col()<<" status_"<<status<<endl;
-        statusNumbers_[abs(status)]++;
+        summary_<<"row_"<<ipix->row()<<" col_"<<ipix->col()<<" status_"<<status
+		<<" number of points in the plateau too large "
+		<<NbofPointsInPlateau<<" "<<nallpoints<<endl;
       }
       return false;
     }
@@ -316,9 +321,10 @@ bool SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelC
   if(npoints<2){
     status = -7;
     bookkeeper_2D_[detid]["status_2d"]->SetBinContent(ipix->col()+1,ipix->row()+1,status);
+    statusNumbers_[abs(status)]++;
     if(writeSummary_){
-      summary_<<"row_"<<ipix->row()<<" col_"<<ipix->col()<<" status_"<<status<<endl;
-      statusNumbers_[abs(status)]++;
+      summary_<<"row_"<<ipix->row()<<" col_"<<ipix->col()<<" status_"<<status
+	      <<" number of fit points less then 2 "<<npoints<<endl;
     }
     std::ostringstream pixelinfo;
     pixelinfo << "GainCurve_row_" << ipix->row() << "_col_" << ipix->col();
@@ -377,24 +383,26 @@ bool SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelC
   }
   
   if(tempresult==0)
-    status=1;
+    status=1;  // OK ?
   else
-    status=0;
+    status=0; // error ?
+  
   if(slope!=0)
     slope = 1./slope;
   if(isnan(slope) || isnan(intercept)){
     status=-6;
     bookkeeper_2D_[detid]["status_2d"]->SetBinContent(ipix->col()+1,ipix->row()+1,status);
+    statusNumbers_[abs(status)]++;
     if(writeSummary_){
-      summary_<<"row_"<<ipix->row()<<" col_"<<ipix->col()<<" status_"<<status<<endl;
-      statusNumbers_[abs(status)]++;
+      summary_<<"row_"<<ipix->row()<<" col_"<<ipix->col()<<" status_"
+	      <<" bad slope or intercept(NAN) "<<status<<endl;
     }
     //return false;
   }
-  if(chi2>chi2Threshold_ && chi2Threshold_>=0)
-    status=5;
-  if(prob<chi2ProbThreshold_)
-    status=5;
+  if(chi2>chi2Threshold_ && chi2Threshold_>=0) {
+    status=5;} // std::cout<<" thr "<<chi2<<" "<<chi2Threshold_<<std::endl;}
+  if(prob<chi2ProbThreshold_) {
+    status=5;} //std::cout<<" prob "<<prob<<" "<<chi2ProbThreshold_<<std::endl;}
   if(noPlateau)
     status=3;
   if(nallpoints<4)
@@ -403,7 +411,7 @@ bool SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelC
     status=-8;
   if(status!=1) makehistopersistent=true;
   statusNumbers_[abs(status)]++;
-
+  
   if(slope<gainlow_)
     gainlow_=slope;
   if(slope>gainhi_)

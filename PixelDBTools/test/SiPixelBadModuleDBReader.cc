@@ -11,7 +11,7 @@
 //#include "CondFormats/SiPixelObjects/interface/PixelROC.h"
 //#include "CondFormats/SiPixelObjects/interface/PixelFEDCabling.h"
 
-#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
+#include "Geometry/CommonTopologies/interface/PixelGeomDetUnit.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
