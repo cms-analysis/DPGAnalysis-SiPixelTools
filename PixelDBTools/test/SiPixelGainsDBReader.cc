@@ -68,9 +68,9 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   TFileDirectory subDirGain = fs->mkdir("Gains");
   char name[128];
 
-  unsigned int nmodules = 0;
-  uint32_t nchannels = 0;
-  uint32_t ndead=0;
+  unsigned int nmodules = 0, nmodulesB=0, nmodulesF=0;
+  uint32_t nchannels = 0, nchannelsB=0, nchannelsF=0;
+  uint32_t ndead=0, ndeadInL1=0,ndeadInL2=0,ndeadInL3=0,ndeadInL4=0,ndeadInF=0;
   uint32_t nnoisy=0;
   
   // Get the calibration data
@@ -172,8 +172,7 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
       edm::LogError("SiPixelCondObjHLTDisplay")<<"[SiPixelCondObjHLTReader::beginJob] the detID "<<detid<<" doesn't seem to belong to Tracker"<<std::endl; 
       continue;
     }     
-   
-      
+         
     _deadfrac_m[detid]=0.;
     _noisyfrac_m[detid]=0.;
 
@@ -186,7 +185,8 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     int layer = -1;
     string name;
     if ( detIdObject.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel) ) { // BPIX
-      // new indecies 
+
+      nmodulesB++;
       // Barell layer = 1,2,3
       unsigned int layerC1 = tTopo->pxbLayer(detIdObject);
       // Barrel ladder id 1-20,32,44.
@@ -194,6 +194,7 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
       // Barrel Z-index=1,8
       unsigned int zindex1 = tTopo->pxbModule(detIdObject);
 
+      // example printouts
       if(layerC1==1 && ladderC1==1 && zindex1==1) select=true;
       if(layerC1==2 && ladderC1==1 && zindex1==1) select=true;
       if(layerC1==3 && ladderC1==1 && zindex1==1) select=true;
@@ -223,7 +224,8 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 
     } else {  // endcaps
 
-      // new ids 
+      nmodulesF++;
+      // ids 
       int disk=tTopo->pxfDisk(detIdObject); //1,2,3
       int blade=tTopo->pxfBlade(detIdObject); //1-24
       int plaq=tTopo->pxfModule(detIdObject); //
@@ -257,6 +259,7 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     int ncols = topol.ncolumns();   // cols in y
     float nchannelspermod=0;
     float gains=0, peds=0;
+    int ndeadInModule=0;
 
     for(int col_iter=0; col_iter<ncols; col_iter++) {
        for(int row_iter=0; row_iter<nrows; row_iter++) {
@@ -266,8 +269,10 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 	 if(SiPixelGainCalibrationService_->isDead(detid,col_iter,row_iter)) {
 	    //	    std::cout << "found dead pixel " << detid << " " <<col_iter << "," << row_iter << std::endl;
 	   ndead++;
+	   ndeadInModule++;
 	   _deadfrac_m[detid]++;
 	   continue;
+
 	 } else if(SiPixelGainCalibrationService_->isNoisy(detid,col_iter,row_iter)) {
 	    //	    std::cout << "found noisy pixel " << detid << " " <<col_iter << "," << row_iter << std::endl;
 	   nnoisy++;
@@ -275,26 +280,25 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 	   continue;
 	 }
 
-
 	 float gain  = SiPixelGainCalibrationService_->getGain(detid, col_iter, row_iter);
 	 _TH1F_Gains_m[detid]->Fill( gain );
 	 _TH1F_Gains_all->Fill(gain);
 	 gains += gain;
 
-	 if (detIdObject.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel))
-    	    _TH1F_Gains_bpix->Fill(gain);
-	 if (detIdObject.subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap))
-	   _TH1F_Gains_fpix->Fill(gain);
+	 //if (detIdObject.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel))
+	 // _TH1F_Gains_bpix->Fill(gain);
+	 //if (detIdObject.subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap))
+	 //_TH1F_Gains_fpix->Fill(gain);
 
 	 float ped  = SiPixelGainCalibrationService_->getPedestal(detid, col_iter, row_iter);
 	 _TH1F_Pedestals_m[detid]->Fill( ped );
        	 _TH1F_Pedestals_all->Fill(ped);
 	 peds += ped;
 
-         if (detIdObject.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel))
-	   _TH1F_Pedestals_bpix->Fill(ped);
-	 if (detIdObject.subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap))
-	   _TH1F_Pedestals_fpix->Fill(ped);
+         //if (detIdObject.subdetId() == static_cast<int>(PixelSubdetector::PixelBarrel))
+	 //_TH1F_Pedestals_bpix->Fill(ped);
+	 //if (detIdObject.subdetId() == static_cast<int>(PixelSubdetector::PixelEndcap))
+	 //_TH1F_Pedestals_fpix->Fill(ped);
 
 	 // This needs updating 
 	 // ADC = VCAL(LOW) * 1/gain + pedestal
@@ -308,13 +312,18 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 	 if(layer>0) { // BPIX
 	   _TH1F_Gains_bpix->Fill(gain);
 	   _TH1F_Pedestals_bpix->Fill(ped);
+	   nchannelsB++;
 	   if(layer==1)      { GainsL1->Fill(gain); PedsL1->Fill(ped);ADCL1->Fill(adc);VcalL1->Fill(vcal);}
 	   else if(layer==2) { GainsL2->Fill(gain); PedsL2->Fill(ped);ADCL2->Fill(adc);VcalL2->Fill(vcal);}
 	   else if(layer==3) { GainsL3->Fill(gain); PedsL3->Fill(ped);ADCL3->Fill(adc);VcalL3->Fill(vcal);}
 	   else if(layer==4) { GainsL4->Fill(gain); PedsL4->Fill(ped);ADCL4->Fill(adc);VcalL4->Fill(vcal);}
-	 } else {
-	   _TH1F_Gains_fpix->Fill(gain); _TH1F_Pedestals_fpix->Fill(ped); ADCF->Fill(adc); VcalF->Fill(vcal);}
+	   else {cout<<" what else? "<<layer<<endl;}
 
+	 } else {  // FPix
+	   nchannelsF++;
+	   _TH1F_Gains_fpix->Fill(gain); _TH1F_Pedestals_fpix->Fill(ped); ADCF->Fill(adc); VcalF->Fill(vcal);
+	 }
+	 
 	 if(PRINT && select && (col_iter%10==0) && (row_iter%20==0) ) 
 	   std::cout <<" DetId "<<detid<<" "<<name<<" Col "<<col_iter<<" Row "<<row_iter
 		     <<" Ped "<<ped<<" Gain "<<gain<<std::endl;	 
@@ -324,6 +333,15 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 	 //std::cout <<" DetId "<<detid<<" "<<name<<" Col "<<col_iter<<" Row "<<row_iter
 	 // <<" Ped "<<ped<<" Gain "<<gain<<std::endl;	 
        }
+    }
+
+    if(ndeadInModule<66460) { // model not completely missing/empty
+      cout<<" Dead pixels in module "<<detid<<" "<<ndeadInModule<<endl;
+      if     (layer==1) ndeadInL1 += ndeadInModule;
+      else if(layer==2) ndeadInL2 += ndeadInModule;
+      else if(layer==3) ndeadInL3 += ndeadInModule;
+      else if(layer==4) ndeadInL4 += ndeadInModule;
+      else              ndeadInF += ndeadInModule;
     }
 
     _deadfrac_m[detid]/=nchannelspermod;
@@ -347,7 +365,7 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     float adc = peds;
     
     if(layer>0) { // BPIX
-      if(layer==1)      { GainsSumL1->Fill(gains); PedsSumL1->Fill(peds);ADCSumL1->Fill(adc);VcalSumL1->Fill(vcal);
+     if(layer==1)      { GainsSumL1->Fill(gains); PedsSumL1->Fill(peds);ADCSumL1->Fill(adc);VcalSumL1->Fill(vcal);
       }else if(layer==2) { GainsSumL2->Fill(gains); PedsSumL2->Fill(peds);ADCSumL2->Fill(adc);VcalSumL2->Fill(vcal);}
       else if(layer==3) { GainsSumL3->Fill(gains); PedsSumL3->Fill(peds);ADCSumL3->Fill(adc);VcalSumL3->Fill(vcal);}
       else if(layer==4) { GainsSumL4->Fill(gains); PedsSumL4->Fill(peds);ADCSumL4->Fill(adc);VcalSumL4->Fill(vcal);}
@@ -358,13 +376,10 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     //std::cout <<" DetId "<<detid<<" "<<name<<" Ped "<<peds<<" Gains "<<gains<<std::endl;	 
     //}
  
-
     gainmeanfortree = _TH1F_Gains_m[detid]->GetMean();
     gainrmsfortree  = _TH1F_Gains_m[detid]->GetRMS();
     pedmeanfortree  = _TH1F_Pedestals_m[detid]->GetMean();
     pedrmsfortree   = _TH1F_Pedestals_m[detid]->GetRMS();
-
-
 
     //std::cout<<"DetId "<<detid<<"       GainMean "<<gainmeanfortree<<" RMS "<<gainrmsfortree<<"      PedMean "<<pedmeanfortree<<" RMS "<<pedrmsfortree<<std::endl;
     tree->Fill();
@@ -377,24 +392,28 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   edm::LogInfo("SiPixelGainsDBReader") <<"[SiPixelGainsDBReader::analyze] ---> PIXEL Channels (i.e. Number of Columns)" << nchannels << std::endl;
   
   std::cout<<" ---> SUMMARY :"<<std::endl;
-  std::cout<<"Encounted "<<ndead<<" dead pixels"<<std::endl;
-  std::cout<<"Encounted "<<nnoisy<<" noisy pixels"<<std::endl;
-  std::cout<<"The Gain Mean is "<<_TH1F_Gains_all->GetMean()<<" with rms "<<_TH1F_Gains_all->GetRMS()<<std::endl;
-  std::cout<<"         in BPIX "<<_TH1F_Gains_bpix->GetMean()<<" with rms "<<_TH1F_Gains_bpix->GetRMS()<<std::endl;
-  std::cout<<"         in FPIX "<<_TH1F_Gains_fpix->GetMean()<<" with rms "<<_TH1F_Gains_fpix->GetRMS()<<std::endl;
-  std::cout<<"The Ped Mean is "<<_TH1F_Pedestals_all->GetMean()<<" with rms "<<_TH1F_Pedestals_all->GetRMS()<<std::endl;
-  std::cout<<"         in BPIX "<<_TH1F_Pedestals_bpix->GetMean()<<" with rms "<<_TH1F_Pedestals_bpix->GetRMS()<<std::endl;
-  std::cout<<"         in FPIX "<<_TH1F_Pedestals_fpix->GetMean()<<" with rms "<<_TH1F_Pedestals_fpix->GetRMS()<<std::endl;
+  std::cout<<"Modules "<<nmodules<<" BPix " <<nmodulesB<<" FPix "<<nmodulesF<< std::endl;
+  std::cout<<"Pixels "<<nchannels<<" BPix " <<nchannelsB<<" FPix "<<nchannelsF<< std::endl;
+  std::cout<<"Encounted "<<ndead<<" dead pixels "<<nnoisy<<" noisy pixels"<<std::endl;
+
+  std::cout<<"The Gain Mean is "<<_TH1F_Gains_all->GetMean()<<" with rms "<<_TH1F_Gains_all->GetRMS()<<" entries "<<_TH1F_Gains_all->GetEntries()<<std::endl;
+  std::cout<<"         in BPIX "<<_TH1F_Gains_bpix->GetMean()<<" with rms "<<_TH1F_Gains_bpix->GetRMS()<<" entries "<<_TH1F_Gains_bpix->GetEntries()<<std::endl;
+  std::cout<<"         in FPIX "<<_TH1F_Gains_fpix->GetMean()<<" with rms "<<_TH1F_Gains_fpix->GetRMS()<<" entries "<<_TH1F_Gains_fpix->GetEntries()<<std::endl;
+  std::cout<<"The Ped Mean is "<<_TH1F_Pedestals_all->GetMean()<<" with rms "<<_TH1F_Pedestals_all->GetRMS()<<" entries "<<_TH1F_Pedestals_all->GetEntries()<<std::endl;
+  std::cout<<"         in BPIX "<<_TH1F_Pedestals_bpix->GetMean()<<" with rms "<<_TH1F_Pedestals_bpix->GetRMS()<<" entries "<<_TH1F_Pedestals_bpix->GetEntries()<<std::endl;
+  std::cout<<"         in FPIX "<<_TH1F_Pedestals_fpix->GetMean()<<" with rms "<<_TH1F_Pedestals_fpix->GetRMS()<<" entries "<<_TH1F_Pedestals_fpix->GetEntries()<<std::endl;
 
   std::cout<<"BPIX1 Gain= "<<GainsL1->GetMean()<<" rms "<<GainsL1->GetRMS()
-	   <<" Ped ="<<PedsL1->GetMean()<<" rms "<<PedsL1->GetRMS()<<std::endl;
+	   <<" Ped ="<<PedsL1->GetMean()<<" rms "<<PedsL1->GetRMS()<<" entries "<<GainsL1->GetEntries()<<std::endl;
   std::cout<<"BPIX2 Gain= "<<GainsL2->GetMean()<<" rms "<<GainsL2->GetRMS()
-	   <<" Ped ="<<PedsL2->GetMean()<<" rms "<<PedsL2->GetRMS()<<std::endl;
-  std::cout<<"BPIX3 Gain= "<<GainsL2->GetMean()<<" rms "<<GainsL3->GetRMS()
-	   <<" Ped ="<<PedsL3->GetMean()<<" rms "<<PedsL3->GetRMS()<<std::endl;
-  std::cout<<"BPIX4 Gain= "<<GainsL2->GetMean()<<" rms "<<GainsL4->GetRMS()
-	   <<" Ped ="<<PedsL4->GetMean()<<" rms "<<PedsL4->GetRMS()<<std::endl;
-    
+	   <<" Ped ="<<PedsL2->GetMean()<<" rms "<<PedsL2->GetRMS()<<" entries "<<GainsL2->GetEntries()<<std::endl;
+  std::cout<<"BPIX3 Gain= "<<GainsL3->GetMean()<<" rms "<<GainsL3->GetRMS()
+	   <<" Ped ="<<PedsL3->GetMean()<<" rms "<<PedsL3->GetRMS()<<" entries "<<GainsL3->GetEntries()<<std::endl;
+  std::cout<<"BPIX4 Gain= "<<GainsL4->GetMean()<<" rms "<<GainsL4->GetRMS()
+	   <<" Ped ="<<PedsL4->GetMean()<<" rms "<<PedsL4->GetRMS()<<" entries "<<GainsL4->GetEntries()<<std::endl;
+  int tmp = ndeadInL1+ndeadInL2+ndeadInL3+ndeadInL4+ndeadInF;
+ cout<<" gains missing in L1 "<<ndeadInL1<<" L2 "<<ndeadInL2<<" L3 "<<ndeadInL3
+     <<" L4 "<<ndeadInL4<<" FPix "<<ndeadInF<<" total "<<tmp<<endl;
 }
 
 // ------------ method called once each job just before starting event loop  ------------

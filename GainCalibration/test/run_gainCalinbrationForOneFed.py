@@ -109,9 +109,12 @@ process.siPixelGainCalibrationAnalysis.phase1 = True
 process.siPixelGainCalibrationAnalysis.minChi2NDFforHistSave = cms.untracked.double(50.)
 process.siPixelGainCalibrationAnalysis.minChi2ProbforHistSave = cms.untracked.double(1.E-30)
 process.siPixelGainCalibrationAnalysis.maxChi2InHist = cms.untracked.double(100.)
-process.siPixelGainCalibrationAnalysis.maxGainInHist = cms.untracked.double(10.)
+#process.siPixelGainCalibrationAnalysis.maxGainInHist = cms.untracked.double(10.) # for old, no vcal
+process.siPixelGainCalibrationAnalysis.maxGainInHist = cms.untracked.double(500.) # for new, with vcal
 #process.siPixelGainCalibrationAnalysis.vCalToEleConvFactors = cms.string("vcal-irradiation-factors_dummy.txt")            
-process.siPixelGainCalibrationAnalysis.vCalToEleConvFactors = cms.string("vcal-irradiation-factors_2018.txt")            
+#process.siPixelGainCalibrationAnalysis.vCalToEleConvFactors = cms.string("vcal-irradiation-factors_2018.txt")            
+#process.siPixelGainCalibrationAnalysis.vCalToEleConvFactors = cms.string("vcal-calibration_nominal.txt")            
+process.siPixelGainCalibrationAnalysis.vCalToEleConvFactors = cms.string("vcal-calibration_2018.txt")            
 
 # Path
 #process.p = cms.Path(process.siPixelDigis )

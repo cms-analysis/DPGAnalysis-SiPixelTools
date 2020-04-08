@@ -74,9 +74,9 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
   edm::Service<TFileService> fs;
 
   TH1F *VCAL_endpoint = fs->make<TH1F>("VCAL_endpoint","value where response = 255 ( x = (255 - ped)/gain )",256,0,256);
-  TH1F *goodgains = fs->make<TH1F>("goodgains","gain values",100,0,10);
+  TH1F *goodgains = fs->make<TH1F>("goodgains","gain values",500,0,gainmax_);
   TH1F *goodpeds = fs->make<TH1F>("goodpeds","pedestal values",356,-100,256); //512,-256,256 original value: 356,-100,256
-  TH1F *totgains = fs->make<TH1F>("totgains","gain values",200,0,10);
+  TH1F *totgains = fs->make<TH1F>("totgains","gain values",500,0,gainmax_);
   TH1F *totpeds = fs->make<TH1F>("totpeds","pedestal values",356,-100,256);
   int useddefaultfortree;
 #ifdef Tree
@@ -275,7 +275,7 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
 	float gain = tempgain->GetBinContent(icol,jrow);
 	float chi2 = tempchi2->GetBinContent(icol,jrow);
 	float fitresult = tempfitresult->GetBinContent(icol,jrow);
-
+	if(gain>500.) std::cout<<gain<<" "<<fitresult<<std::endl;
 	if(ped>pedlow_ && gain>gainlow_ && ped<pedhi_ && gain<gainhi_ && (fitresult>0)){
 	  ntimes++; if(useddefaultfortree==0) npixGood++;
 	  VCAL_endpoint->Fill((255 - ped)/gain);
@@ -573,10 +573,12 @@ SiPixelGainCalibrationDBUploader::SiPixelGainCalibrationDBUploader(const edm::Pa
   theGainCalibrationDbInputHLT_(0),
   theGainCalibrationDbInputService_(iConfig),
   record_(conf_.getUntrackedParameter<std::string>("record","SiPixelGainCalibrationOfflineRcd")),
-  gainlow_(10.),gainhi_(0.),pedlow_(conf_.getUntrackedParameter<double>("pedlow")),pedhi_(conf_.getUntrackedParameter<double>("pedhigh")),
+  gainlow_(0.),gainhi_(1000.),pedlow_(conf_.getUntrackedParameter<double>("pedlow")),pedhi_(conf_.getUntrackedParameter<double>("pedhigh")),
   usemeanwhenempty_(conf_.getUntrackedParameter<bool>("useMeanWhenEmpty",false)),
   rootfilestring_(conf_.getUntrackedParameter<std::string>("inputrootfile","inputfile.root")),
-  gainmax_(6),pedmax_(conf_.getUntrackedParameter<double>("pedmax")),
+					    //gainmax_(6),
+  gainmax_(conf_.getUntrackedParameter<double>("gainmax",6.)),
+  pedmax_(conf_.getUntrackedParameter<double>("pedmax")),
   badchi2_(conf_.getUntrackedParameter<double>("badChi2Prob",0.01)), // not used
   nmaxcols(10*52),nmaxrows(160)
 {
@@ -631,11 +633,14 @@ void SiPixelGainCalibrationDBUploader::beginRun(const edm::EventSetup& iSetup){
 // ------------ method called once each job just before starting event loop  ------------
 void SiPixelGainCalibrationDBUploader::beginJob() {
   countModulesFound=0;
+  emptyPed_=emptyGain_=badPed_=badGain_=0;
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
 void SiPixelGainCalibrationDBUploader::endJob() {
   std::cout<<"Found modules in the root file "<<countModulesFound<<std::endl;
+  std::cout<<" pixels with: empty pedestal "<<emptyPed_<<" pedestal off range "<<badPed_
+	   <<" empty gain "<<emptyGain_<<" gain off range "<<badGain_<<std::endl;
 }
 
 bool SiPixelGainCalibrationDBUploader::getHistograms() {
@@ -784,10 +789,9 @@ bool SiPixelGainCalibrationDBUploader::getHistograms() {
 
     for(int xbin=1; xbin<=temphistoped->GetNbinsX(); ++xbin){
       for(int ybin=1; ybin<=temphistoped->GetNbinsY(); ++ybin){
-	if(temphistofitresult->GetBinContent(xbin,ybin)<=0)
-	  continue;
+	if(temphistofitresult->GetBinContent(xbin,ybin)<=0) {emptyPed_++;continue;}
 	float val = temphistoped->GetBinContent(xbin,ybin);
-	if(val>pedmax_) continue;  // skip large pedestals
+	if(val>pedmax_) {badPed_++; continue;}  // skip large pedestals
 	//std::cout<<val<<" ";
 	// if(pedlow_>val)
 	//     pedlow_=val;
@@ -799,10 +803,9 @@ bool SiPixelGainCalibrationDBUploader::getHistograms() {
 	  
     for(int xbin=1; xbin<=temphistogain->GetNbinsX(); ++xbin){
       for(int ybin=1; ybin<=temphistogain->GetNbinsY(); ++ybin){
-	if(temphistofitresult->GetBinContent(xbin,ybin)<=0)
-	  continue;
+	if(temphistofitresult->GetBinContent(xbin,ybin)<=0) {emptyGain_++;continue;}
 	float val = temphistogain->GetBinContent(xbin,ybin);
-	if(val<=0.0001) continue; // skip low gains
+	if(val<=0.0001 || val>gainmax_) {badGain_++;continue;} // skip low gains
 	//std::cout<<val<<",";
 	if(gainlow_>val)
 	  gainlow_=val;

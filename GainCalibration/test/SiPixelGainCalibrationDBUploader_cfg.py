@@ -20,14 +20,19 @@ process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1))
 process.TFileService = cms.Service("TFileService", fileName = cms.string('gains.root') )
 
 process.gainDBOffline = cms.EDAnalyzer("SiPixelGainCalibrationDBUploader",
-    inputrootfile = cms.untracked.string('file:GainCalibration_v2.root'),
+#    inputrootfile = cms.untracked.string('file:GainCalibration_v2.root'),
+#    inputrootfile = cms.untracked.string('file:GainCalibration_v2_novcal.root'),
+#    inputrootfile = cms.untracked.string('file:GainCalibration_v3_novcal.root'),
+    inputrootfile = cms.untracked.string('file:GainCalibration_v3_vcal.root'),
     record = cms.untracked.string('SiPixelGainCalibrationOfflineRcd'),
     useMeanWhenEmpty = cms.untracked.bool(False), # True-fills ALL modules
     appendMode = cms.untracked.bool(False), # adds to the old *.db file
     badChi2Prob = cms.untracked.double(0.000000001), # not used
     pedlow = cms.untracked.double(-100.0),
     pedhigh = cms.untracked.double(250.0),
-    pedmax = cms.untracked.double(250.0)                                     
+    pedmax = cms.untracked.double(250.0),                                     
+    #gainmax = cms.untracked.double(6.0)    # for vcal not-included (Run1&2)  
+    gainmax = cms.untracked.double(500.0)    # for vcal included (Run3)  
     )
 
 process.gainDBOfflineFull = cms.EDAnalyzer("SiPixelGainCalibrationDBUploader",
@@ -69,7 +74,8 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
     toPut = cms.VPSet(
         cms.PSet(
             record = cms.string('SiPixelGainCalibrationOfflineRcd'),
-            tag = cms.string('GainCalib_offline_v2')
+#            tag = cms.string('GainCalib_offline_v2')
+            tag = cms.string('GainCalib_offline_v3')
             )
         ),
     connect = cms.string('sqlite_file:gains.db')
