@@ -69,10 +69,10 @@ process.source = cms.Source("EmptySource",
 #    firstRun = cms.untracked.uint32(313000)  # iov1-2018 v1
 #    firstRun = cms.untracked.uint32(319000)  # 2018 V2
 #    firstRun = cms.untracked.uint32(319940)  # 2018 V3 (short)
-#    firstRun = cms.untracked.uint32(320000)  # 2018 V4
+    firstRun = cms.untracked.uint32(320000)  # 2018 V4
 #    firstRun = cms.untracked.uint32(321000)  # 2018 V5
 #    firstRun = cms.untracked.uint32(323000)  # 2018 V6
-    firstRun = cms.untracked.uint32(324000)  # 2018 V7
+#    firstRun = cms.untracked.uint32(324000)  # 2018 V7
 #    firstRun = cms.untracked.uint32(327000)  # 2018 V9
 )
 
@@ -83,7 +83,7 @@ process.source = cms.Source("EmptySource",
 #)
 
 # DB stuff 
-useLocalDB = False
+useLocalDB = True
 if useLocalDB:
   process.GainsReader = cms.ESSource("PoolDBESSource",
   #    process.CondDBCommon,
@@ -110,7 +110,7 @@ if useLocalDB:
 #       tag = cms.string('SiPixelGainCalibration_hlt_phase1_mc_v3')
 #       Offline
 #       tag = cms.string('GainCalib_offline_v2')
-#       tag = cms.string('GainCalib_offline_v3')
+       tag = cms.string('GainCalib_offline_v3')
 #       tag = cms.string('SiPixelGainCalibration_r203368_offline')
 #       tag = cms.string('SiPixelGainCalibration_r197749_offline')
 #       tag = cms.string('SiPixelGainCalib_2009CollRuns_offline')
@@ -162,6 +162,7 @@ if useLocalDB:
 # Run3 
 #     connect = cms.string('sqlite_file:../../GainCalibration/test/gains_v2_novcal.db')
 #     connect = cms.string('sqlite_file:../../GainCalibration/test/gains_v2_novcal_withgaincut.db')
+     connect = cms.string('sqlite_file:../../GainCalibration/test/gains_v3_all.db')
 #     connect = cms.string('sqlite_file:../../GainCalibration/test/gains_v3_vcal.db')
 #     connect = cms.string('sqlite_file:../../GainCalibration/test/gains_v3_novcal.db')
 #     connect = cms.string('sqlite_file:../../GainCalibration/test/gains_v3_novcal_nogaincut.db')
@@ -195,7 +196,7 @@ process.SiPixelGainsDBReader = cms.EDAnalyzer("SiPixelGainsDBReader",
 #    useSimRcd = cms.bool(True),
     verbose = cms.bool(False),
     maxRangeDeadPixHist = cms.untracked.double(0.001),
-    vcalIncluded = cms.untracked.bool(False)
+    vcalIncluded = cms.untracked.bool(True)
 )
 
 process.p = cms.Path(process.SiPixelGainsDBReader)

@@ -25,7 +25,8 @@ process.gainDBOffline = cms.EDAnalyzer("SiPixelGainCalibrationDBUploader",
 #    inputrootfile = cms.untracked.string('file:GainCalibration_v3_novcal.root'),
     inputrootfile = cms.untracked.string('file:GainCalibration_v3_vcal.root'),
     record = cms.untracked.string('SiPixelGainCalibrationOfflineRcd'),
-    useMeanWhenEmpty = cms.untracked.bool(False), # True-fills ALL modules
+    useMeanWhenEmpty = cms.untracked.bool(True), # True-fills ALL modules
+    #useMeanWhenEmpty = cms.untracked.bool(False), # True-fills ALL modules
     appendMode = cms.untracked.bool(False), # adds to the old *.db file
     badChi2Prob = cms.untracked.double(0.000000001), # not used
     pedlow = cms.untracked.double(-100.0),
@@ -43,7 +44,9 @@ process.gainDBOfflineFull = cms.EDAnalyzer("SiPixelGainCalibrationDBUploader",
     badChi2Prob = cms.untracked.double(0.00001), # not used
     pedlow = cms.untracked.double(-100.0),
     pedhigh = cms.untracked.double(250.0),
-    pedmax = cms.untracked.double(250.0)                                       
+    pedmax = cms.untracked.double(250.0),                                       
+    #gainmax = cms.untracked.double(6.0)    # for vcal not-included (Run1&2)  
+    gainmax = cms.untracked.double(500.0)    # for vcal included (Run3)  
     )
 
 process.gainDBHLT = cms.EDAnalyzer("SiPixelGainCalibrationDBUploader",
@@ -54,7 +57,9 @@ process.gainDBHLT = cms.EDAnalyzer("SiPixelGainCalibrationDBUploader",
     badChi2Prob = cms.untracked.double(0.00001), # not used
     pedlow = cms.untracked.double(-100.0),
     pedhigh = cms.untracked.double(250.0),
-    pedmax = cms.untracked.double(250.0)                             
+    pedmax = cms.untracked.double(250.0),                             
+    #gainmax = cms.untracked.double(6.0)    # for vcal not-included (Run1&2)  
+    gainmax = cms.untracked.double(500.0)    # for vcal included (Run3)  
     )
 
 process.source = cms.Source("EmptyIOVSource",                            

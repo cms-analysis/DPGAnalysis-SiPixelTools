@@ -335,7 +335,7 @@ SiPixelGainsDBReader::analyze(const edm::Event& iEvent, const edm::EventSetup& i
        }
     }
 
-    if(ndeadInModule<66460) { // model not completely missing/empty
+    if( ndeadInModule>0 && ndeadInModule<66460) { // model not completely missing/empty
       cout<<" Dead pixels in module "<<detid<<" "<<ndeadInModule<<endl;
       if     (layer==1) ndeadInL1 += ndeadInModule;
       else if(layer==2) ndeadInL2 += ndeadInModule;
