@@ -53,7 +53,9 @@ process.configurationMetadata = cms.untracked.PSet(
 )
 
 # Output definition
+########## ACTIVATE THIS FOR RUNNING GEN+IBC METHOD ##########
 # process.PixelCPEGenericESProducer.IrradiationBiasCorrection = True # gen + IBC
+##############################################################
 process.RECOoutput = cms.OutputModule("PoolOutputModule",
     dataset = cms.untracked.PSet(
         dataTier = cms.untracked.string('RECO'),
@@ -108,8 +110,9 @@ process.TrackRefitter_step = cms.Path(process.offlineBeamSpot * process.Measurem
 
 # BPix Resolution
 process.BPixResolution_Template = cms.EDAnalyzer('Pixel_BPix_phase1',
-    triggerSource = cms.InputTag('TriggerResults::RECO'),
-    ttrhBuilder = cms.string('WithAngleAndTemplate')
+                                                 triggerSource = cms.InputTag('TriggerResults::RECO'),
+                                                 ttrhBuilder = cms.string('WithAngleAndTemplate'),
+                                                 track_collection = cms.string('ALCARECOSiPixelCalSingleMuon')#generalTracks
 )
 process.BPixResolution_Generic = process.BPixResolution_Template.clone(
     ttrhBuilder = cms.string('WithTrackAngle')
@@ -117,10 +120,11 @@ process.BPixResolution_Generic = process.BPixResolution_Template.clone(
 
 # FPix Resolution
 process.FPixResolution_Template = cms.EDAnalyzer('Pixel_FPix_phase1',
-    triggerSource = cms.InputTag('TriggerResults::RECO'),
-    ttrhBuilder = cms.string('WithAngleAndTemplate'),
-    doBPix = cms.bool(False),
-    doFPix = cms.bool(True)
+                                                 triggerSource = cms.InputTag('TriggerResults::RECO'),
+                                                 ttrhBuilder = cms.string('WithAngleAndTemplate'),
+                                                 track_collection=cms.string('ALCARECOSiPixelCalSingleMuon'),#generalTracks
+                                                 doBPix = cms.bool(False),
+                                                 doFPix = cms.bool(True)
 )
 process.FPixResolution_Generic = process.FPixResolution_Template.clone(
     ttrhBuilder = cms.string('WithTrackAngle')

@@ -735,6 +735,7 @@ private:
   edm::EDGetTokenT<edm::TriggerResults> t_triggerSrc_ ;
   edm::EDGetTokenT<reco::TrackCollection>  t_generalTracks_;
   edm::EDGetTokenT<edm::View<reco::PFMET>> t_pfMet_;
+  std::string _track_collection;
   // ----------member data:
   std::map<int, Histos> runmap;
 };
@@ -766,8 +767,8 @@ Pixel_BPix_phase1::Pixel_BPix_phase1(const edm::ParameterSet& iConfig// , edm::C
   t_triggerSrc_ = consumes<edm::TriggerResults> (iConfig.getParameter<edm::InputTag>("triggerSource"));
   t_offlineBeamSpot_ =    consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
   t_offlinePrimaryVertices_ =   consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
-  // t_generalTracks_= consumes<reco::TrackCollection> (edm::InputTag("generalTracks"));
-  t_generalTracks_= consumes<reco::TrackCollection> (edm::InputTag("ALCARECOSiPixelCalSingleMuon"));
+  _track_collection = iConfig.getParameter<std::string>("track_collection");
+  t_generalTracks_= consumes<reco::TrackCollection> (edm::InputTag(_track_collection));
   t_pfMet_= consumes< edm::View<reco::PFMET>>(edm::InputTag("pfMet"));
   // _OC_beginning=iConfig.getParameter<int>("orbit_beginning");
   // _OC_end=iConfig.getParameter<int>("orbit_end");
