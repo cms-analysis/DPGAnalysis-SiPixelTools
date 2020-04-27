@@ -33,4 +33,4 @@ The plotting code for FPix is collected [on GitLab](https://gitlab.cern.ch/kosch
 
 ### Batch processing
 
-[Additional code](https://gitlab.cern.ch/koschwei/fpixresolution/-/tree/master/gc) for running the Pixel Triplet code on batch systems. This is implemented using [grid-control](https://github.com/grid-control/grid-control), which can be used with may different batch systems. The linked desciption is for the SLURM cluster using on the T3@PSI.
+[Additional code](https://gitlab.cern.ch/koschwei/fpixresolution/-/tree/master/gc) for running the Pixel Triplet code on batch systems. This is implemented using [grid-control](https://github.com/grid-control/grid-control), which can be used with may different batch systems. The linked desciption is for the SLURM cluster used on the T3@PSI.
