@@ -3371,68 +3371,68 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
     // typedef Global3DPoint  GlobalPoint;
     // typedef Point3DBase< float, GlobalTag> Global3DPoint;
 
-    XYZPoint vtxN = XYZPoint(0,0,0);
+    // XYZPoint vtxN = XYZPoint(0,0,0);
     XYZPoint vtxP = XYZPoint(0,0,0);
 
     double bestNdof = 0;
     double maxSumPt = 0;
     Vertex bestPvx;
 
-    for( VertexCollection::const_iterator iVertex = vertices->begin();
-	 iVertex != vertices->end(); ++iVertex ) {
+    // for( VertexCollection::const_iterator iVertex = vertices->begin();
+	//  iVertex != vertices->end(); ++iVertex ) {
 
-      if( ! iVertex->isValid() )
-	h011->Fill( iVertex->z() );
+    //   if( ! iVertex->isValid() )
+	// h011->Fill( iVertex->z() );
 
-      else {
+    //   else {
 
-	if( iVertex->isFake() )
-	  h012->Fill( iVertex->z() );
+	// if( iVertex->isFake() )
+	//   h012->Fill( iVertex->z() );
 
-	else{
-	  h013->Fill( iVertex->z() );
-	  h014->Fill( iVertex->x() );
-	  h015->Fill( iVertex->y() );
-	  h016->Fill( iVertex->ndof() );
-	  h017->Fill( iVertex->ndof() );
+	// else{
+	//   h013->Fill( iVertex->z() );
+	//   h014->Fill( iVertex->x() );
+	//   h015->Fill( iVertex->y() );
+	//   h016->Fill( iVertex->ndof() );
+	//   h017->Fill( iVertex->ndof() );
 
-	  if( idbg ){
-	    cout << "vertex";
-	    cout << ": x " << iVertex->x();
-	    cout << ", y " << iVertex->y();
-	    cout << ", z " << iVertex->z();
-	    cout << ", ndof " << iVertex->ndof();
-	    cout << ", sumpt " << iVertex->p4().pt();
-	    cout << endl;
-	  }
+	//   if( idbg ){
+	//     cout << "vertex";
+	//     cout << ": x " << iVertex->x();
+	//     cout << ", y " << iVertex->y();
+	//     cout << ", z " << iVertex->z();
+	//     cout << ", ndof " << iVertex->ndof();
+	//     // cout << ", sumpt " << iVertex->p4().pt();
+	//     cout << endl;
+	//   }
 
-	  if( iVertex->hasRefittedTracks() )
-	    h018->Fill( iVertex->z() ); // empty in Zmumu sample
-	  else
-	  h019->Fill( iVertex->z() ); // all here: why?
+	//   if( iVertex->hasRefittedTracks() )
+	//     h018->Fill( iVertex->z() ); // empty in Zmumu sample
+	//   else
+	//   h019->Fill( iVertex->z() ); // all here: why?
 
-	  if( iVertex->ndof() > bestNdof ) {
-	    bestNdof = iVertex->ndof();
-	    vtxN = XYZPoint( iVertex->x(), iVertex->y(), iVertex->z() );
-	  }
+	//   if( iVertex->ndof() > bestNdof ) {
+	//     bestNdof = iVertex->ndof();
+	//     vtxN = XYZPoint( iVertex->x(), iVertex->y(), iVertex->z() );
+	//   }
 
-	  h021->Fill( iVertex->p4().pt() );
+	//   h021->Fill( iVertex->p4().pt() );
 
-	if( iVertex->p4().pt() > maxSumPt ) {
-	  maxSumPt = iVertex->p4().pt();
-	  vtxP = XYZPoint( iVertex->x(), iVertex->y(), iVertex->z() );
-	  bestPvx = *iVertex;
-	}
-	}// non-fake
-      }//valid
-    } // loop over vertices
+	// if( iVertex->p4().pt() > maxSumPt ) {
+	//   maxSumPt = iVertex->p4().pt();
+	//   vtxP = XYZPoint( iVertex->x(), iVertex->y(), iVertex->z() );
+	//   bestPvx = *iVertex;
+	// }
+	// }// non-fake
+    //   }//valid
+    // } // loop over vertices
 
     h022->Fill( maxSumPt );
 
     //if( maxSumPt < 1 ) return;
-    if(!singleParticleMC && maxSumPt < 1 ) return;
+    // if(!singleParticleMC && maxSumPt < 1 ) return;
 
-    if( maxSumPt < 1 ) vtxP = vtxN;
+    // if( maxSumPt < 1 ) vtxP = vtxN;
 
     h023->Fill( vtxP.x() );
     h024->Fill( vtxP.y() );
