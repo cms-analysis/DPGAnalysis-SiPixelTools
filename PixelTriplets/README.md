@@ -1,29 +1,40 @@
-
 # Pixel Triplet Code
 
-Choose which input files to run over in pxl.py. If running on lxplus, you can for instance find GEN-SIM-RECO files in /eos/cms/store/relval/CMSSW_9_4_0/
-
-```
-process.source = cms.Source("PoolSource",
-	fileNames = cms.untracked.vstring(
-"file:/eos/cms/store/relval/CMSSW_9_4_0/RelValSingleMuPt10/GEN-SIM-RECO/94X_mc2017_realistic_v10-v1/10000/1A0C459B-63CA-E711-A9A8-0CC47A4D76AA.root",
-"file:/eos/cms/store/relval/CMSSW_9_4_0/RelValSingleMuPt10/GEN-SIM-RECO/94X_mc2017_realistic_v10-v1/10000/1A0C459B-63CA-E711-A9A8-0CC47A4D76AA.root",
-"file:/eos/cms/store/relval/CMSSW_9_4_0/RelValSingleMuPt10/GEN-SIM-RECO/94X_mc2017_realistic_v10-v1/10000/2C1FD59F-63CA-E711-A75D-0CC47A4D7600.root",
-"file:/eos/cms/store/relval/CMSSW_9_4_0/RelValSingleMuPt10/GEN-SIM-RECO/94X_mc2017_realistic_v10-v1/10000/DABB00E3-68CA-E711-BF46-0CC47A4D75F2.root",
-"file:/eos/cms/store/relval/CMSSW_9_4_0/RelValSingleMuPt10/GEN-SIM-RECO/94X_mc2017_realistic_v10-v1/10000/DCA18BE8-68CA-E711-B3ED-0025905A48D8.root",
-	)
-)
-```
+Tested for CMSSW version : `CMSSW_11_1_0_pre1`
 
 Run with cmsRun
 
 ```
-cmsRun pxl.py
+cmsRun pxl_BPIX_FPIX_genIBC.py
 ```
 
-Remember to set the appropriate Global Tag, for instance via the command line
+Command line options:
+
+- `inputFiles=FILENAME[,FILENAME,..]`
+- `outputFile=OUTPUTFILE.root`
+
+
+Your can set the GT with:
 
 ```
 cmsRun pxl.py GlobalTag='auto:phase1_2017_realistic'
 ```
 
+Remarks:
+
+- Gen+IBC method can be activated by uncommenting the line `process.PixelCPEGenericESProducer.IrradiationBiasCorrection = True` in `pxl_BPIX_FPIX_genIBC.py`
+
+
+## Downstream code
+
+### BPix
+
+TBA
+
+### FPix
+
+The plotting code for FPix is collected [on GitLab](https://gitlab.cern.ch/koschwei/fpixresolution)
+
+### Batch processing
+
+[Additional code](https://gitlab.cern.ch/koschwei/fpixresolution/-/tree/master/gc) for running the Pixel Triplet code on batch systems. This is implemented using [grid-control](https://github.com/grid-control/grid-control), which can be used with may different batch systems. The linked desciption is for the SLURM cluster used on the T3@PSI.
