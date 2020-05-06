@@ -15,22 +15,20 @@ run       = options.run
 era       = eras.Run2_2017
 globaltag = '100X_dataRun2_Express_v2'
 ext       = 'dmp'
-#convfile  = "vcal-irradiation-factors.txt"
-dbfile    = "siPixelVCal.db"
-sqlfile   = "sqlite_file:%s"%(dbfile)
-outfile   = "file:GainCalibration_%s_%s.%s"%(fed,run,ext)
+sqlfile   = "siPixelVCal.db"
+dmpfile   = "GainCalibration_%s_%s.%s"%(fed,run,ext)
 
 # PRINT
 print ">>> %-10s = '%s'"%('era',era)
 print ">>> %-10s = '%s'"%('globaltag',globaltag)
 print ">>> %-10s = '%s'"%('sqlfile',sqlfile)
-print ">>> %-10s = '%s'"%('outfile',outfile)
+print ">>> %-10s = '%s'"%('dmpfile',dmpfile)
 
 # CHECK
-#if not os.path.isfile(convfile):
-#  raise IOError("VCal irradiation conversion file '%s' does not exist!"%convfile)
-if not os.path.isfile(dbfile):
-  raise IOError("VCal database object '%s' does not exist! cwd=%s"%(dbfile,os.getcwd()))
+if not os.path.isfile(sqlfile):
+  raise IOError("VCal database object '%s' does not exist! cwd=%s"%(sqlfile,os.getcwd()))
+if not os.path.isfile(dmpfile):
+  raise IOError("Dump file '%s' does not exist! cwd=%s"%(dmpfile,os.getcwd()))
 
 # SERVICES
 process = cms.Process('PIXEL',era)
@@ -63,7 +61,7 @@ process.load('Configuration.StandardSequences.RawToDigi_Data_cff')
 process.source = cms.Source("PixelDumpDataInputSource",
     fedid = cms.untracked.int32(-1),
     runNumber = cms.untracked.int32(500000),
-    fileNames = cms.untracked.vstring(outfile),
+    fileNames = cms.untracked.vstring("file:"+dmpfile),
     firstLuminosityBlock = cms.untracked.uint32(1),
     firstLuminosityBlockForEachRun = cms.untracked.VLuminosityBlockID(*lumiblocks),
 )
@@ -137,7 +135,6 @@ process.siPixelGainCalibrationAnalysis.calibrows_Int = process.siPixelCalibDigis
 process.siPixelGainCalibrationAnalysis.Repeat = process.siPixelCalibDigis.Repeat
 process.siPixelGainCalibrationAnalysis.CalibMode = process.siPixelCalibDigis.CalibMode
 process.siPixelGainCalibrationAnalysis.phase1 = True
-#process.siPixelGainCalibrationAnalysis.vCalToEleConvFactors = cms.string(convfile)            
 
 # VCAL DB
 process.VCalReader = cms.ESSource("PoolDBESSource",
@@ -146,7 +143,7 @@ process.VCalReader = cms.ESSource("PoolDBESSource",
         messageLevel = cms.untracked.int32(0),
         authenticationPath = cms.untracked.string('')
     ),
-    connect = cms.string(sqlfile),
+    connect = cms.string("sqlite_file:"+sqlfile),
     toGet = cms.VPSet(
         cms.PSet(
             record = cms.string("SiPixelVCalRcd"),

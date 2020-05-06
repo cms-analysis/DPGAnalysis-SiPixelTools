@@ -1,0 +1,11 @@
+universe              = vanilla
+executable            = submit_gain_calib_$RUN.sh
+arguments             = $(arg)
+log                   = log/job_gain_calib.$(ClusterId).$(ProcId).log
+output                = log/job_gain_calib.$(ClusterId).$(ProcId).log
+error                 = log/job_gain_calib.$(ClusterId).$(ProcId).log
+should_transfer_files = NO
++JobFlavour           = longlunch
+#+MaxRuntime           = 60
+#+AccountingGroup      = "group_u_BE.ABP.SLAP"
+queue arg in ( $FEDS )
