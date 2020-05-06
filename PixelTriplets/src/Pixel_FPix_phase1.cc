@@ -177,6 +177,7 @@ private:
 
   edm::InputTag _triggerSrc;
   std::string _ttrhBuilder;
+  std::string _track_collection;
   HLTConfigProvider HLTConfig;
   bool doBPix;
   bool doFPix;
@@ -388,7 +389,9 @@ Pixel_FPix_phase1::Pixel_FPix_phase1(const edm::ParameterSet& iConfig)
 
   t_offlineBeamSpot_ =    consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
   t_offlinePrimaryVertices_ =   consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
-  t_generalTracks_= consumes<reco::TrackCollection> (edm::InputTag("generalTracks"));
+  _track_collection = iConfig.getParameter<std::string>("track_collection");
+  t_generalTracks_= consumes<reco::TrackCollection> (edm::InputTag(_track_collection));
+  
   t_pfMet_= consumes< edm::View<reco::PFMET>>(edm::InputTag("pfMet"));
   
   edm::Service<TFileService> fsT;

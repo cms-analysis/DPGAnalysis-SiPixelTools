@@ -112,6 +112,10 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
     return;
   }
 
+  // Verify again that the high gain is not too high (code from Thea)
+  if(gainhi_>gainmax_) gainhi_=gainmax_;
+  if(pedhi_>pedmax_) pedhi_=pedmax_;
+
   int npixEmpty=0, npixUsed=0, npixGood=0, npixGood2=0, npixBad=0; 
   float badpedval=pedlow_-200;
   float badgainval=gainlow_-200;
@@ -563,7 +567,7 @@ void SiPixelGainCalibrationDBUploader::fillDatabase(const edm::EventSetup& iSetu
     edm::LogInfo(" --- all OK");
   } 
 }
-
+//--------------------------------------------------------------------------------------
 SiPixelGainCalibrationDBUploader::SiPixelGainCalibrationDBUploader(const edm::ParameterSet& iConfig):
   conf_(iConfig),
   appendMode_(conf_.getUntrackedParameter<bool>("appendMode",true)),
@@ -597,23 +601,21 @@ SiPixelGainCalibrationDBUploader::SiPixelGainCalibrationDBUploader(const edm::Pa
     gainhi_=gainlow_;
     gainlow_=temp;
   }
-  // if(pedlow_>pedhi_){
-  //     float temp=pedhi_;
-  //     pedhi_=pedlow_;
-  //     pedlow_=temp;
-  //   }
+  if(pedlow_>pedhi_){
+    float temp=pedhi_;
+    pedhi_=pedlow_;
+    pedlow_=temp;
+  }
   if(gainhi_>gainmax_) gainhi_=gainmax_;
-  // if(pedhi_>pedmax_)
-  //    pedhi_=pedmax_;
+  if(pedhi_>pedmax_) pedhi_=pedmax_;
 
   std::cout<<" max gain "<<gainmax_<<" hi/low gain "<<gainhi_<<"/"<<gainlow_
 	   <<" max ped "<<pedmax_<<" hi/low ped "<<pedhi_<<"/"<<pedlow_
 	   <<" chi2 cut "<<badchi2_<<" fill empty with mean "<<usemeanwhenempty_<<std::endl;
 }
-
+//--------------------------------------------------------------------------
 
 SiPixelGainCalibrationDBUploader::~SiPixelGainCalibrationDBUploader() {}
-
 
 //
 // member functions
@@ -627,7 +629,7 @@ SiPixelGainCalibrationDBUploader::analyze(const edm::Event& iEvent, const edm::E
   fillDatabase(iSetup);
   // empty but should not be called anyway
 }
-
+//-------------------------------------------------------------------------------
 void SiPixelGainCalibrationDBUploader::beginRun(const edm::EventSetup& iSetup){
 }
 // ------------ method called once each job just before starting event loop  ------------
@@ -642,7 +644,7 @@ void SiPixelGainCalibrationDBUploader::endJob() {
   std::cout<<" pixels with: empty pedestal "<<emptyPed_<<" pedestal off range "<<badPed_
 	   <<" empty gain "<<emptyGain_<<" gain off range "<<badGain_<<std::endl;
 }
-
+//----------------------------------------------------------------------------
 bool SiPixelGainCalibrationDBUploader::getHistograms() {
   std::cout <<"Parsing file " << rootfilestring_ << std::endl;
   therootfile_ = new TFile(rootfilestring_.c_str());
