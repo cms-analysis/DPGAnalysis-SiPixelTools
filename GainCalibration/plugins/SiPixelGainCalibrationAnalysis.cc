@@ -178,23 +178,24 @@ void SiPixelGainCalibrationAnalysis::fillDatabase(){
 // ------------ method called to do fits to all objects available  ------------
 bool SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelCalibDigi>::const_iterator ipix){ //,std::string layerString)
 
+  // get VCal to electrons conversion
   double VcalToEle_slope = 47.;
   double VcalToEle_offset = -60.;
-  SiPixelVCalDB::PixelId pixid = SiPixelVCalDB::detIdToPixelId(detid,tt_,phase1_);
-  if(VcalToEleMap_.find(pixid)!=VcalToEleMap_.end()){
-    VcalToEle_slope = VcalToEleMap_[pixid].slope;
-    VcalToEle_offset = VcalToEleMap_[pixid].offset;
+  //SiPixelVCalDB::PixelId pixid = SiPixelVCalDB::detIdToPixelId(detid,tt_,phase1_);
+  if(VcalToEleMap_.find(detid)!=VcalToEleMap_.end()){
+    VcalToEle_slope = VcalToEleMap_[detid].slope;
+    VcalToEle_offset = VcalToEleMap_[detid].offset;
   }
   else
-    std::cerr << "Did not find offset for pixid " << pixid << "! Setting slope=" << VcalToEle_slope << ", offset=" << VcalToEle_offset << std::endl;
+    std::cerr << "Did not find offset for detid " << detid << "! Setting slope=" << VcalToEle_slope << ", offset=" << VcalToEle_offset << std::endl;
   
   std::string currentDir = GetPixelDirectory(detid);
-  float lowmeanval=255;
-  float highmeanval=0;
+  float lowmeanval = 255;
+  float highmeanval = 0;
   bool makehistopersistent = saveALLHistograms_;
-  std::vector<uint32_t>::const_iterator detidfinder=find(listofdetids_.begin(),listofdetids_.end(),detid);
+  std::vector<uint32_t>::const_iterator detidfinder = find(listofdetids_.begin(),listofdetids_.end(),detid);
   if(detidfinder!=listofdetids_.end())
-    makehistopersistent=true;
+    makehistopersistent = true;
   // first, fill the input arrays to the TLinearFitter.
   double xvals[257];
   double yvals[256];
@@ -202,104 +203,105 @@ bool SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelC
   double xvalsall[257];
   double yvalsall[256];
   double yerrvalsall[256];
-  int npoints=0;
-  int nallpoints=0;
-  bool use_point=true;
-  int status=0;
+  int npoints = 0;
+  int nallpoints = 0;
+  bool use_point = true;
+  int status = 0;
   statusNumbers_[9]++;
   bookkeeper_2D_[detid]["status_2d"]->SetBinContent(ipix->col()+1,ipix->row()+1,0);
   if(writeSummary_ && detid!=currentDetID_){
     currentDetID_ = detid;
-    summary_<<endl<<"DetId_"<<currentDetID_<<endl;
+    summary_ << endl << "DetId_" << currentDetID_ << endl;
   }
   
   for(uint32_t ii=0; ii< ipix->getnpoints() && ii<200; ii++){
-    //    std::cout << ipix->getsum(ii) << " " << ipix->getnentries(ii) << " " << ipix->getsumsquares(ii) << std::endl;
+    //std::cout << ipix->getsum(ii) << " " << ipix->getnentries(ii) << " " << ipix->getsumsquares(ii) << std::endl;
     nallpoints++;
-    use_point=true;
+    use_point = true;
     if(useVcalHigh_)
-      xvalsall[ii]=vCalValues_[ii]*scalarVcalHigh_VcalLow_;
+      xvalsall[ii] = vCalValues_[ii]*scalarVcalHigh_VcalLow_;
     else
-      xvalsall[ii]=vCalValues_[ii];
+      xvalsall[ii] = vCalValues_[ii];
     
-    xvalsall[ii]= xvalsall[ii]*VcalToEle_slope+VcalToEle_offset;
-    yerrvalsall[ii]=yvalsall[ii]=0; 
+    xvalsall[ii] = xvalsall[ii]*VcalToEle_slope + VcalToEle_offset;
+    yerrvalsall[ii] = yvalsall[ii]=0; 
   
     if(ipix->getnentries(ii)>min_nentries_){
-      yvalsall[ii]=ipix->getsum(ii)/(float)ipix->getnentries(ii);
-      yerrvalsall[ii]=ipix->getsumsquares(ii)/(float)(ipix->getnentries(ii));
-      yerrvalsall[ii]-=pow(yvalsall[ii],2);
-      yerrvalsall[ii]=sqrt(yerrvalsall[ii])/sqrt(ipix->getnentries(ii));
+      yvalsall[ii] = ipix->getsum(ii)/(float)ipix->getnentries(ii);
+      yerrvalsall[ii] = ipix->getsumsquares(ii)/(float)(ipix->getnentries(ii));
+      yerrvalsall[ii] -= pow(yvalsall[ii],2);
+      yerrvalsall[ii] = sqrt(yerrvalsall[ii])/sqrt(ipix->getnentries(ii));
       
       if(yvalsall[ii]<lowmeanval)
-        lowmeanval=yvalsall[ii];
+        lowmeanval = yvalsall[ii];
       if(yvalsall[ii]>highmeanval)
-        highmeanval=yvalsall[ii];
+        highmeanval = yvalsall[ii];
     }
   }
   
   // calculate plateau value from last 4 entries
-  double plateauval=0;
-  bool noPlateau=0;
+  double plateauval = 0;
+  bool noPlateau = 0;
   if(nallpoints>=4){
-    for(int ii=nallpoints-1; ii>nallpoints-5; --ii) plateauval+=yvalsall[ii];
-    plateauval/=4;
+    for(int ii=nallpoints-1; ii>nallpoints-5; --ii)
+      plateauval += yvalsall[ii];
+    plateauval /= 4;
     for(int ii=nallpoints-1; ii>nallpoints-5; --ii){
       if(fabs(yvalsall[ii]-plateauval)>5){
-        plateauval=255;
-        noPlateau=1;
+        plateauval = 255;
+        noPlateau = 1;
         continue;
       }
     }
     
-    int NbofPointsInPlateau=0;
+    int NbofPointsInPlateau = 0;
     for(int ii=0; ii<nallpoints; ++ii)
       if(fabs(yvalsall[ii]-plateauval)<10 || yvalsall[ii]==0) NbofPointsInPlateau++;
     //summary_<<"row_"<<ipix->row()<<" col_"<<ipix->col()<<"   "<<plateauval<<"  "<<NbofPointsInPlateau<<"  "<<nallpoints<<endl;
     if(NbofPointsInPlateau>=(nallpoints-2)){
-      status=-2;
+      status = -2;
       bookkeeper_2D_[detid]["status_2d"]->SetBinContent(ipix->col()+1,ipix->row()+1,status);
       statusNumbers_[abs(status)]++;
       if(writeSummary_){
-        summary_<<"row_"<<ipix->row()<<" col_"<<ipix->col()<<" status_"<<status
-		<<" number of points in the plateau too large "
-		<<NbofPointsInPlateau<<" "<<nallpoints<<endl;
+        summary_ << "row_" << ipix->row() << " col_" << ipix->col() << " status_" << status
+		<< " number of points in the plateau too large "
+		<< NbofPointsInPlateau << " " << nallpoints<<endl;
       }
       return false;
     }
   }
-  else plateauval=255;
+  else plateauval = 255;
 
-  double maxgoodvalinfit=plateauval*(1.-reject_badpoints_frac_);
-  npoints=0;
+  double maxgoodvalinfit = plateauval*(1.-reject_badpoints_frac_);
+  npoints = 0;
   for(int ii=0; ii<nallpoints; ++ii){
    
     // now selecting the appropriate points for the fit.
-    use_point=true;
+    use_point = true;
     if(reject_first_point_ && xvalsall[ii]<0.1)
-      use_point=false;
+      use_point = false;
     if(ipix->getnentries(ii)<=min_nentries_ && reject_single_entries_)
-      use_point=false;
+      use_point = false;
     if(ipix->getnentries(ii)==0 && reject_badpoints_)
-      use_point=false;
+      use_point = false;
     if(yvalsall[ii]>maxgoodvalinfit && !noPlateau)
-      use_point=false;
+      use_point = false;
     if(ii>1 && fabs(yvalsall[ii]-yvalsall[ii-1])<5. && yvalsall[ii]>0.8*maxgoodvalinfit && reject_plateaupoints_){
-      use_point=false;
+      use_point = false;
       break;
     }
     
     if(use_point){
-      xvals[npoints]=xvalsall[ii];
-      yvals[npoints]=yvalsall[ii];
-      yerrvals[npoints]=yerrvalsall[ii];
+      xvals[npoints] = xvalsall[ii];
+      yvals[npoints] = yvalsall[ii];
+      yerrvals[npoints] = yerrvalsall[ii];
       npoints++;
     }
   }
   
   float chi2,slope,intercept,prob,slopeerror,intercepterror;
-  prob=chi2=-1;
-  slope=intercept=slopeerror=intercepterror=0;
+  prob = chi2 = -1;
+  slope = intercept = slopeerror = intercepterror = 0;
   
 
   // now check on number of points. If bad just start taking the first 4:
@@ -310,9 +312,9 @@ bool SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelC
       if(yvalsall[ii]>0){
         if(ii>0 && yvalsall[ii]-yvalsall[ii-1]<0.1)
           continue;
-        xvals[npoints]=xvalsall[ii];
-        yvals[npoints]=yvalsall[ii];
-        yerrvals[npoints]=yerrvalsall[ii];
+        xvals[npoints] = xvalsall[ii];
+        yvals[npoints] = yvalsall[ii];
+        yerrvals[npoints] = yerrvalsall[ii];
         npoints++;
       }
     }
@@ -323,14 +325,14 @@ bool SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelC
     bookkeeper_2D_[detid]["status_2d"]->SetBinContent(ipix->col()+1,ipix->row()+1,status);
     statusNumbers_[abs(status)]++;
     if(writeSummary_){
-      summary_<<"row_"<<ipix->row()<<" col_"<<ipix->col()<<" status_"<<status
-	      <<" number of fit points less then 2 "<<npoints<<endl;
+      summary_ << "row_" << ipix->row() << " col_" << ipix->col() << " status_" << status
+	           << " number of fit points less then 2 " << npoints<<endl;
     }
     std::ostringstream pixelinfo;
     pixelinfo << "GainCurve_row_" << ipix->row() << "_col_" << ipix->col();
-    std::string tempname=translateDetIdToString(detid);
-    tempname+="_";
-    tempname+=pixelinfo.str();
+    std::string tempname = translateDetIdToString(detid);
+    tempname += "_";
+    tempname += pixelinfo.str();
     // setDQMDirectory(detid);
 
     //bookkeeper_pixels_[detid][pixelinfo.str()] = bookDQMHistogram1D(detid,pixelinfo.str(),tempname,105*nallpoints,xvalsall[0],xvalsall[nallpoints-1]*1.05);
@@ -409,7 +411,8 @@ bool SiPixelGainCalibrationAnalysis::doFits(uint32_t detid, std::vector<SiPixelC
     status=-7;
   if(TMath::Abs(slope>maxGainInHist_) || slope < 0)
     status=-8;
-  if(status!=1) makehistopersistent=true;
+  if(status!=1)
+    makehistopersistent=true;
   statusNumbers_[abs(status)]++;
   
   if(slope<gainlow_)
