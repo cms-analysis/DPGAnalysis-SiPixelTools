@@ -1,11 +1,11 @@
 # Author: Izaak Neutelings (February 2020)
-import os, re, shutil
+import os, re, shutil, json
 from utils import *
 from abc import ABCMeta, abstractmethod
 from subprocess import Popen, PIPE, STDOUT
 
 
-def getConfig(run,verbose=False):
+def getConfig(run,verb=False):
   """Get configuration from JSON file."""
   cwd        = os.getcwd()
   rundir     = os.path.join(cwd,"Run_%s"%run)
@@ -20,7 +20,7 @@ def getConfig(run,verbose=False):
     cfgdict = json.load(file)
   cfgdict.setdefault('rundir',rundir)
   cfgdict.setdefault('calib_payload','none')
-  if verbose>=1:
+  if verb>=1:
     print '-'*80
     print ">>> Reading config JSON file '%s'"%jsonconfig
     for key in ['run', 'indir', 'outdir', 'calib_payload']:
@@ -29,9 +29,9 @@ def getConfig(run,verbose=False):
   return cfgdict
   
 
-def writeFromTemplate(templatename,outfilename,sublist=[],rmlist=[],**kwargs):
+def writeFromTemplate(templatename,outfilename,sublist=[],rmlist=[],key='$',**kwargs):
   """Write file from template."""
-  sublist = [(re.compile("\$%s(?!\w)"%p),str(v)) for p, v in sublist]
+  sublist = [(re.compile("%s%s(?!\w)"%(re.escape(key),p)),str(v)) for p, v in sublist]
   with open(templatename,'r') as template:
     with open(outfilename,'w') as file:
       for i, line in enumerate(template.readlines()):
@@ -76,7 +76,17 @@ def ensureDirectory(dirname,empty=False):
         shutil.rmtree(filepath)
   return dirname
   
-
+def ensureFile(*paths,**kwargs):
+  """Ensure file exists."""
+  fatal = kwargs.get('fatal',True)
+  path = os.path.join(*paths)
+  if not os.path.isfile(path):
+    if fatal:
+      raise IOError("Did not find file %s."%(path))
+    else:
+      print ">>> Warning! Did not find file %s."%(path)
+  return path
+  
 def removeFile(filepaths):
   """Remove (list of) files."""
   if isinstance(filepaths,str):
@@ -86,14 +96,13 @@ def removeFile(filepaths):
       os.unlink(filepath)
   
 
-def execute(command,dry=False,verbose=1):
+def execute(command,dry=False,verb=1):
   """Execute shell command."""
-  out    = ""
-  cmdstr = repr(str(command))
-  if verbose>=1:
-    print ">>> Executing: %s"%(cmdstr)
+  out = ""
+  if verb>=1:
+    print ">>> Executing: %r"%(command)
   if dry:
-    print ">>> Dry run: %s"%(cmdstr)
+    print ">>> Dry run: %r"%(command)
   else:
     try:
       #process = Popen(command.split(),stdout=PIPE,stderr=STDOUT) #,shell=True)
@@ -108,9 +117,9 @@ def execute(command,dry=False,verbose=1):
       retcode = process.wait()
       #print out
     except Exception as e:
-      print ">>> Failed: %s"%(cmdstr)
+      print ">>> Failed: %r"%(command)
       raise e
-    if verbose>=2:
+    if verb>=2:
       print ">>> Output: %s"%(out)
     if retcode:
       raise Exception("Command '%s' ended with return code %s"%(command,retcode)) #,err)
@@ -118,7 +127,7 @@ def execute(command,dry=False,verbose=1):
 
 
 
-def getStorage(path):
+def getstorage(path):
   if onCastor(path): return Castor(path)
   if onIIHE_T2(path): return IIHE_T2(path)
   if '/store/' in path or onEOS(path): return EOS(path)
@@ -132,10 +141,12 @@ def onPSI_T3(path): return '/pnfs/psi.ch/' in path
 
 class StorageSystem(object):
   
-  def __init__(self,path,verbose=1):
+  def __init__(self,path,verb=1,ensure=False):
     self.path    = path
     self.lscmd   = 'ls'
     self.lsurl   = ''
+    self.cdcmd   = 'cd'
+    self.cdurl   = ''
     self.cpcmd   = 'cp'
     self.cpurl   = ''
     self.rmcmd   = 'rm -rf'
@@ -149,97 +160,134 @@ class StorageSystem(object):
     self.haddurl = ''
     self.tmpurl  = '/tmp/$USER/' # $TMPDIR
     self.prefix  = ""
-    self.fsys    = ""
-    self.verbose = verbose
+    self.fileurl = ""
+    self.verbosity = verb
+    if ensure and not self.exists(path):
+      self.mkdir(path)
     
-  def execute(self,cmd,dry=False):
-    return execute(cmd,dry=dry,verbose=self.verbose)
+  def execute(self,cmd,dry=False,**kwargs):
+    verb = kwargs.get('verb',self.verbosity)
+    return execute(cmd,dry=dry,verb=verb)
     
-  def expandPath(self,*paths):
+  def expandpath(self,*paths,**kwargs):
     """Help function to replace variables in given path, or set default to own path."""
+    #verb = kwargs.get('verb',self.verbosity)
+    here  = kwargs.get('here',False)
+    paths = [p for p in paths if p]
     if paths:
-      paths = [p.replace('$PATH',self.path) for p in paths]
       path  = os.path.join(*paths)
     else:
       path  = self.path
+    if here and path[0] not in ['/','$']:
+      path = os.path.join(self.path,path)
     return path.replace('$PATH',self.path)
     
-  def ls(self,*paths):
-    path    = self.expandPath(*paths)
-    retlist = self.execute("%s %s%s"%(self.lscmd,self.lsurl,path)).split('\n')
+  def file(self,*paths,**kwargs):
+    ensure  = kwargs.get('ensure',False)
+    path    = self.expandpath(*paths,here=True)
+    file_   = self.fileurl + path
+    if ensure:
+      if not self.exists("GainCalibration.root"):
+        raise IOError("Did not find %s."%(path))
+    return file_
+    
+  def exists(self,*paths,**kwargs):
+    verb = kwargs.get('verb',self.verbosity)
+    path = self.expandpath(*paths,here=True)
+    cmd  = "if `%s %s%s >/dev/null 2>&1`; then echo 1; else echo 0; fi"%(self.lscmd,self.lsurl,path)
+    out  = self.execute(cmd).strip()
+    return out=='1'
+    
+  def cd(self,*paths,**kwargs):
+    #verb = kwargs.get('verb',self.verbosity)
+    path = self.expandpath(*paths)
+    ret  = os.chdir(path)
+    #ret  = self.execute("%s %s%s"%(self.cdcmd,self.cdurl,path)).split('\n')
+    return ret
+    
+  def ls(self,*paths,**kwargs):
+    verb    = kwargs.get('verb',self.verbosity)
+    path    = self.expandpath(*paths)
+    retlist = self.execute("%s %s%s"%(self.lscmd,self.lsurl,path),verb=verb).split('\n')
     return retlist
     
-  def cp(self,source,target=None):
-    target = self.expandPath(target)
-    return self.execute("%s %s%s %s"%(self.cpcmd,self.cpurl,source,target))
+  def cp(self,source,target=None,**kwargs):
+    verb   = kwargs.get('verb',self.verbosity)
+    source = self.expandpath(source)
+    target = self.expandpath(target)
+    return self.execute("%s %s%s %s"%(self.cpcmd,self.cpurl,source,target),verb=verb)
     
-  def hadd(self,sources,target=None):
-    target = self.expandPath(target)
+  def hadd(self,sources,target=None,**kwargs):
+    verb   = kwargs.get('verb',self.verbosity)
+    target = self.expandpath(target)
     if isinstance(sources,str):
       sources = [ sources ]
     source = ""
     for i, file in enumerate(sources,1):
-      source = self.haddurl+self.expandPath(file)
+      source = self.haddurl+self.expandpath(file)
       if i<len(sources): source += " "
     return self.execute("%s %s %s"%(self.haddcmd,target,source))
     
-  def rm(self,dirname):
+  def rm(self,dirname,**kwargs):
+    verb = kwargs.get('verb',self.verbosity)
     return self.execute("%s %s%s"%(self.rmcmd,self.rmurl,dirname))
     
-  def mkdir(self,dirname='$PATH'):
-    dirname = self.expandPath(dirname)
+  def mkdir(self,dirname='$PATH',**kwargs):
+    verb    = kwargs.get('verb',self.verbosity)
+    dirname = self.expandpath(dirname)
     return self.execute("%s %s%s"%(self.mkdrcmd,self.mkdrurl,dirname))
     
-  def chmod(self,file,perm=None):
+  def chmod(self,file,perm=None,**kwargs):
+    verb = kwargs.get('verb',self.verbosity)
     if not perm: perm = self.chmdprm
     return self.execute("%s %s %s%s"%(self.chmdcmd,perm,self.chmdurl,file))
-    
-  def exists(self,*paths):
-    path = self.expandPath(*paths)
-    cmd  = "if `%s %s%s >/dev/null 2>&1`; then echo 1; else echo 0; fi"%(self.lscmd,self.lsurl,path)
-    out  = self.execute(cmd)
-    return out=='1'
+  
+
+class Local(StorageSystem):
+  
+  def __init__(self,path,verb=1,ensure=False):
+    super(Local,self).__init__(path,verb=verb,ensure=ensure)
   
 
 class EOS(StorageSystem):
   
-  def __init__(self,path,verbose=1):
+  def __init__(self,path,verb=1):
     # EOS is mounted on lxplus now
-    super(EOS,self).__init__(path,verbose=verbose)
-    self.cpcmd  = 'cp' #xrdcp
+    super(EOS,self).__init__(path,verb=verb)
+    self.cpcmd   = 'cp' #xrdcp
     self.chmdprm = '2777'
-    self.tmpurl = '/tmp/$USER/'
-    self.prefix = "root://eoscms.cern.ch/"
-    self.fsys   = "root://eoscms/"
+    self.tmpurl  = '/tmp/$USER/'
+    self.prefix  = "root://eoscms.cern.ch/"
+    self.fileurl = "root://eoscms/"
   
 
 class Castor(StorageSystem):
   
-  def __init__(self,path,verbose=False):
-    super(Castor,self).__init__(path,verbose=verbose)
-    self.lscmd  = 'nsls'
-    self.cpcmd  = 'rfcp'
-    self.rmcmd  = 'nsrm -rf'
+  def __init__(self,path,verb=False,ensure=False):
+    super(Castor,self).__init__(path,verb=verb,ensure=ensure)
+    self.lscmd   = 'nsls'
+    self.cpcmd   = 'rfcp'
+    self.rmcmd   = 'nsrm -rf'
     self.mkdrcmd = 'rfmkdir -p'
     self.chmdcmd = 'rfchmod'
     self.chmdprm = '0777'
     self.chmdurl = ''
-    self.tmpurl = '/tmp/$USER/'
-    self.prefix = ""
-    self.fsys   = "rfio://"
+    self.tmpurl  = '/tmp/$USER/'
+    self.prefix  = ""
+    self.fileurl = "rfio://"
   
 
 class IIHE_T2(StorageSystem):
   
-  def __init__(self,path,verbose=False):
-    super(Castor,self).__init__(path,verbose=verbose)
-    self.cpcmd  = 'dccp -d 2'
+  def __init__(self,path,verb=False,ensure=False):
+    super(Castor,self).__init__(path,verb=verb,ensure=ensure)
+    self.cpcmd   = 'dccp -d 2'
     self.chmdcmd = 'chmod'
     self.chmdprm = '0777'
     self.chmdurl = ''
-    self.tmpurl = '/scratch/$USER/'
-    self.prefix = ""
-    self.fsys   = "dcap://"
+    self.tmpurl  = '/scratch/$USER/'
+    self.prefix  = ""
+    self.fileurl = "dcap://"
     # check /pnfs/iihe/'
     
 
@@ -247,11 +295,11 @@ class IIHE_T2(StorageSystem):
 class BatchSystem(object):
   __metaclass__ = ABCMeta
   
-  def __init__(self,verbose=1):
-    self.verbose = verbose
+  def __init__(self,verb=1):
+    self.verbosity = verb
     
   def execute(self,cmd,dry=False):
-    return execute(cmd,dry=dry,verbose=self.verbose)
+    return execute(cmd,dry=dry,verb=self.verbosity)
     
   @abstractmethod
   def submit(self,script,**kwargs):
@@ -268,8 +316,8 @@ class HTCondor(BatchSystem):
   # https://research.cs.wisc.edu/htcondor/manual/quickstart.html
   # https://twiki.cern.ch/twiki/bin/view/ABPComputing/LxbatchHTCondor
   
-  def __init__(self,verbose=False):
-    super(HTCondor,self).__init__(verbose=verbose)
+  def __init__(self,verb=False):
+    super(HTCondor,self).__init__(verb=verb)
     # http://pages.cs.wisc.edu/~adesmet/status.html
     self.statusdict = { 1: 'q', 2: 'r', 3: 'f', 4: 'c', 5: 'f', 6: 'f' }
   
@@ -298,7 +346,7 @@ class HTCondor(BatchSystem):
     subcmd = "condor_q -format '%s ' Owner -format '%s ' ClusterId -format '%s ' ProcId -format '%s ' JobStatus -format '%s\n' Args"
     rows   = self.execute(subcmd)
     jobs   = JobList()
-    if rows and self.verbose>=1:
+    if rows and self.verbosity>=1:
       print ">>> %10s %10s %8s %8s   %s"%('user','jobid','taskid','status','args')
     for row in rows.split('\n'):
       values = row.split()
@@ -308,7 +356,7 @@ class HTCondor(BatchSystem):
       taskid = values[2]
       status = self.statusdict.get(int(values[3]),'?')
       args   = ' '.join(values[4:])
-      if self.verbose>=1:
+      if self.verbosity>=1:
         print ">>> %10s %10s %8s %8s   %s"%(user,jobid,taskid,status,args)
       job    = Job(self,jobid,args=args,status=status)
       jobs.append(job)
@@ -388,7 +436,7 @@ def bold(string): return "\033[1m%s\033[0m"%(string)
 
 
 
-# verbose=0
+# verb=0
 # 
 # #################S
 # #Queues

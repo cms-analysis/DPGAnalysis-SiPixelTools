@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /bin/bash
 source /afs/cern.ch/cms/cmsset_default.sh
 function peval { echo -e ">>> $@"; eval "$@"; }
 
@@ -23,9 +23,6 @@ file=GainCalibration_NUM_RUN.EXT
 echo "(T2_CP $indir/$file $file)"
 T2_CP T2_PREFIX$indir/$file $file
 
-#convfile="vcal-irradiation-factors.txt"
-#echo "(cp $mydir/../$convfile $convfile)"
-#cp $mydir/../$convfile $convfile
 sqlite="siPixelVCal.db"
 echo "(cp $mydir/../$sqlite $sqlite)"
 cp $mydir/../$sqlite $sqlite
