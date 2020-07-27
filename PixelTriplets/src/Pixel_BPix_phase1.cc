@@ -767,6 +767,7 @@ Pixel_BPix_phase1::Pixel_BPix_phase1(const edm::ParameterSet& iConfig// , edm::C
   t_triggerSrc_ = consumes<edm::TriggerResults> (iConfig.getParameter<edm::InputTag>("triggerSource"));
   t_offlineBeamSpot_ =    consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
   t_offlinePrimaryVertices_ =   consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
+  _track_collection = iConfig.getParameter<std::string>("track_collection");
   t_generalTracks_= consumes<reco::TrackCollection> (edm::InputTag(_track_collection));
 //   t_generalTracks_= consumes<reco::TrackCollection> (edm::InputTag("generalTracks"));//"generalTracks"));
   t_pfMet_= consumes< edm::View<reco::PFMET>>(edm::InputTag("pfMet"));
@@ -3263,7 +3264,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
     const double twopi = 2*pi;
     const double pihalf = 2*atan(1);
     //const double sqrtpihalf = sqrt(pihalf);
-
+	
     myCounters::neve++;
     if( myCounters::prevrun != iEvent.run() ){
 
