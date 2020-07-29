@@ -734,16 +734,16 @@ private:
   float dz_res_3 = -999;
   float dx_res_4 = -999;
   float dz_res_4 = -999;
+  float z_coord_1 = -9999;
 
   float pt_res;
-  float pt_res_refit;
-  int cluster_size_res_init;
-  int cluster_size_res;
-  int hits_track;
-  int hits_barrel;
-  int hits_endcap;
+//   float pt_res_refit;
+//   int cluster_size_res_init;
+//   int cluster_size_res;
+//   int hits_track;
+//   int hits_barrel;
+//   int hits_endcap;
   int ls_with_measure;
-  int ds_with_measure;
   int runNumber_res;
   int lumiBlock_res;
 
@@ -758,16 +758,18 @@ private:
   std::vector<float> dz_resolution_study_l3;
   std::vector<float> dx_resolution_study_l4;
   std::vector<float> dz_resolution_study_l4;
+  
+  std::vector<float> z_coord_resolution_study_l1;
 
   std::vector<float> pt_resolution_study;
-  std::vector<float> pt_resolution_study_refit;
+//   std::vector<float> pt_resolution_study_refit;
   int number_of_tracks;
   std::vector<float> pt_all_tracks;
-  std::vector<int> cluster_size_all_tracks;
-  std::vector<int> hits_on_track_barrel;
-  std::vector<int> hits_on_track_endcap;
-  std::vector<int> hits_on_track_tracker;
-  std::vector<int> cluster_size_resolution_study;
+//   std::vector<int> cluster_size_all_tracks;
+//   std::vector<int> hits_on_track_barrel;
+//   std::vector<int> hits_on_track_endcap;
+//   std::vector<int> hits_on_track_tracker;
+//   std::vector<int> cluster_size_resolution_study;
   std::vector<float> layers_with_measurement;
   std::vector<int> runNumber_resolution_study;
   std::vector<int> lumiBlock_resolution_study;
@@ -834,7 +836,7 @@ Pixel_ntuple::Pixel_ntuple(const edm::ParameterSet& iConfig// , edm::ConsumesCol
   //  tree->Branch("pt_all_tracks", &pt_all_tracks);
   //tree->Branch("cluster_size_all_tracks", &cluster_size_all_tracks);
   //tree->Branch("cluster_size_resolution_study", &cluster_size_resolution_study);
-  tree->Branch("pt_resolution_study_refit", &pt_resolution_study_refit);
+//   tree->Branch("pt_resolution_study_refit", &pt_resolution_study_refit);
   tree->Branch("dx_resolution_study_l1", &dx_resolution_study_l1);
   tree->Branch("dz_resolution_study_l1", &dz_resolution_study_l1);
   tree->Branch("dx_resolution_study_l2", &dx_resolution_study_l2);
@@ -843,9 +845,10 @@ Pixel_ntuple::Pixel_ntuple(const edm::ParameterSet& iConfig// , edm::ConsumesCol
   tree->Branch("dz_resolution_study_l3", &dz_resolution_study_l3);
   tree->Branch("dx_resolution_study_l4", &dx_resolution_study_l4);
   tree->Branch("dz_resolution_study_l4", &dz_resolution_study_l4);
+  tree->Branch("z_coord_resolution_study_l1", &z_coord_resolution_study_l1);
   tree->Branch("pt_resolution_study", &pt_resolution_study);
-  tree->Branch("hits_on_track_barrel", &hits_on_track_barrel);
-  tree->Branch("hits_on_track_tracker", &hits_on_track_tracker);
+//   tree->Branch("hits_on_track_barrel", &hits_on_track_barrel);
+//   tree->Branch("hits_on_track_tracker", &hits_on_track_tracker);
   tree->Branch("layers_with_measurement", &layers_with_measurement);
   tree->Branch("runNumber_res", &runNumber_res);
   tree->Branch("lumiBlock_res", &lumiBlock_res);
@@ -3352,23 +3355,23 @@ void Pixel_ntuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     dz_resolution_study_l3.clear();
     dx_resolution_study_l4.clear();
     dz_resolution_study_l4.clear();
+	z_coord_resolution_study_l1.clear();
     pt_resolution_study.clear();
-    pt_resolution_study_refit.clear();
-    pt_all_tracks.clear();
-    cluster_size_all_tracks.clear();
-    hits_on_track_barrel.clear();
-    hits_on_track_endcap.clear();
-    hits_on_track_tracker.clear();
-    cluster_size_resolution_study.clear();
+    // pt_resolution_study_refit.clear();
+    // pt_all_tracks.clear();
+    // cluster_size_all_tracks.clear();
+    // hits_on_track_barrel.clear();
+    // hits_on_track_endcap.clear();
+    // hits_on_track_tracker.clear();
+    // cluster_size_resolution_study.clear();
     layers_with_measurement.clear();
     bool isTriplet = true;
-
     pt_res = -9999.;
-    pt_res_refit = -9999.;
-    cluster_size_res_init = 0;
-    cluster_size_res = 0;
-    hits_track = 0;
-    hits_barrel = 0;
+    // pt_res_refit = -9999.;
+    // cluster_size_res_init = 0;
+    // cluster_size_res = 0;
+    // hits_track = 0;
+    // hits_barrel = 0;
     ls_with_measure = 0;
     number_of_tracks = 0;
     runNumber_res = -1;
@@ -3770,10 +3773,11 @@ void Pixel_ntuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     dz_res_3 = -999.;
     dx_res_4 = -999.;
     dz_res_4 = -999.;
+	z_coord_1 = -999.;
     pt_res = -9999.;
-    pt_res_refit = -9999.;
-    hits_barrel = -1;
-    hits_track = -1;
+    // pt_res_refit = -9999.;
+    // hits_barrel = -1;
+    // hits_track = -1;
     ls_with_measure = -1;
     //runNumber_res = -1;
     //lumiBlock_res = -1;
@@ -3873,8 +3877,8 @@ void Pixel_ntuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
     if( hp.trackerLayersWithMeasurement() < 7 ) continue; // select only tracks which go into the strips
     pt_res = pt;
-    hits_barrel = hp.numberOfValidPixelBarrelHits();
-    hits_track  = hp.numberOfValidTrackerHits();
+    // hits_barrel = hp.numberOfValidPixelBarrelHits();
+    // hits_track  = hp.numberOfValidTrackerHits();
     ls_with_measure = hp.trackerLayersWithMeasurement();
 
     // if( hp.hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1) && hp.trackerLayersWithMeasurement() > 7 ) {
@@ -4988,7 +4992,7 @@ void Pixel_ntuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	cout << endl;
 
       }//dbg
-      pt_res_refit = refitTrajectory.geometricalInnermostState().globalMomentum().perp();
+    //   pt_res_refit = refitTrajectory.geometricalInnermostState().globalMomentum().perp();
       // trajectory residuals:
 
       for( Trajectory::DataContainer::iterator iTM = refitTMs.begin();
@@ -6944,14 +6948,16 @@ void Pixel_ntuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	    g509->Fill( f4*wt, phiinc*wt );
 	    g510->Fill( dca4*1E4 );
 	    g511->Fill( dz4*1E4 );
+		dx_res_4 = dca4*1E4;
+		dz_res_4 = dz4*1E4;
 	  }
 
 	  if( pt > 12 ) {
 
 	    g520->Fill( dca4*1E4 );
 	    g521->Fill( dz4*1E4 );
-		dx_res_4 = dca4*1E4;
-	  	dz_res_4 = dz4*1E4;
+		//dx_res_4 = dca4*1E4;
+	  	//dz_res_4 = dz4*1E4;
 	    if(bb/aa >= 1.10 && bb/aa < 1.27) g520_1->Fill(dca4*1E4);
 	    else if(bb/aa >= 1.27 && bb/aa < 1.43) g520_2->Fill(dca4*1E4);
 	    else if(bb/aa >= 1.43 && bb/aa < 1.57) g520_3->Fill(dca4*1E4);
@@ -7309,8 +7315,9 @@ void Pixel_ntuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
       	    //   h317->Fill( dz3*1E4 );
       	    //   h318->Fill( nvertex );
       	    // } // pile up
-
-      	  } // pt > 4
+			dx_res_3 = dca3 * 1E4;
+			dz_res_3 = dz3 * 1E4;
+		  } // pt > 4
 
 
       	  if( pt > 12 ) {
@@ -7365,8 +7372,8 @@ void Pixel_ntuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
 
       	    hg421->Fill( dz3*1E4 );
-			dx_res_3 = dca3*1E4;
-	  		dz_res_3 = dz3*1E4;
+			// dx_res_3 = dca3*1E4;
+	  		// dz_res_3 = dz3*1E4;
 
 	    if( abs( phi3 - phiN3 ) < pihalf ) {
 	      hg420_out->Fill( dca3*1E4 );
@@ -8366,7 +8373,8 @@ void Pixel_ntuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	    h317->Fill( dz2*1E4 );
 	    h318->Fill( nvertex );
 	  } // pile up
-
+	  dx_res_2 = dca2*1E4;
+	  dz_res_2 = dz2*1E4;
 	} // pt > 4
 
 
@@ -8422,8 +8430,8 @@ void Pixel_ntuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
 
 	  h421->Fill( dz2*1E4 );
-	  dx_res_2 = dca2*1E4;
-	  dz_res_2 = dz2*1E4;
+	//   dx_res_2 = dca2*1E4;
+	//   dz_res_2 = dz2*1E4;
 	  // Add errors and pulls
           h077->Fill( ePXB2*1E4 );
           h078->Fill( fPXB2*1E4 );
@@ -9289,11 +9297,13 @@ void Pixel_ntuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	  h509->Fill( f1*wt, phiinc*wt );
 	  h510->Fill( dca1*1E4 );
 	  h511->Fill( dz1*1E4 );
+	  dx_res_1 = dca1*1E4;
+	  dz_res_1 = dz1*1E4;
 	}
 
 	if( pt > 12 ) {
-	  dx_res_1 = dca1*1E4;
-	  dz_res_1 = dz1*1E4;
+	//   dx_res_1 = dca1*1E4;
+	//   dz_res_1 = dz1*1E4;
 	  h520->Fill( dca1*1E4 );
 	  h521->Fill( dz1*1E4 );
 
@@ -9413,6 +9423,7 @@ void Pixel_ntuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
 	  h514->Fill( zPXB1, dca1*1E4 );
 	  h515->Fill( zPXB1, dz1*1E4 );
+	  z_coord_1 = zPXB1;
 	}
 	//h516->Fill( logpt, dca1*1E4 );
 	//h517->Fill( logpt, dz1*1E4 );
@@ -11759,13 +11770,14 @@ void Pixel_ntuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
       dz_resolution_study_l3.push_back(dz_res_3);
       dx_resolution_study_l4.push_back(dx_res_4);
       dz_resolution_study_l4.push_back(dz_res_4);
+	  z_coord_resolution_study_l1.push_back(z_coord_1);
       pt_resolution_study.push_back(pt_res);
       runNumber_resolution_study.push_back(runNumber_res);
       lumiBlock_resolution_study.push_back(lumiBlock_res);
-      pt_resolution_study_refit.push_back(pt_res_refit);
+    //   pt_resolution_study_refit.push_back(pt_res_refit);
       //      cluster_size_resolution_study.push_back(cluster_size_res);
-      hits_on_track_barrel.push_back(hits_barrel);
-      hits_on_track_tracker.push_back(hits_track);
+    //   hits_on_track_barrel.push_back(hits_barrel);
+    //   hits_on_track_tracker.push_back(hits_track);
       layers_with_measurement.push_back(ls_with_measure);
 	//   cout << dx_res_1 << dz_res_1 << dx_res_2 << dz_res_2 << dx_res_3 << dz_res_3 << dx_res_4 << dz_res_4 << pt_res << runNumber_res << lumiBlock_res << pt_res_refit << endl;
     }
