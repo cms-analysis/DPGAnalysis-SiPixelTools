@@ -118,11 +118,11 @@ PixelDumpDataInputSource::PixelDumpDataInputSource(const edm::ParameterSet& pset
 {
   produces<FEDRawDataCollection>();
 
-  if (m_fileindex>=fileNames().size()) {
+  if (m_fileindex>=fileNames(0).size()) { // add a 0 in (0) to solve comipilation errors in 11_1_3 , not tested, d.k. 8/2020 
     edm::LogInfo("") << "no more file to read " << std::endl;
     return;// ???
   }
-  std::string currentfilename = fileNames()[m_fileindex];
+  std::string currentfilename = fileNames(0)[m_fileindex];  // add a 0 in (0)
   edm::LogInfo("") << "now examining file "<< currentfilename ;
 
   if(m_runnumber>-1) std::cout<<" Will force run-number to be "<<m_runnumber<<std::endl;

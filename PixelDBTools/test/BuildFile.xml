@@ -8,6 +8,7 @@
 <use   name="CalibTracker/SiPixelESProducers"/>
 <use   name="RecoLocalTracker/SiPixelRecHits"/>
 <use   name="CalibTracker/SiPixelConnectivity"/>
+<use   name="RecoLocalTracker/Records"/>
 <use   name="DQM/SiPixelPhase1Common"/>
 
 #<library   file="SiPixelFedCablingMapDBReader.cc" name="PixelDBTool1">
