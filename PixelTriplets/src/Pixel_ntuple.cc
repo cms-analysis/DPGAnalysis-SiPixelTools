@@ -1,17 +1,17 @@
-// -*- C++ -*-
+// -*- C++ -*-dz%
 //
-// Package:  Pixel_BPix_phase1
-// Class:    Pixel_BPix_phase1
+// Package:  Pixel                                                                                                                                                                                                          // Class:    Pixel
 //
-// my/Pixel_BPix_phase1/src/Pixel_BPix_phase1.cc
+// my/Pixel/src/Pixel.cc
 //
 // Pixel (and strip) triplet residuals
 //
-// Original Author:  Daniel Pitzl, DESY
-//         Created:  Sat Feb 12 12:12:42 CET 2011
-// $Id$
+// Author: Valere Lambert, UZH 2015
 //
-
+// Based off of original Triplet Author:  Daniel Pitzl, DESY
+//         Created:  Sat Feb 12 12:12:42 CET 2011
+//
+//
 // system include files:
 #include <memory>
 #include <iostream>
@@ -22,7 +22,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TProfile.h"
-
+#include "TTree.h"
 // CMS and user include files:
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -712,12 +712,12 @@ struct Histos{
 };
 } // namespace
 
-class Pixel_BPix_phase1 : public edm::EDAnalyzer, public Histos {
+class Pixel_ntuple : public edm::EDAnalyzer, public Histos {
 
 public:
-  explicit Pixel_BPix_phase1(const edm::ParameterSet& // ,edm::ConsumesCollector&&
+  explicit Pixel_ntuple(const edm::ParameterSet& // ,edm::ConsumesCollector&&
 	       );
-  ~Pixel_BPix_phase1();
+  ~Pixel_ntuple();
 
 private:
   virtual void beginJob() ;
@@ -726,10 +726,68 @@ private:
 		       );
   virtual void endJob() ;
 
+  float dx_res_1 = -999;
+  float dz_res_1 = -999;
+  float dx_res_2 = -999;
+  float dz_res_2 = -999;
+  float dx_res_3 = -999;
+  float dz_res_3 = -999;
+  float dx_res_4 = -999;
+  float dz_res_4 = -999;
+  float z_coord_1 = -9999;
+
+  float pt_res;
+//   float pt_res_refit;
+//   int cluster_size_res_init;
+//   int cluster_size_res;
+//   int hits_track;
+//   int hits_barrel;
+//   int hits_endcap;
+  int ls_with_measure;
+  int runNumber_res;
+  int lumiBlock_res;
+
+  bool isTriplet;
+  TTree * tree;
+
+  std::vector<float> dx_resolution_study_l1;
+  std::vector<float> dz_resolution_study_l1;
+  std::vector<float> dx_resolution_study_l2;
+  std::vector<float> dz_resolution_study_l2;
+  std::vector<float> dx_resolution_study_l3;
+  std::vector<float> dz_resolution_study_l3;
+  std::vector<float> dx_resolution_study_l4;
+  std::vector<float> dz_resolution_study_l4;
+  
+  std::vector<float> z_coord_resolution_study_l1;
+
+  std::vector<float> pt_resolution_study;
+//   std::vector<float> pt_resolution_study_refit;
+  int number_of_tracks;
+  std::vector<float> pt_all_tracks;
+//   std::vector<int> cluster_size_all_tracks;
+//   std::vector<int> hits_on_track_barrel;
+//   std::vector<int> hits_on_track_endcap;
+//   std::vector<int> hits_on_track_tracker;
+//   std::vector<int> cluster_size_resolution_study;
+  std::vector<float> layers_with_measurement;
+  std::vector<int> runNumber_resolution_study;
+  std::vector<int> lumiBlock_resolution_study;
+	
+  int numberOfTracksCount = 0;
+  int numberOfTracksCount123 = 0;
+  int numberOfTracksCount124 = 0;
+  int numberOfTracksCount234 = 0;
+  int numberOfTracksCount134 = 0;
+
   edm::InputTag _triggerSrc;
   std::string _ttrhBuilder;
   HLTConfigProvider HLTConfig;
   bool singleParticleMC;
+
+  int _OC_beginning;
+  int _OC_end;
+
   edm::EDGetTokenT<reco::BeamSpot>  t_offlineBeamSpot_;
   edm::EDGetTokenT<reco::VertexCollection> t_offlinePrimaryVertices_ ;
   edm::EDGetTokenT<edm::TriggerResults> t_triggerSrc_ ;
@@ -751,10 +809,10 @@ private:
 //
 // constructor:
 //
-Pixel_BPix_phase1::Pixel_BPix_phase1(const edm::ParameterSet& iConfig// , edm::ConsumesCollector && ic
+Pixel_ntuple::Pixel_ntuple(const edm::ParameterSet& iConfig// , edm::ConsumesCollector && ic
 	 )
 {
-  std::cout << "Pixel constructed\n";
+  std::cout << "Pixel_ntuple constructed\n";
   _triggerSrc = iConfig.getParameter<edm::InputTag>("triggerSource");
   _ttrhBuilder = iConfig.getParameter<std::string>("ttrhBuilder");
   singleParticleMC  = iConfig.getUntrackedParameter<bool>("singleParticleMC",false);
@@ -769,16 +827,39 @@ Pixel_BPix_phase1::Pixel_BPix_phase1(const edm::ParameterSet& iConfig// , edm::C
   t_offlinePrimaryVertices_ =   consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
   _track_collection = iConfig.getParameter<std::string>("track_collection");
   t_generalTracks_= consumes<reco::TrackCollection> (edm::InputTag(_track_collection));
-//   t_generalTracks_= consumes<reco::TrackCollection> (edm::InputTag("generalTracks"));//"generalTracks"));
+
   t_pfMet_= consumes< edm::View<reco::PFMET>>(edm::InputTag("pfMet"));
-  // _OC_beginning=iConfig.getParameter<int>("orbit_beginning");
-  // _OC_end=iConfig.getParameter<int>("orbit_end");
+
+  edm::Service<TFileService> fsT;
+  tree = fsT->make<TTree>("tree", "tree");
+  tree->Branch("number_of_tracks", &number_of_tracks);
+  //  tree->Branch("pt_all_tracks", &pt_all_tracks);
+  //tree->Branch("cluster_size_all_tracks", &cluster_size_all_tracks);
+  //tree->Branch("cluster_size_resolution_study", &cluster_size_resolution_study);
+//   tree->Branch("pt_resolution_study_refit", &pt_resolution_study_refit);
+  tree->Branch("dx_resolution_study_l1", &dx_resolution_study_l1);
+  tree->Branch("dz_resolution_study_l1", &dz_resolution_study_l1);
+  tree->Branch("dx_resolution_study_l2", &dx_resolution_study_l2);
+  tree->Branch("dz_resolution_study_l2", &dz_resolution_study_l2);
+  tree->Branch("dx_resolution_study_l3", &dx_resolution_study_l3);
+  tree->Branch("dz_resolution_study_l3", &dz_resolution_study_l3);
+  tree->Branch("dx_resolution_study_l4", &dx_resolution_study_l4);
+  tree->Branch("dz_resolution_study_l4", &dz_resolution_study_l4);
+  tree->Branch("z_coord_resolution_study_l1", &z_coord_resolution_study_l1);
+  tree->Branch("pt_resolution_study", &pt_resolution_study);
+//   tree->Branch("hits_on_track_barrel", &hits_on_track_barrel);
+//   tree->Branch("hits_on_track_tracker", &hits_on_track_tracker);
+  tree->Branch("layers_with_measurement", &layers_with_measurement);
+  tree->Branch("runNumber_res", &runNumber_res);
+  tree->Branch("lumiBlock_res", &lumiBlock_res);
+  //_OC_beginning=iConfig.getParameter<int>("orbit_beginning");
+  //_OC_end=iConfig.getParameter<int>("orbit_end");
   // tok_caloHH_ = consumes<edm::PCaloHitContainer>(edm::InputTag("g4SimHits", "HcalHits"));
 }
 //
 // destructor:
 //
-Pixel_BPix_phase1::~Pixel_BPix_phase1()
+Pixel_ntuple::~Pixel_ntuple()
 {
    // do anything here that needs to be done at desctruction time
    // (e.g. close files, deallocate resources etc.)
@@ -1177,7 +1258,7 @@ void Histos::init(TFileDirectory* fs)
   h418 = fs->make<TProfile>( "h418", "PXB2 #Deltax vs p_{t} +;log(p_{t} [GeV]);PXB2 <#Deltax> [#mum]", 20, 0, 2, -99, 99 );
   h419 = fs->make<TProfile>( "h419", "PXB2 #Deltax vs p_{t} -;log(p_{t} [GeV]);PXB2 <#Deltax> [#mum]", 20, 0, 2, -99, 99 );
 
-  h420 = fs->make<TH1D>( "h420", "PXB2 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits", 150, -150, 150 );
+  h420 = fs->make<TH1D>( "h420", "PXB2 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits", 3000, -150, 150 );
   h420_out_zplus = fs->make<TH1D>( "h420_out_zplus", "PXB2 residuals #Deltax, p_{t} > 12, outward-facing modules, z+;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h420_out_zminus = fs->make<TH1D>( "h420_out_zminus", "PXB2 residuals #Deltax, p_{t} > 12, outward-facing modules, z-;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h420_in_zplus = fs->make<TH1D>( "h420_in_zplus", "PXB2 residuals #Deltax, p_{t} > 12, inward-facing modules, z+;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
@@ -1186,7 +1267,7 @@ void Histos::init(TFileDirectory* fs)
   h421_out_zminus = fs->make<TH1D>( "h421_out_zminus", "PXB2 residuals #Deltaz, p_{t} > 12, outward-facing modules, z-;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
   h421_in_zplus = fs->make<TH1D>( "h421_in_zplus", "PXB2 residuals #Deltaz, p_{t} > 12, inward-facing modules, z+;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
   h421_in_zminus = fs->make<TH1D>( "h421_in_zminus", "PXB2 residuals #Deltaz, p_{t} > 12, inward-facing modules, z-;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
-  h421 = fs->make<TH1D>( "h421", "PXB2 residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+  h421 = fs->make<TH1D>( "h421", "PXB2 residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 3000, -300, 300 );
 
   h420_out = fs->make<TH1D>( "h420_out", "PXB2 residuals #Deltax, p_{t} > 12, outward-facing modules;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h420_in = fs->make<TH1D>( "h420_in", "PXB2 residuals #Deltax, p_{t} > 12, in-facing modules;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
@@ -2546,7 +2627,7 @@ void Histos::init(TFileDirectory* fs)
   g518 = fs->make<TProfile>( "g518", "PXB4 #Deltax vs p_{t} +;log(p_{t} [GeV]);PXB4 <#Deltax> [#mum]", 20, 0, 2, -199, 199 );
   g519 = fs->make<TProfile>( "g519", "PXB4 #Deltax vs p_{t} -;log(p_{t} [GeV]);PXB4 <#Deltax> [#mum]", 20, 0, 2, -199, 199 );
 
-  g520 = fs->make<TH1D>( "g520", "PXB4 residuals #Deltax, p_{t} > 12;PXB4 #Deltax [#mum];hits", 150, -150, 150 );
+  g520 = fs->make<TH1D>( "g520", "PXB4 residuals #Deltax, p_{t} > 12;PXB4 #Deltax [#mum];hits", 3000, -150, 150 );
   g520_out_zplus = fs->make<TH1D>( "g520_out_zplus", "PXB4 residuals #Deltax, p_{t} > 12, outward-facing modules, z+;PXB4 #Deltax [#mum];hits", 3000, -150, 150 );
   g520_out_zminus = fs->make<TH1D>( "g520_out_zminus", "PXB4 residuals #Deltax, p_{t} > 12, outward-facing modules, z-;PXB4 #Deltax [#mum];hits", 3000, -150, 150 );
   g520_in_zplus = fs->make<TH1D>( "g520_in_zplus", "PXB4 residuals #Deltax, p_{t} > 12, inward-facing modules, z+;PXB4 #Deltax [#mum];hits", 3000, -150, 150 );
@@ -3211,17 +3292,16 @@ void Histos::init(TFileDirectory* fs)
 // member functions:
 // method called once each job just before starting event loop
 //
-void Pixel_BPix_phase1::beginJob()
+void Pixel_ntuple::beginJob()
 {
 }
 
 //----------------------------------------------------------------------
 // method called for each event:
 
-void Pixel_BPix_phase1::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
+void Pixel_ntuple::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 {
 	const int run = iRun.run();
-
 	std::map<int, Histos>::iterator iter = runmap.find(run);
 	if(iter != runmap.end())
 	{
@@ -3252,8 +3332,10 @@ void Pixel_BPix_phase1::beginRun(const edm::Run& iRun, const edm::EventSetup& iS
 	*/
 }
 
-void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , edm::ConsumesCollector && ic
+void Pixel_ntuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup // , edm::ConsumesCollector && ic
 		  ){
+  //if((int)iEvent.orbitNumber() >= (int)_OC_beginning && (int)iEvent.orbitNumber() <= (int)_OC_end ){
+//   if(true){
     using namespace std;
     using namespace edm;
     using namespace reco;
@@ -3264,7 +3346,37 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
     const double twopi = 2*pi;
     const double pihalf = 2*atan(1);
     //const double sqrtpihalf = sqrt(pihalf);
-	
+
+    dx_resolution_study_l1.clear();
+    dz_resolution_study_l1.clear();
+    dx_resolution_study_l2.clear();
+    dz_resolution_study_l2.clear();
+    dx_resolution_study_l3.clear();
+    dz_resolution_study_l3.clear();
+    dx_resolution_study_l4.clear();
+    dz_resolution_study_l4.clear();
+	z_coord_resolution_study_l1.clear();
+    pt_resolution_study.clear();
+    // pt_resolution_study_refit.clear();
+    // pt_all_tracks.clear();
+    // cluster_size_all_tracks.clear();
+    // hits_on_track_barrel.clear();
+    // hits_on_track_endcap.clear();
+    // hits_on_track_tracker.clear();
+    // cluster_size_resolution_study.clear();
+    layers_with_measurement.clear();
+    bool isTriplet = true;
+    pt_res = -9999.;
+    // pt_res_refit = -9999.;
+    // cluster_size_res_init = 0;
+    // cluster_size_res = 0;
+    // hits_track = 0;
+    // hits_barrel = 0;
+    ls_with_measure = 0;
+    number_of_tracks = 0;
+    runNumber_res = -1;
+    lumiBlock_res = -1;
+
     myCounters::neve++;
     if( myCounters::prevrun != iEvent.run() ){
 
@@ -3317,6 +3429,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 
   //--------------------------------------------------------------------
   // beam spot:
+
     edm::Handle<reco::BeamSpot> rbs;
     iEvent.getByToken( t_offlineBeamSpot_, rbs );
 
@@ -3339,8 +3452,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
     h009->Fill( rbs->dydz()*1e3 );
     bsP = XYZPoint( rbs->x0(), rbs->y0(), rbs->z0() );
 
-    // double bx = rbs->BeamWidthX();
-    // double by = rbs->BeamWidthY();
+    double bx = rbs->BeamWidthX();
+    double by = rbs->BeamWidthY();
 
     if( idbg ){
       cout << "beam spot x " << rbs->x0();
@@ -3491,7 +3604,9 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 
   //--------------------------------------------------------------------
   // tracks:
+  
   Handle<reco::TrackCollection> tracks;
+  
   iEvent.getByToken( t_generalTracks_, tracks );
   //iEvent.getByLabel( "generalTracks", tracks );
 
@@ -3502,8 +3617,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
     cout << "  tracks " << tracks->size();
     cout << endl;
   }
-
   h030->Fill( tracks->size() );
+  number_of_tracks = tracks->size();
 
   //----------------------------------------------------------------------------
   // get tracker geometry:
@@ -3645,15 +3760,34 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
   double sumq = 0;
   Surface::GlobalPoint origin = Surface::GlobalPoint(0,0,0);
   const TrackerGeomDet * geomDet2 = NULL;
+  runNumber_res = iEvent.run();
+  lumiBlock_res = iEvent.luminosityBlock();
   for( TrackCollection::const_iterator iTrack = tracks->begin();
       iTrack != tracks->end(); ++iTrack ) {
-
+    isTriplet = true;
+    dx_res_1 = -999.;
+    dz_res_1 = -999.;
+    dx_res_2 = -999.;
+    dz_res_2 = -999.;
+    dx_res_3 = -999.;
+    dz_res_3 = -999.;
+    dx_res_4 = -999.;
+    dz_res_4 = -999.;
+	z_coord_1 = -999.;
+    pt_res = -9999.;
+    // pt_res_refit = -9999.;
+    // hits_barrel = -1;
+    // hits_track = -1;
+    ls_with_measure = -1;
+    //runNumber_res = -1;
+    //lumiBlock_res = -1;
+    // double pt = iTrack->pt();
     // cpt = cqRB = 0.3*R[m]*B[T] = 1.14*R[m] for B=3.8T
     // D = 2R = 2*pt/1.14
     // calo: D = 1.3 m => pt = 0.74 GeV/c
 
     double pt = iTrack->pt();
-    // double pp = iTrack->p();
+    double pp = iTrack->p();
 
     //if( pt < 0.75 ) continue;// curls up
     //if( pt < 1.75 ) continue;// want sharper image
@@ -3730,18 +3864,22 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
     double zBeam = iTrack->dz(bsP);//z0p of track along beam line w.r.t. beam z center
     double xBeam = rbs->x0() + rbs->dxdz() * zBeam;//beam at z of track
     double yBeam = rbs->y0() + rbs->dydz() * zBeam;
-    // double z0p =  zBeam + bsP.z(); // z0p of track along beam line w.r.t. CMS z = 0
-    // XYZPoint blP = XYZPoint( xBeam, yBeam, z0p );//point on beam line at z of track
+    double z0p =  zBeam + bsP.z(); // z0p of track along beam line w.r.t. CMS z = 0
+    XYZPoint blP = XYZPoint( xBeam, yBeam, z0p );//point on beam line at z of track
 
     xBS = xBeam;//improve
     yBS = yBeam;//beam tilt taken into account
 
-    // double bcap = iTrack->dxy(blP);//impact parameter to beam
-    // double edca = iTrack->dxyError();
-    // double ebca = sqrt( edca*edca + bx*by );//round beam
+    double bcap = iTrack->dxy(blP);//impact parameter to beam
+    double edca = iTrack->dxyError();
+    double ebca = sqrt( edca*edca + bx*by );//round beam
     //double sbca = bcap / ebca;//impact parameter significance
 
     if( hp.trackerLayersWithMeasurement() < 7 ) continue; // select only tracks which go into the strips
+    pt_res = pt;
+    // hits_barrel = hp.numberOfValidPixelBarrelHits();
+    // hits_track  = hp.numberOfValidTrackerHits();
+    ls_with_measure = hp.trackerLayersWithMeasurement();
 
     // if( hp.hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1) && hp.trackerLayersWithMeasurement() > 7 ) {
     //   if( pt > 8 ) {
@@ -3863,7 +4001,6 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
     double ycrss[99];
     double zcrss[99];
     int ncrss = 0;
-
     for( TrackerGeometry::DetContainer::const_iterator idet = pTG->dets().begin();
 	 idet != pTG->dets().end(); ++idet ) {
 
@@ -4206,7 +4343,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	if( subDet == 1 ){ // PXB
 
 	  int ilay = tTopo->pxbLayer(detId);//PXBDetId(detId).layer();
-	  // int ilad = tTopo->pxbLadder(detId);//PXBDetId(detId).ladder();
+	  int ilad = tTopo->pxbLadder(detId);//PXBDetId(detId).ladder();
 	  imod = tTopo->pxbModule(detId);//PXBDetId(detId).module();
 	 // std::cout << " imod 1 "<< imod<< std::endl;
 	  ///To be seen
@@ -4855,14 +4992,13 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	cout << endl;
 
       }//dbg
-
+    //   pt_res_refit = refitTrajectory.geometricalInnermostState().globalMomentum().perp();
       // trajectory residuals:
 
       for( Trajectory::DataContainer::iterator iTM = refitTMs.begin();
 	   iTM != refitTMs.end(); iTM++ ) {
 
 	if( ! iTM->recHit()->isValid() ) continue;
-
 	DetId detId = iTM->recHit()->geographicalId();
 
 	uint32_t subDet = detId.subdetId();
@@ -5823,7 +5959,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 
     double kap2 = 0;
     bool refit2valid = 0;
-    // double  clusProb_Pixel_BPix_phase1 = -99;
+    // double  clusProb_pxl = -99;
     if( n2 > 0 ){
 
       Trajectory::RecHitContainer nyTTRHvec; // for fit
@@ -5862,7 +5998,6 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
       std::vector<Trajectory> refitTrajectoryVec2 = theFitter->fit( seed, nyTTRHvec, initialTSOS );
 
       if( refitTrajectoryVec2.size() > 0 ) { // should be either 0 or 1
-
 	const Trajectory& refitTrajectory2 = refitTrajectoryVec2.front();
 
 	// Trajectory.measurements:
@@ -5881,10 +6016,10 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	  if( iTTRH->hit()->isValid() ){
 	    // const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( iTTRH->hit() );
 	    // if (pixhit->hasFilledProb()){
-	    //   cout << "Pixel_BPix_phase1 layer 2:  clust prob "<<pixhit->clusterProbability(0)<<endl;
-	    //   clusProb_Pixel_BPix_phase1 = pixhit->clusterProbability(0);
+	    //   cout << "PXL layer 2:  clust prob "<<pixhit->clusterProbability(0)<<endl;
+	    //   clusProb_pxl = pixhit->clusterProbability(0);
 	    // PXB2_clusterProb
-	    // }else     cout << "Pixel_BPix_phase1 layer 2: NO  clust prob "<< endl;
+	    // }else     cout << "PXL layer 2: NO  clust prob "<< endl;
 
 	    if( idbg ) cout << "  " << iTTRH->geographicalId().subdetId();
 
@@ -6119,7 +6254,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	if( cogp2 < 79 ) cogx -= 0.01; // big pix
 	if( cogp2 > 80 ) cogx += 0.01; // big pix
 
-	// double mpix = fmod( cogx + 0.82, 0.01 ); // mpix = 0..0.01 from cluster COG
+	double mpix = fmod( cogx + 0.82, 0.01 ); // mpix = 0..0.01 from cluster COG
 	//double cogdx = cogx - lp2.x(); // residual
 
 	// hybrid method:
@@ -6805,20 +6940,24 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	  double s = ks*rho;// signed
 	  double uz4 = uz0 + s*tandip; //track z at R4
 	  double dz4 = zPXB4 - uz4;
-
+	//   dx_res_4 = dca4*1E4;
+	//   dz_res_4 = dz4*1E4;
 	  if( pt > 4 ) {
 	    g507->Fill( bb/aa );//lever arm
 	    g508->Fill( f4*wt, bb/aa );//lever arm
 	    g509->Fill( f4*wt, phiinc*wt );
 	    g510->Fill( dca4*1E4 );
 	    g511->Fill( dz4*1E4 );
+		dx_res_4 = dca4*1E4;
+		dz_res_4 = dz4*1E4;
 	  }
 
 	  if( pt > 12 ) {
 
 	    g520->Fill( dca4*1E4 );
 	    g521->Fill( dz4*1E4 );
-
+		//dx_res_4 = dca4*1E4;
+	  	//dz_res_4 = dz4*1E4;
 	    if(bb/aa >= 1.10 && bb/aa < 1.27) g520_1->Fill(dca4*1E4);
 	    else if(bb/aa >= 1.27 && bb/aa < 1.43) g520_2->Fill(dca4*1E4);
 	    else if(bb/aa >= 1.43 && bb/aa < 1.57) g520_3->Fill(dca4*1E4);
@@ -6930,8 +7069,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	}
 
 
-      }
 
+      }
 
       if( n3*n2*n4 > 0 ) {
 
@@ -7131,9 +7270,11 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
       	  if( cogp3 < 79 ) cogx -= 0.01; // big pix
       	  if( cogp3 > 80 ) cogx += 0.01; // big pix
 
-      	  // double mpix = fmod( cogx + 0.82, 0.01 ); // mpix = 0..0.01 from cluster COG
+      	  double mpix = fmod( cogx + 0.82, 0.01 ); // mpix = 0..0.01 from cluster COG
       	  double cogdx = cogx - lp3.x(); // residual
-
+			// cout << dca3*1E4 << " -- " << dz3*1E4;
+	//   dx_res_3 = dca3*1E4;
+	//   dz_res_3 = dz3*1E4;
       	  // hybrid method:
 
       	  //double hybx = uPXB3; // template
@@ -7174,8 +7315,9 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
       	    //   h317->Fill( dz3*1E4 );
       	    //   h318->Fill( nvertex );
       	    // } // pile up
-
-      	  } // pt > 4
+			dx_res_3 = dca3 * 1E4;
+			dz_res_3 = dz3 * 1E4;
+		  } // pt > 4
 
 
       	  if( pt > 12 ) {
@@ -7230,7 +7372,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 
 
       	    hg421->Fill( dz3*1E4 );
-
+			// dx_res_3 = dca3*1E4;
+	  		// dz_res_3 = dz3*1E4;
 
 	    if( abs( phi3 - phiN3 ) < pihalf ) {
 	      hg420_out->Fill( dca3*1E4 );
@@ -8196,7 +8339,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	if( mpix*1E4 > 75 ) hybx = cogx;
 	//double hpix = fmod( hybx + 0.82, 0.01 ); // hpix = 0..0.01 from cluster hybrid method
 	double hybdx = hybx - lp2.x(); // residual
-
+	// dx_res_2 = dca2*1E4;
+	// dz_res_2 = dz2*1E4;
 	// bool halfmod = 0;
 	// if(      ilad2 ==  8 ) halfmod = 1;
 	// else if( ilad2 ==  9 ) halfmod = 1;
@@ -8229,7 +8373,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	    h317->Fill( dz2*1E4 );
 	    h318->Fill( nvertex );
 	  } // pile up
-
+	  dx_res_2 = dca2*1E4;
+	  dz_res_2 = dz2*1E4;
 	} // pt > 4
 
 
@@ -8285,7 +8430,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 
 
 	  h421->Fill( dz2*1E4 );
-
+	//   dx_res_2 = dca2*1E4;
+	//   dz_res_2 = dz2*1E4;
 	  // Add errors and pulls
           h077->Fill( ePXB2*1E4 );
           h078->Fill( fPXB2*1E4 );
@@ -9144,16 +9290,20 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	double s = ks*rho;// signed
 	double uz1 = uz0 + s*tandip; //track z at R1
 	double dz1 = zPXB1 - uz1;
-
+	// dx_res_1 = dca1*1E4;
+	// dz_res_1 = dz1*1E4;
 	if( pt > 4 ) {
 	  h508->Fill( bb/aa );//lever arm
 	  h509->Fill( f1*wt, phiinc*wt );
 	  h510->Fill( dca1*1E4 );
 	  h511->Fill( dz1*1E4 );
+	  dx_res_1 = dca1*1E4;
+	  dz_res_1 = dz1*1E4;
 	}
 
 	if( pt > 12 ) {
-
+	//   dx_res_1 = dca1*1E4;
+	//   dz_res_1 = dz1*1E4;
 	  h520->Fill( dca1*1E4 );
 	  h521->Fill( dz1*1E4 );
 
@@ -9273,6 +9423,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 
 	  h514->Fill( zPXB1, dca1*1E4 );
 	  h515->Fill( zPXB1, dz1*1E4 );
+	  z_coord_1 = zPXB1;
 	}
 	//h516->Fill( logpt, dca1*1E4 );
 	//h517->Fill( logpt, dz1*1E4 );
@@ -9651,8 +9802,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
       double RNV = 2*FKA / SQT; // inverse radius = -kappa
       double DCA = 2*DLT / ( 1 + SQT ); // dca to reference point (beam)
       double KAP = -RNV; // CMS sign convention
-      // double ERD = 1.0 - KAP*DCA;
-      // double RHO = 1/KAP;
+      double ERD = 1.0 - KAP*DCA;
+      double RHO = 1/KAP;
 
       h557->Fill( KAP - kap );
       double df = PHI - phip;
@@ -11609,20 +11760,42 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 
 //     }//pt cut
 // #endif // NOT_USED
-
+	// cout << isTriplet << endl;
+	if(isTriplet) {
+      dx_resolution_study_l1.push_back(dx_res_1);
+      dz_resolution_study_l1.push_back(dz_res_1);
+      dx_resolution_study_l2.push_back(dx_res_2);
+      dz_resolution_study_l2.push_back(dz_res_2);
+      dx_resolution_study_l3.push_back(dx_res_3);
+      dz_resolution_study_l3.push_back(dz_res_3);
+      dx_resolution_study_l4.push_back(dx_res_4);
+      dz_resolution_study_l4.push_back(dz_res_4);
+	  z_coord_resolution_study_l1.push_back(z_coord_1);
+      pt_resolution_study.push_back(pt_res);
+      runNumber_resolution_study.push_back(runNumber_res);
+      lumiBlock_resolution_study.push_back(lumiBlock_res);
+    //   pt_resolution_study_refit.push_back(pt_res_refit);
+      //      cluster_size_resolution_study.push_back(cluster_size_res);
+    //   hits_on_track_barrel.push_back(hits_barrel);
+    //   hits_on_track_tracker.push_back(hits_track);
+      layers_with_measurement.push_back(ls_with_measure);
+	//   cout << dx_res_1 << dz_res_1 << dx_res_2 << dz_res_2 << dx_res_3 << dz_res_3 << dx_res_4 << dz_res_4 << pt_res << runNumber_res << lumiBlock_res << pt_res_refit << endl;
+    }
   }// loop over tracks
 
   h028->Fill( sumpt );
   h029->Fill( sumq );
+//   }
+  tree->Fill();
 }//event
 //----------------------------------------------------------------------
 // method called just after ending the event loop:
 //
-void Pixel_BPix_phase1::endJob() {
+void Pixel_ntuple::endJob() {
 
   std::cout << "end of job after " << myCounters::neve << " events.\n";
 
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(Pixel_BPix_phase1);
+DEFINE_FWK_MODULE(Pixel_ntuple);
