@@ -5,7 +5,7 @@ log                   = log/job_gain_calib.$(ClusterId).$(ProcId).log
 output                = log/job_gain_calib.$(ClusterId).$(ProcId).log
 error                 = log/job_gain_calib.$(ClusterId).$(ProcId).log
 should_transfer_files = NO
-+JobFlavour           = longlunch
-#+MaxRuntime           = 60
-#+AccountingGroup      = "group_u_BE.ABP.SLAP"
+#use_x509userproxy     = true
++JobFlavour           = workday
++MaxRuntime           = 3*60*60
 queue arg in ( $FEDS )

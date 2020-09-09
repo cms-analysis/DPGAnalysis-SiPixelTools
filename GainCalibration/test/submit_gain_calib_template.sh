@@ -14,10 +14,10 @@ outdir=$OUTDIR
 workdir="$TMPDIR/job_GainCalib_${run}_${fed}"
 logdir="${rundir}/job_${fed}"
 cpcmd="xrdcp -f --nopbar"
-cpurl="root://eoscms.cern.ch//eos/cms/"
+cpurl="root://eoscms.cern.ch/"
 
 # remove leading "/" to make eos cp work
-if [ ${outdir:0:1} = "/" ]; then outdir=${outdir:1}; fi
+#if [ ${outdir:0:1} = "/" ]; then outdir=${outdir:1}; fi
 
 # FILES
 script="gain_calib_cfg.py"

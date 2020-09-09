@@ -149,7 +149,7 @@ working_on_lxplus(){
 
 is_staged(){
   status=`stager_qry -M $1`
-  if [ `echo $status|grep -e "STAGED"|wc -l` -eq 1 ] || [ `echo $status|grep -e "CANBEMIGR"|wc -l` -eq 1 ];then
+  if [ `echo $status|grep -e "STAGED"|wc -l` -eq 1 ] || [ `echo $status|grep -e "CANBEMIGR"|wc -l` -eq 1 ]; then
     echo 1
   else
     if [ `echo $status|grep -e "STAGEIN"|wc -l` -eq 1 ];then
