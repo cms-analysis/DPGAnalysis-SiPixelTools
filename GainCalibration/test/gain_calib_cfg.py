@@ -7,11 +7,13 @@ from Configuration.StandardSequences.Eras import eras
 # SETTINGS
 from FWCore.ParameterSet.VarParsing import VarParsing
 options   = VarParsing('analysis')
-options.register('run', 323203, mytype=VarParsing.varType.int)
-options.register('fed', 1200,   mytype=VarParsing.varType.int)
+options.register('run',  323203, mytype=VarParsing.varType.int)
+options.register('fed',  1200,   mytype=VarParsing.varType.int)
+options.register('verb', int,    mytype=VarParsing.varType.int)
 options.parseArguments()
 fed       = options.fed
 run       = options.run
+verbosity = options.verb
 era       = eras.Run2_2017
 globaltag = '100X_dataRun2_Express_v2'
 ext       = 'dmp'
@@ -35,8 +37,8 @@ process = cms.Process('PIXEL',era)
 process.load('Configuration.StandardSequences.Services_cff')
 process.TFileService = cms.Service('TFileService', fileName = cms.string('GainCalibration.root'))
 process.MessageLogger = cms.Service('MessageLogger',
-    text_output = cms.untracked.PSet(threshold = cms.untracked.string('ERROR')),
-    destinations = cms.untracked.vstring('text_output')
+    destinations = cms.untracked.vstring('text_output'),
+    text_output = cms.untracked.PSet(threshold=cms.untracked.string('WARNING')),
 )
 
 # GLOBAL TAG
@@ -78,7 +80,7 @@ process.siPixelCalibDigis.CalibMode = cms.string('GainCalibration')
 process.siPixelCalibDigis.vCalValues_Int =  cms.vint32(
      6,  8, 10, 12, 14, 15, 16,  17,  18,  21,  24,  28,  35,  42, 49,
     56, 63, 70, 77, 84, 91, 98, 105, 112, 119, 126, 133, 140, 160
-    )
+)
 # --> have to add -1 (as a separator) after every 3rd column
 # process.siPixelCalibDigis.calibcols_Int = cms.vint32(
 #      0, 13, 26, -1,
@@ -135,6 +137,8 @@ process.siPixelGainCalibrationAnalysis.calibrows_Int = process.siPixelCalibDigis
 process.siPixelGainCalibrationAnalysis.Repeat = process.siPixelCalibDigis.Repeat
 process.siPixelGainCalibrationAnalysis.CalibMode = process.siPixelCalibDigis.CalibMode
 process.siPixelGainCalibrationAnalysis.phase1 = True
+if verbosity>=1:
+  process.siPixelGainCalibrationAnalysis.writeSummary = True
 
 # VCAL DB
 process.VCalReader = cms.ESSource("PoolDBESSource",
@@ -147,9 +151,7 @@ process.VCalReader = cms.ESSource("PoolDBESSource",
     toGet = cms.VPSet(
         cms.PSet(
             record = cms.string("SiPixelVCalRcd"),
-            #tag = cms.string("trivial_VCal")
             tag = cms.string("SiPixelVCal_v1")
-            #tag = cms.string("SiPixelVCal_2015_v2")
         ),
     ),
 )

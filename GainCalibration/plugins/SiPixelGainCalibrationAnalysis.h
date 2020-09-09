@@ -115,10 +115,12 @@ private:
   SiPixelGainCalibrationOffline *theGainCalibrationDbInputOffline_;
   SiPixelGainCalibrationForHLT *theGainCalibrationDbInputHLT_;
   SiPixelGainCalibrationService theGainCalibrationDbInputService_;*/
-
+  
   // Keep track of lowest and highest vals for range
+  float gainave_;
   float gainlow_;
   float gainhi_;
+  float pedave_;
   float pedlow_;
   float pedhi_;
   uint16_t min_nentries_;
@@ -126,7 +128,7 @@ private:
   double scalarVcalHigh_VcalLow_;
   
   //// VCal to electrons conversion factor
-  //std::string vCalToEleConvFactors_;
+  //std::string vCalToEleConvFactors_; (txt file)
   
   // Summary
   std::ofstream summary_;

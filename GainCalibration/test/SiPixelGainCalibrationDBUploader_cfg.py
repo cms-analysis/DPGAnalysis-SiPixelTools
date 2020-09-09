@@ -5,7 +5,7 @@ from Configuration.StandardSequences.Eras import eras
 # SETTINGS
 from FWCore.ParameterSet.VarParsing import VarParsing
 options    = VarParsing('analysis')
-options.register('run',         -1, mytype=VarParsing.varType.int)
+options.register('run',     300000, mytype=VarParsing.varType.int)
 options.register('year',        -1, mytype=VarParsing.varType.int)
 options.register('dbversion',    0, mytype=VarParsing.varType.int)
 options.register('phase',        1, mytype=VarParsing.varType.int)
@@ -16,7 +16,7 @@ options.parseArguments()
 phase      = 1
 gaincalDB  = options.gain
 era        = eras.Run2_2017
-run        = options.run if options.run>0 else 300000
+run        = options.run
 year       = options.year
 dbversion  = options.dbversion
 outdir     = options.outdir
@@ -24,11 +24,13 @@ if run>0 and year>0:
   infile   = "GainCalibration.root"
   dbfile   = "SiPixelGainCalibration_%s_v%s_%s.db"%(year,dbversion,gaincalDB)
   rootfile = "SiPixelGainCalibration_%s_v%s_%s.root"%(year,dbversion,gaincalDB)
+  tag      = "SiPixelGainCalibration_%s_v%s_%s"%(year,dbversion,gaincalDB)
 else:
   infile   = "GainCalibration_v2.root"
   #infile   = "GainCalibration_v3_vcal.root"
   dbfile   = "gains.db"
   rootfile = "gains.root"
+  tag      = "GainCalib_offline_v3"
 if options.file:
   infile   = options.file
 if outdir:
@@ -136,7 +138,7 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
         cms.PSet(
             record = cms.string('SiPixelGainCalibrationOfflineRcd'),
             #tag = cms.string('GainCalib_offline_v2')
-            tag = cms.string('GainCalib_offline_v3')
+            tag = cms.string(tag)
         )
     ),
     connect = cms.string(dbfile)
