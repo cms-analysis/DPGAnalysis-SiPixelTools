@@ -29,7 +29,13 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag.globaltag = '92X_dataRun2_Express_v7' # from CMSSW927
 # 2018
 #process.GlobalTag.globaltag = '100X_dataRun2_Express_v2' # 
-process.GlobalTag.globaltag = '101X_dataRun2_Express_v8' # 
+#process.GlobalTag.globaltag = '101X_dataRun2_Express_v8' # 
+# AUTO conditions 
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_data', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_design', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2017', '')
 
 import HLTrigger.HLTfilters.hltHighLevel_cfi as hlt
 # accept if 'path_1' succeeds
@@ -72,27 +78,11 @@ process.source = cms.Source("PoolSource",
 # fileNames =  cms.untracked.vstring('file:rawdata.root')
 
 fileNames =  cms.untracked.vstring(
-"/store/express/Run2018C/ExpressPhysics/FEVT/Express-v1/000/319/450/00000/22B731DE-EE83-E811-80A8-FA163E6B71E2.root",
-#"/store/express/Run2018C/ExpressPhysics/FEVT/Express-v1/000/319/450/00000/B6F4CC3D-F083-E811-A6AE-FA163E11300E.root",
-#"/store/express/Run2018C/ExpressPhysics/FEVT/Express-v1/000/319/450/00000/64839786-F083-E811-871D-FA163E2D815C.root",
-#"/store/express/Run2018C/ExpressPhysics/FEVT/Express-v1/000/319/450/00000/EA3E6685-F083-E811-BFCB-FA163E53585E.root",
-#"/store/express/Run2018C/ExpressPhysics/FEVT/Express-v1/000/319/450/00000/1055209E-F083-E811-A395-FA163EEF5766.root",
-#"/store/express/Run2018C/ExpressPhysics/FEVT/Express-v1/000/319/450/00000/DAB306B2-F083-E811-ABB2-FA163EEFE78F.root",
-#"/store/express/Run2018C/ExpressPhysics/FEVT/Express-v1/000/319/450/00000/9201F21A-F183-E811-A3F8-02163E017693.root",
-#"/store/express/Run2018C/ExpressPhysics/FEVT/Express-v1/000/319/450/00000/58E8628C-F383-E811-8118-FA163E4440F5.root",
-#"/store/express/Run2018C/ExpressPhysics/FEVT/Express-v1/000/319/450/00000/7A2F5892-F383-E811-9D87-FA163E75C6E8.root",
-#"/store/express/Run2018C/ExpressPhysics/FEVT/Express-v1/000/319/450/00000/984BE994-F383-E811-883B-FA163E6456FD.root",
-#"/store/express/Run2018C/ExpressPhysics/FEVT/Express-v1/000/319/450/00000/185DC666-F483-E811-B917-FA163E8DC37A.root",
-#"/store/express/Run2018C/ExpressPhysics/FEVT/Express-v1/000/319/450/00000/263618F4-F683-E811-95FF-FA163E8DC37A.root",
-#"/store/express/Run2018C/ExpressPhysics/FEVT/Express-v1/000/319/450/00000/00D919C3-F483-E811-9CEC-02163E012D22.root",
-#"/store/express/Run2018C/ExpressPhysics/FEVT/Express-v1/000/319/450/00000/B2BC8217-F783-E811-9376-FA163E014A3A.root",
-#"/store/express/Run2018C/ExpressPhysics/FEVT/Express-v1/000/319/450/00000/52154DEA-F783-E811-8685-FA163ECEE553.root",
-#"/store/express/Run2018C/ExpressPhysics/FEVT/Express-v1/000/319/450/00000/8E7579F9-F783-E811-A803-FA163E949BDE.root",
-#"/store/express/Run2018C/ExpressPhysics/FEVT/Express-v1/000/319/450/00000/D4FC3911-F883-E811-A2B2-FA163E77A6A7.root",
-#"/store/express/Run2018C/ExpressPhysics/FEVT/Express-v1/000/319/450/00000/228AD4F5-F783-E811-A584-FA163EFE4E9E.root",
-#"/store/express/Run2018C/ExpressPhysics/FEVT/Express-v1/000/319/450/00000/4E36121C-F883-E811-B22E-FA163EA6ABB6.root",
-#"/store/express/Run2018C/ExpressPhysics/FEVT/Express-v1/000/319/450/00000/50929FA3-F883-E811-885E-FA163E59DFFB.root",
-#"/store/express/Run2018C/ExpressPhysics/FEVT/Express-v1/000/319/450/00000/BCE84922-F983-E811-A4A0-FA163E8561FE.root",
+
+
+"file:/work/kotlinski/DATA/RAW/325170/06590754-A60F-E24C-AFDE-4B01585C2B01.root", # copy from AAA
+#"file:/work/kotlinski/DATA/RAW/325308/FDDD4BEE-4B1B-7E42-BD0E-E7FDF26FB466.root", # copy from eos
+
 
  )
 #   skipEvents = cms.untracked.uint32(5000)
@@ -234,6 +224,7 @@ process.d = cms.EDAnalyzer("PixClusterAna",
 
 process.c = cms.EDAnalyzer("PixClustersWithTracks",
     Verbosity = cms.untracked.bool(False),
+    phase1 = cms.untracked.bool(True),
     src = cms.InputTag("generalTracks::MyRawToTracks"),
 #     PrimaryVertexLabel = cms.untracked.InputTag("offlinePrimaryVertices"),                             
 #     trajectoryInput = cms.string("TrackRefitterP5")
@@ -291,6 +282,7 @@ process.myTracking = cms.Sequence(process.InitialStep*
 
 
 #process.p = cms.Path(process.hltfilter*process.RawToDigi*process.reconstruction*process.c*process.c1*process.c2)
-process.p = cms.Path(process.hltfilter*process.RawToDigi*process.reconstruction*process.c*process.d)
+#process.p = cms.Path(process.hltfilter*process.RawToDigi*process.reconstruction*process.c*process.d)
+process.p = cms.Path(process.RawToDigi*process.reconstruction*process.c*process.d)
 
 #process.ep = cms.EndPath(process.out)

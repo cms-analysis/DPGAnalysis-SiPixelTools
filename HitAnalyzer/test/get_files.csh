@@ -68,7 +68,7 @@
 # gives
 # /store/mc/Run3Summer19DR/TTbar_14TeV_TuneCP5_Pythia8/GEN-SIM-DIGI-RAW/106X_mcRun3_2021_realistic_v3-v2/130000/F37978B0-7657-4845-B84A-918A4C91652E.root
 
-/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/RelValTTbar_13/CMSSW_10_6_1_patch3-PU25ns_106X_upgrade2018_realistic_v6-v1/GEN-SIM-RECO'
+#/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/RelValTTbar_13/CMSSW_10_6_1_patch3-PU25ns_106X_upgrade2018_realistic_v6-v1/GEN-SIM-RECO'
 #"/store/relval/CMSSW_10_6_1_patch3/RelValTTbar_13/GEN-SIM-RECO/PU25ns_106X_upgrade2018_realistic_v6-v1/20000/FF0A1ADF-8ECA-514A-A177-2723BCCABDE0.root",
 
 #/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/ExpressCosmics/Commissioning2018-Express-v1/FEVT run=312220' 
@@ -90,4 +90,8 @@
 
 #/cvmfs/cms.cern.ch/common/dasgoclient  --limit=0 --query='file dataset=/HIExpressPhysics/HIRun2018A-Express-v1/FEVT run=326384'
 
+
+#dasgoclient -query='dataset dataset=/*/Run2018*/RAW site=T2_CH_CERN'  # all RAW at CERN
+#dasgoclient -query='file dataset=/ZeroBias/Run2018E-v1/RAW site=T2_CH_CERN'  # all RAW at CERN
+dasgoclient -query='file dataset=/HIMinimumBias0/HIRun2018A-v1/RAW run=327560'  # RAW HI
 
