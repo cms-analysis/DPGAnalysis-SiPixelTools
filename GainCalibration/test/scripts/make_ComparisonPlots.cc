@@ -4,11 +4,8 @@
 void make_ComparisonPlots(TString fname="" , TString run="" , TString fname2="" , TString run2="" ){
 
   Bool_t diff = 0;
-  
-  RunNumber+=run;
-
+  RunNumber += run;
   pix_trans.init();
-
   gStyle->SetPalette(1);
   
   TFile* file2 = TFile::Open(fname2,"READ");
@@ -43,18 +40,14 @@ void make_ComparisonPlots(TString fname="" , TString run="" , TString fname2="" 
  
   TFile* file = TFile::Open(fname,"READ");
   file->cd();
- 
-
+  
   // Getting list of modules to loop on
   std::vector<TString> dirlist;
   dirlist = makedirlist(file,"Module");
-
   
   TDirectory* dir;
   TList* list;
-  
-  Double_t bmin = 999999999999 , bmax = 0 , fmin = 999999999999 , fmax = 0;
-  
+  Double_t bmin = 999999999999, bmax = 0, fmin = 999999999999, fmax = 0;
   
   //*******************************
   //Declaration of histograms
@@ -62,8 +55,6 @@ void make_ComparisonPlots(TString fname="" , TString run="" , TString fname2="" 
   //gStyle->SetOptStat(0);
   
   #include "hist_declarations.C"
-  
-  
   
   PIX<TH2F*> hist;
   PIX<TH2F*> hist_2;
@@ -133,7 +124,7 @@ void make_ComparisonPlots(TString fname="" , TString run="" , TString fname2="" 
       // cout <<"keytype "<< keytype << "  ; keyname " <<  keyname  << endl;
 
       if(keytype=="TH1F"){
-	if(keyname.Contains("GainNPoints1d")) {GainNPoints1d           = (TH1F*) dir->Get(keyname);
+	if(keyname.Contains("GainNPoints1d")) {GainNPoints1d = (TH1F*) dir->Get(keyname);
 	  // cout <<" Got Histogram " << keyname <<  endl;
 	}
       }
@@ -314,7 +305,6 @@ void make_ComparisonPlots(TString fname="" , TString run="" , TString fname2="" 
 	 if( pix_1.fit_result <= 0 ){
 	   nBadFitPerROC[rocID]++;
 	   M_frac_bad_fit->Add(1);
-	   
 	 }
 	 else {
 	   

@@ -103,12 +103,12 @@ void SiPixelOfflineCalibAnalysisBase::beginRun(const edm::Run& iRun, const edm::
   
   // Get SiPixelVCalDB object, VCal = slope * #electrons + offset
   VcalToEleMap_ = siPixelVCal->getSlopeAndOffset();
-  VCalMapType::iterator it = VcalToEleMap_.begin();
-  std::cout << ">>> Run " << iRun.id().run() << ": VCal to #electron conversion factors per layer/ring (BPix=1000, FPix=2000):\n";
-  while(it!=VcalToEleMap_.end()){
-     std::cout<<"detid="<<it->first<<": slope="<<it->second.slope<<", offset="<<it->second.offset<<std::endl;
-     it++;
-  }
+  //VCalMapType::iterator it = VcalToEleMap_.begin();
+  //std::cout << ">>> Run " << iRun.id().run() << ": VCal to #electron conversion factors per layer/ring (BPix=1000, FPix=2000):\n";
+  //while(it!=VcalToEleMap_.end()){
+  //   std::cout<<"detid="<<it->first<<": slope="<<it->second.slope<<", offset="<<it->second.offset<<std::endl;
+  //   it++;
+  //}
 }
 
 
