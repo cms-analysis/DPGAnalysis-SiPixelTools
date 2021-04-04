@@ -32,7 +32,6 @@
 <use   name="L1Trigger/GlobalTriggerAnalyzer"/>
 <use   name="MagneticField/Engine"/>
 <use   name="MagneticField/Records"/>
-<use   name="MagneticField/UniformEngine"/>
 <use   name="PhysicsTools/UtilAlgos"/>
 <use   name="RecoMuon/GlobalTrackingTools"/>
 <use   name="SimDataFormats/Track"/>
