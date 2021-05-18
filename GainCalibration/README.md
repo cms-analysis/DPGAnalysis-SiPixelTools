@@ -1,5 +1,8 @@
 # Pixel gain calibration
 
+The gain calibration is explained in pages 23 to 24 in the [Phase-I pixel paper](https://arxiv.org/pdf/2012.14304.pdf).
+An overview was presented in [these slides](https://indico.cern.ch/event/1011744/#1-pixel-gain-calibration).
+
 ## Installation
 Prepare your working directory with CMSSW
 ```
