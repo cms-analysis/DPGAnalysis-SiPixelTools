@@ -29,7 +29,7 @@ Remarks:
 
 ### BPix
 
-TBA
+The plotting code for BPix is [here](https://github.com/dbrzhechko/BPixResolution)
 
 ### FPix
 

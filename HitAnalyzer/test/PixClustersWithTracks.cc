@@ -127,7 +127,7 @@
 //#define ALIGN_STUDIES
 //#define OVERLAP_STUDIES
 //#define STUDY_LAY1
-//#define SINGLE_MODULES
+#define SINGLE_MODULES
 //#define CLU_SHAPE    // L1, use one or the other but not both
 //#define CLU_SHAPE_L2  // same for L2 
 //#define PHI_PROFILES
@@ -2985,69 +2985,60 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    
 #ifdef SINGLE_MODULES
 	    float weight=1.;
-	    if     (ladder==-6 && module==-1) hpixDetMap10->Fill(pixy,pixx,weight); //  BmO1,2
-	    else if(ladder==-6 && module==-2) hpixDetMap11->Fill(pixy,pixx,weight); // 
-	    else if(ladder==-6 && module==-3) hpixDetMap12->Fill(pixy,pixx,weight); // 
-	    else if(ladder==-6 && module==-4) hpixDetMap13->Fill(pixy,pixx,weight); //  
-	    else if(ladder==-2 && module== 3) hpixDetMap14->Fill(pixy,pixx,weight); // "
-	    else if(ladder==-3 && module== 3) hpixDetMap15->Fill(pixy,pixx,weight); // "
-	    else if(ladder==-4 && module== 3) hpixDetMap16->Fill(pixy,pixx,weight); // "
-	    else if(ladder==-5 && module== 3) hpixDetMap17->Fill(pixy,pixx,weight); // 
-	    else if(ladder== 2 && module== 3) hpixDetMap18->Fill(pixy,pixx,weight); //  
-	    else if(ladder== 3 && module== 3) hpixDetMap19->Fill(pixy,pixx,weight); // 
+	    // if     (ladderOn==-6 && module==-1) hpixDetMap10->Fill(pixy,pixx,weight); //  BmO1,2
+	    // else if(ladderOn==-6 && module==-2) hpixDetMap11->Fill(pixy,pixx,weight); // 
 #endif
 
 	  } else if(layer==2) {
 	    
 	    if(select) cout<<i<<" "<<pixx<<" "<<pixy<<" "<<adc<<endl;
+	    //cout<<ladderOn<<" "<<module<<" "<<pixx<<" "<<pixy<<endl;
+
 	    hpixchargeDets2->Fill(float(module),float(ladderOn),adc);
 	    htest4->Fill(adc,float(sizeY));
 	    hpladder2id->Fill(float(ladderOn));
 	    hpz2id->Fill(float(module));
+	    
+#ifdef SINGLE_MODULES
+	    //cout<<ladderOn<<" "<<module<<" "<<pixx<<" "<<pixy<<endl;
+	    if     (ladderOn== -1 && module== 1) {hpixDetMap20->Fill(pixy,pixx); // dcdc 
+	      //cout<<ladderOn<<" "<<module<<" "<<pixx<<" "<<pixy<<endl;
+	    } else if(ladderOn== -1 && module== 2) hpixDetMap21->Fill(pixy,pixx); //  "
+	   else if(ladderOn== -1 && module== 3) hpixDetMap22->Fill(pixy,pixx); //  "
+	   else if(ladderOn== -5 && module==-1) hpixDetMap23->Fill(pixy,pixx); //  "
+	   else if(ladderOn== -5 && module==-2) hpixDetMap24->Fill(pixy,pixx); //  "
+	   else if(ladderOn== -5 && module==-3) hpixDetMap25->Fill(pixy,pixx); //
+	   else if(ladderOn== 12 && module==-1) hpixDetMap26->Fill(pixy,pixx); // dcdc
+	   else if(ladderOn== 11 && module==-4) hpixDetMap27->Fill(pixy,pixx); // dcdc
+	   else if(ladderOn== 14 && module==-1) hpixDetMap28->Fill(pixy,pixx); // dcdc
+	   else if(ladderOn== 13 && module==-4) hpixDetMap29->Fill(pixy,pixx); // "
 
-	    if( badL2Modules)      {hpixcharge2b->Fill(adc); continue;}
-	    else if(goodL2Modules) {hpixcharge2g->Fill(adc); continue;}
+	   else if(ladderOn== 7 && module== 1) hpixDetMap30->Fill(pixy,pixx); // "
+	   else if(ladderOn== 1 && module== 1) hpixDetMap31->Fill(pixy,pixx); // "
+	   else if(ladderOn== 1 && module== 2) hpixDetMap32->Fill(pixy,pixx); // "
+	   else if(ladderOn== 1 && module== 3) hpixDetMap33->Fill(pixy,pixx); // "	    
+#endif	    
 
+	    if( badL2Modules)      {hpixcharge2b->Fill(adc); continue;}  // skip 
+	    else if(goodL2Modules) {hpixcharge2g->Fill(adc); continue;}  // skip 
+	    
 	    hpixcharge2->Fill(adc);
 	    hpixDetMap2->Fill(pixy,pixx);
 	    hpcols2->Fill(pixy);
 	    hprows2->Fill(pixx);
-	   
+	    
 #ifdef PHI_PROFILES
 	    if(pt>CLU_SIZE_PT_CUT_MULT) hpixcharPhi2->Fill(phi,adc);
 #endif
 #if defined(PHI_PROFILES) && defined(TRAJECTORY)
-	    if(pt>CLU_SIZE_PT_CUT_MULT && (abs(eta)<CLU_SIZE_ETA_CUT) hpixcharX2->Fill(llx,adc);
+	    if( pt>CLU_SIZE_PT_CUT_MULT && abs(eta)<CLU_SIZE_ETA_CUT ) hpixcharX2->Fill(llx,adc);
 #endif
+
 #ifdef CLU_SHAPE_L2
 	    histogramPix(adc, size, sizeX, sizeY, same, corner);
 #endif
 	      
-#ifdef SINGLE_MODULES
-	    if     (ladder== -1 && module== -1) hpixDetMap20->Fill(pixy,pixx); // dcdc 
-	    else if(ladder== -1 && module== -2) hpixDetMap21->Fill(pixy,pixx); //  "
-	    else if(ladder== -1 && module== -3) hpixDetMap22->Fill(pixy,pixx); //  "
-	    else if(ladder== -5 && module==-3) hpixDetMap23->Fill(pixy,pixx); //  "
-	    else if(ladder== -8 && module==-1) hpixDetMap24->Fill(pixy,pixx); //  "
-	    else if(ladder== -8 && module==-2) hpixDetMap25->Fill(pixy,pixx); //  '
-	    else if(ladder== -8 && module==-3) hpixDetMap26->Fill(pixy,pixx); // dcdc
-	    else if(ladder==  6 && module== 4) hpixDetMap27->Fill(pixy,pixx); // dcdc
-	    else if(ladder==  7 && module== 1) hpixDetMap28->Fill(pixy,pixx); // dcdc
-	    else if(ladder==  1 && module== 1) hpixDetMap29->Fill(pixy,pixx); //  '
-	       // this is bad I use layer 3,4 for layer 2 modules 
-	    else if(ladder==  1 && module== 2) hpixDetMap30->Fill(pixy,pixx); // fed errors
-	    else if(ladder==  1 && module== 3) hpixDetMap31->Fill(pixy,pixx); // bad caldel
-	       
-	    else if(ladder== -5 && module==-1) hpixDetMap32->Fill(pixy,pixx); // pix 0,0
-	    else if(ladder== -5 && module==-2) hpixDetMap33->Fill(pixy,pixx); // unmaskable pixel
-	    else if(ladder== -1 && module== 1) hpixDetMap34->Fill(pixy,pixx); // noisy
-	    else if(ladder== -1 && module== 2) hpixDetMap35->Fill(pixy,pixx); // " 
-	    else if(ladder== -1 && module== 3) hpixDetMap36->Fill(pixy,pixx); // "   
-	    else if(ladder== 14 && module==-1) hpixDetMap37->Fill(pixy,pixx); // fed errors 
-	    else if(ladder== 13 && module==-4) hpixDetMap38->Fill(pixy,pixx); // noisy  
-	    else if(ladder== 12 && module==-1) hpixDetMap39->Fill(pixy,pixx); // fed errors, masked 1/2
-	    else if(ladder== 11 && module==-4) hpixDetMap40->Fill(pixy,pixx); // fed errors, masked 1/2	    
-#endif	    
+
 	  } else if(layer==3) {
 	    
 	    hpixcharge3->Fill(adc);
@@ -3060,20 +3051,12 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    hprows3->Fill(pixx);
 
 #ifdef SINGLE_MODULES
-	    // if     (ladder==  9 && module== 2) hpixDetMap30->Fill(pixy,pixx); // fed errors
-	    // else if(ladder==  8 && module== 3) hpixDetMap31->Fill(pixy,pixx); // bad caldel
-	    // else if(ladder== -6 && module== 2) hpixDetMap32->Fill(pixy,pixx); // pix 0,0
-	    // else if(ladder== 21 && module== 4) hpixDetMap33->Fill(pixy,pixx); // unmaskable pixel
-	    // else if(ladder==-5  && module==-2) hpixDetMap34->Fill(pixy,pixx); // noisy
-	    // else if(ladder==-10 && module== 3) hpixDetMap35->Fill(pixy,pixx); // " 
-	    // else if(ladder==3   && module==-3) hpixDetMap36->Fill(pixy,pixx); // "   
-	    // else if(ladder==-19 && module==-4) hpixDetMap37->Fill(pixy,pixx); // fed errors 
-	    // else if(ladder== 9  && module==-2) hpixDetMap38->Fill(pixy,pixx); // noisy  
-	    // else if(ladder==-22 && module==-2) hpixDetMap39->Fill(pixy,pixx); // fed errors, masked 1/2
+	    // if     (ladderOn==  9 && module== 2) hpixDetMap30->Fill(pixy,pixx); // fed errors
+	    // else if(ladderOn==  8 && module== 3) hpixDetMap31->Fill(pixy,pixx); // bad caldel
 #endif
 
 #if defined(PHI_PROFILES) && defined(TRAJECTORY)
-	    if(pt>CLU_SIZE_PT_CUT_MULT && (abs(eta)<CLU_SIZE_ETA_CUT) hpixcharX3->Fill(llx,adc);
+	    if( pt>CLU_SIZE_PT_CUT_MULT && abs(eta)<CLU_SIZE_ETA_CUT ) hpixcharX3->Fill(llx,adc);
 #endif
 	    
 	  } else if(layer==4) {
@@ -3088,16 +3071,8 @@ void PixClustersWithTracks::analyze(const edm::Event& e,
 	    hprows4->Fill(pixx);
 
 #ifdef SINGLE_MODULES
-	    // if     (ladder==  2 && module==-2) hpixDetMap40->Fill(pixy,pixx); // fed errors 
-	    //else if(ladder== 21 && module== 3) hpixDetMap41->Fill(pixy,pixx); // noise
-	    //else if(ladder==  2 && module== 4) hpixDetMap42->Fill(pixy,pixx); //  "
-	    //else if(ladder==-26 && module==-2) hpixDetMap43->Fill(pixy,pixx); //  "
-	    //else if(ladder==-20 && module==-1) hpixDetMap44->Fill(pixy,pixx); //  " 
-	    //else if(ladder==  3 && module==-4) hpixDetMap45->Fill(pixy,pixx); // " 
-	    // else if(ladder== 31 && module==-1) hpixDetMap46->Fill(pixy,pixx); // "
-	    //else if(ladder== 15 && module== 1) hpixDetMap47->Fill(pixy,pixx); // "
-	    //else if(ladder==-22 && module== 2) hpixDetMap48->Fill(pixy,pixx); //  
-	    //else if(ladder== 32 && module== 2) hpixDetMap49->Fill(pixy,pixx); //  
+	    // if     (ladderOn==  2 && module==-2) hpixDetMap40->Fill(pixy,pixx); // fed errors 	    
+	    // else if(ladderOn== -6 && module== 2) hpixDetMap32->Fill(pixy,pixx); // pix 0,0
 #endif
 	    	    
 #if defined(PHI_PROFILES) && defined(TRAJECTORY)

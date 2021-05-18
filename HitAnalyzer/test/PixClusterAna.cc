@@ -101,7 +101,7 @@ using namespace std;
 #define PV
 #define BX_TESTS
 //#define STUDY_LAY1
-//#define SINGLE_MODULES
+#define SINGLE_MODULES
 //#define PHI_PROFILES
 //#define TEST_GEOM
 //#define TEST_DCOLS
@@ -3069,16 +3069,16 @@ void PixClusterAna::analyze(const edm::Event& e,
 
 #ifdef SINGLE_MODULES
 	    float weight = 1.; // adc
-	    if     ( ladder==-6 && module==-1) hpixDetMap10->Fill(pixy,pixx,weight); // 
-	    else if( ladder==-1 && module==-1) hpixDetMap11->Fill(pixy,pixx,weight); // "
-	    else if( ladder==-1 && module==-2) hpixDetMap12->Fill(pixy,pixx,weight); // "
-	    else if( ladder==-3 && module==-4) hpixDetMap13->Fill(pixy,pixx,weight); // 
-	    else if( ladder== 4 && module==-2) hpixDetMap14->Fill(pixy,pixx,weight); // 
-	    else if( ladder== 6 && module==-1) hpixDetMap15->Fill(pixy,pixx,weight); // 
-	    else if( ladder== 4 && module== 1) hpixDetMap16->Fill(pixy,pixx,weight); //
-	    else if( ladder== 2 && module== 1) hpixDetMap17->Fill(pixy,pixx,weight); // 
-	    else if( ladder==-4 && module== 2) hpixDetMap18->Fill(pixy,pixx,weight); // 
-	    else if( ladder==-1 && module== 2) hpixDetMap19->Fill(pixy,pixx,weight); // 
+	    // if     ( ladder==-6 && module==-1) hpixDetMap10->Fill(pixy,pixx,weight); // 
+	    // else if( ladder==-1 && module==-1) hpixDetMap11->Fill(pixy,pixx,weight); // "
+	    // else if( ladder==-1 && module==-2) hpixDetMap12->Fill(pixy,pixx,weight); // "
+	    // else if( ladder==-3 && module==-4) hpixDetMap13->Fill(pixy,pixx,weight); // 
+	    // else if( ladder== 4 && module==-2) hpixDetMap14->Fill(pixy,pixx,weight); // 
+	    // else if( ladder== 6 && module==-1) hpixDetMap15->Fill(pixy,pixx,weight); // 
+	    // else if( ladder== 4 && module== 1) hpixDetMap16->Fill(pixy,pixx,weight); //
+	    // else if( ladder== 2 && module== 1) hpixDetMap17->Fill(pixy,pixx,weight); // 
+	    // else if( ladder==-4 && module== 2) hpixDetMap18->Fill(pixy,pixx,weight); // 
+	    // else if( ladder==-1 && module== 2) hpixDetMap19->Fill(pixy,pixx,weight); // 
 #endif
 
 #ifdef LS_TESTS
@@ -3178,16 +3178,21 @@ void PixClusterAna::analyze(const edm::Event& e,
 	    }
 
 #ifdef SINGLE_MODULES
-	   //if     (ladder== -1 && module== 2) hpixDetMap20->Fill(pixy,pixx); // dcdc 
-	   // else if(ladder== -1 && module== 1) hpixDetMap21->Fill(pixy,pixx); //  "
-	   //else if(ladder==  1 && module== 2) hpixDetMap22->Fill(pixy,pixx); //  "
-	   //else if(ladder== -5 && module==-2) hpixDetMap23->Fill(pixy,pixx); //  "
-	   //else if(ladder==  9 && module== 4) hpixDetMap24->Fill(pixy,pixx); //  "
-	   //else if(ladder==-10 && module== 3) hpixDetMap25->Fill(pixy,pixx); // noisy 34/64
-	   //else if(ladder== 13 && module==-4) hpixDetMap26->Fill(pixy,pixx); // dcdc
-	    //else if(ladder== 12 && module==-1) hpixDetMap27->Fill(pixy,pixx); // dcdc
-	    //else if(ladder== 14 && module==-1) hpixDetMap28->Fill(pixy,pixx); // dcdc
-	    //else if(ladder==  6 && module== 4) hpixDetMap29->Fill(pixy,pixx); // noisy
+	   if     (ladder== -1 && module== 1) hpixDetMap20->Fill(pixy,pixx); // dcdc 
+	   else if(ladder== -1 && module== 2) hpixDetMap21->Fill(pixy,pixx); //  "
+	   else if(ladder== -1 && module== 3) hpixDetMap22->Fill(pixy,pixx); //  "
+	   else if(ladder== -5 && module==-1) hpixDetMap23->Fill(pixy,pixx); //  "
+	   else if(ladder== -5 && module==-2) hpixDetMap24->Fill(pixy,pixx); //  "
+	   else if(ladder== -5 && module==-3) hpixDetMap25->Fill(pixy,pixx); //
+	   else if(ladder== 12 && module==-1) hpixDetMap26->Fill(pixy,pixx); // dcdc
+	   else if(ladder== 11 && module==-4) hpixDetMap27->Fill(pixy,pixx); // dcdc
+	   else if(ladder== 14 && module==-1) hpixDetMap28->Fill(pixy,pixx); // dcdc
+	   else if(ladder== 13 && module==-4) hpixDetMap29->Fill(pixy,pixx); // "
+
+	   else if(ladder== 7 && module== 1) hpixDetMap30->Fill(pixy,pixx); // "
+	   else if(ladder== 1 && module== 1) hpixDetMap31->Fill(pixy,pixx); // "
+	   else if(ladder== 1 && module== 2) hpixDetMap32->Fill(pixy,pixx); // "
+	   else if(ladder== 1 && module== 3) hpixDetMap33->Fill(pixy,pixx); // "
 #endif
 
 #if defined(BX) || defined(BX_NEW)
