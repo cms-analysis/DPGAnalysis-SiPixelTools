@@ -1,4 +1,6 @@
-# Pixel gain calibration
+# Pixel gain calibration [DEPRECATED]
+
+**NOTE**: This repository is now deprecated. Please use https://github.com/CMSTrackerDPG/SiPixelTools-GainCalibration.</span>
 
 The gain calibration is explained in pages 23 to 24 in the [Phase-I pixel paper](https://arxiv.org/pdf/2012.14304.pdf).
 An overview was presented in [these slides](https://indico.cern.ch/event/1011744/#1-pixel-gain-calibration).
@@ -91,7 +93,7 @@ where YEAR is the year the calibration was taken and VERSION is the number of pa
 After this is done, please notify the following people of the location of the database object
 Currently (this list might change)
 Danek Kotlinksi <danek.kotlinskiATpsi.ch>
-Tamás Vámi <vami.tamasATwigner.mta.hu>
+Tamás Vámi <vami.tamasATwigner.mta.hu>
 Tanja Susa <Tatjana.SusaATcern.ch>
 
 
