@@ -3,6 +3,8 @@
 The gain calibration is explained in pages 23 to 24 in the [Phase-I pixel paper](https://arxiv.org/pdf/2012.14304.pdf).
 An overview was presented in [these slides](https://indico.cern.ch/event/1011744/#1-pixel-gain-calibration).
 
+Instructions for DOCs can be found on this TWiki: https://twiki.cern.ch/twiki/bin/viewauth/CMS/SiPixelGainCalibrationDoc
+
 ## Installation
 Prepare your working directory with CMSSW
 ```
@@ -77,7 +79,7 @@ Create a summary pdf with
 ```
 ./run.py summary 2381
 ```
-Then create a tar file with the output and print some output to be posted at the TWiki (https://twiki.cern.ch/twiki/bin/viewauth/CMS/SiPixelGainCalibrationDoc)
+Then create a tar file with the output and print some output to be posted at the [TWiki](https://twiki.cern.ch/twiki/bin/viewauth/CMS/SiPixelGainCalibrationDoc):
 ```
 ./run.py twiki 2381
 ```
@@ -107,7 +109,7 @@ git cms-addpkg CondTools/SiPixel
 scram b -j8
 cd CondTools/SiPixel/test
 
-# edit hardcoded VCal -> #electrons slope/offset SiPixelVCalDB_cfg.py
+# edit hardcoded VCal -> #electrons slopes/offsets in SiPixelVCalDB_cfg.py
 cmsRun SiPixelVCalDB_cfg.py
 ```
 
