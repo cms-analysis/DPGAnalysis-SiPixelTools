@@ -88,6 +88,24 @@ cp /eos/cms/store/group/dpg_tracker_pixel/comm_pixel/GainCalibrations/Phase1/Run
 cmsRun gain_calib_cfg.py run=323203 fed=1200
 ```
 
+## VCal database object
+To update the VCal database object, please see the [TWiki](https://twiki.cern.ch/twiki/bin/view/CMS/SiPixelGainCalibrationDoc#VCal_database_object).
+Basically:
+```
+export SCRAM_ARCH=slc7_amd64_gcc820
+mkdir pixels
+cd pixels
+cmsrel CMSSW_11_1_2
+cd CMSSW_11_1_2/src
+cmsenv
+git cms-addpkg CondTools/SiPixel
+scram b -j8
+cd CondTools/SiPixel/test
+
+# edit hardcoded VCal -> #electrons slope/offset SiPixelVCalDB_cfg.py
+cmsRun SiPixelVCalDB_cfg.py
+```
+
 ## Contact
 If you have issues with running the gain calibration code or `run.py`, please contact
 Lars Noehte <lars.noehteATpsi.ch> and
