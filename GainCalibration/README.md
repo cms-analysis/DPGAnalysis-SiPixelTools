@@ -19,6 +19,14 @@ scram b -j 20
 cd DPGAnalysis-SiPixelTools/GainCalibration/test
 ```
 
+## Local run
+If you want to run the gain calibration on a single FED, please use [`test/gain_calib_cfg.py`](test/gain_calib_cfg.py)
+For example, to run a test job, try
+```
+cp /eos/cms/store/group/dpg_tracker_pixel/comm_pixel/GainCalibrations/Phase1/Run_323203/GainCalibration_1200_323203.dmp ./
+cmsRun gain_calib_cfg.py run=323203 fed=1200
+```
+
 ## Submission
 To launch the gain calibration process, you need to use [`test/run.py`](test/run.py) script,
 which will submit one job for each FED to the HTCondor batch system.
@@ -54,14 +62,15 @@ If jobs fail, please use
 ```
 ./run.py resubmit 2381
 ```
-One or more specific FED jobs can be submitted with `--fed`.
+To resubmit one or more specific FED jobs, please use `--fed`.
 
 ## Finalizing
 Now, hadd the output
 ```
 ./run.py hadd 2381
 ```
-and create a summary pdf
+This creates a large `GainCalibration.root` file.
+Create a summary pdf with
 ```
 ./run.py summary 2381
 ```
@@ -80,13 +89,6 @@ Danek Kotlinksi <danek.kotlinskiATpsi.ch>
 Tamás Vámi <vami.tamasATwigner.mta.hu>
 Tanja Susa <Tatjana.SusaATcern.ch>
 
-## Local run
-If you want to run the gain calibration on a single FED, please use [`test/gain_calib_cfg.py`](test/gain_calib_cfg.py)
-For example, to run a test job, try
-```
-cp /eos/cms/store/group/dpg_tracker_pixel/comm_pixel/GainCalibrations/Phase1/Run_323203/GainCalibration_1200_323203.dmp ./
-cmsRun gain_calib_cfg.py run=323203 fed=1200
-```
 
 ## VCal database object
 To update the VCal database object, please see the [TWiki](https://twiki.cern.ch/twiki/bin/view/CMS/SiPixelGainCalibrationDoc#VCal_database_object).
